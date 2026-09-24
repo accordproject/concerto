@@ -208,7 +208,10 @@ function opTable(core) {
     const dtu = core.dateTimeUtilModule;
     stat('DateTimeUtil.setCurrentTime', 'DateTimeUtil', [dtu, dtu.default].filter(Boolean), 'setCurrentTime');
 
-    for (const cls of ['ModelManager', 'BaseModelManager', 'AstModelManager', 'ModelFile']) {
+    // Serializer.new (task P2-11): the public Serializer constructor, so that
+    // its own argument checks (a missing factory or model manager) are
+    // recorded; a successful construction is summarised as an object.
+    for (const cls of ['ModelManager', 'BaseModelManager', 'AstModelManager', 'ModelFile', 'Serializer']) {
         ops.set(cls + '.new', {
             op: cls + '.new', kind: 'ctor', cls,
             exec: (c, target, args) => new (c[cls])(...args),

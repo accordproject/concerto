@@ -10,6 +10,8 @@
 # 3. conformance: drivers/conformance.spec.js over concerto-conformance.
 # 4. gaps:        drivers/gaps.spec.js, targeted inputs for coverage-gaps.json
 #                 branches (task P2-11).
+# 5. lifted:      drivers/lifted.spec.js, black-box replacements for white-box
+#                 unit tests (task P2-10, lifted/*.scenarios.js).
 # Then build-corpus.js dedupes into migration/oracle/fixtures.
 #
 # Raw records, staging blobs and logs stay in <work dir>.
@@ -21,7 +23,7 @@ CORE_DIR="$(cd "$ORACLE_DIR/../.." && pwd)/packages/concerto-core"
 JOBS="${JOBS:-4}"
 
 rm -rf "$WORK/raw" "$WORK/blobs" "$WORK/logs"
-mkdir -p "$WORK/raw/unit" "$WORK/raw/data" "$WORK/raw/conformance" "$WORK/raw/gaps" "$WORK/blobs" "$WORK/logs/unit"
+mkdir -p "$WORK/raw/unit" "$WORK/raw/data" "$WORK/raw/conformance" "$WORK/raw/gaps" "$WORK/raw/lifted" "$WORK/blobs" "$WORK/logs/unit"
 
 export TS_NODE_PROJECT=tsconfig.build.json TZ=UTC ORACLE_BLOB_DIR="$WORK/blobs"
 MOCHA=(npx mocha -r ts-node/register -r "$ORACLE_DIR/lib/recorder.js" -t 10000 --reporter dot)
@@ -67,4 +69,8 @@ echo "gaps driver"
 ORACLE_SOURCE=gaps ORACLE_RAW_DIR="$WORK/raw/gaps" "${MOCHA[@]}" -t 600000 "$ORACLE_DIR/drivers/gaps.spec.js" > "$WORK/logs/gaps.log" 2>&1 || echo "ERROR gaps driver failed (see $WORK/logs/gaps.log)"
 tail -3 "$WORK/logs/gaps.log"
 
-node "$ORACLE_DIR/bin/build-corpus.js" --raw "$WORK/raw/unit" --raw "$WORK/raw/data" --raw "$WORK/raw/conformance" --raw "$WORK/raw/gaps" --blobs "$WORK/blobs" --out "$ORACLE_DIR/fixtures"
+echo "lifted driver"
+ORACLE_SOURCE=lifted ORACLE_RAW_DIR="$WORK/raw/lifted" "${MOCHA[@]}" -t 600000 "$ORACLE_DIR/drivers/lifted.spec.js" > "$WORK/logs/lifted.log" 2>&1 || echo "ERROR lifted driver failed (see $WORK/logs/lifted.log)"
+tail -3 "$WORK/logs/lifted.log"
+
+node "$ORACLE_DIR/bin/build-corpus.js" --raw "$WORK/raw/unit" --raw "$WORK/raw/data" --raw "$WORK/raw/conformance" --raw "$WORK/raw/gaps" --raw "$WORK/raw/lifted" --blobs "$WORK/blobs" --out "$ORACLE_DIR/fixtures"

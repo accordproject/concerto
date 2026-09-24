@@ -1,27 +1,55 @@
 {
- "generated_at": "2026-09-24T13:36:18.579Z",
- "driver": "oracle corpus only (bin/replay.js --engine src under nyc)",
+ "generated_at": "2026-09-24T14:58:07.847Z",
+ "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
  "corpus": {
   "statements": {
-   "pct": 90.5,
-   "covered": 3013,
-   "total": 3329
+   "pct": 91.77,
+   "covered": 3145,
+   "total": 3427
   },
   "branches": {
-   "pct": 85.83,
-   "covered": 1575,
+   "pct": 92.26,
+   "covered": 1693,
    "total": 1835
   },
   "functions": {
-   "pct": 89.67,
-   "covered": 547,
+   "pct": 91.14,
+   "covered": 556,
    "total": 610
   },
   "lines": {
-   "pct": 90.43,
-   "covered": 2961,
+   "pct": 91.69,
+   "covered": 3092,
+   "total": 3372
+  }
+ },
+ "corpus_src_driver": "the same corpus, bin/replay.js --engine src under nyc (workspace src/ through ts-node)",
+ "corpus_src": {
+  "statements": {
+   "pct": 94.47,
+   "covered": 3145,
+   "total": 3329
+  },
+  "branches": {
+   "pct": 92.26,
+   "covered": 1693,
+   "total": 1835
+  },
+  "functions": {
+   "pct": 91.14,
+   "covered": 556,
+   "total": 610
+  },
+  "lines": {
+   "pct": 94.44,
+   "covered": 3092,
    "total": 3274
   }
+ },
+ "corpus_reference_vs_src": {
+  "branch_layout_mismatches": 0,
+  "branch_hit_disagreements": 0,
+  "disagreements": []
  },
  "unit_suite": {
   "statements": {
@@ -45,7 +73,7 @@
    "total": 3286
   }
  },
- "unit_suite_source": "nyc run of the unit suite in this task (same command as baseline.json)",
+ "unit_suite_source": "nyc run of the unit suite over the workspace src/ (same command as baseline.json)",
  "baseline_json": {
   "statements_pct": 98.95,
   "statements_fraction": "3306/3341",
@@ -62,6 +90,13 @@
   "functions": 99,
   "lines": 99
  },
- "uncovered_branches": 260,
- "uncovered_branches_covered_by_suite": 189
+ "uncovered_branches": 142,
+ "uncovered_branches_covered_by_suite": 74,
+ "covered_by_suite_by_category": {
+  "unrecordable": 58,
+  "stub-only": 4,
+  "internal-only": 12
+ },
+ "unexplained_covered_by_suite": [],
+ "stale_reasons": []
 }

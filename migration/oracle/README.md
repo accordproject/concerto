@@ -20,11 +20,14 @@ lib/              core.js      loads the modules of one build (workspace src/ vi
                   judge.js     replay and verdicts
 drivers/          data.spec.js (test/data, test/1.0.0), conformance.spec.js (concerto-conformance),
                   gaps.spec.js (task P2-11: targeted inputs closing coverage-gaps.json branches),
+                  lifted.spec.js (task P2-10: runs lifted/*.scenarios.js),
                   unit-setup.js (global chai set-up for per-file unit runs)
+lifted/           task P2-10: black-box scenarios replacing white-box unit tests (see lifted/README.md)
 bin/              record-all.sh, build-corpus.js, replay.js, coverage.sh, coverage-gaps.js, self-check.js
 fixtures/         the corpus: <source>/<op>/<id>.json, blobs/, manifest.json
 results/          replay-reference.json, coverage.json, self-check.json
-coverage-gaps.json  every src branch the corpus does not reach
+coverage-gaps.json  every branch the corpus does not reach on the reference
+gap-reasons.json  the verified reason for every one of those branches the unit suite covers
 ```
 
 ## Commands
@@ -34,7 +37,7 @@ Run from anywhere; `<work>` is a scratch directory for raw records and logs.
 | Step | Command |
 |---|---|
 | Install the reference (once) | `cd migration/oracle/reference && npm ci` |
-| Record and build the corpus | `migration/oracle/bin/record-all.sh <work>` |
+| Record and build the corpus | `CONFORMANCE_DIR=<concerto-conformance checkout> JOBS=<n> migration/oracle/bin/record-all.sh <work>` |
 | Replay against the reference | `node migration/oracle/bin/replay.js --report migration/oracle/results/replay-reference.json` |
 | Replay against another engine | `node migration/oracle/bin/replay.js --engine path/to/adapter.js` |
 | Corpus-only coverage and gaps | `migration/oracle/bin/coverage.sh <work> --with-suite` |
@@ -50,14 +53,15 @@ It wraps the public boundary of `packages/concerto-core/src` (the same code as t
 their compiled `dist/*.js` are identical) and writes one raw record per **outermost** public call.
 Calls made while another recorded call is running are nested and are not recorded.
 
-Four sources feed it:
+Five sources feed it:
 
 | Source | What runs |
 |---|---|
-| `unit` | Every file of `packages/concerto-core/test` in its own mocha process (4 in parallel). One file (`test/serializer/jsongenerator.js`) leaks a `ModelUtil.isEnum` stub from a `before` hook into all later files when the suite runs in one process; per-file processes contain that. `drivers/unit-setup.js` supplies the `chai.should()` and chai plugins that the single-process suite gets from other files. Under the recorder: 1299 passing, 1 failing (the network test `ModelLoader #loadModelFromUrl`, as in `baseline.json`), 8 pending. |
+| `unit` | Every file of `packages/concerto-core/test` in its own mocha process (`JOBS` in parallel, default 4). One file (`test/serializer/jsongenerator.js`) leaks a `ModelUtil.isEnum` stub from a `before` hook into all later files when the suite runs in one process; per-file processes contain that. `drivers/unit-setup.js` supplies the `chai.should()` and chai plugins that the single-process suite gets from other files. |
 | `data` | `drivers/data.spec.js`: every `.cto`, AST `.json`, instance `.json`/`.expect`, DCS `.json` and `.yaml` under `test/data` and `test/1.0.0`, loaded alone and per directory, with and without validation, metamodel validation, instance generation (`sample`/`empty`), `toJSON`/`fromJSON` round trips, decorator application and extraction. |
 | `conformance` | `drivers/conformance.spec.js`: every semantic scenario of concerto-conformance run exactly as its JavaScript step definitions do (`new ModelFile`, `addModelFile(…, true)`, `validateModelFiles`), every AST and CTO file under `semantic/specifications` on its own, and every instance scenario of `validate/features` (ModelLoader, `fromJSON`, `toJSON`). |
-| `gaps` | `drivers/gaps.spec.js` (task P2-11, plan §2.4): targeted black-box inputs — crafted CTO models, mutated metamodel ASTs (via `fromAst`), and direct calls on the introspection objects a model manager returns — each aimed at one or more branches listed in `coverage-gaps.json` that the unit suite covers but the corpus did not. |
+| `gaps` | `drivers/gaps.spec.js` (task P2-11, plan §2.4): targeted black-box inputs — crafted CTO models, mutated metamodel ASTs (via `fromAst`), Resources built by a Factory and assigned field values directly, `Serializer`/`Factory` options, and direct calls on the introspection objects a model manager returns — each aimed at one or more branches listed in `coverage-gaps.json` that the unit suite covers but the corpus did not. |
+| `lifted` | `drivers/lifted.spec.js` (task P2-10, plan §2.3): every scenario in `lifted/*.scenarios.js`, each replacing a white-box unit test with a public `Serializer.fromJSON` call. |
 
 A call is **skipped** (and counted by op and reason in `fixtures/manifest.json`) when:
 
@@ -72,7 +76,11 @@ A call is **skipped** (and counted by op and reason in `fixtures/manifest.json`)
 * the result is a promise (`async-result`); async ops are not recorded.
 
 Deduplication: records are hashed on `{op, inputs, outcome, env}`; a fixture seen in several sources is kept
-once, under the first of unit, data, conformance, with `occurrences` counting the copies.
+once, under the first of unit, data, conformance, gaps, lifted, with `occurrences` counting the copies.
+
+`CONFORMANCE_DIR` must point at a concerto-conformance checkout (the driver's default,
+`/home/user/concerto-conformance`, is the original container's path). The figures below used commit
+66a5e8bc (its `main`, the commit recorded in `migration/baseline.json`).
 
 ## Fixture schema
 
@@ -134,7 +142,7 @@ status or error class differs from the recorded one is a **state divergence**, r
 | Model managers | `ModelManager.new`, `BaseModelManager.new`, `AstModelManager.new`; steps `addModel`, `addCTOModel`, `addModelFile`, `addModelFiles`, `updateModelFile`, `deleteModelFile`, `clearModelFiles`, `fromAst`, `validateModelFiles`; queries `validateModelFile`, `getType`, `resolveType`, `getAst`, `getModels`, `getNamespaces`, `derivesFrom`, `isAssignableTo`, `getAssignableConcreteTypes`, `resolveMetaModel`, `get*Declarations`, `getDecoratorValidation` |
 | Model files | `ModelFile.new`, `validate`, `getType`, `resolveType`, `isLocalType`, `isImportedType`, `resolveImport`, `getFullyQualifiedTypeName`, `getLocalType`, `isDefined`, and every other public accessor |
 | Introspection | every public method of `Declaration`, `ClassDeclaration` and subclasses, `MapDeclaration`, `ScalarDeclaration`, `Property`, `Field`, `RelationshipDeclaration`, `EnumValueDeclaration`, `MapKeyType`, `MapValueType`, `Decorated`, `Decorator`, the validators, `Introspector` |
-| Instances | `Factory.newResource/newConcept/newRelationship/newTransaction/newEvent`, `Serializer.fromJSON/toJSON`, `Resource.validate/setPropertyValue/addArrayValue/instanceOf/toJSON`, `Typed`/`Identifiable`/`Resource`/`Relationship` accessors, `Relationship.fromURI` |
+| Instances | `Factory.newResource/newConcept/newRelationship/newTransaction/newEvent`, `Serializer.new` (the constructor; a successful one is summarised as `{"@@oracle":"object","ctor":"Serializer"}`), `Serializer.fromJSON/toJSON`, `Resource.validate/setPropertyValue/addArrayValue/instanceOf/toJSON`, `Typed`/`Identifiable`/`Resource`/`Relationship` accessors, `Relationship.fromURI` |
 | Statics | every `ModelUtil` static, every `DecoratorManager` static, `MetaModel.newMetaModelManager/validateMetaModel/modelManagerFromMetaModel`, `DcsConverter.jsonToYaml/yamlToJson`, `DateTimeUtil.setCurrentTime` |
 
 ## Adding an engine adapter
@@ -173,139 +181,111 @@ A harness error is never a pass.
 
 ## Results
 
-Originally recorded 2026-09-24 (task P0-05); the `gaps` source and the coverage figures below were
-updated the same day by task P2-11 (full numbers: `fixtures/manifest.json`, `results/*.json`), and the
-judge self-check was re-run, and `coverage-gaps.json`'s per-branch reasons were checked and filled in, by a
-same-day fix-up pass — see "Coverage of the reference..." and "Judge self-check" below.
+Recorded 2026-09-24 (task P0-05) and re-recorded end to end the same day by task P2-11, after
+merging P2-10 part 1 (`lifted/`): `record-all.sh` (all five sources, `JOBS=5`), `coverage.sh
+--with-suite`, both replays and `self-check.js`, in that order, on the committed drivers. Full numbers:
+`fixtures/manifest.json`, `results/*.json`, `coverage-gaps.json`.
 
 ### Corpus
 
 | Source | Fixtures | Ops |
 |---|---:|---:|
-| unit | 4,091 | 206 |
-| data | 10,123 | 31 |
-| conformance | 826 | 8 |
-| gaps | 174 | 22 |
-| **total** | **15,214** (from 27,902 recorded calls; 619 blobs) | |
+| unit | 4,113 | 207 |
+| data | 10,231 | 32 |
+| conformance | 839 | 9 |
+| gaps | 526 | 35 |
+| lifted | 64 | 3 |
+| **total** | **15,773** (from 28,904 recorded calls; 620 blobs) | |
 
-Largest op families (fixtures, all sources): Serializer 3,621; ModelManager 2,988; ClassDeclaration 1,670;
-DecoratorManager 1,542; Factory 1,444; Declaration 1,340; Property 778; ModelFile 579; Field 263;
-Typed 141; ModelUtil 127; Resource 125. Per-op counts per source are in `fixtures/manifest.json` (`by_source`).
+Unit suite under the recorder: 1300 passing, 0 failing, 8 pending (the network test `ModelLoader
+#loadModelFromUrl`, failing in `baseline.json`, passes when the network is reachable).
 
-Skipped calls: e.g. tainted model managers, declarations built outside a model file, validators not owned
-by their field, properties built outside a declaration, cycles, a stubbed `ModelUtil` function, function
-arguments, async results, a stubbed CTO parser. `gaps` itself skips one op it deliberately still exercises
-for its throw side effect: `ModelManager.filter` takes a predicate *function*, which the recorder cannot
-encode as plain data (`nonplain:function`) — its own branches (`basemodelmanager.ts` lines 914, 918) can
-never become a corpus fixture, whatever input reaches them.
+Skipped calls: 1,010 in `unit` (tainted model managers, declarations built outside a model file,
+validators not owned by their field, properties built outside a declaration, cycles, a stubbed `ModelUtil`
+function, function arguments, async results, a stubbed CTO parser) and 1 in `gaps`: `ModelManager.filter`,
+whose predicate is a function (`nonplain:function`), so none of `filter()`'s branches can become a fixture.
 
-### Replay against the frozen reference
+### Replay
 
-`results/replay-reference.json`: **15,214 / 15,214 pass (100%)**, 0 fail, 0 harness errors
-(unit 4,091/4,091, data 10,123/10,123, conformance 826/826, gaps 174/174). The corpus also replays 100%
-against the workspace `src/` (the coverage run below).
+`results/replay-reference.json`: **15,773 / 15,773 pass (100%)** against the frozen reference, 0 fail,
+0 harness errors. Against the workspace `src/`: also 15,773 / 15,773, 0 harness errors.
 
-### Coverage of the reference with the corpus as the only driver
+The corpus recorded at the start of this round (15,384 fixtures) had one failing fixture on both engines,
+`gaps/Serializer.toJSON/504efcf4…`: `drivers/gaps.spec.js` built a DateTime with the `dayjs` that
+`require('dayjs')` resolves to from `drivers/`, a copy without concerto-core's `utc` plugin, so the recorded
+outcome (`obj.utc is not a function`) depended on which dayjs the engine decoded the value with. The driver
+now uses concerto-core's own `dayjs-setup` and a fixed instant.
 
-nyc over `packages/concerto-core/src`, driver `bin/replay.js --engine src`:
+### Coverage with the corpus as the only driver
 
-| Metric | Corpus only | Unit suite (this run; = `baseline.json`) | Thresholds |
+`bin/coverage.sh` replays the corpus under nyc twice. The primary run is against the **frozen reference**:
+nyc instruments `reference/node_modules/@accordproject/concerto-core/dist/*.js` and remaps the counts
+through the package's own source maps to `src/*.ts`, which gives the same files and the same branch map
+as the workspace `src/` (`coverage-gaps.js` compares every branch's location: 0 mismatches). The second run,
+against `src/` through ts-node, is a cross-check: 0 branches on which the two runs disagree. The unit suite
+can only run against `src/`.
+
+| Metric | Corpus → reference | Corpus → `src/` | Unit suite → `src/` |
 |---|---:|---:|---:|
-| Statements | 90.50% (3013/3329) | 99.01% (3308/3341) | 99 |
-| Branches | 85.83% (1575/1835) | 95.80% (1758/1835) | 94.8 |
-| Functions | 89.67% (547/610) | 99.34% (606/610) | 99 |
-| Lines | 90.43% (2961/3274) | 99.02% (3254/3286) | 99 |
+| Statements | 91.77% (3145/3427) | 94.47% (3145/3329) | 99.01% (3308/3341) |
+| Branches | **92.26% (1693/1835)** | 92.26% (1693/1835) | **95.80% (1758/1835)** |
+| Functions | 91.14% (556/610) | 91.14% (556/610) | 99.34% (606/610) |
+| Lines | 91.69% (3092/3372) | 94.44% (3092/3274) | 99.02% (3254/3286) |
 
-Before task P2-11 the corpus-only figures were statements 87.77% (2922/3329), branches 80.92%
-(1485/1835), functions 88.36% (539/610), lines 87.66% (2870/3274): the `gaps` driver closed 90 branches
-(91 statements, 8 functions) with black-box inputs alone, at 100% replay agreement throughout.
+Branches and functions have the same totals in every run. Statement and line totals differ: on the
+reference, nyc also counts statements of the compiled `dist/*.js` (such as the module interop helpers tsc
+emits) that the source maps attribute to `src` lines, and a ts-node run counts a file it never loads
+without its source map. The covered counts of the two corpus runs are identical.
 
-The statement/line totals differ slightly between the two runs because nyc `all: true` counts files that a
-run never loads without their source map (the suite run loads every file). Branch and function totals agree.
+History of corpus-only branch coverage: 80.92% (1485/1835) after P0-05; 88.99% (1633/1835) at the start of
+this round (15,384 fixtures, measured with this pipeline after merging P2-10 part 1; statements 89.78%
+3077/3427, functions 90.16% 550/610, lines 89.70% 3025/3372 on the reference); 92.26% (1693/1835) now.
+The README's earlier 85.83% predated the previous round's fix-up and was never re-measured.
 
-`coverage-gaps.json` lists all 260 branches the corpus still does not reach (189 of them are covered by the
-unit suite), with file, line, type and location, and per file the uncovered statement lines and functions.
-The largest remaining gaps are `introspect/modelfile.ts` (33), `serializer/jsonpopulator.ts` (29),
-`serializer/jsongenerator.ts` (20), `serializer/resourcevalidator.ts` (17), `serializer/valuegenerator.ts`
-(17), `basemodelmanager.ts` (16), `modelloader.ts` (14, async, not recorded) and
-`introspect/collectionsizevalidator.ts` (9).
+This round closed 60 branches, 58 of them covered by the unit suite: `jsongenerator.ts` 22 (all of its
+suite-covered gaps), `valuegenerator.ts` 14, `resourcevalidator.ts` 10, `instancegenerator.ts` 8,
+`serializer.ts` 2 (through the new `Serializer.new` op), and one each in `basemodelmanager.ts`
+(`deleteModelFile` of an unknown namespace), `modelfile.ts` (`getFullyQualifiedTypeName` of a primitive),
+`property.ts` (`getFullyQualifiedTypeName` of an undeclared type) and `jsonpopulator.ts` (the default
+namespace of a relationship to a primitive type). Two of these correct earlier claims: `jsongenerator.ts`'s
+`visit()` fallthrough is reachable (`Relationship.fromURI` to a scalar, then `Serializer.toJSON`), and the
+`jsonpopulator.ts` default-namespace branch, listed not-liftable in `lifted/MAP.tsv`, is reachable with a
+model added without validation whose relationship targets a primitive.
 
-**Update (fix-up pass, same day):** every one of the 189 `covered_by_suite: true` branches now carries a
-`reason` field in `coverage-gaps.json`, checked branch by branch against its actual controlling condition
-and its unit test's mechanism, rather than asserted at the file level as the original pass here did (that
-"strong hint, not a certainty" framing was itself the problem a review caught: the file-level read for
-`serializer/*` turned out to be substantially wrong for `jsonpopulator.ts` and the same shape of code in
-`jsongenerator.ts`/`resourcevalidator.ts`/`valuegenerator.ts`/`instancegenerator.ts` — these are internal
-visitor classes whose unit tests happen to construct them directly, but the same branches are reachable
-with no stub at all through the public, wrapped `Serializer.fromJSON`/`toJSON` and `Resource.validate` ops,
-because `Serializer.fromJSON`/`toJSON` pass their `options` straight through to the same constructors, and
-a `Resource` is a plain dynamic object a test can mutate directly before calling `.validate()`). The
-fix-up pass:
-* added targeted fixtures that close `basemodelmanager.ts` (1 branch pair), `modelfile.ts` (7, plus adding
-  the missing `getImportURI` op), `classdeclaration.ts` (1), `scalardeclaration.ts` (1), `modelutil.ts` (1,
-  fixing a pre-existing fixture that used a primitive-typed property and so never reached its target),
-  `resourcevalidator.ts` (2), and all of `numbervalidator.ts` (4), `stringvalidator.ts` (6) and
-  `collectionsizevalidator.ts` (9) — the last three via `.validate()`/`.compatibleWith()` called directly on
-  real `Validator`s from real `Field`s, with bound combinations chosen so the branch is actually reached
-  (two of the pre-existing `compatibleWith()` pairs, `narrow`/`wide`, never reach their file's
-  greater-than-upper-bound branch because they always return early on the lower-bound check instead —
-  confirmed by running them directly against `src/`);
-* added a broad `Serializer.fromJSON`/`toJSON` fixture sweep targeting most of `jsonpopulator.ts`'s
-  remaining branches (one, the internal `visit()` dispatch's final `else`, is confirmed reachable only by
-  calling the internal class directly with a non-property argument — see `coverage-gaps.json`);
-* left `jsongenerator.ts`, the rest of `resourcevalidator.ts`, `valuegenerator.ts` and
-  `instancegenerator.ts` **not individually closed**: each branch's `reason` explains why it is *not*
-  stub-only (so it is not a P2-10 candidate) without claiming it is covered. Closing them is follow-up
-  P2-11 work.
-* every new/changed fixture was confirmed to take its intended branch by running it directly against
-  `src/` outside mocha, and the whole driver was run standalone and once more through the recorder
-  (`ORACLE_SOURCE=gaps`, ops recorded cleanly including the new `ModelFile.getImportURI`). The full
-  `record-all.sh` + `coverage.sh` pipeline (unit+data+conformance+gaps, ~1,300 mocha processes plus an nyc
-  replay of the whole corpus) was **not** re-run in the fix-up pass — `self-check.js` alone, a lighter
-  replay-only job, took over 20 minutes against the current 15,214-fixture corpus — so the coverage numbers
-  in the table above are still the pre-fix-up ones, and branches marked closed above are not yet
-  re-confirmed through nyc. See `coverage_gaps_fixup_2026_09_24` in `coverage-gaps.json` for the full
-  accounting.
+### Remaining gaps
 
-A few remaining gaps are not stub-only but structurally unrecordable by this oracle and are not P2-10's to
-lift either:
-* `basemodelmanager.ts` 914, 918 (`filter()`'s own branches): `ModelManager.filter` takes a predicate
-  function as its argument, which the recorder's plain-data encoding cannot capture (`nonplain:function`).
-* `basemodelmanager.ts` 457, 473 (inside `updateExternalModels`): async, and `updateExternalModels` is
-  listed as taint-only in `lib/ops.js`, never as a tracked, replayable op.
-* `basemodelmanager.ts` 499, 507 (inside `writeModelsToFileSystem`): that method is not in `lib/ops.js`'s
-  `MM_STEPS`/`MM_QUERIES` list at all, so no call to it is ever recorded.
-* `serializer.ts` 56, 58 (the `Serializer` constructor's null-factory/null-modelManager checks): only
-  `Serializer.fromJSON`/`toJSON` are wrapped ops; the constructor itself is never intercepted, and nothing
-  else in the recorded surface constructs a `Serializer` with invalid arguments.
-* `introspect/decorated.ts` 104, 107, 112 (the decorator-factory path of `Decorated.process()`): reaching
-  it needs `ModelManager.addDecoratorFactory`, which is in `lib/ops.js`'s `MM_TAINT` list — calling it
-  taints the model manager, so every later op on it (including the `addCTOModel`/`addModel` that would
-  build the decorated declaration) is skipped from recording.
-* `basemodelmanager.ts` 371 (`updateModelFile`'s `!modelFile.getVersion()` throw) and
-  `typenotfoundexception.ts` 36 (the default-message branch of its constructor) both look like dead code:
-  `introspect/modelfile.ts`'s `fromAst` unconditionally rejects an unversioned, non-system namespace before
-  a `ModelFile` can exist, so `updateModelFile` can never see one; and every call site that throws
-  `TypeNotFoundException` in `src/` already supplies a message, so the omitted-message branch has no
-  caller. Confirming either is truly unreachable, rather than reachable through some path this task did not
-  find, is worth a second pair of eyes before anyone spends more time trying to cover them.
+`coverage-gaps.json` lists all 142 branches the corpus does not reach on the reference. 74 of them are
+covered by the unit suite; each carries a category and a verified reason from `gap-reasons.json`
+(`coverage-gaps.js` merges them and reports a stale or missing reason):
+
+| Category | Branches | Where |
+|---|---:|---|
+| `unrecordable` | 58 | `ModelManager.filter` and the private `ModelFile.filter` it calls (30: the predicate is a function); `ModelLoader` (14: static async, reads files and URLs); `updateExternalModels` (4: async, taints the model manager); `writeModelsToFileSystem` (5: not an op, writes files); the decorator-factory path of `Decorated.process` (4: `addDecoratorFactory` takes code and taints the model manager); `resourcevalidator.ts` 306 (1: only a Symbol reaches it publicly) |
+| `internal-only` | 12 | `jsonpopulator.ts` 129, 154, 171, 281, 363, 439; `instancegenerator.ts` 44; `valuegenerator.ts` 80, 102, 171; `scalardeclaration.ts` 89; `typenotfoundexception.ts` 36 |
+| `stub-only` | 4 | `property.ts` 209, 213; `field.ts` 194; `relationshipdeclaration.ts` 79 |
+
+The 16 `internal-only` and `stub-only` branches are handed to P2-10. The 58 `unrecordable` ones are not
+stub-only: the public API reaches them, but only through a call this oracle does not record by design (an
+async result, a function argument, a Symbol, a tainted model manager, or file-system output). Covering them
+needs a change to the oracle, such as a predicate encoding in the fixture schema or async ops in the
+recorder and judge, not a new input. **So neither clause of P2-11's exit condition holds yet:** corpus-only
+branch coverage is 92.26% against the unit suite's 95.80%, and 58 remaining gaps are not stub-only.
 
 ### Judge self-check
 
-`results/self-check.json` (`bin/self-check.js`): re-run in the P2-11 fix-up pass against the current
-15,214-fixture corpus (baseline 15,214/15,214 pass, 0 fail, 0 harness errors — up from the 15,037 recorded
-before this task added the `gaps` source); every seeded mutant is still detected.
+`results/self-check.json` (`bin/self-check.js`), run on this corpus: baseline 15,773 / 15,773 pass,
+0 fail, 0 harness errors; every seeded mutant is detected.
 
 | Mutant | Kind | Fixtures that flag it |
 |---|---|---:|
-| error-message-changed: IllegalModelException messages gain a full stop | adapter wrapper | 621 |
+| error-message-changed: IllegalModelException messages gain a full stop | adapter wrapper | 623 |
 | verdict-flipped: `validateModelFiles` succeeds where the reference throws and vice versa | adapter wrapper | 385 |
-| identifier-check-dropped: `ModelUtil.isValidIdentifier` always true | in-engine patch | 4 |
-| abstract-check-dropped: `ClassDeclaration.isAbstract` always false | in-engine patch | 178 |
-| canonical-result-altered: `Serializer.toJSON` results lose `$class` | adapter wrapper | 1,619 |
-| error-class-swapped: TypeNotFoundException reported as Error | adapter wrapper | 272 |
-| optional-field-rule-dropped: `Property.isOptional` always true | in-engine patch | 11,136 |
-| datetime-shifted: DateTime values serialised 1 ms late | in-engine patch | 584 |
+| identifier-check-dropped: `ModelUtil.isValidIdentifier` always true | in-engine patch | 5 |
+| abstract-check-dropped: `ClassDeclaration.isAbstract` always false | in-engine patch | 180 |
+| canonical-result-altered: `Serializer.toJSON` results lose `$class` | adapter wrapper | 1,670 |
+| error-class-swapped: TypeNotFoundException reported as Error | adapter wrapper | 281 |
+| optional-field-rule-dropped: `Property.isOptional` always true | in-engine patch | 11,288 |
+| datetime-shifted: DateTime values serialised 1 ms late | in-engine patch | 585 |
 
 Harness checks, all reported as `harness-error`: a fixture whose input blob is missing, a fixture without
 inputs, a fixture file that does not exist, a fixture referencing an unknown blob.
@@ -320,6 +300,5 @@ inputs, a fixture file that does not exist, a fixture referencing an unknown blo
   (100% replay), and plain-function overrides of methods on tracked objects are detected and skipped.
 * An op whose primary argument is a function (`ModelManager.filter`'s predicate) is never recorded
   (`nonplain:function`); nor is a call that would taint its model manager first, such as one made after
-  `addDecoratorFactory` (`lib/ops.js`'s `MM_TAINT`). See "Coverage of the reference…" above for the
-  `coverage-gaps.json` branches task P2-11 traced to these two causes, plus to ops that are not in
-  `lib/ops.js`'s wrapped surface at all (`writeModelsToFileSystem`, the `Serializer` constructor).
+  `addDecoratorFactory` (`lib/ops.js`'s `MM_TAINT`), nor `writeModelsToFileSystem`, whose effect is files
+  on disk. These, with the async calls above, are the `unrecordable` gaps in "Remaining gaps".

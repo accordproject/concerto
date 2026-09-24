@@ -32,7 +32,11 @@ const { ModelManager } = S('modelmanager');
 const { Factory } = S('factory');
 const { Serializer } = S('serializer');
 const ModelUtil = S('modelutil').default || S('modelutil').ModelUtil;
-const dayjs = require('dayjs');
+// The dayjs that concerto-core itself uses (with its utc plugin), not
+// whichever copy require('dayjs') resolves to from this directory: a
+// DateTime built from a different copy lacks .utc(), so its outcome would
+// depend on the engine's own dayjs rather than on concerto-core.
+const dayjs = S('dayjs-setup').default;
 
 const attempt = (f) => {
     try {
@@ -681,7 +685,7 @@ concept Root identified by id {
             const resource = attempt(() => factory.newResource('gaps.jsonpop3@1.0.0', 'Root', 'r4'));
             if (resource) {
                 attempt(() => serializer.toJSON(resource));
-                resource.dt = dayjs();
+                resource.dt = dayjs.utc('2020-01-02T03:04:05.678Z');
                 resource.i = 1;
                 resource.l = 2;
                 resource.d = 1.5;
@@ -968,5 +972,358 @@ concept Collections {
                 attempt(() => validator && validator.compatibleWith(validator));
             }
         });
+    });
+
+    // ---------------------------------------------------------------------
+    // Second P2-11 round: the remaining public-API gaps in the serializer
+    // visitors (jsongenerator.ts, resourcevalidator.ts, instancegenerator.ts,
+    // valuegenerator.ts) and in basemodelmanager.ts, modelfile.ts,
+    // property.ts, jsonpopulator.ts and serializer.ts. Each block names the
+    // public op it goes through; none uses a stub or calls an internal.
+    // ---------------------------------------------------------------------
+
+    describe('jsongenerator.ts / resourcevalidator.ts: Serializer.toJSON options over hand-built Resources', () => {
+        // Serializer.toJSON hands its options straight to `new
+        // ResourceValidator(options)` and `new JSONGenerator(...)`
+        // (src/serializer.ts). A Resource is a plain dynamic object: the
+        // values below are assigned to its fields directly, as a caller
+        // would, and never through any concerto-core internal.
+        const NS = 'gaps.jgen@1.0.0';
+        const cto = `namespace ${NS}
+
+asset Car identified by vin {
+  o String vin
+  o String colour optional
+  --> Car next optional
+  --> Car[] nexts optional
+}
+asset Bike identified by bid {
+  o String bid
+}
+concept Part {
+  o String name
+}
+map PartMap {
+  o String
+  o Part
+}
+map PhoneBook {
+  o String
+  o String
+}
+asset Garage identified by gid {
+  o String gid
+  o String label optional
+  o String[] tags optional
+  o Car car optional
+  o Car[] cars optional
+  o Part part optional
+  o PartMap parts optional
+  o PhoneBook contacts size=[1,2] optional
+  --> Car rel optional
+  --> Car[] rels optional
+}
+`;
+        const setup = () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto, 'jgen.cto', true);
+            const factory = new Factory(mm);
+            const serializer = new Serializer(factory, mm);
+            const garage = (id) => factory.newResource(NS, 'Garage', id);
+            const car = (id) => factory.newResource(NS, 'Car', id);
+            const rel = (type, id) => factory.newRelationship(NS, type, id);
+            return { mm, factory, serializer, garage, car, rel };
+        };
+        const OPTION_SETS = [
+            undefined,
+            { validate: false },
+            { deduplicateResources: true },
+            { deduplicateResources: true, validate: false },
+            { convertResourcesToRelationships: true },
+            { convertResourcesToRelationships: true, validate: false },
+            { permitResourcesForRelationships: true },
+            { permitResourcesForRelationships: true, validate: false },
+            { convertResourcesToId: true },
+            { convertResourcesToId: true, validate: false },
+        ];
+
+        it('deduplicateResources: the same car (by identifier) reached several times', () => {
+            const { serializer, garage, car } = setup();
+            const g = garage('g1');
+            g.car = car('c1');
+            g.cars = [car('c1'), car('c2'), car('c1')];
+            for (const options of OPTION_SETS) {
+                attempt(() => serializer.toJSON(g, options));
+            }
+        });
+
+        it('a Relationship where a contained Car is expected', () => {
+            const { serializer, garage, rel } = setup();
+            const g = garage('g2');
+            g.car = rel('Car', 'c1');
+            for (const options of OPTION_SETS) {
+                attempt(() => serializer.toJSON(g, options));
+            }
+            const g2 = garage('g2b');
+            g2.cars = [rel('Car', 'c1')];
+            for (const options of OPTION_SETS) {
+                attempt(() => serializer.toJSON(g2, options));
+            }
+        });
+
+        it('Resources in relationship fields: single and array, fresh and already being serialised', () => {
+            const { serializer, garage, car, rel } = setup();
+            // A car whose own relationships point back at a car with the
+            // same identifier: separate objects (no cycle), same identifier.
+            const loopCar = (id) => {
+                const c = car(id);
+                c.next = car(id);
+                c.nexts = [car(id), rel('Car', 'other')];
+                return c;
+            };
+            const g = garage('g3');
+            g.rel = loopCar('c1');
+            g.rels = [loopCar('c2'), rel('Car', 'c3'), car('c4')];
+            for (const options of OPTION_SETS) {
+                attempt(() => serializer.toJSON(g, options));
+            }
+            const single = garage('g3b');
+            single.rel = loopCar('c5');
+            for (const options of OPTION_SETS) {
+                attempt(() => serializer.toJSON(single, options));
+            }
+            const plainRels = garage('g3c');
+            plainRels.rel = rel('Car', 'c6');
+            plainRels.rels = [rel('Car', 'c7')];
+            for (const options of OPTION_SETS) {
+                attempt(() => serializer.toJSON(plainRels, options));
+            }
+        });
+
+        it('relationship fields holding the wrong kind of value', () => {
+            const { serializer, garage, car, rel } = setup();
+            const values = [
+                { rels: 'not-an-array' },
+                { rels: [rel('Bike', 'b1')] },
+                { rel: rel('Bike', 'b1') },
+                { rel: 'resource:gaps.jgen@1.0.0.Car#c1' },
+                { rels: [car('c1')] },
+            ];
+            for (const patch of values) {
+                const g = garage('g4');
+                Object.assign(g, patch);
+                for (const options of OPTION_SETS) {
+                    attempt(() => serializer.toJSON(g, options));
+                }
+                attempt(() => g.validate());
+            }
+        });
+
+        it('primitive and contained fields holding Resources, Relationships and undefined items', () => {
+            const { factory, serializer, garage, car, rel } = setup();
+            const values = [
+                { label: rel('Car', 'c1') },
+                { label: car('c1') },
+                { tags: ['a', undefined, 'b'] },
+                { cars: [factory.newResource(NS, 'Bike', 'b1')] },
+                { car: factory.newResource(NS, 'Bike', 'b1') },
+                { part: { name: 'plain object, not a Resource' } },
+                { parts: new Map([['p1', { name: 'plain object map value' }]]) },
+                { parts: new Map([['p1', factory.newConcept(NS, 'Part')]]) },
+            ];
+            for (const patch of values) {
+                const g = garage('g5');
+                Object.assign(g, patch);
+                for (const options of [undefined, { validate: false }]) {
+                    attempt(() => serializer.toJSON(g, options));
+                }
+                attempt(() => g.validate());
+            }
+        });
+
+        it('a map field with a size validator: within, below and above the bounds', () => {
+            const { serializer, garage } = setup();
+            for (const entries of [[['a', '1']], [], [['a', '1'], ['b', '2'], ['c', '3']]]) {
+                const g = garage('g6');
+                g.contacts = new Map(entries);
+                attempt(() => serializer.toJSON(g));
+                attempt(() => g.validate());
+            }
+        });
+
+        it('an unidentified concept with an undeclared property', () => {
+            const { factory, serializer, garage } = setup();
+            const p = factory.newConcept(NS, 'Part');
+            p.name = 'wheel';
+            p.extra = 'not declared';
+            attempt(() => p.validate());
+            attempt(() => serializer.toJSON(p));
+            const g = garage('g7');
+            g.part = p;
+            attempt(() => g.validate());
+            attempt(() => serializer.toJSON(g));
+        });
+    });
+
+    describe('jsongenerator.ts / resourcevalidator.ts: Serializer.toJSON of a Relationship to a scalar type', () => {
+        // Relationship.fromURI (public, recorded) resolves the type named in
+        // the URI without checking that it is identifiable, unlike
+        // Factory.newRelationship. A Relationship to a scalar is Typed, so
+        // Serializer.toJSON accepts it and dispatches the ScalarDeclaration to
+        // both visitors: neither visit() recognises it.
+        it('toJSON with and without validation', () => {
+            const { Relationship } = S('model/relationship');
+            const NS = 'gaps.relscalar@1.0.0';
+            const mm = new ModelManager();
+            mm.addCTOModel(`namespace ${NS}\nscalar SSN extends String\nconcept C {\n  o String s\n}\n`, 'relscalar.cto', true);
+            const serializer = new Serializer(new Factory(mm), mm);
+            for (const uri of [`resource:${NS}.SSN#x`, `resource:${NS}.C#x`]) {
+                const rel = attempt(() => Relationship.fromURI(mm, uri));
+                if (rel) {
+                    attempt(() => serializer.toJSON(rel));
+                    attempt(() => serializer.toJSON(rel, { validate: false }));
+                }
+            }
+        });
+    });
+
+    describe('basemodelmanager.ts / modelfile.ts / property.ts: public queries on unusual but real inputs', () => {
+        it('deleteModelFile for a namespace that was never added', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel('namespace gaps.del@1.0.0\nconcept C {\n  o String s\n}\n', 'del.cto', true);
+            attempt(() => mm.deleteModelFile('gaps.nothere@1.0.0'));
+            attempt(() => mm.deleteModelFile('gaps.del@1.0.0'));
+        });
+
+        it('ModelFile.getFullyQualifiedTypeName of a primitive type name', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel('namespace gaps.prim@1.0.0\nconcept C {\n  o String s\n}\n', 'prim.cto', true);
+            const mf = mm.getModelFile('gaps.prim@1.0.0');
+            for (const t of ['String', 'Integer', 'DateTime', 'C', 'Nope']) {
+                attempt(() => mf.getFullyQualifiedTypeName(t));
+            }
+        });
+
+        it('Property.getFullyQualifiedTypeName of a property whose type is not declared (model added without validation)', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel('namespace gaps.undecl@1.0.0\nconcept C {\n  o Missing m\n  --> Missing2 r\n}\n', 'undecl.cto', true);
+            const decl = mm.getType('gaps.undecl@1.0.0.C');
+            attempt(() => decl.getProperty('m').getFullyQualifiedTypeName());
+            attempt(() => decl.getProperty('r').getFullyQualifiedTypeName());
+        });
+    });
+
+    describe('jsonpopulator.ts: Serializer.fromJSON of a relationship to a primitive type (model added without validation)', () => {
+        // A relationship whose type is a primitive has an unqualified
+        // fully-qualified type name, so visitRelationshipDeclaration falls
+        // back to the relationship's own namespace for its default.
+        it('single and array relationships, string and object values', () => {
+            const NS = 'gaps.relprim@1.0.0';
+            const mm = new ModelManager();
+            mm.addCTOModel(`namespace ${NS}\nconcept C {\n  --> String s optional\n  --> String[] ss optional\n}\n`, 'relprim.cto', true);
+            const serializer = new Serializer(new Factory(mm), mm);
+            for (const options of [undefined, { validate: false }, { acceptResourcesForRelationships: true, validate: false }]) {
+                attempt(() => serializer.fromJSON({ $class: `${NS}.C`, s: 'abc' }, options));
+                attempt(() => serializer.fromJSON({ $class: `${NS}.C`, ss: ['abc', 'resource:gaps.other@1.0.0.X#1'] }, options));
+            }
+        });
+    });
+
+    describe('serializer.ts: the Serializer constructor (Serializer.new)', () => {
+        it('rejects a missing factory or model manager', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel('namespace gaps.ser@1.0.0\nconcept C {\n  o String s\n}\n', 'ser.cto', true);
+            const factory = new Factory(mm);
+            attempt(() => new Serializer(null, mm));
+            attempt(() => new Serializer(factory, null));
+            attempt(() => new Serializer(undefined, undefined));
+            attempt(() => new Serializer(factory, mm));
+            attempt(() => new Serializer(factory, mm, { validate: false, utcOffset: 60 }));
+        });
+    });
+
+    describe('resourcevalidator.ts: a Resource whose type is redeclared abstract', () => {
+        it('validates a Resource after its class is made abstract by updateModelFile', () => {
+            const NS = 'gaps.abs@1.0.0';
+            const mm = new ModelManager();
+            mm.addCTOModel(`namespace ${NS}\nconcept C {\n  o String s\n}\n`, 'abs.cto', true);
+            const factory = new Factory(mm);
+            const serializer = new Serializer(factory, mm);
+            const c = factory.newConcept(NS, 'C');
+            c.s = 'x';
+            attempt(() => mm.updateModelFile(`namespace ${NS}\nabstract concept C {\n  o String s\n}\n`, 'abs.cto'));
+            attempt(() => c.validate());
+            attempt(() => serializer.toJSON(c));
+        });
+    });
+
+    describe('instancegenerator.ts / valuegenerator.ts: Factory.newResource with generate options', () => {
+        const NS = 'gaps.igen@1.0.0';
+        const cto = `namespace ${NS}
+
+scalar SSN extends String regex=/[0-9]{3}-[0-9]{2}-[0-9]{4}/
+scalar Code extends String
+
+participant Person identified by ssn {
+  o SSN ssn
+}
+participant Member identified by code {
+  o Code code
+}
+participant Badge identified by badgeId {
+  o String badgeId regex=/B-[0-9]{4}/
+}
+concept Node {
+  o String label
+  o Node child optional
+  o Node[] children optional
+}
+concept Loop {
+  o Loop self
+}
+concept Numbers {
+  o Integer i range=[1,5]
+  o Integer iLow range=[3,]
+  o Integer iHigh range=[,7]
+  o Long l range=[10,20]
+  o Long lHigh range=[,20]
+  o Double d range=[0.5,1.5]
+  o Double dLow range=[0.5,]
+}
+concept Strings {
+  o String plainRegex regex=/abc/
+  o String shortRegex regex=/a/ length=[5,10]
+  o String longRegex regex=/abcdefghijklmnop/ length=[1,3]
+  o String fitRegex regex=/abc/ length=[1,10]
+  o String minOnlyRegex regex=/abc/ length=[1,]
+  o String maxOnlyRegex regex=/abc/ length=[,10]
+  o String lenOnly length=[2,4]
+}
+concept People {
+  o Person person
+  o Member member
+  o Badge badge
+  o Person[] people
+}
+`;
+        const GEN = [
+            { generate: 'sample' },
+            { generate: 'sample', includeOptionalFields: true },
+            { generate: 'empty' },
+            { generate: 'empty', includeOptionalFields: true },
+        ];
+        const setup = () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto, 'igen.cto', true);
+            return new Factory(mm);
+        };
+        for (const type of ['Node', 'Loop', 'Numbers', 'Strings', 'People']) {
+            it(`generates ${type}`, () => {
+                const factory = setup();
+                for (const options of GEN) {
+                    attempt(() => factory.newConcept(NS, type, undefined, options));
+                }
+            });
+        }
     });
 });

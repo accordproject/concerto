@@ -1,31 +1,37 @@
 {
  "engine": "reference@5.0.0",
- "total": 15214,
- "pass": 15214,
+ "total": 15773,
+ "pass": 15773,
  "fail": 0,
  "harness_error": 0,
  "by_source": {
   "conformance": {
-   "total": 826,
-   "pass": 826,
+   "total": 839,
+   "pass": 839,
    "fail": 0,
    "harness_error": 0
   },
   "data": {
-   "total": 10123,
-   "pass": 10123,
+   "total": 10231,
+   "pass": 10231,
    "fail": 0,
    "harness_error": 0
   },
   "gaps": {
-   "total": 174,
-   "pass": 174,
+   "total": 526,
+   "pass": 526,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "lifted": {
+   "total": 64,
+   "pass": 64,
    "fail": 0,
    "harness_error": 0
   },
   "unit": {
-   "total": 4091,
-   "pass": 4091,
+   "total": 4113,
+   "pass": 4113,
    "fail": 0,
    "harness_error": 0
   }
@@ -44,8 +50,8 @@
    "harness_error": 0
   },
   "ModelManager.addCTOModel": {
-   "total": 1328,
-   "pass": 1328,
+   "total": 1357,
+   "pass": 1357,
    "fail": 0,
    "harness_error": 0
   },
@@ -68,14 +74,20 @@
    "harness_error": 0
   },
   "Serializer.fromJSON": {
-   "total": 1983,
-   "pass": 1983,
+   "total": 2072,
+   "pass": 2072,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Serializer.new": {
+   "total": 161,
+   "pass": 161,
    "fail": 0,
    "harness_error": 0
   },
   "Serializer.toJSON": {
-   "total": 1638,
-   "pass": 1638,
+   "total": 1776,
+   "pass": 1776,
    "fail": 0,
    "harness_error": 0
   },
@@ -170,8 +182,8 @@
    "harness_error": 0
   },
   "Factory.newResource": {
-   "total": 1375,
-   "pass": 1375,
+   "total": 1393,
+   "pass": 1393,
    "fail": 0,
    "harness_error": 0
   },
@@ -200,26 +212,26 @@
    "harness_error": 0
   },
   "ModelManager.fromAst": {
-   "total": 29,
-   "pass": 29,
+   "total": 33,
+   "pass": 33,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.getAst": {
-   "total": 122,
-   "pass": 122,
+   "total": 125,
+   "pass": 125,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.getModels": {
-   "total": 110,
-   "pass": 110,
+   "total": 112,
+   "pass": 112,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.getType": {
-   "total": 637,
-   "pass": 637,
+   "total": 640,
+   "pass": 640,
    "fail": 0,
    "harness_error": 0
   },
@@ -230,8 +242,8 @@
    "harness_error": 0
   },
   "Resource.validate": {
-   "total": 52,
-   "pass": 52,
+   "total": 73,
+   "pass": 73,
    "fail": 0,
    "harness_error": 0
   },
@@ -242,20 +254,32 @@
    "harness_error": 0
   },
   "ClassDeclaration.getProperty": {
-   "total": 143,
-   "pass": 143,
+   "total": 158,
+   "pass": 158,
    "fail": 0,
    "harness_error": 0
   },
   "CollectionSizeValidator.compatibleWith": {
-   "total": 1,
-   "pass": 1,
+   "total": 10,
+   "pass": 10,
    "fail": 0,
    "harness_error": 0
   },
   "Declaration.getModelFile": {
    "total": 16,
    "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newConcept": {
+   "total": 46,
+   "pass": 46,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newRelationship": {
+   "total": 37,
+   "pass": 37,
    "fail": 0,
    "harness_error": 0
   },
@@ -266,14 +290,38 @@
    "harness_error": 0
   },
   "Field.getValidator": {
-   "total": 29,
-   "pass": 29,
+   "total": 34,
+   "pass": 34,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getFullyQualifiedTypeName": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getImportURI": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getType": {
+   "total": 34,
+   "pass": 34,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.deleteModelFile": {
+   "total": 5,
+   "pass": 5,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.updateModelFile": {
-   "total": 5,
-   "pass": 5,
+   "total": 6,
+   "pass": 6,
    "fail": 0,
    "harness_error": 0
   },
@@ -290,20 +338,32 @@
    "harness_error": 0
   },
   "NumberValidator.compatibleWith": {
-   "total": 8,
-   "pass": 8,
+   "total": 9,
+   "pass": 9,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "NumberValidator.validate": {
+   "total": 3,
+   "pass": 3,
    "fail": 0,
    "harness_error": 0
   },
   "Property.getFullyQualifiedTypeName": {
-   "total": 61,
-   "pass": 61,
+   "total": 63,
+   "pass": 63,
    "fail": 0,
    "harness_error": 0
   },
   "Property.getSizeValidator": {
-   "total": 26,
-   "pass": 26,
+   "total": 34,
+   "pass": 34,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Relationship.fromURI": {
+   "total": 18,
+   "pass": 18,
    "fail": 0,
    "harness_error": 0
   },
@@ -314,8 +374,14 @@
    "harness_error": 0
   },
   "StringValidator.compatibleWith": {
-   "total": 12,
-   "pass": 12,
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "StringValidator.validate": {
+   "total": 4,
+   "pass": 4,
    "fail": 0,
    "harness_error": 0
   },
@@ -541,21 +607,9 @@
    "fail": 0,
    "harness_error": 0
   },
-  "Factory.newConcept": {
-   "total": 24,
-   "pass": 24,
-   "fail": 0,
-   "harness_error": 0
-  },
   "Factory.newEvent": {
    "total": 5,
    "pass": 5,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "Factory.newRelationship": {
-   "total": 31,
-   "pass": 31,
    "fail": 0,
    "harness_error": 0
   },
@@ -841,12 +895,6 @@
    "fail": 0,
    "harness_error": 0
   },
-  "ModelFile.getType": {
-   "total": 33,
-   "pass": 33,
-   "fail": 0,
-   "harness_error": 0
-  },
   "ModelFile.isDefined": {
    "total": 3,
    "pass": 3,
@@ -898,12 +946,6 @@
   "ModelManager.clearModelFiles": {
    "total": 72,
    "pass": 72,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "ModelManager.deleteModelFile": {
-   "total": 3,
-   "pass": 3,
    "fail": 0,
    "harness_error": 0
   },
@@ -1117,12 +1159,6 @@
    "fail": 0,
    "harness_error": 0
   },
-  "Relationship.fromURI": {
-   "total": 16,
-   "pass": 16,
-   "fail": 0,
-   "harness_error": 0
-  },
   "Relationship.isRelationship": {
    "total": 2,
    "pass": 2,
@@ -1300,6 +1336,6 @@
  },
  "failures": [],
  "agreement_pct": 100,
- "seconds": 254.5,
+ "seconds": 57,
  "failures_truncated": false
 }

@@ -500,6 +500,11 @@ function wrapFunction(spec, orig) {
  * @returns {object} snapshot
  */
 function ctorSnapshot(cls, args) {
+    if (cls === 'Serializer') {
+        // A Serializer carries no recipe: it is encoded from its model
+        // manager, factory and default options whenever it is an input.
+        return null;
+    }
     state.suspended++;
     try {
         if (cls === 'ModelFile') {
@@ -620,6 +625,7 @@ proxyClass(core.req('basemodelmanager'), 'BaseModelManager', ops.get('BaseModelM
 proxyClass(core.req('modelmanager'), 'ModelManager', ops.get('ModelManager.new'));
 proxyClass(core.req('astmodelmanager'), 'AstModelManager', ops.get('AstModelManager.new'));
 proxyClass(core.modelFileModule, 'ModelFile', ops.get('ModelFile.new'));
+proxyClass(core.req('serializer'), 'Serializer', ops.get('Serializer.new'));
 
 // Test titles: every mocha runnable (test or hook) sets the current title.
 try {

@@ -1,8 +1,8 @@
 {
  "fixtures": "fixtures",
  "baseline": {
-  "total": 15214,
-  "pass": 15214,
+  "total": 15773,
+  "pass": 15773,
   "fail": 0,
   "harness_error": 0
  },
@@ -11,7 +11,7 @@
    "name": "error-message-changed",
    "description": "IllegalModelException messages gain a trailing full stop",
    "detected": true,
-   "failing_fixtures": 621,
+   "failing_fixtures": 623,
    "harness_errors": 0,
    "by_op": {
     "ModelFile.new": 3,
@@ -20,7 +20,7 @@
     "DecoratorManager.decorateModels": 225,
     "ModelManager.addModelFiles": 2,
     "ClassDeclaration.getProperties": 1,
-    "ModelManager.fromAst": 12,
+    "ModelManager.fromAst": 14,
     "ClassDeclaration.getNestedProperty": 1,
     "ClassDeclaration.validate": 1,
     "MapDeclaration.validate": 8,
@@ -53,10 +53,10 @@
    "name": "identifier-check-dropped",
    "description": "in-engine: ModelUtil.isValidIdentifier always returns true",
    "detected": true,
-   "failing_fixtures": 4,
+   "failing_fixtures": 5,
    "harness_errors": 0,
    "by_op": {
-    "ModelManager.fromAst": 2,
+    "ModelManager.fromAst": 3,
     "ModelUtil.isValidIdentifier": 2
    },
    "example": {
@@ -68,10 +68,12 @@
    "name": "abstract-check-dropped",
    "description": "in-engine: ClassDeclaration.isAbstract always returns false",
    "detected": true,
-   "failing_fixtures": 178,
+   "failing_fixtures": 180,
    "harness_errors": 0,
    "by_op": {
     "Factory.newResource": 168,
+    "Resource.validate": 1,
+    "Serializer.toJSON": 1,
     "ClassDeclaration.isAbstract": 6,
     "ClassDeclaration.toString": 1,
     "Factory.newConcept": 1,
@@ -87,24 +89,24 @@
    "name": "canonical-result-altered",
    "description": "Serializer.toJSON results lose their $class key",
    "detected": true,
-   "failing_fixtures": 1619,
+   "failing_fixtures": 1670,
    "harness_errors": 0,
    "by_op": {
-    "Serializer.toJSON": 1619
+    "Serializer.toJSON": 1670
    },
    "example": {
-    "file": "conformance/Serializer.toJSON/0825dd5ba870100a74ee27c7.json",
-    "detail": "$.ok.$class: expected \"org.acme.collections@1.0.0.BoundedTags\" got undefined"
+    "file": "conformance/Serializer.toJSON/09e3d63bd98c6b9f4feab068.json",
+    "detail": "$.ok.$class: expected \"org.acme.test@1.0.0.Person\" got undefined"
    }
   },
   {
    "name": "error-class-swapped",
    "description": "TypeNotFoundException is reported as a plain Error",
    "detected": true,
-   "failing_fixtures": 272,
+   "failing_fixtures": 281,
    "harness_errors": 0,
    "by_op": {
-    "Serializer.fromJSON": 203,
+    "Serializer.fromJSON": 212,
     "DecoratorManager.decorateModels": 46,
     "DecoratorManager.jsonToYaml": 2,
     "DecoratorManager.validate": 3,
@@ -116,7 +118,7 @@
     "Relationship.fromURI": 2
    },
    "example": {
-    "file": "conformance/Serializer.fromJSON/25ac911b99783b746552aeaf.json",
+    "file": "conformance/Serializer.fromJSON/4d449aa90abb05a2c2f158fa.json",
     "detail": "$.error.class: expected \"TypeNotFoundException\" got \"Error\""
    }
   },
@@ -124,13 +126,14 @@
    "name": "optional-field-rule-dropped",
    "description": "in-engine: Property.isOptional always returns true (missing required fields accepted)",
    "detected": true,
-   "failing_fixtures": 11136,
+   "failing_fixtures": 11288,
    "harness_errors": 0,
    "by_op": {
-    "ModelManager.addCTOModel": 539,
+    "ModelManager.addCTOModel": 543,
     "ModelManager.validateModelFiles": 385,
-    "Serializer.fromJSON": 1324,
-    "Serializer.toJSON": 1230,
+    "Serializer.fromJSON": 1377,
+    "Serializer.new": 81,
+    "Serializer.toJSON": 1231,
     "ClassDeclaration.isClassDeclaration": 339,
     "ClassDeclaration.isEnum": 298,
     "ClassDeclaration.isIdentified": 258,
@@ -151,7 +154,8 @@
     "ModelManager.getAst": 48,
     "ModelManager.getModels": 48,
     "ModelManager.getType": 479,
-    "Resource.validate": 13,
+    "Resource.validate": 14,
+    "Factory.newConcept": 36,
     "AssetDeclaration.declarationKind": 4,
     "ClassDeclaration.getAllSuperTypeDeclarations": 3,
     "ClassDeclaration.getAssignableClassDeclarations": 5,
@@ -185,7 +189,6 @@
     "EnumDeclaration.toString": 1,
     "EnumValueDeclaration.isEnumValue": 1,
     "EventDeclaration.declarationKind": 1,
-    "Factory.newConcept": 24,
     "Factory.newEvent": 5,
     "Factory.newRelationship": 31,
     "Factory.newTransaction": 10,
@@ -318,14 +321,14 @@
    "name": "datetime-shifted",
    "description": "in-engine: DateTime values are serialised one millisecond late",
    "detected": true,
-   "failing_fixtures": 584,
+   "failing_fixtures": 585,
    "harness_errors": 0,
    "by_op": {
-    "Serializer.toJSON": 583,
+    "Serializer.toJSON": 584,
     "Resource.toJSON": 1
    },
    "example": {
-    "file": "conformance/Serializer.toJSON/1a45a969cb5d728c62ee40a7.json",
+    "file": "conformance/Serializer.toJSON/120b88f4f32ce867dfd3cefd.json",
     "detail": "$.ok.created: expected \"2024-01-15T10:30:00.000Z\" got \"2024-01-15T10:30:00.001Z\""
    }
   }

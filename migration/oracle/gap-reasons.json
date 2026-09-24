@@ -1,0 +1,306 @@
+{
+ "note": "Verified reason for every branch of concerto-core src that the unit suite covers but the oracle corpus does not (task P2-11). Keyed <file>:<line>:<branch> as in coverage-gaps.json; bin/coverage-gaps.js merges these into it and reports stale or missing entries. Line numbers are those of the frozen reference and the identical workspace src/.",
+ "categories": {
+  "stub-only": "The unit suite reaches the branch only through a sinon stub, a sinon stub instance or a monkey-patched method, forcing a state no object built through the public API can be in. Handed to P2-10 (accordproject/concerto-rust#54).",
+  "internal-only": "Reached only by calling an internal (@private) method or constructor directly, with arguments no public operation passes. Handed to P2-10.",
+  "unrecordable": "Reachable through the public API, but only by a call this oracle cannot record by design: an async result, a function argument, a Symbol, a model manager tainted by addDecoratorFactory/updateExternalModels, or an operation whose effect is on the file system. Not stub-only and not P2-10 work: covering it needs a change to the oracle (fixture schema or recorder), which is a coordinator decision."
+ },
+ "reasons": {
+  "src/basemodelmanager.ts:457:30[0]": {
+   "category": "unrecordable",
+   "reason": "Inside updateExternalModels (`fileDownloader ?? new FileDownloader(...)`). The method is async, so the recorder skips it (async-result) and lib/ops.js lists it in MM_TAINT: calling it taints the model manager. Its downloader argument is an object with a function, and the default downloader fetches over the network. The unit suite reaches it with sinon.createStubInstance(FileDownloader) (test/modelmanager.js '#updateExternalModels'); with no stub it is still an async, network-bound call this oracle does not record."
+  },
+  "src/basemodelmanager.ts:457:30[1]": {
+   "category": "unrecordable",
+   "reason": "Inside updateExternalModels (`fileDownloader ?? new FileDownloader(...)`). The method is async, so the recorder skips it (async-result) and lib/ops.js lists it in MM_TAINT: calling it taints the model manager. Its downloader argument is an object with a function, and the default downloader fetches over the network. The unit suite reaches it with sinon.createStubInstance(FileDownloader) (test/modelmanager.js '#updateExternalModels'); with no stub it is still an async, network-bound call this oracle does not record."
+  },
+  "src/basemodelmanager.ts:473:31[0]": {
+   "category": "unrecordable",
+   "reason": "Inside updateExternalModels (`if (existing)` over the downloaded files). Same as line 457: async, MM_TAINT, and fed by a downloader object with functions (a sinon stub instance in test/modelmanager.js)."
+  },
+  "src/basemodelmanager.ts:473:31[1]": {
+   "category": "unrecordable",
+   "reason": "Inside updateExternalModels (`if (existing)` over the downloaded files). Same as line 457: async, MM_TAINT, and fed by a downloader object with functions (a sinon stub instance in test/modelmanager.js)."
+  },
+  "src/basemodelmanager.ts:499:32[0]": {
+   "category": "unrecordable",
+   "reason": "writeModelsToFileSystem's `options = {}` default. The method writes the models to a directory; it is not an op in lib/ops.js because its effect is files on disk, which the fixture outcome model does not capture. The unit suite calls it with a real temporary directory (test/modelmanager.js '#writeModelsToFileSystem'), not through a stub."
+  },
+  "src/basemodelmanager.ts:507:33[1]": {
+   "category": "unrecordable",
+   "reason": "writeModelsToFileSystem's check that each model file has a file name and definitions. Same as line 499: the method is not in lib/ops.js because it writes to the file system."
+  },
+  "src/basemodelmanager.ts:507:34[0]": {
+   "category": "unrecordable",
+   "reason": "writeModelsToFileSystem's check that each model file has a file name and definitions. Same as line 499: the method is not in lib/ops.js because it writes to the file system."
+  },
+  "src/basemodelmanager.ts:507:34[1]": {
+   "category": "unrecordable",
+   "reason": "writeModelsToFileSystem's check that each model file has a file name and definitions. Same as line 499: the method is not in lib/ops.js because it writes to the file system."
+  },
+  "src/basemodelmanager.ts:507:34[2]": {
+   "category": "unrecordable",
+   "reason": "writeModelsToFileSystem's check that each model file has a file name and definitions. Same as line 499: the method is not in lib/ops.js because it writes to the file system."
+  },
+  "src/basemodelmanager.ts:914:52[0]": {
+   "category": "unrecordable",
+   "reason": "BaseModelManager.filter(predicate, options): the predicate is a JavaScript function, so every call is skipped as nonplain:function and no branch inside filter() can be recorded. The unit suite passes real predicates (test/modelmanager.js '#filter'). Needs a predicate encoding in the fixture schema, not a new input."
+  },
+  "src/basemodelmanager.ts:914:52[1]": {
+   "category": "unrecordable",
+   "reason": "BaseModelManager.filter(predicate, options): the predicate is a JavaScript function, so every call is skipped as nonplain:function and no branch inside filter() can be recorded. The unit suite passes real predicates (test/modelmanager.js '#filter'). Needs a predicate encoding in the fixture schema, not a new input."
+  },
+  "src/basemodelmanager.ts:918:53[0]": {
+   "category": "unrecordable",
+   "reason": "BaseModelManager.filter(predicate, options), as line 914: the predicate is a function, so the call cannot be recorded."
+  },
+  "src/basemodelmanager.ts:918:53[1]": {
+   "category": "unrecordable",
+   "reason": "BaseModelManager.filter(predicate, options), as line 914: the predicate is a function, so the call cannot be recorded."
+  },
+  "src/introspect/decorated.ts:104:3[0]": {
+   "category": "unrecordable",
+   "reason": "The decorator-factory path of Decorated.process(). It runs only when the model manager has decorator factories, and ModelManager.addDecoratorFactory takes a DecoratorFactory object whose newDecorator is code (test/introspect/decorators.js subclasses DecoratorFactory). lib/ops.js lists addDecoratorFactory in MM_TAINT, so every later op on that model manager, including the addCTOModel that builds the decorated declaration, is skipped."
+  },
+  "src/introspect/decorated.ts:107:4[0]": {
+   "category": "unrecordable",
+   "reason": "Decorator-factory path of Decorated.process(), as line 104: needs addDecoratorFactory with a factory object carrying code, which taints the model manager."
+  },
+  "src/introspect/decorated.ts:107:4[1]": {
+   "category": "unrecordable",
+   "reason": "Decorator-factory path of Decorated.process(), as line 104: needs addDecoratorFactory with a factory object carrying code, which taints the model manager."
+  },
+  "src/introspect/decorated.ts:112:5[1]": {
+   "category": "unrecordable",
+   "reason": "Decorator-factory path of Decorated.process(), as line 104 (`if (!decorator)` after a factory declined): needs addDecoratorFactory, which taints the model manager."
+  },
+  "src/introspect/field.ts:194:8[6]": {
+   "category": "stub-only",
+   "reason": "getScalarField()'s `Unrecognized scalar type` default. ModelFile only builds a ScalarDeclaration for the six scalar $classes (modelfile.ts, the switch in fromAst), so a real scalar field always matches a case. The unit suite forces it with sinon.createStubInstance(ScalarDeclaration) given a hand-made ast.$class FooScalar (test/introspect/scalars.js 'should throw for unknown scalar type'). Handed to P2-10."
+  },
+  "src/introspect/modelfile.ts:894:61[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:894:61[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:899:62[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:899:62[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:909:63[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:914:64[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:914:64[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:914:65[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:914:65[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:920:66[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:920:66[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:922:67[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:922:67[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:926:68[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:926:68[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:929:69[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:931:70[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:931:70[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:936:71[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:936:71[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:938:72[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:938:72[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:941:73[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:941:73[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:941:74[0]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/modelfile.ts:941:74[1]": {
+   "category": "unrecordable",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
+  },
+  "src/introspect/property.ts:209:14[0]": {
+   "category": "stub-only",
+   "reason": "Property.getFullyQualifiedTypeName() on a property with no parent. Every Property the public API returns is built by its ClassDeclaration, which always sets the parent. The unit suite forces it with sinon.stub(field, 'getParent') (test/introspect/property_ex.js '#getFullyQualifiedTypeName'). Handed to P2-10."
+  },
+  "src/introspect/property.ts:213:15[0]": {
+   "category": "stub-only",
+   "reason": "Property.getFullyQualifiedTypeName() on a property whose parent has no ModelFile. A declaration built by ModelFile always has its model file. The unit suite forces it with sinon.stub(person, 'getModelFile') (test/introspect/property_ex.js). Handed to P2-10."
+  },
+  "src/introspect/relationshipdeclaration.ts:79:3[0]": {
+   "category": "stub-only",
+   "reason": "RelationshipDeclaration.validate()'s `points to a missing type` throw. With real objects Property.validate() (called first) already rejects a missing type (`Type ... is not defined`, `No type ... in namespace`, checked against src with a relationship to a missing local, imported and unregistered type), and the other-namespace lookup throws rather than returning null. The unit suite reaches it by replacing modelManager.getType with a function returning null (test/introspect/relationshipdeclaration.js). Handed to P2-10."
+  },
+  "src/introspect/scalardeclaration.ts:89:6[1]": {
+   "category": "internal-only",
+   "reason": "ScalarDeclaration.process()'s `type = null` fallback for an unknown $class. ModelFile constructs a ScalarDeclaration only for the six scalar $classes (modelfile.ts fromAst switch; anything else is rejected as an unrecognised model element), so only a direct `new ScalarDeclaration(modelFile, {name})` with no $class reaches it, as test/introspect/scalardeclaration.js does. A declaration built outside its model file is not encodable (nonplain:declaration-not-in-modelfile). Handed to P2-10."
+  },
+  "src/modelloader.ts:104:5[0]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:105:6[0]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:113:7[0]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:113:7[1]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:113:8[0]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:113:8[1]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:46:0[0]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:46:0[1]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:68:1[0]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:69:2[0]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:85:3[0]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:85:3[1]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:85:4[0]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/modelloader.ts:85:4[1]": {
+   "category": "unrecordable",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
+  },
+  "src/serializer/instancegenerator.ts:44:4[1]": {
+   "category": "internal-only",
+   "reason": "InstanceGenerator.visit()'s `Unrecognised` throw. Factory.newResource only runs the generator over a declaration it has resolved and checked (an abstract or scalar type is rejected, and a map declaration fails its isAbstract() check), and the generator then only visits that class's properties and the class, relationship or map declarations they name. The unit suite calls the internal visit() directly with a dayjs value (test/serializer/instancegenerator.js). Handed to P2-10."
+  },
+  "src/serializer/jsonpopulator.ts:129:7[1]": {
+   "category": "internal-only",
+   "reason": "JSONPopulator's constructor defaulting strictQualifiedDateTimes when it is undefined. Its only call site, Serializer.fromJSON (serializer.ts:196), always passes a boolean (`options.strictQualifiedDateTimes === true`), so only a direct `new JSONPopulator(...)` reaches it, as test/serializer/jsonpopulator.js does. Handed to P2-10 (see lifted/MAP.tsv)."
+  },
+  "src/serializer/jsonpopulator.ts:154:14[1]": {
+   "category": "internal-only",
+   "reason": "JSONPopulator.visit()'s `Unrecognised` throw. Every value the public Serializer.fromJSON dispatches is a real declaration or property; the unit suite calls the internal visit(3.142, {}) directly (test/serializer/jsonpopulator.js). Listed not-liftable by P2-10 in lifted/MAP.tsv."
+  },
+  "src/serializer/jsonpopulator.ts:171:15[1]": {
+   "category": "internal-only",
+   "reason": "The right-hand side of `parameters.path ?? (parameters.path = new TypedStack('$'))` in visitClassDeclaration. Serializer.fromJSON enters through accept() -> visit(), which seeds parameters.path first (jsonpopulator.ts:144), so the path is always set here; only calling visitClassDeclaration directly without a path reaches it (test/serializer/jsonpopulator.js). Listed not-liftable by P2-10 (root object path injection) in lifted/MAP.tsv."
+  },
+  "src/serializer/jsonpopulator.ts:281:24[1]": {
+   "category": "internal-only",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in visitField: as line 171, visit() has always seeded the path; only a direct visitField call without one reaches it. Listed not-liftable by P2-10 in lifted/MAP.tsv."
+  },
+  "src/serializer/jsonpopulator.ts:363:32[1]": {
+   "category": "internal-only",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in convertToObject: reached from visitField after visit() has seeded the path; only a direct call without one reaches it."
+  },
+  "src/serializer/jsonpopulator.ts:439:47[1]": {
+   "category": "internal-only",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in visitRelationshipDeclaration: as line 171, only a direct call without a seeded path reaches it."
+  },
+  "src/serializer/resourcevalidator.ts:306:34[0]": {
+   "category": "unrecordable",
+   "reason": "visitField's `typeof obj === 'undefined' || 'symbol'` check. visitClassDeclaration only visits non-null values (Util.isNull), so through the public API only a Symbol can reach it, and a Symbol cannot be encoded as plain data (nonplain:symbol, so the call is skipped). The unit suite reaches it by calling the internal visitField() directly with a stack that pops undefined (test/serializer/resourcevalidator.js 'should throw if dataType is undefined')."
+  },
+  "src/serializer/valuegenerator.ts:102:5[3]": {
+   "category": "internal-only",
+   "reason": "getRange()'s default case for a type other than Long, Integer or Double. InstanceGenerator calls it only for those three types and generateString only with 'Integer'; only a direct call on the value generator reaches it (test/serializer/valuegenerator.js). Handed to P2-10."
+  },
+  "src/serializer/valuegenerator.ts:171:14[0]": {
+   "category": "internal-only",
+   "reason": "getRegexString()'s `if (!regex) return ''`. Both callers (instancegenerator.ts:145 and :172) check `validator.regex` before calling getRegex, so only a direct getRegex(undefined) on the value generator reaches it (test/serializer/valuegenerator.js). Handed to P2-10."
+  },
+  "src/serializer/valuegenerator.ts:80:3[0]": {
+   "category": "internal-only",
+   "reason": "getRange()'s swap when max < min. Its callers pass validator bounds, and model validation already rejects inverted bounds: NumberValidator's constructor throws when lower > upper and StringValidator's when minLength > maxLength (so no model with them can be loaded; see the inverted-bound fixtures earlier in drivers/gaps.spec.js). Only a direct getRange(1.0, 0.0, 'Double') reaches it (test/serializer/valuegenerator.js 'should reverse arguments'). Handed to P2-10."
+  },
+  "src/typenotfoundexception.ts:36:1[0]": {
+   "category": "internal-only",
+   "reason": "TypeNotFoundException's default message. Both places src throws it (basemodelmanager.ts getType) pass a message, so only a direct `new TypeNotFoundException(typeName)` reaches it, as test/typenotfoundexception.js does; exception constructors are not ops. Handed to P2-10."
+  }
+ }
+}
