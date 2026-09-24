@@ -78,6 +78,63 @@ concept Container identified by containerId {
 }
 `;
 
+// Model for the second `#visit` describe block: an array of declared-type
+// objects (to reach a nested field-type error at an array index) and an
+// array of primitives (to reach the "array field is not an array" checks).
+const ARRAY_MODEL = `
+namespace org.acme.lifted.array@1.0.0
+
+asset ArrAsset identified by assetId {
+  o String assetId
+  o Integer assetValue optional
+}
+
+concept ArrContainer identified by containerId {
+  o String containerId
+  o ArrAsset[] arrAssets optional
+  o String[] values optional
+}
+`;
+
+// Model for the "deserialise a map that uses abstract types as values" case
+// -- copied verbatim from the abstract-type model the W test builds in
+// jsonpopulator.js's `before()`, so the abstract/concrete relationship and
+// the missing `identified by` on the abstract asset match exactly.
+const MAP_MODEL = `
+namespace org.acme.lifted.map@1.0.0
+abstract asset Asset3 {
+    o String assetId
+}
+asset Asset4 extends Asset3 {}
+map AssetByName {
+    o String
+    o Asset3
+}
+concept MyContainerAsset3 {
+    o AssetByName assetByName
+}
+`;
+
+// Model for `#visitRelationshipDeclaration`: a single (non-array) and an
+// array relationship field, each pointing at an identified asset type, plus
+// a second asset type absent from the model so the "does not exist" cases
+// reach a real TypeNotFoundException.
+const REL_MODEL = `
+namespace org.acme.lifted.rel@1.0.0
+
+asset RelAsset identified by assetId {
+  o String assetId
+}
+
+transaction RelTx1 {
+  --> RelAsset relAsset
+}
+
+transaction RelTx2 {
+  --> RelAsset[] relAssets
+}
+`;
+
 const noValidate = (extra) => Object.assign({ validate: false }, extra || {});
 
 // id prefix: JP (JSONPopulator). Groups: CV = #convertToObject, IT = #convertItem.
@@ -360,6 +417,202 @@ const scenarios = [
             myAsset: { assetId: 'asset1' },
         },
         options: noValidate(),
+    },
+
+    // ---- #visit (second block) -------------------------------------------
+    // id prefix JP-VS (VisitStandalone): array-field and abstract-map rules
+    // exercised at the root of Serializer.fromJSON, the same rules the W
+    // tests reached by calling jsonPopulator.visit(classDeclaration, ...)
+    // directly with a hand-built jsonStack/resourceStack.
+    {
+        // "should throw if the type of a nested field is invalid"
+        id: 'JP-VS-001',
+        model: ARRAY_MODEL,
+        json: {
+            $class: 'org.acme.lifted.array@1.0.0.ArrContainer',
+            containerId: 'c1',
+            arrAssets: [{
+                $class: 'org.acme.lifted.array@1.0.0.ArrAsset',
+                assetId: 'a1',
+                assetValue: 'string', // invalid: should be Integer
+            }],
+        },
+        options: noValidate(),
+    },
+    {
+        // "should throw if the value for an array field is a string rather
+        // than an array"
+        id: 'JP-VS-002',
+        model: ARRAY_MODEL,
+        json: {
+            $class: 'org.acme.lifted.array@1.0.0.ArrContainer',
+            containerId: 'c1',
+            values: 'hello', // invalid: should be an array
+        },
+        options: noValidate(),
+    },
+    {
+        // "should throw if the value for an array relationship is a string
+        // rather than an array"
+        id: 'JP-VS-003',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx2',
+            relAssets: 'asset1', // invalid: should be an array
+        },
+        options: noValidate(),
+    },
+    {
+        // "should throw if the value for an array field is not an array"
+        // (a non-string, non-array primitive this time)
+        id: 'JP-VS-004',
+        model: ARRAY_MODEL,
+        json: {
+            $class: 'org.acme.lifted.array@1.0.0.ArrContainer',
+            containerId: 'c1',
+            values: 42, // invalid: should be an array
+        },
+        options: noValidate(),
+    },
+    {
+        // "should be able to deserialise a map that uses abstract types as
+        // values". assetId (inherited from the abstract Asset3) must be
+        // present: unlike the W test's stub factory (which silently no-ops
+        // the sub-resource, so the missing-identifier path is never
+        // exercised), the real Factory/ValidatedResource created here does
+        // require it.
+        id: 'JP-VS-005',
+        model: MAP_MODEL,
+        json: {
+            $class: 'org.acme.lifted.map@1.0.0.MyContainerAsset3',
+            assetByName: {
+                asset3: { $class: 'org.acme.lifted.map@1.0.0.Asset4', assetId: 'a4-1' },
+            },
+        },
+        options: noValidate(),
+    },
+
+    // ---- #visitRelationshipDeclaration ------------------------------------
+    // id prefix JP-RL. relAsset is a single relationship, relAssets an array
+    // relationship, both on REL_MODEL.
+    {
+        // "should create a new relationship from a string" (also covers
+        // "should get the relationship namespace if required": both exercise
+        // relationship-from-string through the same public code path once
+        // the sinon stub forcing an unqualified getFullyQualifiedTypeName()
+        // is removed -- see MAP.tsv note on that test, which is not-liftable)
+        id: 'JP-RL-001',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx1',
+            relAsset: 'asset1',
+        },
+        options: noValidate(),
+    },
+    {
+        // "should not create a new relationship from an object if not
+        // permitted"
+        id: 'JP-RL-002',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx1',
+            relAsset: { $class: 'org.acme.lifted.rel@1.0.0.RelAsset', assetId: 'asset1' },
+        },
+        options: noValidate(),
+    },
+    {
+        // "should throw if the JSON data is not a string or an object"
+        id: 'JP-RL-004',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx1',
+            relAsset: 3.142,
+        },
+        options: noValidate(),
+    },
+    {
+        // "should throw if the JSON data is an object without a class"
+        id: 'JP-RL-005',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx1',
+            relAsset: {},
+        },
+        options: noValidate({ acceptResourcesForRelationships: true }),
+    },
+    {
+        // "should throw if the JSON data is an object with a class that
+        // causes an error to be thrown" and "...that does not exist": both
+        // W tests exercise the same TypeNotFoundException from
+        // modelManager.getType on a nonexistent $class -- one via the real
+        // lookup, one via a redundant sinon stub of the same lookup. See
+        // MAP.tsv, which maps both test titles to this one fixture.
+        id: 'JP-RL-006',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx1',
+            relAsset: { $class: 'org.acme.lifted.rel@1.0.0.NoSuchClass' },
+        },
+        options: noValidate({ acceptResourcesForRelationships: true }),
+    },
+    {
+        // "should create a new relationship from an array of strings"
+        id: 'JP-RL-007',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx2',
+            relAssets: ['asset1', 'asset2'],
+        },
+        options: noValidate(),
+    },
+    {
+        // "should not create a new relationship from an array of objects if
+        // not permitted"
+        id: 'JP-RL-008',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx2',
+            relAssets: [
+                { $class: 'org.acme.lifted.rel@1.0.0.RelAsset', assetId: 'asset1' },
+                { $class: 'org.acme.lifted.rel@1.0.0.RelAsset', assetId: 'asset2' },
+            ],
+        },
+        options: noValidate(),
+    },
+    {
+        // "should throw if the JSON data in the array is not a string or an
+        // object"
+        id: 'JP-RL-010',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx2',
+            relAssets: [3.142],
+        },
+        options: noValidate(),
+    },
+    {
+        // "should throw if the JSON data in the array is an object without a
+        // class"
+        id: 'JP-RL-011',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx2',
+            relAssets: [{}],
+        },
+        options: noValidate({ acceptResourcesForRelationships: true }),
+    },
+    {
+        // "should throw if the JSON data in the array is an object with a
+        // class that causes an error to be thrown" and "...that does not
+        // exist": same reasoning as JP-RL-006, both titles map to this
+        // fixture in MAP.tsv.
+        id: 'JP-RL-012',
+        model: REL_MODEL,
+        json: {
+            $class: 'org.acme.lifted.rel@1.0.0.RelTx2',
+            relAssets: [{ $class: 'org.acme.lifted.rel@1.0.0.NoSuchClass' }],
+        },
+        options: noValidate({ acceptResourcesForRelationships: true }),
     },
 ];
 
