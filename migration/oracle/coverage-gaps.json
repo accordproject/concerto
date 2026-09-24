@@ -1,33 +1,33 @@
 {
  "summary": {
-  "generated_at": "2026-09-24T10:26:01.129Z",
+  "generated_at": "2026-09-24T13:36:18.579Z",
   "driver": "oracle corpus only (bin/replay.js --engine src under nyc)",
   "corpus": {
    "statements": {
-    "pct": 87.77,
-    "covered": 2922,
+    "pct": 90.5,
+    "covered": 3013,
     "total": 3329
    },
    "branches": {
-    "pct": 80.92,
-    "covered": 1485,
+    "pct": 85.83,
+    "covered": 1575,
     "total": 1835
    },
    "functions": {
-    "pct": 88.36,
-    "covered": 539,
+    "pct": 89.67,
+    "covered": 547,
     "total": 610
    },
    "lines": {
-    "pct": 87.66,
-    "covered": 2870,
+    "pct": 90.43,
+    "covered": 2961,
     "total": 3274
    }
   },
   "unit_suite": {
    "statements": {
-    "pct": 98.95,
-    "covered": 3306,
+    "pct": 99.01,
+    "covered": 3308,
     "total": 3341
    },
    "branches": {
@@ -36,13 +36,13 @@
     "total": 1835
    },
    "functions": {
-    "pct": 99.18,
-    "covered": 605,
+    "pct": 99.34,
+    "covered": 606,
     "total": 610
    },
    "lines": {
-    "pct": 98.96,
-    "covered": 3252,
+    "pct": 99.02,
+    "covered": 3254,
     "total": 3286
    }
   },
@@ -63,8 +63,8 @@
    "functions": 99,
    "lines": 99
   },
-  "uncovered_branches": 350,
-  "uncovered_branches_covered_by_suite": 279
+  "uncovered_branches": 260,
+  "uncovered_branches_covered_by_suite": 189
  },
  "note": "Every branch of packages/concerto-core/src that the oracle corpus does not reach. covered_by_suite marks branches the unit suite does reach: these are the lifting tasks of plan §2.3/§2.4.",
  "per_file": {
@@ -74,13 +74,12 @@
    "uncovered_functions": []
   },
   "src/basemodelmanager.ts": {
-   "uncovered_branches": 30,
+   "uncovered_branches": 28,
    "uncovered_statement_lines": [
     137,
     148,
     162,
     172,
-    192,
     208,
     250,
     356,
@@ -250,7 +249,7 @@
    ]
   },
   "src/introspect/classdeclaration.ts": {
-   "uncovered_branches": 9,
+   "uncovered_branches": 8,
    "uncovered_statement_lines": [
     61,
     102,
@@ -259,43 +258,26 @@
     131,
     171,
     217,
-    218,
-    553
+    218
    ],
    "uncovered_functions": [
     "(anonymous_1)"
    ]
   },
   "src/introspect/collectionsizevalidator.ts": {
-   "uncovered_branches": 23,
+   "uncovered_branches": 9,
    "uncovered_statement_lines": [
-    50,
-    101,
     102,
-    105,
-    106,
-    107,
     108,
-    109,
-    110,
     111,
-    115,
-    116,
-    117,
     118,
-    119,
-    120,
-    121,
-    125
+    121
    ],
-   "uncovered_functions": [
-    "(anonymous_5)"
-   ]
+   "uncovered_functions": []
   },
   "src/introspect/declaration.ts": {
-   "uncovered_branches": 6,
+   "uncovered_branches": 5,
    "uncovered_statement_lines": [
-    64,
     105,
     163,
     171,
@@ -347,20 +329,9 @@
    ]
   },
   "src/introspect/field.ts": {
-   "uncovered_branches": 7,
+   "uncovered_branches": 1,
    "uncovered_statement_lines": [
     116,
-    166,
-    176,
-    177,
-    180,
-    181,
-    184,
-    185,
-    188,
-    189,
-    192,
-    193,
     195
    ],
    "uncovered_functions": [
@@ -376,15 +347,6 @@
     "(anonymous_1)"
    ]
   },
-  "src/introspect/mapdeclaration.ts": {
-   "uncovered_branches": 3,
-   "uncovered_statement_lines": [
-    63,
-    67,
-    71
-   ],
-   "uncovered_functions": []
-  },
   "src/introspect/mapkeytype.ts": {
    "uncovered_branches": 0,
    "uncovered_statement_lines": [
@@ -397,11 +359,8 @@
    ]
   },
   "src/introspect/mapvaluetype.ts": {
-   "uncovered_branches": 3,
+   "uncovered_branches": 0,
    "uncovered_statement_lines": [
-    98,
-    103,
-    108,
     178,
     187
    ],
@@ -475,46 +434,20 @@
    ]
   },
   "src/introspect/numbervalidator.ts": {
-   "uncovered_branches": 28,
+   "uncovered_branches": 4,
    "uncovered_statement_lines": [
-    65,
-    77,
-    81,
-    91,
-    98,
     111,
     115,
     126,
-    138,
-    139,
-    141,
-    142,
-    143,
-    144,
-    145,
-    146,
-    147,
-    150,
-    151,
-    152,
-    153,
-    154,
-    155,
-    156,
-    159
+    156
    ],
    "uncovered_functions": [
-    "(anonymous_2)",
-    "(anonymous_3)",
-    "(anonymous_5)",
-    "(anonymous_6)"
+    "(anonymous_5)"
    ]
   },
   "src/introspect/property.ts": {
-   "uncovered_branches": 6,
+   "uncovered_branches": 3,
    "uncovered_statement_lines": [
-    86,
-    92,
     210,
     214,
     218
@@ -522,17 +455,15 @@
    "uncovered_functions": []
   },
   "src/introspect/relationshipdeclaration.ts": {
-   "uncovered_branches": 2,
+   "uncovered_branches": 1,
    "uncovered_statement_lines": [
-    54,
     80
    ],
    "uncovered_functions": []
   },
   "src/introspect/scalardeclaration.ts": {
-   "uncovered_branches": 3,
+   "uncovered_branches": 2,
    "uncovered_statement_lines": [
-    66,
     92,
     135,
     136,
@@ -545,44 +476,17 @@
    ]
   },
   "src/introspect/stringvalidator.ts": {
-   "uncovered_branches": 34,
+   "uncovered_branches": 7,
    "uncovered_statement_lines": [
-    65,
-    84,
     104,
     107,
     111,
     124,
-    143,
-    150,
     158,
-    170,
-    171,
-    174,
-    175,
-    176,
-    177,
-    180,
-    181,
-    182,
-    183,
-    184,
-    185,
-    186,
-    189,
-    190,
-    191,
-    192,
-    193,
-    194,
-    195,
-    198
+    195
    ],
    "uncovered_functions": [
-    "(anonymous_4)",
-    "(anonymous_5)",
-    "(anonymous_6)",
-    "(anonymous_7)"
+    "(anonymous_6)"
    ]
   },
   "src/introspect/validator.ts": {
@@ -616,22 +520,12 @@
    "uncovered_functions": []
   },
   "src/model/typed.ts": {
-   "uncovered_branches": 4,
+   "uncovered_branches": 0,
    "uncovered_statement_lines": [
-    66,
-    188,
-    189,
-    190,
-    193,
-    194,
-    195,
-    196,
-    198,
-    200
+    66
    ],
    "uncovered_functions": [
-    "(anonymous_2)",
-    "(anonymous_11)"
+    "(anonymous_2)"
    ]
   },
   "src/serializer/instancegenerator.ts": {
@@ -879,23 +773,6 @@
   },
   {
    "file": "src/basemodelmanager.ts",
-   "line": 187,
-   "type": "if",
-   "branch": "7[1]",
-   "location": {
-    "start": {
-     "line": 187,
-     "column": 8
-    },
-    "end": {
-     "line": 193,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
    "line": 205,
    "type": "binary-expr",
    "branch": "8[1]",
@@ -961,23 +838,6 @@
     }
    },
    "covered_by_suite": false
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 358,
-   "type": "if",
-   "branch": "23[1]",
-   "location": {
-    "start": {
-     "line": 358,
-     "column": 12
-    },
-    "end": {
-     "line": 360,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1678,23 +1538,6 @@
   },
   {
    "file": "src/introspect/classdeclaration.ts",
-   "line": 552,
-   "type": "if",
-   "branch": "56[0]",
-   "location": {
-    "start": {
-     "line": 552,
-     "column": 12
-    },
-    "end": {
-     "line": 554,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/classdeclaration.ts",
    "line": 610,
    "type": "if",
    "branch": "61[1]",
@@ -1712,43 +1555,9 @@
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 49,
-   "type": "if",
-   "branch": "2[0]",
-   "location": {
-    "start": {
-     "line": 49,
-     "column": 8
-    },
-    "end": {
-     "line": 57,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
    "line": 101,
    "type": "if",
    "branch": "15[0]",
-   "location": {
-    "start": {
-     "line": 101,
-     "column": 8
-    },
-    "end": {
-     "line": 103,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 101,
-   "type": "if",
-   "branch": "15[1]",
    "location": {
     "start": {
      "line": 101,
@@ -1781,40 +1590,6 @@
   {
    "file": "src/introspect/collectionsizevalidator.ts",
    "line": 107,
-   "type": "if",
-   "branch": "16[1]",
-   "location": {
-    "start": {
-     "line": 107,
-     "column": 8
-    },
-    "end": {
-     "line": 113,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 107,
-   "type": "binary-expr",
-   "branch": "17[0]",
-   "location": {
-    "start": {
-     "line": 107,
-     "column": 12
-    },
-    "end": {
-     "line": 107,
-     "column": 31
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 107,
    "type": "binary-expr",
    "branch": "17[1]",
    "location": {
@@ -1825,23 +1600,6 @@
     "end": {
      "line": 107,
      "column": 56
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 109,
-   "type": "if",
-   "branch": "18[0]",
-   "location": {
-    "start": {
-     "line": 109,
-     "column": 15
-    },
-    "end": {
-     "line": 113,
-     "column": 9
     }
    },
    "covered_by_suite": true
@@ -1865,60 +1623,9 @@
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 109,
-   "type": "binary-expr",
-   "branch": "19[0]",
-   "location": {
-    "start": {
-     "line": 109,
-     "column": 19
-    },
-    "end": {
-     "line": 109,
-     "column": 39
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 109,
-   "type": "binary-expr",
-   "branch": "19[1]",
-   "location": {
-    "start": {
-     "line": 109,
-     "column": 43
-    },
-    "end": {
-     "line": 109,
-     "column": 64
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
    "line": 110,
    "type": "if",
    "branch": "20[0]",
-   "location": {
-    "start": {
-     "line": 110,
-     "column": 12
-    },
-    "end": {
-     "line": 112,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 110,
-   "type": "if",
-   "branch": "20[1]",
    "location": {
     "start": {
      "line": 110,
@@ -1951,40 +1658,6 @@
   {
    "file": "src/introspect/collectionsizevalidator.ts",
    "line": 117,
-   "type": "if",
-   "branch": "21[1]",
-   "location": {
-    "start": {
-     "line": 117,
-     "column": 8
-    },
-    "end": {
-     "line": 123,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 117,
-   "type": "binary-expr",
-   "branch": "22[0]",
-   "location": {
-    "start": {
-     "line": 117,
-     "column": 12
-    },
-    "end": {
-     "line": 117,
-     "column": 31
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 117,
    "type": "binary-expr",
    "branch": "22[1]",
    "location": {
@@ -1995,23 +1668,6 @@
     "end": {
      "line": 117,
      "column": 56
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 119,
-   "type": "if",
-   "branch": "23[0]",
-   "location": {
-    "start": {
-     "line": 119,
-     "column": 15
-    },
-    "end": {
-     "line": 123,
-     "column": 9
     }
    },
    "covered_by_suite": true
@@ -2035,40 +1691,6 @@
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 119,
-   "type": "binary-expr",
-   "branch": "24[0]",
-   "location": {
-    "start": {
-     "line": 119,
-     "column": 19
-    },
-    "end": {
-     "line": 119,
-     "column": 39
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 119,
-   "type": "binary-expr",
-   "branch": "24[1]",
-   "location": {
-    "start": {
-     "line": 119,
-     "column": 43
-    },
-    "end": {
-     "line": 119,
-     "column": 64
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
    "line": 120,
    "type": "if",
    "branch": "25[0]",
@@ -2080,40 +1702,6 @@
     "end": {
      "line": 122,
      "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 120,
-   "type": "if",
-   "branch": "25[1]",
-   "location": {
-    "start": {
-     "line": 120,
-     "column": 12
-    },
-    "end": {
-     "line": 122,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/declaration.ts",
-   "line": 63,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 63,
-     "column": 8
-    },
-    "end": {
-     "line": 65,
-     "column": 9
     }
    },
    "covered_by_suite": true
@@ -2307,108 +1895,6 @@
   },
   {
    "file": "src/introspect/field.ts",
-   "line": 165,
-   "type": "if",
-   "branch": "7[0]",
-   "location": {
-    "start": {
-     "line": 165,
-     "column": 8
-    },
-    "end": {
-     "line": 167,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
-   "line": 175,
-   "type": "switch",
-   "branch": "8[1]",
-   "location": {
-    "start": {
-     "line": 175,
-     "column": 8
-    },
-    "end": {
-     "line": 177,
-     "column": 18
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
-   "line": 179,
-   "type": "switch",
-   "branch": "8[2]",
-   "location": {
-    "start": {
-     "line": 179,
-     "column": 8
-    },
-    "end": {
-     "line": 181,
-     "column": 18
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
-   "line": 183,
-   "type": "switch",
-   "branch": "8[3]",
-   "location": {
-    "start": {
-     "line": 183,
-     "column": 8
-    },
-    "end": {
-     "line": 185,
-     "column": 18
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
-   "line": 187,
-   "type": "switch",
-   "branch": "8[4]",
-   "location": {
-    "start": {
-     "line": 187,
-     "column": 8
-    },
-    "end": {
-     "line": 189,
-     "column": 18
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
-   "line": 191,
-   "type": "switch",
-   "branch": "8[5]",
-   "location": {
-    "start": {
-     "line": 191,
-     "column": 8
-    },
-    "end": {
-     "line": 193,
-     "column": 18
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
    "line": 194,
    "type": "switch",
    "branch": "8[6]",
@@ -2420,108 +1906,6 @@
     "end": {
      "line": 195,
      "column": 75
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapdeclaration.ts",
-   "line": 62,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 62,
-     "column": 8
-    },
-    "end": {
-     "line": 64,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapdeclaration.ts",
-   "line": 66,
-   "type": "if",
-   "branch": "2[0]",
-   "location": {
-    "start": {
-     "line": 66,
-     "column": 8
-    },
-    "end": {
-     "line": 68,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapdeclaration.ts",
-   "line": 70,
-   "type": "if",
-   "branch": "3[0]",
-   "location": {
-    "start": {
-     "line": 70,
-     "column": 8
-    },
-    "end": {
-     "line": 72,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapvaluetype.ts",
-   "line": 97,
-   "type": "if",
-   "branch": "3[0]",
-   "location": {
-    "start": {
-     "line": 97,
-     "column": 12
-    },
-    "end": {
-     "line": 99,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapvaluetype.ts",
-   "line": 102,
-   "type": "if",
-   "branch": "4[0]",
-   "location": {
-    "start": {
-     "line": 102,
-     "column": 12
-    },
-    "end": {
-     "line": 104,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapvaluetype.ts",
-   "line": 107,
-   "type": "if",
-   "branch": "6[0]",
-   "location": {
-    "start": {
-     "line": 107,
-     "column": 12
-    },
-    "end": {
-     "line": 109,
-     "column": 13
     }
    },
    "covered_by_suite": true
@@ -3157,57 +2541,6 @@
   },
   {
    "file": "src/introspect/numbervalidator.ts",
-   "line": 63,
-   "type": "if",
-   "branch": "2[0]",
-   "location": {
-    "start": {
-     "line": 63,
-     "column": 8
-    },
-    "end": {
-     "line": 72,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 76,
-   "type": "if",
-   "branch": "8[0]",
-   "location": {
-    "start": {
-     "line": 76,
-     "column": 12
-    },
-    "end": {
-     "line": 78,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 80,
-   "type": "if",
-   "branch": "10[0]",
-   "location": {
-    "start": {
-     "line": 80,
-     "column": 12
-    },
-    "end": {
-     "line": 82,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
    "line": 109,
    "type": "if",
    "branch": "12[1]",
@@ -3259,346 +2592,6 @@
   },
   {
    "file": "src/introspect/numbervalidator.ts",
-   "line": 138,
-   "type": "if",
-   "branch": "17[0]",
-   "location": {
-    "start": {
-     "line": 138,
-     "column": 8
-    },
-    "end": {
-     "line": 140,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 138,
-   "type": "if",
-   "branch": "17[1]",
-   "location": {
-    "start": {
-     "line": 138,
-     "column": 8
-    },
-    "end": {
-     "line": 140,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 143,
-   "type": "if",
-   "branch": "18[0]",
-   "location": {
-    "start": {
-     "line": 143,
-     "column": 8
-    },
-    "end": {
-     "line": 149,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 143,
-   "type": "if",
-   "branch": "18[1]",
-   "location": {
-    "start": {
-     "line": 143,
-     "column": 8
-    },
-    "end": {
-     "line": 149,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 143,
-   "type": "binary-expr",
-   "branch": "19[0]",
-   "location": {
-    "start": {
-     "line": 143,
-     "column": 12
-    },
-    "end": {
-     "line": 143,
-     "column": 34
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 143,
-   "type": "binary-expr",
-   "branch": "19[1]",
-   "location": {
-    "start": {
-     "line": 143,
-     "column": 38
-    },
-    "end": {
-     "line": 143,
-     "column": 62
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 145,
-   "type": "if",
-   "branch": "20[0]",
-   "location": {
-    "start": {
-     "line": 145,
-     "column": 15
-    },
-    "end": {
-     "line": 149,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 145,
-   "type": "if",
-   "branch": "20[1]",
-   "location": {
-    "start": {
-     "line": 145,
-     "column": 15
-    },
-    "end": {
-     "line": 149,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 145,
-   "type": "binary-expr",
-   "branch": "21[0]",
-   "location": {
-    "start": {
-     "line": 145,
-     "column": 19
-    },
-    "end": {
-     "line": 145,
-     "column": 42
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 145,
-   "type": "binary-expr",
-   "branch": "21[1]",
-   "location": {
-    "start": {
-     "line": 145,
-     "column": 46
-    },
-    "end": {
-     "line": 145,
-     "column": 70
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 146,
-   "type": "if",
-   "branch": "22[0]",
-   "location": {
-    "start": {
-     "line": 146,
-     "column": 12
-    },
-    "end": {
-     "line": 148,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 146,
-   "type": "if",
-   "branch": "22[1]",
-   "location": {
-    "start": {
-     "line": 146,
-     "column": 12
-    },
-    "end": {
-     "line": 148,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 152,
-   "type": "if",
-   "branch": "23[0]",
-   "location": {
-    "start": {
-     "line": 152,
-     "column": 8
-    },
-    "end": {
-     "line": 158,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 152,
-   "type": "if",
-   "branch": "23[1]",
-   "location": {
-    "start": {
-     "line": 152,
-     "column": 8
-    },
-    "end": {
-     "line": 158,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 152,
-   "type": "binary-expr",
-   "branch": "24[0]",
-   "location": {
-    "start": {
-     "line": 152,
-     "column": 12
-    },
-    "end": {
-     "line": 152,
-     "column": 34
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 152,
-   "type": "binary-expr",
-   "branch": "24[1]",
-   "location": {
-    "start": {
-     "line": 152,
-     "column": 38
-    },
-    "end": {
-     "line": 152,
-     "column": 62
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 154,
-   "type": "if",
-   "branch": "25[0]",
-   "location": {
-    "start": {
-     "line": 154,
-     "column": 15
-    },
-    "end": {
-     "line": 158,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 154,
-   "type": "if",
-   "branch": "25[1]",
-   "location": {
-    "start": {
-     "line": 154,
-     "column": 15
-    },
-    "end": {
-     "line": 158,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 154,
-   "type": "binary-expr",
-   "branch": "26[0]",
-   "location": {
-    "start": {
-     "line": 154,
-     "column": 19
-    },
-    "end": {
-     "line": 154,
-     "column": 42
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 154,
-   "type": "binary-expr",
-   "branch": "26[1]",
-   "location": {
-    "start": {
-     "line": 154,
-     "column": 46
-    },
-    "end": {
-     "line": 154,
-     "column": 70
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
    "line": 155,
    "type": "if",
    "branch": "27[0]",
@@ -3610,74 +2603,6 @@
     "end": {
      "line": 157,
      "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 155,
-   "type": "if",
-   "branch": "27[1]",
-   "location": {
-    "start": {
-     "line": 155,
-     "column": 12
-    },
-    "end": {
-     "line": 157,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/property.ts",
-   "line": 85,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 85,
-     "column": 8
-    },
-    "end": {
-     "line": 87,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/property.ts",
-   "line": 91,
-   "type": "if",
-   "branch": "1[0]",
-   "location": {
-    "start": {
-     "line": 91,
-     "column": 8
-    },
-    "end": {
-     "line": 93,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/property.ts",
-   "line": 117,
-   "type": "cond-expr",
-   "branch": "3[1]",
-   "location": {
-    "start": {
-     "line": 117,
-     "column": 61
-    },
-    "end": {
-     "line": 117,
-     "column": 65
     }
    },
    "covered_by_suite": true
@@ -3735,23 +2660,6 @@
   },
   {
    "file": "src/introspect/relationshipdeclaration.ts",
-   "line": 53,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 53,
-     "column": 8
-    },
-    "end": {
-     "line": 55,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/relationshipdeclaration.ts",
    "line": 79,
    "type": "if",
    "branch": "3[0]",
@@ -3763,23 +2671,6 @@
     "end": {
      "line": 81,
      "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/scalardeclaration.ts",
-   "line": 65,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 65,
-     "column": 8
-    },
-    "end": {
-     "line": 71,
-     "column": 9
     }
    },
    "covered_by_suite": true
@@ -3817,40 +2708,6 @@
     }
    },
    "covered_by_suite": false
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 63,
-   "type": "if",
-   "branch": "1[0]",
-   "location": {
-    "start": {
-     "line": 63,
-     "column": 12
-    },
-    "end": {
-     "line": 72,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 63,
-   "type": "binary-expr",
-   "branch": "2[1]",
-   "location": {
-    "start": {
-     "line": 63,
-     "column": 42
-    },
-    "end": {
-     "line": 63,
-     "column": 65
-    }
-   },
-   "covered_by_suite": true
   },
   {
    "file": "src/introspect/stringvalidator.ts",
@@ -3956,434 +2813,9 @@
   },
   {
    "file": "src/introspect/stringvalidator.ts",
-   "line": 170,
-   "type": "if",
-   "branch": "23[0]",
-   "location": {
-    "start": {
-     "line": 170,
-     "column": 8
-    },
-    "end": {
-     "line": 172,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 170,
-   "type": "if",
-   "branch": "23[1]",
-   "location": {
-    "start": {
-     "line": 170,
-     "column": 8
-    },
-    "end": {
-     "line": 172,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 174,
-   "type": "if",
-   "branch": "24[0]",
-   "location": {
-    "start": {
-     "line": 174,
-     "column": 8
-    },
-    "end": {
-     "line": 178,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 174,
-   "type": "if",
-   "branch": "24[1]",
-   "location": {
-    "start": {
-     "line": 174,
-     "column": 8
-    },
-    "end": {
-     "line": 178,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 176,
-   "type": "if",
-   "branch": "25[0]",
-   "location": {
-    "start": {
-     "line": 176,
-     "column": 15
-    },
-    "end": {
-     "line": 178,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 176,
-   "type": "if",
-   "branch": "25[1]",
-   "location": {
-    "start": {
-     "line": 176,
-     "column": 15
-    },
-    "end": {
-     "line": 178,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 182,
-   "type": "if",
-   "branch": "26[0]",
-   "location": {
-    "start": {
-     "line": 182,
-     "column": 8
-    },
-    "end": {
-     "line": 188,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 182,
-   "type": "if",
-   "branch": "26[1]",
-   "location": {
-    "start": {
-     "line": 182,
-     "column": 8
-    },
-    "end": {
-     "line": 188,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 182,
-   "type": "binary-expr",
-   "branch": "27[0]",
-   "location": {
-    "start": {
-     "line": 182,
-     "column": 12
-    },
-    "end": {
-     "line": 182,
-     "column": 33
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 182,
-   "type": "binary-expr",
-   "branch": "27[1]",
-   "location": {
-    "start": {
-     "line": 182,
-     "column": 37
-    },
-    "end": {
-     "line": 182,
-     "column": 60
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 184,
-   "type": "if",
-   "branch": "28[0]",
-   "location": {
-    "start": {
-     "line": 184,
-     "column": 15
-    },
-    "end": {
-     "line": 188,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 184,
-   "type": "if",
-   "branch": "28[1]",
-   "location": {
-    "start": {
-     "line": 184,
-     "column": 15
-    },
-    "end": {
-     "line": 188,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 184,
-   "type": "binary-expr",
-   "branch": "29[0]",
-   "location": {
-    "start": {
-     "line": 184,
-     "column": 19
-    },
-    "end": {
-     "line": 184,
-     "column": 41
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 184,
-   "type": "binary-expr",
-   "branch": "29[1]",
-   "location": {
-    "start": {
-     "line": 184,
-     "column": 45
-    },
-    "end": {
-     "line": 184,
-     "column": 68
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 185,
-   "type": "if",
-   "branch": "30[0]",
-   "location": {
-    "start": {
-     "line": 185,
-     "column": 12
-    },
-    "end": {
-     "line": 187,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 185,
-   "type": "if",
-   "branch": "30[1]",
-   "location": {
-    "start": {
-     "line": 185,
-     "column": 12
-    },
-    "end": {
-     "line": 187,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 191,
-   "type": "if",
-   "branch": "31[0]",
-   "location": {
-    "start": {
-     "line": 191,
-     "column": 8
-    },
-    "end": {
-     "line": 197,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 191,
-   "type": "if",
-   "branch": "31[1]",
-   "location": {
-    "start": {
-     "line": 191,
-     "column": 8
-    },
-    "end": {
-     "line": 197,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 191,
-   "type": "binary-expr",
-   "branch": "32[0]",
-   "location": {
-    "start": {
-     "line": 191,
-     "column": 12
-    },
-    "end": {
-     "line": 191,
-     "column": 33
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 191,
-   "type": "binary-expr",
-   "branch": "32[1]",
-   "location": {
-    "start": {
-     "line": 191,
-     "column": 37
-    },
-    "end": {
-     "line": 191,
-     "column": 60
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 193,
-   "type": "if",
-   "branch": "33[0]",
-   "location": {
-    "start": {
-     "line": 193,
-     "column": 15
-    },
-    "end": {
-     "line": 197,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 193,
-   "type": "if",
-   "branch": "33[1]",
-   "location": {
-    "start": {
-     "line": 193,
-     "column": 15
-    },
-    "end": {
-     "line": 197,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 193,
-   "type": "binary-expr",
-   "branch": "34[0]",
-   "location": {
-    "start": {
-     "line": 193,
-     "column": 19
-    },
-    "end": {
-     "line": 193,
-     "column": 41
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 193,
-   "type": "binary-expr",
-   "branch": "34[1]",
-   "location": {
-    "start": {
-     "line": 193,
-     "column": 45
-    },
-    "end": {
-     "line": 193,
-     "column": 68
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
    "line": 194,
    "type": "if",
    "branch": "35[0]",
-   "location": {
-    "start": {
-     "line": 194,
-     "column": 12
-    },
-    "end": {
-     "line": 196,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 194,
-   "type": "if",
-   "branch": "35[1]",
    "location": {
     "start": {
      "line": 194,
@@ -4548,74 +2980,6 @@
     }
    },
    "covered_by_suite": false
-  },
-  {
-   "file": "src/model/typed.ts",
-   "line": 189,
-   "type": "if",
-   "branch": "10[0]",
-   "location": {
-    "start": {
-     "line": 189,
-     "column": 8
-    },
-    "end": {
-     "line": 191,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/model/typed.ts",
-   "line": 189,
-   "type": "if",
-   "branch": "10[1]",
-   "location": {
-    "start": {
-     "line": 189,
-     "column": 8
-    },
-    "end": {
-     "line": 191,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/model/typed.ts",
-   "line": 195,
-   "type": "if",
-   "branch": "11[0]",
-   "location": {
-    "start": {
-     "line": 195,
-     "column": 12
-    },
-    "end": {
-     "line": 197,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/model/typed.ts",
-   "line": 195,
-   "type": "if",
-   "branch": "11[1]",
-   "location": {
-    "start": {
-     "line": 195,
-     "column": 12
-    },
-    "end": {
-     "line": 197,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
   },
   {
    "file": "src/modelloader.ts",

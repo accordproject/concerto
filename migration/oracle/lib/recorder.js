@@ -23,7 +23,7 @@
  *   {source, source_test, op, inputs, outcome, env}
  *
  * Environment:
- *   ORACLE_SOURCE   label for the corpus source (unit | data | conformance)
+ *   ORACLE_SOURCE   label for the corpus source (unit | data | conformance | gaps)
  *   ORACLE_RAW_DIR  where raw records (<source>-<pid>.jsonl) and skip stats go
  *   ORACLE_BLOB_DIR content-addressed blob store (shared with the corpus)
  *

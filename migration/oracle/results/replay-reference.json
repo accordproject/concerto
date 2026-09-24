@@ -1,7 +1,7 @@
 {
  "engine": "reference@5.0.0",
- "total": 15037,
- "pass": 15037,
+ "total": 15214,
+ "pass": 15214,
  "fail": 0,
  "harness_error": 0,
  "by_source": {
@@ -17,29 +17,35 @@
    "fail": 0,
    "harness_error": 0
   },
+  "gaps": {
+   "total": 174,
+   "pass": 174,
+   "fail": 0,
+   "harness_error": 0
+  },
   "unit": {
-   "total": 4088,
-   "pass": 4088,
+   "total": 4091,
+   "pass": 4091,
    "fail": 0,
    "harness_error": 0
   }
  },
  "by_op": {
   "ModelFile.getName": {
-   "total": 90,
-   "pass": 90,
+   "total": 91,
+   "pass": 91,
    "fail": 0,
    "harness_error": 0
   },
   "ModelFile.new": {
-   "total": 208,
-   "pass": 208,
+   "total": 211,
+   "pass": 211,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.addCTOModel": {
-   "total": 1297,
-   "pass": 1297,
+   "total": 1328,
+   "pass": 1328,
    "fail": 0,
    "harness_error": 0
   },
@@ -50,14 +56,14 @@
    "harness_error": 0
   },
   "ModelManager.addModelFile": {
-   "total": 106,
-   "pass": 106,
+   "total": 107,
+   "pass": 107,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.validateModelFiles": {
-   "total": 383,
-   "pass": 383,
+   "total": 385,
+   "pass": 385,
    "fail": 0,
    "harness_error": 0
   },
@@ -164,8 +170,8 @@
    "harness_error": 0
   },
   "Factory.newResource": {
-   "total": 1374,
-   "pass": 1374,
+   "total": 1375,
+   "pass": 1375,
    "fail": 0,
    "harness_error": 0
   },
@@ -194,26 +200,26 @@
    "harness_error": 0
   },
   "ModelManager.fromAst": {
-   "total": 2,
-   "pass": 2,
+   "total": 29,
+   "pass": 29,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.getAst": {
-   "total": 108,
-   "pass": 108,
+   "total": 122,
+   "pass": 122,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.getModels": {
-   "total": 107,
-   "pass": 107,
+   "total": 110,
+   "pass": 110,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.getType": {
-   "total": 627,
-   "pass": 627,
+   "total": 637,
+   "pass": 637,
    "fail": 0,
    "harness_error": 0
   },
@@ -226,6 +232,90 @@
   "Resource.validate": {
    "total": 52,
    "pass": 52,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getProperties": {
+   "total": 88,
+   "pass": 88,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getProperty": {
+   "total": 143,
+   "pass": 143,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "CollectionSizeValidator.compatibleWith": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getModelFile": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getScalarField": {
+   "total": 17,
+   "pass": 17,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getValidator": {
+   "total": 29,
+   "pass": 29,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.updateModelFile": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.validateModelFile": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isAssignableTo": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "NumberValidator.compatibleWith": {
+   "total": 8,
+   "pass": 8,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getFullyQualifiedTypeName": {
+   "total": 61,
+   "pass": 61,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getSizeValidator": {
+   "total": 26,
+   "pass": 26,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.instanceOf": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "StringValidator.compatibleWith": {
+   "total": 12,
+   "pass": 12,
    "fail": 0,
    "harness_error": 0
   },
@@ -280,18 +370,6 @@
   "ClassDeclaration.getOwnProperties": {
    "total": 6,
    "pass": 6,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "ClassDeclaration.getProperties": {
-   "total": 87,
-   "pass": 87,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "ClassDeclaration.getProperty": {
-   "total": 116,
-   "pass": 116,
    "fail": 0,
    "harness_error": 0
   },
@@ -370,12 +448,6 @@
   "DcsConverter.yamlToJson": {
    "total": 4,
    "pass": 4,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "Declaration.getModelFile": {
-   "total": 15,
-   "pass": 15,
    "fail": 0,
    "harness_error": 0
   },
@@ -496,18 +568,6 @@
   "Field.getDefaultValue": {
    "total": 28,
    "pass": 28,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "Field.getScalarField": {
-   "total": 10,
-   "pass": 10,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "Field.getValidator": {
-   "total": 12,
-   "pass": 12,
    "fail": 0,
    "harness_error": 0
   },
@@ -925,18 +985,6 @@
    "fail": 0,
    "harness_error": 0
   },
-  "ModelManager.updateModelFile": {
-   "total": 3,
-   "pass": 3,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "ModelManager.validateModelFile": {
-   "total": 4,
-   "pass": 4,
-   "fail": 0,
-   "harness_error": 0
-  },
   "ModelUtil.capitalizeFirstLetter": {
    "total": 4,
    "pass": 4,
@@ -958,12 +1006,6 @@
   "ModelUtil.getShortName": {
    "total": 4,
    "pass": 4,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "ModelUtil.isAssignableTo": {
-   "total": 5,
-   "pass": 5,
    "fail": 0,
    "harness_error": 0
   },
@@ -1027,12 +1069,6 @@
    "fail": 0,
    "harness_error": 0
   },
-  "Property.getFullyQualifiedTypeName": {
-   "total": 60,
-   "pass": 60,
-   "fail": 0,
-   "harness_error": 0
-  },
   "Property.getName": {
    "total": 245,
    "pass": 245,
@@ -1048,12 +1084,6 @@
   "Property.getParent": {
    "total": 21,
    "pass": 21,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "Property.getSizeValidator": {
-   "total": 25,
-   "pass": 25,
    "fail": 0,
    "harness_error": 0
   },
@@ -1270,6 +1300,6 @@
  },
  "failures": [],
  "agreement_pct": 100,
- "seconds": 48.7,
+ "seconds": 254.5,
  "failures_truncated": false
 }

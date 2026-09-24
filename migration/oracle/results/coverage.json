@@ -1,32 +1,32 @@
 {
- "generated_at": "2026-09-24T10:26:01.129Z",
+ "generated_at": "2026-09-24T13:36:18.579Z",
  "driver": "oracle corpus only (bin/replay.js --engine src under nyc)",
  "corpus": {
   "statements": {
-   "pct": 87.77,
-   "covered": 2922,
+   "pct": 90.5,
+   "covered": 3013,
    "total": 3329
   },
   "branches": {
-   "pct": 80.92,
-   "covered": 1485,
+   "pct": 85.83,
+   "covered": 1575,
    "total": 1835
   },
   "functions": {
-   "pct": 88.36,
-   "covered": 539,
+   "pct": 89.67,
+   "covered": 547,
    "total": 610
   },
   "lines": {
-   "pct": 87.66,
-   "covered": 2870,
+   "pct": 90.43,
+   "covered": 2961,
    "total": 3274
   }
  },
  "unit_suite": {
   "statements": {
-   "pct": 98.95,
-   "covered": 3306,
+   "pct": 99.01,
+   "covered": 3308,
    "total": 3341
   },
   "branches": {
@@ -35,13 +35,13 @@
    "total": 1835
   },
   "functions": {
-   "pct": 99.18,
-   "covered": 605,
+   "pct": 99.34,
+   "covered": 606,
    "total": 610
   },
   "lines": {
-   "pct": 98.96,
-   "covered": 3252,
+   "pct": 99.02,
+   "covered": 3254,
    "total": 3286
   }
  },
@@ -62,6 +62,6 @@
   "functions": 99,
   "lines": 99
  },
- "uncovered_branches": 350,
- "uncovered_branches_covered_by_suite": 279
+ "uncovered_branches": 260,
+ "uncovered_branches_covered_by_suite": 189
 }
