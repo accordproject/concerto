@@ -1,18 +1,18 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-24T18:22:05.998Z",
+  "generated_at": "2026-09-24T19:20:21.410Z",
   "requested_at_sha": null,
   "fast": true,
-  "runtime_ms": 144095,
+  "runtime_ms": 40632,
   "repos": {
     "concerto": {
       "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/coord/concerto",
-      "commit": "2cbfe8d487d592486c673f7ea646d60d47aaa481",
-      "commit_used": "2cbfe8d487d592486c673f7ea646d60d47aaa481"
+      "commit": "f21df0a1b321dbceebde877c6cc634146a0fe007",
+      "commit_used": "f21df0a1b321dbceebde877c6cc634146a0fe007"
     },
     "concerto-rust": {
       "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/coord/concerto-rust",
-      "commit": "5f35dbacabb54749f31ec9faa40545cdbdd1cefc"
+      "commit": "ef781f62796ee4c5f26dcf6a006a8f93fa02dacf"
     },
     "concerto-validate-rs": {
       "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/coord/concerto-validate-rs",
@@ -60,7 +60,7 @@
         "passing": 1300,
         "failing": 0,
         "pending": 8,
-        "duration_ms": 25562
+        "duration_ms": 6358
       },
       "by_tag": {
         "available": true,
@@ -94,7 +94,7 @@
           "passing": 1300,
           "failing": 0,
           "pending": 8,
-          "duration_ms": 25562
+          "duration_ms": 6358
         },
         "rust": {
           "available": false,
@@ -235,12 +235,12 @@
           "available": true,
           "command_exit_ok": true,
           "totals": {
-            "passed": 192,
+            "passed": 234,
             "failed": 0
           },
           "per_crate": {
             "concerto_core": {
-              "passed": 162,
+              "passed": 204,
               "failed": 0
             },
             "derive": {
