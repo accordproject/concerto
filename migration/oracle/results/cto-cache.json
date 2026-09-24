@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-09-24T17:34:49.341Z",
+  "fixturesDir": "fixtures",
+  "cacheDir": "cto-cache",
+  "ctoParserVersion": "5.0.0",
+  "fixturesScanned": 15040,
+  "fixturesWithCto": 14018,
+  "uniqueCtoTexts": 509,
+  "entries": {
+    "ast": 486,
+    "error": 23,
+    "total": 509
+  },
+  "written": 509,
+  "reused": 0,
+  "contentHash": "0c6b264f82aae8c95319ba7e6af649ae6272125b0186b36c993e43a8ff617201",
+  "note": "fixturesWithCto (14018) differs from the 13006 the issue and README's corpus snapshot record. That figure counted only fixtures reaching addCTOModel; on the canonical unit+data+conformance corpus (fixtures/lifted and fixtures/gaps excluded) this generator reproduces it exactly when scoped to that one entry point (verified directly: git-stash the entry-point fix and re-run against the same corpus). The figure here also counts fixtures reaching ModelManager's other four entry points into ctoProcessFile -- addModel, addModelFiles, updateModelFile and validateModelFile -- which parse CTO text just as addCTOModel does and were previously missing from the cache. It also moves with the corpus itself: a re-recording or a P2-10/P2-11 addition under fixtures/lifted or fixtures/gaps changes both fixturesScanned and fixturesWithCto. This manifest was generated from a corpus recorded fresh with migration/oracle/bin/record-all.sh against this branch's own packages/concerto-core/src (unit 4,091, data 10,123, conformance 826 = 15,040 fixtures), not copied from another worktree; data and conformance match this file's corpus snapshot below exactly, unit differs by 3 fixtures run-to-run (within the recorder's normal variance for this environment, e.g. Node/timing-sensitive branches), which is the source of the 15,040 vs 15,037 difference in fixturesScanned."
+}
