@@ -14,7 +14,9 @@
 
 /* istanbul ignore file */
 // Maps the engine's error payload to the TS exception class (PORTING.md 2.3;
-// P0-04b trial scaffold: the kinds the trial units raise).
+// P4-02). Every ErrorKind concerto-rust's error/mod.rs defines has an entry
+// here, so a ported member is never left throwing the "unknown engine error
+// kind" fallback just because it is not one of the P0-04b trial units.
 //
 // The payload is {kind, code, params, message, location, errorType,
 // modelFile}. `message` is the raw rendered message: each TS constructor
@@ -22,6 +24,7 @@
 
 import { BaseException } from '@accordproject/concerto-util';
 import IllegalModelException from '../introspect/illegalmodelexception';
+import TypeNotFoundException from '../typenotfoundexception';
 
 /**
  * The error payload the engine hands to the factory.
@@ -38,6 +41,11 @@ interface ErrorPayload {
 
 const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     IllegalModel: (p) => new IllegalModelException(p.message, p.modelFile, p.location),
+    // `TypeNotFoundException(typeName, message)`: `typeName` travels in
+    // `params.typeName` (concerto-rust error/mod.rs `ContractError::type_not_found`),
+    // separately from the rendered `message` the constructor would otherwise
+    // recompute a default for.
+    TypeNotFound: (p) => new TypeNotFoundException(p.params.typeName, p.message),
     Validator: (p) => new BaseException(p.message, undefined, p.errorType),
     Error: (p) => new Error(p.message),
     JsTypeError: (p) => new TypeError(p.message),
