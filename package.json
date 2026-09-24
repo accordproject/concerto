@@ -70,6 +70,7 @@
       ".tern-project",
       "node_modules",
       "e2e",
+    "migration",
       "packages",
       "softhsm",
       "build.cfg",
