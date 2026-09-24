@@ -1,0 +1,422 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "org.acme.base@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "State",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "GOLD"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "SILVER"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "BRONZE"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Person",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "stringProperty",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "address",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "UnitedStatesAddress"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "stringProperty"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Bloke",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "stringProperty",
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "stringProperty"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "SimpleAsset",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "stringProperty",
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "stringProperty"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "AbstractAsset",
+      "isAbstract": true,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "stringProperty",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": "defaultString"
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "stringProperty"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Address",
+      "isAbstract": true,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "street",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "city",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": "Winchester"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "country",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": "UK"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "counts",
+          "isArray": true,
+          "isOptional": true
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "UnitedStatesAddress",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "zipcode",
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Address"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+      "name": "Dictionary",
+      "key": {
+        "$class": "concerto.metamodel@1.0.0.StringMapKeyType"
+      },
+      "value": {
+        "$class": "concerto.metamodel@1.0.0.StringMapValueType"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "BaseAsset",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "stringProperty",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": "defaultString"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "integerProperty",
+          "isArray": false,
+          "isOptional": true,
+          "defaultValue": 10
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "name": "doubleProperty",
+          "isArray": false,
+          "isOptional": true,
+          "defaultValue": 999
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+          "name": "booleanProperty",
+          "isArray": false,
+          "isOptional": true,
+          "defaultValue": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DateTimeProperty",
+          "name": "dateTimeProperty",
+          "isArray": false,
+          "isOptional": true,
+          "defaultValue": "2008-09-15T15:53:00"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "longProperty",
+          "isArray": false,
+          "isOptional": true,
+          "defaultValue": 1000
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "stateProperty",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "State"
+          },
+          "isArray": false,
+          "isOptional": true,
+          "defaultValue": "GOLD"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "stringArrayProperty",
+          "isArray": true,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "integerArrayProperty",
+          "isArray": true,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "name": "doubleArrayProperty",
+          "isArray": true,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+          "name": "booleanArrayProperty",
+          "isArray": true,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DateTimeProperty",
+          "name": "dateTimeArrayProperty",
+          "isArray": true,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "longArrayProperty",
+          "isArray": true,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "stateArrayProperty",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "State"
+          },
+          "isArray": true,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "singlePerson",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Person"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "personArray",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Person"
+          },
+          "isArray": true,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "myPerson",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Person"
+          },
+          "isArray": false,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "myPeople",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Person"
+          },
+          "isArray": true,
+          "isOptional": true
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "stringProperty"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "DerivedAsset",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "anotherStringProperty",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": "defaultString"
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "BaseAsset"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "MyBasicTransaction",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "transactionId",
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "transactionId"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "DerivedDerivedAsset",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "includedTransaction",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "MyBasicTransaction"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "DerivedAsset"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "MyTransaction",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "myAsset",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "BaseAsset"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.Identified"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "MyTransactionEx",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "anotherBaseAsset",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "BaseAsset"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "arrayOfBaseAssets",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "BaseAsset"
+          },
+          "isArray": true,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "MyTransaction"
+      }
+    }
+  ]
+}

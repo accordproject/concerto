@@ -22,7 +22,7 @@
  *
  * Records are deduplicated by content hash of {op, inputs, outcome, env}
  * across all sources; a record seen in several sources is kept under the
- * first source in the order unit, data, conformance. Each fixture is written
+ * first source in the order unit, data, conformance, gaps, lifted. Each fixture is written
  * to <out>/<source>/<op>/<id>.json, and every blob a fixture references
  * (directly or through another blob) is copied from the recorder's staging
  * blob store to <out>/blobs. <out>/manifest.json holds the counts per
@@ -34,7 +34,7 @@ const path = require('path');
 const readline = require('readline');
 const { sha256, sortedStringify } = require('../lib/canon');
 
-const SOURCE_ORDER = ['unit', 'data', 'conformance'];
+const SOURCE_ORDER = ['unit', 'data', 'conformance', 'gaps', 'lifted'];
 
 /**
  * @param {string[]} argv arguments

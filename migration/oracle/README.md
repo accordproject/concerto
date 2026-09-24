@@ -12,6 +12,8 @@ reference/        frozen reference: package.json pinning @accordproject/concerto
 lib/              core.js      loads the modules of one build (workspace src/ via ts-node, or reference dist/)
                   ops.js       op catalogue: what is recorded and how an op is executed
                   codec.js     value encoding for inputs (decodable recipes) and outcomes (summaries)
+                  encodable.js language-neutral kinds for arguments that are code in JS: filter
+                               predicates and decorator factories (task accordproject/concerto-rust#94)
                   canon.js     canonicalisation (sorted keys, <uuid>, <now>)
                   store.js     content-addressed blob store
                   env.js       determinism envelope (seeded Math.random, clock separation)
@@ -20,14 +22,19 @@ lib/              core.js      loads the modules of one build (workspace src/ vi
                   judge.js     replay and verdicts
                   rust-adapter.js  the Rust/WASM engine: workspace src/ with CONCERTO_ENGINE=rust (P0-04b trial)
 drivers/          data.spec.js (test/data, test/1.0.0), conformance.spec.js (concerto-conformance),
+                  gaps.spec.js (task P2-11: targeted inputs closing coverage-gaps.json branches;
+                  task accordproject/concerto-rust#94 added predicates, factories, async ops),
+                  lifted.spec.js (task P2-10: runs lifted/*.scenarios.js),
                   unit-setup.js (global chai set-up for per-file unit runs)
+lifted/           task P2-10: black-box scenarios replacing white-box unit tests (see lifted/README.md)
 bin/              record-all.sh, build-corpus.js, replay.js, coverage.sh, coverage-gaps.js, self-check.js,
                   cto-cache.js (P0-04b trial version, kept as-is, not used by anything else any more),
                   build-cto-cache.js (CTO -> AST cache for the native Rust harness, OD-9; task P1-07a)
 fixtures/         the corpus: <source>/<op>/<id>.json, blobs/, manifest.json
 cto-cache/        the CTO -> AST cache: <aa>/<sha256>.json (generated; see "CTO -> AST cache" below)
 results/          replay-reference.json, coverage.json, self-check.json, cto-cache.json
-coverage-gaps.json  every src branch the corpus does not reach
+coverage-gaps.json  every branch the corpus does not reach on the reference
+gap-reasons.json  the verified reason for every one of those branches the unit suite covers
 ```
 
 ## Commands
@@ -37,10 +44,11 @@ Run from anywhere; `<work>` is a scratch directory for raw records and logs.
 | Step | Command |
 |---|---|
 | Install the reference (once) | `cd migration/oracle/reference && npm ci` |
-| Record and build the corpus | `migration/oracle/bin/record-all.sh <work>` |
+| Record and build the corpus | `CONFORMANCE_DIR=<concerto-conformance checkout> JOBS=<n> migration/oracle/bin/record-all.sh <work>` |
 | Replay against the reference | `node migration/oracle/bin/replay.js --report migration/oracle/results/replay-reference.json` |
 | Replay against another engine | `node migration/oracle/bin/replay.js --engine path/to/adapter.js` |
 | Corpus-only coverage and gaps | `migration/oracle/bin/coverage.sh <work> --with-suite` |
+| Gaps against the suite on the reference's source (while `src/` differs from v5.0.0, see "Coverage") | run the unit suite under nyc over a copy of `packages/concerto-core` with `src/` from `git archive v5.0.0`, then `node migration/oracle/bin/coverage-gaps.js` with `--corpus`, `--corpus-summary`, `--corpus-src`, `--corpus-src-summary` from `<work>` and `--suite`, `--suite-summary` from that run |
 | Judge self-check (mutants) | `node migration/oracle/bin/self-check.js --report migration/oracle/results/self-check.json` |
 | Build/refresh the CTO -> AST cache | `node migration/oracle/bin/build-cto-cache.js` |
 | Check the CTO -> AST cache is complete | `node migration/oracle/bin/build-cto-cache.js --check` |
@@ -55,13 +63,15 @@ It wraps the public boundary of `packages/concerto-core/src` (the same code as t
 their compiled `dist/*.js` are identical) and writes one raw record per **outermost** public call.
 Calls made while another recorded call is running are nested and are not recorded.
 
-Three sources feed it:
+Five sources feed it:
 
 | Source | What runs |
 |---|---|
-| `unit` | Every file of `packages/concerto-core/test` in its own mocha process (4 in parallel). One file (`test/serializer/jsongenerator.js`) leaks a `ModelUtil.isEnum` stub from a `before` hook into all later files when the suite runs in one process; per-file processes contain that. `drivers/unit-setup.js` supplies the `chai.should()` and chai plugins that the single-process suite gets from other files. Under the recorder: 1299 passing, 1 failing (the network test `ModelLoader #loadModelFromUrl`, as in `baseline.json`), 8 pending. |
+| `unit` | Every file of `packages/concerto-core/test` in its own mocha process (`JOBS` in parallel, default 4). One file (`test/serializer/jsongenerator.js`) leaks a `ModelUtil.isEnum` stub from a `before` hook into all later files when the suite runs in one process; per-file processes contain that. `drivers/unit-setup.js` supplies the `chai.should()` and chai plugins that the single-process suite gets from other files. |
 | `data` | `drivers/data.spec.js`: every `.cto`, AST `.json`, instance `.json`/`.expect`, DCS `.json` and `.yaml` under `test/data` and `test/1.0.0`, loaded alone and per directory, with and without validation, metamodel validation, instance generation (`sample`/`empty`), `toJSON`/`fromJSON` round trips, decorator application and extraction. |
 | `conformance` | `drivers/conformance.spec.js`: every semantic scenario of concerto-conformance run exactly as its JavaScript step definitions do (`new ModelFile`, `addModelFile(…, true)`, `validateModelFiles`), every AST and CTO file under `semantic/specifications` on its own, and every instance scenario of `validate/features` (ModelLoader, `fromJSON`, `toJSON`). |
+| `gaps` | `drivers/gaps.spec.js` (task P2-11, plan §2.4): targeted black-box inputs — crafted CTO models, mutated metamodel ASTs (via `fromAst`), Resources built by a Factory and assigned field values directly, `Serializer`/`Factory` options, and direct calls on the introspection objects a model manager returns — each aimed at one or more branches listed in `coverage-gaps.json` that the unit suite covers but the corpus did not. |
+| `lifted` | `drivers/lifted.spec.js` (task P2-10, plan §2.3): every scenario in `lifted/*.scenarios.js`, each replacing a white-box unit test with a public `Serializer.fromJSON` call. |
 
 A call is **skipped** (and counted by op and reason in `fixtures/manifest.json`) when:
 
@@ -71,12 +81,29 @@ A call is **skipped** (and counted by op and reason in `fixtures/manifest.json`)
   an object with a stubbed or monkey-patched method, a declaration that is not part of its model file,
   a cycle (`nonplain:<reason>`);
 * the receiver's model manager was *tainted*: its state stopped being reproducible from plain data
-  (a custom `processFile`, non-plain options, `addDecoratorFactory`, `updateExternalModels`, a mutation made
-  inside another op, a step whose arguments were not plain);
-* the result is a promise (`async-result`); async ops are not recorded.
+  (a custom `processFile`, non-plain options, `addDecoratorFactory` with a factory that is not an encodable
+  kind, `updateExternalModels` (async: the call itself is recorded, but a replayed recipe cannot await it),
+  a mutation made inside another op, a step whose arguments were not plain);
+* the result of an op that is not an async op is a promise (`async-result`);
+* an async op reads a file by an absolute path or one that leaves the working directory
+  (`nonportable-path`), or a fetch it made failed without a response (`network-error`).
+
+Async ops (`lib/ops.js` `async: true`, task accordproject/concerto-rust#94: `ModelLoader.loadModelManager`,
+`ModelLoader.loadModelManagerFromModelFiles`, `ModelManager.updateExternalModels`) are recorded when their
+promise settles; the outcome is the settled value or the rejection. An `AsyncLocalStorage` scope marks every
+call made on the op's behalf after an `await`, so those calls are nested exactly like the ones it makes
+synchronously. While the op runs, the recorder wraps `globalThis.fetch` and keeps every response
+(`inputs.net`), and it reads the local files the op will read (`inputs.fs`). A model manager an async op
+creates is never a `derived` recipe (a replayed recipe cannot await). Instead its recipe is its
+constructor plus the state-changing calls the op makes on it, recorded as steps as if the op's code had
+made them at the top level; an async call on it (`updateExternalModels`) taints it.
 
 Deduplication: records are hashed on `{op, inputs, outcome, env}`; a fixture seen in several sources is kept
-once, under the first of unit, data, conformance, with `occurrences` counting the copies.
+once, under the first of unit, data, conformance, gaps, lifted, with `occurrences` counting the copies.
+
+`CONFORMANCE_DIR` must point at a concerto-conformance checkout (the driver's default,
+`/home/user/concerto-conformance`, is the original container's path). The figures below used commit
+66a5e8bc (its `main`, the commit recorded in `migration/baseline.json`).
 
 ## Fixture schema
 
@@ -94,6 +121,12 @@ once, under the first of unit, data, conformance, with `occurrences` counting th
 ```
 
 * `inputs.target` is present for method ops only; constructors and static functions have `args` only.
+* Async ops only (task accordproject/concerto-rust#94): `inputs.fs` maps each relative path the op reads to
+  the file's contents (UTF-8), and `inputs.net` maps each URL the op fetched to `{"status": <HTTP status>,
+  "body": <text>}`. A harness writes `fs` into a fresh directory that is the op's working directory, and
+  answers every fetch from `net`. The recorder keeps every URL the reference fetched, so an engine that
+  fetches any other URL has diverged (a failure); a malformed `fs` or `net` is a harness error.
+  The outcome of an async op is what its promise settles to.
 * `outcome` may also carry `effects`: `{"target": <receiver after the call>}` for ops that change an instance
   (`setPropertyValue`, `addArrayValue`, `setIdentifier`), and `{"args": {"<i>": <argument after the call>}}`
   when an op changed a plain-data argument in place (for example DCS options or ASTs).
@@ -121,6 +154,9 @@ Plain JSON is itself. Everything else is an object with an `"@@oracle"` kind:
 | `mfref` | model file registered in a model manager: `{mm, ns}` |
 | `mfnew` | model file built but not registered: `{mm, ast, definitions, fileName}` |
 | `declref`, `propref`, `decoref`, `validatorref` | declaration / property / map key or value / decorator / validator, by position inside its parent |
+| `declnew` | a declaration built by a recorded constructor op, not part of its model file: `{cls: "ScalarDeclaration", mf, ast}`, rebuilt as `new ScalarDeclaration(mf, ast)` |
+| `predicate` | a filter predicate over a declaration: `{kind: "fqn-in", names}` is true when the declaration's fully qualified name is in `names` |
+| `decoratorfactory` | a `DecoratorFactory`: `{kind: "base"}` is the exported base class (its `newDecorator` throws `Error('abstract function called')`); `{kind: "names", names}` returns `new Decorator(parent, ast)` when `ast.name` is in `names`, and `null` otherwise |
 | `factory`, `serializer`, `introspector` | rebuilt from their model manager (and the serializer's default options) |
 | `typed` | a Resource, ValidatedResource or Relationship: its handles plus every own property in order |
 | outcome only: `ModelManager`, `ModelFile`, `Declaration`, `Property`, `Decorator`, `Validator`, `object`, `function`, `throws` | summaries of handles returned by an op (e.g. a model manager's full AST) |
@@ -128,6 +164,16 @@ Plain JSON is itself. Everything else is an object with an `"@@oracle"` kind:
 A model manager recipe's `steps` are the state-changing public calls made on it, in order:
 `{method, args, status: ok|error, errorClass}`. Replaying a recipe re-runs the steps; a step whose
 status or error class differs from the recorded one is a **state divergence**, reported as a failure.
+`addDecoratorFactory` is a step when its argument is a `decoratorfactory` kind.
+
+The `predicate` and `decoratorfactory` kinds (task accordproject/concerto-rust#94, `lib/encodable.js`) stand
+for arguments that are code in JavaScript. A driver builds them with `encodable.predicate(...)` and
+`encodable.decoratorFactory(core, ...)`, which register the value with its encoding; the encoder accepts a
+function or factory only when it is registered (or is the bare base `DecoratorFactory`), so an encoding
+always describes the whole behaviour. Any other function or factory stays unrecordable (`nonplain:function`,
+`nonplain:decoratorfactory:<class>`). Each kind is defined by what it does, not by JavaScript, so a native
+harness implements it directly: a predicate is a set of fully qualified names, and a factory is "fail" or
+"a plain decorator for these names".
 
 ## Ops
 
@@ -135,10 +181,11 @@ status or error class differs from the recorded one is a **state divergence**, r
 
 | Family | Ops |
 |---|---|
-| Model managers | `ModelManager.new`, `BaseModelManager.new`, `AstModelManager.new`; steps `addModel`, `addCTOModel`, `addModelFile`, `addModelFiles`, `updateModelFile`, `deleteModelFile`, `clearModelFiles`, `fromAst`, `validateModelFiles`; queries `validateModelFile`, `getType`, `resolveType`, `getAst`, `getModels`, `getNamespaces`, `derivesFrom`, `isAssignableTo`, `getAssignableConcreteTypes`, `resolveMetaModel`, `get*Declarations`, `getDecoratorValidation` |
+| Model managers | `ModelManager.new`, `BaseModelManager.new`, `AstModelManager.new`; steps `addModel`, `addCTOModel`, `addModelFile`, `addModelFiles`, `updateModelFile`, `deleteModelFile`, `clearModelFiles`, `fromAst`, `validateModelFiles`, `addDecoratorFactory`; async `updateExternalModels` (its effect on the model manager is `effects.target`); queries `validateModelFile`, `getType`, `resolveType`, `getAst`, `getModels`, `getNamespaces`, `derivesFrom`, `isAssignableTo`, `getAssignableConcreteTypes`, `resolveMetaModel`, `get*Declarations`, `getDecoratorValidation`, `filter` (with a `predicate`), `writeModelsToFileSystem` (only with no directory) |
 | Model files | `ModelFile.new`, `validate`, `getType`, `resolveType`, `isLocalType`, `isImportedType`, `resolveImport`, `getFullyQualifiedTypeName`, `getLocalType`, `isDefined`, and every other public accessor |
-| Introspection | every public method of `Declaration`, `ClassDeclaration` and subclasses, `MapDeclaration`, `ScalarDeclaration`, `Property`, `Field`, `RelationshipDeclaration`, `EnumValueDeclaration`, `MapKeyType`, `MapValueType`, `Decorated`, `Decorator`, the validators, `Introspector` |
-| Instances | `Factory.newResource/newConcept/newRelationship/newTransaction/newEvent`, `Serializer.fromJSON/toJSON`, `Resource.validate/setPropertyValue/addArrayValue/instanceOf/toJSON`, `Typed`/`Identifiable`/`Resource`/`Relationship` accessors, `Relationship.fromURI` |
+| Model loader | async `ModelLoader.loadModelManager`, `ModelLoader.loadModelManagerFromModelFiles` |
+| Introspection | `ScalarDeclaration.new` (the exported constructor; its result is a `declnew` input); every public method of `Declaration`, `ClassDeclaration` and subclasses, `MapDeclaration`, `ScalarDeclaration`, `Property`, `Field`, `RelationshipDeclaration`, `EnumValueDeclaration`, `MapKeyType`, `MapValueType`, `Decorated`, `Decorator`, the validators, `Introspector` |
+| Instances | `Factory.newResource/newConcept/newRelationship/newTransaction/newEvent`, `TypeNotFoundException.new` (recorded as an error value), `Serializer.new` (the constructor; a successful one is summarised as `{"@@oracle":"object","ctor":"Serializer"}`), `Serializer.fromJSON/toJSON`, `Resource.validate/setPropertyValue/addArrayValue/instanceOf/toJSON`, `Typed`/`Identifiable`/`Resource`/`Relationship` accessors, `Relationship.fromURI` |
 | Statics | every `ModelUtil` static, every `DecoratorManager` static, `MetaModel.newMetaModelManager/validateMetaModel/modelManagerFromMetaModel`, `DcsConverter.jsonToYaml/yamlToJson`, `DateTimeUtil.setCurrentTime` |
 
 ## Adding an engine adapter
@@ -150,7 +197,7 @@ An adapter is a module exporting `createAdapter()` that returns:
   name: 'rust-wasm',
   run(op, inputs) {
     // inputs: fixture inputs with every blob resolved
-    // return { outcome, window } where
+    // return { outcome, window } (or, for an async op, a promise of it) where
     //   outcome = { ok: <result in the output encoding> } | { error: { class, message, location, component } }
     //             (+ effects when the op changed its receiver or a plain argument)
     //   window  = { start, end }  wall-clock ms around the op itself (optional; the judge times run() otherwise)
@@ -167,6 +214,8 @@ Rules:
    different status), and `err.unsupported = true` for an op the engine does not implement: both are failures.
 3. Keys need not be sorted and generated ids/timestamps need not be normalised: the judge canonicalises.
 4. Run the op under the seeded PRNG if the engine can; otherwise treat `env.random` fixtures specially.
+5. For an async op, run it inside `inputs.fs` and `inputs.net` (see "Fixture schema") and report what it
+   settles to. An engine without async APIs runs the op to completion and reports its result the same way.
 
 `lib/adapter.js` `coreAdapter(core)` is the adapter for any JS build of concerto-core; `referenceAdapter()`
 uses `reference/node_modules/@accordproject/concerto-core` and `srcAdapter()` the workspace `src/`.
@@ -290,80 +339,168 @@ silently passing on a missing or corrupt entry.
 
 ## Results
 
-Recorded on 2026-09-24 from the migration branch (full numbers: `fixtures/manifest.json`,
-`results/*.json`).
+Recorded 2026-09-24 (task P0-05), re-recorded by task P2-11 after merging P2-10 part 1 (`lifted/`), and
+re-recorded end to end the same day by task accordproject/concerto-rust#94: `record-all.sh` (all five
+sources, `JOBS=6`, concerto-conformance at 66a5e8bc), `coverage.sh --with-suite`, the unit suite over the
+reference's own source (see "Coverage" below), both replays and `self-check.js`, in that order, on the
+committed drivers. Full numbers: `fixtures/manifest.json`, `results/*.json`, `coverage-gaps.json`.
 
 ### Corpus
 
 | Source | Fixtures | Ops |
 |---|---:|---:|
-| unit | 4,088 | 206 |
-| data | 10,123 | 31 |
-| conformance | 826 | 8 |
-| **total** | **15,037** (from 27,577 recorded calls; 615 blobs) | |
+| unit | 4,082 | 213 |
+| data | 10,231 | 32 |
+| conformance | 815 | 9 |
+| gaps | 658 | 54 |
+| lifted | 64 | 3 |
+| **total** | **15,850** (from 28,927 recorded calls; 618 blobs) | |
 
-Largest op families (fixtures, all sources): Serializer 3,621; ModelManager 2,988; ClassDeclaration 1,670;
-DecoratorManager 1,542; Factory 1,444; Declaration 1,340; Property 778; ModelFile 579; Field 263;
-Typed 141; ModelUtil 127; Resource 125. 2,080 fixtures record an error outcome; 516 carry `env.random`;
-79 carry `effects`. Per-op counts per source are in `fixtures/manifest.json` (`by_source`).
+Unit suite under the recorder: 1300 passing, 0 failing, 8 pending. The network test `ModelLoader
+#loadModelFromUrl` (failing in `baseline.json`) passed, and is now recorded with the response it fetched
+(`inputs.net`), so its fixture replays offline; recording it again needs the network.
 
-Skipped calls: 1,000 in the unit source (0 in data and conformance), e.g. 236 on tainted model managers,
-138 on declarations built outside a model file, 126 on validators not owned by their field, 90 on
-properties built outside a declaration, 75 cycles, 73 while a `ModelUtil` function was stubbed,
-63 with function arguments, 27 async results, 19 while the CTO parser was stubbed.
+New fixtures of task accordproject/concerto-rust#94, by op (source):
 
-### Replay against the frozen reference
+| Op | Fixtures |
+|---|---:|
+| `ModelManager.filter` (predicate `fqn-in`) | 20 (gaps) |
+| `ModelManager.addDecoratorFactory` (and as a step in 26 other gaps fixtures) | 6 (gaps) |
+| `ModelManager.updateExternalModels` | 6 (2 unit, 4 gaps) |
+| `ModelLoader.loadModelManager` | 10 (1 unit, 9 gaps) |
+| `ModelLoader.loadModelManagerFromModelFiles` | 7 (2 unit, 5 gaps) |
+| `ScalarDeclaration.new` (and 31 calls on its result, `declnew`) | 13 (8 unit, 5 gaps) |
 
-`results/replay-reference.json`: **15,037 / 15,037 pass (100%)**, 0 fail, 0 harness errors
-(unit 4,088/4,088, data 10,123/10,123, conformance 826/826). The corpus also replays 100% against the
-workspace `src/` (the coverage run below).
+Some counts fell against the P2-11 corpus (`ModelFile.new` 211 to 196, `ModelManager.addModelFile` 107
+to 92, `ModelManager.validateModelFiles` 385 to 376, a few `ModelUtil` statics). Those fixtures were calls
+that `ModelLoader` makes after an `await`: with no async scope, the old recorder saw them as outermost
+calls. They are now part of the `ModelLoader` op that makes them, and the model manager the loader builds
+is rebuilt from its constructor and those calls as steps. The conformance count fell by 24 for the same
+reason: `drivers/conformance.spec.js` loads models by absolute path, which is not portable
+(`nonportable-path`, 15 calls).
 
-### Coverage of the reference with the corpus as the only driver
+Skipped calls: 885 in `unit` (tainted model managers, declarations built outside a model file,
+validators not owned by their field, properties built outside a declaration, cycles, a stubbed `ModelUtil`
+function, function arguments including 3 `filter` predicates, 2 decorator factories that carry code,
+8 `updateExternalModels` calls given a stub `FileDownloader`, 23 `ModelLoader` calls with absolute paths,
+a stubbed CTO parser, and 3 `writeModelsToFileSystem` calls given a real directory, skipped as
+`writes-to-disk`), 15 in `conformance` (`nonportable-path`) and 1 in `gaps` (a P2-11 `filter` call with a
+plain function predicate, `nonplain:function`).
 
-nyc over `packages/concerto-core/src`, driver `bin/replay.js --engine src`:
+### Replay
 
-| Metric | Corpus only | Unit suite (this run; = `baseline.json`) | Thresholds |
+`results/replay-reference.json`: **15,850 / 15,850 pass (100%)** against the frozen reference, 0 fail,
+0 harness errors. Against the workspace `src/`: also 15,850 / 15,850, 0 harness errors.
+
+### Coverage with the corpus as the only driver
+
+`bin/coverage.sh` replays the corpus under nyc twice. The primary run is against the **frozen reference**:
+nyc instruments `reference/node_modules/@accordproject/concerto-core/dist/*.js` and remaps the counts
+through the package's own source maps to `src/*.ts`. The second run, against the workspace `src/`
+through ts-node, is a cross-check.
+
+The workspace `src/` is no longer the reference's source: the P0-04b trial port (merged after P2-11) added
+engine views to `modelutil.ts`, `introspect/numbervalidator.ts` and `introspect/scalardeclaration.ts`,
+so those three files have a different branch map in `src/` (1,860 branches in all, against the
+reference's 1,835). `coverage.sh` compares branches by id, so in those three files its cross-check reports
+58 layout mismatches and 18 hit disagreements, and a unit suite run over `src/` cannot be compared with
+the reference branch by branch (it reported one spurious "unexplained" gap,
+`scalardeclaration.ts:134:12[0]`). The test files are unchanged since v5.0.0. So the unit-suite figures
+below, and the `covered_by_suite` marks in `coverage-gaps.json`, come from the same suite command run over
+a copy of `packages/concerto-core` whose `src/` is `git archive v5.0.0 packages/concerto-core/src`
+(`TZ=UTC`, `nyc … mocha -r ts-node/register --recursive -t 10000 test/`), passed to `coverage-gaps.js` as
+`--suite`/`--suite-summary`. That run gives exactly the P2-11 suite figures: 1300 passing, branches 95.80%
+(1758/1835).
+
+| Metric | Corpus → reference | Corpus → `src/` (P0-04b layout) | Unit suite → v5.0.0 `src/` |
 |---|---:|---:|---:|
-| Statements | 87.77% (2922/3329) | 98.95% (3306/3341) | 99 |
-| Branches | 80.92% (1485/1835) | 95.80% (1758/1835) | 94.8 |
-| Functions | 88.36% (539/610) | 99.18% (605/610) | 99 |
-| Lines | 87.66% (2870/3274) | 98.96% (3252/3286) | 99 |
+| Statements | 95.36% (3268/3427) | 97.88% (3292/3363) | 99.01% (3308/3341) |
+| Branches | **95.85% (1759/1835)** | 95.86% (1783/1860) | **95.80% (1758/1835)** |
+| Functions | 94.09% (574/610) | 94.09% (574/610) | 99.34% (606/610) |
+| Lines | 95.31% (3214/3372) | 97.88% (3238/3308) | 99.02% (3254/3286) |
 
-The statement/line totals differ slightly between the two runs because nyc `all: true` counts files that a
-run never loads without their source map (the suite run loads every file). Branch and function totals agree.
+**Corpus-only branch coverage of the reference is now 95.85% (1759/1835), against the unit suite's
+95.80% (1758/1835).** The corpus reaches every branch the suite reaches except the 12 below, and 13 the
+suite does not. Statements, lines and functions stay below the suite's: the uncovered statements and
+functions are mostly those only a stub or an internal call reaches (see "Remaining gaps").
 
-`coverage-gaps.json` lists all 350 uncovered branches (279 of them are covered by the unit suite) with file,
-line, type and location, and per file the uncovered statement lines and functions. The largest gaps are
-`introspect/modelfile.ts` (37), `introspect/stringvalidator.ts` (34), `serializer/jsonpopulator.ts` (33),
-`basemodelmanager.ts` (30), `introspect/numbervalidator.ts` (28), `introspect/collectionsizevalidator.ts` (23),
-`serializer/jsongenerator.ts` (22), `serializer/resourcevalidator.ts` (22), `serializer/valuegenerator.ts` (17)
-and `modelloader.ts` (16, async, not recorded). Most are reached in the unit suite only through stubs
-(validators built on stub fields, populators and generators driven with fake parameters): these are the
-lifting tasks of plan §2.3 (P2-10).
+History of corpus-only branch coverage: 80.92% (1485/1835) after P0-05; 88.99% (1633/1835) at the start of
+P2-11; 92.86% (1704/1835) after P2-11; 95.85% (1759/1835) now.
+
+Task accordproject/concerto-rust#94 closed all 53 branches that P2-11 handed to it, and 2 more the suite
+does not cover:
+
+| Group | Branches | Closed by |
+|---|---:|---|
+| `filter()` predicates: `basemodelmanager.ts` 914, 918; `modelfile.ts` 894–941 | 30 | `ModelManager.filter` with `fqn-in` predicates over models with ImportType, ImportTypes (with an alias), wildcard and system imports, imports of missing namespaces and types, a model file with no `imports`, and `disableValidation` on and off |
+| `modelloader.ts` | 14 | `ModelLoader.loadModelManager` over a relative file (`inputs.fs`), `https://` and `github://` URLs (`inputs.net`), a 404, default, `null`, offline and online options; `loadModelManagerFromModelFiles` likewise |
+| `updateExternalModels`: `basemodelmanager.ts` 457, 473 | 4 | `updateExternalModels` with the default downloader over served external imports: a new namespace, an existing one, none, and a 404 |
+| Decorator factories: `decorated.ts` 107[0], 107[1], 112[1] | 3 | `addDecoratorFactory` steps with `names` factories |
+| `decorated.ts` 104[0] (plan-owner decision) | 1 | `addDecoratorFactory` step with the `base` factory |
+| `scalardeclaration.ts` 89[1] (plan-owner decision) | 1 | a new `ScalarDeclaration.new` op, with an AST that has no scalar `$class` |
+
+Decisions on the two plan-owner items: `ScalarDeclaration.new` is now an op (the constructor is exported;
+the declaration it builds is an input as a `declnew` recipe, so calls on it such as `getType()` are
+recorded too), and `addDecoratorFactory` is a model manager step when its factory is an encodable kind.
+
+### Remaining gaps
+
+`coverage-gaps.json` lists all 76 branches the corpus does not reach on the reference. 12 of them are
+covered by the unit suite, each with a verified reason from `gap-reasons.json`, and all handed to P2-10:
+
+| Handed to | Category | Branches | Where |
+|---|---|---:|---|
+| P2-10 (accordproject/concerto-rust#54) | `internal-only` | 8 | `jsonpopulator.ts` 129, 171, 281, 363, 439; `valuegenerator.ts` 80, 102, 171 |
+| P2-10 (accordproject/concerto-rust#54) | `stub-only` | 4 | `property.ts` 209, 213; `field.ts` 194; `relationshipdeclaration.ts` 79 |
+
+No suite-covered branch is unexplained and no reason is stale.
 
 ### Judge self-check
 
-`results/self-check.json` (`bin/self-check.js`): every seeded mutant is detected.
+`results/self-check.json` (`bin/self-check.js`), run on this corpus: baseline 15,850 / 15,850 pass,
+0 fail, 0 harness errors; every seeded mutant is detected. The last five (task
+accordproject/concerto-rust#94) each name the kind of fixture that must catch them, and count as detected
+only when such a fixture fails.
 
 | Mutant | Kind | Fixtures that flag it |
 |---|---|---:|
-| error-message-changed: IllegalModelException messages gain a full stop | adapter wrapper | 606 |
-| verdict-flipped: `validateModelFiles` succeeds where the reference throws and vice versa | adapter wrapper | 383 |
-| identifier-check-dropped: `ModelUtil.isValidIdentifier` always true | in-engine patch | 2 |
-| abstract-check-dropped: `ClassDeclaration.isAbstract` always false | in-engine patch | 178 |
-| canonical-result-altered: `Serializer.toJSON` results lose `$class` | adapter wrapper | 1,619 |
-| error-class-swapped: TypeNotFoundException reported as Error | adapter wrapper | 272 |
-| optional-field-rule-dropped: `Property.isOptional` always true | in-engine patch | 11,134 |
-| datetime-shifted: DateTime values serialised 1 ms late | in-engine patch | 584 |
+| error-message-changed: IllegalModelException messages gain a full stop | adapter wrapper | 638 |
+| verdict-flipped: `validateModelFiles` succeeds where the reference throws and vice versa | adapter wrapper | 376 |
+| identifier-check-dropped: `ModelUtil.isValidIdentifier` always true | in-engine patch | 5 |
+| abstract-check-dropped: `ClassDeclaration.isAbstract` always false | in-engine patch | 180 |
+| canonical-result-altered: `Serializer.toJSON` results lose `$class` | adapter wrapper | 1,670 |
+| error-class-swapped: TypeNotFoundException reported as Error | adapter wrapper | 285 |
+| optional-field-rule-dropped: `Property.isOptional` always true | in-engine patch | 11,326 |
+| datetime-shifted: DateTime values serialised 1 ms late | in-engine patch | 585 |
+| filter-imports-unpruned: `filter` keeps every import whatever the predicate says | in-engine patch | 12 (all `ModelManager.filter`) |
+| offline-flag-inverted: `ModelLoader` resolves external models offline, only validates online | in-engine patch | 4 (all `ModelLoader.*`) |
+| async-rejection-swallowed: a rejected async op reported as resolving to undefined | adapter wrapper | 6 (3 `updateExternalModels`) |
+| decorator-factories-ignored: `getDecoratorFactories` always empty | in-engine patch | 9 (all with an `addDecoratorFactory` step) |
+| scalar-type-fallback-changed: a scalar with no scalar `$class` gets type String, not null | in-engine patch | 2 (both on a `ScalarDeclaration.new` result) |
 
 Harness checks, all reported as `harness-error`: a fixture whose input blob is missing, a fixture without
-inputs, a fixture file that does not exist, a fixture referencing an unknown blob.
+inputs, a fixture file that does not exist, a fixture referencing an unknown blob, and an async fixture
+whose network response is malformed.
 
 ## Known limits
 
-* Async public calls (`ModelLoader.*`, `updateExternalModels`) are not recorded; `modelloader.ts` is only
-  reached through its synchronous callees.
 * Logger output (e.g. decorator validation warnings) is not part of the outcome.
 * A test that mutates concerto-core objects through non-API paths (assigning fields directly) after a
   recipe was captured would produce a fixture whose inputs no longer match; none occurs in this corpus
   (100% replay), and plain-function overrides of methods on tracked objects are detected and skipped.
+* A function argument is recorded only when it is an encodable kind (`lib/encodable.js`): the unit
+  suite's own `filter` predicates and its `DecoratorFactory` subclass carry code, so those calls stay
+  unrecorded, and a model manager given such a factory is tainted. The `names` factory returns plain
+  `Decorator`s, which are indistinguishable from the ones built without a factory; the `base` factory is
+  what makes a factory's effect observable (and what the `decorator-factories-ignored` mutant needs).
+* `updateExternalModels` is recorded, but a recipe cannot replay an async step, so the model manager it
+  changed is tainted afterwards (its state after the call is `effects.target`). Likewise a model manager
+  an async op returns is rebuilt from its steps only when the op made no async call on it: an online
+  `ModelLoader` load calls `updateExternalModels`, so calls on its result stay unrecorded.
+* A `FileDownloader` argument is code, so `updateExternalModels` is recorded with the default downloader
+  only; its downloads come from `inputs.net`.
+* Async ops that read files by absolute path (the unit suite's `ModelLoader` tests, the conformance
+  driver) are skipped as `nonportable-path`; one that fetches with no response at all is skipped as
+  `network-error`.
+* `writeModelsToFileSystem` with a directory is never recorded (it would write files; only a call with no
+  directory is recorded).

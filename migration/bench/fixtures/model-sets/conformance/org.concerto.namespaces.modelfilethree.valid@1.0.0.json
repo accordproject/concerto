@@ -1,0 +1,51 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "org.concerto.namespaces.modelfilethree.valid@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "LocalType",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "VALUE",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 87,
+              "line": 4,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 103,
+              "line": 5,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        }
+      ],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 64,
+          "line": 3,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 104,
+          "line": 5,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      }
+    }
+  ]
+}

@@ -23,7 +23,7 @@
  *   {source, source_test, op, inputs, outcome, env}
  *
  * Environment:
- *   ORACLE_SOURCE   label for the corpus source (unit | data | conformance)
+ *   ORACLE_SOURCE   label for the corpus source (unit | data | conformance | gaps)
  *   ORACLE_RAW_DIR  where raw records (<source>-<pid>.jsonl) and skip stats go
  *   ORACLE_BLOB_DIR content-addressed blob store (shared with the corpus)
  *
@@ -31,10 +31,18 @@
  * with a known recipe, and no concerto-core / collaborator function is stubbed
  * by sinon at the time of the call. Everything else is counted as a skip,
  * by op and reason.
+ *
+ * An async op (lib/ops.js `async`, task accordproject/concerto-rust#94) is
+ * recorded when its promise settles. Calls it makes after an await are
+ * nested, like the calls it makes synchronously: an AsyncLocalStorage scope
+ * marks everything that runs on its behalf. Its environment goes into the
+ * fixture inputs: the files it reads (`fs`, relative paths only) and the HTTP
+ * responses it fetched (`net`).
  */
 
 const fs = require('fs');
 const path = require('path');
+const { AsyncLocalStorage } = require('async_hooks');
 const { getSrcCore, SRC_ROOT, CORE_PKG_DIR } = require('./core');
 const codec = require('./codec');
 const { opTable } = require('./ops');
@@ -85,10 +93,85 @@ const state = {
 
 const mmRecipes = new WeakMap();
 const mfRecipes = new WeakMap();
+const declRecipes = new WeakMap();
 const tracker = {
     mmRecipe: (mm) => mmRecipes.get(mm) || null,
     mfRecipe: (mf) => mfRecipes.get(mf) || null,
+    declRecipe: (d) => declRecipes.get(d) || null,
 };
+
+// The async op (if any) on whose behalf the current code runs.
+const asyncScope = new AsyncLocalStorage();
+
+/**
+ * @returns {object|null} the recorded op the current call is nested in:
+ * {spec, target, created}, or null for an outermost call
+ */
+function currentOp() {
+    // Inside an async op's scope the op is the outer one, even in a nested
+    // call made after an await (state.outer no longer names it by then).
+    const scoped = asyncScope.getStore();
+    if (scoped) {
+        return scoped;
+    }
+    return state.depth > 0 ? state.outer : null;
+}
+
+/**
+ * A model manager an async op creates cannot be a derived recipe (a replayed
+ * recipe cannot await), but it is rebuilt from its constructor and the
+ * state-changing calls the op makes on it, exactly as if the op's own code had
+ * made them at the top level: each such call becomes a step of its recipe.
+ * Calls made inside one of those steps are that step's own business.
+ * @param {object} spec op spec of the nested call
+ * @param {object} mm receiver
+ * @param {Array} args arguments
+ * @param {function} call performs the real call
+ * @returns {object} {handled, owned, value}: handled is true when the call
+ * was made here (value is its result; a throw propagates), owned when the
+ * model manager is one the current async op is building
+ */
+function asyncBuildStep(spec, mm, args, call) {
+    const r = isMM(mm) ? mmRecipes.get(mm) : null;
+    if (!r || !r.asyncBuild || r.asyncBuild !== currentOp()) {
+        return { handled: false };
+    }
+    if (r.tainted || r.inStep) {
+        return { handled: false, owned: true };
+    }
+    if (spec.taint) {
+        r.tainted = 'called:' + spec.op;
+        bump(stats.tainted, spec.op, r.tainted);
+        return { handled: false, owned: true };
+    }
+    let enc = null;
+    state.suspended++;
+    try {
+        enc = { method: spec.method, args: args.map((a) => store.pack(encodeIn(a, newCtx(mm)))) };
+    } catch (e) {
+        r.tainted = e instanceof NonPlain ? 'step-nonplain:' + e.reason : 'step-encoder-error:' + String(e && e.message).slice(0, 60);
+        bump(stats.tainted, spec.op, r.tainted);
+    } finally {
+        state.suspended--;
+    }
+    if (!enc) {
+        return { handled: false, owned: true };
+    }
+    r.inStep = true;
+    state.depth++;
+    let value;
+    try {
+        value = call();
+    } catch (e) {
+        r.steps.push({ enc: Object.assign(enc, { status: 'error', errorClass: errClass(e) }) });
+        throw e;
+    } finally {
+        state.depth--;
+        r.inStep = false;
+    }
+    r.steps.push({ enc: Object.assign(enc, { status: 'ok', errorClass: null }) });
+    return { handled: true, value };
+}
 const encodeIn = codec.makeInputEncoder(core, tracker);
 const encodeOut = codec.makeOutputEncoder(core);
 
@@ -249,7 +332,7 @@ function noteNestedMutation(mm) {
     if (!r || r.tainted || r.pending) {
         return;
     }
-    const outer = state.outer;
+    const outer = currentOp();
     if (outer && outer.target === mm && outer.spec.step) {
         return;
     }
@@ -269,6 +352,8 @@ function recordCall(spec, target, args, invoke) {
     let skip = findEnvStub();
     if (skip) {
         skip = 'env-stubbed:' + skip;
+    } else if (spec.skipIf) {
+        skip = spec.skipIf(args);
     }
     let inputs = null;
     let plainBefore = null;
@@ -324,6 +409,17 @@ function recordCall(spec, target, args, invoke) {
         }
     }
 
+    // The environment of an async op: the files it reads.
+    let envFiles = null;
+    if (!skip && spec.envFiles) {
+        const r = captureFiles(spec.envFiles(args));
+        if (r.skip) {
+            skip = r.skip;
+        } else {
+            envFiles = r.files;
+        }
+    }
+
     let packedInputs = null;
     let facts = null;
     if (!skip) {
@@ -339,129 +435,232 @@ function recordCall(spec, target, args, invoke) {
 
     const savedOuter = state.outer;
     const savedCreated = state.created;
-    state.outer = { spec, target };
-    state.created = [];
+    const opCtx = { spec, target, created: [] };
+    state.outer = opCtx;
+    state.created = opCtx.created;
     const rnd = seededRandom();
+    const net = spec.async ? captureNetwork() : null;
     let result;
     let error;
     let threw = false;
     const start = Date.now();
     state.depth++;
     try {
-        result = invoke();
+        result = spec.async ? asyncScope.run(opCtx, invoke) : invoke();
     } catch (e) {
         threw = true;
         error = e;
     } finally {
         state.depth--;
     }
-    const end = Date.now();
-    const randomUsed = rnd.restore();
-    const created = state.created;
     state.outer = savedOuter;
     state.created = savedCreated;
 
-    if (!threw && result && typeof result.then === 'function') {
-        skip = skip || 'async-result';
-        if (mmTarget) {
-            stepTaint = stepTaint || 'async';
-        }
-    }
+    /**
+     * Record the call once it has finished (for an async op: settled).
+     * @param {boolean} failed the call threw, or its promise rejected
+     * @param {*} value result or error
+     * @param {number} end ms when it finished
+     * @returns {*} value (or throws it)
+     */
+    const finish = (failed, value, end) => {
+        const randomUsed = rnd.restore();
+        const netResult = net ? net.stop() : null;
+        const res = failed ? undefined : value;
+        const created = opCtx.created;
 
-    for (const mm of created) {
-        const r = mmRecipes.get(mm);
-        if (!r || !r.pending) {
+        let stepTaintNow = stepTaint;
+        if (!failed && res && typeof res.then === 'function') {
+            skip = skip || 'async-result';
+            if (mmTarget) {
+                stepTaintNow = stepTaintNow || 'async';
+            }
+        }
+        if (!skip && netResult && netResult.error) {
+            skip = 'network-error';
+        }
+
+        for (const mm of created) {
+            const r = mmRecipes.get(mm);
+            if (!r || !r.pending) {
+                continue;
+            }
+            r.pending = false;
+            if (r.asyncBuild === opCtx) {
+                // rebuilt from its constructor and the steps recorded while
+                // the async op ran (asyncBuildStep); never derived
+                r.asyncBuild = null;
+                continue;
+            }
+            // a replayed recipe cannot await, so an async op never derives one
+            const where = failed || spec.async ? null : findPath(res, mm);
+            if (where && !skip && spec.kind !== 'ctor') {
+                r.derived = { op, inputs: packedInputs };
+                if (where.length > 0) {
+                    r.derived.path = where;
+                }
+            } else if (!(spec.kind === 'ctor' && res === mm)) {
+                r.tainted = r.tainted || ('created-inside:' + op);
+                bump(stats.tainted, op, r.tainted);
+            }
+        }
+
+        if (mmTarget) {
+            const r = mmRecipes.get(mmTarget);
+            if (r && !r.tainted) {
+                if (stepTaintNow) {
+                    r.tainted = stepTaintNow;
+                    bump(stats.tainted, op, stepTaintNow);
+                } else if (stepEnc) {
+                    r.steps.push({
+                        enc: {
+                            method: stepEnc.method,
+                            args: stepEnc.args,
+                            status: failed ? 'error' : 'ok',
+                            errorClass: failed ? errClass(value) : null,
+                        },
+                    });
+                }
+            }
+        }
+
+        if (skip) {
+            bump(stats.skipped, op, skip);
+        } else {
+            state.suspended++;
+            try {
+                let recInputs = packedInputs;
+                let recFacts = facts;
+                if (spec.async) {
+                    const withEnv = Object.assign({}, inputs);
+                    if (envFiles) {
+                        withEnv.fs = envFiles;
+                    }
+                    if (netResult && Object.keys(netResult.net).length > 0) {
+                        withEnv.net = netResult.net;
+                    }
+                    recInputs = store.pack(withEnv, { root: false });
+                    recFacts = store.facts(recInputs);
+                }
+                const outcome = failed ? { error: encodeError(value) } : { ok: encodeOut(res) };
+                const effects = {};
+                if (spec.mutatesTarget && (target instanceof core.Typed || target instanceof core.BaseModelManager)) {
+                    effects.target = encodeOut(target);
+                }
+                args.forEach((a, i) => {
+                    if (plainBefore[i] === null) {
+                        return;
+                    }
+                    let after = null;
+                    try {
+                        after = JSON.stringify(encodePlain(a));
+                    } catch (e) {
+                        after = null;
+                    }
+                    if (after !== plainBefore[i]) {
+                        effects.args = effects.args || {};
+                        effects.args[i] = after === null ? { [codec.M]: 'nonplain-after' } : JSON.parse(after);
+                    }
+                });
+                if (Object.keys(effects).length > 0) {
+                    outcome.effects = effects;
+                }
+                const canonical = canonicalise(outcome, recFacts, { start, end });
+                const rec = {
+                    source: SOURCE,
+                    source_test: state.title,
+                    op,
+                    inputs: recInputs,
+                    outcome: store.pack(canonical, { root: false }),
+                    env: { random: randomUsed > 0 },
+                };
+                buffer.push(JSON.stringify(rec) + '\n');
+                if (buffer.length >= 200) {
+                    flush();
+                }
+                stats.recorded[op] = (stats.recorded[op] || 0) + 1;
+            } catch (e) {
+                if (e instanceof NonPlain) {
+                    bump(stats.skipped, op, 'nonplain-outcome:' + e.reason);
+                } else {
+                    bump(stats.skipped, op, 'recorder-error:' + e.message.slice(0, 80));
+                }
+            } finally {
+                state.suspended--;
+            }
+        }
+
+        if (failed) {
+            throw value;
+        }
+        return value;
+    };
+
+    if (spec.async && !threw && result && typeof result.then === 'function') {
+        return Promise.resolve(result).then(
+            (v) => finish(false, v, Date.now()),
+            (e) => finish(true, e, Date.now()));
+    }
+    return finish(threw, threw ? error : result, Date.now());
+}
+
+/**
+ * Read the files an async op will read (lib/ops.js `envFiles`), for
+ * inputs.fs. Only relative paths inside the working directory are portable.
+ * A path that does not exist is left out: the op's own error is the outcome.
+ * @param {string[]} paths paths as the op receives them
+ * @returns {object} {files: contents by path, or null} or {skip: reason}
+ */
+function captureFiles(paths) {
+    const files = {};
+    for (const p of paths) {
+        if (p === '' || path.isAbsolute(p) || p.split(/[\\/]/).includes('..')) {
+            return { skip: 'nonportable-path' };
+        }
+        let content;
+        try {
+            content = fs.readFileSync(p, 'utf8');
+        } catch (e) {
             continue;
         }
-        r.pending = false;
-        const where = threw ? null : findPath(result, mm);
-        if (where && !skip && spec.kind !== 'ctor') {
-            r.derived = { op, inputs: packedInputs };
-            if (where.length > 0) {
-                r.derived.path = where;
-            }
-        } else if (!(spec.kind === 'ctor' && result === mm)) {
-            r.tainted = r.tainted || ('created-inside:' + op);
-            bump(stats.tainted, op, r.tainted);
-        }
+        files[p] = content;
     }
+    return { files: Object.keys(files).length > 0 ? files : null };
+}
 
-    if (mmTarget) {
-        const r = mmRecipes.get(mmTarget);
-        if (r && !r.tainted) {
-            if (stepTaint) {
-                r.tainted = stepTaint;
-                bump(stats.tainted, op, stepTaint);
-            } else if (stepEnc) {
-                r.steps.push({
-                    enc: {
-                        method: stepEnc.method,
-                        args: stepEnc.args,
-                        status: threw ? 'error' : 'ok',
-                        errorClass: threw ? errClass(error) : null,
-                    },
-                });
-            }
-        }
-    }
-
-    if (skip) {
-        bump(stats.skipped, op, skip);
-    } else {
-        state.suspended++;
+/**
+ * Capture every HTTP response an async op fetches, for inputs.net. The
+ * current global.fetch is wrapped for the duration of the op, so a
+ * driver may serve its own responses; a fetch that fails (no response at
+ * all) makes the call unrecordable ('network-error').
+ * @returns {object} {stop()}: stop() restores fetch and returns {net, error}
+ */
+function captureNetwork() {
+    const prev = global.fetch;
+    const net = {};
+    let error = null;
+    global.fetch = async function (url, options) {
+        const key = String(url && typeof url === 'object' && 'href' in url ? url.href : (url && typeof url === 'object' && 'url' in url ? url.url : url));
+        let res;
         try {
-            const outcome = threw ? { error: encodeError(error) } : { ok: encodeOut(result) };
-            const effects = {};
-            if (spec.mutatesTarget && target instanceof core.Typed) {
-                effects.target = encodeOut(target);
-            }
-            args.forEach((a, i) => {
-                if (plainBefore[i] === null) {
-                    return;
-                }
-                let after = null;
-                try {
-                    after = JSON.stringify(encodePlain(a));
-                } catch (e) {
-                    after = null;
-                }
-                if (after !== plainBefore[i]) {
-                    effects.args = effects.args || {};
-                    effects.args[i] = after === null ? { [codec.M]: 'nonplain-after' } : JSON.parse(after);
-                }
-            });
-            if (Object.keys(effects).length > 0) {
-                outcome.effects = effects;
-            }
-            const canonical = canonicalise(outcome, facts, { start, end });
-            const rec = {
-                source: SOURCE,
-                source_test: state.title,
-                op,
-                inputs: packedInputs,
-                outcome: store.pack(canonical, { root: false }),
-                env: { random: randomUsed > 0 },
-            };
-            buffer.push(JSON.stringify(rec) + '\n');
-            if (buffer.length >= 200) {
-                flush();
-            }
-            stats.recorded[op] = (stats.recorded[op] || 0) + 1;
+            res = await prev.call(this, url, options);
         } catch (e) {
-            if (e instanceof NonPlain) {
-                bump(stats.skipped, op, 'nonplain-outcome:' + e.reason);
-            } else {
-                bump(stats.skipped, op, 'recorder-error:' + e.message.slice(0, 80));
-            }
-        } finally {
-            state.suspended--;
+            error = error || String(e && e.message || e);
+            throw e;
         }
-    }
-
-    if (threw) {
-        throw error;
-    }
-    return result;
+        try {
+            net[key] = { status: res.status, body: await res.clone().text() };
+        } catch (e) {
+            error = error || 'unreadable body: ' + String(e && e.message || e);
+        }
+        return res;
+    };
+    return {
+        stop() {
+            global.fetch = prev;
+            return { net, error };
+        },
+    };
 }
 
 /**
@@ -475,9 +674,15 @@ function wrapFunction(spec, orig) {
         if (state.suspended > 0) {
             return orig.apply(this, args);
         }
-        if (state.depth > 0) {
+        if (state.depth > 0 || asyncScope.getStore()) {
             if (spec.step || spec.taint) {
-                noteNestedMutation(this);
+                const b = asyncBuildStep(spec, this, args, () => orig.apply(this, args));
+                if (b.handled) {
+                    return b.value;
+                }
+                if (!b.owned) {
+                    noteNestedMutation(this);
+                }
             }
             state.depth++;
             try {
@@ -497,9 +702,31 @@ function wrapFunction(spec, orig) {
  * Snapshot what a constructor needs to attach a recipe.
  * @param {string} cls class name
  * @param {Array} args ctor args
+ * @param {boolean} [nested] constructed inside another op
  * @returns {object} snapshot
  */
-function ctorSnapshot(cls, args) {
+function ctorSnapshot(cls, args, nested) {
+    if (cls === 'Serializer' || cls === 'TypeNotFoundException') {
+        // Neither carries a recipe: a Serializer is encoded from its model
+        // manager, factory and default options whenever it is an input, and
+        // an exception is only ever an outcome.
+        return null;
+    }
+    if (cls === 'ScalarDeclaration') {
+        // Only a declaration built by the recorded constructor op carries a
+        // recipe (declnew); one a model file builds is found in its model file.
+        if (nested) {
+            return null;
+        }
+        state.suspended++;
+        try {
+            return { cls, mf: args[0], ast: store.pack(encodePlain(args[1])) };
+        } catch (e) {
+            return null;
+        } finally {
+            state.suspended--;
+        }
+    }
     state.suspended++;
     try {
         if (cls === 'ModelFile') {
@@ -550,13 +777,23 @@ function attachRecipe(cls, obj, snap, nested, subclass) {
         mfRecipes.set(obj, snap);
         return;
     }
+    if (cls === 'ScalarDeclaration') {
+        if (!subclass) {
+            declRecipes.set(obj, snap);
+        }
+        return;
+    }
     const r = { kind: snap.kind, options: snap.options, steps: [], tainted: snap.tainted, pending: nested, derived: null };
     if (subclass) {
         r.tainted = r.tainted || 'subclass';
     }
     mmRecipes.set(obj, r);
-    if (nested && state.created) {
-        state.created.push(obj);
+    const outer = nested ? currentOp() : null;
+    if (outer) {
+        outer.created.push(obj);
+        if (outer.spec.async) {
+            r.asyncBuild = outer;
+        }
     }
 }
 
@@ -574,8 +811,8 @@ function proxyClass(mod, cls, spec) {
             if (state.suspended > 0) {
                 return Reflect.construct(target, args, newTarget);
             }
-            if (state.depth > 0) {
-                const snap = ctorSnapshot(cls, args);
+            if (state.depth > 0 || asyncScope.getStore()) {
+                const snap = ctorSnapshot(cls, args, true);
                 state.depth++;
                 let obj;
                 try {
@@ -620,6 +857,9 @@ proxyClass(core.req('basemodelmanager'), 'BaseModelManager', ops.get('BaseModelM
 proxyClass(core.req('modelmanager'), 'ModelManager', ops.get('ModelManager.new'));
 proxyClass(core.req('astmodelmanager'), 'AstModelManager', ops.get('AstModelManager.new'));
 proxyClass(core.modelFileModule, 'ModelFile', ops.get('ModelFile.new'));
+proxyClass(core.req('serializer'), 'Serializer', ops.get('Serializer.new'));
+proxyClass(core.req('typenotfoundexception'), 'TypeNotFoundException', ops.get('TypeNotFoundException.new'));
+proxyClass(core.req('introspect/scalardeclaration'), 'ScalarDeclaration', ops.get('ScalarDeclaration.new'));
 
 // Test titles: every mocha runnable (test or hook) sets the current title.
 try {

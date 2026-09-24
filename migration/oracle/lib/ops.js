@@ -23,6 +23,11 @@
  *   ctor    new <Class>(...args)                       inputs: {args}
  *   method  target.<method>(...args)                   inputs: {target, args}
  *   static  <holder>.<fn>(...args)                     inputs: {args}
+ *
+ * An op with `async: true` returns a promise; its outcome is what the promise
+ * settles to (task accordproject/concerto-rust#94). Such an op may also carry
+ * an environment in its inputs: `fs` (files it reads, by relative path) and
+ * `net` (the HTTP responses it fetched, by URL); see README.md.
  */
 
 // Model manager calls that change (or may cache into) its state. They are
@@ -30,6 +35,10 @@
 const MM_STEPS = [
     'addModel', 'addModelFile', 'addModelFiles', 'updateModelFile', 'deleteModelFile',
     'clearModelFiles', 'fromAst', 'validateModelFiles',
+    // task accordproject/concerto-rust#94: a step whose argument is an
+    // encodable DecoratorFactory (lib/encodable.js); any other factory still
+    // taints the model manager (step-nonplain).
+    'addDecoratorFactory',
 ];
 // ModelManager (CTO) only.
 const MM_CTO_STEPS = ['addCTOModel'];
@@ -40,13 +49,39 @@ const MM_QUERIES = [
     'getAssetDeclarations', 'getTransactionDeclarations', 'getEventDeclarations',
     'getParticipantDeclarations', 'getMapDeclarations', 'getEnumDeclarations',
     'getConceptDeclarations', 'getDecoratorValidation', 'filter',
+    // writeModelsToFileSystem (task P2-11): recorded only when its path is
+    // falsy, where it throws (no file name, or no path) before touching the
+    // disk; see WRITES_TO_DISK below.
+    'writeModelsToFileSystem',
 ];
+// Ops that would write files for a truthy first argument (the directory).
+// The recorder skips such calls ('writes-to-disk') and an adapter refuses to
+// run one, so no recorded or replayed call ever writes to disk.
+const WRITES_TO_DISK = new Set(['ModelManager.writeModelsToFileSystem']);
 // Calls that make a model manager's state unreproducible from plain data.
-const MM_TAINT = ['addDecoratorFactory', 'updateExternalModels'];
+// updateExternalModels is async: the call itself is recorded (task
+// accordproject/concerto-rust#94), with the model manager after it as an
+// effect, but a replayed recipe cannot await a step, so later calls on that
+// model manager are still not recorded.
+const MM_TAINT = ['updateExternalModels'];
+// Async public ops (task accordproject/concerto-rust#94).
+const MODELLOADER_STATICS = ['loadModelManager', 'loadModelManagerFromModelFiles'];
+const ASYNC_OPS = new Set([
+    ...MM_TAINT.map((m) => 'ModelManager.' + m),
+    ...MODELLOADER_STATICS.map((f) => 'ModelLoader.' + f),
+]);
+// Matches a string ModelLoader hands to a URL loader rather than to the file
+// system (http://, https://, github://).
+const URL_LIKE = /^[a-z][a-z0-9+.-]*:\/\//i;
 
 const MODELFILE_METHODS = [
     'validate', 'getType', 'resolveType', 'isLocalType', 'isImportedType', 'resolveImport',
     'getFullyQualifiedTypeName', 'getLocalType', 'isDefined',
+    // getImportURI (task P2-11): a plain public accessor over importUriMap,
+    // reachable on any registered ModelFile with no stub needed; it was
+    // simply missing from this op table, so no call to it was ever
+    // recorded regardless of input.
+    'getImportURI',
 ];
 const FACTORY_METHODS = ['newResource', 'newConcept', 'newRelationship', 'newTransaction', 'newEvent'];
 const SERIALIZER_METHODS = ['fromJSON', 'toJSON'];
@@ -113,8 +148,8 @@ function opTable(core) {
             },
         }, extra || {}));
     };
-    const stat = (op, holderName, holders, name) => {
-        ops.set(op, {
+    const stat = (op, holderName, holders, name, extra) => {
+        ops.set(op, Object.assign({
             op, kind: 'static', fn: name,
             patch: holders.map((h) => ({ holder: h, key: name })),
             exec: (c, target, args) => {
@@ -124,7 +159,7 @@ function opTable(core) {
                 }
                 return h[name](...args);
             },
-        });
+        }, extra || {}));
     };
 
     const BMM = core.BaseModelManager.prototype;
@@ -135,10 +170,28 @@ function opTable(core) {
         method('ModelManager.' + m, [core.ModelManager.prototype], m, { step: true });
     }
     for (const m of MM_QUERIES) {
-        method('ModelManager.' + m, [BMM], m);
+        const op = 'ModelManager.' + m;
+        if (!WRITES_TO_DISK.has(op)) {
+            method(op, [BMM], m);
+            continue;
+        }
+        method(op, [BMM], m, {
+            skipIf: (args) => (args[0] ? 'writes-to-disk' : null),
+            exec: (c, target, args) => {
+                if (args[0]) {
+                    const err = new Error(op + ' with a directory would write to disk');
+                    err.name = 'HarnessError';
+                    throw err;
+                }
+                if (!target || typeof target[m] !== 'function') {
+                    throw new TypeError(`target has no method ${m}`);
+                }
+                return target[m](...args);
+            },
+        });
     }
     for (const m of MM_TAINT) {
-        method('ModelManager.' + m, [BMM], m, { taint: true });
+        method('ModelManager.' + m, [BMM], m, { taint: true, async: true, mutatesTarget: true });
     }
     for (const m of MODELFILE_METHODS) {
         method('ModelFile.' + m, [core.ModelFile.prototype], m);
@@ -203,7 +256,28 @@ function opTable(core) {
     const dtu = core.dateTimeUtilModule;
     stat('DateTimeUtil.setCurrentTime', 'DateTimeUtil', [dtu, dtu.default].filter(Boolean), 'setCurrentTime');
 
-    for (const cls of ['ModelManager', 'BaseModelManager', 'AstModelManager', 'ModelFile']) {
+    // ModelLoader (task accordproject/concerto-rust#94): static async.
+    // loadModelManager reads each of its ctoFiles that is not a URL from the
+    // file system; `envFiles` names those paths so the recorder can put their
+    // contents in the fixture (inputs.fs).
+    for (const f of MODELLOADER_STATICS) {
+        stat('ModelLoader.' + f, 'ModelLoader', [core.ModelLoader], f, {
+            async: true,
+            envFiles: f === 'loadModelManager'
+                ? (args) => (Array.isArray(args[0]) ? args[0].filter((x) => typeof x === 'string' && !URL_LIKE.test(x)) : [])
+                : undefined,
+        });
+    }
+
+    // Serializer.new and TypeNotFoundException.new (task P2-11): public,
+    // exported constructors, recorded for their own argument handling (a
+    // missing factory or model manager; the default message). A successful
+    // Serializer is summarised as an object, an exception as an error value.
+    // ScalarDeclaration.new (task accordproject/concerto-rust#94): the exported
+    // constructor, the only way to a ScalarDeclaration whose AST has no scalar
+    // $class. The result is summarised; as an input it is encoded as a
+    // `declnew` recipe (its model file and AST).
+    for (const cls of ['ModelManager', 'BaseModelManager', 'AstModelManager', 'ModelFile', 'Serializer', 'TypeNotFoundException', 'ScalarDeclaration']) {
         ops.set(cls + '.new', {
             op: cls + '.new', kind: 'ctor', cls,
             exec: (c, target, args) => new (c[cls])(...args),
@@ -225,8 +299,9 @@ function staticHolder(core, name) {
     case 'DcsConverter': return core.dcsConverterModule;
     case 'Relationship': return core.Relationship;
     case 'DateTimeUtil': return core.dateTimeUtilModule;
+    case 'ModelLoader': return core.ModelLoader;
     default: throw new Error('unknown static holder ' + name);
     }
 }
 
-module.exports = { opTable, MM_STEPS, MM_CTO_STEPS, MM_QUERIES, MM_TAINT, staticHolder };
+module.exports = { opTable, MM_STEPS, MM_CTO_STEPS, MM_QUERIES, MM_TAINT, ASYNC_OPS, URL_LIKE, staticHolder };
