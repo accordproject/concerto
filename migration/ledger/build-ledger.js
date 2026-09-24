@@ -17,9 +17,11 @@ const fs = require('fs');
 const path = require('path');
 const { extract, repo } = require('./extract-members.js');
 const rules = require('./classification.js');
+const { computeEvidence, fmtTestSet } = require('./test-evidence.js');
 
 const pkg = path.join(repo, 'packages', 'concerto-core');
 const outDir = __dirname;
+const tagsPath = path.join(repo, 'migration', 'tags', 'test-tags.tsv');
 const FACTOR = { glue: 0.5, logic: 1, validation: 1.5 };
 
 // ---------------------------------------------------------------- tests
@@ -148,8 +150,21 @@ const ledger = rows.map(row => {
     return {
         file: row.file, cls: row.cls, member: row.member, kind: row.kind, loc: row.loc,
         weight: +(row.loc * FACTOR[cat]).toFixed(1), category: cat, classification: c, reason: r,
-        coupled_tests: cp.text, target: t, planned: p, line: row.line, cw: cp.w, cs: cp.s, cb: cp.b,
+        coupled_tests_grep: cp.text, target: t, planned: p, line: row.line, cw: cp.w, cs: cp.s, cb: cp.b,
     };
+});
+
+// ---------------------------------------------------------------- real per-test evidence
+// Re-derives test coupling from migration/tags/test-tags.tsv's per-it() B/W/M
+// tags and reasons (runtime sinon trace + static acorn pass), instead of the
+// coupled_tests_grep whole-file name grep above. See test-evidence.js.
+const evidence = computeEvidence(rows, tagsPath, path.join(pkg, 'test'));
+ledger.forEach((l, i) => {
+    l.w_tests = fmtTestSet(evidence.wTestsByRow[i], 3);
+    l.direct_tests = fmtTestSet(evidence.directTestsByRow[i], 3);
+    l.needs_fallback = evidence.needsFallback[i];
+    l.w_tests_n = evidence.wTestsByRow[i].size;
+    l.direct_tests_n = evidence.directTestsByRow[i].size;
 });
 for (const f of Object.keys(rules)) {
     for (const k of Object.keys(rules[f].m || {})) {
@@ -162,9 +177,15 @@ for (const l of ledger) {
 }
 
 // ---------------------------------------------------------------- TSV
-const header = ['file', 'class', 'member', 'kind', 'loc', 'weight', 'classification', 'reason', 'coupled_tests', 'target_rust_module', 'planned_task', 'category', 'line'];
+const header = [
+    'file', 'class', 'member', 'kind', 'loc', 'weight', 'classification', 'reason',
+    'coupled_tests_grep', 'w_tests', 'direct_tests', 'needs_fallback',
+    'target_rust_module', 'planned_task', 'category', 'line',
+];
 const tsv = [header.join('\t')].concat(ledger.map(l => [
-    l.file, l.cls, l.member, l.kind, l.loc, l.weight, l.classification, l.reason, l.coupled_tests, l.target, l.planned, l.category, l.line,
+    l.file, l.cls, l.member, l.kind, l.loc, l.weight, l.classification, l.reason,
+    l.coupled_tests_grep, l.w_tests, l.direct_tests, l.needs_fallback,
+    l.target, l.planned, l.category, l.line,
 ].join('\t'))).join('\n') + '\n';
 fs.writeFileSync(path.join(outDir, 'SEAM_LEDGER.tsv'), tsv);
 
@@ -213,8 +234,42 @@ const tsFull = tsItems.map(l => `| ${l.file.replace(/^src\//, '')} | ${l.cls || 
 const hyItems = ledger.filter(l => l.classification === 'HYBRID');
 const hyFull = hyItems.map(l => `| ${l.file.replace(/^src\//, '')} | ${l.cls || '(function)'} | ${l.member} | ${l.weight} | ${l.reason} |`);
 const wCoupled = ledger.filter(l => l.cw > 0);
-const wCoupledRows = wCoupled.map(l => `| ${l.file.replace(/^src\//, '')} | ${l.cls ? l.cls + '.' : ''}${l.member} | ${l.classification} | ${l.coupled_tests.split(' ').filter(s => s.startsWith('W:')).join('')} |`);
-const stubbedClasses = ledger.filter(l => l.cs > 0).map(l => `| ${l.cls} | ${l.classification} | ${l.coupled_tests.split(' ').filter(s => s.startsWith('S:')).join('')} |`);
+const wCoupledRows = wCoupled.map(l => `| ${l.file.replace(/^src\//, '')} | ${l.cls ? l.cls + '.' : ''}${l.member} | ${l.classification} | ${l.coupled_tests_grep.split(' ').filter(s => s.startsWith('W:')).join('')} |`);
+const stubbedClasses = ledger.filter(l => l.cs > 0).map(l => `| ${l.cls} | ${l.classification} | ${l.coupled_tests_grep.split(' ').filter(s => s.startsWith('S:')).join('')} |`);
+
+// ---------------------------------------------------------------- D1 with the maintainer's denominator change (#32)
+// Constant markers and accept() visitor entry points are not logic; excluded
+// from the D1 denominator on the maintainer's decision (open question 2).
+const CONST_REASON = 'constant-return member (type/kind marker or fixed default, body is `return <literal>`); stays as-is on the TS class, nothing to port';
+const ACCEPT_REASON = 'visitor dispatch entry point (accept -> visitor.visit); kept in TS, visitors call back into views';
+const d1Excluded = ledger.filter(l => l.reason === CONST_REASON || l.reason === ACCEPT_REASON);
+const d1ExcludedW = sum(d1Excluded, l => l.weight);
+const d1TotW = +(totW - d1ExcludedW).toFixed(1);
+const d1Pct = pct(wR + wH, d1TotW);
+const oldPct = pct(wR + wH, totW);
+
+// ---------------------------------------------------------------- needs_fallback, grouped by class (drives P4 view work)
+const nfRows = ledger.filter(l => l.needs_fallback);
+const nfByClass = new Map();
+for (const l of nfRows) {
+    const key = l.cls || '(function)';
+    if (!nfByClass.has(key)) { nfByClass.set(key, []); }
+    nfByClass.get(key).push(l);
+}
+const nfSections = [...nfByClass.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([cls, xs]) => {
+    const rowsMd = xs.map(l => `| ${l.member} | ${l.kind} | ${l.classification} | ${l.w_tests} |`).join('\n');
+    return `### ${cls} (${xs.length} member${xs.length === 1 ? '' : 's'})\n\n| member | kind | classification | w_tests |\n|---|---|---|---|\n${rowsMd}`;
+});
+
+// ---------------------------------------------------------------- W tests to lift to fixtures, per test file (drives P2-10)
+const wLiftSections = [...evidence.wLiftByFile.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0])).map(([file, tests]) => {
+    const items = tests.map(t => `  - ${t.title}`).join('\n');
+    return `### \`${file}\` (${tests.length} W test${tests.length === 1 ? '' : 's'})\n\n${items}`;
+});
+const wLiftTotal = [...evidence.wLiftByFile.values()].reduce((a, xs) => a + xs.length, 0);
+
+// ---------------------------------------------------------------- unmapped W tests (verification step 4)
+const unmappedRows = evidence.unmappedW.map(u => `| ${u.file} | ${u.title} | ${u.reason} |`);
 
 const md = `# Seam ledger summary (P0-03)
 
@@ -228,18 +283,24 @@ Generated by \`migration/ledger/build-ledger.js\` from the TypeScript AST of
 
 1. Start with the **TS items** below (section 4). Each one needs a reason you accept.
 2. Then read the **HYBRID items** (section 5). The reason says which part stays in JS.
-3. Answer the **open questions** in section 8. Several classifications depend on them.
+3. Section 8's open questions are now settled; see
+   [accordproject/concerto-rust#32](https://github.com/accordproject/concerto-rust/issues/32).
 4. RUST rows need no reason. Spot-check them by file in section 3.
 
-Verify completeness with:
+Reproduce the whole ledger, including the test-coupling columns below, with
+one command (it reads \`migration/tags/test-tags.tsv\`, so run
+\`migration/tags/run-tagging.sh\` + \`node migration/bin/tag-tests.mjs\` first if
+that file is stale):
 
 \`\`\`sh
+node migration/ledger/build-ledger.js
 node migration/ledger/extract-members.js --check migration/ledger/SEAM_LEDGER.tsv
 \`\`\`
 
-This extracts every constructor, method, static method, accessor and
-top-level function (including \`const f = () => ...\`) from the TS AST. It then
-diffs them against the ledger and checks that each TS or HYBRID row has a reason.
+The first command writes \`SEAM_LEDGER.tsv\` and this file. The second extracts
+every constructor, method, static method, accessor and top-level function
+(including \`const f = () => ...\`) from the TS AST and diffs them against the
+ledger, checking that each TS or HYBRID row has a reason.
 
 ## Method
 
@@ -267,17 +328,39 @@ diffs them against the ledger and checks that each TS or HYBRID row has a reason
   * bodies that are a single \`return <literal>\`, i.e. constant type/kind markers;
   * abstract \`throw new Error('not implemented')\` stubs;
   * empty bodies.
-* **coupled_tests** comes from grepping \`test/**/*.js\` (excluding \`test/data\`, \`test/scripts\` and
-  \`test/models\`). It has three parts:
+* **coupled_tests_grep** is the original heuristic: grepping \`test/**/*.js\` (excluding
+  \`test/data\`, \`test/scripts\` and \`test/models\`) by member *name*, whole file at a time.
+  It has three parts, kept only for comparison against the real evidence below:
   * \`W:\` files that stub or spy on a member of this name, via \`stub/spy/replace(obj,'name')\`
-    or \`.name.returns/.callsFake/.calledWith...\`. This is the white-box signal;
+    or \`.name.returns/.callsFake/.calledWith...\`;
   * \`S:\` (constructor rows only) files that \`createStubInstance(ThisClass)\`;
   * \`B:\` files that call \`.name(\` directly. The counterpart test file is listed first,
     at most 3 are shown, and \`+N\` counts the rest.
 
-  The match is by name, so a common name like \`getType\` over-reports. P0-02's
-  \`migration/test-tags.tsv\` will give per-\`it()\` B/W/M tags. Join on test file
-  once it lands.
+  The match is by name only, so a common name like \`getType\` over-reports, and it can't
+  tell *which* test in a file is responsible.
+* **w_tests / direct_tests / needs_fallback** (the re-derived columns, task: re-derive
+  \`coupled_tests\` from per-test evidence, accordproject/concerto-rust#32) come from
+  \`migration/ledger/test-evidence.js\`, joined against \`migration/tags/test-tags.tsv\`'s
+  per-\`it()\` B/W/M tags and reasons (the sinon runtime trace + a static acorn pass,
+  already reconciled there) plus a fresh acorn walk of each test file to recover, per
+  test, its own body and in-scope \`beforeEach\`/\`before\` hook text:
+  * \`w_tests\`: W-tagged tests that stub/spy/\`createStubInstance\` this member or its
+    class (including whole-class stubs, and the generic "internal-only member" reason
+    resolved via source scan to \`visitX\`, \`getAst()\` and \`_resolveSuperType\` hits).
+    Format \`n=<count> <file>:<count>,...\` (top 3 files, \`+Nfiles\` for the rest), \`-\` if none.
+  * \`direct_tests\`: any test (B or W) whose own text calls this member directly
+    (\`.member(\`, \`Class.member(\` or \`new Class(\`), same format.
+  * \`needs_fallback\`: \`true\` when a W test builds this member's class with \`new\`
+    while a *different* class is stubbed in the same test (a collaborator-context
+    fallback, plan section 3), or stubs the whole class via \`createStubInstance\`
+    (which replaces every prototype method for that test).
+
+  This is still name-based call-site matching (no cross-file type inference) and the
+  \`visitX\` receiver is not resolved (so a visitX hit attributes to every ledger member
+  of that name, across \`ResourceValidator\`/\`JSONGenerator\`/\`JSONPopulator\`/
+  \`InstanceGenerator\`) — real per-test evidence, but still an approximation where the
+  source itself is ambiguous; see sections 9-11 below for what it drives.
 * **planned_task**: the Rust implementation task, then the view-conversion task
   (\`P2-xx+P4-xx\`, or \`P3-xx+P4-xx\` for instance and metamodel validation). Exception classes
   point at P1-05 (error contract) and P4-02 (the error mapper that instantiates them).
@@ -289,9 +372,13 @@ diffs them against the ledger and checks that each TS or HYBRID row has a reason
 ${cls.map(x => `| ${x.c} | ${x.n} | ${x.loc} | ${x.w} | ${pct(x.w, totW)} |`).join('\n')}
 | **total** | ${ledger.length} | ${totLoc} | ${totW} | 100% |
 
-* **RUST+HYBRID weighted share: ${pct(wR + wH, totW)}**. D1 target: >= 70%. ${(wR + wH) / totW >= 0.7 ? '**Met.**' : '**NOT met.**'}
-* Conservative reading, counting HYBRID at half weight: ${pct(wR + wH / 2, totW)}.
-* RUST only: ${pct(wR, totW)}.
+* **RUST+HYBRID weighted share (new D1 denominator): ${d1Pct}**, HYBRID at full weight
+  (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. ${(wR + wH) / d1TotW >= 0.7 ? '**Met.**' : '**NOT met.**'}
+  Denominator excludes constant markers and \`accept()\` visitor entry points
+  (${d1Excluded.length} members, weight ${d1ExcludedW}) as not-logic, per the maintainer's
+  decision on open question 2 below. New total weight: ${d1TotW} (was ${totW}).
+* **Old figure (previous denominator, all ${ledger.length} members): ${oldPct}.**
+* RUST only (new denominator): ${pct(wR, d1TotW)}.
 
 By weight category:
 
@@ -395,12 +482,15 @@ ${stubbedClasses.join('\n')}
   P4-02 mapper builds these classes. \`Globalize\` stays as a TS helper, and its templates
   are duplicated into the Rust catalogue (P1-05).
 
-## 8. Open questions for the human reviewer
+## 8. Open questions for the human reviewer — all settled (accordproject/concerto-rust#32)
 
-1. **Does HYBRID count toward D1?** The task counts RUST+HYBRID. The conservative figure,
-   with HYBRID at half weight, is ${pct(wR + wH / 2, totW)}. Confirm which figure the gate (P5-02) uses.
-2. **Constant markers and \`accept()\` count as TS.** They add ${sum(tsItems.filter(l => /constant-return|visitor dispatch entry|abstract stub|empty no-op|returns \`this\`/.test(l.reason)), l => l.weight)} weight.
-   Should they be excluded from the D1 denominator instead? They are not "logic".
+Kept for history; every question below has a maintainer decision now, linked from each item.
+
+1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: ${d1Pct}
+   (old figure, previous denominator: ${oldPct}). See section 1.
+2. **Constant markers and \`accept()\` count as TS. Settled: excluded from the D1
+   denominator.** They are not "logic". ${d1Excluded.length} members, weight ${d1ExcludedW},
+   removed from the denominator (section 1).
 3. **Where do DCS operations get a Rust implementation task?** The plan has P4-09
    (view conversion) but no P2/P3 task that implements \`concerto_core::dcs\` in Rust.
    Options: add a P2-12 "DCS in Rust", or fold it into P4-09.
@@ -421,8 +511,42 @@ ${stubbedClasses.join('\n')}
 8. **\`ModelLoader\`, \`writeModelsToFileSystem\` and \`updateExternalModels\`** stay TS or
    HYBRID for I/O reasons. Confirm that the browser/WASM build does not need a Rust
    loader.
-9. **Name-based coupling.** Coupling here is a heuristic grep. Once P0-02's
-   \`test-tags.tsv\` lands, should P2-10 re-derive \`coupled_tests\` from the per-\`it()\` tags?
+9. **Name-based coupling. Settled: re-derived from \`test-tags.tsv\` (this task).**
+   \`coupled_tests\` is replaced by \`w_tests\`/\`direct_tests\`/\`needs_fallback\`, computed
+   per-\`it()\` from real evidence; the old grep is kept as \`coupled_tests_grep\` for
+   comparison. See the Method section above and sections 9-11 below.
+
+Items 3-8 remain open for a follow-up decision; they are unrelated to test coupling
+and outside this task's scope (accordproject/concerto-rust#32 covers items 1, 2 and 9).
+
+## 9. Members needing a collaborator-context fallback (\`needs_fallback\`), by class
+
+Drives the P4 view-conversion work: each of these classes' listed members must keep
+(or gain) a fallback path for when a W test has stubbed a collaborator, per plan section 3.
+${nfRows.length} members across ${nfByClass.size} classes.
+
+${nfSections.join("\n\n") || "(none)"}
+
+## 10. W tests to lift to fixtures, by test file
+
+Drives P2-10: replacing these sinon stubs/spies with real fixtures once the classes
+they stub are Rust-backed views. ${wLiftTotal} W tests across ${evidence.wLiftByFile.size} files.
+
+${wLiftSections.join("\n\n")}
+
+## 11. Unmapped W tests
+
+Every W test in \`test-tags.tsv\` is accounted for: it is either attributed to at least
+one ledger member (rolled up in section 9's \`w_tests\` and listed per test file in
+section 10), or listed here with why it could not be routed to one specific ledger
+member (verification step 4) — never silently dropped.
+${unmappedRows.length} of ${wLiftTotal} W tests fall in the second group: a bare internal-field
+read (\`.ast\`, \`modelFiles[..]\`) or an internal-only member name (\`_resolveInternal\`) that
+has no corresponding *method* row in this ledger (methods/functions only, no fields).
+
+| file | test | reason |
+|---|---|---|
+${unmappedRows.join("\n") || "(none)"}
 `;
 fs.writeFileSync(path.join(outDir, 'SUMMARY.md'), md);
-console.log(`members=${ledger.length} RUST=${cls[0].n} HYBRID=${cls[1].n} TS=${cls[2].n} weight=${totW} R+H=${pct(wR + wH, totW)} conservative=${pct(wR + wH / 2, totW)}`);
+console.log(`members=${ledger.length} RUST=${cls[0].n} HYBRID=${cls[1].n} TS=${cls[2].n} weight=${totW} R+H(new denom)=${d1Pct} R+H(old denom)=${oldPct} needs_fallback=${nfRows.length} unmapped_W=${unmappedRows.length}`);
