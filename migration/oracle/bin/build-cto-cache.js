@@ -22,14 +22,21 @@
  *   node bin/build-cto-cache.js --check [--fixtures <dir>] [--cache <dir>]
  *
  * CTO parsing stays in JS (concerto-cto is out of scope for the Rust port), so
- * a native harness cannot rebuild a model manager whose recipe has an
- * `addCTOModel` step by itself. This script walks every fixture in the
- * corpus (every source directory under `fixtures/`, including the `lifted`
- * and `gaps` ones that P2-10/P2-11 add), resolves blobs, and collects every
- * CTO text an `addCTOModel` call parses -- both where it is a step inside a
- * ModelManager recipe, and where the fixture's own recorded op *is*
- * `ModelManager.addCTOModel` (its `inputs.args` then carry the call's own
- * arguments directly, not a step list).
+ * a native harness cannot rebuild a model manager whose recipe reached the
+ * CTO parser by itself. This script walks every fixture in the corpus (every
+ * source directory under `fixtures/`, including the `lifted` and `gaps` ones
+ * that P2-10/P2-11 add), resolves blobs, and collects every CTO text that any
+ * of `ModelManager`'s five entry points into `ctoProcessFile` parses --
+ * `addCTOModel`, `addModel`, `addModelFiles`, `updateModelFile` and
+ * `validateModelFile` (the last is a query, never a step) -- each recorded
+ * either as a step inside the owning `ModelManager` recipe, or as the
+ * fixture's own recorded op (its `inputs.args` then carry the call's own
+ * arguments directly, not a step list). `addModelFile` is excluded: it takes
+ * an already-built `ModelFile`, never a CTO string, so it never reaches
+ * `processFile`. A call is only collected when the owning model manager's
+ * recipe `kind` is `ModelManager` -- `BaseModelManager` and `AstModelManager`
+ * inherit the same methods but their `processFile` never runs `Parser.parse`,
+ * so a string argument there is AST-shaped input, not CTO text.
  *
  * Each CTO text is parsed with the frozen reference `concerto-cto` 5.0.0 (the
  * one the oracle recorded with), exactly as `ModelManager`'s `ctoProcessFile`
@@ -127,10 +134,58 @@ function keyFor(cto, fileName, skipLocationNodes) {
 }
 
 /**
+ * One entry per `ModelManager` method that can reach `ctoProcessFile`
+ * (`this.processFile(fileName, modelInput)` where `modelInput` is a CTO
+ * string), keyed by the method's bare name -- which is how it appears both as
+ * a step's `method` and, stripped of its `ModelManager.` prefix, as an op
+ * field. Each extractor reads a call's `args` and returns every `{cto,
+ * fileName}` pair it would hand to the parser; `addModelFile` has no entry
+ * because it takes an already-built `ModelFile`, never a string, so it never
+ * calls `processFile`.
+ * @type {Object<string, function(*[]): {cto: string, fileName: (string|null)}[]>}
+ */
+const CTO_ENTRY_POINTS = {
+    // addCTOModel(cto, fileName?, disableValidation?)
+    addCTOModel: (args) => (Array.isArray(args) && typeof args[0] === 'string')
+        ? [{ cto: args[0], fileName: typeof args[1] === 'string' ? args[1] : null }]
+        : [],
+    // addModel(modelInput, cto?, fileName?, disableValidation?) -- processFile parses
+    // modelInput, not the optional cto convenience argument.
+    addModel: (args) => (Array.isArray(args) && typeof args[0] === 'string')
+        ? [{ cto: args[0], fileName: typeof args[2] === 'string' ? args[2] : null }]
+        : [],
+    // updateModelFile(modelFile, fileName?, disableValidation?) -- only when modelFile is a string.
+    updateModelFile: (args) => (Array.isArray(args) && typeof args[0] === 'string')
+        ? [{ cto: args[0], fileName: typeof args[1] === 'string' ? args[1] : null }]
+        : [],
+    // validateModelFile(modelFile, fileName?) -- a query, never a step; only when modelFile is a string.
+    validateModelFile: (args) => (Array.isArray(args) && typeof args[0] === 'string')
+        ? [{ cto: args[0], fileName: typeof args[1] === 'string' ? args[1] : null }]
+        : [],
+    // addModelFiles(modelFiles, fileNames?, disableValidation?) -- each string element of
+    // modelFiles is parsed against the same-index element of fileNames.
+    addModelFiles: (args) => {
+        if (!Array.isArray(args) || !Array.isArray(args[0])) {
+            return [];
+        }
+        const modelFiles = args[0];
+        const fileNames = Array.isArray(args[1]) ? args[1] : null;
+        const out = [];
+        for (let i = 0; i < modelFiles.length; i++) {
+            if (typeof modelFiles[i] === 'string') {
+                out.push({ cto: modelFiles[i], fileName: fileNames && typeof fileNames[i] === 'string' ? fileNames[i] : null });
+            }
+        }
+        return out;
+    },
+};
+
+/**
  * Collect every (cto, fileName, skipLocationNodes) triple that the corpus'
- * `addCTOModel` calls need parsed, deduplicated by key. Also counts, per
- * fixture file, whether it contributed at least one triple (a "CTO-dependent
- * fixture"), for the manifest's coverage figure.
+ * calls into `ctoProcessFile` (any of `CTO_ENTRY_POINTS`) need parsed,
+ * deduplicated by key. Also counts, per fixture file, whether it contributed
+ * at least one triple (a "CTO-dependent fixture"), for the manifest's
+ * coverage figure.
  * @param {string} fixturesDir fixtures root
  * @returns {{needed: Map<string,{cto:string,fileName:string|null,skipLocationNodes:boolean|null}>,
  *            fixturesScanned: number, fixturesWithCto: number}} the collected keys and counts
@@ -142,68 +197,72 @@ function collect(fixturesDir) {
     let fixturesWithCto = 0;
 
     /**
-     * Record one addCTOModel call if its arguments look like a CTO parse.
-     * @param {string} opName the op name (e.g. "ModelManager.addCTOModel" or a step's "method")
-     * @param {*[]} args call arguments: [cto, fileName?, ...]
-     * @param {object} mmOptions the owning model manager's constructor options
-     * @returns {boolean} whether a triple was recorded
+     * Record every CTO parse one call would make, if it is a call into
+     * `ctoProcessFile` on a `ModelManager` (never `BaseModelManager` or
+     * `AstModelManager`: they inherit the same methods, but their
+     * `processFile` never runs `Parser.parse`, so a string argument there is
+     * AST-shaped input, not CTO text).
+     * @param {string} opName the op name (e.g. "ModelManager.addModelFiles" or a step's bare "method")
+     * @param {*[]} args call arguments
+     * @param {{options: object, kind: string}} mmCtx the owning model manager's recipe context
+     * @returns {boolean} whether at least one triple was recorded
      */
-    function record(opName, args, mmOptions) {
-        // A step's method is the bare name ("addCTOModel"); an op field (fixture.op,
-        // derived.op) is class-qualified ("ModelManager.addCTOModel"). Both are addCTOModel calls.
-        const isAddCTOModel = typeof opName === 'string' && (opName === 'addCTOModel' || opName.endsWith('.addCTOModel'));
-        if (!isAddCTOModel) {
+    function record(opName, args, mmCtx) {
+        // A step's method is the bare name ("addModelFiles"); an op field (fixture.op,
+        // derived.op) is class-qualified ("ModelManager.addModelFiles"). Both key the same entry.
+        const bareName = typeof opName === 'string' ? opName.slice(opName.lastIndexOf('.') + 1) : null;
+        const extract = bareName && CTO_ENTRY_POINTS[bareName];
+        if (!extract || !mmCtx || mmCtx.kind !== 'ModelManager') {
             return false;
         }
-        if (!Array.isArray(args) || typeof args[0] !== 'string') {
-            return false;
+        const skipLocationNodes = mmCtx.options && mmCtx.options.skipLocationNodes !== undefined ? mmCtx.options.skipLocationNodes : null;
+        let found = false;
+        for (const { cto, fileName } of extract(args)) {
+            const key = keyFor(cto, fileName, skipLocationNodes);
+            if (!needed.has(key)) {
+                needed.set(key, { cto, fileName, skipLocationNodes });
+            }
+            found = true;
         }
-        const cto = args[0];
-        const fileName = typeof args[1] === 'string' ? args[1] : null;
-        const skipLocationNodes = mmOptions && mmOptions.skipLocationNodes !== undefined ? mmOptions.skipLocationNodes : null;
-        const key = keyFor(cto, fileName, skipLocationNodes);
-        if (!needed.has(key)) {
-            needed.set(key, { cto, fileName, skipLocationNodes });
-        }
-        return true;
+        return found;
     }
 
     /**
-     * Walk a resolved (blob-free) fixture value for addCTOModel calls, both
-     * inside `mm` recipe steps and inside any `{op, inputs}` shape (a
-     * `derived` spec, or the fixture root itself).
+     * Walk a resolved (blob-free) fixture value for calls into
+     * `ctoProcessFile`, both inside `mm` recipe steps and inside any `{op,
+     * inputs}` shape (a `derived` spec, or the fixture root itself).
      * @param {*} v resolved value
-     * @param {object} ambientOptions the nearest enclosing model manager's options
+     * @param {{options: object, kind: string}|null} ambientCtx the nearest enclosing model manager's recipe context
      * @returns {boolean} whether anything was recorded under this node
      */
-    function walk(v, ambientOptions) {
+    function walk(v, ambientCtx) {
         if (v === null || typeof v !== 'object') {
             return false;
         }
         let found = false;
         if (Array.isArray(v)) {
             for (const x of v) {
-                if (walk(x, ambientOptions)) {
+                if (walk(x, ambientCtx)) {
                     found = true;
                 }
             }
             return found;
         }
         if (v['@@oracle'] === 'mm') {
-            const mmOptions = v.options || {};
+            const mmCtx = { options: v.options || {}, kind: v.kind };
             for (const step of Array.isArray(v.steps) ? v.steps : []) {
-                if (record(step.method, step.args, mmOptions)) {
+                if (record(step.method, step.args, mmCtx)) {
                     found = true;
                 }
-                if (walk(step.args, mmOptions)) {
+                if (walk(step.args, mmCtx)) {
                     found = true;
                 }
             }
             if (v.derived) {
-                if (record(v.derived.op, v.derived.inputs && v.derived.inputs.args, mmOptions)) {
+                if (record(v.derived.op, v.derived.inputs && v.derived.inputs.args, mmCtx)) {
                     found = true;
                 }
-                if (walk(v.derived, mmOptions)) {
+                if (walk(v.derived, mmCtx)) {
                     found = true;
                 }
             }
@@ -211,13 +270,13 @@ function collect(fixturesDir) {
         }
         if (typeof v.op === 'string' && v.inputs && typeof v.inputs === 'object') {
             const target = v.inputs.target;
-            const targetOptions = target && target['@@oracle'] === 'mm' ? target.options || {} : ambientOptions;
-            if (record(v.op, v.inputs.args, targetOptions)) {
+            const targetCtx = target && target['@@oracle'] === 'mm' ? { options: target.options || {}, kind: target.kind } : ambientCtx;
+            if (record(v.op, v.inputs.args, targetCtx)) {
                 found = true;
             }
         }
         for (const x of Object.values(v)) {
-            if (walk(x, ambientOptions)) {
+            if (walk(x, ambientCtx)) {
                 found = true;
             }
         }
@@ -447,12 +506,21 @@ function main() {
         reused,
         contentHash: hash,
     };
-    const expected = 13006;
-    if (fixturesWithCto !== expected) {
-        manifest.note = `fixturesWithCto (${fixturesWithCto}) differs from the ${expected} recorded in migration/oracle/README.md's corpus snapshot; `
-            + 'this generator counts a fixture as CTO-dependent whenever its resolved inputs reach at least one addCTOModel call (step-level or '
-            + 'as the fixture\'s own recorded op), so the figure tracks the corpus present at generation time -- it moves when the corpus is '
-            + 're-recorded or topped up (P2-10/P2-11 add fixtures under fixtures/lifted and fixtures/gaps).';
+    // The issue's own figure (13,006) was fixtures reaching addCTOModel specifically, on the
+    // canonical unit+data+conformance corpus (no fixtures/lifted or fixtures/gaps): this generator,
+    // scoped to just that one entry point, reproduces exactly 13,006 on that corpus (see git history
+    // for the check). The corrected figure is higher because ModelManager has four more entry points
+    // into ctoProcessFile -- addModel, addModelFiles, updateModelFile, validateModelFile -- that also
+    // parse CTO text and also need a cache entry; CTO_ENTRY_POINTS above covers all five.
+    const issueFigure = 13006;
+    if (fixturesWithCto !== issueFigure) {
+        manifest.note = `fixturesWithCto (${fixturesWithCto}) differs from the ${issueFigure} the issue and README's corpus snapshot record. `
+            + `That figure counted only fixtures reaching addCTOModel; on the canonical unit+data+conformance corpus (fixtures/lifted and `
+            + `fixtures/gaps excluded) this generator reproduces it exactly when scoped to that one entry point. The figure here also counts `
+            + `fixtures reaching ModelManager's other four entry points into ctoProcessFile -- addModel, addModelFiles, updateModelFile and `
+            + `validateModelFile -- which parse CTO text just as addCTOModel does and were previously missing from the cache (see git history). `
+            + `It also moves with the corpus itself: a re-recording or a P2-10/P2-11 addition under fixtures/lifted or fixtures/gaps changes `
+            + `both fixturesScanned and fixturesWithCto.`;
     }
     fs.mkdirSync(path.dirname(opts.manifest), { recursive: true });
     fs.writeFileSync(opts.manifest, JSON.stringify(manifest, null, 2) + '\n');
