@@ -50,7 +50,7 @@
 //   - `attempt` isn't in the journal, so it is inferred as "the nth time
 //     this task has actually been re-attempted so far in this journal".
 //     Only roles that represent a new attempt at the work itself (no role,
-//     or one of ATTEMPT_ROLES: implement/fix/retry/reimplement) advance
+//     or one of ATTEMPT_ROLES: impl/implement/fix/retry/reimplement) advance
 //     the counter; review-type roles (review/re-review/rereview) and the
 //     commit role are agent calls *about* the current attempt, not new
 //     attempts, so they reuse whatever attempt number is already current
@@ -209,7 +209,7 @@ function parseLabel(label) {
 // Roles that represent a brand-new attempt at doing the work, as opposed
 // to an agent call *about* an existing attempt (reviewing it, or
 // committing its files).
-const ATTEMPT_ROLES = new Set(['implement', 'fix', 'retry', 'reimplement']);
+const ATTEMPT_ROLES = new Set(['impl', 'implement', 'fix', 'retry', 'reimplement']);
 const REVIEW_ROLES = new Set(['review', 're-review', 'rereview']);
 const COMMIT_ROLE = 'commit';
 
@@ -294,6 +294,8 @@ function importJournal(journalDir, opts) {
   }
 
   const emitted = [];
+  // Latest review verdict per task (true = approve), for closing events.
+  const lastVerdict = new Map();
   let stillOpen = 0;
   let missingStart = 0;
   let noTranscript = 0;
@@ -404,6 +406,28 @@ function importJournal(journalDir, opts) {
           .join(' | ') || null,
       });
       if (!resultRec && startedRec) stillOpen++;
+      // The commit step is the dispatcher's final step for a task: it only
+      // runs after implementation and review. Close the task so finished work
+      // never looks like a running task to stuck.mjs: 'merged' unless its
+      // latest review rejected it, in which case it is 'blocked' pending a
+      // new round.
+      if (resultRec) {
+        const rejected = lastVerdict.get(task) === false;
+        emitted.push({
+          timestamp: endTs,
+          event: rejected ? 'blocked' : 'merged',
+          task,
+          attempt,
+          role: rawRole,
+          source: 'import-workflow-journal',
+          label: label || null,
+          workflow_run_id: workflowRunId,
+          transcript: transcriptPathForEvent,
+          reason: rejected
+            ? 'committed after a rejected review; awaiting another round'
+            : 'committed after implementation and review',
+        });
+      }
       continue;
     }
 
@@ -448,6 +472,7 @@ function importJournal(journalDir, opts) {
       if (REVIEW_ROLES.has(role)) {
         const verdict = extractReviewVerdict(result);
         if (verdict) {
+          lastVerdict.set(task, verdict.ok);
           emitted.push({
             timestamp: endTs,
             event: 'review_verdict',
