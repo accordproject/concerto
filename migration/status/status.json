@@ -1,18 +1,18 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-24T11:17:34.343Z",
+  "generated_at": "2026-09-24T14:19:02.582Z",
   "requested_at_sha": null,
   "fast": true,
-  "runtime_ms": 33610,
+  "runtime_ms": 53552,
   "repos": {
     "concerto": {
       "path": "/home/user/concerto",
-      "commit": "4e7de7dc7b8c3545e6c9d18795515f35d21d209e",
-      "commit_used": "4e7de7dc7b8c3545e6c9d18795515f35d21d209e"
+      "commit": "a2aa8c83b48ba6a590204b8270d3561df0bb6bb8",
+      "commit_used": "a2aa8c83b48ba6a590204b8270d3561df0bb6bb8"
     },
     "concerto-rust": {
       "path": "/home/user/concerto-rust",
-      "commit": "c20c40befef5bc4716c4a549819bd61e26e0fc3b"
+      "commit": "53280924cec925163849c8b5ef4f46b1a550e9d2"
     },
     "concerto-validate-rs": {
       "path": "/home/user/concerto-validate-rs",
@@ -26,24 +26,25 @@
   "metrics": {
     "queue": {
       "available": true,
-      "total": 48,
+      "total": 54,
       "counts": {
-        "done": 1,
-        "in_progress": 6,
-        "pending": 41
+        "done": 8,
+        "in_progress": 4,
+        "pending": 42
       },
       "by_priority": {
         "P0": {
-          "done": 1,
-          "in_progress": 5,
-          "pending": 13
+          "done": 7,
+          "in_progress": 2,
+          "pending": 12
         },
         "P1": {
-          "in_progress": 1,
-          "pending": 24
+          "done": 1,
+          "pending": 23,
+          "in_progress": 2
         },
         "P2": {
-          "pending": 3
+          "pending": 6
         },
         "P3": {
           "pending": 1
@@ -59,7 +60,7 @@
         "passing": 1299,
         "failing": 1,
         "pending": 8,
-        "duration_ms": 6797
+        "duration_ms": 14549
       },
       "by_tag": {
         "available": true,
@@ -93,7 +94,7 @@
           "passing": 1299,
           "failing": 1,
           "pending": 8,
-          "duration_ms": 6797
+          "duration_ms": 14549
         },
         "rust": {
           "available": false,
@@ -116,17 +117,104 @@
       "gate_status": "FAILS: statements, lines below threshold"
     },
     "oracle": {
+      "reference": {
+        "available": true,
+        "engine": "reference@5.0.0",
+        "total": 15037,
+        "pass": 15037,
+        "fail": 0,
+        "harness_error": 0,
+        "pass_pct": 100,
+        "by_source": {
+          "conformance": {
+            "total": 826,
+            "pass": 826,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "data": {
+            "total": 10123,
+            "pass": 10123,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "unit": {
+            "total": 4088,
+            "pass": 4088,
+            "fail": 0,
+            "harness_error": 0
+          }
+        }
+      },
       "native": {
         "available": false,
-        "reason": "the oracle recorder has not produced a corpus/results file yet (P0-05 in progress - only lib/ and reference/ exist so far)"
+        "reason": "no native oracle adapter exists yet (P1-07 has not landed)"
       },
       "wasm": {
         "available": false,
         "reason": "no WASM binding crate exists yet (P4-01 has not landed)"
       },
       "corpus_coverage_of_reference": {
-        "available": false,
-        "reason": "the oracle recorder has not produced a corpus/results file yet (P0-05 in progress - only lib/ and reference/ exist so far)"
+        "available": true,
+        "generated_at": "2026-09-24T10:26:01.129Z",
+        "corpus": {
+          "statements": {
+            "pct": 87.77,
+            "covered": 2922,
+            "total": 3329
+          },
+          "branches": {
+            "pct": 80.92,
+            "covered": 1485,
+            "total": 1835
+          },
+          "functions": {
+            "pct": 88.36,
+            "covered": 539,
+            "total": 610
+          },
+          "lines": {
+            "pct": 87.66,
+            "covered": 2870,
+            "total": 3274
+          }
+        },
+        "unit_suite": {
+          "statements": {
+            "pct": 98.95,
+            "covered": 3306,
+            "total": 3341
+          },
+          "branches": {
+            "pct": 95.8,
+            "covered": 1758,
+            "total": 1835
+          },
+          "functions": {
+            "pct": 99.18,
+            "covered": 605,
+            "total": 610
+          },
+          "lines": {
+            "pct": 98.96,
+            "covered": 3252,
+            "total": 3286
+          }
+        },
+        "thresholds": {
+          "statements": 99,
+          "branches": 94.8,
+          "functions": 99,
+          "lines": 99
+        }
+      },
+      "mutants": {
+        "available": true,
+        "detected": 8,
+        "total": 8,
+        "catch_rate_pct": 100,
+        "all_mutants_detected": true,
+        "harness_checks_ok": true
       }
     },
     "rust": {
@@ -135,12 +223,12 @@
           "available": true,
           "command_exit_ok": true,
           "totals": {
-            "passed": 102,
+            "passed": 133,
             "failed": 0
           },
           "per_crate": {
             "concerto_core": {
-              "passed": 97,
+              "passed": 128,
               "failed": 0
             },
             "concerto_metamodel": {
@@ -198,13 +286,22 @@
     "ledger": {
       "available": true,
       "rows": 508,
-      "total_weight": 6588.5,
-      "weight_by_classification": {
-        "RUST": 3715,
-        "HYBRID": 1826,
-        "TS": 1047.5
+      "full_weight": {
+        "total_weight": 6588.5,
+        "weight_by_classification": {
+          "RUST": 3715,
+          "HYBRID": 1826,
+          "TS": 1047.5
+        },
+        "weighted_pct_rust_plus_hybrid": 84.1
       },
-      "weighted_pct_rust_plus_hybrid": 84.1
+      "d1_denominator_weight": 6498.5,
+      "d1_excluded": {
+        "members": 60,
+        "weight": 90
+      },
+      "weighted_pct_rust_plus_hybrid": 85.3,
+      "weighted_pct_rust_only": 57.2
     },
     "mutants": {
       "available": false,

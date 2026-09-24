@@ -181,44 +181,88 @@ function collectTagMap(migrationDir) {
 }
 
 // ---------------------------------------------------------------------------
-// Seam ledger (RUST/HYBRID/TS + weight), from migration/ledger/SEAM_LEDGER.tsv
-// ---------------------------------------------------------------------------
-
+// Seam ledger (RUST/HYBRID/TS + weight), read from the figures the ledger
+// itself publishes in migration/ledger/SUMMARY.md §1, rather than
+// recomputed here from SEAM_LEDGER.tsv's raw rows.
+//
+// As of commit c48423c (P0-03 rebuild), the ledger's D1 denominator
+// excludes constant markers and accept() visitor entry points (they are
+// not "logic"); re-summing every SEAM_LEDGER.tsv row's `weight` column
+// the way this function used to (the "old formula") reproduces the
+// *previous*, now-superseded denominator (all 508 members, 6588.5 total
+// weight, giving 84.10%) instead of the maintainer-accepted new one
+// (6498.5, 85.3% RUST+HYBRID, 57.2% RUST-only) -- see SUMMARY.md §1 and
+// its "open question 2" writeup. Reading SUMMARY.md's own published
+// numbers, instead of re-deriving the denominator here, keeps this
+// script from drifting out of sync with however build-ledger.js's rules
+// (classification.js) currently define "not logic".
+// SEAM_LEDGER.tsv is still read for the row count (rows haven't moved).
 function collectLedger(migrationDir) {
   const ledgerPath = path.join(migrationDir, 'ledger', 'SEAM_LEDGER.tsv');
+  const summaryPath = path.join(migrationDir, 'ledger', 'SUMMARY.md');
   if (!fs.existsSync(ledgerPath)) {
     return na(`${ledgerPath} does not exist yet (P0-03 not finished)`);
   }
+  if (!fs.existsSync(summaryPath)) {
+    return na(`${summaryPath} does not exist yet (P0-03 not finished)`);
+  }
   try {
     const lines = fs.readFileSync(ledgerPath, 'utf8').split('\n').filter(Boolean);
-    const header = lines[0].split('\t');
-    const idx = Object.fromEntries(header.map((h, i) => [h, i]));
-    const weights = { RUST: 0, HYBRID: 0, TS: 0 };
-    let total = 0;
-    let rows = 0;
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split('\t');
-      const cls = cols[idx.classification];
-      const w = parseFloat(cols[idx.weight]);
-      if (!cls || Number.isNaN(w)) continue;
-      weights[cls] = (weights[cls] || 0) + w;
-      total += w;
-      rows++;
+    const rows = Math.max(0, lines.length - 1); // minus header
+
+    const summary = fs.readFileSync(summaryPath, 'utf8');
+
+    // "| RUST | 260 | 3305 | 3715 | 56.4% |" / HYBRID / TS / "| **total** | ... |"
+    // from the §1 headline table (members | loc | weight | share of weight).
+    const classRow = (label) => {
+      const re = new RegExp(
+        `^\\|\\s*(?:\\*\\*)?${label}(?:\\*\\*)?\\s*\\|\\s*\\d+\\s*\\|\\s*\\d+\\s*\\|\\s*([\\d.]+)\\s*\\|`,
+        'm'
+      );
+      const m = re.exec(summary);
+      return m ? Number.parseFloat(m[1]) : null;
+    };
+    const fullWeightRust = classRow('RUST');
+    const fullWeightHybrid = classRow('HYBRID');
+    const fullWeightTs = classRow('TS');
+    const fullWeightTotal = classRow('total');
+
+    // "RUST+HYBRID weighted share (new D1 denominator): 85.3%"
+    const newPctMatch = /RUST\+HYBRID weighted share \(new D1 denominator\):\s*([\d.]+)%/.exec(summary);
+    // "New total weight: 6498.5 (was 6588.5)."
+    const denomMatch = /New total weight:\s*([\d.]+)\s*\(was\s*([\d.]+)\)/.exec(summary);
+    // "Old figure (previous denominator, all 508 members): 84.1%."
+    const oldPctMatch = /Old figure \(previous denominator, all \d+ members\):\s*([\d.]+)%/.exec(summary);
+    // "RUST only (new denominator): 57.2%."
+    const rustOnlyPctMatch = /RUST only \(new denominator\):\s*([\d.]+)%/.exec(summary);
+    // "(60 members, weight 90) as not-logic"
+    const excludedMatch = /\((\d+) members, weight ([\d.]+)\) as not-logic/.exec(summary);
+
+    if (!newPctMatch || !denomMatch || !oldPctMatch || !rustOnlyPctMatch || fullWeightTotal == null) {
+      return na(`could not find the §1 headline figures in ${summaryPath} (format may have changed)`);
     }
-    const rustPlusHybrid = (weights.RUST || 0) + (weights.HYBRID || 0);
+
     return {
       available: true,
       rows,
-      total_weight: round2(total),
-      weight_by_classification: {
-        RUST: round2(weights.RUST || 0),
-        HYBRID: round2(weights.HYBRID || 0),
-        TS: round2(weights.TS || 0),
+      // Full-weight figures: every member in SEAM_LEDGER.tsv, including
+      // constant markers and accept() (the "old formula"/"old figure").
+      full_weight: {
+        total_weight: fullWeightTotal,
+        weight_by_classification: { RUST: fullWeightRust, HYBRID: fullWeightHybrid, TS: fullWeightTs },
+        weighted_pct_rust_plus_hybrid: Number.parseFloat(oldPctMatch[1]),
       },
-      weighted_pct_rust_plus_hybrid: total > 0 ? round2((rustPlusHybrid / total) * 100) : null,
+      // D1 figures: the maintainer-accepted denominator, excluding constant
+      // markers and accept() visitor entry points as not-logic.
+      d1_denominator_weight: Number.parseFloat(denomMatch[1]),
+      d1_excluded: excludedMatch
+        ? { members: Number.parseInt(excludedMatch[1], 10), weight: Number.parseFloat(excludedMatch[2]) }
+        : null,
+      weighted_pct_rust_plus_hybrid: Number.parseFloat(newPctMatch[1]),
+      weighted_pct_rust_only: Number.parseFloat(rustOnlyPctMatch[1]),
     };
   } catch (e) {
-    return na(`failed to parse SEAM_LEDGER.tsv: ${e.message}`);
+    return na(`failed to parse SEAM_LEDGER.tsv / SUMMARY.md: ${e.message}`);
   }
 }
 
@@ -434,44 +478,101 @@ function collectNycCoverage(coreDir, nycReportDir) {
 }
 
 // ---------------------------------------------------------------------------
-// Oracle (task P0-05): pass % per engine, corpus coverage of the reference
+// Oracle (task P0-05): pass % per engine, corpus coverage of the reference,
+// mutants detected/total.
+//
+// The oracle actually writes (see migration/oracle/bin/replay.js,
+// coverage.sh and self-check.js, verified against
+// migration/oracle/results/*.json on 2026-09-24):
+//   - results/replay-reference.json: the reference-engine replay of the
+//     whole corpus (conformance + data + unit fixtures) -- {total, pass,
+//     fail, harness_error, by_source: {conformance,data,unit}, by_op}.
+//     This is the "reference replay pass %" metric; it is not per-engine
+//     (native/wasm) because neither adapter exists yet (see below).
+//   - results/coverage.json: the oracle corpus's own nyc coverage of the
+//     reference implementation (`corpus`), alongside the unit suite's
+//     coverage of the same reference for comparison (`unit_suite`).
+//   - results/self-check.json: the judge self-check against seeded
+//     mutants (`mutants`, each with a `detected` boolean) and harness
+//     sanity checks (`harness_checks`).
+// There is no results.json or coverage-report.json (those never existed;
+// an earlier version of this function guessed those paths and always
+// fell through to "n/a"). native/wasm per-engine pass % stay n/a until
+// the native (P1-07) and WASM (P4-01/P4-02) adapters exist to replay the
+// corpus against something other than the reference itself.
 // ---------------------------------------------------------------------------
 
 function collectOracle(migrationDir, rustRoot) {
   const oracleDir = path.join(migrationDir, 'oracle');
-  const corpusDir = path.join(oracleDir, 'corpus');
-  const coverageReport = path.join(oracleDir, 'coverage-report.json');
-  const resultsFile = path.join(oracleDir, 'results.json');
+  const replayReferenceFile = path.join(oracleDir, 'results', 'replay-reference.json');
+  const coverageFile = path.join(oracleDir, 'results', 'coverage.json');
+  const selfCheckFile = path.join(oracleDir, 'results', 'self-check.json');
 
-  const reason = fs.existsSync(oracleDir)
-    ? 'the oracle recorder has not produced a corpus/results file yet (P0-05 in progress - only lib/ and reference/ exist so far)'
-    : 'migration/oracle/ does not exist yet (P0-05 not started)';
+  const notStarted = !fs.existsSync(oracleDir)
+    ? 'migration/oracle/ does not exist yet (P0-05 not started)'
+    : 'migration/oracle/results/ has not been produced yet (P0-05 in progress)';
 
   const out = {
-    native: na(reason),
+    reference: na(notStarted),
+    native: na('no native oracle adapter exists yet (P1-07 has not landed)'),
     wasm: na(fs.existsSync(path.join(rustRoot, 'concerto-wasm'))
-      ? reason
+      ? 'no WASM oracle adapter exists yet (P4-01/P4-02 have not landed)'
       : 'no WASM binding crate exists yet (P4-01 has not landed)'),
-    corpus_coverage_of_reference: na(reason),
+    corpus_coverage_of_reference: na(notStarted),
+    mutants: na(notStarted),
   };
 
-  if (fs.existsSync(resultsFile)) {
+  if (fs.existsSync(replayReferenceFile)) {
     try {
-      const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
-      if (results.native) out.native = { available: true, ...results.native };
-      if (results.wasm) out.wasm = { available: true, ...results.wasm };
+      const r = JSON.parse(fs.readFileSync(replayReferenceFile, 'utf8'));
+      out.reference = {
+        available: true,
+        engine: r.engine,
+        total: r.total,
+        pass: r.pass,
+        fail: r.fail,
+        harness_error: r.harness_error,
+        pass_pct: r.total > 0 ? round2((r.pass / r.total) * 100) : null,
+        by_source: r.by_source,
+      };
     } catch (e) {
-      out.native = na(`failed to parse oracle results.json: ${e.message}`);
+      out.reference = na(`failed to parse ${replayReferenceFile}: ${e.message}`);
     }
   }
-  if (fs.existsSync(coverageReport)) {
+
+  if (fs.existsSync(coverageFile)) {
     try {
-      const cov = JSON.parse(fs.readFileSync(coverageReport, 'utf8'));
-      out.corpus_coverage_of_reference = { available: true, ...cov };
+      const cov = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
+      out.corpus_coverage_of_reference = {
+        available: true,
+        generated_at: cov.generated_at,
+        corpus: cov.corpus, // {statements,branches,functions,lines}.pct/covered/total
+        unit_suite: cov.unit_suite, // same shape, for comparison
+        thresholds: cov.thresholds || null,
+      };
     } catch (e) {
-      out.corpus_coverage_of_reference = na(`failed to parse oracle coverage-report.json: ${e.message}`);
+      out.corpus_coverage_of_reference = na(`failed to parse ${coverageFile}: ${e.message}`);
     }
   }
+
+  if (fs.existsSync(selfCheckFile)) {
+    try {
+      const sc = JSON.parse(fs.readFileSync(selfCheckFile, 'utf8'));
+      const mutants = sc.mutants || [];
+      const detected = mutants.filter((m) => m.detected).length;
+      out.mutants = {
+        available: true,
+        detected,
+        total: mutants.length,
+        catch_rate_pct: mutants.length > 0 ? round2((detected / mutants.length) * 100) : null,
+        all_mutants_detected: !!sc.all_mutants_detected,
+        harness_checks_ok: !!sc.harness_checks_ok,
+      };
+    } catch (e) {
+      out.mutants = na(`failed to parse ${selfCheckFile}: ${e.message}`);
+    }
+  }
+
   return out;
 }
 

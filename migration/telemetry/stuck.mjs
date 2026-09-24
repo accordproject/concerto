@@ -424,10 +424,18 @@ function checkGlobalStall(metricsRows, thresholds) {
 }
 
 // ---- rule: review_churn -----------------------------------------------------
+// A task whose latest state is terminal (merged/failed/blocked) is done
+// churning: however many rejections it went through on the way, a later
+// 'merged' (or 'failed'/'blocked') event means the churn was resolved (or
+// the task stopped for another reason already captured by another rule),
+// so it must not be reported as an ongoing review_churn condition. Same
+// convention as checkBurning above.
 function checkReviewChurn(tasks, thresholds) {
   const findings = [];
   const n = thresholds.review_churn.rejections;
   for (const [task, evs] of tasks) {
+    const last = latestNonMeta(evs);
+    if (last && TERMINAL.has(last.event)) continue;
     const rejections = evs.filter(
       (e) => e.event === 'review_verdict' && /reject/i.test(e.reason || '')
     );

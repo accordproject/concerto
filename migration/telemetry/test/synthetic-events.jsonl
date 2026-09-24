@@ -30,7 +30,13 @@
 {"timestamp": "2026-01-01T02:06:00.000Z", "event": "retried", "task": "REVIEW_CHURN-1", "attempt": 2}
 {"timestamp": "2026-01-01T02:10:00.000Z", "event": "started", "task": "REVIEW_CHURN-1", "attempt": 2, "role": "impl"}
 {"timestamp": "2026-01-01T02:15:00.000Z", "event": "review_verdict", "task": "REVIEW_CHURN-1", "attempt": 2, "role": "reviewer", "reason": "reject: still missing tests"}
-{"timestamp": "2026-01-01T02:16:00.000Z", "event": "blocked", "task": "REVIEW_CHURN-1", "attempt": 2, "reason": "review churn; escalate to update PORTING.md"}
 {"timestamp": "2026-01-01T02:20:00.000Z", "event": "started", "task": "EXTERNAL-1", "attempt": 1, "role": "impl"}
 {"timestamp": "2026-01-01T02:25:00.000Z", "event": "blocked", "task": "EXTERNAL-1", "attempt": 1, "reason": "npm install failed: network timeout to registry.npmjs.org"}
+{"timestamp": "2026-01-01T02:26:00.000Z", "event": "started", "task": "REVIEW_CHURN-2", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T02:26:30.000Z", "event": "review_verdict", "task": "REVIEW_CHURN-2", "attempt": 1, "role": "reviewer", "reason": "reject: missing edge case"}
+{"timestamp": "2026-01-01T02:27:00.000Z", "event": "retried", "task": "REVIEW_CHURN-2", "attempt": 2}
+{"timestamp": "2026-01-01T02:27:30.000Z", "event": "started", "task": "REVIEW_CHURN-2", "attempt": 2, "role": "impl"}
+{"timestamp": "2026-01-01T02:28:00.000Z", "event": "review_verdict", "task": "REVIEW_CHURN-2", "attempt": 2, "role": "reviewer", "reason": "reject: still missing tests"}
+{"timestamp": "2026-01-01T02:28:30.000Z", "event": "commit", "task": "REVIEW_CHURN-2", "attempt": 3, "sha": "ccc3330000000000000000000000000000000c"}
+{"timestamp": "2026-01-01T02:29:00.000Z", "event": "merged", "task": "REVIEW_CHURN-2", "attempt": 3, "sha": "ccc3330000000000000000000000000000000c"}
 {"timestamp": "2026-01-01T02:30:00.000Z", "event": "queued", "task": "DEADLOCK-1"}
