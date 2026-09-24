@@ -52,7 +52,7 @@ tasks:
     priority: P0
     agent: architect
     model: O
-    status: in_progress
+    status: done
     exit_condition: "merged; reviewed as actionable"
 
   - id: P0-04b
@@ -61,7 +61,7 @@ tasks:
     priority: P0
     agent: architect
     model: O
-    status: pending
+    status: in_progress
     exit_condition: "trial units pass their oracle fixtures (native and WASM) and unit test files"
 
   - id: P0-05
@@ -116,7 +116,7 @@ tasks:
     priority: P0
     agent: rust-core
     model: S
-    status: in_progress
+    status: done
     exit_condition: "existing tests green; no hand-built metamodel structs (grep)"
 
   - id: P1-03
@@ -143,7 +143,7 @@ tasks:
     priority: P0
     agent: rust-core
     model: S
-    status: pending
+    status: in_progress
     exit_condition: "every TS template has a golden test"
 
   - id: P1-06
@@ -313,12 +313,12 @@ tasks:
   # ---- Phase 4: Bindings and TS views ----
   - id: P4-01a
     title: "WASM spike: browser synchronous-compile limits and boundary cost, informing concerto-wasm's design before the full build"
-    deps: [P1-04]
-    priority: P0
+    deps: []
+    priority: P1
     agent: bindings
     model: O
-    status: pending
-    exit_condition: "spike report merged; informs P4-01's design"
+    status: done
+    exit_condition: "spike report merged; informs P1-04's handle design and P4-01's loader"
 
   - id: P4-01
     title: "concerto-wasm (#28): wasm-bindgen, synchronous instantiation from inlined bytes, handle API, npm @accordproject/concerto-engine via a local workspace link. Spike: browser sync-compile limits and boundary cost."
@@ -510,3 +510,21 @@ tasks:
     model: S
     status: pending
     exit_condition: "CI green; a deliberate API change fails it"
+
+  - id: P1-07a
+    title: "Oracle CTO-to-AST cache for the native harness (PORTING.md OD-9), JS only"
+    deps: [P0-05]
+    priority: P1
+    agent: harness
+    model: S
+    status: pending
+    exit_condition: "cache covers every CTO-dependent fixture; completeness check passes and fails on a removed entry"
+
+  - id: P5-04a
+    title: "Benchmark harness and TS vs Rust baseline"
+    deps: []
+    priority: P2
+    agent: runner
+    model: S
+    status: pending
+    exit_condition: "both harnesses run with one documented command each; baseline table committed"

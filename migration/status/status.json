@@ -1,14 +1,14 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-24T14:19:02.582Z",
+  "generated_at": "2026-09-24T15:16:03.263Z",
   "requested_at_sha": null,
   "fast": true,
-  "runtime_ms": 53552,
+  "runtime_ms": 50359,
   "repos": {
     "concerto": {
       "path": "/home/user/concerto",
-      "commit": "a2aa8c83b48ba6a590204b8270d3561df0bb6bb8",
-      "commit_used": "a2aa8c83b48ba6a590204b8270d3561df0bb6bb8"
+      "commit": "e89ace0ebbf74b333cc23e334734988dcf225e52",
+      "commit_used": "e89ace0ebbf74b333cc23e334734988dcf225e52"
     },
     "concerto-rust": {
       "path": "/home/user/concerto-rust",
@@ -26,25 +26,25 @@
   "metrics": {
     "queue": {
       "available": true,
-      "total": 54,
+      "total": 56,
       "counts": {
-        "done": 8,
+        "done": 11,
         "in_progress": 4,
-        "pending": 42
+        "pending": 41
       },
       "by_priority": {
         "P0": {
-          "done": 7,
+          "done": 9,
           "in_progress": 2,
-          "pending": 12
+          "pending": 9
         },
         "P1": {
-          "done": 1,
-          "pending": 23,
+          "done": 2,
+          "pending": 24,
           "in_progress": 2
         },
         "P2": {
-          "pending": 6
+          "pending": 7
         },
         "P3": {
           "pending": 1
@@ -60,7 +60,7 @@
         "passing": 1299,
         "failing": 1,
         "pending": 8,
-        "duration_ms": 14549
+        "duration_ms": 8760
       },
       "by_tag": {
         "available": true,
@@ -94,7 +94,7 @@
           "passing": 1299,
           "failing": 1,
           "pending": 8,
-          "duration_ms": 14549
+          "duration_ms": 8760
         },
         "rust": {
           "available": false,
