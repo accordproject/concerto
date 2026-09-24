@@ -1,0 +1,1275 @@
+{
+ "engine": "reference@5.0.0",
+ "total": 15037,
+ "pass": 15037,
+ "fail": 0,
+ "harness_error": 0,
+ "by_source": {
+  "conformance": {
+   "total": 826,
+   "pass": 826,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "data": {
+   "total": 10123,
+   "pass": 10123,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "unit": {
+   "total": 4088,
+   "pass": 4088,
+   "fail": 0,
+   "harness_error": 0
+  }
+ },
+ "by_op": {
+  "ModelFile.getName": {
+   "total": 90,
+   "pass": 90,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.new": {
+   "total": 208,
+   "pass": 208,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addCTOModel": {
+   "total": 1297,
+   "pass": 1297,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addModel": {
+   "total": 173,
+   "pass": 173,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addModelFile": {
+   "total": 106,
+   "pass": 106,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.validateModelFiles": {
+   "total": 383,
+   "pass": 383,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Serializer.fromJSON": {
+   "total": 1983,
+   "pass": 1983,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Serializer.toJSON": {
+   "total": 1638,
+   "pass": 1638,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isClassDeclaration": {
+   "total": 422,
+   "pass": 422,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isEnum": {
+   "total": 381,
+   "pass": 381,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isIdentified": {
+   "total": 330,
+   "pass": 330,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isSystemIdentified": {
+   "total": 158,
+   "pass": 158,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DcsConverter.jsonToYaml": {
+   "total": 22,
+   "pass": 22,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getFullyQualifiedName": {
+   "total": 488,
+   "pass": 488,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getName": {
+   "total": 364,
+   "pass": 364,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getNamespace": {
+   "total": 327,
+   "pass": 327,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isClassDeclaration": {
+   "total": 89,
+   "pass": 89,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.decorateModels": {
+   "total": 1301,
+   "pass": 1301,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.extractDecorators": {
+   "total": 59,
+   "pass": 59,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.extractNonVocabDecorators": {
+   "total": 55,
+   "pass": 55,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.extractVocabularies": {
+   "total": 69,
+   "pass": 69,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.jsonToYaml": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.validate": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newResource": {
+   "total": 1374,
+   "pass": 1374,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MetaModel.modelManagerFromMetaModel": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MetaModel.validateMetaModel": {
+   "total": 12,
+   "pass": 12,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAllDeclarations": {
+   "total": 124,
+   "pass": 124,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addModelFiles": {
+   "total": 54,
+   "pass": 54,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.fromAst": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getAst": {
+   "total": 108,
+   "pass": 108,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getModels": {
+   "total": 107,
+   "pass": 107,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getType": {
+   "total": 627,
+   "pass": 627,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.new": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.validate": {
+   "total": 52,
+   "pass": 52,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "AssetDeclaration.declarationKind": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "AstModelManager.new": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "BaseModelManager.new": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getAllSuperTypeDeclarations": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getAssignableClassDeclarations": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getDirectSubclasses": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getIdentifierFieldName": {
+   "total": 40,
+   "pass": 40,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getNestedProperty": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getOwnProperties": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getProperties": {
+   "total": 87,
+   "pass": 87,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getProperty": {
+   "total": 116,
+   "pass": 116,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getSuperType": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getSuperTypeDeclaration": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isAbstract": {
+   "total": 32,
+   "pass": 32,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isEvent": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isExplicitlyIdentified": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isMapDeclaration": {
+   "total": 66,
+   "pass": 66,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.validate": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "CollectionSizeValidator.getMaxSize": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "CollectionSizeValidator.getMinSize": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ConceptDeclaration.declarationKind": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DateTimeUtil.setCurrentTime": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DcsConverter.yamlToJson": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getModelFile": {
+   "total": 15,
+   "pass": 15,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isEnum": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isMapDeclaration": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isScalarDeclaration": {
+   "total": 50,
+   "pass": 50,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorated.getDecorator": {
+   "total": 74,
+   "pass": 74,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorated.getDecorators": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorator.getArguments": {
+   "total": 43,
+   "pass": 43,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorator.validate": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.executePropertyCommand": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.falsyOrEqual": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.migrateTo": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.yamlToJson": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EnumDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EnumDeclaration.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EnumValueDeclaration.isEnumValue": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EventDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newConcept": {
+   "total": 24,
+   "pass": 24,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newEvent": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newRelationship": {
+   "total": 31,
+   "pass": 31,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newTransaction": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getDefaultValue": {
+   "total": 28,
+   "pass": 28,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getScalarField": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getValidator": {
+   "total": 12,
+   "pass": 12,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.isField": {
+   "total": 100,
+   "pass": 100,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.isTypeScalar": {
+   "total": 113,
+   "pass": 113,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.getFullyQualifiedIdentifier": {
+   "total": 21,
+   "pass": 21,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.getIdentifier": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.getTimestamp": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.isRelationship": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.isResource": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.setIdentifier": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.toURI": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Introspector.getClassDeclaration": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Introspector.getClassDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Introspector.getModelManager": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.getKey": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.getValue": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.isMapDeclaration": {
+   "total": 8,
+   "pass": 8,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.validate": {
+   "total": 34,
+   "pass": 34,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.getNamespace": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.getParent": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.getType": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.validate": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.getNamespace": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.getParent": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.getType": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.validate": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAssetDeclaration": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAssetDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAst": {
+   "total": 29,
+   "pass": 29,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getClassDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getConcertoVersion": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getDefinitions": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getEnumDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getEventDeclaration": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getEventDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getImportedType": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getImports": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getModelManager": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getNamespace": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getParticipantDeclaration": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getScalarDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getTransactionDeclaration": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getTransactionDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getType": {
+   "total": 33,
+   "pass": 33,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isDefined": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isExternal": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isImportedType": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isLocalType": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isModelFile": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isSystemModelFile": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.resolveImport": {
+   "total": 8,
+   "pass": 8,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.validate": {
+   "total": 17,
+   "pass": 17,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.clearModelFiles": {
+   "total": 72,
+   "pass": 72,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.deleteModelFile": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.derivesFrom": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getAssetDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getAssignableConcreteTypes": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getConceptDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getEnumDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getEventDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getMapDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getNamespaces": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getParticipantDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getTransactionDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.isAssignableTo": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.resolveMetaModel": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.resolveType": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.updateModelFile": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.validateModelFile": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.capitalizeFirstLetter": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.getFullyQualifiedName": {
+   "total": 12,
+   "pass": 12,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.getNamespace": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.getShortName": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isAssignableTo": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isPrimitiveType": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isPrivateSystemProperty": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isSystemProperty": {
+   "total": 28,
+   "pass": 28,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isValidIdentifier": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isValidMapKey": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isValidMapValue": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.parseNamespace": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.removeNamespaceVersionFromFullyQualifiedName": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ParticipantDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getFullyQualifiedName": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getFullyQualifiedTypeName": {
+   "total": 60,
+   "pass": 60,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getName": {
+   "total": 245,
+   "pass": 245,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getNamespace": {
+   "total": 18,
+   "pass": 18,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getParent": {
+   "total": 21,
+   "pass": 21,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getSizeValidator": {
+   "total": 25,
+   "pass": 25,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getType": {
+   "total": 66,
+   "pass": 66,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isArray": {
+   "total": 92,
+   "pass": 92,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isOptional": {
+   "total": 154,
+   "pass": 154,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isPrimitive": {
+   "total": 73,
+   "pass": 73,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isTypeEnum": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Relationship.fromURI": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Relationship.isRelationship": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Relationship.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "RelationshipDeclaration.isRelationship": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "RelationshipDeclaration.toString": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.addArrayValue": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.isConcept": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.isIdentifiable": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.isResource": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.setPropertyValue": {
+   "total": 51,
+   "pass": 51,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.toJSON": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.toString": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getDefaultValue": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getIdentifierFieldName": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getSuperType": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getSuperTypeDeclaration": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getValidator": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isAbstract": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isAsset": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isConcept": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isEvent": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isIdentified": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isParticipant": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isSystemIdentified": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isTransaction": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "TransactionDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getClassDeclaration": {
+   "total": 42,
+   "pass": 42,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getFullyQualifiedType": {
+   "total": 68,
+   "pass": 68,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getNamespace": {
+   "total": 20,
+   "pass": 20,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getType": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  }
+ },
+ "failures": [],
+ "agreement_pct": 100,
+ "seconds": 49.6,
+ "failures_truncated": false
+}
