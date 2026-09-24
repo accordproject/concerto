@@ -1,0 +1,18 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "com.acme@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+      "name": "Dictionary",
+      "key": {
+        "$class": "concerto.metamodel@1.0.0.DateTimeMapKeyType"
+      },
+      "value": {
+        "$class": "concerto.metamodel@1.0.0.StringMapValueType"
+      }
+    }
+  ]
+}
