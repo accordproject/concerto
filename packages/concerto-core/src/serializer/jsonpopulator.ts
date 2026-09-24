@@ -368,18 +368,42 @@ class JSONPopulator {
             if (json && typeof json === 'object' && typeof json.isBefore === 'function') {
                 result = json;
             } else if (typeof json !== 'string') {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+                throw new ValidationException(
+                    `Expected value at path \`${path}\` to be of type \`${field.getType()}\``,
+                    undefined,
+                    {
+                        path,
+                        code: 'TYPE_VIOLATION',
+                        expected: field.getType()
+                    }
+                );
             } else if (!this.strictQualifiedDateTimes){
                 result = dayjs.utc(json).utcOffset(this.utcOffset);
             } else if (this.strictQualifiedDateTimes){
                 if (json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)){
                     result = dayjs.utc(json);
                 } else {
-                    throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
+                    throw new ValidationException(
+                        `Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`,
+                        undefined,
+                        {
+                            path,
+                            code: 'TYPE_VIOLATION',
+                            expected: field.getType()
+                        }
+                    );
                 }
             }
             if (!result || !result.isValid()) {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+                throw new ValidationException(
+                    `Expected value at path \`${path}\` to be of type \`${field.getType()}\``,
+                    undefined,
+                    {
+                        path,
+                        code: 'TYPE_VIOLATION',
+                        expected: field.getType()
+                    }
+                );
             }
         }
             break;
@@ -388,12 +412,28 @@ class JSONPopulator {
             const num = json;
             if (typeof num === 'number') {
                 if (Math.trunc(num) !== num) {
-                    throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+                   throw new ValidationException(
+                        `Expected value at path \`${path}\` to be of type \`${field.getType()}\``,
+                        undefined,
+                        {
+                            path,
+                            code: 'TYPE_VIOLATION',
+                            expected: field.getType()
+                        }
+                    );
                 } else {
                     result = num;
                 }
             } else {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+                throw new ValidationException(
+                    `Expected value at path \`${path}\` to be of type \`${field.getType()}\``,
+                    undefined,
+                    {
+                        path,
+                        code: 'TYPE_VIOLATION',
+                        expected: field.getType()
+                    }
+                );
             }
         }
             break;
@@ -401,7 +441,15 @@ class JSONPopulator {
             if (typeof json === 'number') {
                 result = result = json;
             } else {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+                throw new ValidationException(
+                    `Expected value at path \`${path}\` to be of type \`${field.getType()}\``,
+                    undefined,
+                    {
+                        path,
+                        code: 'TYPE_VIOLATION',
+                        expected: field.getType()
+                    }
+                );
             }
         }
             break;
@@ -409,7 +457,15 @@ class JSONPopulator {
             if (typeof json === 'boolean') {
                 result = json;
             } else {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+                throw new ValidationException(
+                    `Expected value at path \`${path}\` to be of type \`${field.getType()}\``,
+                    undefined,
+                    {
+                        path,
+                        code: 'TYPE_VIOLATION',
+                        expected: field.getType()
+                    }
+                );
             }
         }
             break;
@@ -417,7 +473,15 @@ class JSONPopulator {
             if (typeof json === 'string') {
                 result = json;
             } else {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+                throw new ValidationException(
+                    `Expected value at path \`${path}\` to be of type \`${field.getType()}\``,
+                    undefined,
+                    {
+                        path,
+                        code: 'TYPE_VIOLATION',
+                        expected: field.getType()
+                    }
+                );
             }
             break;
         default: {

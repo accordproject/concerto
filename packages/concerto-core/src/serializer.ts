@@ -107,6 +107,7 @@ class Serializer {
             modelManager: this.modelManager,
             seenResources: new Set(),
             dedupeResources: new Set(),
+            path: '$',
         };
         const classDeclaration = this.modelManager.getType( resource.getFullyQualifiedType() );
 
