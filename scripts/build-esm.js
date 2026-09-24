@@ -28,6 +28,27 @@ const browserOutdir = path.join(packageDir, 'dist', 'esm-browser');
 const isNodeOnlyPackage = packageJson.name === '@accordproject/concerto-linter';
 
 /**
+ * The src/ directories the package's tsconfig.build.json excludes (plain
+ * `src/...` paths, no globs), so that the ESM builds compile the same modules
+ * as the CJS build. concerto-core excludes src/engine/, the CONCERTO_ENGINE=rust
+ * shim of the Rust migration, which dist/ does not ship yet.
+ *
+ * @return {Set<string>} absolute paths of the excluded directories
+ */
+function readExcludedSourceDirs() {
+    const tsconfigPath = path.join(packageDir, 'tsconfig.build.json');
+    if (!fs.existsSync(tsconfigPath)) {
+        return new Set();
+    }
+    const excludes = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8')).exclude || [];
+    return new Set(excludes
+        .filter(entry => entry.startsWith('src/') && !/[*?]/.test(entry))
+        .map(entry => path.join(packageDir, entry)));
+}
+
+const excludedSourceDirs = readExcludedSourceDirs();
+
+/**
  * Every TypeScript module under src/ is an entry point.
  *
  * This is what makes the packages tree-shakeable. esbuild will happily bundle
@@ -48,7 +69,9 @@ function collectEntryPoints(dir, found = []) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
         const entryPath = path.join(dir, entry.name);
         if (entry.isDirectory()) {
-            collectEntryPoints(entryPath, found);
+            if (!excludedSourceDirs.has(entryPath)) {
+                collectEntryPoints(entryPath, found);
+            }
         } else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.d.ts')) {
             found.push(entryPath);
         }

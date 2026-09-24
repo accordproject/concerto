@@ -1,50 +1,50 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-24T14:19:02.582Z",
+  "generated_at": "2026-09-24T16:21:12.863Z",
   "requested_at_sha": null,
   "fast": true,
-  "runtime_ms": 53552,
+  "runtime_ms": 95876,
   "repos": {
     "concerto": {
-      "path": "/home/user/concerto",
-      "commit": "a2aa8c83b48ba6a590204b8270d3561df0bb6bb8",
-      "commit_used": "a2aa8c83b48ba6a590204b8270d3561df0bb6bb8"
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/coord/concerto",
+      "commit": "565aa6d7d01c633c03948e42d6a787deaf1cad76",
+      "commit_used": "565aa6d7d01c633c03948e42d6a787deaf1cad76"
     },
     "concerto-rust": {
-      "path": "/home/user/concerto-rust",
-      "commit": "53280924cec925163849c8b5ef4f46b1a550e9d2"
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/coord/concerto-rust",
+      "commit": "7bb2f05235408bee454913ec5f2c6cf2ee8492c1"
     },
     "concerto-validate-rs": {
-      "path": "/home/user/concerto-validate-rs",
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/coord/concerto-validate-rs",
       "commit": "c8e27378fc3983844b33d760e6adb4a49669b7d3"
     },
     "concerto-conformance": {
-      "path": "/home/user/concerto-conformance",
-      "commit": "83c004b38f8bf469e3ebc033de4d26b8cbd9a3d4"
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/coord/concerto-conformance",
+      "commit": "66a5e8bc290eb4f33ee0f065104f76b30e7cce66"
     }
   },
   "metrics": {
     "queue": {
       "available": true,
-      "total": 54,
+      "total": 56,
       "counts": {
-        "done": 8,
+        "done": 11,
         "in_progress": 4,
-        "pending": 42
+        "pending": 41
       },
       "by_priority": {
         "P0": {
-          "done": 7,
+          "done": 9,
           "in_progress": 2,
-          "pending": 12
+          "pending": 9
         },
         "P1": {
-          "done": 1,
-          "pending": 23,
+          "done": 2,
+          "pending": 24,
           "in_progress": 2
         },
         "P2": {
-          "pending": 6
+          "pending": 7
         },
         "P3": {
           "pending": 1
@@ -57,18 +57,18 @@
         "engine": "ts",
         "suites": 411,
         "tests": 1308,
-        "passing": 1299,
-        "failing": 1,
+        "passing": 1300,
+        "failing": 0,
         "pending": 8,
-        "duration_ms": 14549
+        "duration_ms": 9685
       },
       "by_tag": {
         "available": true,
         "tally": {
           "B": {
             "tests": 956,
-            "passing": 949,
-            "failing": 1,
+            "passing": 950,
+            "failing": 0,
             "pending": 6
           },
           "M": {
@@ -91,10 +91,10 @@
           "engine": "ts",
           "suites": 411,
           "tests": 1308,
-          "passing": 1299,
-          "failing": 1,
+          "passing": 1300,
+          "failing": 0,
           "pending": 8,
-          "duration_ms": 14549
+          "duration_ms": 9685
         },
         "rust": {
           "available": false,
@@ -104,17 +104,17 @@
     },
     "nyc_coverage": {
       "available": true,
-      "statements_pct": 98.95,
-      "branches_pct": 95.8,
-      "functions_pct": 99.18,
-      "lines_pct": 98.96,
+      "statements_pct": 99.01,
+      "branches_pct": 95.86,
+      "functions_pct": 99.34,
+      "lines_pct": 99.03,
       "thresholds": {
         "statements": 99,
         "branches": 94.8,
         "functions": 99,
         "lines": 99
       },
-      "gate_status": "FAILS: statements, lines below threshold"
+      "gate_status": "PASS"
     },
     "oracle": {
       "reference": {
@@ -152,7 +152,7 @@
       },
       "wasm": {
         "available": false,
-        "reason": "no WASM binding crate exists yet (P4-01 has not landed)"
+        "reason": "no WASM oracle adapter exists yet (P4-01/P4-02 have not landed)"
       },
       "corpus_coverage_of_reference": {
         "available": true,
@@ -223,12 +223,12 @@
           "available": true,
           "command_exit_ok": true,
           "totals": {
-            "passed": 133,
+            "passed": 157,
             "failed": 0
           },
           "per_crate": {
             "concerto_core": {
-              "passed": 128,
+              "passed": 152,
               "failed": 0
             },
             "concerto_metamodel": {

@@ -27,6 +27,25 @@ import type Field from './field';
 import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// Its bindings are typed `never` so that a view leaves the member's inferred
+// return type, and so the .d.ts, exactly as the TS body makes it.
+//
+// dist/ does not ship src/engine/ (OD-11), so a bundler of dist/ must never
+// see a specifier it would resolve: `loadEngine` takes a non-literal one
+// (esbuild, rollup and browserify leave it alone), and webpack folds the
+// `typeof __webpack_require__` test and keeps only the dead-in-Node
+// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
+// bundles exactly as before (PORTING.md 1.5).
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 /**
  * A Validator to enforce that non null numeric values are between two values.
  * @private
@@ -35,8 +54,9 @@ import type ScalarDeclaration from './scalardeclaration';
  */
 class NumberValidator extends Validator{
     declare validator: NumberDomainValidatorAst;
-    lowerBound: number | null;
-    upperBound: number | null;
+    // Definitely assigned: by the TS body, or from the Rust snapshot.
+    lowerBound!: number | null;
+    upperBound!: number | null;
 
     /**
      * Create a NumberValidator.
@@ -47,6 +67,12 @@ class NumberValidator extends Validator{
      */
     constructor(field: ValidatedElement, ast: NumberDomainValidatorAst) {
         super(field, ast);
+
+        /* istanbul ignore if */
+        if (rust) {
+            Object.assign(this, rust.numberValidatorNew(this, ast));
+            return;
+        }
 
         this.lowerBound = null;
         this.upperBound = null;
@@ -106,6 +132,11 @@ class NumberValidator extends Validator{
      * @private
      */
     validate(identifier: string | null, value: number): void {
+        /* istanbul ignore if */
+        if (rust) {
+            rust.numberValidatorValidate(this, identifier, value);
+            return;
+        }
         if(value !== null) {
             if(this.lowerBound !== null && value < this.lowerBound) {
                 this.reportError(identifier, `Value ${value} is outside lower bound ${this.lowerBound}`);
@@ -123,6 +154,10 @@ class NumberValidator extends Validator{
      * @private
      */
     toString(): string {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.numberValidatorToString(this);
+        }
         return 'NumberValidator lower: ' + this.lowerBound + ' upper: ' + this.upperBound;
     }
 
@@ -135,6 +170,10 @@ class NumberValidator extends Validator{
      * validator, false otherwise.
      */
     compatibleWith(other: Validator | null): boolean {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.numberValidatorCompatibleWith(this, other, NumberValidator);
+        }
         if (!(other instanceof NumberValidator)) {
             return false;
         }

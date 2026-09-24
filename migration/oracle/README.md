@@ -18,12 +18,14 @@ lib/              core.js      loads the modules of one build (workspace src/ vi
                   recorder.js  mocha --require hook that records fixtures
                   adapter.js   engine adapter contract, and the adapter for any JS build of concerto-core
                   judge.js     replay and verdicts
+                  rust-adapter.js  the Rust/WASM engine: workspace src/ with CONCERTO_ENGINE=rust (P0-04b trial)
 drivers/          data.spec.js (test/data, test/1.0.0), conformance.spec.js (concerto-conformance),
                   gaps.spec.js (task P2-11: targeted inputs closing coverage-gaps.json branches),
                   lifted.spec.js (task P2-10: runs lifted/*.scenarios.js),
                   unit-setup.js (global chai set-up for per-file unit runs)
 lifted/           task P2-10: black-box scenarios replacing white-box unit tests (see lifted/README.md)
-bin/              record-all.sh, build-corpus.js, replay.js, coverage.sh, coverage-gaps.js, self-check.js
+bin/              record-all.sh, build-corpus.js, replay.js, coverage.sh, coverage-gaps.js, self-check.js,
+                  cto-cache.js (CTO -> AST cache for the native Rust harness, OD-9; P0-04b trial)
 fixtures/         the corpus: <source>/<op>/<id>.json, blobs/, manifest.json
 results/          replay-reference.json, coverage.json, self-check.json
 coverage-gaps.json  every branch the corpus does not reach on the reference
