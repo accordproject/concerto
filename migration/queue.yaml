@@ -15,7 +15,7 @@
 #   exit_condition - the machine-checkable condition from the plan
 
 version: 1
-updated_at: "2026-09-24T09:20:00Z"
+updated_at: "2026-09-24T12:20:00Z"
 
 tasks:
   # ---- Phase 0: Harness, oracle and rulebook (gate) ----
@@ -34,7 +34,7 @@ tasks:
     priority: P0
     agent: harness
     model: S
-    status: in_progress
+    status: done
     exit_condition: "tags cover all it(); a deliberately bad edit is caught"
 
   - id: P0-03
@@ -43,17 +43,26 @@ tasks:
     priority: P0
     agent: architect
     model: O
-    status: in_progress
+    status: done
     exit_condition: "every method classified; human review"
 
-  - id: P0-04
-    title: "PORTING.md rulebook, plus a trial port of ModelUtil, NumberValidator and ScalarDeclaration end to end (Rust, WASM, view, oracle)"
+  - id: P0-04a
+    title: "PORTING.md rulebook: TS-to-Rust mapping, error and message contract, semantics, ledger defaults (#32), module layout (WASM-facing types stay out of core's public API), testing, porting discipline, review checklist, and a worked example (ModelUtil.getShortName)"
     deps: [P0-03]
     priority: P0
     agent: architect
     model: O
+    status: in_progress
+    exit_condition: "merged; reviewed as actionable"
+
+  - id: P0-04b
+    title: "Trial port of ModelUtil, NumberValidator and ScalarDeclaration end to end (Rust, WASM, view, oracle); fold the lessons back into PORTING.md"
+    deps: [P0-04a, P1-02]
+    priority: P0
+    agent: architect
+    model: O
     status: pending
-    exit_condition: "the trial units pass their oracle fixtures and unit test files"
+    exit_condition: "trial units pass their oracle fixtures (native and WASM) and unit test files"
 
   - id: P0-05
     title: "Oracle recorder and judge (§2.2, §2.4, §2.6): instrument the reference; record from the unit suite, the fixtures and conformance; canonicalise; measure the corpus's nyc coverage of the reference; judge self-check against mutants"
@@ -61,7 +70,7 @@ tasks:
     priority: P0
     agent: harness
     model: "O(design)->S"
-    status: in_progress
+    status: done
     exit_condition: "corpus plus a coverage report; the judge rejects every seeded mutant"
 
   - id: P0-06
@@ -70,7 +79,7 @@ tasks:
     priority: P0
     agent: harness
     model: H
-    status: in_progress
+    status: done
     exit_condition: "status.json in under 10 minutes; --at reproduces a past row"
 
   - id: P0-07
@@ -79,7 +88,7 @@ tasks:
     priority: P1
     agent: rust-core
     model: S
-    status: in_progress
+    status: done
     exit_condition: "conformance job green"
 
   - id: P0-08
@@ -88,17 +97,17 @@ tasks:
     priority: P0
     agent: "harness, review O"
     model: S
-    status: in_progress
+    status: done
     exit_condition: "a replayed synthetic run fires every stuck rule once; the dashboard renders from the logs"
 
   # ---- Phase 1: Rust foundations ----
   - id: P1-01
     title: "Metamodel crate: build.rs downloads pinned+SHA-256 metamodels with vendored offline fallback; Rust-native codegen replaces npx; abstract types become $class-tagged serde enums; Debug derived (#24); align with TS ^3.17"
-    deps: [P0-04]
+    deps: [P0-04a]
     priority: P0
     agent: rust-infra
     model: O
-    status: pending
+    status: done
     exit_condition: "offline build works; the corpus ASTs round-trip; #24 test passes"
 
   - id: P1-02
@@ -107,7 +116,7 @@ tasks:
     priority: P0
     agent: rust-core
     model: S
-    status: pending
+    status: in_progress
     exit_condition: "existing tests green; no hand-built metamodel structs (grep)"
 
   - id: P1-03
@@ -243,7 +252,7 @@ tasks:
     priority: P1
     agent: "S (lift) / O (review)"
     model: "S/O"
-    status: pending
+    status: in_progress
     exit_condition: "each lifted fixture signed off against the reference; test files unchanged"
 
   - id: P2-11
@@ -252,8 +261,17 @@ tasks:
     priority: P1
     agent: harness
     model: S
-    status: pending
+    status: in_progress
     exit_condition: "oracle nyc coverage of the reference >= 99% statements/lines, 94.8% branches"
+
+  - id: P2-12
+    title: "DCS (decorator command sets) in Rust: apply, validate, migrate, converter, extractor (with a Rust port of YAML plain-scalar quoting)"
+    deps: [P2-07]
+    priority: P1
+    agent: rust-core
+    model: "S/O"
+    status: pending
+    exit_condition: "ported TS DCS tests and matching oracle fixtures pass"
 
   # ---- Phase 3: Instance validation and the modern API ----
   - id: P3-01
@@ -293,6 +311,15 @@ tasks:
     exit_condition: "validate-rs tests pass on the new core"
 
   # ---- Phase 4: Bindings and TS views ----
+  - id: P4-01a
+    title: "WASM spike: browser synchronous-compile limits and boundary cost, informing concerto-wasm's design before the full build"
+    deps: [P1-04]
+    priority: P0
+    agent: bindings
+    model: O
+    status: pending
+    exit_condition: "spike report merged; informs P4-01's design"
+
   - id: P4-01
     title: "concerto-wasm (#28): wasm-bindgen, synchronous instantiation from inlined bytes, handle API, npm @accordproject/concerto-engine via a local workspace link. Spike: browser sync-compile limits and boundary cost."
     deps: [P1-04]
@@ -455,3 +482,31 @@ tasks:
     model: S
     status: pending
     exit_condition: "catch rate >= 85%"
+
+  # ---- Phase 6: Standalone Rust interface (after the TS migration; D11) ----
+  - id: P6-01
+    title: "Rust public API design: audit core's public items, keep WASM and JS-facing types in concerto-wasm, idiomatic naming and errors, design note"
+    deps: [P5-03]
+    priority: P2
+    agent: architect
+    model: O
+    status: pending
+    exit_condition: "design note merged; no missing docs on public items"
+
+  - id: P6-02
+    title: "Native acceptance example and usage guide; feature-parity table (native vs TS-only) in the final report"
+    deps: [P6-01]
+    priority: P2
+    agent: rust-core
+    model: S
+    status: pending
+    exit_condition: "example runs in CI; guide covers the D11 scope"
+
+  - id: P6-03
+    title: "cargo public-api snapshot and cargo semver-checks in CI"
+    deps: [P6-01]
+    priority: P2
+    agent: harness
+    model: S
+    status: pending
+    exit_condition: "CI green; a deliberate API change fails it"

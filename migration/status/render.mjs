@@ -62,11 +62,30 @@ function renderNyc(n) {
 }
 
 function renderOracle(o) {
-  const bits = ['native', 'wasm', 'corpus_coverage_of_reference'].map((k) => {
-    const v = o[k];
-    return v.available ? `${k}: ${JSON.stringify(v).slice(0, 80)}` : `${k}: n/a`;
-  });
-  return `- **Oracle:** ${bits.join('; ')}`;
+  const ref = o.reference;
+  const refLine = ref.available
+    ? `reference replay: ${pct(ref.pass_pct)} (${ref.pass}/${ref.total} pass, ${ref.harness_error} harness errors)`
+    : `reference replay: n/a (${ref.reason})`;
+
+  const cov = o.corpus_coverage_of_reference;
+  let covLine;
+  if (cov.available) {
+    const fmt = (m) => `statements ${pct(m.statements.pct)}, branches ${pct(m.branches.pct)}, functions ${pct(m.functions.pct)}, lines ${pct(m.lines.pct)}`;
+    covLine = `corpus coverage of reference: ${fmt(cov.corpus)}\n    - unit suite (comparison): ${fmt(cov.unit_suite)}`;
+  } else {
+    covLine = `corpus coverage of reference: n/a (${cov.reason})`;
+  }
+
+  const mut = o.mutants;
+  const mutLine = mut.available
+    ? `mutants: ${mut.detected}/${mut.total} detected${mut.all_mutants_detected ? ' (all)' : ''}`
+    : `mutants: n/a (${mut.reason})`;
+
+  const engineLine = ['native', 'wasm']
+    .map((k) => `${k} pass: ${o[k].available ? pct(o[k].pass_pct) : 'n/a'}`)
+    .join(', ');
+
+  return `- **Oracle:** ${refLine}\n  - ${covLine}\n  - ${mutLine}\n  - ${engineLine}`;
 }
 
 function renderRust(name, r) {
@@ -81,7 +100,12 @@ function renderRust(name, r) {
 
 function renderLedger(l) {
   if (!l.available) return `- **Seam ledger:** n/a (${l.reason})`;
-  return `- **Seam ledger:** ${pct(l.weighted_pct_rust_plus_hybrid)} weighted RUST+HYBRID (of ${l.total_weight} total weight, ${l.rows} rows)`;
+  return (
+    `- **Seam ledger:** ${pct(l.weighted_pct_rust_plus_hybrid)} weighted RUST+HYBRID ` +
+    `(of ${l.d1_denominator_weight} D1 denominator weight, ${l.rows} rows); ` +
+    `RUST-only ${pct(l.weighted_pct_rust_only)}` +
+    `\n  - full weight (incl. constant markers/accept()): ${pct(l.full_weight.weighted_pct_rust_plus_hybrid)} of ${l.full_weight.total_weight}`
+  );
 }
 
 function renderConformance(c) {
