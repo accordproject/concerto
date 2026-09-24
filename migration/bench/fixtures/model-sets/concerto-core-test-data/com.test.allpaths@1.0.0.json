@@ -1,0 +1,170 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [
+    {
+      "$class": "concerto.metamodel@1.0.0.Decorator",
+      "name": "Term",
+      "arguments": [
+        {
+          "$class": "concerto.metamodel@1.0.0.DecoratorString",
+          "value": "My Namespace: Title"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.Decorator",
+      "name": "Term_version",
+      "arguments": [
+        {
+          "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.Decorator",
+      "name": "Term_active",
+      "arguments": [
+        {
+          "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+          "value": true
+        }
+      ]
+    }
+  ],
+  "namespace": "com.test.allpaths@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Product",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "fieldName",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "Field: Label"
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term_rank",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "value": 2
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term_visible",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "Term",
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "Product: Details"
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "Term_sortOrder",
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "Term_featured",
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "value": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+      "name": "Inventory",
+      "key": {
+        "$class": "concerto.metamodel@1.0.0.StringMapKeyType",
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Term",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "Key: Identifier"
+              }
+            ]
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Term_weight",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                "value": 5
+              }
+            ]
+          }
+        ]
+      },
+      "value": {
+        "$class": "concerto.metamodel@1.0.0.StringMapValueType",
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Term",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "Value: Data"
+              }
+            ]
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Term_required",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                "value": false
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
