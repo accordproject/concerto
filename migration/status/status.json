@@ -1,14 +1,14 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-24T19:20:21.410Z",
+  "generated_at": "2026-09-24T20:20:16.469Z",
   "requested_at_sha": null,
   "fast": true,
-  "runtime_ms": 40632,
+  "runtime_ms": 41738,
   "repos": {
     "concerto": {
       "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/coord/concerto",
-      "commit": "f21df0a1b321dbceebde877c6cc634146a0fe007",
-      "commit_used": "f21df0a1b321dbceebde877c6cc634146a0fe007"
+      "commit": "88e97f57df0f3d4d08f66a9ae65a1b5f2e43e286",
+      "commit_used": "88e97f57df0f3d4d08f66a9ae65a1b5f2e43e286"
     },
     "concerto-rust": {
       "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/coord/concerto-rust",
@@ -60,7 +60,7 @@
         "passing": 1300,
         "failing": 0,
         "pending": 8,
-        "duration_ms": 6358
+        "duration_ms": 6337
       },
       "by_tag": {
         "available": true,
@@ -94,7 +94,7 @@
           "passing": 1300,
           "failing": 0,
           "pending": 8,
-          "duration_ms": 6358
+          "duration_ms": 6337
         },
         "rust": {
           "available": false,
@@ -120,15 +120,15 @@
       "reference": {
         "available": true,
         "engine": "reference@5.0.0",
-        "total": 15794,
-        "pass": 15794,
+        "total": 15850,
+        "pass": 15850,
         "fail": 0,
         "harness_error": 0,
         "pass_pct": 100,
         "by_source": {
           "conformance": {
-            "total": 839,
-            "pass": 839,
+            "total": 815,
+            "pass": 815,
             "fail": 0,
             "harness_error": 0
           },
@@ -139,8 +139,8 @@
             "harness_error": 0
           },
           "gaps": {
-            "total": 543,
-            "pass": 543,
+            "total": 658,
+            "pass": 658,
             "fail": 0,
             "harness_error": 0
           },
@@ -151,8 +151,8 @@
             "harness_error": 0
           },
           "unit": {
-            "total": 4117,
-            "pass": 4117,
+            "total": 4082,
+            "pass": 4082,
             "fail": 0,
             "harness_error": 0
           }
@@ -168,26 +168,26 @@
       },
       "corpus_coverage_of_reference": {
         "available": true,
-        "generated_at": "2026-09-24T16:09:48.856Z",
+        "generated_at": "2026-09-24T18:31:02.846Z",
         "corpus": {
           "statements": {
-            "pct": 92.12,
-            "covered": 3157,
+            "pct": 95.36,
+            "covered": 3268,
             "total": 3427
           },
           "branches": {
-            "pct": 92.86,
-            "covered": 1704,
+            "pct": 95.85,
+            "covered": 1759,
             "total": 1835
           },
           "functions": {
-            "pct": 91.47,
-            "covered": 558,
+            "pct": 94.09,
+            "covered": 574,
             "total": 610
           },
           "lines": {
-            "pct": 92.05,
-            "covered": 3104,
+            "pct": 95.31,
+            "covered": 3214,
             "total": 3372
           }
         },
@@ -222,8 +222,8 @@
       },
       "mutants": {
         "available": true,
-        "detected": 8,
-        "total": 8,
+        "detected": 13,
+        "total": 13,
         "catch_rate_pct": 100,
         "all_mutants_detected": true,
         "harness_checks_ok": true
