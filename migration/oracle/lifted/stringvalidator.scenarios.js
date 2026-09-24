@@ -78,6 +78,50 @@ function fieldS(mm, ns) {
     return mm.getType(`${ns}.Box`).getProperty('s');
 }
 
+/**
+ * Build a ModelManager whose `Box.s` field carries an *explicitly* null
+ * length bound -- a shape CTO's own grammar cannot produce. `length=[,10]`
+ * or `length=[2,]` leave the omitted bound's key out of the AST entirely
+ * (so `getMinLength()`/`getMaxLength()` return `undefined`, not `null`);
+ * only an explicit `{minLength: null, ...}` (or `maxLength`) in the AST
+ * itself reaches the `this.minLength === null || this.maxLength === null`
+ * branch in the constructor the way the W tests' bare `{minLength: null,
+ * maxLength: 10}` / `{minLength: 2, maxLength: null}` objects did. Starts
+ * from a real CTO parse with both bounds present, then mutates the AST's
+ * `lengthValidator` before feeding it back through the model manager's own
+ * public `fromAst`, exactly as SV-CTOR-002 already does for the
+ * both-bounds-null case.
+ * @param {object} ModelManager the ModelManager class
+ * @param {string} name a distinct name for the one-off namespace/file
+ * @param {{minLength: (number|null), maxLength: (number|null)}} bounds the
+ *   explicit lengthValidator bounds to set on the mutated AST
+ * @returns {object} the ModelManager built from the mutated AST
+ */
+function buildWithExplicitNullBound(ModelManager, name, bounds) {
+    const cto = `
+namespace ${NS}.${name}@1.0.0
+concept Box identified by id {
+  o String id
+  o String s length=[1,10] optional
+}
+`;
+    const mm0 = build(ModelManager, cto, `${name}.cto`);
+    const ast = mm0.getAst(false);
+    const model = JSON.parse(
+        JSON.stringify(ast.models.find((m) => m.namespace === `${NS}.${name}@1.0.0`))
+    );
+    const box = model.declarations.find((d) => d.name === 'Box');
+    const sField = box.properties.find((p) => p.name === 's');
+    sField.lengthValidator = {
+        $class: 'concerto.metamodel@1.0.0.StringLengthValidator',
+        minLength: bounds.minLength,
+        maxLength: bounds.maxLength,
+    };
+    const mm = new ModelManager();
+    mm.fromAst({ $class: 'concerto.metamodel@1.0.0.Models', models: [model] });
+    return mm;
+}
+
 // ---- #constructor -----------------------------------------------------
 // All nine constructor scenarios reach StringValidator's constructor the
 // same way the reference always builds one: by loading a model with a
@@ -389,19 +433,50 @@ concept Box identified by id {
         'ABCD1234567',
     ]); // only maxLength specified: two passes, one too-long failure
 
-    push(
-        'SV-VAL-014',
-        withField('v14', '', 'length=[,10]'),
-        nsFor('v14'),
-        ['ABCD123456', '', 'ABCD1234567']
-    ); // maxLength specified, minLength omitted -> null
+    // maxLength specified, minLength *explicitly* null (not omitted): the W
+    // test passes `{minLength: null, maxLength: 10}` directly to the
+    // constructor, which CTO's `length=[,10]` cannot reproduce (that leaves
+    // minLength undefined, the same shape as SV-VAL-013 -- see
+    // buildWithExplicitNullBound above). Needs fromAst on a mutated AST to
+    // put an explicit `null` in the lengthValidator, like SV-CTOR-002.
+    scenarios.push({
+        id: 'SV-VAL-014',
+        run: ({ ModelManager }) => {
+            const mm = buildWithExplicitNullBound(ModelManager, 'v14', {
+                minLength: null,
+                maxLength: 10,
+            });
+            const v = fieldS(mm, nsFor('v14')).getValidator();
+            for (const value of ['ABCD123456', '', 'ABCD1234567']) {
+                try {
+                    v.validate('id', value);
+                } catch (e) {
+                    // recorded by the oracle as this call's error outcome
+                }
+            }
+        },
+    });
 
-    push(
-        'SV-VAL-015',
-        withField('v15', '', 'length=[2,]'),
-        nsFor('v15'),
-        ['AB1234567455455455', 'w', '']
-    ); // minLength specified, maxLength omitted -> null
+    // minLength specified, maxLength *explicitly* null (not omitted): same
+    // reasoning as SV-VAL-014, mirroring the W test's `{minLength: 2,
+    // maxLength: null}`.
+    scenarios.push({
+        id: 'SV-VAL-015',
+        run: ({ ModelManager }) => {
+            const mm = buildWithExplicitNullBound(ModelManager, 'v15', {
+                minLength: 2,
+                maxLength: null,
+            });
+            const v = fieldS(mm, nsFor('v15')).getValidator();
+            for (const value of ['AB1234567455455455', 'w', '']) {
+                try {
+                    v.validate('id', value);
+                } catch (e) {
+                    // recorded by the oracle as this call's error outcome
+                }
+            }
+        },
+    });
 
     push(
         'SV-VAL-016',
@@ -500,11 +575,20 @@ concept Box identified by id {
         twoFields('cw6', 'length=[1,100]', 'length=[1,100]'),
         nsFor('cw6')
     ); // same string lengths
+    // "different string lengths": the W test's `v` (this) is
+    // NO_MIN_LENGTH_AST ({maxLength: 10}, minLength omitted -> undefined)
+    // and its `other` is VALID_MIN_LENGTH_AND_MAX_LENGTH_AST ({minLength:
+    // 1, maxLength: 100}). That reaches the `isNull(thisMinLength) &&
+    // !isNull(otherMinLength)` branch (this min unset, other min has a
+    // value) and returns false there, without ever comparing the two
+    // maxLengths. `a`/`b` below mirror those exact values (CTO's omitted
+    // key is undefined, and isNull() treats undefined as null, so no
+    // fromAst mutation is needed here).
     push(
         'SV-CW-007',
-        twoFields('cw7', 'length=[1,100]', 'length=[2,]'),
+        twoFields('cw7', 'length=[,10]', 'length=[1,100]'),
         nsFor('cw7')
-    ); // different string lengths
+    ); // this minLength unset, other minLength has a value
     push('SV-CW-008', twoFields('cw8', 'length=[,10]', 'length=[,10]'), nsFor('cw8')); // same min lengths (both null)
     push('SV-CW-009', twoFields('cw9', 'length=[2,]', 'length=[2,]'), nsFor('cw9')); // same max lengths (both null)
     push(

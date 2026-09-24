@@ -175,28 +175,52 @@ node ../../migration/oracle/bin/replay.js --engine src        --fixtures <work>/
   `compatibleWith` scenario's expected `true`/`false` was confirmed against
   the rule its title states, and all 16 matched on the first try once the
   CTO field-clause order (`default=` before `regex=`/`length=`) was fixed).
-* Recorded against the reference: 280 raw records -> 234 deduplicated
-  fixtures, 0 skipped, 0 tainted.
-* Replay: **234/234 pass (100%)** against both the frozen reference
+* Recorded against the reference: 284 raw records -> 236 deduplicated
+  fixtures, 0 skipped, 0 tainted. (An earlier version of this file recorded
+  280 -> 234: SV-VAL-014 and SV-VAL-015 were not faithful lifts — see below
+  — and fixing them adds the 4 extra raw records / 2 extra fixtures that
+  `fromAst` on a mutated AST needs over the CTO text those two used before.)
+* Replay: **236/236 pass (100%)** against both the frozen reference
   (`--engine reference`) and the workspace `src/` (`--engine src`).
 * Corpus-only coverage of `packages/concerto-core/src/introspect/stringvalidator.ts`
-  from these 234 fixtures alone (`replay.js` under nyc, `--include
+  from these 236 fixtures alone (`replay.js` under nyc, `--include
   src/introspect/stringvalidator.ts`), against both the frozen reference and
-  `src` (the two agree exactly): **96.87% statements / 94.66% branches /
-  100% functions / 96.87% lines**. All 45 W tests in the file, run directly
-  (sinon stubs) under the same nyc configuration, cover **98.43% statements
-  / 97.33% branches / 100% functions / 98.43% lines** — the gap is exactly
-  two lines: `matchesRegex`'s `if (!this.regex) return true` fallback (line
-  124), never reached by *any* test including the W ones, because
-  `validate()` only calls `matchesRegex` when `this.regex` is already
-  truthy; and one arm of `compatibleWith`'s minLength check (line 183,
-  `isNull(thisMinLength) && !isNull(otherMinLength)` returning `false`) that
-  the **original W suite itself never tests either** — its 16
-  `#compatibleWith` tests cover the symmetric maxLength case
-  ("this max length is null and other max length has value") but have no
-  minLength equivalent, so this lift does not narrow coverage relative to
-  the tests it replaces; it was confirmed by checking nyc's uncovered-line
-  report for the W suite's own run, not assumed.
+  `src` (the two agree exactly): **98.43% statements / 97.33% branches /
+  100% functions / 98.43% lines**. All 45 W tests in the file, run directly
+  (sinon stubs) under the same nyc configuration, cover the exact same
+  **98.43% statements / 97.33% branches / 100% functions / 98.43% lines** —
+  this lift now matches the W suite's own coverage of the file exactly, with
+  nothing narrowed. The one line neither suite covers is `matchesRegex`'s
+  `if (!this.regex) return true` fallback (line 124), never reached by *any*
+  test including the W ones, because `validate()` only calls `matchesRegex`
+  when `this.regex` is already truthy.
+* This corrects two earlier, unverified claims about this file. First,
+  SV-VAL-014 and SV-VAL-015 used to build their field with CTO's
+  `length=[,10]` / `length=[2,]`, which — confirmed with `Parser.parse` —
+  leaves the omitted bound's key out of the AST entirely (`undefined`), not
+  `null`; that only reaches the same `this.minLength !== null && ... value
+  < this.minLength` fallthrough SV-VAL-013/SV-VAL-012 already exercise, not
+  the constructor's `this.minLength === null || this.maxLength === null`
+  branch (line 68) the W tests' own bare `{minLength: null, maxLength: 10}`
+  / `{minLength: 2, maxLength: null}` objects reach directly. Both scenarios
+  now go through `fromAst` on a mutated AST instead, the same technique
+  SV-CTOR-002 already used for the both-bounds-null case, putting an
+  explicit `null` on exactly one bound. Second, `SV-CW-007` ("should return
+  false when the string length is changed") used to build its two fields
+  with `length=[1,100]`/`length=[2,]`, values that don't match the W test it
+  claims to replace (`other=VALID_MIN_LENGTH_AND_MAX_LENGTH_AST={minLength:1,
+  maxLength:100}`, `v=NO_MIN_LENGTH_AST={maxLength:10}`) and so landed on a
+  different `compatibleWith` branch (the `!isNull(thisMinLength) &&
+  !isNull(otherMinLength)` min-length comparison at line 184, not the
+  `isNull(thisMinLength) && !isNull(otherMinLength)` branch at line 182 the
+  W test's own null/value combination reaches). `SV-CW-007` now uses
+  `length=[,10]` / `length=[1,100]`, matching the W test's field values, and
+  reaches line 182 as it should. Together these two fixes are what closes
+  the coverage gap above from two lines to one: an nyc run of the *previous*
+  version of these 236 fixtures (i.e. before this correction) was missing an
+  arm at lines 68 and 182 in addition to line 124, confirmed by re-running
+  nyc against both that version and the unmodified W suite side by side, not
+  assumed.
 
 ## Whole-corpus coverage of the reference, before and after this PR
 
@@ -207,7 +231,7 @@ conformance + gaps + lifted; `CONFORMANCE_DIR` pointed at a
 merged twice with `build-corpus.js`: once as the corpus stood before this
 PR (`lifted/` driver over `jsonpopulator.scenarios.js` only, i.e. the state
 already on `origin/claude/tender-pascal-ocwf9q`), once with
-`stringvalidator.scenarios.js`'s 234 fixtures folded in too, both replayed
+`stringvalidator.scenarios.js`'s fixtures folded in too, both replayed
 under nyc (`--engine src`) against `packages/concerto-core/src`:
 
 * **Before**: 15,794 fixtures (unit 4,117 / data 10,231 / conformance 839 /
@@ -215,15 +239,24 @@ under nyc (`--engine src`) against `packages/concerto-core/src`:
   (whole repo): **94.81% statements (3,180/3,354), 92.84% branches
   (1,727/1,860), 91.47% functions (558/610), 94.78% lines (3,127/3,299)**.
   Replay against `src`: 15,794/15,794 pass (100%), 0 harness errors.
-* **After** (+ 233 new fixtures from this PR's `stringvalidator.js` lift):
-  16,027 fixtures. Corpus-only coverage: **94.84% statements
-  (3,181/3,354), 92.84% branches (1,727/1,860), 91.63% functions
-  (559/610), 94.81% lines (3,128/3,299)**. Replay against `src`:
-  16,027/16,027 pass (100%), 0 harness errors.
+* **After**: `stringvalidator.scenarios.js` now records 236 fixtures (not
+  234 -- see "Verification done" above), of which 235 are new to the corpus
+  (the other, a bare `ModelManager.new` with no arguments, is identical
+  content to one `unit` already recorded and stays attributed there by the
+  source-priority dedup rule). **16,029 fixtures.** The two branches
+  (stringvalidator.ts lines 68 and 182) this correction newly exercises
+  *within the lifted bucket* were, on inspection, already exercised by the
+  `gaps` driver's own `StringValidator` scenarios (`drivers/gaps.spec.js`,
+  the `bothNullLen`/`minOnly` `compatibleWith` pair for line 182, and the
+  `explicitNullMin` degenerate-bounds case for line 68) before this PR, so
+  the whole-corpus coverage percentages above are not expected to move; they
+  were not independently re-measured for this fix (a full corpus rebuild is
+  expensive and this correction's own, directly-verified claim is the
+  236-fixture lifted-only coverage number above, not the whole-repo one).
 * Replay of the "after" corpus against the frozen reference
-  (`--engine reference`): confirmed via the isolated 298-fixture lifted-only
-  replay above (jsonpopulator.js + stringvalidator.js together): 298/298
-  pass (100%), 0 harness errors; the full 16,027-fixture reference replay
+  (`--engine reference`): confirmed via the isolated 300-fixture lifted-only
+  replay (jsonpopulator.js + stringvalidator.js together): 300/300
+  pass (100%), 0 harness errors; the full 16,029-fixture reference replay
   was not re-run in this PR (it is the same code path `--engine src`
   already exercises, and the isolated lifted-only reference replay already
   confirms these specific new fixtures agree with the reference).
