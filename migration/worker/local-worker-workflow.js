@@ -1,12 +1,13 @@
 export const meta = {
   name: 'concerto-migration-worker',
-  description: 'Pick up concerto Rust migration issues assigned to this worker and run implement, review and draft-PR handoff for each',
+  description: 'Pick up concerto Rust migration issues assigned to this worker and run implement, review, PR handoff and merge into the integration branch for each',
   whenToUse: 'Run on any machine or cloud session that should take migration tasks from the accordproject/concerto-rust issue tracker',
   phases: [
     { title: 'Fetch', detail: 'find ready issues labelled for this worker' },
     { title: 'Implement', detail: 'one agent per task, in its own git worktree' },
     { title: 'Review', detail: 'adversarial review, one fix round' },
     { title: 'Handoff', detail: 'push branch, open draft PR, update labels' },
+    { title: 'Merge', detail: 'wait for green CI, merge into the integration branch, close the issue' },
   ],
 }
 
@@ -25,7 +26,7 @@ Rules for every migration agent:
 - NEVER edit packages/concerto-core/test/** or the nyc thresholds in packages/concerto-core/package.json.
 - Work only in the git worktree created for your task. Never change branches in the shared clones.
 - Never run 'npm test' in concerto-core; run mocha with nyc using --temp-dir/--report-dir under your worktree.
-- Faithful work: do what the issue says, nothing extra. No model names in files or commits.
+- Faithful work: do what the issue says, nothing extra. Model names in commit trailers are fine.
 - In concerto-rust, commits need a DCO sign-off (git commit --signoff).`
 
 const ISSUE_LIST = {
@@ -53,6 +54,13 @@ const REVIEW = {
   properties: { pass: { type: 'boolean' }, summary: { type: 'string' },
     issues: { type: 'array', items: { type: 'object', properties: { severity: { type: 'string', enum: ['blocking', 'minor'] }, description: { type: 'string' } }, required: ['severity', 'description'] } } },
   required: ['pass', 'issues', 'summary'],
+}
+
+const MERGE = {
+  type: 'object',
+  properties: { status: { type: 'string', enum: ['merged', 'ci_pending', 'ci_failed', 'conflict', 'error'] }, detail: { type: 'string' },
+    merge_commits: { type: 'array', items: { type: 'string' } } },
+  required: ['status', 'detail', 'merge_commits'],
 }
 
 const seen = new Set()
@@ -92,7 +100,7 @@ Do the work there, commit (DCO sign-off in concerto-rust), but DO NOT push. Repo
 
 You are an ADVERSARIAL REVIEWER for ${it.id} (${TRACKER}#${it.number}); read the issue body for the task and exit condition. Default to pass=false if unsure.
 Implementer report:\n${JSON.stringify(r, null, 1)}
-Inspect the worktrees and commits, re-run the key commands yourself, and look for vacuous passes, missing inputs treated as success, hard-coded numbers, test edits, or scope creep. Do not modify files.`,
+Inspect the worktrees and commits. Do NOT re-run a test or build command that the implementer report already evidences for the current commit: the same command, the commit SHA, and pass/fail counts or output. Accept that evidence. Re-run a command only if its evidence is missing or vague, names a different commit or command, or conflicts with what you see in the diff. Spend your effort on reading the diff, and on checks the implementer did not run. Look for vacuous passes, missing inputs treated as success, hard-coded numbers, test edits, or scope creep. Do not modify files.`,
         { label: `${it.id}:review`, phase: 'Review', model: 'opus', schema: REVIEW })
       const blocking = ((rev && rev.issues) || []).filter(x => x.severity === 'blocking')
       if (rev && !rev.pass && blocking.length) {
@@ -103,7 +111,7 @@ Fix these BLOCKING review findings for ${it.id} in the existing worktrees (${JSO
         if (fixed) r = fixed
         rev = await agent(`${RULES}
 
-Re-review ${it.id} after fixes. Previously blocking:\n${blocking.map(x => '- ' + x.description).join('\n')}\nReport:\n${JSON.stringify(r, null, 1)}\nDo not modify files.`,
+Re-review ${it.id} after fixes. Previously blocking:\n${blocking.map(x => '- ' + x.description).join('\n')}\nReport:\n${JSON.stringify(r, null, 1)}\nDo NOT re-run a test or build command that the implementer report already evidences for the current commit: the same command, the commit SHA, and pass/fail counts or output. Accept that evidence. Re-run a command only if its evidence is missing or vague, names a different commit or command, or conflicts with what you see in the diff. Spend your effort on reading the diff, and on checks the implementer did not run. Do not modify files.`,
           { label: `${it.id}:re-review`, phase: 'Review', model: 'opus', schema: REVIEW })
       }
       return { r, rev }
@@ -119,6 +127,24 @@ Re-review ${it.id} after fixes. Previously blocking:\n${blocking.map(x => '- ' +
 Return the PR URLs, one per line.`,
         { label: `${it.id}:handoff`, phase: 'Handoff', model: 'haiku', effort: 'low' })
       return { id: it.id, number: it.number, status: x.r.status, reviewPass: !!ok, prs: out }
+    },
+    // merge: only tasks whose review passed
+    async (h, it) => {
+      if (!h || !h.reviewPass) return h
+      const m = await agent(`${RULES}
+
+MERGE task ${it.id} (${TRACKER}#${it.number}) into the integration branch ${INTEGRATION}. Its review passed. Its PRs, from the handoff step:
+${h.prs}
+You may merge only into ${INTEGRATION}. NEVER merge or push to main or any other branch.
+1. For each PR, check that its base is ${INTEGRATION} (gh pr view <url> --json baseRefName,headRefName,headRefOid). Then wait for its checks: gh pr checks <url> --watch --interval 30, with a 20-minute limit. If any check fails, or checks are still running after that, do not merge anything. Report status ci_failed or ci_pending, name the failing check, and skip to step 4.
+2. Merge every PR only once ALL of the task's PRs are green and mergeable, so that a multi-repo task lands together. First mark each PR ready with gh pr ready <url>.
+   - accordproject/concerto-rust and accordproject/concerto-validate-rs: gh pr merge <url> --merge --match-head-commit <headRefOid> --subject "Merge ${it.id} <short title> (#<PR>) into the migration integration branch" --body "Passed adversarial review and CI. Tracks #${it.number}." followed by a blank line and "Signed-off-by: <your git user.name> <your git user.email>".
+   - accordproject/concerto: that repo refuses merge commits through the API. Merge locally in a throwaway worktree instead, never in the shared clone: git -C ${WS}/concerto fetch origin ${INTEGRATION} <head branch>; git -C ${WS}/concerto worktree add --detach ${WS}/wt/merge-${it.id}/concerto origin/${INTEGRATION}; then in that worktree run git merge --no-ff --signoff origin/<head branch> -m "Merge ${it.id} <short title> (#<PR>) into the migration integration branch" -m "Passed adversarial review and CI. Tracks accordproject/concerto-rust#${it.number}."; then git push origin HEAD:${INTEGRATION}, retrying network failures with 2s/4s/8s/16s backoff; then remove the worktree. GitHub marks the PR as merged on its own.
+   - If a merge conflicts or a push is rejected, abort it and report status conflict. Do not force-push, and do not resolve a conflict that changes behaviour.
+3. Only if every PR merged: gh issue edit ${it.number} --repo ${TRACKER} --remove-label mig:in-review --add-label mig:done, then gh issue close ${it.number} --repo ${TRACKER} --reason completed.
+4. If you did not merge, leave the issue as mig:in-review and add a comment saying why. End that comment with a blank line, '---', and '_Generated by [Claude Code](https://claude.ai/code)_'.`,
+        { label: `${it.id}:merge`, phase: 'Merge', model: 'sonnet', schema: MERGE })
+      return { ...h, merge: m }
     })
   outcomes.push(...results.filter(Boolean))
 }

@@ -3,7 +3,7 @@
 The worker is a dynamic workflow. Each round it:
 1. finds open issues in `accordproject/concerto-rust` labelled `migration`, `mig:ready` and `worker:<you>` whose dependencies are done;
 2. claims them;
-3. runs each through **implement → adversarial review (plus one fix round if needed) → draft PR**, in parallel.
+3. runs each through **implement → adversarial review (plus one fix round if needed) → draft PR → merge**, in parallel. A task is merged only if its review passed and CI is green.
 
 It keeps going until no ready issues are left, or until it has run the configured number of rounds.
 
@@ -22,7 +22,11 @@ It keeps going until no ready issues are left, or until it has run the configure
 ## How work reaches you
 - The coordinator (the cloud session) is the only dispatcher. It sets `mig:ready` together with `worker:local-matt` on the issues it wants your machine to take. Your worker never takes issues labelled for another worker, so two environments never pick up the same task.
 - Your worker pushes `claude/tender-pascal-ocwf9q-local-matt-<ID>` branches and opens **draft PRs** against `claude/tender-pascal-ocwf9q`, each saying "Tracks accordproject/concerto-rust#N".
-- The coordinator subscribes to those PRs, reviews them, merges them into the integration branch and closes the issue.
+- When a task's review passed, the worker waits for CI on all of its PRs. If every check is green, it merges them all into `claude/tender-pascal-ocwf9q`, closes the issue and labels it `mig:done`.
+  - `concerto-rust` and `concerto-validate-rs` merge with `gh pr merge --merge`.
+  - `concerto` refuses merge commits through the API. There, the worker makes a signed-off `--no-ff` merge in a throwaway worktree and pushes it.
+- The worker never merges to `main`.
+- The worker leaves some tasks for the coordinator: any task whose review failed (`mig:blocked`), and any task whose CI failed, timed out or hit a merge conflict (still `mig:in-review`, with a comment on the issue).
 
 ## Sizing parallelism
 - A workflow runs at most min(16, CPUs − 2) agents at once. `maxPerRound` caps how many tasks each round claims.
