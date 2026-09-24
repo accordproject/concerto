@@ -27,7 +27,7 @@ Rules for every migration agent:
 - Work only in the git worktree created for your task. Never change branches in the shared clones.
 - Never run 'npm test' in concerto-core; run mocha with nyc using --temp-dir/--report-dir under your worktree.
 - Faithful work: do what the issue says, nothing extra. Model names in commit trailers are fine.
-- In concerto-rust, commits need a DCO sign-off (git commit --signoff).`
+- Every commit in every repo needs a DCO sign-off (git commit --signoff). concerto, concerto-rust and concerto-validate-rs all run the DCO check.`
 
 const ISSUE_LIST = {
   type: 'object',
@@ -89,7 +89,7 @@ Return at most ${MAX_PER_ROUND}, highest priority (P0 before P1 ...) first.`,
 TASK ${it.id}: ${it.title} (issue ${TRACKER}#${it.number}). Read the issue body with gh.
 For each repo you need to change, create a worktree from origin/${INTEGRATION}:
   git -C ${WS}/<repo> worktree add ${WS}/wt/${it.id}/<repo> -b claude/tender-pascal-ocwf9q-${WORKER}-${it.id} origin/${INTEGRATION}
-Do the work there, commit (DCO sign-off in concerto-rust), but DO NOT push. Report honestly against the exit condition.`,
+Do the work there, commit with a DCO sign-off (git commit --signoff) in every repo, but DO NOT push. Report honestly against the exit condition.`,
         { label: `${it.id}:impl`, phase: 'Implement', model: it.model, schema: RESULT })
     },
     // review, one fix round
