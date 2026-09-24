@@ -66,7 +66,7 @@
   "uncovered_branches": 260,
   "uncovered_branches_covered_by_suite": 189
  },
- "note": "Every branch of packages/concerto-core/src that the oracle corpus does not reach. covered_by_suite marks branches the unit suite does reach: these are the lifting tasks of plan §2.3/§2.4.",
+ "note": "Every branch of packages/concerto-core/src that the oracle corpus (as last measured, generated_at above) did not reach. covered_by_suite marks branches the unit suite does reach; every such branch now carries a reason, checked branch by branch against its actual controlling condition and its unit test's mechanism (a confirmed sinon stub/monkeypatch, an async/MM_TAINT/op-surface exclusion, or — where NOT stub-only — a note that it is reachable through the public API and either closed by a new drivers/gaps.spec.js fixture this round (pending a corpus/coverage rebuild to confirm) or still open as a P2-11 gap, not a P2-10 one. See coverage_gaps_fixup_2026_09_24 below and the README for the full accounting.",
  "per_file": {
   "src/astmodelmanager.ts": {
    "uncovered_branches": 1,
@@ -854,7 +854,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Looks like dead code, not stub-only: updateModelFile's `if (!modelFile.getVersion())` throw can never see a ModelFile without a version, because introspect/modelfile.ts's fromAst already rejects an unversioned, non-system namespace before a ModelFile can exist (verified by reading fromAst; no test constructs a versionless, non-system ModelFile). Flagged for a second look rather than asserted as unreachable — see README."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -888,7 +889,8 @@
      "column": 41
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Inside updateExternalModels, which is `async` and is in lib/ops.js's MM_TAINT list, not MM_STEPS/MM_QUERIES: it is never a tracked, replayable op, and calling it also taints the model manager so every later op on it is skipped from recording. Not stub-only — architecturally excluded from the recorded op surface."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -905,7 +907,8 @@
      "column": null
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Inside updateExternalModels, which is `async` and is in lib/ops.js's MM_TAINT list, not MM_STEPS/MM_QUERIES: it is never a tracked, replayable op, and calling it also taints the model manager so every later op on it is skipped from recording. Not stub-only — architecturally excluded from the recorded op surface."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -922,7 +925,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Same as line 457: inside updateExternalModels (async, MM_TAINT-listed), never a tracked op."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -939,7 +943,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Same as line 457: inside updateExternalModels (async, MM_TAINT-listed), never a tracked op."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -956,7 +961,8 @@
      "column": 46
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "writeModelsToFileSystem's `options = {}` default parameter. writeModelsToFileSystem is not in lib/ops.js's MM_STEPS/MM_QUERIES at all (only its callees ModelWriter.writeModelsToFileSystem are exercised elsewhere), so no call to it, with any input, is ever recorded. An oracle op-surface gap, not a stub-only branch."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -990,7 +996,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Same as line 499: inside writeModelsToFileSystem, which is not in lib/ops.js at all."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1007,7 +1014,8 @@
      "column": 25
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Same as line 499: inside writeModelsToFileSystem, which is not in lib/ops.js at all."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1024,7 +1032,8 @@
      "column": 49
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Same as line 499: inside writeModelsToFileSystem, which is not in lib/ops.js at all."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1041,7 +1050,8 @@
      "column": 78
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Same as line 499: inside writeModelsToFileSystem, which is not in lib/ops.js at all."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1092,7 +1102,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'getModels({ includeExternalModels: false }) skips a model file named like an external dependency' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1109,7 +1120,8 @@
      "column": 64
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'getModels({ includeExternalModels: false }) skips a model file named like an external dependency' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1126,7 +1138,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "filter()'s own branches: ModelManager.filter(predicate, options) takes a predicate function argument, which the recorder cannot encode as plain data (skipped as `nonplain:function`; see fixtures/manifest.json's `skip_and_taint_samples` for `ModelManager.filter`). The whole top-level call is skipped, so none of the branches inside it are ever recorded, for any predicate. Not stub-only — there is no black-box way to pass a function through this JSON-based oracle."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1143,7 +1156,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "filter()'s own branches: ModelManager.filter(predicate, options) takes a predicate function argument, which the recorder cannot encode as plain data (skipped as `nonplain:function`; see fixtures/manifest.json's `skip_and_taint_samples` for `ModelManager.filter`). The whole top-level call is skipped, so none of the branches inside it are ever recorded, for any predicate. Not stub-only — there is no black-box way to pass a function through this JSON-based oracle."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1160,7 +1174,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "filter()'s own branches: ModelManager.filter(predicate, options) takes a predicate function argument, which the recorder cannot encode as plain data (skipped as `nonplain:function`; see fixtures/manifest.json's `skip_and_taint_samples` for `ModelManager.filter`). The whole top-level call is skipped, so none of the branches inside it are ever recorded, for any predicate. Not stub-only — there is no black-box way to pass a function through this JSON-based oracle."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1177,7 +1192,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "filter()'s own branches: ModelManager.filter(predicate, options) takes a predicate function argument, which the recorder cannot encode as plain data (skipped as `nonplain:function`; see fixtures/manifest.json's `skip_and_taint_samples` for `ModelManager.filter`). The whole top-level call is skipped, so none of the branches inside it are ever recorded, for any predicate. Not stub-only — there is no black-box way to pass a function through this JSON-based oracle."
   },
   {
    "file": "src/decoratorextractor.ts",
@@ -1449,7 +1465,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'throws for a property whose $class is not a known property kind' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. The unit suite's only test for this (test/introspect/classdeclaration.js, 'should throw if ast contains invalid type') constructs a `new ClassDeclaration(modelFile, {...})` directly with an orphan property object (not part of any real ModelFile) — the recorder's `nonplain:reason` skip for \"a declaration that is not part of its model file\" applies to that specific test, but the same throw is reachable through a normal ModelManager.fromAst call with a mutated, otherwise-valid AST, which is what the new fixture does."
   },
   {
    "file": "src/introspect/classdeclaration.ts",
@@ -1568,7 +1585,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'CollectionSizeValidator.compatibleWith across bound combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. New: this validator family had no compatibleWith() coverage attempt before this round at all (unlike String/Number, which already had a partial one) — the whole test is new, mirroring the (now-fixed) String/Number pattern."
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
@@ -1585,7 +1603,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'CollectionSizeValidator.compatibleWith across bound combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. New: this validator family had no compatibleWith() coverage attempt before this round at all (unlike String/Number, which already had a partial one) — the whole test is new, mirroring the (now-fixed) String/Number pattern."
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
@@ -1602,7 +1621,8 @@
      "column": 56
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'CollectionSizeValidator.compatibleWith across bound combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. New: this validator family had no compatibleWith() coverage attempt before this round at all (unlike String/Number, which already had a partial one) — the whole test is new, mirroring the (now-fixed) String/Number pattern."
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
@@ -1619,7 +1639,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'CollectionSizeValidator.compatibleWith across bound combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. New: this validator family had no compatibleWith() coverage attempt before this round at all (unlike String/Number, which already had a partial one) — the whole test is new, mirroring the (now-fixed) String/Number pattern."
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
@@ -1636,7 +1657,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'CollectionSizeValidator.compatibleWith across bound combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. New: this validator family had no compatibleWith() coverage attempt before this round at all (unlike String/Number, which already had a partial one) — the whole test is new, mirroring the (now-fixed) String/Number pattern."
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
@@ -1653,7 +1675,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'CollectionSizeValidator.compatibleWith across bound combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. New: this validator family had no compatibleWith() coverage attempt before this round at all (unlike String/Number, which already had a partial one) — the whole test is new, mirroring the (now-fixed) String/Number pattern."
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
@@ -1670,7 +1693,8 @@
      "column": 56
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'CollectionSizeValidator.compatibleWith across bound combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. New: this validator family had no compatibleWith() coverage attempt before this round at all (unlike String/Number, which already had a partial one) — the whole test is new, mirroring the (now-fixed) String/Number pattern."
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
@@ -1687,7 +1711,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'CollectionSizeValidator.compatibleWith across bound combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. New: this validator family had no compatibleWith() coverage attempt before this round at all (unlike String/Number, which already had a partial one) — the whole test is new, mirroring the (now-fixed) String/Number pattern."
   },
   {
    "file": "src/introspect/collectionsizevalidator.ts",
@@ -1704,7 +1729,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'CollectionSizeValidator.compatibleWith across bound combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. New: this validator family had no compatibleWith() coverage attempt before this round at all (unlike String/Number, which already had a partial one) — the whole test is new, mirroring the (now-fixed) String/Number pattern."
   },
   {
    "file": "src/introspect/declaration.ts",
@@ -1806,7 +1832,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Decorated.process()'s decorator-factory path only runs when `modelFile.getModelManager().getDecoratorFactories()` is non-empty, which requires ModelManager.addDecoratorFactory — listed in lib/ops.js's MM_TAINT. Once a model manager is tainted, every later op on it (including the addModel/addCTOModel call that would build a decorated declaration through this path) is skipped from recording, so this path can never appear in the corpus. Not stub-only — architecturally excluded, same root cause as the updateExternalModels branches above."
   },
   {
    "file": "src/introspect/decorated.ts",
@@ -1823,7 +1850,8 @@
      "column": 25
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Decorated.process()'s decorator-factory path only runs when `modelFile.getModelManager().getDecoratorFactories()` is non-empty, which requires ModelManager.addDecoratorFactory — listed in lib/ops.js's MM_TAINT. Once a model manager is tainted, every later op on it (including the addModel/addCTOModel call that would build a decorated declaration through this path) is skipped from recording, so this path can never appear in the corpus. Not stub-only — architecturally excluded, same root cause as the updateExternalModels branches above."
   },
   {
    "file": "src/introspect/decorated.ts",
@@ -1840,7 +1868,8 @@
      "column": 25
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Decorated.process()'s decorator-factory path only runs when `modelFile.getModelManager().getDecoratorFactories()` is non-empty, which requires ModelManager.addDecoratorFactory — listed in lib/ops.js's MM_TAINT. Once a model manager is tainted, every later op on it (including the addModel/addCTOModel call that would build a decorated declaration through this path) is skipped from recording, so this path can never appear in the corpus. Not stub-only — architecturally excluded, same root cause as the updateExternalModels branches above."
   },
   {
    "file": "src/introspect/decorated.ts",
@@ -1857,7 +1886,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Decorated.process()'s decorator-factory path only runs when `modelFile.getModelManager().getDecoratorFactories()` is non-empty, which requires ModelManager.addDecoratorFactory — listed in lib/ops.js's MM_TAINT. Once a model manager is tainted, every later op on it (including the addModel/addCTOModel call that would build a decorated declaration through this path) is skipped from recording, so this path can never appear in the corpus. Not stub-only — architecturally excluded, same root cause as the updateExternalModels branches above."
   },
   {
    "file": "src/introspect/decorator.ts",
@@ -1908,7 +1938,8 @@
      "column": 75
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Confirmed reached only by constructing internal objects directly, not through the public API. The unit suite's only test (test/introspect/scalars.js, '#unbox should throw for unknown scalar type') uses `sinon.createStubInstance(ClassDeclaration)` / `sinon.createStubInstance(ModelFile)` for the Field's parent chain, with a hand-built `mockScalarDeclaration.ast.$class` naming a nonexistent scalar kind. A real ScalarDeclaration's `$class` is one of the fixed set the metamodel defines, so no black-box AST (even a mutated one fed through fromAst) can produce a getScalarField() call whose backing scalar has an unrecognized $class — the metamodel schema itself would already reject it earlier. Stub-only."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -1925,7 +1956,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'getImportURI resolves an import URI and returns null for a non-imported name' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -1942,7 +1974,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'getImportURI resolves an import URI and returns null for a non-imported name' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. (This also required adding 'getImportURI' to lib/ops.js's MODELFILE_METHODS: it is a plain public accessor that was simply missing from the op table, so no call to it was ever recorded regardless of input.)"
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -1959,7 +1992,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'getType returns null when an imported type's namespace has no registered ModelFile' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -1976,7 +2010,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'getFullyQualifiedTypeName resolves an imported type and returns null for an unknown one' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -1993,7 +2028,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'getFullyQualifiedTypeName resolves an imported type and returns null for an unknown one' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2027,7 +2063,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'fromAst rejects a namespace part that is not a valid identifier' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. The unit suite's only test for this (test/introspect/modelfile.js, 'should throw for a bad namespace part') stubs the external CTO Parser to inject the same crafted AST; ModelManager.fromAst does the same, no stub."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2044,7 +2081,8 @@
      "column": 71
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'fromAst rejects a wildcard (ImportAll) import' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. The unit suite's only test for this (test/introspect/modelfile.js, 'should throw for a wildcard import') stubs the external CTO Parser to inject the same crafted AST; ModelManager.fromAst does the same, no stub."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2078,7 +2116,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2095,7 +2134,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2112,7 +2152,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2129,7 +2170,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2146,7 +2188,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2180,7 +2223,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2197,7 +2241,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2214,7 +2259,8 @@
      "column": 46
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2231,7 +2277,8 @@
      "column": 67
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2248,7 +2295,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2265,7 +2313,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2282,7 +2331,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2299,7 +2349,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2316,7 +2367,8 @@
      "column": 32
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2333,7 +2385,8 @@
      "column": 51
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2350,7 +2403,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2384,7 +2438,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2401,7 +2456,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2418,7 +2474,8 @@
      "column": 36
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2435,7 +2492,8 @@
      "column": 55
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2452,7 +2510,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2469,7 +2528,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2486,7 +2546,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2503,7 +2564,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2520,7 +2582,8 @@
      "column": 40
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2537,7 +2600,8 @@
      "column": 71
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelFile.filter()'s own branches. Its only caller is BaseModelManager.filter(predicate, modelManager) (basemodelmanager.ts:917, `modelFile.filter(predicate, modelManager)`), and ModelManager.filter's predicate argument is a function, which the recorder cannot encode as plain data (`nonplain:function`, same root cause as basemodelmanager.ts lines 914/918 above). Since the whole top-level ModelManager.filter call is skipped from recording, none of ModelFile.filter's internal branches can ever be reached by a recorded fixture either — confirmed by tracing the call chain, not assumed from the file-level pattern."
   },
   {
    "file": "src/introspect/numbervalidator.ts",
@@ -2554,7 +2618,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'NumberValidator.validate() directly, on a real Validator owned by a real Field: below and above the bound.' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/numbervalidator.ts",
@@ -2571,7 +2636,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'NumberValidator.validate() directly, on a real Validator owned by a real Field: below and above the bound.' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/numbervalidator.ts",
@@ -2588,7 +2654,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'NumberValidator.validate() directly, on a real Validator owned by a real Field: below and above the bound.' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/numbervalidator.ts",
@@ -2605,7 +2672,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'NumberValidator.compatibleWith across bound combinations, and default-value bound checks' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/property.ts",
@@ -2622,7 +2690,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Confirmed stub-only. The unit suite's only tests reaching these branches (test/introspect/property_ex.js, '#getFullyQualifiedTypeName') call `sinon.stub(field, 'getParent').callsFake(...)`, `sinon.stub(person, 'getModelFile').callsFake(...)` and `sinon.stub(person.getModelFile(), 'getFullyQualifiedTypeName').callsFake(...)` directly on real objects, to force a state (a Property with no parent, or a parent with no ModelFile) that cannot arise from any Property this oracle can record: every recorded Property comes from a ClassDeclaration built by ModelFile.fromAst, which always gives it both."
   },
   {
    "file": "src/introspect/property.ts",
@@ -2639,7 +2708,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Confirmed stub-only. The unit suite's only tests reaching these branches (test/introspect/property_ex.js, '#getFullyQualifiedTypeName') call `sinon.stub(field, 'getParent').callsFake(...)`, `sinon.stub(person, 'getModelFile').callsFake(...)` and `sinon.stub(person.getModelFile(), 'getFullyQualifiedTypeName').callsFake(...)` directly on real objects, to force a state (a Property with no parent, or a parent with no ModelFile) that cannot arise from any Property this oracle can record: every recorded Property comes from a ClassDeclaration built by ModelFile.fromAst, which always gives it both."
   },
   {
    "file": "src/introspect/property.ts",
@@ -2656,7 +2726,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Confirmed stub-only. The unit suite's only tests reaching these branches (test/introspect/property_ex.js, '#getFullyQualifiedTypeName') call `sinon.stub(field, 'getParent').callsFake(...)`, `sinon.stub(person, 'getModelFile').callsFake(...)` and `sinon.stub(person.getModelFile(), 'getFullyQualifiedTypeName').callsFake(...)` directly on real objects, to force a state (a Property with no parent, or a parent with no ModelFile) that cannot arise from any Property this oracle can record: every recorded Property comes from a ClassDeclaration built by ModelFile.fromAst, which always gives it both."
   },
   {
    "file": "src/introspect/relationshipdeclaration.ts",
@@ -2673,7 +2744,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Confirmed stub-only. The unit suite's only test reaching this exact branch (test/introspect/relationshipdeclaration.js, 'should throw if relationship points to a missing type') monkey-patches the real ModelManager instance directly (`modelManager.getType = () => { return null; };`) to force the null result. A genuinely-missing type is instead caught earlier and differently: feeding the same \"type renamed to a nonexistent type\" edit through ModelManager.fromAst + validateModelFiles (verified directly against src/) throws modelfile.ts's \"Undeclared type ...\" from resolveType, inside Property.validate's `super.validate(classDecl)` call, before this line is ever reached. So this branch — the null-classDeclaration check on the *same-namespace* lookup path — has no known black-box input; it may only be reachable when resolveType's own check and this one disagree, which real ASTs do not appear to construct."
   },
   {
    "file": "src/introspect/scalardeclaration.ts",
@@ -2690,7 +2762,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'a scalar extending DateTime gets type \"DateTime\"' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/scalardeclaration.ts",
@@ -2724,7 +2797,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'StringValidator constructor: degenerate lengthValidator bounds (via AST)' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. CTO's own `length=[1,]`/`length=[,10]` syntax leaves the missing bound `undefined`, not `null` (confirmed empirically against src/), so it can never trip this `=== null` check; only an AST with an explicit JSON `null` for exactly one bound can, which the new fixture now supplies."
   },
   {
    "file": "src/introspect/stringvalidator.ts",
@@ -2741,7 +2815,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'StringValidator.compatibleWith across pattern/flags/length combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/stringvalidator.ts",
@@ -2758,7 +2833,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'StringValidator.compatibleWith across pattern/flags/length combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/stringvalidator.ts",
@@ -2775,7 +2851,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'StringValidator.compatibleWith across pattern/flags/length combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/stringvalidator.ts",
@@ -2792,7 +2869,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'StringValidator.compatibleWith across pattern/flags/length combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch."
   },
   {
    "file": "src/introspect/stringvalidator.ts",
@@ -2826,7 +2904,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'StringValidator.compatibleWith across pattern/flags/length combinations' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. (the `hiMin`/`loMax` pair added in this round, chosen so the minLength check passes through without an early return and the maxLength check then trips: the pre-existing narrow/wide pairs always return early on the minLength check instead, verified directly against src/.)"
   },
   {
    "file": "src/model/resourceid.ts",
@@ -2996,7 +3075,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3013,7 +3093,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3030,7 +3111,8 @@
      "column": 102
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3047,7 +3129,8 @@
      "column": 28
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3081,7 +3164,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3098,7 +3182,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3115,7 +3200,8 @@
      "column": 15
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3132,7 +3218,8 @@
      "column": 31
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3149,7 +3236,8 @@
      "column": 157
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3166,7 +3254,8 @@
      "column": 28
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3200,7 +3289,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3217,7 +3307,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3234,7 +3325,8 @@
      "column": 15
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelloader.ts",
@@ -3251,7 +3343,8 @@
      "column": 31
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "ModelLoader.addModel/loadModelManager/loadModelManagerFromModelFiles are all `static async` methods. lib/ops.js has no ModelLoader entry at all (only ModelManager/ModelFile/Factory/Serializer/introspection classes are wrapped as ops), so no call to them, however constructed, is ever recorded — and even if one were wrapped, an async result is unconditionally skipped by the recorder as `async-result` (lib/recorder.js). Confirmed genuinely unrecordable; not stub-only, and not reachable through any fixture this oracle can build."
   },
   {
    "file": "src/modelmanager.ts",
@@ -3285,7 +3378,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Closed in this round (task P2-11 fix-up): drivers/gaps.spec.js's 'throws when the candidate type does not exist in the model file' reaches this branch with a real, black-box input built through the public API, no stub. Not yet confirmed against a rebuilt corpus/coverage report (record-all.sh + coverage.sh was not re-run in this pass because of its runtime); verified instead by running the same input directly against src/ and observing it take this branch. The existing gaps.spec.js test for this predates this round but never actually reached the branch: it used a String-typed (primitive) property, and isAssignableTo short-circuits on `isPrimitiveType(propertyTypeName)` before ever calling modelFile.getType() — verified directly against src/. Fixed in this round to use a concept-typed (non-primitive) property instead, which reaches the branch."
   },
   {
    "file": "src/serializer.ts",
@@ -3302,7 +3396,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Serializer's constructor is never itself a wrapped op (only Serializer.fromJSON/toJSON are, in lib/ops.js's SERIALIZER_METHODS). Both always call `new Serializer(factory, modelManager, options)` internally with the real, non-falsy factory/modelManager the op was given, so no recorded call ever constructs a Serializer with a falsy factory or modelManager. Not stub-only — the constructor itself is outside the recorded surface."
   },
   {
    "file": "src/serializer.ts",
@@ -3319,7 +3414,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Serializer's constructor is never itself a wrapped op (only Serializer.fromJSON/toJSON are, in lib/ops.js's SERIALIZER_METHODS). Both always call `new Serializer(factory, modelManager, options)` internally with the real, non-falsy factory/modelManager the op was given, so no recorded call ever constructs a Serializer with a falsy factory or modelManager. Not stub-only — the constructor itself is outside the recorded surface."
   },
   {
    "file": "src/serializer/instancegenerator.ts",
@@ -3336,7 +3432,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: InstanceGenerator is reached via the same Factory.newResource(..., { generate: 'sample' | 'empty' }) op as ValueGenerator above. The specific branches here (the recursive-model self-reference guard at visitField, and the Integer/Long/regex-validator-aware generation paths) need a sample-generated recursive model and fields with NumberValidator/StringValidator bounds respectively — genuinely reachable through the public API by construction (verified by reading the source: `parameters.seen.includes(fqn)` is populated purely from the models visited during one generation call, and `fieldOrScalarDeclaration.validator` is the same real Validator object used elsewhere in this file), just not yet fed. Deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/instancegenerator.ts",
@@ -3353,7 +3450,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: InstanceGenerator is reached via the same Factory.newResource(..., { generate: 'sample' | 'empty' }) op as ValueGenerator above. The specific branches here (the recursive-model self-reference guard at visitField, and the Integer/Long/regex-validator-aware generation paths) need a sample-generated recursive model and fields with NumberValidator/StringValidator bounds respectively — genuinely reachable through the public API by construction (verified by reading the source: `parameters.seen.includes(fqn)` is populated purely from the models visited during one generation call, and `fieldOrScalarDeclaration.validator` is the same real Validator object used elsewhere in this file), just not yet fed. Deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/instancegenerator.ts",
@@ -3370,7 +3468,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: InstanceGenerator is reached via the same Factory.newResource(..., { generate: 'sample' | 'empty' }) op as ValueGenerator above. The specific branches here (the recursive-model self-reference guard at visitField, and the Integer/Long/regex-validator-aware generation paths) need a sample-generated recursive model and fields with NumberValidator/StringValidator bounds respectively — genuinely reachable through the public API by construction (verified by reading the source: `parameters.seen.includes(fqn)` is populated purely from the models visited during one generation call, and `fieldOrScalarDeclaration.validator` is the same real Validator object used elsewhere in this file), just not yet fed. Deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/instancegenerator.ts",
@@ -3387,7 +3486,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: InstanceGenerator is reached via the same Factory.newResource(..., { generate: 'sample' | 'empty' }) op as ValueGenerator above. The specific branches here (the recursive-model self-reference guard at visitField, and the Integer/Long/regex-validator-aware generation paths) need a sample-generated recursive model and fields with NumberValidator/StringValidator bounds respectively — genuinely reachable through the public API by construction (verified by reading the source: `parameters.seen.includes(fqn)` is populated purely from the models visited during one generation call, and `fieldOrScalarDeclaration.validator` is the same real Validator object used elsewhere in this file), just not yet fed. Deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/instancegenerator.ts",
@@ -3421,7 +3521,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: InstanceGenerator is reached via the same Factory.newResource(..., { generate: 'sample' | 'empty' }) op as ValueGenerator above. The specific branches here (the recursive-model self-reference guard at visitField, and the Integer/Long/regex-validator-aware generation paths) need a sample-generated recursive model and fields with NumberValidator/StringValidator bounds respectively — genuinely reachable through the public API by construction (verified by reading the source: `parameters.seen.includes(fqn)` is populated purely from the models visited during one generation call, and `fieldOrScalarDeclaration.validator` is the same real Validator object used elsewhere in this file), just not yet fed. Deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/instancegenerator.ts",
@@ -3438,7 +3539,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: InstanceGenerator is reached via the same Factory.newResource(..., { generate: 'sample' | 'empty' }) op as ValueGenerator above. The specific branches here (the recursive-model self-reference guard at visitField, and the Integer/Long/regex-validator-aware generation paths) need a sample-generated recursive model and fields with NumberValidator/StringValidator bounds respectively — genuinely reachable through the public API by construction (verified by reading the source: `parameters.seen.includes(fqn)` is populated purely from the models visited during one generation call, and `fieldOrScalarDeclaration.validator` is the same real Validator object used elsewhere in this file), just not yet fed. Deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/instancegenerator.ts",
@@ -3455,7 +3557,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: InstanceGenerator is reached via the same Factory.newResource(..., { generate: 'sample' | 'empty' }) op as ValueGenerator above. The specific branches here (the recursive-model self-reference guard at visitField, and the Integer/Long/regex-validator-aware generation paths) need a sample-generated recursive model and fields with NumberValidator/StringValidator bounds respectively — genuinely reachable through the public API by construction (verified by reading the source: `parameters.seen.includes(fqn)` is populated purely from the models visited during one generation call, and `fieldOrScalarDeclaration.validator` is the same real Validator object used elsewhere in this file), just not yet fed. Deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/instancegenerator.ts",
@@ -3472,7 +3575,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: InstanceGenerator is reached via the same Factory.newResource(..., { generate: 'sample' | 'empty' }) op as ValueGenerator above. The specific branches here (the recursive-model self-reference guard at visitField, and the Integer/Long/regex-validator-aware generation paths) need a sample-generated recursive model and fields with NumberValidator/StringValidator bounds respectively — genuinely reachable through the public API by construction (verified by reading the source: `parameters.seen.includes(fqn)` is populated purely from the models visited during one generation call, and `fieldOrScalarDeclaration.validator` is the same real Validator object used elsewhere in this file), just not yet fed. Deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/instancegenerator.ts",
@@ -3489,7 +3593,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: InstanceGenerator is reached via the same Factory.newResource(..., { generate: 'sample' | 'empty' }) op as ValueGenerator above. The specific branches here (the recursive-model self-reference guard at visitField, and the Integer/Long/regex-validator-aware generation paths) need a sample-generated recursive model and fields with NumberValidator/StringValidator bounds respectively — genuinely reachable through the public API by construction (verified by reading the source: `parameters.seen.includes(fqn)` is populated purely from the models visited during one generation call, and `fieldOrScalarDeclaration.validator` is the same real Validator object used elsewhere in this file), just not yet fed. Deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3506,7 +3611,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3540,7 +3646,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3557,7 +3664,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3574,7 +3682,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3591,7 +3700,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3608,7 +3718,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3625,7 +3736,8 @@
      "column": 42
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3642,7 +3754,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3659,7 +3772,8 @@
      "column": 84
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3676,7 +3790,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3693,7 +3808,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3710,7 +3826,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3727,7 +3844,8 @@
      "column": 82
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3744,7 +3862,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3761,7 +3880,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3778,7 +3898,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3795,7 +3916,8 @@
      "column": 52
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3812,7 +3934,8 @@
      "column": 92
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3829,7 +3952,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3846,7 +3970,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round; NOT assumed stub-only. JSONGenerator is the toJSON-side mirror of JSONPopulator (same architecture: an internal visitor, reached in the unit suite by constructing `new JSONGenerator(...)` directly, but driven in practice by the public, wrapped Serializer.toJSON(resource, options) op with the same options plumbed through per src/serializer.ts). This round's new 'jsonpopulator.ts / jsongenerator.ts' fixture block in drivers/gaps.spec.js exercises toJSON on the same model (arrays, relationships, DateTime, optional fields present/absent) and likely closes some of these, but each branch's specific JSON/options combination was not individually traced and confirmed the way the jsonpopulator.ts, resourcevalidator.ts (partial) and validator-family branches above were. Needs a coverage rebuild to confirm, then a further pass to close what remains. Not a P2-10 candidate: reaching it does not need a stub."
   },
   {
    "file": "src/serializer/jsongenerator.ts",
@@ -3880,7 +4005,8 @@
      "column": 112
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -3914,7 +4040,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Confirmed reached only by calling the internal JSONPopulator.visit() directly with a value that satisfies none of isClassDeclaration/isMapDeclaration/isRelationship/isTypeScalar/isField — the unit suite's test (test/serializer/jsonpopulator.js, '#visit should throw an error for an unrecognized type') does exactly that: `jsonPopulator.visit(3.142, {})`. JSONPopulator itself is not a wrapped op (only Serializer.fromJSON/toJSON are); every `thing` that reaches visit() through that public entry point is a real Property/Declaration obtained from a real ClassDeclaration, which always implements one of those predicates. No black-box JSON/AST input can make Serializer.fromJSON call visit() with anything else. Internal-only, not closeable through this oracle's public surface."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -3931,7 +4058,8 @@
      "column": 65
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -3982,7 +4110,8 @@
      "column": 65
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -3999,7 +4128,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4016,7 +4146,8 @@
      "column": 65
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4033,7 +4164,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4050,7 +4182,8 @@
      "column": 87
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4067,7 +4200,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4101,7 +4235,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4118,7 +4253,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4135,7 +4271,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4152,7 +4289,8 @@
      "column": 65
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4169,7 +4307,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4186,7 +4325,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4203,7 +4343,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4220,7 +4361,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4237,7 +4379,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4254,7 +4397,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4271,7 +4415,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4288,7 +4433,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4305,7 +4451,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4322,7 +4469,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4339,7 +4487,8 @@
      "column": 50
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4356,7 +4505,8 @@
      "column": 70
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4373,7 +4523,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4390,7 +4541,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4407,7 +4559,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -4424,7 +4577,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Targeted by this round's new black-box fixtures (drivers/gaps.spec.js, 'jsonpopulator.ts: constructor options via Serializer.fromJSON' and 'jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON'), which drive every primitive type mismatch, array/non-array, $class-present/absent and acceptResourcesForRelationships on/off combination through the real, public Serializer.fromJSON(json, options) op — the unit suite's own tests for these branches construct `new JSONPopulator(...)` directly instead, but Serializer.fromJSON passes the same constructor options through (verified in src/serializer.ts), and visitField/convertItem/convertToObject/visitRelationshipDeclaration run identically however they are entered. NOT stub-only, so this does not qualify for the P2-10 hand-off. Not individually confirmed closed against a rebuilt coverage report (see top-level note) — if still open after the next coverage.sh run, that is a P2-11 follow-up gap (a missing input combination), not a white-box test to lift."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4441,7 +4595,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4475,7 +4630,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4492,7 +4648,8 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4509,7 +4666,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4577,7 +4735,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4594,7 +4753,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4611,7 +4771,8 @@
      "column": 65
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4628,7 +4789,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4645,7 +4807,8 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4662,7 +4825,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4679,7 +4843,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4696,7 +4861,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4713,7 +4879,8 @@
      "column": 42
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4730,7 +4897,8 @@
      "column": 91
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4747,7 +4915,8 @@
      "column": 139
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4781,7 +4950,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -4798,7 +4968,8 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not individually verified branch-by-branch in this round beyond the two closed above (undeclared-field and empty-identifier checks). NOT assumed stub-only: ResourceValidator is reached via the public, wrapped Resource.validate() op on a real Resource (obtained from Factory.newResource, itself a wrapped op), and a Resource is a dynamic, plain-property object — setting an undeclared property or an out-of-range field value directly (`resource.x = ...`) before calling validate() is itself black-box, no stub, as the two closed branches above demonstrate. Only about a third of this file's unit tests (test/serializer/resourcevalidator.js) use sinon stubs at all; the rest build real resources from a real ModelManager. Each remaining branch's specific triggering condition (abstract-class reassignment, array/size-validator interaction, Map values, undefined/symbol field values, and others) was not individually traced. Needs targeted fixtures, not a P2-10 hand-off."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4815,7 +4986,8 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4832,7 +5004,8 @@
      "column": 10
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4849,7 +5022,8 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4866,7 +5040,8 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4883,7 +5058,8 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4900,7 +5076,8 @@
      "column": 26
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4917,7 +5094,8 @@
      "column": 53
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4934,7 +5112,8 @@
      "column": 81
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4951,7 +5130,8 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4968,7 +5148,8 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -4985,7 +5166,8 @@
      "column": 26
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -5002,7 +5184,8 @@
      "column": 53
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -5019,7 +5202,8 @@
      "column": 81
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -5036,7 +5220,8 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -5053,7 +5238,8 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -5070,7 +5256,8 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -5087,7 +5274,8 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Not targeted by any new fixture in this round, and not individually verified. NOT assumed stub-only: the unit suite's own test file (test/serializer/valuegenerator.js) has zero sinon stub usages, and EmptyValueGenerator/SampleValueGenerator are reached via Factory.newResource(ns, name, id, { generate: 'sample' | 'empty', includeOptionalFields }) — a wrapped, public op. The module-level helpers these branches sit in (getRange, generateString, getRegexString and their callers in SampleValueGenerator) are driven by a field's NumberValidator/StringValidator bounds and by Math.random (the JS adapters run every op under a seeded PRNG per lib/env.js, so this replays deterministically). This oracle's existing Factory fixtures (1,444 in the corpus) evidently do not happen to include fields with the specific bound shapes (inverted, very large, zero-width, regex-with-length-bounds) these branches need. Closing them needs new sample-generation fixtures over purpose-built validator bounds, deferred as a P2-11 follow-up, not P2-10."
   },
   {
    "file": "src/typenotfoundexception.ts",
@@ -5104,7 +5292,14 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "reason": "Looks like dead code, not stub-only: every call site in src/ that throws TypeNotFoundException already supplies an explicit message (grep confirms this), so the omitted-message default-formatter branch has no caller anywhere in the current source. Flagged for a second look rather than asserted as unreachable, consistent with basemodelmanager.ts:371 above — see README."
   }
- ]
+ ],
+ "coverage_gaps_fixup_2026_09_24": {
+  "what_changed": "Fix-up pass for blocking review findings on task P2-11 (issue accordproject/concerto-rust#55): every covered_by_suite branch now has a reason field, checked branch by branch instead of asserted at file level.",
+  "new_fixtures_added": "drivers/gaps.spec.js gained new describe blocks covering: basemodelmanager.ts getModels()/external model files; modelfile.ts fromAst (namespace identifier, wildcard import), getFullyQualifiedTypeName/getType/getImportURI on real registered ModelFiles (also required adding getImportURI to lib/ops.js's MODELFILE_METHODS); classdeclaration.ts unrecognized property $class; scalardeclaration.ts DateTimeScalar; jsonpopulator.ts constructor options and a broad convertToObject/convertItem/visitField/visitRelationshipDeclaration sweep via Serializer.fromJSON/toJSON; resourcevalidator.ts undeclared-field/empty-identifier; StringValidator/NumberValidator/CollectionSizeValidator.validate()/compatibleWith() across bound combinations chosen to actually reach the target branches (verified several pre-existing pairs did not, e.g. narrow/wide never trips the maxLength-exceeds branch because it always returns early on minLength); and a fix to an existing modelutil.ts isAssignableTo() fixture that used a primitive-typed property and so never reached its target branch.",
+  "verification_method": "Every new/changed fixture was run directly against src/ outside mocha (see the reasons for exact assertions) to confirm it takes the intended branch, and the whole drivers/gaps.spec.js file was run standalone (53 passing) and once more through lib/recorder.js with ORACLE_SOURCE=gaps (also 53 passing, all ops recorded including the new ModelFile.getImportURI) to confirm every new op records cleanly. The full record-all.sh (unit+data+conformance+gaps, ~1300 mocha processes) plus nyc coverage.sh replay was NOT re-run in this pass: self-check.js alone (a much lighter replay-only job) took over 20 minutes against the current 15,214-fixture corpus, and a full re-record plus nyc coverage run was judged too slow to complete in this session. The coverage numbers in `summary` above are therefore the PRE-fix-up ones (same generated_at as before); branches marked as closed by a new fixture are believed closed based on the direct src/ verification described above, not re-confirmed through nyc.",
+  "not_individually_verified": "jsongenerator.ts (20 branches), the remaining resourcevalidator.ts branches beyond the two closed (15), valuegenerator.ts (17) and instancegenerator.ts (9) were NOT individually traced to a specific triggering input the way every other file in this list was. Each of those four files' per-branch reason instead documents why they are structurally NOT stub-only (verified: their unit test files use little or no sinon stubbing, and the classes are reached through public, wrapped ops — Serializer.toJSON, Resource.validate, Factory.newResource with generate:sample/empty) and are therefore P2-11 gaps rather than P2-10 lifting candidates, without claiming they are closed. This is the main remaining work the exit condition's fallback clause does not yet satisfy: not every remaining gap is reachable only through stubs, so a literal reading of the exit condition still needs either those branches closed or an explicit maintainer decision to accept this state."
+ }
 }

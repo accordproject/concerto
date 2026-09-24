@@ -47,6 +47,11 @@ const MM_TAINT = ['addDecoratorFactory', 'updateExternalModels'];
 const MODELFILE_METHODS = [
     'validate', 'getType', 'resolveType', 'isLocalType', 'isImportedType', 'resolveImport',
     'getFullyQualifiedTypeName', 'getLocalType', 'isDefined',
+    // getImportURI (task P2-11): a plain public accessor over importUriMap,
+    // reachable on any registered ModelFile with no stub needed; it was
+    // simply missing from this op table, so no call to it was ever
+    // recorded regardless of input.
+    'getImportURI',
 ];
 const FACTORY_METHODS = ['newResource', 'newConcept', 'newRelationship', 'newTransaction', 'newEvent'];
 const SERIALIZER_METHODS = ['fromJSON', 'toJSON'];

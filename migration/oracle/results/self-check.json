@@ -1,8 +1,8 @@
 {
  "fixtures": "fixtures",
  "baseline": {
-  "total": 15037,
-  "pass": 15037,
+  "total": 15214,
+  "pass": 15214,
   "fail": 0,
   "harness_error": 0
  },
@@ -11,14 +11,16 @@
    "name": "error-message-changed",
    "description": "IllegalModelException messages gain a trailing full stop",
    "detected": true,
-   "failing_fixtures": 606,
+   "failing_fixtures": 621,
    "harness_errors": 0,
    "by_op": {
     "ModelFile.new": 3,
     "ModelManager.addCTOModel": 211,
-    "ModelManager.validateModelFiles": 133,
+    "ModelManager.validateModelFiles": 135,
     "DecoratorManager.decorateModels": 225,
     "ModelManager.addModelFiles": 2,
+    "ClassDeclaration.getProperties": 1,
+    "ModelManager.fromAst": 12,
     "ClassDeclaration.getNestedProperty": 1,
     "ClassDeclaration.validate": 1,
     "MapDeclaration.validate": 8,
@@ -37,10 +39,10 @@
    "name": "verdict-flipped",
    "description": "validateModelFiles reports success when the reference throws, and vice versa",
    "detected": true,
-   "failing_fixtures": 383,
+   "failing_fixtures": 385,
    "harness_errors": 0,
    "by_op": {
-    "ModelManager.validateModelFiles": 383
+    "ModelManager.validateModelFiles": 385
    },
    "example": {
     "file": "conformance/ModelManager.validateModelFiles/0067c292caa33573dcf9f35e.json",
@@ -51,14 +53,15 @@
    "name": "identifier-check-dropped",
    "description": "in-engine: ModelUtil.isValidIdentifier always returns true",
    "detected": true,
-   "failing_fixtures": 2,
+   "failing_fixtures": 4,
    "harness_errors": 0,
    "by_op": {
+    "ModelManager.fromAst": 2,
     "ModelUtil.isValidIdentifier": 2
    },
    "example": {
-    "file": "unit/ModelUtil.isValidIdentifier/ea8308fef78b0e065847f858.json",
-    "detail": "$.ok: expected false got true"
+    "file": "gaps/ModelManager.fromAst/5b5ea304cec625abe1294892.json",
+    "detail": "$.error: expected {\"class\":\"IllegalModelException\",\"component\":\"@accordproject/concerto-core\",\"location\":null,\"message\":\"Invalid property name '1bad' \"} got undefined"
    }
   },
   {
@@ -90,8 +93,8 @@
     "Serializer.toJSON": 1619
    },
    "example": {
-    "file": "conformance/Serializer.toJSON/09e3d63bd98c6b9f4feab068.json",
-    "detail": "$.ok.$class: expected \"org.acme.test@1.0.0.Person\" got undefined"
+    "file": "conformance/Serializer.toJSON/0825dd5ba870100a74ee27c7.json",
+    "detail": "$.ok.$class: expected \"org.acme.collections@1.0.0.BoundedTags\" got undefined"
    }
   },
   {
@@ -113,7 +116,7 @@
     "Relationship.fromURI": 2
    },
    "example": {
-    "file": "conformance/Serializer.fromJSON/4d449aa90abb05a2c2f158fa.json",
+    "file": "conformance/Serializer.fromJSON/25ac911b99783b746552aeaf.json",
     "detail": "$.error.class: expected \"TypeNotFoundException\" got \"Error\""
    }
   },
@@ -121,11 +124,11 @@
    "name": "optional-field-rule-dropped",
    "description": "in-engine: Property.isOptional always returns true (missing required fields accepted)",
    "detected": true,
-   "failing_fixtures": 11134,
+   "failing_fixtures": 11136,
    "harness_errors": 0,
    "by_op": {
     "ModelManager.addCTOModel": 539,
-    "ModelManager.validateModelFiles": 383,
+    "ModelManager.validateModelFiles": 385,
     "Serializer.fromJSON": 1324,
     "Serializer.toJSON": 1230,
     "ClassDeclaration.isClassDeclaration": 339,
@@ -322,7 +325,7 @@
     "Resource.toJSON": 1
    },
    "example": {
-    "file": "conformance/Serializer.toJSON/81f018a7ce8cc4b54d812082.json",
+    "file": "conformance/Serializer.toJSON/1a45a969cb5d728c62ee40a7.json",
     "detail": "$.ok.created: expected \"2024-01-15T10:30:00.000Z\" got \"2024-01-15T10:30:00.001Z\""
    }
   }

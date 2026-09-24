@@ -174,7 +174,9 @@ A harness error is never a pass.
 ## Results
 
 Originally recorded 2026-09-24 (task P0-05); the `gaps` source and the coverage figures below were
-updated the same day by task P2-11 (full numbers: `fixtures/manifest.json`, `results/*.json`).
+updated the same day by task P2-11 (full numbers: `fixtures/manifest.json`, `results/*.json`), and the
+judge self-check was re-run, and `coverage-gaps.json`'s per-branch reasons were checked and filled in, by a
+same-day fix-up pass — see "Coverage of the reference..." and "Judge self-check" below.
 
 ### Corpus
 
@@ -222,18 +224,48 @@ The statement/line totals differ slightly between the two runs because nyc `all:
 run never loads without their source map (the suite run loads every file). Branch and function totals agree.
 
 `coverage-gaps.json` lists all 260 branches the corpus still does not reach (189 of them are covered by the
-unit suite) with file, line, type and location, and per file the uncovered statement lines and functions.
+unit suite), with file, line, type and location, and per file the uncovered statement lines and functions.
 The largest remaining gaps are `introspect/modelfile.ts` (33), `serializer/jsonpopulator.ts` (29),
 `serializer/jsongenerator.ts` (20), `serializer/resourcevalidator.ts` (17), `serializer/valuegenerator.ts`
 (17), `basemodelmanager.ts` (16), `modelloader.ts` (14, async, not recorded) and
-`introspect/collectionsizevalidator.ts` (9). Most of the branches in the `serializer/*` and
-`modelfile.ts` families are reached in the unit suite only through stubs (validators built on stub
-fields, populators and generators driven with fake parameters, as `fixtures/manifest.json`'s
-`skip_and_taint_samples` confirms for several of them, e.g. `nonplain:validator-not-in-owner`): these are
-the lifting tasks of plan §2.3 (P2-10), which was already lifting `jsonpopulator.ts` in parallel with this
-task. P2-11 did not verify stub-only-ness branch by branch for that whole set, so P2-10 should treat the
-"largely stub-only" read as a strong hint, not a certainty, for any branch it turns out to still be able to
-reach through a real model.
+`introspect/collectionsizevalidator.ts` (9).
+
+**Update (fix-up pass, same day):** every one of the 189 `covered_by_suite: true` branches now carries a
+`reason` field in `coverage-gaps.json`, checked branch by branch against its actual controlling condition
+and its unit test's mechanism, rather than asserted at the file level as the original pass here did (that
+"strong hint, not a certainty" framing was itself the problem a review caught: the file-level read for
+`serializer/*` turned out to be substantially wrong for `jsonpopulator.ts` and the same shape of code in
+`jsongenerator.ts`/`resourcevalidator.ts`/`valuegenerator.ts`/`instancegenerator.ts` — these are internal
+visitor classes whose unit tests happen to construct them directly, but the same branches are reachable
+with no stub at all through the public, wrapped `Serializer.fromJSON`/`toJSON` and `Resource.validate` ops,
+because `Serializer.fromJSON`/`toJSON` pass their `options` straight through to the same constructors, and
+a `Resource` is a plain dynamic object a test can mutate directly before calling `.validate()`). The
+fix-up pass:
+* added targeted fixtures that close `basemodelmanager.ts` (1 branch pair), `modelfile.ts` (7, plus adding
+  the missing `getImportURI` op), `classdeclaration.ts` (1), `scalardeclaration.ts` (1), `modelutil.ts` (1,
+  fixing a pre-existing fixture that used a primitive-typed property and so never reached its target),
+  `resourcevalidator.ts` (2), and all of `numbervalidator.ts` (4), `stringvalidator.ts` (6) and
+  `collectionsizevalidator.ts` (9) — the last three via `.validate()`/`.compatibleWith()` called directly on
+  real `Validator`s from real `Field`s, with bound combinations chosen so the branch is actually reached
+  (two of the pre-existing `compatibleWith()` pairs, `narrow`/`wide`, never reach their file's
+  greater-than-upper-bound branch because they always return early on the lower-bound check instead —
+  confirmed by running them directly against `src/`);
+* added a broad `Serializer.fromJSON`/`toJSON` fixture sweep targeting most of `jsonpopulator.ts`'s
+  remaining branches (one, the internal `visit()` dispatch's final `else`, is confirmed reachable only by
+  calling the internal class directly with a non-property argument — see `coverage-gaps.json`);
+* left `jsongenerator.ts`, the rest of `resourcevalidator.ts`, `valuegenerator.ts` and
+  `instancegenerator.ts` **not individually closed**: each branch's `reason` explains why it is *not*
+  stub-only (so it is not a P2-10 candidate) without claiming it is covered. Closing them is follow-up
+  P2-11 work.
+* every new/changed fixture was confirmed to take its intended branch by running it directly against
+  `src/` outside mocha, and the whole driver was run standalone and once more through the recorder
+  (`ORACLE_SOURCE=gaps`, ops recorded cleanly including the new `ModelFile.getImportURI`). The full
+  `record-all.sh` + `coverage.sh` pipeline (unit+data+conformance+gaps, ~1,300 mocha processes plus an nyc
+  replay of the whole corpus) was **not** re-run in the fix-up pass — `self-check.js` alone, a lighter
+  replay-only job, took over 20 minutes against the current 15,214-fixture corpus — so the coverage numbers
+  in the table above are still the pre-fix-up ones, and branches marked closed above are not yet
+  re-confirmed through nyc. See `coverage_gaps_fixup_2026_09_24` in `coverage-gaps.json` for the full
+  accounting.
 
 A few remaining gaps are not stub-only but structurally unrecordable by this oracle and are not P2-10's to
 lift either:
@@ -260,17 +292,19 @@ lift either:
 
 ### Judge self-check
 
-`results/self-check.json` (`bin/self-check.js`): every seeded mutant is detected.
+`results/self-check.json` (`bin/self-check.js`): re-run in the P2-11 fix-up pass against the current
+15,214-fixture corpus (baseline 15,214/15,214 pass, 0 fail, 0 harness errors — up from the 15,037 recorded
+before this task added the `gaps` source); every seeded mutant is still detected.
 
 | Mutant | Kind | Fixtures that flag it |
 |---|---|---:|
-| error-message-changed: IllegalModelException messages gain a full stop | adapter wrapper | 606 |
-| verdict-flipped: `validateModelFiles` succeeds where the reference throws and vice versa | adapter wrapper | 383 |
-| identifier-check-dropped: `ModelUtil.isValidIdentifier` always true | in-engine patch | 2 |
+| error-message-changed: IllegalModelException messages gain a full stop | adapter wrapper | 621 |
+| verdict-flipped: `validateModelFiles` succeeds where the reference throws and vice versa | adapter wrapper | 385 |
+| identifier-check-dropped: `ModelUtil.isValidIdentifier` always true | in-engine patch | 4 |
 | abstract-check-dropped: `ClassDeclaration.isAbstract` always false | in-engine patch | 178 |
 | canonical-result-altered: `Serializer.toJSON` results lose `$class` | adapter wrapper | 1,619 |
 | error-class-swapped: TypeNotFoundException reported as Error | adapter wrapper | 272 |
-| optional-field-rule-dropped: `Property.isOptional` always true | in-engine patch | 11,134 |
+| optional-field-rule-dropped: `Property.isOptional` always true | in-engine patch | 11,136 |
 | datetime-shifted: DateTime values serialised 1 ms late | in-engine patch | 584 |
 
 Harness checks, all reported as `harness-error`: a fixture whose input blob is missing, a fixture without

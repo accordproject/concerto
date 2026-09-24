@@ -30,7 +30,9 @@ const { SRC_ROOT } = require('../lib/core');
 const S = (m) => require(path.join(SRC_ROOT, m));
 const { ModelManager } = S('modelmanager');
 const { Factory } = S('factory');
+const { Serializer } = S('serializer');
 const ModelUtil = S('modelutil').default || S('modelutil').ModelUtil;
+const dayjs = require('dayjs');
 
 const attempt = (f) => {
     try {
@@ -376,12 +378,16 @@ concept Leaf extends Mid {
 
     describe('modelutil.ts: isAssignableTo() cannot find the type', () => {
         it('throws when the candidate type does not exist in the model file', () => {
-            const cto = 'namespace gaps.assign@1.0.0\nconcept C {\n  o String s\n}\n';
+            // The property's own type must be non-primitive: isAssignableTo
+            // short-circuits on isPrimitiveType(propertyTypeName) before it
+            // ever calls modelFile.getType(), so a String-typed property (as
+            // used here previously) can never reach that call.
+            const cto = 'namespace gaps.assign@1.0.0\nconcept D {\n  o String x\n}\nconcept C {\n  o D d\n}\n';
             const mm = new ModelManager();
             mm.addCTOModel(cto, 'assign.cto', true);
             const decl = mm.getType('gaps.assign@1.0.0.C');
             const modelFile = decl.getModelFile();
-            const property = decl.getProperty('s');
+            const property = decl.getProperty('d');
             attempt(() => ModelUtil.isAssignableTo(modelFile, 'gaps.assign@1.0.0.NoSuchType', property));
         });
     });
@@ -427,6 +433,19 @@ concept Leaf extends Mid {
             attempt(() => mm.getModels({ includeExternalModels: false }));
         });
 
+        // ModelFile.isExternal() is set purely from the fileName ('@'-prefixed)
+        // passed to addCTOModel, with no need to route through the async
+        // updateExternalModels/FileDownloader path: this reaches the
+        // isExternal() && !includeExternalModels branch in getModels() on a
+        // synchronously-added model file.
+        it('getModels({ includeExternalModels: false }) skips a model file named like an external dependency', () => {
+            const cto = 'namespace gaps.gmext@1.0.0\nconcept C {\n  o String s\n}\n';
+            const mm = new ModelManager();
+            mm.addCTOModel(cto, '@gmext.cto', true);
+            attempt(() => mm.getModels({ includeExternalModels: false }));
+            attempt(() => mm.getModels({ includeExternalModels: true }));
+        });
+
         it('filter() skips system model files and drops emptied model files', () => {
             const cto1 = 'namespace gaps.filter1@1.0.0\nconcept Keep {\n  o String s\n}\n';
             const cto2 = 'namespace gaps.filter2@1.0.0\nconcept Drop {\n  o String s\n}\n';
@@ -434,6 +453,277 @@ concept Leaf extends Mid {
             mm.addCTOModel(cto1, 'f1.cto', true);
             mm.addCTOModel(cto2, 'f2.cto', true);
             attempt(() => mm.filter((decl) => decl.getNamespace() === 'gaps.filter1@1.0.0'));
+        });
+    });
+
+    describe('modelfile.ts: fromAst edge cases (namespace identifier, wildcard import)', () => {
+        // Both branches below are exercised in the unit suite only by
+        // sandbox.stub(Parser, 'parse') returning a hand-built AST (see
+        // test/introspect/modelfile.js). That stubs an *external*
+        // collaborator (the CTO parser), not concerto-core itself, so the
+        // same crafted AST reaches the identical code path here via the
+        // public ModelManager.fromAst op, with no stub at all.
+        it('fromAst rejects a namespace part that is not a valid identifier', () => {
+            const cto = 'namespace gaps.badns@1.0.0\nconcept C {\n  o String s\n}\n';
+            const model = astFor(cto, 'gaps.badns@1.0.0');
+            const m = clone(model);
+            m.namespace = 'gaps.bad-ns@1.0.0';
+            const mm = new ModelManager();
+            attempt(() => mm.fromAst({ $class: `${MM1}.Models`, models: [m] }, { disableValidation: true }));
+        });
+
+        it('fromAst rejects a wildcard (ImportAll) import', () => {
+            const cto = 'namespace gaps.wildcard@1.0.0\nconcept C {\n  o String s\n}\n';
+            const model = astFor(cto, 'gaps.wildcard@1.0.0');
+            const m = clone(model);
+            m.imports = (m.imports || []).concat([{
+                $class: `${MM1}.ImportAll`,
+                namespace: 'gaps.wildcardtarget@1.0.0',
+                uri: 'https://example.invalid/model.cto',
+            }]);
+            const mm = new ModelManager();
+            attempt(() => mm.fromAst({ $class: `${MM1}.Models`, models: [m] }, { disableValidation: true }));
+        });
+    });
+
+    describe('modelfile.ts: getFullyQualifiedTypeName / getType / getImportURI on a real registered ModelFile', () => {
+        const target = 'namespace gaps.gfqtn.target@1.0.0\nconcept Foo {\n  o String s\n}\n';
+        const cto = `namespace gaps.gfqtn@1.0.0
+import gaps.gfqtn.target@1.0.0.{Foo}
+
+concept Bar {
+  o Foo foo
+}
+`;
+        it('getFullyQualifiedTypeName resolves an imported type and returns null for an unknown one', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(target, 'target.cto', true);
+            mm.addCTOModel(cto, 'gfqtn.cto', true);
+            const modelFile = mm.getModelFile('gaps.gfqtn@1.0.0');
+            attempt(() => modelFile.getFullyQualifiedTypeName('Foo'));
+            attempt(() => modelFile.getFullyQualifiedTypeName('NoSuchLocalOrImportedType'));
+        });
+
+        it('getType returns null when an imported type\'s namespace has no registered ModelFile', () => {
+            // Validation is disabled, so the import target namespace is
+            // never added to this model manager: resolveImport() still
+            // resolves the short name (it only reads this file's own
+            // import table), but getModelManager().getModelFile(ns) for
+            // that namespace comes back falsy.
+            const cto2 = `namespace gaps.gettype@1.0.0
+import gaps.gettype.missing@1.0.0.{Foo}
+
+concept Bar {
+  o Foo foo
+}
+`;
+            const mm = new ModelManager();
+            mm.addCTOModel(cto2, 'gettype.cto', true);
+            const modelFile = mm.getModelFile('gaps.gettype@1.0.0');
+            attempt(() => modelFile.getType('Foo'));
+        });
+
+        it('getImportURI resolves an import URI and returns null for a non-imported name', () => {
+            const importer = `namespace gaps.importuri@1.0.0
+import gaps.importuri.target@1.0.0.{Foo} from https://example.invalid/target.cto
+
+concept Bar {
+  o Foo foo
+}
+`;
+            const mm = new ModelManager();
+            mm.addCTOModel(target.replace(/gfqtn/g, 'importuri'), 'target2.cto', true);
+            mm.addCTOModel(importer, 'importuri.cto', true);
+            const modelFile = mm.getModelFile('gaps.importuri@1.0.0');
+            attempt(() => modelFile.getImportURI('gaps.importuri.target@1.0.0.Foo'));
+            attempt(() => modelFile.getImportURI('gaps.importuri@1.0.0.NotImported'));
+        });
+    });
+
+    describe('classdeclaration.ts: process() rejects an unrecognized property $class (via mutated AST)', () => {
+        it('throws for a property whose $class is not a known property kind', () => {
+            const cto = 'namespace gaps.badprop@1.0.0\nconcept C {\n  o String s\n}\n';
+            const model = astFor(cto, 'gaps.badprop@1.0.0');
+            const m = clone(model);
+            m.declarations[0].properties[0].$class = `${MM1}.BogusProperty`;
+            const mm = new ModelManager();
+            attempt(() => mm.fromAst({ $class: `${MM1}.Models`, models: [m] }, { disableValidation: true }));
+        });
+    });
+
+    describe('scalardeclaration.ts: DateTimeScalar type detection', () => {
+        it('a scalar extending DateTime gets type "DateTime"', () => {
+            const cto = 'namespace gaps.dtscalar@1.0.0\nscalar TS extends DateTime\n';
+            const mm = new ModelManager();
+            attempt(() => mm.addCTOModel(cto, 'dtscalar.cto', true));
+        });
+    });
+
+    describe('jsonpopulator.ts: constructor options via Serializer.fromJSON', () => {
+        // Serializer.fromJSON passes options.strictQualifiedDateTimes and
+        // options.acceptResourcesForRelationships straight through to `new
+        // JSONPopulator(...)` (src/serializer.ts): the unit suite's
+        // JSONPopulator tests construct it directly instead (`new
+        // JSONPopulator(true)`, `new JSONPopulator(false, false, 0,
+        // false)`), but the same constructor branches are reachable here
+        // through the public op with no stub at all.
+        const cto = 'namespace gaps.jsonpop@1.0.0\nconcept C {\n  o DateTime d optional\n}\n';
+        it('strictQualifiedDateTimes default vs explicit true/false', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto, 'jsonpop.cto', true);
+            const serializer = new Serializer(new Factory(mm), mm);
+            attempt(() => serializer.fromJSON({ $class: 'gaps.jsonpop@1.0.0.C', d: '2020-01-01T00:00:00Z' }));
+            attempt(() => serializer.fromJSON({ $class: 'gaps.jsonpop@1.0.0.C', d: '2020-01-01T00:00:00Z' }, { strictQualifiedDateTimes: true }));
+            attempt(() => serializer.fromJSON({ $class: 'gaps.jsonpop@1.0.0.C', d: '2020-01-01' }, { strictQualifiedDateTimes: false }));
+        });
+    });
+
+    describe('jsonpopulator.ts / jsongenerator.ts: convertToObject/convertItem/visitField/visitRelationshipDeclaration via Serializer.fromJSON/toJSON', () => {
+        // The unit suite's tests for these branches build a JSONPopulator or
+        // JSONGenerator directly (`new JSONPopulator(true)`, etc.) and drive
+        // it with jsonStack/resourceStack pushed by hand. But visitField,
+        // convertItem, convertToObject and visitRelationshipDeclaration are
+        // the same code whichever way they are entered, and
+        // Serializer.fromJSON/toJSON is the public, wrapped way in: real
+        // model, real Factory, real ModelManager, no stub.
+        const cto = `namespace gaps.jsonpop3@1.0.0
+
+concept Inner {
+  o String s
+}
+concept Root identified by id {
+  o String id
+  o DateTime dt optional
+  o Integer i optional
+  o Long l optional
+  o Double d optional
+  o Boolean b optional
+  o String s optional
+  o Inner inner optional
+  o Inner[] items optional
+  o String[] tags optional
+  --> Inner rel optional
+  --> Inner[] rels optional
+}
+`;
+        /**
+         * Builds a fresh ModelManager (with the `cto` model above) and a
+         * Serializer over it.
+         * @param {object} [options] - Serializer options, passed straight
+         * through to the JSONPopulator/JSONGenerator constructors.
+         * @returns {{mm: object, serializer: object}} the pair.
+         */
+        function newSerializer(options) {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto, 'jsonpop3.cto', true);
+            return { mm, serializer: new Serializer(new Factory(mm), mm, options) };
+        }
+
+        it('convertToObject: wrong-typed scalar values for every primitive branch', () => {
+            const { serializer } = newSerializer();
+            const base = { $class: 'gaps.jsonpop3@1.0.0.Root', id: 'r1' };
+            const bad = [
+                { i: 'not-a-number' }, { i: 1.5 }, { l: 'not-a-number' }, { l: 1.5 },
+                { d: 'not-a-number' }, { b: 'not-a-boolean' }, { s: 42 },
+                { dt: 42 }, { dt: '2020-01-01T00:00:00Z' }, { dt: 'not-a-date' },
+                { dt: '2020-01-01T00:00:00.000Z' },
+            ];
+            for (const patch of bad) {
+                attempt(() => serializer.fromJSON(Object.assign({}, base, patch)));
+            }
+        });
+
+        it('convertItem/visitField: array vs non-array mismatches, and $class fallback for sub-resources', () => {
+            const { serializer } = newSerializer();
+            const base = { $class: 'gaps.jsonpop3@1.0.0.Root', id: 'r2' };
+            attempt(() => serializer.fromJSON(Object.assign({}, base, { items: 'not-an-array' })));
+            attempt(() => serializer.fromJSON(Object.assign({}, base, { tags: 'not-an-array' })));
+            attempt(() => serializer.fromJSON(Object.assign({}, base, {
+                inner: { s: 'x' }, // no $class: falls back to the field's own type
+            })));
+            attempt(() => serializer.fromJSON(Object.assign({}, base, {
+                inner: { $class: 'gaps.jsonpop3@1.0.0.Inner', s: 'x' },
+            })));
+            attempt(() => serializer.fromJSON(Object.assign({}, base, {
+                items: [{ s: 'x' }, { $class: 'gaps.jsonpop3@1.0.0.Inner', s: 'y' }],
+            })));
+        });
+
+        it('visitRelationshipDeclaration: array/non-array, string URI vs object, $class-less object, acceptResourcesForRelationships on/off', () => {
+            const base = { $class: 'gaps.jsonpop3@1.0.0.Root', id: 'r3' };
+            for (const acceptResourcesForRelationships of [true, false]) {
+                const { serializer } = newSerializer({ acceptResourcesForRelationships });
+                attempt(() => serializer.fromJSON(Object.assign({}, base, {
+                    rel: 'resource:gaps.jsonpop3@1.0.0.Inner#i1',
+                })));
+                attempt(() => serializer.fromJSON(Object.assign({}, base, {
+                    rel: { $class: 'gaps.jsonpop3@1.0.0.Inner', s: 'x' },
+                })));
+                attempt(() => serializer.fromJSON(Object.assign({}, base, {
+                    rel: { s: 'x' }, // object with no $class
+                })));
+                attempt(() => serializer.fromJSON(Object.assign({}, base, {
+                    rels: 'not-an-array',
+                })));
+                attempt(() => serializer.fromJSON(Object.assign({}, base, {
+                    rels: [
+                        'resource:gaps.jsonpop3@1.0.0.Inner#i2',
+                        { $class: 'gaps.jsonpop3@1.0.0.Inner', s: 'y' },
+                        { s: 'z' }, // object with no $class, inside the array
+                    ],
+                })));
+            }
+        });
+
+        it('toJSON: the JSONGenerator side of the same model (arrays, relationships, DateTime, optional fields absent)', () => {
+            const { mm, serializer } = newSerializer();
+            const factory = new Factory(mm);
+            const resource = attempt(() => factory.newResource('gaps.jsonpop3@1.0.0', 'Root', 'r4'));
+            if (resource) {
+                attempt(() => serializer.toJSON(resource));
+                resource.dt = dayjs();
+                resource.i = 1;
+                resource.l = 2;
+                resource.d = 1.5;
+                resource.b = true;
+                resource.s = 'x';
+                attempt(() => serializer.toJSON(resource));
+            }
+        });
+    });
+
+    describe('resourcevalidator.ts: undeclared field, empty identifier, abstract-superType assignment via a real Resource', () => {
+        // A Resource is a dynamic, plain-property object: setting an
+        // undeclared property directly, or clearing the identifying field,
+        // is itself a public, black-box operation on an object obtained
+        // from Factory.newResource. No stub of ResourceValidator, Field or
+        // ClassDeclaration is needed to reach these checks.
+        const cto = `namespace gaps.rv@1.0.0
+concept C identified by id {
+  o String id
+  o String s optional
+}
+`;
+        it('Resource.validate() rejects a property that is not declared on the class', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto, 'rv.cto', true);
+            const factory = new Factory(mm);
+            const r = attempt(() => factory.newResource('gaps.rv@1.0.0', 'C', 'r1'));
+            if (r) {
+                r.extra = 'bogus';
+                attempt(() => r.validate());
+            }
+        });
+
+        it('Resource.validate() rejects an empty identifier', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto, 'rv.cto', true);
+            const factory = new Factory(mm);
+            const r = attempt(() => factory.newResource('gaps.rv@1.0.0', 'C', 'r2'));
+            if (r) {
+                r.id = '';
+                attempt(() => r.validate());
+            }
         });
     });
 
@@ -451,6 +741,8 @@ concept Strings {
   o String maxOnly length=[,10]
   o String narrow length=[3,5]
   o String wide length=[1,20]
+  o String hiMin length=[5,20]
+  o String loMax length=[1,10]
 }
 concept Numbers {
   o Integer same1 range=[1,10]
@@ -459,6 +751,18 @@ concept Numbers {
   o Integer maxOnly range=[,10]
   o Integer narrow range=[3,5]
   o Integer wide range=[1,20]
+  o Integer hiLower range=[5,20]
+  o Integer loUpper range=[1,10]
+}
+concept Collections {
+  o String[] same1 size=[1,10]
+  o String[] same2 size=[1,10]
+  o String[] minOnly size=[1,]
+  o String[] maxOnly size=[,10]
+  o String[] narrow size=[3,5]
+  o String[] wide size=[1,20]
+  o String[] hiMin size=[5,20]
+  o String[] loMax size=[1,10]
 }
 `;
         it('StringValidator.compatibleWith across pattern/flags/length combinations', () => {
@@ -470,6 +774,12 @@ concept Numbers {
                 ['same1', 'same2'], ['same1', 'diffPattern'], ['same1', 'diffFlags'],
                 ['bothNullLen', 'minOnly'], ['minOnly', 'bothNullLen'], ['bothNullLen', 'bothNullLen'],
                 ['minOnly', 'maxOnly'], ['maxOnly', 'minOnly'], ['narrow', 'wide'], ['wide', 'narrow'],
+                // narrow/wide only ever trips the minLength check (in one
+                // direction or the other), so the `thisMaxLength >
+                // otherMaxLength` branch is never reached by either pair:
+                // hiMin (min 5, max 20) vs loMax (min 1, max 10) clears the
+                // minLength check (5 is not < 1) and then trips it.
+                ['hiMin', 'loMax'],
             ];
             for (const [a, b] of pairs) {
                 attempt(() => v(a).compatibleWith(v(b)));
@@ -479,6 +789,13 @@ concept Numbers {
             numMm.addCTOModel(cto, 'validators2.cto', true);
             const numDecl = numMm.getType('gaps.validators@1.0.0.Numbers');
             attempt(() => v('same1').compatibleWith(numDecl.getProperty('same1').getValidator()));
+
+            // StringValidator.validate() directly, on real Validators owned
+            // by real Fields: below/above each bound, and a regex mismatch.
+            attempt(() => v('same1').validate('id', 'a'.repeat(11)));
+            attempt(() => v('same1').validate('id', ''));
+            attempt(() => v('same1').validate('id', 'zzz'));
+            attempt(() => v('same1').validate('id', null));
         });
 
         it('NumberValidator.compatibleWith across bound combinations, and default-value bound checks', () => {
@@ -489,6 +806,11 @@ concept Numbers {
             const pairs = [
                 ['same1', 'same2'], ['minOnly', 'maxOnly'], ['maxOnly', 'minOnly'],
                 ['narrow', 'wide'], ['wide', 'narrow'], ['minOnly', 'minOnly'],
+                // As with StringValidator above, narrow/wide only ever trips
+                // the lowerBound check; hiLower (lower 5, upper 20) vs
+                // loUpper (lower 1, upper 10) clears it (5 is not < 1) and
+                // then trips the upperBound check (20 > 10).
+                ['hiLower', 'loUpper'],
             ];
             for (const [a, b] of pairs) {
                 attempt(() => v(a).compatibleWith(v(b)));
@@ -496,6 +818,34 @@ concept Numbers {
             attempt(() => v('same1').compatibleWith(null));
             const strMm = new ModelManager();
             strMm.addCTOModel(cto, 'validators4.cto', true);
+            const strDecl = strMm.getType('gaps.validators@1.0.0.Strings');
+            attempt(() => v('same1').compatibleWith(strDecl.getProperty('same1').getValidator()));
+
+            // NumberValidator.validate() directly, on a real Validator owned
+            // by a real Field: below and above the bound.
+            attempt(() => v('same1').validate('id', 0));
+            attempt(() => v('same1').validate('id', 11));
+            attempt(() => v('same1').validate('id', null));
+        });
+
+        it('CollectionSizeValidator.compatibleWith across bound combinations', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto, 'validators5.cto', true);
+            const decl = mm.getType('gaps.validators@1.0.0.Collections');
+            // Collection size bounds live on Property.getSizeValidator(),
+            // not the Field.getValidator() used by String/Number above.
+            const v = (name) => decl.getProperty(name).getSizeValidator();
+            const pairs = [
+                ['same1', 'same2'], ['minOnly', 'maxOnly'], ['maxOnly', 'minOnly'],
+                ['narrow', 'wide'], ['wide', 'narrow'], ['minOnly', 'minOnly'],
+                ['hiMin', 'loMax'],
+            ];
+            for (const [a, b] of pairs) {
+                attempt(() => v(a).compatibleWith(v(b)));
+            }
+            attempt(() => v('same1').compatibleWith(null));
+            const strMm = new ModelManager();
+            strMm.addCTOModel(cto, 'validators6.cto', true);
             const strDecl = strMm.getType('gaps.validators@1.0.0.Strings');
             attempt(() => v('same1').compatibleWith(strDecl.getProperty('same1').getValidator()));
         });
@@ -560,6 +910,18 @@ concept Numbers {
             attempt(() => {
                 const mm = new ModelManager();
                 mm.fromAst({ $class: `${MM1}.Models`, models: [minOnly] }, { disableValidation: true });
+            });
+
+            // CTO's own `length=[1,]`/`length=[,10]` syntax leaves the
+            // missing bound `undefined`, not `null` (confirmed empirically),
+            // so it can never trip the `this.minLength === null ||
+            // this.maxLength === null` branch below -- only an AST with an
+            // explicit JSON `null` for exactly one bound can.
+            const explicitNullMin = clone(model);
+            explicitNullMin.declarations[0].properties[0].lengthValidator.minLength = null;
+            attempt(() => {
+                const mm = new ModelManager();
+                mm.fromAst({ $class: `${MM1}.Models`, models: [explicitNullMin] }, { disableValidation: true });
             });
 
             const badRegexCto = 'namespace gaps.strv2@1.0.0\nconcept C {\n  o String s\n}\n';
