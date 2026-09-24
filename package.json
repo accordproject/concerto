@@ -21,6 +21,7 @@
     "packages/concerto-util",
     "packages/concerto-cto",
     "packages/concerto-core",
+    "packages/concerto-engine",
     "packages/concerto-linter/default-ruleset",
     "packages/concerto-analysis",
     "packages/concertino",
