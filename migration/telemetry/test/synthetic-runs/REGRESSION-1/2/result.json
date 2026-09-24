@@ -1,0 +1,18 @@
+{
+  "task": "REGRESSION-1",
+  "attempt": 2,
+  "label": "synthetic fixture",
+  "recordedAt": "2026-01-01T01:54:00.000Z",
+  "summary": { "total": 2, "passed": 1, "failed": 1, "pending": 0 },
+  "tests": [
+    {
+      "suite": "mocha",
+      "fullTitle": "Foo::testA",
+      "title": "testA",
+      "status": "fail",
+      "errorMessage": "Expected 1 to equal 2",
+      "signature": "sigREGR001"
+    },
+    { "suite": "mocha", "fullTitle": "Foo::testB", "title": "testB", "status": "pass" }
+  ]
+}
