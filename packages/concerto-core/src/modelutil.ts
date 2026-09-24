@@ -27,6 +27,25 @@ import Globalize from './globalize';
 import type ModelFile from './introspect/modelfile';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// Its bindings are typed `never` so that a view leaves the member's inferred
+// return type, and so the .d.ts, exactly as the TS body makes it.
+//
+// dist/ does not ship src/engine/ (OD-11), so a bundler of dist/ must never
+// see a specifier it would resolve: `loadEngine` takes a non-literal one
+// (esbuild, rollup and browserify leave it alone), and webpack folds the
+// `typeof __webpack_require__` test and keeps only the dead-in-Node
+// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
+// bundles exactly as before (PORTING.md 1.5).
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
+
 const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
 
 const privateReservedProperties = [
@@ -73,6 +92,10 @@ class ModelUtil {
      * @return {string} - the string after the last dot
      */
     static getShortName(fqn) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilGetShortName(fqn);
+        }
         let result = fqn;
         let dotIndex = fqn.lastIndexOf('.');
         if (dotIndex > -1) {
@@ -89,6 +112,10 @@ class ModelUtil {
      * or the empty string if there is no dot
      */
     static getNamespace(fqn) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilGetNamespace(fqn);
+        }
         if (!fqn) {
             throw new Error(Globalize.formatMessage('modelutil-getnamespace-nofnq'));
         }
@@ -120,6 +147,10 @@ class ModelUtil {
      * @returns {ParseNamespaceResult} the result of parsing
      */
     static parseNamespace(ns: string, options?: { disableVersionParsing?: boolean }) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilParseNamespace(ns, options);
+        }
         if(!ns) {
             throw new Error('Namespace is null or undefined.');
         }
@@ -159,6 +190,10 @@ class ModelUtil {
      * @private
      */
     static importFullyQualifiedNames(imp) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilImportFullyQualifiedNames(imp);
+        }
         return MetaModelUtil.importFullyQualifiedNames(imp);
     }
 
@@ -169,6 +204,10 @@ class ModelUtil {
      * @private
      */
     static isPrimitiveType(typeName) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsPrimitiveType(typeName);
+        }
         const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
         return (primitiveTypes.indexOf(typeName) >= 0);
     }
@@ -184,6 +223,10 @@ class ModelUtil {
      * @private
      */
     static isAssignableTo(modelFile, typeName, property) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsAssignableTo(modelFile, typeName, property);
+        }
         const propertyTypeName = property.getFullyQualifiedTypeName();
 
         const isDirectMatch = (typeName === propertyTypeName);
@@ -207,6 +250,10 @@ class ModelUtil {
      * @private
      */
     static capitalizeFirstLetter(string) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilCapitalizeFirstLetter(string);
+        }
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
@@ -217,6 +264,10 @@ class ModelUtil {
      * @private
      */
     static isEnum(field) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsEnum(field);
+        }
         const modelFile = field.getParent().getModelFile();
         const typeDeclaration = modelFile.getType(field.getType());
         return typeDeclaration?.isEnum();
@@ -229,6 +280,10 @@ class ModelUtil {
      * @private
      */
     static isMap(field) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsMap(field);
+        }
         const modelFile = field.getParent().getModelFile();
         const typeDeclaration = modelFile.getType(field.getType());
         return typeDeclaration?.isMapDeclaration?.();
@@ -241,6 +296,10 @@ class ModelUtil {
      * @private
      */
     static isScalar(field) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsScalar(field);
+        }
         const modelFile = field.getParent().getModelFile();
         const declaration = modelFile.getType(field.getType());
         return declaration?.isScalarDeclaration?.();
@@ -252,6 +311,10 @@ class ModelUtil {
      * @returns {boolean} true if the identifier is valid.
      */
     static isValidIdentifier(name: string | undefined): name is string {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsValidIdentifier(name);
+        }
         return ID_REGEX.test(name as string);
     }
 
@@ -262,6 +325,10 @@ class ModelUtil {
      * @returns {string} the fully qualified type name.
      */
     static getFullyQualifiedName(namespace, type) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilGetFullyQualifiedName(namespace, type);
+        }
         if (namespace) {
             return `${namespace}.${type}`;
         } else {
@@ -276,6 +343,10 @@ class ModelUtil {
      * @returns {string} the fully qualified name minus the namespace version
      */
     static removeNamespaceVersionFromFullyQualifiedName(fqn) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilRemoveNamespaceVersionFromFullyQualifiedName(fqn);
+        }
         if(ModelUtil.isPrimitiveType(fqn)) {
             return fqn;
         }
@@ -293,6 +364,10 @@ class ModelUtil {
      * @private
      */
     static isSystemProperty(propertyName) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsSystemProperty(propertyName);
+        }
         return reservedProperties.includes(propertyName);
     }
 
@@ -304,6 +379,10 @@ class ModelUtil {
      * @private
      */
     static isPrivateSystemProperty(propertyName) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsPrivateSystemProperty(propertyName);
+        }
         return privateReservedProperties.includes(propertyName);
     }
 
@@ -314,6 +393,10 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key
     */
     static isValidMapKey(key) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsValidMapKey(key);
+        }
         return [
             `${MetaModelNamespace}.StringMapKeyType`,
             `${MetaModelNamespace}.DateTimeMapKeyType`,
@@ -328,6 +411,10 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
     static isValidMapKeyScalar(decl) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsValidMapKeyScalar(decl);
+        }
         return (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.StringScalar`)  ||
         (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.DateTimeScalar`);
     }
@@ -339,6 +426,10 @@ class ModelUtil {
      * @return {boolean} true if the Value is a valid Map Value
      */
     static isValidMapValue(value) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsValidMapValue(value);
+        }
         return [
             `${MetaModelNamespace}.BooleanMapValueType`,
             `${MetaModelNamespace}.DateTimeMapValueType`,
