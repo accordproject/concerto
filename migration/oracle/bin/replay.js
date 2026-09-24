@@ -100,18 +100,23 @@ const filter = (f) => {
     }
     return true;
 };
-const t0 = Date.now();
-const summary = replayCorpus(opts.fixtures, adapter, store, { filter });
-summary.seconds = Math.round((Date.now() - t0) / 100) / 10;
-const allFailures = summary.failures;
-summary.failures = allFailures.slice(0, opts.maxFailures);
-summary.failures_truncated = allFailures.length > opts.maxFailures;
-if (opts.report) {
-    fs.mkdirSync(path.dirname(opts.report), { recursive: true });
-    fs.writeFileSync(opts.report, JSON.stringify(Object.assign({}, summary, { failures: allFailures }), null, 1) + '\n');
-}
-out(`engine=${summary.engine} total=${summary.total} pass=${summary.pass} fail=${summary.fail} harness_error=${summary.harness_error} agreement=${summary.agreement_pct}% (${summary.seconds}s)`);
-for (const f of summary.failures.slice(0, 10)) {
-    out(`ERROR ${f.status} ${f.op} ${f.file}: ${f.detail}`);
-}
-process.exitCode = summary.pass === summary.total && summary.total > 0 ? 0 : 1;
+(async () => {
+    const t0 = Date.now();
+    const summary = await replayCorpus(opts.fixtures, adapter, store, { filter });
+    summary.seconds = Math.round((Date.now() - t0) / 100) / 10;
+    const allFailures = summary.failures;
+    summary.failures = allFailures.slice(0, opts.maxFailures);
+    summary.failures_truncated = allFailures.length > opts.maxFailures;
+    if (opts.report) {
+        fs.mkdirSync(path.dirname(opts.report), { recursive: true });
+        fs.writeFileSync(opts.report, JSON.stringify(Object.assign({}, summary, { failures: allFailures }), null, 1) + '\n');
+    }
+    out(`engine=${summary.engine} total=${summary.total} pass=${summary.pass} fail=${summary.fail} harness_error=${summary.harness_error} agreement=${summary.agreement_pct}% (${summary.seconds}s)`);
+    for (const f of summary.failures.slice(0, 10)) {
+        out(`ERROR ${f.status} ${f.op} ${f.file}: ${f.detail}`);
+    }
+    process.exitCode = summary.pass === summary.total && summary.total > 0 ? 0 : 1;
+})().catch((e) => {
+    out('ERROR replay: ' + (e && e.stack || e));
+    process.exitCode = 1;
+});

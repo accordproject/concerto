@@ -23,7 +23,8 @@
  *
  *   inputs  (decodable):  undefined, number, bigint, date, regexp, map, set,
  *                         dayjs, mm, mmref, self, mfref, mfnew, declref,
- *                         propref, factory, serializer, typed, blob
+ *                         declnew, propref, factory, serializer, typed, blob,
+ *                         predicate, decoratorfactory
  *   outputs (summaries):  the same scalar kinds plus ModelManager, ModelFile,
  *                         Declaration, Property, typed (without handles),
  *                         object, function
@@ -36,6 +37,7 @@
  */
 
 const M = '@@oracle';
+const encodable = require('./encodable');
 
 /** Thrown when a value cannot be expressed as plain data. */
 class NonPlain extends Error {
@@ -221,6 +223,8 @@ function encodePlain(v, stack = new Set()) {
  * The tracker supplies what was observed at construction time:
  *   tracker.mmRecipe(mm)  -> {kind, options, derived, steps, tainted} | null
  *   tracker.mfRecipe(mf)  -> {mm, ast, definitions, fileName} | null
+ *   tracker.declRecipe(d) -> {cls, mf, ast} | null   (optional; declarations
+ *                            built by a recorded constructor op)
  *
  * @param {object} core module set (lib/core.js)
  * @param {object} tracker recorder tracker
@@ -296,6 +300,13 @@ function makeInputEncoder(core, tracker) {
         const all = mf.getAllDeclarations();
         const idx = Array.isArray(all) ? all.indexOf(d) : -1;
         if (idx < 0) {
+            // A declaration built by a recorded constructor op (task
+            // accordproject/concerto-rust#94: ScalarDeclaration.new) is
+            // rebuilt from its model file and AST.
+            const r = typeof tracker.declRecipe === 'function' ? tracker.declRecipe(d) : null;
+            if (r && r.mf === mf) {
+                return { [M]: 'declnew', cls: r.cls, mf: encMF(mf, ctx), ast: r.ast };
+            }
             throw new NonPlain('declaration-not-in-modelfile');
         }
         return { [M]: 'declref', mf: encMF(mf, ctx), index: idx, name: d.getName() };
@@ -386,6 +397,12 @@ function makeInputEncoder(core, tracker) {
             return v;
         }
         if (typeof v === 'function') {
+            // A predicate built by lib/encodable.js (task
+            // accordproject/concerto-rust#94); any other function is code.
+            const enc = encodable.encodingOf(v);
+            if (enc && enc[M] === 'predicate') {
+                return enc;
+            }
             throw new NonPlain(isSinonProxy(v) ? 'sinon-function' : 'function');
         }
         if (typeof v === 'symbol') {
@@ -491,6 +508,18 @@ function makeInputEncoder(core, tracker) {
                     factory: enc(v.factory),
                     defaultOptions: enc(v.defaultOptions),
                 };
+            }
+            if (core.DecoratorFactory && v instanceof core.DecoratorFactory) {
+                // task accordproject/concerto-rust#94: a factory built by
+                // lib/encodable.js, or the exported base class itself.
+                const encF = encodable.encodingOf(v);
+                if (encF && encF[M] === 'decoratorfactory') {
+                    return encF;
+                }
+                if (Object.getPrototypeOf(v) === core.DecoratorFactory.prototype && Object.getOwnPropertyNames(v).length === 0) {
+                    return { [M]: 'decoratorfactory', kind: 'base' };
+                }
+                throw new NonPlain('decoratorfactory:' + ((v.constructor && v.constructor.name) || 'Object'));
             }
             throw new NonPlain('instance:' + ((v.constructor && v.constructor.name) || 'Object'));
         } finally {
@@ -735,6 +764,13 @@ function makeDecoder(core, runDerived) {
     };
 
     const decodeDecl = (node, dctx) => {
+        if (node && node[M] === 'declnew') {
+            const Cls = { ScalarDeclaration: core.ScalarDeclaration }[node.cls];
+            if (!Cls) {
+                throw new HarnessError('unknown declnew class ' + node.cls);
+            }
+            return new Cls(decodeMF(node.mf, dctx), decode(node.ast, dctx));
+        }
         const mf = decodeMF(node.mf, dctx);
         const d = mf.getAllDeclarations()[node.index];
         if (!d || d.getName() !== node.name) {
@@ -821,7 +857,11 @@ function makeDecoder(core, runDerived) {
         case 'mfref':
         case 'mfnew':
             return decodeMF(v, dctx);
-        case 'declref': return decodeDecl(v, dctx);
+        case 'declref':
+        case 'declnew':
+            return decodeDecl(v, dctx);
+        case 'predicate': return encodable.buildPredicate(v);
+        case 'decoratorfactory': return encodable.buildDecoratorFactory(core, v);
         case 'propref': {
             const decl = decodeDecl(v.decl, dctx);
             if (v.part === 'key') {

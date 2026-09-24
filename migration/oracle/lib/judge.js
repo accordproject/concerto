@@ -24,6 +24,10 @@
  *                  inputs' state, or the engine does not support the op
  *   harness-error  the fixture or one of its inputs is missing, unreadable or
  *                  malformed; never counted as a pass
+ *
+ * An adapter's run() may return a promise (async ops, task
+ * accordproject/concerto-rust#94); judgeFixture() then returns a promise of
+ * the verdict, and replayCorpus() awaits each fixture in turn.
  */
 
 const fs = require('fs');
@@ -88,7 +92,7 @@ function firstDiff(a, b, p = '$') {
  * @param {string} file fixture path
  * @param {object} adapter engine adapter
  * @param {object} store blob store
- * @returns {{status: string, op: string|null, source: string|null, detail?: string}} verdict
+ * @returns {object|Promise<object>} verdict {status, op, source, detail?}
  */
 function judgeFile(file, adapter, store) {
     let fx;
@@ -105,7 +109,7 @@ function judgeFile(file, adapter, store) {
  * @param {object} fx fixture
  * @param {object} adapter engine adapter
  * @param {object} store blob store
- * @returns {object} verdict
+ * @returns {object|Promise<object>} verdict (a promise when the op is async)
  */
 function judgeFixture(fx, adapter, store) {
     const base = { op: fx && fx.op || null, source: fx && fx.source || null, id: fx && fx.id || null };
@@ -129,9 +133,7 @@ function judgeFixture(fx, adapter, store) {
     waitPastInputInstants(facts);
     let res;
     const start = Date.now();
-    try {
-        res = adapter.run(fx.op, inputs);
-    } catch (e) {
+    const runFailed = (e) => {
         if (e instanceof HarnessError || (e && e.name === 'HarnessError')) {
             return Object.assign(base, { status: 'harness-error', detail: e.message });
         }
@@ -142,8 +144,31 @@ function judgeFixture(fx, adapter, store) {
             return Object.assign(base, { status: 'fail', detail: 'unsupported op: ' + e.message });
         }
         return Object.assign(base, { status: 'fail', detail: 'input construction failed: ' + (e && e.constructor ? e.constructor.name : '') + ': ' + (e && e.message) });
+    };
+    try {
+        res = adapter.run(fx.op, inputs);
+    } catch (e) {
+        return runFailed(e);
     }
-    const end = Date.now();
+    if (res && typeof res.then === 'function') {
+        return Promise.resolve(res).then(
+            (r) => verdictOf(base, r, start, Date.now(), expected, facts),
+            runFailed);
+    }
+    return verdictOf(base, res, start, Date.now(), expected, facts);
+}
+
+/**
+ * Compare an adapter's result with the recorded outcome.
+ * @param {object} base verdict fields {op, source, id}
+ * @param {object} res adapter result {outcome, window?} or a bare outcome
+ * @param {number} start ms before run()
+ * @param {number} end ms after run() (or after its promise settled)
+ * @param {object} expected recorded outcome (blobs resolved)
+ * @param {object} facts facts of the fixture inputs
+ * @returns {object} verdict
+ */
+function verdictOf(base, res, start, end, expected, facts) {
     const outcome = res && res.outcome ? res.outcome : res;
     const window = res && res.window ? res.window : { start, end };
     let actual;
@@ -165,13 +190,16 @@ function judgeFixture(fx, adapter, store) {
  * @param {object} adapter engine adapter
  * @param {object} store blob store
  * @param {object} [opts] {filter: fn(file) -> bool, onVerdict}
- * @returns {object} summary
+ * @returns {Promise<object>} summary
  */
-function replayCorpus(fixturesDir, adapter, store, opts = {}) {
+async function replayCorpus(fixturesDir, adapter, store, opts = {}) {
     const files = listFixtures(fixturesDir).filter(opts.filter || (() => true));
     const summary = { engine: adapter.name, total: 0, pass: 0, fail: 0, harness_error: 0, by_source: {}, by_op: {}, failures: [] };
     for (const f of files) {
-        const v = judgeFile(f, adapter, store);
+        let v = judgeFile(f, adapter, store);
+        if (v && typeof v.then === 'function') {
+            v = await v;
+        }
         summary.total++;
         const key = v.status === 'harness-error' ? 'harness_error' : v.status;
         summary[key]++;

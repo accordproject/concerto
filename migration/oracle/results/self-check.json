@@ -1,8 +1,8 @@
 {
  "fixtures": "fixtures",
  "baseline": {
-  "total": 15794,
-  "pass": 15794,
+  "total": 15850,
+  "pass": 15850,
   "fail": 0,
   "harness_error": 0
  },
@@ -11,7 +11,7 @@
    "name": "error-message-changed",
    "description": "IllegalModelException messages gain a trailing full stop",
    "detected": true,
-   "failing_fixtures": 623,
+   "failing_fixtures": 638,
    "harness_errors": 0,
    "by_op": {
     "ModelFile.new": 3,
@@ -20,7 +20,11 @@
     "DecoratorManager.decorateModels": 225,
     "ModelManager.addModelFiles": 2,
     "ClassDeclaration.getProperties": 1,
+    "ModelLoader.loadModelManager": 1,
+    "ModelLoader.loadModelManagerFromModelFiles": 1,
+    "ModelManager.filter": 6,
     "ModelManager.fromAst": 14,
+    "ScalarDeclaration.new": 7,
     "ClassDeclaration.getNestedProperty": 1,
     "ClassDeclaration.validate": 1,
     "MapDeclaration.validate": 8,
@@ -39,10 +43,10 @@
    "name": "verdict-flipped",
    "description": "validateModelFiles reports success when the reference throws, and vice versa",
    "detected": true,
-   "failing_fixtures": 385,
+   "failing_fixtures": 376,
    "harness_errors": 0,
    "by_op": {
-    "ModelManager.validateModelFiles": 385
+    "ModelManager.validateModelFiles": 376
    },
    "example": {
     "file": "conformance/ModelManager.validateModelFiles/0067c292caa33573dcf9f35e.json",
@@ -95,30 +99,30 @@
     "Serializer.toJSON": 1670
    },
    "example": {
-    "file": "conformance/Serializer.toJSON/09e3d63bd98c6b9f4feab068.json",
-    "detail": "$.ok.$class: expected \"org.acme.test@1.0.0.Person\" got undefined"
+    "file": "conformance/Serializer.toJSON/0825dd5ba870100a74ee27c7.json",
+    "detail": "$.ok.$class: expected \"org.acme.collections@1.0.0.BoundedTags\" got undefined"
    }
   },
   {
    "name": "error-class-swapped",
    "description": "TypeNotFoundException is reported as a plain Error",
    "detected": true,
-   "failing_fixtures": 281,
+   "failing_fixtures": 285,
    "harness_errors": 0,
    "by_op": {
     "Serializer.fromJSON": 212,
     "DecoratorManager.decorateModels": 46,
     "DecoratorManager.jsonToYaml": 2,
     "DecoratorManager.validate": 3,
+    "ModelManager.getType": 14,
     "ClassDeclaration.getIdentifierFieldName": 1,
     "DecoratorManager.yamlToJson": 1,
     "Factory.newConcept": 2,
     "Factory.newRelationship": 2,
-    "ModelManager.getType": 10,
     "Relationship.fromURI": 2
    },
    "example": {
-    "file": "conformance/Serializer.fromJSON/4d449aa90abb05a2c2f158fa.json",
+    "file": "conformance/Serializer.fromJSON/25ac911b99783b746552aeaf.json",
     "detail": "$.error.class: expected \"TypeNotFoundException\" got \"Error\""
    }
   },
@@ -126,11 +130,11 @@
    "name": "optional-field-rule-dropped",
    "description": "in-engine: Property.isOptional always returns true (missing required fields accepted)",
    "detected": true,
-   "failing_fixtures": 11290,
+   "failing_fixtures": 11326,
    "harness_errors": 0,
    "by_op": {
     "ModelManager.addCTOModel": 543,
-    "ModelManager.validateModelFiles": 385,
+    "ModelManager.validateModelFiles": 376,
     "Serializer.fromJSON": 1377,
     "Serializer.new": 81,
     "Serializer.toJSON": 1231,
@@ -138,8 +142,8 @@
     "ClassDeclaration.isEnum": 298,
     "ClassDeclaration.isIdentified": 258,
     "ClassDeclaration.isSystemIdentified": 149,
-    "Declaration.getFullyQualifiedName": 348,
-    "Declaration.getName": 292,
+    "Declaration.getFullyQualifiedName": 349,
+    "Declaration.getName": 293,
     "Declaration.getNamespace": 255,
     "Declaration.isClassDeclaration": 32,
     "DecoratorManager.decorateModels": 1155,
@@ -156,6 +160,10 @@
     "ModelManager.getType": 479,
     "Resource.validate": 14,
     "Factory.newConcept": 36,
+    "ModelLoader.loadModelManager": 9,
+    "ModelLoader.loadModelManagerFromModelFiles": 7,
+    "ModelManager.filter": 13,
+    "ModelManager.updateExternalModels": 5,
     "AssetDeclaration.declarationKind": 4,
     "ClassDeclaration.getAllSuperTypeDeclarations": 3,
     "ClassDeclaration.getAssignableClassDeclarations": 5,
@@ -306,6 +314,8 @@
     "ScalarDeclaration.isParticipant": 1,
     "ScalarDeclaration.isSystemIdentified": 1,
     "ScalarDeclaration.isTransaction": 1,
+    "ScalarDeclaration.new": 8,
+    "ScalarDeclaration.toString": 1,
     "TransactionDeclaration.declarationKind": 1,
     "Typed.getClassDeclaration": 42,
     "Typed.getFullyQualifiedType": 68,
@@ -328,8 +338,103 @@
     "Resource.toJSON": 1
    },
    "example": {
-    "file": "conformance/Serializer.toJSON/120b88f4f32ce867dfd3cefd.json",
+    "file": "conformance/Serializer.toJSON/1a45a969cb5d728c62ee40a7.json",
     "detail": "$.ok.created: expected \"2024-01-15T10:30:00.000Z\" got \"2024-01-15T10:30:00.001Z\""
+   }
+  },
+  {
+   "name": "filter-imports-unpruned",
+   "description": "in-engine: ModelManager.filter keeps every import, whatever the predicate says about the imported type",
+   "detected": true,
+   "failing_fixtures": 12,
+   "must_flag": {
+    "what": "a ModelManager.filter fixture",
+    "failing": 12
+   },
+   "harness_errors": 0,
+   "by_op": {
+    "ModelManager.filter": 12
+   },
+   "example": {
+    "file": "gaps/ModelManager.filter/2f02b9ada4c1646ea481a8c2.json",
+    "detail": "$.ok.ast.models.3.imports.0.types.1: expected undefined got \"A3\""
+   }
+  },
+  {
+   "name": "offline-flag-inverted",
+   "description": "in-engine: ModelLoader resolves external models when offline, and only validates when online",
+   "detected": true,
+   "failing_fixtures": 4,
+   "must_flag": {
+    "what": "a ModelLoader fixture",
+    "failing": 4
+   },
+   "harness_errors": 0,
+   "by_op": {
+    "ModelLoader.loadModelManager": 2,
+    "ModelLoader.loadModelManagerFromModelFiles": 2
+   },
+   "example": {
+    "file": "gaps/ModelLoader.loadModelManager/8e974dece6d7bf6edaef2ea9.json",
+    "detail": "state divergence: fetched https://oracle.invalid/gaps/ext.cto, which the reference did not fetch"
+   }
+  },
+  {
+   "name": "async-rejection-swallowed",
+   "description": "an async op whose promise rejects is reported as resolving to undefined",
+   "detected": true,
+   "failing_fixtures": 6,
+   "must_flag": {
+    "what": "a ModelManager.updateExternalModels fixture",
+    "failing": 3
+   },
+   "harness_errors": 0,
+   "by_op": {
+    "ModelLoader.loadModelManager": 2,
+    "ModelLoader.loadModelManagerFromModelFiles": 1,
+    "ModelManager.updateExternalModels": 3
+   },
+   "example": {
+    "file": "gaps/ModelLoader.loadModelManager/8e974dece6d7bf6edaef2ea9.json",
+    "detail": "$.error: expected {\"class\":\"IllegalModelException\",\"component\":\"@accordproject/concerto-core\",\"location\":null,\"message\":\"Namespace is not defined for type \\\"gaps.ext@1.0.0.E\\\". File '@oracle.invalid.gaps.loader.cto': \"… got undefined"
+   }
+  },
+  {
+   "name": "decorator-factories-ignored",
+   "description": "in-engine: a model manager reports no decorator factories, so addDecoratorFactory has no effect",
+   "detected": true,
+   "failing_fixtures": 9,
+   "must_flag": {
+    "what": "a fixture with an addDecoratorFactory step",
+    "failing": 9
+   },
+   "harness_errors": 0,
+   "by_op": {
+    "ModelManager.addCTOModel": 3,
+    "ModelManager.getAst": 2,
+    "ModelManager.getType": 4
+   },
+   "example": {
+    "file": "gaps/ModelManager.addCTOModel/55b72831f71abb0e02ab6af1.json",
+    "detail": "$.error: expected {\"class\":\"Error\",\"component\":null,\"location\":null,\"message\":\"abstract function called\"} got undefined"
+   }
+  },
+  {
+   "name": "scalar-type-fallback-changed",
+   "description": "in-engine: a ScalarDeclaration whose AST has no scalar $class gets type String instead of null",
+   "detected": true,
+   "failing_fixtures": 2,
+   "must_flag": {
+    "what": "a ScalarDeclaration.new fixture or one built on its result",
+    "failing": 2
+   },
+   "harness_errors": 0,
+   "by_op": {
+    "ScalarDeclaration.getType": 2
+   },
+   "example": {
+    "file": "gaps/ScalarDeclaration.getType/b3bdf1483151e54cf51ed495.json",
+    "detail": "$.ok: expected null got \"String\""
    }
   }
  ],
@@ -352,6 +457,12 @@
   },
   {
    "check": "fixture references unknown blob",
+   "verdict": "harness-error",
+   "ok": true
+  },
+  {
+   "check": "async fixture with a malformed network response",
+   "fixture": "gaps/ModelLoader.loadModelManager/8324f187f7103a7fc429384e.json",
    "verdict": "harness-error",
    "ok": true
   }

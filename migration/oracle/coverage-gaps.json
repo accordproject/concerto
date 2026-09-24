@@ -1,56 +1,149 @@
 {
  "summary": {
-  "generated_at": "2026-09-24T16:09:48.856Z",
+  "generated_at": "2026-09-24T18:31:02.846Z",
   "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
   "corpus": {
    "statements": {
-    "pct": 92.12,
-    "covered": 3157,
+    "pct": 95.36,
+    "covered": 3268,
     "total": 3427
    },
    "branches": {
-    "pct": 92.86,
-    "covered": 1704,
+    "pct": 95.85,
+    "covered": 1759,
     "total": 1835
    },
    "functions": {
-    "pct": 91.47,
-    "covered": 558,
+    "pct": 94.09,
+    "covered": 574,
     "total": 610
    },
    "lines": {
-    "pct": 92.05,
-    "covered": 3104,
+    "pct": 95.31,
+    "covered": 3214,
     "total": 3372
    }
   },
   "corpus_src_driver": "the same corpus, bin/replay.js --engine src under nyc (workspace src/ through ts-node)",
   "corpus_src": {
    "statements": {
-    "pct": 94.83,
-    "covered": 3157,
-    "total": 3329
+    "pct": 97.88,
+    "covered": 3292,
+    "total": 3363
    },
    "branches": {
-    "pct": 92.86,
-    "covered": 1704,
-    "total": 1835
+    "pct": 95.86,
+    "covered": 1783,
+    "total": 1860
    },
    "functions": {
-    "pct": 91.47,
-    "covered": 558,
+    "pct": 94.09,
+    "covered": 574,
     "total": 610
    },
    "lines": {
-    "pct": 94.8,
-    "covered": 3104,
-    "total": 3274
+    "pct": 97.88,
+    "covered": 3238,
+    "total": 3308
    }
   },
   "corpus_reference_vs_src": {
-   "branch_layout_mismatches": 0,
-   "branch_hit_disagreements": 0,
-   "disagreements": []
+   "branch_layout_mismatches": 58,
+   "branch_hit_disagreements": 18,
+   "disagreements": [
+    {
+     "file": "src/modelutil.ts",
+     "branch": "0[1]",
+     "reference": 9
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "2[1]",
+     "reference": 15
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "5[1]",
+     "reference": 13561
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "12[2]",
+     "reference": 193215
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "14[1]",
+     "reference": 2
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "15[1]",
+     "reference": 1
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "16[1]",
+     "reference": 351
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "16[2]",
+     "reference": 157
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "16[3]",
+     "reference": 130
+    },
+    {
+     "file": "src/introspect/numbervalidator.ts",
+     "branch": "0[1]",
+     "reference": 347
+    },
+    {
+     "file": "src/introspect/numbervalidator.ts",
+     "branch": "13[1]",
+     "reference": 78
+    },
+    {
+     "file": "src/introspect/numbervalidator.ts",
+     "branch": "19[0]",
+     "reference": 7,
+     "src": 0
+    },
+    {
+     "file": "src/introspect/numbervalidator.ts",
+     "branch": "19[1]",
+     "reference": 1
+    },
+    {
+     "file": "src/introspect/numbervalidator.ts",
+     "branch": "20[1]",
+     "reference": 1
+    },
+    {
+     "file": "src/introspect/scalardeclaration.ts",
+     "branch": "0[1]",
+     "reference": 5038
+    },
+    {
+     "file": "src/introspect/scalardeclaration.ts",
+     "branch": "7[2]",
+     "reference": 703
+    },
+    {
+     "file": "src/introspect/scalardeclaration.ts",
+     "branch": "7[3]",
+     "reference": 3819
+    },
+    {
+     "file": "src/introspect/scalardeclaration.ts",
+     "branch": "12[0]",
+     "reference": 0,
+     "src": 2664
+    }
+   ]
   },
   "unit_suite": {
    "statements": {
@@ -91,16 +184,13 @@
    "functions": 99,
    "lines": 99
   },
-  "uncovered_branches": 131,
-  "uncovered_branches_covered_by_suite": 65,
+  "uncovered_branches": 76,
+  "uncovered_branches_covered_by_suite": 12,
   "covered_by_suite_by_category": {
-   "unrecordable": 51,
-   "plan-owner-decision": 2,
    "stub-only": 4,
    "internal-only": 8
   },
   "covered_by_suite_by_destination": {
-   "accordproject/concerto-rust#94": 53,
    "P2-10 (accordproject/concerto-rust#54)": 12
   },
   "unexplained_covered_by_suite": [],
@@ -109,9 +199,7 @@
  "note": "Every branch of concerto-core src the oracle corpus does not reach on the frozen reference. covered_by_suite marks branches the unit suite does reach; each of those carries the category, the task it is handed to and the verified reason from gap-reasons.json (categories are defined there).",
  "categories": {
   "stub-only": "The unit suite reaches the branch only through a sinon stub, a sinon stub instance or a monkey-patched method, forcing a state no object built through the public API can be in. Handed to P2-10 (accordproject/concerto-rust#54).",
-  "internal-only": "Reached only by calling an internal (@private) method or constructor directly, with arguments no public operation passes. Handed to P2-10 (accordproject/concerto-rust#54).",
-  "plan-owner-decision": "Reachable through an exported API with no stub, but only through a call the oracle deliberately does not record (an introspection constructor) or cannot yet encode (a DecoratorFactory). Recording it is a change to the oracle design, not implemented here. Handed to accordproject/concerto-rust#94 by the plan owner.",
-  "unrecordable": "Reachable through the public API, but only by a call this oracle cannot record by design: an async result, a function argument, a Symbol, a model manager tainted by addDecoratorFactory/updateExternalModels, or an operation whose effect is on the file system. Not stub-only and not P2-10 work: covering it needs a change to the oracle (fixture schema or recorder). Handed to accordproject/concerto-rust#94 by the plan owner."
+  "internal-only": "Reached only by calling an internal (@private) method or constructor directly, with arguments no public operation passes. Handed to P2-10 (accordproject/concerto-rust#54)."
  },
  "per_file": {
   "src/astmodelmanager.ts": {
@@ -120,7 +208,7 @@
    "uncovered_functions": []
   },
   "src/basemodelmanager.ts": {
-   "uncovered_branches": 18,
+   "uncovered_branches": 10,
    "uncovered_statement_lines": [
     137,
     148,
@@ -130,53 +218,17 @@
     250,
     356,
     410,
-    454,
-    455,
-    457,
-    459,
-    462,
-    463,
-    465,
-    466,
-    468,
-    469,
-    470,
-    471,
-    473,
-    474,
-    476,
-    481,
-    482,
-    485,
-    486,
-    487,
     637,
     637,
-    754,
-    778,
-    910,
-    911,
-    913,
-    914,
-    915,
-    917,
-    918,
-    919,
-    923,
-    924
+    754
    ],
    "uncovered_functions": [
     "(anonymous_4)",
     "(anonymous_6)",
     "(anonymous_7)",
-    "(anonymous_18)",
-    "(anonymous_19)",
-    "(anonymous_20)",
     "(anonymous_30)",
     "(anonymous_31)",
-    "(anonymous_48)",
-    "(anonymous_51)",
-    "(anonymous_61)"
+    "(anonymous_48)"
    ]
   },
   "src/decoratorextractor.ts": {
@@ -292,53 +344,6 @@
    ],
    "uncovered_functions": []
   },
-  "src/modelloader.ts": {
-   "uncovered_branches": 16,
-   "uncovered_statement_lines": [
-    15,
-    16,
-    17,
-    21,
-    22,
-    45,
-    46,
-    47,
-    49,
-    50,
-    51,
-    54,
-    56,
-    69,
-    70,
-    73,
-    74,
-    75,
-    77,
-    80,
-    81,
-    85,
-    86,
-    87,
-    89,
-    90,
-    105,
-    107,
-    110,
-    113,
-    114,
-    115,
-    117,
-    118,
-    124,
-    125
-   ],
-   "uncovered_functions": [
-    "(anonymous_10)",
-    "(anonymous_11)",
-    "(anonymous_12)",
-    "(anonymous_13)"
-   ]
-  },
   "src/modelmanager.ts": {
    "uncovered_branches": 1,
    "uncovered_statement_lines": [],
@@ -409,13 +414,9 @@
    ]
   },
   "src/introspect/decorated.ts": {
-   "uncovered_branches": 4,
+   "uncovered_branches": 0,
    "uncovered_statement_lines": [
-    75,
-    105,
-    106,
-    107,
-    108
+    75
    ],
    "uncovered_functions": [
     "(anonymous_2)"
@@ -430,17 +431,6 @@
    "uncovered_functions": [
     "(anonymous_3)",
     "(anonymous_13)"
-   ]
-  },
-  "src/introspect/decoratorfactory.ts": {
-   "uncovered_branches": 0,
-   "uncovered_statement_lines": [
-    38,
-    43,
-    44
-   ],
-   "uncovered_functions": [
-    "(anonymous_0)"
    ]
   },
   "src/introspect/field.ts": {
@@ -485,57 +475,17 @@
    ]
   },
   "src/introspect/modelfile.ts": {
-   "uncovered_branches": 30,
+   "uncovered_branches": 4,
    "uncovered_statement_lines": [
     194,
     204,
     475,
     764,
-    892,
-    893,
-    894,
-    895,
-    899,
-    900,
-    903,
-    906,
-    909,
-    910,
-    912,
-    913,
-    914,
-    915,
-    918,
-    920,
-    921,
-    922,
-    923,
-    925,
-    926,
-    929,
-    930,
-    931,
-    932,
-    934,
-    935,
-    936,
-    938,
-    939,
-    941,
-    942,
-    942,
-    944,
-    947,
-    951
+    947
    ],
    "uncovered_functions": [
     "(anonymous_8)",
-    "(anonymous_9)",
-    "(anonymous_53)",
-    "(anonymous_54)",
-    "(anonymous_55)",
-    "(anonymous_56)",
-    "(anonymous_57)"
+    "(anonymous_9)"
    ]
   },
   "src/introspect/numbervalidator.ts": {
@@ -563,17 +513,14 @@
    "uncovered_functions": []
   },
   "src/introspect/scalardeclaration.ts": {
-   "uncovered_branches": 2,
+   "uncovered_branches": 1,
    "uncovered_statement_lines": [
-    92,
     135,
     136,
-    138,
-    222
+    138
    ],
    "uncovered_functions": [
-    "(anonymous_4)",
-    "(anonymous_13)"
+    "(anonymous_4)"
    ]
   },
   "src/introspect/stringvalidator.ts": {
@@ -833,86 +780,6 @@
   },
   {
    "file": "src/basemodelmanager.ts",
-   "line": 457,
-   "type": "binary-expr",
-   "branch": "30[0]",
-   "location": {
-    "start": {
-     "line": 457,
-     "column": 27
-    },
-    "end": {
-     "line": 457,
-     "column": 41
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "Inside updateExternalModels (`fileDownloader ?? new FileDownloader(...)`). The method is async, so the recorder skips it (async-result) and lib/ops.js lists it in MM_TAINT: calling it taints the model manager. Its downloader argument is an object with a function, and the default downloader fetches over the network. The unit suite reaches it with sinon.createStubInstance(FileDownloader) (test/modelmanager.js '#updateExternalModels'); with no stub it is still an async, network-bound call this oracle does not record."
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 457,
-   "type": "binary-expr",
-   "branch": "30[1]",
-   "location": {
-    "start": {
-     "line": 457,
-     "column": 45
-    },
-    "end": {
-     "line": 459,
-     "column": null
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "Inside updateExternalModels (`fileDownloader ?? new FileDownloader(...)`). The method is async, so the recorder skips it (async-result) and lib/ops.js lists it in MM_TAINT: calling it taints the model manager. Its downloader argument is an object with a function, and the default downloader fetches over the network. The unit suite reaches it with sinon.createStubInstance(FileDownloader) (test/modelmanager.js '#updateExternalModels'); with no stub it is still an async, network-bound call this oracle does not record."
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 473,
-   "type": "if",
-   "branch": "31[0]",
-   "location": {
-    "start": {
-     "line": 473,
-     "column": 16
-    },
-    "end": {
-     "line": 477,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "Inside updateExternalModels (`if (existing)` over the downloaded files). Same as line 457: async, MM_TAINT, and fed by a downloader object with functions (a sinon stub instance in test/modelmanager.js)."
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 473,
-   "type": "if",
-   "branch": "31[1]",
-   "location": {
-    "start": {
-     "line": 473,
-     "column": 16
-    },
-    "end": {
-     "line": 477,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "Inside updateExternalModels (`if (existing)` over the downloaded files). Same as line 457: async, MM_TAINT, and fed by a downloader object with functions (a sinon stub instance in test/modelmanager.js)."
-  },
-  {
-   "file": "src/basemodelmanager.ts",
    "line": 508,
    "type": "cond-expr",
    "branch": "35[1]",
@@ -927,86 +794,6 @@
     }
    },
    "covered_by_suite": false
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 914,
-   "type": "if",
-   "branch": "52[0]",
-   "location": {
-    "start": {
-     "line": 914,
-     "column": 12
-    },
-    "end": {
-     "line": 916,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "BaseModelManager.filter(predicate, options): the predicate is a JavaScript function, so every call is skipped as nonplain:function and no branch inside filter() can be recorded. The unit suite passes real predicates (test/modelmanager.js '#filter'). Needs a predicate encoding in the fixture schema, not a new input."
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 914,
-   "type": "if",
-   "branch": "52[1]",
-   "location": {
-    "start": {
-     "line": 914,
-     "column": 12
-    },
-    "end": {
-     "line": 916,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "BaseModelManager.filter(predicate, options): the predicate is a JavaScript function, so every call is skipped as nonplain:function and no branch inside filter() can be recorded. The unit suite passes real predicates (test/modelmanager.js '#filter'). Needs a predicate encoding in the fixture schema, not a new input."
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 918,
-   "type": "if",
-   "branch": "53[0]",
-   "location": {
-    "start": {
-     "line": 918,
-     "column": 12
-    },
-    "end": {
-     "line": 920,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "BaseModelManager.filter(predicate, options), as line 914: the predicate is a function, so the call cannot be recorded."
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 918,
-   "type": "if",
-   "branch": "53[1]",
-   "location": {
-    "start": {
-     "line": 918,
-     "column": 12
-    },
-    "end": {
-     "line": 920,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "BaseModelManager.filter(predicate, options), as line 914: the predicate is a function, so the call cannot be recorded."
   },
   {
    "file": "src/decoratorextractor.ts",
@@ -1451,86 +1238,6 @@
    "covered_by_suite": false
   },
   {
-   "file": "src/introspect/decorated.ts",
-   "line": 104,
-   "type": "if",
-   "branch": "3[0]",
-   "location": {
-    "start": {
-     "line": 104,
-     "column": 16
-    },
-    "end": {
-     "line": 111,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true,
-   "category": "plan-owner-decision",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "The `if (hasFactories)` branch of Decorated.process(). It is reachable with the exported base DecoratorFactory (whose newDecorator returns null) registered through ModelManager.addDecoratorFactory before a decorated model is added, with no stub. The oracle cannot record it today: addDecoratorFactory is in lib/ops.js MM_TAINT, and a DecoratorFactory instance has no encoding in lib/codec.js. Recording it needs a codec change (a factory encoding, and addDecoratorFactory as a model manager step); handed to accordproject/concerto-rust#94. Lines 107 and 112 are not reachable with the base factory: 107[0]/[1] and 112[1] need a factory whose newDecorator returns a decorator, i.e. a subclass carrying code (test/introspect/decorators.js), which stays unrecordable (also handed to #94)."
-  },
-  {
-   "file": "src/introspect/decorated.ts",
-   "line": 107,
-   "type": "if",
-   "branch": "4[0]",
-   "location": {
-    "start": {
-     "line": 107,
-     "column": 24
-    },
-    "end": {
-     "line": 109,
-     "column": 25
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "Decorator-factory path of Decorated.process(): the loop over factories and its `if (decorator) break` only take both ways with a factory whose newDecorator returns a decorator, which means a DecoratorFactory subclass carrying code (test/introspect/decorators.js). addDecoratorFactory is in MM_TAINT, and code is not encodable."
-  },
-  {
-   "file": "src/introspect/decorated.ts",
-   "line": 107,
-   "type": "if",
-   "branch": "4[1]",
-   "location": {
-    "start": {
-     "line": 107,
-     "column": 24
-    },
-    "end": {
-     "line": 109,
-     "column": 25
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "Decorator-factory path of Decorated.process(): the loop over factories and its `if (decorator) break` only take both ways with a factory whose newDecorator returns a decorator, which means a DecoratorFactory subclass carrying code (test/introspect/decorators.js). addDecoratorFactory is in MM_TAINT, and code is not encodable."
-  },
-  {
-   "file": "src/introspect/decorated.ts",
-   "line": 112,
-   "type": "if",
-   "branch": "5[1]",
-   "location": {
-    "start": {
-     "line": 112,
-     "column": 16
-    },
-    "end": {
-     "line": 114,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "The false side of `if (!decorator)` in Decorated.process(): only taken when a registered factory returned a decorator, which needs a DecoratorFactory subclass carrying code (test/introspect/decorators.js). addDecoratorFactory is in MM_TAINT, and code is not encodable."
-  },
-  {
    "file": "src/introspect/decorator.ts",
    "line": 73,
    "type": "if",
@@ -1620,106 +1327,6 @@
   },
   {
    "file": "src/introspect/modelfile.ts",
-   "line": 894,
-   "type": "if",
-   "branch": "61[0]",
-   "location": {
-    "start": {
-     "line": 894,
-     "column": 12
-    },
-    "end": {
-     "line": 896,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 894,
-   "type": "if",
-   "branch": "61[1]",
-   "location": {
-    "start": {
-     "line": 894,
-     "column": 12
-    },
-    "end": {
-     "line": 896,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 899,
-   "type": "if",
-   "branch": "62[0]",
-   "location": {
-    "start": {
-     "line": 899,
-     "column": 8
-    },
-    "end": {
-     "line": 901,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 899,
-   "type": "if",
-   "branch": "62[1]",
-   "location": {
-    "start": {
-     "line": 899,
-     "column": 8
-    },
-    "end": {
-     "line": 901,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 909,
-   "type": "if",
-   "branch": "63[0]",
-   "location": {
-    "start": {
-     "line": 909,
-     "column": 8
-    },
-    "end": {
-     "line": 949,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
    "line": 909,
    "type": "if",
    "branch": "63[1]",
@@ -1737,226 +1344,6 @@
   },
   {
    "file": "src/introspect/modelfile.ts",
-   "line": 914,
-   "type": "if",
-   "branch": "64[0]",
-   "location": {
-    "start": {
-     "line": 914,
-     "column": 16
-    },
-    "end": {
-     "line": 916,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 914,
-   "type": "if",
-   "branch": "64[1]",
-   "location": {
-    "start": {
-     "line": 914,
-     "column": 16
-    },
-    "end": {
-     "line": 916,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 914,
-   "type": "binary-expr",
-   "branch": "65[0]",
-   "location": {
-    "start": {
-     "line": 914,
-     "column": 20
-    },
-    "end": {
-     "line": 914,
-     "column": 46
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 914,
-   "type": "binary-expr",
-   "branch": "65[1]",
-   "location": {
-    "start": {
-     "line": 914,
-     "column": 50
-    },
-    "end": {
-     "line": 914,
-     "column": 67
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 920,
-   "type": "if",
-   "branch": "66[0]",
-   "location": {
-    "start": {
-     "line": 920,
-     "column": 16
-    },
-    "end": {
-     "line": 927,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 920,
-   "type": "if",
-   "branch": "66[1]",
-   "location": {
-    "start": {
-     "line": 920,
-     "column": 16
-    },
-    "end": {
-     "line": 927,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 922,
-   "type": "if",
-   "branch": "67[0]",
-   "location": {
-    "start": {
-     "line": 922,
-     "column": 20
-    },
-    "end": {
-     "line": 924,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 922,
-   "type": "if",
-   "branch": "67[1]",
-   "location": {
-    "start": {
-     "line": 922,
-     "column": 20
-    },
-    "end": {
-     "line": 924,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 926,
-   "type": "binary-expr",
-   "branch": "68[0]",
-   "location": {
-    "start": {
-     "line": 926,
-     "column": 27
-    },
-    "end": {
-     "line": 926,
-     "column": 32
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 926,
-   "type": "binary-expr",
-   "branch": "68[1]",
-   "location": {
-    "start": {
-     "line": 926,
-     "column": 36
-    },
-    "end": {
-     "line": 926,
-     "column": 51
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 929,
-   "type": "if",
-   "branch": "69[0]",
-   "location": {
-    "start": {
-     "line": 929,
-     "column": 16
-    },
-    "end": {
-     "line": 945,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
    "line": 929,
    "type": "if",
    "branch": "69[1]",
@@ -1971,206 +1358,6 @@
     }
    },
    "covered_by_suite": false
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 931,
-   "type": "if",
-   "branch": "70[0]",
-   "location": {
-    "start": {
-     "line": 931,
-     "column": 20
-    },
-    "end": {
-     "line": 933,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 931,
-   "type": "if",
-   "branch": "70[1]",
-   "location": {
-    "start": {
-     "line": 931,
-     "column": 20
-    },
-    "end": {
-     "line": 933,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 936,
-   "type": "binary-expr",
-   "branch": "71[0]",
-   "location": {
-    "start": {
-     "line": 936,
-     "column": 31
-    },
-    "end": {
-     "line": 936,
-     "column": 36
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 936,
-   "type": "binary-expr",
-   "branch": "71[1]",
-   "location": {
-    "start": {
-     "line": 936,
-     "column": 40
-    },
-    "end": {
-     "line": 936,
-     "column": 55
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 938,
-   "type": "if",
-   "branch": "72[0]",
-   "location": {
-    "start": {
-     "line": 938,
-     "column": 20
-    },
-    "end": {
-     "line": 940,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 938,
-   "type": "if",
-   "branch": "72[1]",
-   "location": {
-    "start": {
-     "line": 938,
-     "column": 20
-    },
-    "end": {
-     "line": 940,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 941,
-   "type": "if",
-   "branch": "73[0]",
-   "location": {
-    "start": {
-     "line": 941,
-     "column": 20
-    },
-    "end": {
-     "line": 943,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 941,
-   "type": "if",
-   "branch": "73[1]",
-   "location": {
-    "start": {
-     "line": 941,
-     "column": 20
-    },
-    "end": {
-     "line": 943,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 941,
-   "type": "binary-expr",
-   "branch": "74[0]",
-   "location": {
-    "start": {
-     "line": 941,
-     "column": 24
-    },
-    "end": {
-     "line": 941,
-     "column": 40
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 941,
-   "type": "binary-expr",
-   "branch": "74[1]",
-   "location": {
-    "start": {
-     "line": 941,
-     "column": 44
-    },
-    "end": {
-     "line": 941,
-     "column": 71
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/property.ts",
@@ -2231,26 +1418,6 @@
    "category": "stub-only",
    "handed_to": "P2-10 (accordproject/concerto-rust#54)",
    "reason": "RelationshipDeclaration.validate()'s `points to a missing type` throw. With real objects Property.validate() (called first) already rejects a missing type (`Type ... is not defined`, `No type ... in namespace`, checked against src with a relationship to a missing local, imported and unregistered type), and the other-namespace lookup throws rather than returning null. The unit suite reaches it by replacing modelManager.getType with a function returning null (test/introspect/relationshipdeclaration.js). "
-  },
-  {
-   "file": "src/introspect/scalardeclaration.ts",
-   "line": 89,
-   "type": "if",
-   "branch": "6[1]",
-   "location": {
-    "start": {
-     "line": 89,
-     "column": 15
-    },
-    "end": {
-     "line": 93,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true,
-   "category": "plan-owner-decision",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ScalarDeclaration.process()'s `type = null` fallback for an unknown $class. ModelFile builds a ScalarDeclaration only for the six scalar $classes (modelfile.ts fromAst switch; anything else is rejected), so the only way in is the exported ScalarDeclaration constructor called directly with an AST that has no scalar $class, as test/introspect/scalardeclaration.js does. The oracle deliberately records no introspection constructors (a declaration built outside its model file is also not encodable: nonplain:declaration-not-in-modelfile). Recording it would mean adding a ScalarDeclaration.new op and an encoding for the parent ModelFile; handed to accordproject/concerto-rust#94."
   },
   {
    "file": "src/introspect/scalardeclaration.ts",
@@ -2438,320 +1605,6 @@
     }
    },
    "covered_by_suite": false
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 46,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 46,
-     "column": 8
-    },
-    "end": {
-     "line": 52,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 46,
-   "type": "if",
-   "branch": "0[1]",
-   "location": {
-    "start": {
-     "line": 46,
-     "column": 8
-    },
-    "end": {
-     "line": 52,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 68,
-   "type": "default-arg",
-   "branch": "1[0]",
-   "location": {
-    "start": {
-     "line": 68,
-     "column": 84
-    },
-    "end": {
-     "line": 68,
-     "column": 102
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 69,
-   "type": "binary-expr",
-   "branch": "2[0]",
-   "location": {
-    "start": {
-     "line": 69,
-     "column": 21
-    },
-    "end": {
-     "line": 69,
-     "column": 28
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 69,
-   "type": "binary-expr",
-   "branch": "2[1]",
-   "location": {
-    "start": {
-     "line": 69,
-     "column": 32
-    },
-    "end": {
-     "line": 69,
-     "column": 50
-    }
-   },
-   "covered_by_suite": false
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 85,
-   "type": "if",
-   "branch": "3[0]",
-   "location": {
-    "start": {
-     "line": 85,
-     "column": 8
-    },
-    "end": {
-     "line": 91,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 85,
-   "type": "if",
-   "branch": "3[1]",
-   "location": {
-    "start": {
-     "line": 85,
-     "column": 8
-    },
-    "end": {
-     "line": 91,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 85,
-   "type": "binary-expr",
-   "branch": "4[0]",
-   "location": {
-    "start": {
-     "line": 85,
-     "column": 11
-    },
-    "end": {
-     "line": 85,
-     "column": 15
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 85,
-   "type": "binary-expr",
-   "branch": "4[1]",
-   "location": {
-    "start": {
-     "line": 85,
-     "column": 19
-    },
-    "end": {
-     "line": 85,
-     "column": 31
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 104,
-   "type": "default-arg",
-   "branch": "5[0]",
-   "location": {
-    "start": {
-     "line": 104,
-     "column": 139
-    },
-    "end": {
-     "line": 104,
-     "column": 157
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 105,
-   "type": "binary-expr",
-   "branch": "6[0]",
-   "location": {
-    "start": {
-     "line": 105,
-     "column": 21
-    },
-    "end": {
-     "line": 105,
-     "column": 28
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 105,
-   "type": "binary-expr",
-   "branch": "6[1]",
-   "location": {
-    "start": {
-     "line": 105,
-     "column": 32
-    },
-    "end": {
-     "line": 105,
-     "column": 50
-    }
-   },
-   "covered_by_suite": false
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 113,
-   "type": "if",
-   "branch": "7[0]",
-   "location": {
-    "start": {
-     "line": 113,
-     "column": 8
-    },
-    "end": {
-     "line": 119,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 113,
-   "type": "if",
-   "branch": "7[1]",
-   "location": {
-    "start": {
-     "line": 113,
-     "column": 8
-    },
-    "end": {
-     "line": 119,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 113,
-   "type": "binary-expr",
-   "branch": "8[0]",
-   "location": {
-    "start": {
-     "line": 113,
-     "column": 11
-    },
-    "end": {
-     "line": 113,
-     "column": 15
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
-  },
-  {
-   "file": "src/modelloader.ts",
-   "line": 113,
-   "type": "binary-expr",
-   "branch": "8[1]",
-   "location": {
-    "start": {
-     "line": 113,
-     "column": 19
-    },
-    "end": {
-     "line": 113,
-     "column": 31
-    }
-   },
-   "covered_by_suite": true,
-   "category": "unrecordable",
-   "handed_to": "accordproject/concerto-rust#94",
-   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelmanager.ts",
