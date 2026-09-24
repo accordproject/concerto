@@ -2,7 +2,10 @@
 
 Committed baseline for accordproject/concerto-rust#92 (task P5-04a, under
 the migration plan accordproject/concerto-rust#29). Recorded from one run
-of each harness, on the same machine, back to back. Detailed JSON is in
+of each harness, on the same machine, in the same session: `run-ts.mjs`
+with its defaults (5 warm-up + 30 timed samples per workload) and a full
+criterion run (criterion's defaults: 3 s warm-up, 100 samples per
+benchmark - *not* `--quick`). Detailed JSON is in
 `results/` (TS) and `accordproject/concerto-rust`'s `benches/results/`
 (Rust) - the timestamps below match the committed files there.
 
@@ -19,9 +22,9 @@ of each harness, on the same machine, back to back. Detailed JSON is in
 | cargo | 1.94.1 (29ea6fb6a 2026-03-24) |
 | criterion | 0.5.1 |
 | `concerto` commit | `b81adfad8c8d` (branch `claude/tender-pascal-ocwf9q`) |
-| `concerto-rust` commit | `75615c461cf8` (branch `claude/tender-pascal-ocwf9q`) |
+| `concerto-rust` commit | `fb972a2fdafc` (branch `claude/tender-pascal-ocwf9q-cloud-2-P5-04a`) |
 | TS run | `results/2026-09-24T16-46-49-815Z-ts.json` |
-| Rust run | `concerto-rust`'s `benches/results/2026-09-24T17-01-44Z-rust.json` |
+| Rust run | `concerto-rust`'s `benches/results/2026-09-24T17-22-00Z-rust.json` (full run, `--features validate-rs`) |
 
 Both TS and Rust raw JSON carry standard deviation and coefficient of
 variation (CV) per entry (`stddev_ms`/`cv` on the TS side,
@@ -37,19 +40,20 @@ both sides currently succeed on the *same* set of models; see the notes.
 
 | Model set | n | Phase | TS (µs) | TS CV | Rust (µs) | Rust CV | Rust /TS |
 |---|---|---|---|---|---|---|---|
-| concerto-core-test-data | 35 | load | 45.5 | 25.3% | 118.2 | 3.7% | 2.60× (slower) |
+| concerto-core-test-data | 35 | load | 45.5 | 25.3% | 118.8 | 8.6% | 2.61× (slower) |
 | concerto-core-test-data | 35 | validate | 105.0 | 23.5% | SKIPPED¹ | - | - |
-| conformance | 41 | load | 21.6 | 31.5% | 41.4 | 3.1% | 1.92× (slower) |
-| conformance | 41 | validate | 32.7 | 20.0% | 7.8 | 2.7% | **0.24× (4.2× faster)** |
-| synthetic-large | 1 (300 decls) | load | 980.4 | 22.0% | 7111.8 | 1.8% | 7.25× (slower)² |
+| conformance | 41 | load | 21.6 | 31.5% | 41.0 | 13.6% | 1.90× (slower) |
+| conformance | 41 | validate | 32.7 | 20.0% | 8.0 | 16.9% | **0.24× (4.1× faster)** |
+| synthetic-large | 1 (300 decls) | load | 980.4 | 22.0% | 8395.3 | 13.8% | 8.56× (slower)² |
 | synthetic-large | 1 (300 decls) | validate | 3902.7 | 29.2% | SKIPPED¹ | - | - |
 
 CV (coefficient of variation, stddev/mean) is per-sample noise within
 one run, not run-to-run drift - see "Reproducibility" below for that.
-TS's CV is consistently higher than Rust's on this workload: these are
-mostly sub-100µs-per-op operations in a shared, sandboxed environment,
-where Node's JIT warm-up and GC pauses add more relative jitter than a
-natively-compiled Rust binary sees for the same work.
+TS's CV (20-32%) is consistently higher than Rust's (9-17%) on this
+workload: these are mostly sub-100µs-per-op operations in a shared,
+sandboxed environment, where Node's JIT warm-up and GC pauses add more
+relative jitter than a natively-compiled Rust binary sees for the same
+work - though the Rust side is far from noise-free here either.
 
 ¹ `validate_models` (Rust) does not yet accept these two sets: both
 contain a relationship whose target's identifier is inherited from a
@@ -62,7 +66,7 @@ thing this baseline exists to surface before later phases close it.
 ² `load` here is real, structural work only (no semantic validation) -
 the current trial port's `from_json`/newtype construction is
 meaningfully slower than TS's for one large model (300 declarations).
-Worth a look before treating the 4.2× validate speed-up as
+Worth a look before treating the 4.1× validate speed-up as
 representative: the two model sets where Rust is currently *slower*
 than TS (`load` on all three sets, `synthetic-large` end to end) are
 just as real a baseline number as the sets where it is faster, and the
@@ -79,9 +83,9 @@ performs; this workload isolates it on its own) and the separate
 
 | Model set | n (TS / core / validate-rs) | TS validateAst (µs) | TS CV | concerto-core from_json (µs) | core CV | core /TS | concerto-validate-rs (µs) | validate-rs CV | validate-rs /TS |
 |---|---|---|---|---|---|---|---|---|---|
-| concerto-core-test-data | 34 / 35 / 17³ | 871.2 | 5.6% | 100.8 | 0.05% | **0.116× (8.6× faster)** | 47.1 | 2.5% | **0.054× (18.5× faster)³** |
-| conformance | 41 / 41 / 40 | 329.9 | 4.3% | 34.9 | 0.4% | **0.106× (9.5× faster)** | 39.2 | 3.5% | **0.119× (8.4× faster)** |
-| synthetic-large | 0 / 1 / 0 | SKIPPED⁴ | - | 7033.9 | 0.5% | - | SKIPPED⁵ | - | - |
+| concerto-core-test-data | 34 / 35 / 17³ | 871.2 | 5.6% | 106.5 | 9.0% | **0.122× (8.2× faster)** | 47.2 | 11.2% | **0.054× (18.5× faster)³** |
+| conformance | 41 / 41 / 40 | 329.9 | 4.3% | 36.8 | 16.7% | **0.112× (9.0× faster)** | 38.4 | 9.0% | **0.116× (8.6× faster)** |
+| synthetic-large | 0 / 1 / 0 | SKIPPED⁴ | - | 7706.0 | 12.1% | - | SKIPPED⁵ | - | - |
 
 ³ Different, overlapping subsets: TS's `validateAst` rejects one model
 in this set that the normal load path accepts (a `DateTimeProperty`
@@ -117,14 +121,21 @@ Per the issue, the Rust side is filled in once instance validation lands
 Two consecutive `run-ts.mjs` runs on this machine reproduced every
 workload's median within about 10-15% (e.g. `concerto-core-test-data`
 `load`: 44.9 µs then 48.2 µs; `synthetic-large` `load`: 1025.1 µs then
-1012.2 µs; `validateAst` on `conformance`: 341.0 µs then 355.7 µs). The
-Rust side's `--quick` and full runs agreed even more closely (e.g.
-`load_validate/conformance/load`: 1.65 ms quick vs 1.68 ms full, for the
-whole 41-model batch). Per-sample coefficient of variation is noisier for
-the smallest, sub-100µs-per-op workloads in this shared, sandboxed
+1012.2 µs; `validateAst` on `conformance`: 341.0 µs then 355.7 µs). On the
+Rust side, an earlier criterion `--quick` run (since replaced by the full
+run above, and not used in any table here) agreed with the full run's
+medians within about 6% on seven of the nine benchmarks (e.g.
+`load_validate/conformance/load`: 1.70 ms quick vs 1.68 ms full, for the
+whole 41-model batch), but not on the two single-model `synthetic-large`
+benchmarks, where the full run's medians came out 18% (`load`) and 10%
+(`from_json`) higher - treat those two Rust numbers as the least settled
+in this table. The `--quick` run's CVs (0.05-3.7%) were also misleadingly
+low, from very few samples; the full run's 100-sample CVs (8.6-16.9%) are
+the ones reported above. Per-sample coefficient of variation is noisier
+for the smallest, sub-100µs-per-op workloads in this shared, sandboxed
 environment (GC pauses, scheduler jitter) - see `migration/bench/README.md`'s
-"Variance" section - but the medians hold up across reruns, which is what
-the exit condition asks for.
+"Variance" section - but the medians mostly hold up across reruns, which
+is what the exit condition asks for.
 
 ## Refreshing this table
 
