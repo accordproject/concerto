@@ -23,7 +23,7 @@
  *   {source, source_test, op, inputs, outcome, env}
  *
  * Environment:
- *   ORACLE_SOURCE   label for the corpus source (unit | data | conformance)
+ *   ORACLE_SOURCE   label for the corpus source (unit | data | conformance | gaps)
  *   ORACLE_RAW_DIR  where raw records (<source>-<pid>.jsonl) and skip stats go
  *   ORACLE_BLOB_DIR content-addressed blob store (shared with the corpus)
  *
@@ -269,6 +269,8 @@ function recordCall(spec, target, args, invoke) {
     let skip = findEnvStub();
     if (skip) {
         skip = 'env-stubbed:' + skip;
+    } else if (spec.skipIf) {
+        skip = spec.skipIf(args);
     }
     let inputs = null;
     let plainBefore = null;
@@ -500,6 +502,12 @@ function wrapFunction(spec, orig) {
  * @returns {object} snapshot
  */
 function ctorSnapshot(cls, args) {
+    if (cls === 'Serializer' || cls === 'TypeNotFoundException') {
+        // Neither carries a recipe: a Serializer is encoded from its model
+        // manager, factory and default options whenever it is an input, and
+        // an exception is only ever an outcome.
+        return null;
+    }
     state.suspended++;
     try {
         if (cls === 'ModelFile') {
@@ -620,6 +628,8 @@ proxyClass(core.req('basemodelmanager'), 'BaseModelManager', ops.get('BaseModelM
 proxyClass(core.req('modelmanager'), 'ModelManager', ops.get('ModelManager.new'));
 proxyClass(core.req('astmodelmanager'), 'AstModelManager', ops.get('AstModelManager.new'));
 proxyClass(core.modelFileModule, 'ModelFile', ops.get('ModelFile.new'));
+proxyClass(core.req('serializer'), 'Serializer', ops.get('Serializer.new'));
+proxyClass(core.req('typenotfoundexception'), 'TypeNotFoundException', ops.get('TypeNotFoundException.new'));
 
 // Test titles: every mocha runnable (test or hook) sets the current title.
 try {

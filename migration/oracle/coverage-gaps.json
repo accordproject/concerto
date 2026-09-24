@@ -1,33 +1,61 @@
 {
  "summary": {
-  "generated_at": "2026-09-24T10:26:01.129Z",
-  "driver": "oracle corpus only (bin/replay.js --engine src under nyc)",
+  "generated_at": "2026-09-24T16:09:48.856Z",
+  "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
   "corpus": {
    "statements": {
-    "pct": 87.77,
-    "covered": 2922,
-    "total": 3329
+    "pct": 92.12,
+    "covered": 3157,
+    "total": 3427
    },
    "branches": {
-    "pct": 80.92,
-    "covered": 1485,
+    "pct": 92.86,
+    "covered": 1704,
     "total": 1835
    },
    "functions": {
-    "pct": 88.36,
-    "covered": 539,
+    "pct": 91.47,
+    "covered": 558,
     "total": 610
    },
    "lines": {
-    "pct": 87.66,
-    "covered": 2870,
+    "pct": 92.05,
+    "covered": 3104,
+    "total": 3372
+   }
+  },
+  "corpus_src_driver": "the same corpus, bin/replay.js --engine src under nyc (workspace src/ through ts-node)",
+  "corpus_src": {
+   "statements": {
+    "pct": 94.83,
+    "covered": 3157,
+    "total": 3329
+   },
+   "branches": {
+    "pct": 92.86,
+    "covered": 1704,
+    "total": 1835
+   },
+   "functions": {
+    "pct": 91.47,
+    "covered": 558,
+    "total": 610
+   },
+   "lines": {
+    "pct": 94.8,
+    "covered": 3104,
     "total": 3274
    }
   },
+  "corpus_reference_vs_src": {
+   "branch_layout_mismatches": 0,
+   "branch_hit_disagreements": 0,
+   "disagreements": []
+  },
   "unit_suite": {
    "statements": {
-    "pct": 98.95,
-    "covered": 3306,
+    "pct": 99.01,
+    "covered": 3308,
     "total": 3341
    },
    "branches": {
@@ -36,17 +64,17 @@
     "total": 1835
    },
    "functions": {
-    "pct": 99.18,
-    "covered": 605,
+    "pct": 99.34,
+    "covered": 606,
     "total": 610
    },
    "lines": {
-    "pct": 98.96,
-    "covered": 3252,
+    "pct": 99.02,
+    "covered": 3254,
     "total": 3286
    }
   },
-  "unit_suite_source": "nyc run of the unit suite in this task (same command as baseline.json)",
+  "unit_suite_source": "nyc run of the unit suite over the workspace src/ (same command as baseline.json)",
   "baseline_json": {
    "statements_pct": 98.95,
    "statements_fraction": "3306/3341",
@@ -63,10 +91,28 @@
    "functions": 99,
    "lines": 99
   },
-  "uncovered_branches": 350,
-  "uncovered_branches_covered_by_suite": 279
+  "uncovered_branches": 131,
+  "uncovered_branches_covered_by_suite": 65,
+  "covered_by_suite_by_category": {
+   "unrecordable": 51,
+   "plan-owner-decision": 2,
+   "stub-only": 4,
+   "internal-only": 8
+  },
+  "covered_by_suite_by_destination": {
+   "accordproject/concerto-rust#94": 53,
+   "P2-10 (accordproject/concerto-rust#54)": 12
+  },
+  "unexplained_covered_by_suite": [],
+  "stale_reasons": []
  },
- "note": "Every branch of packages/concerto-core/src that the oracle corpus does not reach. covered_by_suite marks branches the unit suite does reach: these are the lifting tasks of plan §2.3/§2.4.",
+ "note": "Every branch of concerto-core src the oracle corpus does not reach on the frozen reference. covered_by_suite marks branches the unit suite does reach; each of those carries the category, the task it is handed to and the verified reason from gap-reasons.json (categories are defined there).",
+ "categories": {
+  "stub-only": "The unit suite reaches the branch only through a sinon stub, a sinon stub instance or a monkey-patched method, forcing a state no object built through the public API can be in. Handed to P2-10 (accordproject/concerto-rust#54).",
+  "internal-only": "Reached only by calling an internal (@private) method or constructor directly, with arguments no public operation passes. Handed to P2-10 (accordproject/concerto-rust#54).",
+  "plan-owner-decision": "Reachable through an exported API with no stub, but only through a call the oracle deliberately does not record (an introspection constructor) or cannot yet encode (a DecoratorFactory). Recording it is a change to the oracle design, not implemented here. Handed to accordproject/concerto-rust#94 by the plan owner.",
+  "unrecordable": "Reachable through the public API, but only by a call this oracle cannot record by design: an async result, a function argument, a Symbol, a model manager tainted by addDecoratorFactory/updateExternalModels, or an operation whose effect is on the file system. Not stub-only and not P2-10 work: covering it needs a change to the oracle (fixture schema or recorder). Handed to accordproject/concerto-rust#94 by the plan owner."
+ },
  "per_file": {
   "src/astmodelmanager.ts": {
    "uncovered_branches": 1,
@@ -74,17 +120,15 @@
    "uncovered_functions": []
   },
   "src/basemodelmanager.ts": {
-   "uncovered_branches": 30,
+   "uncovered_branches": 18,
    "uncovered_statement_lines": [
     137,
     148,
     162,
     172,
-    192,
     208,
     250,
     356,
-    372,
     410,
     454,
     455,
@@ -106,14 +150,6 @@
     485,
     486,
     487,
-    504,
-    505,
-    506,
-    507,
-    508,
-    510,
-    512,
-    560,
     637,
     637,
     754,
@@ -136,8 +172,6 @@
     "(anonymous_18)",
     "(anonymous_19)",
     "(anonymous_20)",
-    "(anonymous_21)",
-    "(anonymous_22)",
     "(anonymous_30)",
     "(anonymous_31)",
     "(anonymous_48)",
@@ -166,9 +200,106 @@
    "uncovered_statement_lines": [],
    "uncovered_functions": []
   },
+  "src/index.ts": {
+   "uncovered_branches": 0,
+   "uncovered_statement_lines": [
+    15,
+    63,
+    16,
+    64,
+    17,
+    65,
+    18,
+    66,
+    19,
+    67,
+    20,
+    68,
+    21,
+    69,
+    22,
+    70,
+    23,
+    71,
+    24,
+    72,
+    25,
+    73,
+    26,
+    74,
+    27,
+    75,
+    28,
+    76,
+    29,
+    77,
+    30,
+    78,
+    31,
+    79,
+    32,
+    80,
+    33,
+    81,
+    34,
+    82,
+    35,
+    83,
+    36,
+    84,
+    37,
+    85,
+    38,
+    86,
+    39,
+    87,
+    40,
+    88,
+    41,
+    89,
+    42,
+    90,
+    43,
+    91,
+    44,
+    92,
+    45,
+    93,
+    46,
+    94,
+    47,
+    95,
+    48,
+    96,
+    49,
+    97,
+    50,
+    98,
+    51,
+    99,
+    53,
+    100,
+    55,
+    103,
+    56,
+    101,
+    57,
+    102,
+    58,
+    104,
+    59,
+    105
+   ],
+   "uncovered_functions": []
+  },
   "src/modelloader.ts": {
    "uncovered_branches": 16,
    "uncovered_statement_lines": [
+    15,
+    16,
+    17,
+    21,
+    22,
     45,
     46,
     47,
@@ -197,13 +328,15 @@
     114,
     115,
     117,
-    118
+    118,
+    124,
+    125
    ],
    "uncovered_functions": [
-    "(anonymous_0)",
-    "(anonymous_1)",
-    "(anonymous_2)",
-    "(anonymous_3)"
+    "(anonymous_10)",
+    "(anonymous_11)",
+    "(anonymous_12)",
+    "(anonymous_13)"
    ]
   },
   "src/modelmanager.ts": {
@@ -211,27 +344,21 @@
    "uncovered_statement_lines": [],
    "uncovered_functions": []
   },
-  "src/modelutil.ts": {
-   "uncovered_branches": 1,
-   "uncovered_statement_lines": [
-    196
-   ],
-   "uncovered_functions": []
-  },
   "src/securityexception.ts": {
    "uncovered_branches": 0,
    "uncovered_statement_lines": [
-    30
+    15,
+    30,
+    35,
+    36
    ],
    "uncovered_functions": [
     "(anonymous_0)"
    ]
   },
   "src/serializer.ts": {
-   "uncovered_branches": 2,
+   "uncovered_branches": 0,
    "uncovered_statement_lines": [
-    57,
-    59,
     73
    ],
    "uncovered_functions": [
@@ -239,10 +366,8 @@
    ]
   },
   "src/typenotfoundexception.ts": {
-   "uncovered_branches": 1,
+   "uncovered_branches": 0,
    "uncovered_statement_lines": [
-    37,
-    38,
     54
    ],
    "uncovered_functions": [
@@ -250,52 +375,22 @@
    ]
   },
   "src/introspect/classdeclaration.ts": {
-   "uncovered_branches": 9,
+   "uncovered_branches": 7,
    "uncovered_statement_lines": [
     61,
     102,
     103,
-    130,
-    131,
     171,
     217,
-    218,
-    553
+    218
    ],
    "uncovered_functions": [
     "(anonymous_1)"
    ]
   },
-  "src/introspect/collectionsizevalidator.ts": {
-   "uncovered_branches": 23,
-   "uncovered_statement_lines": [
-    50,
-    101,
-    102,
-    105,
-    106,
-    107,
-    108,
-    109,
-    110,
-    111,
-    115,
-    116,
-    117,
-    118,
-    119,
-    120,
-    121,
-    125
-   ],
-   "uncovered_functions": [
-    "(anonymous_5)"
-   ]
-  },
   "src/introspect/declaration.ts": {
-   "uncovered_branches": 6,
+   "uncovered_branches": 5,
    "uncovered_statement_lines": [
-    64,
     105,
     163,
     171,
@@ -340,27 +435,18 @@
   "src/introspect/decoratorfactory.ts": {
    "uncovered_branches": 0,
    "uncovered_statement_lines": [
-    38
+    38,
+    43,
+    44
    ],
    "uncovered_functions": [
     "(anonymous_0)"
    ]
   },
   "src/introspect/field.ts": {
-   "uncovered_branches": 7,
+   "uncovered_branches": 1,
    "uncovered_statement_lines": [
     116,
-    166,
-    176,
-    177,
-    180,
-    181,
-    184,
-    185,
-    188,
-    189,
-    192,
-    193,
     195
    ],
    "uncovered_functions": [
@@ -376,15 +462,6 @@
     "(anonymous_1)"
    ]
   },
-  "src/introspect/mapdeclaration.ts": {
-   "uncovered_branches": 3,
-   "uncovered_statement_lines": [
-    63,
-    67,
-    71
-   ],
-   "uncovered_functions": []
-  },
   "src/introspect/mapkeytype.ts": {
    "uncovered_branches": 0,
    "uncovered_statement_lines": [
@@ -397,11 +474,8 @@
    ]
   },
   "src/introspect/mapvaluetype.ts": {
-   "uncovered_branches": 3,
+   "uncovered_branches": 0,
    "uncovered_statement_lines": [
-    98,
-    103,
-    108,
     178,
     187
    ],
@@ -411,20 +485,11 @@
    ]
   },
   "src/introspect/modelfile.ts": {
-   "uncovered_branches": 37,
+   "uncovered_branches": 30,
    "uncovered_statement_lines": [
-    179,
-    180,
-    181,
-    184,
     194,
     204,
-    426,
-    452,
-    464,
     475,
-    727,
-    757,
     764,
     892,
     893,
@@ -464,7 +529,6 @@
     951
    ],
    "uncovered_functions": [
-    "(anonymous_7)",
     "(anonymous_8)",
     "(anonymous_9)",
     "(anonymous_53)",
@@ -475,64 +539,32 @@
    ]
   },
   "src/introspect/numbervalidator.ts": {
-   "uncovered_branches": 28,
+   "uncovered_branches": 0,
    "uncovered_statement_lines": [
-    65,
-    77,
-    81,
-    91,
-    98,
-    111,
-    115,
-    126,
-    138,
-    139,
-    141,
-    142,
-    143,
-    144,
-    145,
-    146,
-    147,
-    150,
-    151,
-    152,
-    153,
-    154,
-    155,
-    156,
-    159
+    126
    ],
    "uncovered_functions": [
-    "(anonymous_2)",
-    "(anonymous_3)",
-    "(anonymous_5)",
-    "(anonymous_6)"
+    "(anonymous_5)"
    ]
   },
   "src/introspect/property.ts": {
-   "uncovered_branches": 6,
+   "uncovered_branches": 2,
    "uncovered_statement_lines": [
-    86,
-    92,
     210,
-    214,
-    218
+    214
    ],
    "uncovered_functions": []
   },
   "src/introspect/relationshipdeclaration.ts": {
-   "uncovered_branches": 2,
+   "uncovered_branches": 1,
    "uncovered_statement_lines": [
-    54,
     80
    ],
    "uncovered_functions": []
   },
   "src/introspect/scalardeclaration.ts": {
-   "uncovered_branches": 3,
+   "uncovered_branches": 2,
    "uncovered_statement_lines": [
-    66,
     92,
     135,
     136,
@@ -545,44 +577,13 @@
    ]
   },
   "src/introspect/stringvalidator.ts": {
-   "uncovered_branches": 34,
+   "uncovered_branches": 1,
    "uncovered_statement_lines": [
-    65,
-    84,
-    104,
-    107,
-    111,
     124,
-    143,
-    150,
-    158,
-    170,
-    171,
-    174,
-    175,
-    176,
-    177,
-    180,
-    181,
-    182,
-    183,
-    184,
-    185,
-    186,
-    189,
-    190,
-    191,
-    192,
-    193,
-    194,
-    195,
-    198
+    158
    ],
    "uncovered_functions": [
-    "(anonymous_4)",
-    "(anonymous_5)",
-    "(anonymous_6)",
-    "(anonymous_7)"
+    "(anonymous_6)"
    ]
   },
   "src/introspect/validator.ts": {
@@ -616,179 +617,47 @@
    "uncovered_functions": []
   },
   "src/model/typed.ts": {
-   "uncovered_branches": 4,
+   "uncovered_branches": 0,
    "uncovered_statement_lines": [
-    66,
-    188,
-    189,
-    190,
-    193,
-    194,
-    195,
-    196,
-    198,
-    200
+    66
    ],
    "uncovered_functions": [
-    "(anonymous_2)",
-    "(anonymous_11)"
+    "(anonymous_2)"
    ]
   },
   "src/serializer/instancegenerator.ts": {
-   "uncovered_branches": 10,
+   "uncovered_branches": 1,
    "uncovered_statement_lines": [
-    47,
-    91,
-    92,
-    94,
-    120,
-    129,
-    134,
-    146,
-    170,
-    173
-   ],
-   "uncovered_functions": []
-  },
-  "src/serializer/jsongenerator.ts": {
-   "uncovered_branches": 22,
-   "uncovered_statement_lines": [
-    78,
-    142,
-    149,
-    150,
-    151,
-    154,
-    160,
-    264,
-    265,
-    266,
-    267,
-    269,
-    270,
-    271,
-    272,
-    273,
-    282,
-    283,
-    284,
-    285,
-    287,
-    288,
-    289,
-    290,
-    291,
-    309,
-    310,
-    311,
-    315
+    120
    ],
    "uncovered_functions": []
   },
   "src/serializer/jsonpopulator.ts": {
-   "uncovered_branches": 33,
+   "uncovered_branches": 9,
    "uncovered_statement_lines": [
-    157,
-    257,
-    287,
-    288,
-    369,
-    371,
-    391,
-    404,
-    420,
-    446,
-    452,
-    453,
-    462,
-    463,
-    467,
-    468,
-    471,
-    474,
-    476,
-    477,
-    478,
-    479,
-    486,
-    487,
-    488,
-    489,
-    493,
-    494,
-    496,
-    499,
-    501,
-    502,
-    503,
-    504,
-    506
+    257
    ],
    "uncovered_functions": []
   },
   "src/serializer/resourcevalidator.ts": {
-   "uncovered_branches": 22,
+   "uncovered_branches": 4,
    "uncovered_statement_lines": [
-    226,
-    243,
-    254,
     280,
     284,
-    307,
-    319,
-    391,
     441,
-    468,
-    494,
-    497,
-    503,
-    525,
-    526,
-    538,
-    577,
-    578,
-    606,
-    607,
-    635,
-    636,
-    672
+    538
    ],
-   "uncovered_functions": [
-    "(anonymous_17)",
-    "(anonymous_19)",
-    "(anonymous_21)"
-   ]
+   "uncovered_functions": []
   },
   "src/serializer/valuegenerator.ts": {
-   "uncovered_branches": 17,
+   "uncovered_branches": 3,
    "uncovered_statement_lines": [
     81,
     82,
-    86,
     103,
-    153,
-    154,
-    156,
-    157,
-    159,
-    171,
-    172,
-    174,
-    175,
-    180,
-    181,
-    181,
-    183,
-    289,
-    395
+    172
    ],
-   "uncovered_functions": [
-    "(anonymous_7)",
-    "(anonymous_8)",
-    "(anonymous_9)",
-    "(anonymous_20)",
-    "(anonymous_31)"
-   ]
+   "uncovered_functions": []
   }
  },
  "branches": [
@@ -879,23 +748,6 @@
   },
   {
    "file": "src/basemodelmanager.ts",
-   "line": 187,
-   "type": "if",
-   "branch": "7[1]",
-   "location": {
-    "start": {
-     "line": 187,
-     "column": 8
-    },
-    "end": {
-     "line": 193,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
    "line": 205,
    "type": "binary-expr",
    "branch": "8[1]",
@@ -964,40 +816,6 @@
   },
   {
    "file": "src/basemodelmanager.ts",
-   "line": 358,
-   "type": "if",
-   "branch": "23[1]",
-   "location": {
-    "start": {
-     "line": 358,
-     "column": 12
-    },
-    "end": {
-     "line": 360,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 371,
-   "type": "if",
-   "branch": "24[0]",
-   "location": {
-    "start": {
-     "line": 371,
-     "column": 8
-    },
-    "end": {
-     "line": 375,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
    "line": 409,
    "type": "if",
    "branch": "27[0]",
@@ -1028,7 +846,10 @@
      "column": 41
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "Inside updateExternalModels (`fileDownloader ?? new FileDownloader(...)`). The method is async, so the recorder skips it (async-result) and lib/ops.js lists it in MM_TAINT: calling it taints the model manager. Its downloader argument is an object with a function, and the default downloader fetches over the network. The unit suite reaches it with sinon.createStubInstance(FileDownloader) (test/modelmanager.js '#updateExternalModels'); with no stub it is still an async, network-bound call this oracle does not record."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1045,7 +866,10 @@
      "column": null
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "Inside updateExternalModels (`fileDownloader ?? new FileDownloader(...)`). The method is async, so the recorder skips it (async-result) and lib/ops.js lists it in MM_TAINT: calling it taints the model manager. Its downloader argument is an object with a function, and the default downloader fetches over the network. The unit suite reaches it with sinon.createStubInstance(FileDownloader) (test/modelmanager.js '#updateExternalModels'); with no stub it is still an async, network-bound call this oracle does not record."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1062,7 +886,10 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "Inside updateExternalModels (`if (existing)` over the downloaded files). Same as line 457: async, MM_TAINT, and fed by a downloader object with functions (a sinon stub instance in test/modelmanager.js)."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1079,126 +906,10 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 499,
-   "type": "default-arg",
-   "branch": "32[0]",
-   "location": {
-    "start": {
-     "line": 499,
-     "column": 44
-    },
-    "end": {
-     "line": 499,
-     "column": 46
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 507,
-   "type": "if",
-   "branch": "33[0]",
-   "location": {
-    "start": {
-     "line": 507,
-     "column": 12
-    },
-    "end": {
-     "line": 509,
-     "column": 13
-    }
-   },
-   "covered_by_suite": false
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 507,
-   "type": "if",
-   "branch": "33[1]",
-   "location": {
-    "start": {
-     "line": 507,
-     "column": 12
-    },
-    "end": {
-     "line": 509,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 507,
-   "type": "binary-expr",
-   "branch": "34[0]",
-   "location": {
-    "start": {
-     "line": 507,
-     "column": 16
-    },
-    "end": {
-     "line": 507,
-     "column": 25
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 507,
-   "type": "binary-expr",
-   "branch": "34[1]",
-   "location": {
-    "start": {
-     "line": 507,
-     "column": 29
-    },
-    "end": {
-     "line": 507,
-     "column": 49
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 507,
-   "type": "binary-expr",
-   "branch": "34[2]",
-   "location": {
-    "start": {
-     "line": 507,
-     "column": 53
-    },
-    "end": {
-     "line": 507,
-     "column": 78
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 508,
-   "type": "cond-expr",
-   "branch": "35[0]",
-   "location": {
-    "start": {
-     "line": 508,
-     "column": 145
-    },
-    "end": {
-     "line": 508,
-     "column": 156
-    }
-   },
-   "covered_by_suite": false
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "Inside updateExternalModels (`if (existing)` over the downloaded files). Same as line 457: async, MM_TAINT, and fed by a downloader object with functions (a sinon stub instance in test/modelmanager.js)."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1219,40 +930,6 @@
   },
   {
    "file": "src/basemodelmanager.ts",
-   "line": 559,
-   "type": "if",
-   "branch": "38[0]",
-   "location": {
-    "start": {
-     "line": 559,
-     "column": 12
-    },
-    "end": {
-     "line": 561,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
-   "line": 559,
-   "type": "binary-expr",
-   "branch": "39[1]",
-   "location": {
-    "start": {
-     "line": 559,
-     "column": 37
-    },
-    "end": {
-     "line": 559,
-     "column": 64
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/basemodelmanager.ts",
    "line": 914,
    "type": "if",
    "branch": "52[0]",
@@ -1266,7 +943,10 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "BaseModelManager.filter(predicate, options): the predicate is a JavaScript function, so every call is skipped as nonplain:function and no branch inside filter() can be recorded. The unit suite passes real predicates (test/modelmanager.js '#filter'). Needs a predicate encoding in the fixture schema, not a new input."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1283,7 +963,10 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "BaseModelManager.filter(predicate, options): the predicate is a JavaScript function, so every call is skipped as nonplain:function and no branch inside filter() can be recorded. The unit suite passes real predicates (test/modelmanager.js '#filter'). Needs a predicate encoding in the fixture schema, not a new input."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1300,7 +983,10 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "BaseModelManager.filter(predicate, options), as line 914: the predicate is a function, so the call cannot be recorded."
   },
   {
    "file": "src/basemodelmanager.ts",
@@ -1317,7 +1003,10 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "BaseModelManager.filter(predicate, options), as line 914: the predicate is a function, so the call cannot be recorded."
   },
   {
    "file": "src/decoratorextractor.ts",
@@ -1576,23 +1265,6 @@
   },
   {
    "file": "src/introspect/classdeclaration.ts",
-   "line": 119,
-   "type": "if",
-   "branch": "10[1]",
-   "location": {
-    "start": {
-     "line": 119,
-     "column": 19
-    },
-    "end": {
-     "line": 134,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/classdeclaration.ts",
    "line": 170,
    "type": "if",
    "branch": "14[0]",
@@ -1678,23 +1350,6 @@
   },
   {
    "file": "src/introspect/classdeclaration.ts",
-   "line": 552,
-   "type": "if",
-   "branch": "56[0]",
-   "location": {
-    "start": {
-     "line": 552,
-     "column": 12
-    },
-    "end": {
-     "line": 554,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/classdeclaration.ts",
    "line": 610,
    "type": "if",
    "branch": "61[1]",
@@ -1709,414 +1364,6 @@
     }
    },
    "covered_by_suite": false
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 49,
-   "type": "if",
-   "branch": "2[0]",
-   "location": {
-    "start": {
-     "line": 49,
-     "column": 8
-    },
-    "end": {
-     "line": 57,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 101,
-   "type": "if",
-   "branch": "15[0]",
-   "location": {
-    "start": {
-     "line": 101,
-     "column": 8
-    },
-    "end": {
-     "line": 103,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 101,
-   "type": "if",
-   "branch": "15[1]",
-   "location": {
-    "start": {
-     "line": 101,
-     "column": 8
-    },
-    "end": {
-     "line": 103,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 107,
-   "type": "if",
-   "branch": "16[0]",
-   "location": {
-    "start": {
-     "line": 107,
-     "column": 8
-    },
-    "end": {
-     "line": 113,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 107,
-   "type": "if",
-   "branch": "16[1]",
-   "location": {
-    "start": {
-     "line": 107,
-     "column": 8
-    },
-    "end": {
-     "line": 113,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 107,
-   "type": "binary-expr",
-   "branch": "17[0]",
-   "location": {
-    "start": {
-     "line": 107,
-     "column": 12
-    },
-    "end": {
-     "line": 107,
-     "column": 31
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 107,
-   "type": "binary-expr",
-   "branch": "17[1]",
-   "location": {
-    "start": {
-     "line": 107,
-     "column": 35
-    },
-    "end": {
-     "line": 107,
-     "column": 56
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 109,
-   "type": "if",
-   "branch": "18[0]",
-   "location": {
-    "start": {
-     "line": 109,
-     "column": 15
-    },
-    "end": {
-     "line": 113,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 109,
-   "type": "if",
-   "branch": "18[1]",
-   "location": {
-    "start": {
-     "line": 109,
-     "column": 15
-    },
-    "end": {
-     "line": 113,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 109,
-   "type": "binary-expr",
-   "branch": "19[0]",
-   "location": {
-    "start": {
-     "line": 109,
-     "column": 19
-    },
-    "end": {
-     "line": 109,
-     "column": 39
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 109,
-   "type": "binary-expr",
-   "branch": "19[1]",
-   "location": {
-    "start": {
-     "line": 109,
-     "column": 43
-    },
-    "end": {
-     "line": 109,
-     "column": 64
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 110,
-   "type": "if",
-   "branch": "20[0]",
-   "location": {
-    "start": {
-     "line": 110,
-     "column": 12
-    },
-    "end": {
-     "line": 112,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 110,
-   "type": "if",
-   "branch": "20[1]",
-   "location": {
-    "start": {
-     "line": 110,
-     "column": 12
-    },
-    "end": {
-     "line": 112,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 117,
-   "type": "if",
-   "branch": "21[0]",
-   "location": {
-    "start": {
-     "line": 117,
-     "column": 8
-    },
-    "end": {
-     "line": 123,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 117,
-   "type": "if",
-   "branch": "21[1]",
-   "location": {
-    "start": {
-     "line": 117,
-     "column": 8
-    },
-    "end": {
-     "line": 123,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 117,
-   "type": "binary-expr",
-   "branch": "22[0]",
-   "location": {
-    "start": {
-     "line": 117,
-     "column": 12
-    },
-    "end": {
-     "line": 117,
-     "column": 31
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 117,
-   "type": "binary-expr",
-   "branch": "22[1]",
-   "location": {
-    "start": {
-     "line": 117,
-     "column": 35
-    },
-    "end": {
-     "line": 117,
-     "column": 56
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 119,
-   "type": "if",
-   "branch": "23[0]",
-   "location": {
-    "start": {
-     "line": 119,
-     "column": 15
-    },
-    "end": {
-     "line": 123,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 119,
-   "type": "if",
-   "branch": "23[1]",
-   "location": {
-    "start": {
-     "line": 119,
-     "column": 15
-    },
-    "end": {
-     "line": 123,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 119,
-   "type": "binary-expr",
-   "branch": "24[0]",
-   "location": {
-    "start": {
-     "line": 119,
-     "column": 19
-    },
-    "end": {
-     "line": 119,
-     "column": 39
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 119,
-   "type": "binary-expr",
-   "branch": "24[1]",
-   "location": {
-    "start": {
-     "line": 119,
-     "column": 43
-    },
-    "end": {
-     "line": 119,
-     "column": 64
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 120,
-   "type": "if",
-   "branch": "25[0]",
-   "location": {
-    "start": {
-     "line": 120,
-     "column": 12
-    },
-    "end": {
-     "line": 122,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/collectionsizevalidator.ts",
-   "line": 120,
-   "type": "if",
-   "branch": "25[1]",
-   "location": {
-    "start": {
-     "line": 120,
-     "column": 12
-    },
-    "end": {
-     "line": 122,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/declaration.ts",
-   "line": 63,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 63,
-     "column": 8
-    },
-    "end": {
-     "line": 65,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
   },
   {
    "file": "src/introspect/declaration.ts",
@@ -2218,7 +1465,10 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "plan-owner-decision",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "The `if (hasFactories)` branch of Decorated.process(). It is reachable with the exported base DecoratorFactory (whose newDecorator returns null) registered through ModelManager.addDecoratorFactory before a decorated model is added, with no stub. The oracle cannot record it today: addDecoratorFactory is in lib/ops.js MM_TAINT, and a DecoratorFactory instance has no encoding in lib/codec.js. Recording it needs a codec change (a factory encoding, and addDecoratorFactory as a model manager step); handed to accordproject/concerto-rust#94. Lines 107 and 112 are not reachable with the base factory: 107[0]/[1] and 112[1] need a factory whose newDecorator returns a decorator, i.e. a subclass carrying code (test/introspect/decorators.js), which stays unrecordable (also handed to #94)."
   },
   {
    "file": "src/introspect/decorated.ts",
@@ -2235,7 +1485,10 @@
      "column": 25
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "Decorator-factory path of Decorated.process(): the loop over factories and its `if (decorator) break` only take both ways with a factory whose newDecorator returns a decorator, which means a DecoratorFactory subclass carrying code (test/introspect/decorators.js). addDecoratorFactory is in MM_TAINT, and code is not encodable."
   },
   {
    "file": "src/introspect/decorated.ts",
@@ -2252,7 +1505,10 @@
      "column": 25
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "Decorator-factory path of Decorated.process(): the loop over factories and its `if (decorator) break` only take both ways with a factory whose newDecorator returns a decorator, which means a DecoratorFactory subclass carrying code (test/introspect/decorators.js). addDecoratorFactory is in MM_TAINT, and code is not encodable."
   },
   {
    "file": "src/introspect/decorated.ts",
@@ -2269,7 +1525,10 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "The false side of `if (!decorator)` in Decorated.process(): only taken when a registered factory returned a decorator, which needs a DecoratorFactory subclass carrying code (test/introspect/decorators.js). addDecoratorFactory is in MM_TAINT, and code is not encodable."
   },
   {
    "file": "src/introspect/decorator.ts",
@@ -2307,108 +1566,6 @@
   },
   {
    "file": "src/introspect/field.ts",
-   "line": 165,
-   "type": "if",
-   "branch": "7[0]",
-   "location": {
-    "start": {
-     "line": 165,
-     "column": 8
-    },
-    "end": {
-     "line": 167,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
-   "line": 175,
-   "type": "switch",
-   "branch": "8[1]",
-   "location": {
-    "start": {
-     "line": 175,
-     "column": 8
-    },
-    "end": {
-     "line": 177,
-     "column": 18
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
-   "line": 179,
-   "type": "switch",
-   "branch": "8[2]",
-   "location": {
-    "start": {
-     "line": 179,
-     "column": 8
-    },
-    "end": {
-     "line": 181,
-     "column": 18
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
-   "line": 183,
-   "type": "switch",
-   "branch": "8[3]",
-   "location": {
-    "start": {
-     "line": 183,
-     "column": 8
-    },
-    "end": {
-     "line": 185,
-     "column": 18
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
-   "line": 187,
-   "type": "switch",
-   "branch": "8[4]",
-   "location": {
-    "start": {
-     "line": 187,
-     "column": 8
-    },
-    "end": {
-     "line": 189,
-     "column": 18
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
-   "line": 191,
-   "type": "switch",
-   "branch": "8[5]",
-   "location": {
-    "start": {
-     "line": 191,
-     "column": 8
-    },
-    "end": {
-     "line": 193,
-     "column": 18
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/field.ts",
    "line": 194,
    "type": "switch",
    "branch": "8[6]",
@@ -2422,194 +1579,10 @@
      "column": 75
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapdeclaration.ts",
-   "line": 62,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 62,
-     "column": 8
-    },
-    "end": {
-     "line": 64,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapdeclaration.ts",
-   "line": 66,
-   "type": "if",
-   "branch": "2[0]",
-   "location": {
-    "start": {
-     "line": 66,
-     "column": 8
-    },
-    "end": {
-     "line": 68,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapdeclaration.ts",
-   "line": 70,
-   "type": "if",
-   "branch": "3[0]",
-   "location": {
-    "start": {
-     "line": 70,
-     "column": 8
-    },
-    "end": {
-     "line": 72,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapvaluetype.ts",
-   "line": 97,
-   "type": "if",
-   "branch": "3[0]",
-   "location": {
-    "start": {
-     "line": 97,
-     "column": 12
-    },
-    "end": {
-     "line": 99,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapvaluetype.ts",
-   "line": 102,
-   "type": "if",
-   "branch": "4[0]",
-   "location": {
-    "start": {
-     "line": 102,
-     "column": 12
-    },
-    "end": {
-     "line": 104,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/mapvaluetype.ts",
-   "line": 107,
-   "type": "if",
-   "branch": "6[0]",
-   "location": {
-    "start": {
-     "line": 107,
-     "column": 12
-    },
-    "end": {
-     "line": 109,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 180,
-   "type": "if",
-   "branch": "8[0]",
-   "location": {
-    "start": {
-     "line": 180,
-     "column": 8
-    },
-    "end": {
-     "line": 185,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 180,
-   "type": "if",
-   "branch": "8[1]",
-   "location": {
-    "start": {
-     "line": 180,
-     "column": 8
-    },
-    "end": {
-     "line": 185,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 425,
-   "type": "if",
-   "branch": "24[0]",
-   "location": {
-    "start": {
-     "line": 425,
-     "column": 16
-    },
-    "end": {
-     "line": 429,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 447,
-   "type": "if",
-   "branch": "25[1]",
-   "location": {
-    "start": {
-     "line": 447,
-     "column": 8
-    },
-    "end": {
-     "line": 465,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 451,
-   "type": "if",
-   "branch": "27[0]",
-   "location": {
-    "start": {
-     "line": 451,
-     "column": 16
-    },
-    "end": {
-     "line": 456,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getScalarField()'s `Unrecognized scalar type` default. ModelFile only builds a ScalarDeclaration for the six scalar $classes (modelfile.ts, the switch in fromAst), so a real scalar field always matches a case. The unit suite forces it with sinon.createStubInstance(ScalarDeclaration) given a hand-made ast.$class FooScalar (test/introspect/scalars.js 'should throw for unknown scalar type'). "
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2627,40 +1600,6 @@
     }
    },
    "covered_by_suite": false
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 726,
-   "type": "if",
-   "branch": "44[0]",
-   "location": {
-    "start": {
-     "line": 726,
-     "column": 12
-    },
-    "end": {
-     "line": 728,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/modelfile.ts",
-   "line": 756,
-   "type": "switch",
-   "branch": "49[0]",
-   "location": {
-    "start": {
-     "line": 756,
-     "column": 12
-    },
-    "end": {
-     "line": 757,
-     "column": 71
-    }
-   },
-   "covered_by_suite": true
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2694,7 +1633,10 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2711,7 +1653,10 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2728,7 +1673,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2745,7 +1693,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2762,7 +1713,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2796,7 +1750,10 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2813,7 +1770,10 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2830,7 +1790,10 @@
      "column": 46
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2847,7 +1810,10 @@
      "column": 67
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2864,7 +1830,10 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2881,7 +1850,10 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2898,7 +1870,10 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2915,7 +1890,10 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2932,7 +1910,10 @@
      "column": 32
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2949,7 +1930,10 @@
      "column": 51
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -2966,7 +1950,10 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -3000,7 +1987,10 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -3017,7 +2007,10 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -3034,7 +2027,10 @@
      "column": 36
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -3051,7 +2047,10 @@
      "column": 55
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -3068,7 +2067,10 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -3085,7 +2087,10 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -3102,7 +2107,10 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -3119,7 +2127,10 @@
      "column": 21
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -3136,7 +2147,10 @@
      "column": 40
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/modelfile.ts",
@@ -3153,534 +2167,10 @@
      "column": 71
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 63,
-   "type": "if",
-   "branch": "2[0]",
-   "location": {
-    "start": {
-     "line": 63,
-     "column": 8
-    },
-    "end": {
-     "line": 72,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 76,
-   "type": "if",
-   "branch": "8[0]",
-   "location": {
-    "start": {
-     "line": 76,
-     "column": 12
-    },
-    "end": {
-     "line": 78,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 80,
-   "type": "if",
-   "branch": "10[0]",
-   "location": {
-    "start": {
-     "line": 80,
-     "column": 12
-    },
-    "end": {
-     "line": 82,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 109,
-   "type": "if",
-   "branch": "12[1]",
-   "location": {
-    "start": {
-     "line": 109,
-     "column": 8
-    },
-    "end": {
-     "line": 117,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 110,
-   "type": "if",
-   "branch": "13[0]",
-   "location": {
-    "start": {
-     "line": 110,
-     "column": 12
-    },
-    "end": {
-     "line": 112,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 114,
-   "type": "if",
-   "branch": "15[0]",
-   "location": {
-    "start": {
-     "line": 114,
-     "column": 12
-    },
-    "end": {
-     "line": 116,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 138,
-   "type": "if",
-   "branch": "17[0]",
-   "location": {
-    "start": {
-     "line": 138,
-     "column": 8
-    },
-    "end": {
-     "line": 140,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 138,
-   "type": "if",
-   "branch": "17[1]",
-   "location": {
-    "start": {
-     "line": 138,
-     "column": 8
-    },
-    "end": {
-     "line": 140,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 143,
-   "type": "if",
-   "branch": "18[0]",
-   "location": {
-    "start": {
-     "line": 143,
-     "column": 8
-    },
-    "end": {
-     "line": 149,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 143,
-   "type": "if",
-   "branch": "18[1]",
-   "location": {
-    "start": {
-     "line": 143,
-     "column": 8
-    },
-    "end": {
-     "line": 149,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 143,
-   "type": "binary-expr",
-   "branch": "19[0]",
-   "location": {
-    "start": {
-     "line": 143,
-     "column": 12
-    },
-    "end": {
-     "line": 143,
-     "column": 34
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 143,
-   "type": "binary-expr",
-   "branch": "19[1]",
-   "location": {
-    "start": {
-     "line": 143,
-     "column": 38
-    },
-    "end": {
-     "line": 143,
-     "column": 62
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 145,
-   "type": "if",
-   "branch": "20[0]",
-   "location": {
-    "start": {
-     "line": 145,
-     "column": 15
-    },
-    "end": {
-     "line": 149,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 145,
-   "type": "if",
-   "branch": "20[1]",
-   "location": {
-    "start": {
-     "line": 145,
-     "column": 15
-    },
-    "end": {
-     "line": 149,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 145,
-   "type": "binary-expr",
-   "branch": "21[0]",
-   "location": {
-    "start": {
-     "line": 145,
-     "column": 19
-    },
-    "end": {
-     "line": 145,
-     "column": 42
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 145,
-   "type": "binary-expr",
-   "branch": "21[1]",
-   "location": {
-    "start": {
-     "line": 145,
-     "column": 46
-    },
-    "end": {
-     "line": 145,
-     "column": 70
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 146,
-   "type": "if",
-   "branch": "22[0]",
-   "location": {
-    "start": {
-     "line": 146,
-     "column": 12
-    },
-    "end": {
-     "line": 148,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 146,
-   "type": "if",
-   "branch": "22[1]",
-   "location": {
-    "start": {
-     "line": 146,
-     "column": 12
-    },
-    "end": {
-     "line": 148,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 152,
-   "type": "if",
-   "branch": "23[0]",
-   "location": {
-    "start": {
-     "line": 152,
-     "column": 8
-    },
-    "end": {
-     "line": 158,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 152,
-   "type": "if",
-   "branch": "23[1]",
-   "location": {
-    "start": {
-     "line": 152,
-     "column": 8
-    },
-    "end": {
-     "line": 158,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 152,
-   "type": "binary-expr",
-   "branch": "24[0]",
-   "location": {
-    "start": {
-     "line": 152,
-     "column": 12
-    },
-    "end": {
-     "line": 152,
-     "column": 34
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 152,
-   "type": "binary-expr",
-   "branch": "24[1]",
-   "location": {
-    "start": {
-     "line": 152,
-     "column": 38
-    },
-    "end": {
-     "line": 152,
-     "column": 62
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 154,
-   "type": "if",
-   "branch": "25[0]",
-   "location": {
-    "start": {
-     "line": 154,
-     "column": 15
-    },
-    "end": {
-     "line": 158,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 154,
-   "type": "if",
-   "branch": "25[1]",
-   "location": {
-    "start": {
-     "line": 154,
-     "column": 15
-    },
-    "end": {
-     "line": 158,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 154,
-   "type": "binary-expr",
-   "branch": "26[0]",
-   "location": {
-    "start": {
-     "line": 154,
-     "column": 19
-    },
-    "end": {
-     "line": 154,
-     "column": 42
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 154,
-   "type": "binary-expr",
-   "branch": "26[1]",
-   "location": {
-    "start": {
-     "line": 154,
-     "column": 46
-    },
-    "end": {
-     "line": 154,
-     "column": 70
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 155,
-   "type": "if",
-   "branch": "27[0]",
-   "location": {
-    "start": {
-     "line": 155,
-     "column": 12
-    },
-    "end": {
-     "line": 157,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/numbervalidator.ts",
-   "line": 155,
-   "type": "if",
-   "branch": "27[1]",
-   "location": {
-    "start": {
-     "line": 155,
-     "column": 12
-    },
-    "end": {
-     "line": 157,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/property.ts",
-   "line": 85,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 85,
-     "column": 8
-    },
-    "end": {
-     "line": 87,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/property.ts",
-   "line": 91,
-   "type": "if",
-   "branch": "1[0]",
-   "location": {
-    "start": {
-     "line": 91,
-     "column": 8
-    },
-    "end": {
-     "line": 93,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/property.ts",
-   "line": 117,
-   "type": "cond-expr",
-   "branch": "3[1]",
-   "location": {
-    "start": {
-     "line": 117,
-     "column": 61
-    },
-    "end": {
-     "line": 117,
-     "column": 65
-    }
-   },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelFile.filter() (@private). Its only caller is BaseModelManager.filter(predicate, options) (basemodelmanager.ts:917), and both take the predicate as a JavaScript function. The recorder can only encode plain data, so every ModelManager.filter call is skipped as nonplain:function (fixtures/manifest.json, skipped_calls) and nothing inside it can become a fixture, whatever the predicate. The unit suite reaches these branches with real predicates, not stubs (test/modelmanager.js '#filter', test/introspect/modelfile.js), so this is not P2-10's to lift either: covering it needs a predicate encoding in the fixture schema, which is a change to the oracle's design, not a new input."
   },
   {
    "file": "src/introspect/property.ts",
@@ -3697,7 +2187,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "Property.getFullyQualifiedTypeName() on a property with no parent. Every Property the public API returns is built by its ClassDeclaration, which always sets the parent. The unit suite forces it with sinon.stub(field, 'getParent') (test/introspect/property_ex.js '#getFullyQualifiedTypeName'). "
   },
   {
    "file": "src/introspect/property.ts",
@@ -3714,41 +2207,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/property.ts",
-   "line": 217,
-   "type": "if",
-   "branch": "16[0]",
-   "location": {
-    "start": {
-     "line": 217,
-     "column": 8
-    },
-    "end": {
-     "line": 219,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/relationshipdeclaration.ts",
-   "line": 53,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 53,
-     "column": 8
-    },
-    "end": {
-     "line": 55,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "Property.getFullyQualifiedTypeName() on a property whose parent has no ModelFile. A declaration built by ModelFile always has its model file. The unit suite forces it with sinon.stub(person, 'getModelFile') (test/introspect/property_ex.js). "
   },
   {
    "file": "src/introspect/relationshipdeclaration.ts",
@@ -3765,24 +2227,10 @@
      "column": 13
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/scalardeclaration.ts",
-   "line": 65,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 65,
-     "column": 8
-    },
-    "end": {
-     "line": 71,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "RelationshipDeclaration.validate()'s `points to a missing type` throw. With real objects Property.validate() (called first) already rejects a missing type (`Type ... is not defined`, `No type ... in namespace`, checked against src with a relationship to a missing local, imported and unregistered type), and the other-namespace lookup throws rather than returning null. The unit suite reaches it by replacing modelManager.getType with a function returning null (test/introspect/relationshipdeclaration.js). "
   },
   {
    "file": "src/introspect/scalardeclaration.ts",
@@ -3799,7 +2247,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "plan-owner-decision",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ScalarDeclaration.process()'s `type = null` fallback for an unknown $class. ModelFile builds a ScalarDeclaration only for the six scalar $classes (modelfile.ts fromAst switch; anything else is rejected), so the only way in is the exported ScalarDeclaration constructor called directly with an AST that has no scalar $class, as test/introspect/scalardeclaration.js does. The oracle deliberately records no introspection constructors (a declaration built outside its model file is also not encodable: nonplain:declaration-not-in-modelfile). Recording it would mean adding a ScalarDeclaration.new op and an encoding for the parent ModelFile; handed to accordproject/concerto-rust#94."
   },
   {
    "file": "src/introspect/scalardeclaration.ts",
@@ -3820,125 +2271,6 @@
   },
   {
    "file": "src/introspect/stringvalidator.ts",
-   "line": 63,
-   "type": "if",
-   "branch": "1[0]",
-   "location": {
-    "start": {
-     "line": 63,
-     "column": 12
-    },
-    "end": {
-     "line": 72,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 63,
-   "type": "binary-expr",
-   "branch": "2[1]",
-   "location": {
-    "start": {
-     "line": 63,
-     "column": 42
-    },
-    "end": {
-     "line": 63,
-     "column": 65
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 68,
-   "type": "if",
-   "branch": "7[0]",
-   "location": {
-    "start": {
-     "line": 68,
-     "column": 19
-    },
-    "end": {
-     "line": 72,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 101,
-   "type": "if",
-   "branch": "15[1]",
-   "location": {
-    "start": {
-     "line": 101,
-     "column": 8
-    },
-    "end": {
-     "line": 113,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 103,
-   "type": "if",
-   "branch": "16[0]",
-   "location": {
-    "start": {
-     "line": 103,
-     "column": 12
-    },
-    "end": {
-     "line": 105,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 106,
-   "type": "if",
-   "branch": "18[0]",
-   "location": {
-    "start": {
-     "line": 106,
-     "column": 12
-    },
-    "end": {
-     "line": 108,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 110,
-   "type": "if",
-   "branch": "20[0]",
-   "location": {
-    "start": {
-     "line": 110,
-     "column": 12
-    },
-    "end": {
-     "line": 112,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
    "line": 123,
    "type": "if",
    "branch": "22[0]",
@@ -3953,448 +2285,6 @@
     }
    },
    "covered_by_suite": false
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 170,
-   "type": "if",
-   "branch": "23[0]",
-   "location": {
-    "start": {
-     "line": 170,
-     "column": 8
-    },
-    "end": {
-     "line": 172,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 170,
-   "type": "if",
-   "branch": "23[1]",
-   "location": {
-    "start": {
-     "line": 170,
-     "column": 8
-    },
-    "end": {
-     "line": 172,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 174,
-   "type": "if",
-   "branch": "24[0]",
-   "location": {
-    "start": {
-     "line": 174,
-     "column": 8
-    },
-    "end": {
-     "line": 178,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 174,
-   "type": "if",
-   "branch": "24[1]",
-   "location": {
-    "start": {
-     "line": 174,
-     "column": 8
-    },
-    "end": {
-     "line": 178,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 176,
-   "type": "if",
-   "branch": "25[0]",
-   "location": {
-    "start": {
-     "line": 176,
-     "column": 15
-    },
-    "end": {
-     "line": 178,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 176,
-   "type": "if",
-   "branch": "25[1]",
-   "location": {
-    "start": {
-     "line": 176,
-     "column": 15
-    },
-    "end": {
-     "line": 178,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 182,
-   "type": "if",
-   "branch": "26[0]",
-   "location": {
-    "start": {
-     "line": 182,
-     "column": 8
-    },
-    "end": {
-     "line": 188,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 182,
-   "type": "if",
-   "branch": "26[1]",
-   "location": {
-    "start": {
-     "line": 182,
-     "column": 8
-    },
-    "end": {
-     "line": 188,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 182,
-   "type": "binary-expr",
-   "branch": "27[0]",
-   "location": {
-    "start": {
-     "line": 182,
-     "column": 12
-    },
-    "end": {
-     "line": 182,
-     "column": 33
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 182,
-   "type": "binary-expr",
-   "branch": "27[1]",
-   "location": {
-    "start": {
-     "line": 182,
-     "column": 37
-    },
-    "end": {
-     "line": 182,
-     "column": 60
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 184,
-   "type": "if",
-   "branch": "28[0]",
-   "location": {
-    "start": {
-     "line": 184,
-     "column": 15
-    },
-    "end": {
-     "line": 188,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 184,
-   "type": "if",
-   "branch": "28[1]",
-   "location": {
-    "start": {
-     "line": 184,
-     "column": 15
-    },
-    "end": {
-     "line": 188,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 184,
-   "type": "binary-expr",
-   "branch": "29[0]",
-   "location": {
-    "start": {
-     "line": 184,
-     "column": 19
-    },
-    "end": {
-     "line": 184,
-     "column": 41
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 184,
-   "type": "binary-expr",
-   "branch": "29[1]",
-   "location": {
-    "start": {
-     "line": 184,
-     "column": 45
-    },
-    "end": {
-     "line": 184,
-     "column": 68
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 185,
-   "type": "if",
-   "branch": "30[0]",
-   "location": {
-    "start": {
-     "line": 185,
-     "column": 12
-    },
-    "end": {
-     "line": 187,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 185,
-   "type": "if",
-   "branch": "30[1]",
-   "location": {
-    "start": {
-     "line": 185,
-     "column": 12
-    },
-    "end": {
-     "line": 187,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 191,
-   "type": "if",
-   "branch": "31[0]",
-   "location": {
-    "start": {
-     "line": 191,
-     "column": 8
-    },
-    "end": {
-     "line": 197,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 191,
-   "type": "if",
-   "branch": "31[1]",
-   "location": {
-    "start": {
-     "line": 191,
-     "column": 8
-    },
-    "end": {
-     "line": 197,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 191,
-   "type": "binary-expr",
-   "branch": "32[0]",
-   "location": {
-    "start": {
-     "line": 191,
-     "column": 12
-    },
-    "end": {
-     "line": 191,
-     "column": 33
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 191,
-   "type": "binary-expr",
-   "branch": "32[1]",
-   "location": {
-    "start": {
-     "line": 191,
-     "column": 37
-    },
-    "end": {
-     "line": 191,
-     "column": 60
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 193,
-   "type": "if",
-   "branch": "33[0]",
-   "location": {
-    "start": {
-     "line": 193,
-     "column": 15
-    },
-    "end": {
-     "line": 197,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 193,
-   "type": "if",
-   "branch": "33[1]",
-   "location": {
-    "start": {
-     "line": 193,
-     "column": 15
-    },
-    "end": {
-     "line": 197,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 193,
-   "type": "binary-expr",
-   "branch": "34[0]",
-   "location": {
-    "start": {
-     "line": 193,
-     "column": 19
-    },
-    "end": {
-     "line": 193,
-     "column": 41
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 193,
-   "type": "binary-expr",
-   "branch": "34[1]",
-   "location": {
-    "start": {
-     "line": 193,
-     "column": 45
-    },
-    "end": {
-     "line": 193,
-     "column": 68
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 194,
-   "type": "if",
-   "branch": "35[0]",
-   "location": {
-    "start": {
-     "line": 194,
-     "column": 12
-    },
-    "end": {
-     "line": 196,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/introspect/stringvalidator.ts",
-   "line": 194,
-   "type": "if",
-   "branch": "35[1]",
-   "location": {
-    "start": {
-     "line": 194,
-     "column": 12
-    },
-    "end": {
-     "line": 196,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
   },
   {
    "file": "src/model/resourceid.ts",
@@ -4550,74 +2440,6 @@
    "covered_by_suite": false
   },
   {
-   "file": "src/model/typed.ts",
-   "line": 189,
-   "type": "if",
-   "branch": "10[0]",
-   "location": {
-    "start": {
-     "line": 189,
-     "column": 8
-    },
-    "end": {
-     "line": 191,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/model/typed.ts",
-   "line": 189,
-   "type": "if",
-   "branch": "10[1]",
-   "location": {
-    "start": {
-     "line": 189,
-     "column": 8
-    },
-    "end": {
-     "line": 191,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/model/typed.ts",
-   "line": 195,
-   "type": "if",
-   "branch": "11[0]",
-   "location": {
-    "start": {
-     "line": 195,
-     "column": 12
-    },
-    "end": {
-     "line": 197,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/model/typed.ts",
-   "line": 195,
-   "type": "if",
-   "branch": "11[1]",
-   "location": {
-    "start": {
-     "line": 195,
-     "column": 12
-    },
-    "end": {
-     "line": 197,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
    "file": "src/modelloader.ts",
    "line": 46,
    "type": "if",
@@ -4632,7 +2454,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4649,7 +2474,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4666,7 +2494,10 @@
      "column": 102
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4683,7 +2514,10 @@
      "column": 28
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4717,7 +2551,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4734,7 +2571,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4751,7 +2591,10 @@
      "column": 15
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4768,7 +2611,10 @@
      "column": 31
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4785,7 +2631,10 @@
      "column": 157
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4802,7 +2651,10 @@
      "column": 28
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4836,7 +2688,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4853,7 +2708,10 @@
      "column": 9
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4870,7 +2728,10 @@
      "column": 15
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelloader.ts",
@@ -4887,7 +2748,10 @@
      "column": 31
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "unrecordable",
+   "handed_to": "accordproject/concerto-rust#94",
+   "reason": "ModelLoader.addModel / loadModelManager / loadModelManagerFromModelFiles are static async methods that read .cto files from disk or URLs. lib/ops.js has no ModelLoader op and the recorder skips any async result (async-result), so no call is recorded. The unit suite calls them for real (test/modelloader.js), not through stubs; covering them needs async op support in the recorder and judge, which is a change to the oracle's design."
   },
   {
    "file": "src/modelmanager.ts",
@@ -4907,125 +2771,6 @@
    "covered_by_suite": false
   },
   {
-   "file": "src/modelutil.ts",
-   "line": 195,
-   "type": "if",
-   "branch": "13[0]",
-   "location": {
-    "start": {
-     "line": 195,
-     "column": 8
-    },
-    "end": {
-     "line": 197,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer.ts",
-   "line": 56,
-   "type": "if",
-   "branch": "0[0]",
-   "location": {
-    "start": {
-     "line": 56,
-     "column": 8
-    },
-    "end": {
-     "line": 60,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer.ts",
-   "line": 58,
-   "type": "if",
-   "branch": "1[0]",
-   "location": {
-    "start": {
-     "line": 58,
-     "column": 15
-    },
-    "end": {
-     "line": 60,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/instancegenerator.ts",
-   "line": 44,
-   "type": "if",
-   "branch": "4[1]",
-   "location": {
-    "start": {
-     "line": 44,
-     "column": 15
-    },
-    "end": {
-     "line": 48,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/instancegenerator.ts",
-   "line": 88,
-   "type": "if",
-   "branch": "10[1]",
-   "location": {
-    "start": {
-     "line": 88,
-     "column": 16
-    },
-    "end": {
-     "line": 90,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/instancegenerator.ts",
-   "line": 91,
-   "type": "if",
-   "branch": "11[0]",
-   "location": {
-    "start": {
-     "line": 91,
-     "column": 16
-    },
-    "end": {
-     "line": 93,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/instancegenerator.ts",
-   "line": 91,
-   "type": "if",
-   "branch": "11[1]",
-   "location": {
-    "start": {
-     "line": 91,
-     "column": 16
-    },
-    "end": {
-     "line": 93,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
    "file": "src/serializer/instancegenerator.ts",
    "line": 119,
    "type": "if",
@@ -5037,465 +2782,6 @@
     },
     "end": {
      "line": 121,
-     "column": 9
-    }
-   },
-   "covered_by_suite": false
-  },
-  {
-   "file": "src/serializer/instancegenerator.ts",
-   "line": 128,
-   "type": "if",
-   "branch": "16[0]",
-   "location": {
-    "start": {
-     "line": 128,
-     "column": 16
-    },
-    "end": {
-     "line": 130,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/instancegenerator.ts",
-   "line": 133,
-   "type": "if",
-   "branch": "17[0]",
-   "location": {
-    "start": {
-     "line": 133,
-     "column": 16
-    },
-    "end": {
-     "line": 135,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/instancegenerator.ts",
-   "line": 145,
-   "type": "if",
-   "branch": "19[0]",
-   "location": {
-    "start": {
-     "line": 145,
-     "column": 16
-    },
-    "end": {
-     "line": 149,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/instancegenerator.ts",
-   "line": 169,
-   "type": "if",
-   "branch": "23[0]",
-   "location": {
-    "start": {
-     "line": 169,
-     "column": 16
-    },
-    "end": {
-     "line": 171,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/instancegenerator.ts",
-   "line": 172,
-   "type": "if",
-   "branch": "24[0]",
-   "location": {
-    "start": {
-     "line": 172,
-     "column": 16
-    },
-    "end": {
-     "line": 177,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 75,
-   "type": "if",
-   "branch": "5[1]",
-   "location": {
-    "start": {
-     "line": 75,
-     "column": 15
-    },
-    "end": {
-     "line": 79,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 115,
-   "type": "cond-expr",
-   "branch": "8[1]",
-   "location": {
-    "start": {
-     "line": 115,
-     "column": 22
-    },
-    "end": {
-     "line": 115,
-     "column": 94
-    }
-   },
-   "covered_by_suite": false
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 141,
-   "type": "if",
-   "branch": "9[0]",
-   "location": {
-    "start": {
-     "line": 141,
-     "column": 8
-    },
-    "end": {
-     "line": 143,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 148,
-   "type": "if",
-   "branch": "10[0]",
-   "location": {
-    "start": {
-     "line": 148,
-     "column": 8
-    },
-    "end": {
-     "line": 156,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 150,
-   "type": "if",
-   "branch": "12[0]",
-   "location": {
-    "start": {
-     "line": 150,
-     "column": 12
-    },
-    "end": {
-     "line": 155,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 150,
-   "type": "if",
-   "branch": "12[1]",
-   "location": {
-    "start": {
-     "line": 150,
-     "column": 12
-    },
-    "end": {
-     "line": 155,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 159,
-   "type": "if",
-   "branch": "13[0]",
-   "location": {
-    "start": {
-     "line": 159,
-     "column": 8
-    },
-    "end": {
-     "line": 161,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 159,
-   "type": "binary-expr",
-   "branch": "14[1]",
-   "location": {
-    "start": {
-     "line": 159,
-     "column": 40
-    },
-    "end": {
-     "line": 159,
-     "column": 42
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 263,
-   "type": "if",
-   "branch": "25[0]",
-   "location": {
-    "start": {
-     "line": 263,
-     "column": 16
-    },
-    "end": {
-     "line": 278,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 263,
-   "type": "binary-expr",
-   "branch": "26[1]",
-   "location": {
-    "start": {
-     "line": 263,
-     "column": 60
-    },
-    "end": {
-     "line": 263,
-     "column": 84
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 265,
-   "type": "if",
-   "branch": "27[0]",
-   "location": {
-    "start": {
-     "line": 265,
-     "column": 20
-    },
-    "end": {
-     "line": 274,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 265,
-   "type": "if",
-   "branch": "27[1]",
-   "location": {
-    "start": {
-     "line": 265,
-     "column": 20
-    },
-    "end": {
-     "line": 274,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 281,
-   "type": "if",
-   "branch": "28[0]",
-   "location": {
-    "start": {
-     "line": 281,
-     "column": 15
-    },
-    "end": {
-     "line": 296,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 281,
-   "type": "binary-expr",
-   "branch": "29[1]",
-   "location": {
-    "start": {
-     "line": 281,
-     "column": 59
-    },
-    "end": {
-     "line": 281,
-     "column": 82
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 283,
-   "type": "if",
-   "branch": "30[0]",
-   "location": {
-    "start": {
-     "line": 283,
-     "column": 12
-    },
-    "end": {
-     "line": 292,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 283,
-   "type": "if",
-   "branch": "30[1]",
-   "location": {
-    "start": {
-     "line": 283,
-     "column": 12
-    },
-    "end": {
-     "line": 292,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 307,
-   "type": "if",
-   "branch": "31[0]",
-   "location": {
-    "start": {
-     "line": 307,
-     "column": 8
-    },
-    "end": {
-     "line": 313,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 309,
-   "type": "binary-expr",
-   "branch": "32[0]",
-   "location": {
-    "start": {
-     "line": 309,
-     "column": 16
-    },
-    "end": {
-     "line": 309,
-     "column": 52
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 309,
-   "type": "binary-expr",
-   "branch": "32[1]",
-   "location": {
-    "start": {
-     "line": 309,
-     "column": 56
-    },
-    "end": {
-     "line": 309,
-     "column": 92
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 310,
-   "type": "if",
-   "branch": "33[0]",
-   "location": {
-    "start": {
-     "line": 310,
-     "column": 12
-    },
-    "end": {
-     "line": 312,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 310,
-   "type": "if",
-   "branch": "33[1]",
-   "location": {
-    "start": {
-     "line": 310,
-     "column": 12
-    },
-    "end": {
-     "line": 312,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsongenerator.ts",
-   "line": 314,
-   "type": "if",
-   "branch": "34[0]",
-   "location": {
-    "start": {
-     "line": 314,
-     "column": 8
-    },
-    "end": {
-     "line": 318,
      "column": 9
     }
    },
@@ -5516,7 +2802,10 @@
      "column": 112
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "JSONPopulator's constructor defaulting strictQualifiedDateTimes when it is undefined. Its only call site, Serializer.fromJSON (serializer.ts:196), always passes a boolean (`options.strictQualifiedDateTimes === true`), so only a direct `new JSONPopulator(...)` reaches it, as test/serializer/jsonpopulator.js does. "
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -5537,23 +2826,6 @@
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
-   "line": 154,
-   "type": "if",
-   "branch": "14[1]",
-   "location": {
-    "start": {
-     "line": 154,
-     "column": 15
-    },
-    "end": {
-     "line": 158,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
    "line": 171,
    "type": "binary-expr",
    "branch": "15[1]",
@@ -5567,7 +2839,10 @@
      "column": 65
     }
    },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (parameters.path = new TypedStack('$'))` in visitClassDeclaration. Serializer.fromJSON enters through accept() -> visit(), which seeds parameters.path first (jsonpopulator.ts:144), so the path is always set here; only calling visitClassDeclaration directly without a path reaches it (test/serializer/jsonpopulator.js). Listed not-liftable by P2-10 (root object path injection) in lifted/MAP.tsv."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -5618,24 +2893,10 @@
      "column": 65
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 286,
-   "type": "if",
-   "branch": "26[0]",
-   "location": {
-    "start": {
-     "line": 286,
-     "column": 12
-    },
-    "end": {
-     "line": 289,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in visitField: as line 171, visit() has always seeded the path; only a direct visitField call without one reaches it. Listed not-liftable by P2-10 in lifted/MAP.tsv."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -5652,58 +2913,10 @@
      "column": 65
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 368,
-   "type": "if",
-   "branch": "34[0]",
-   "location": {
-    "start": {
-     "line": 368,
-     "column": 12
-    },
-    "end": {
-     "line": 380,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 368,
-   "type": "binary-expr",
-   "branch": "35[2]",
-   "location": {
-    "start": {
-     "line": 368,
-     "column": 52
-    },
-    "end": {
-     "line": 368,
-     "column": 87
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 370,
-   "type": "if",
-   "branch": "36[0]",
-   "location": {
-    "start": {
-     "line": 370,
-     "column": 19
-    },
-    "end": {
-     "line": 380,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in convertToObject: reached from visitField after visit() has seeded the path; only a direct call without one reaches it."
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
@@ -5724,57 +2937,6 @@
   },
   {
    "file": "src/serializer/jsonpopulator.ts",
-   "line": 390,
-   "type": "if",
-   "branch": "43[0]",
-   "location": {
-    "start": {
-     "line": 390,
-     "column": 16
-    },
-    "end": {
-     "line": 394,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 401,
-   "type": "if",
-   "branch": "44[1]",
-   "location": {
-    "start": {
-     "line": 401,
-     "column": 12
-    },
-    "end": {
-     "line": 405,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 417,
-   "type": "if",
-   "branch": "46[1]",
-   "location": {
-    "start": {
-     "line": 417,
-     "column": 12
-    },
-    "end": {
-     "line": 421,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
    "line": 439,
    "type": "binary-expr",
    "branch": "47[1]",
@@ -5788,296 +2950,10 @@
      "column": 65
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 445,
-   "type": "if",
-   "branch": "48[0]",
-   "location": {
-    "start": {
-     "line": 445,
-     "column": 8
-    },
-    "end": {
-     "line": 447,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 451,
-   "type": "if",
-   "branch": "50[0]",
-   "location": {
-    "start": {
-     "line": 451,
-     "column": 12
-    },
-    "end": {
-     "line": 454,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 459,
-   "type": "if",
-   "branch": "51[1]",
-   "location": {
-    "start": {
-     "line": 459,
-     "column": 16
-    },
-    "end": {
-     "line": 480,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 462,
-   "type": "if",
-   "branch": "52[0]",
-   "location": {
-    "start": {
-     "line": 462,
-     "column": 20
-    },
-    "end": {
-     "line": 464,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 462,
-   "type": "if",
-   "branch": "52[1]",
-   "location": {
-    "start": {
-     "line": 462,
-     "column": 20
-    },
-    "end": {
-     "line": 464,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 467,
-   "type": "if",
-   "branch": "53[0]",
-   "location": {
-    "start": {
-     "line": 467,
-     "column": 20
-    },
-    "end": {
-     "line": 469,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 467,
-   "type": "if",
-   "branch": "53[1]",
-   "location": {
-    "start": {
-     "line": 467,
-     "column": 20
-    },
-    "end": {
-     "line": 469,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 484,
-   "type": "if",
-   "branch": "54[1]",
-   "location": {
-    "start": {
-     "line": 484,
-     "column": 12
-    },
-    "end": {
-     "line": 507,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 486,
-   "type": "if",
-   "branch": "55[0]",
-   "location": {
-    "start": {
-     "line": 486,
-     "column": 19
-    },
-    "end": {
-     "line": 507,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 486,
-   "type": "if",
-   "branch": "55[1]",
-   "location": {
-    "start": {
-     "line": 486,
-     "column": 19
-    },
-    "end": {
-     "line": 507,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 486,
-   "type": "binary-expr",
-   "branch": "56[0]",
-   "location": {
-    "start": {
-     "line": 486,
-     "column": 23
-    },
-    "end": {
-     "line": 486,
-     "column": 50
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 486,
-   "type": "binary-expr",
-   "branch": "56[1]",
-   "location": {
-    "start": {
-     "line": 486,
-     "column": 54
-    },
-    "end": {
-     "line": 486,
-     "column": 70
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 488,
-   "type": "if",
-   "branch": "57[0]",
-   "location": {
-    "start": {
-     "line": 488,
-     "column": 16
-    },
-    "end": {
-     "line": 490,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 488,
-   "type": "if",
-   "branch": "57[1]",
-   "location": {
-    "start": {
-     "line": 488,
-     "column": 16
-    },
-    "end": {
-     "line": 490,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 493,
-   "type": "if",
-   "branch": "58[0]",
-   "location": {
-    "start": {
-     "line": 493,
-     "column": 16
-    },
-    "end": {
-     "line": 495,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/jsonpopulator.ts",
-   "line": 493,
-   "type": "if",
-   "branch": "58[1]",
-   "location": {
-    "start": {
-     "line": 493,
-     "column": 16
-    },
-    "end": {
-     "line": 495,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 81,
-   "type": "if",
-   "branch": "6[1]",
-   "location": {
-    "start": {
-     "line": 81,
-     "column": 15
-    },
-    "end": {
-     "line": 83,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in visitRelationshipDeclaration: as line 171, only a direct call without a seeded path reaches it."
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -6095,57 +2971,6 @@
     }
    },
    "covered_by_suite": false
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 225,
-   "type": "if",
-   "branch": "20[0]",
-   "location": {
-    "start": {
-     "line": 225,
-     "column": 8
-    },
-    "end": {
-     "line": 227,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 236,
-   "type": "if",
-   "branch": "23[1]",
-   "location": {
-    "start": {
-     "line": 236,
-     "column": 20
-    },
-    "end": {
-     "line": 244,
-     "column": 21
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 253,
-   "type": "if",
-   "branch": "26[0]",
-   "location": {
-    "start": {
-     "line": 253,
-     "column": 12
-    },
-    "end": {
-     "line": 255,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
   },
   {
    "file": "src/serializer/resourcevalidator.ts",
@@ -6199,244 +3024,6 @@
    "covered_by_suite": false
   },
   {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 306,
-   "type": "if",
-   "branch": "34[0]",
-   "location": {
-    "start": {
-     "line": 306,
-     "column": 8
-    },
-    "end": {
-     "line": 308,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 318,
-   "type": "if",
-   "branch": "38[0]",
-   "location": {
-    "start": {
-     "line": 318,
-     "column": 16
-    },
-    "end": {
-     "line": 320,
-     "column": 17
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 318,
-   "type": "binary-expr",
-   "branch": "39[1]",
-   "location": {
-    "start": {
-     "line": 318,
-     "column": 47
-    },
-    "end": {
-     "line": 318,
-     "column": 65
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 390,
-   "type": "if",
-   "branch": "44[0]",
-   "location": {
-    "start": {
-     "line": 390,
-     "column": 8
-    },
-    "end": {
-     "line": 392,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 467,
-   "type": "if",
-   "branch": "59[0]",
-   "location": {
-    "start": {
-     "line": 467,
-     "column": 12
-    },
-    "end": {
-     "line": 469,
-     "column": 13
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 492,
-   "type": "if",
-   "branch": "60[1]",
-   "location": {
-    "start": {
-     "line": 492,
-     "column": 8
-    },
-    "end": {
-     "line": 498,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 494,
-   "type": "if",
-   "branch": "61[0]",
-   "location": {
-    "start": {
-     "line": 494,
-     "column": 15
-    },
-    "end": {
-     "line": 498,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 494,
-   "type": "if",
-   "branch": "61[1]",
-   "location": {
-    "start": {
-     "line": 494,
-     "column": 15
-    },
-    "end": {
-     "line": 498,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 494,
-   "type": "binary-expr",
-   "branch": "62[0]",
-   "location": {
-    "start": {
-     "line": 494,
-     "column": 19
-    },
-    "end": {
-     "line": 494,
-     "column": 42
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 494,
-   "type": "binary-expr",
-   "branch": "62[1]",
-   "location": {
-    "start": {
-     "line": 494,
-     "column": 47
-    },
-    "end": {
-     "line": 494,
-     "column": 91
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 494,
-   "type": "binary-expr",
-   "branch": "62[2]",
-   "location": {
-    "start": {
-     "line": 494,
-     "column": 95
-    },
-    "end": {
-     "line": 494,
-     "column": 139
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 502,
-   "type": "if",
-   "branch": "63[0]",
-   "location": {
-    "start": {
-     "line": 502,
-     "column": 8
-    },
-    "end": {
-     "line": 504,
-     "column": 9
-    }
-   },
-   "covered_by_suite": false
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 524,
-   "type": "if",
-   "branch": "66[0]",
-   "location": {
-    "start": {
-     "line": 524,
-     "column": 8
-    },
-    "end": {
-     "line": 541,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/resourcevalidator.ts",
-   "line": 671,
-   "type": "if",
-   "branch": "70[0]",
-   "location": {
-    "start": {
-     "line": 671,
-     "column": 8
-    },
-    "end": {
-     "line": 673,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
    "file": "src/serializer/valuegenerator.ts",
    "line": 80,
    "type": "if",
@@ -6451,24 +3038,10 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 85,
-   "type": "switch",
-   "branch": "5[0]",
-   "location": {
-    "start": {
-     "line": 85,
-     "column": 4
-    },
-    "end": {
-     "line": 88,
-     "column": 10
-    }
-   },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getRange()'s swap when max < min. Its callers pass validator bounds, and model validation already rejects inverted bounds: NumberValidator's constructor throws when lower > upper and StringValidator's when minLength > maxLength (so no model with them can be loaded; see the inverted-bound fixtures earlier in drivers/gaps.spec.js). Only a direct getRange(1.0, 0.0, 'Double') reaches it (test/serializer/valuegenerator.js 'should reverse arguments'). "
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -6485,177 +3058,10 @@
      "column": 17
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 153,
-   "type": "if",
-   "branch": "10[0]",
-   "location": {
-    "start": {
-     "line": 153,
-     "column": 4
-    },
-    "end": {
-     "line": 155,
-     "column": 5
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 153,
-   "type": "if",
-   "branch": "10[1]",
-   "location": {
-    "start": {
-     "line": 153,
-     "column": 4
-    },
-    "end": {
-     "line": 155,
-     "column": 5
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 153,
-   "type": "binary-expr",
-   "branch": "11[0]",
-   "location": {
-    "start": {
-     "line": 153,
-     "column": 8
-    },
-    "end": {
-     "line": 153,
-     "column": 26
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 153,
-   "type": "binary-expr",
-   "branch": "11[1]",
-   "location": {
-    "start": {
-     "line": 153,
-     "column": 30
-    },
-    "end": {
-     "line": 153,
-     "column": 53
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 153,
-   "type": "binary-expr",
-   "branch": "11[2]",
-   "location": {
-    "start": {
-     "line": 153,
-     "column": 57
-    },
-    "end": {
-     "line": 153,
-     "column": 81
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 156,
-   "type": "if",
-   "branch": "12[0]",
-   "location": {
-    "start": {
-     "line": 156,
-     "column": 4
-    },
-    "end": {
-     "line": 158,
-     "column": 5
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 156,
-   "type": "if",
-   "branch": "12[1]",
-   "location": {
-    "start": {
-     "line": 156,
-     "column": 4
-    },
-    "end": {
-     "line": 158,
-     "column": 5
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 156,
-   "type": "binary-expr",
-   "branch": "13[0]",
-   "location": {
-    "start": {
-     "line": 156,
-     "column": 8
-    },
-    "end": {
-     "line": 156,
-     "column": 26
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 156,
-   "type": "binary-expr",
-   "branch": "13[1]",
-   "location": {
-    "start": {
-     "line": 156,
-     "column": 30
-    },
-    "end": {
-     "line": 156,
-     "column": 53
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 156,
-   "type": "binary-expr",
-   "branch": "13[2]",
-   "location": {
-    "start": {
-     "line": 156,
-     "column": 57
-    },
-    "end": {
-     "line": 156,
-     "column": 81
-    }
-   },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getRange()'s default case for a type other than Long, Integer or Double. InstanceGenerator calls it only for those three types and generateString only with 'Integer'; only a direct call on the value generator reaches it (test/serializer/valuegenerator.js). "
   },
   {
    "file": "src/serializer/valuegenerator.ts",
@@ -6672,75 +3078,10 @@
      "column": 5
     }
    },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 171,
-   "type": "if",
-   "branch": "14[1]",
-   "location": {
-    "start": {
-     "line": 171,
-     "column": 4
-    },
-    "end": {
-     "line": 173,
-     "column": 5
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 180,
-   "type": "if",
-   "branch": "15[0]",
-   "location": {
-    "start": {
-     "line": 180,
-     "column": 4
-    },
-    "end": {
-     "line": 182,
-     "column": 5
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/serializer/valuegenerator.ts",
-   "line": 180,
-   "type": "if",
-   "branch": "15[1]",
-   "location": {
-    "start": {
-     "line": 180,
-     "column": 4
-    },
-    "end": {
-     "line": 182,
-     "column": 5
-    }
-   },
-   "covered_by_suite": true
-  },
-  {
-   "file": "src/typenotfoundexception.ts",
-   "line": 36,
-   "type": "if",
-   "branch": "1[0]",
-   "location": {
-    "start": {
-     "line": 36,
-     "column": 8
-    },
-    "end": {
-     "line": 41,
-     "column": 9
-    }
-   },
-   "covered_by_suite": true
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getRegexString()'s `if (!regex) return ''`. Both callers (instancegenerator.ts:145 and :172) check `validator.regex` before calling getRegex, so only a direct getRegex(undefined) on the value generator reaches it (test/serializer/valuegenerator.js). "
   }
  ]
 }

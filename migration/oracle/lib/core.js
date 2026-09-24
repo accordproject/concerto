@@ -100,6 +100,7 @@ function loadCore(root, label) {
         Field: pick(req('introspect/field'), 'Field'),
         RelationshipDeclaration: pick(req('introspect/relationshipdeclaration'), 'RelationshipDeclaration'),
         EnumValueDeclaration: pick(req('introspect/enumvaluedeclaration'), 'EnumValueDeclaration'),
+        TypeNotFoundException: pick(req('typenotfoundexception'), 'TypeNotFoundException'),
     };
     // ModelFile is looked up lazily: the recorder replaces the export with a
     // recording subclass, and every consumer must see the current binding.
