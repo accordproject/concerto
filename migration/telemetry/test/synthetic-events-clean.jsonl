@@ -1,0 +1,46 @@
+{"timestamp": "2026-01-01T00:00:00.000Z", "event": "started", "task": "CLEAN-A", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T00:02:00.000Z", "event": "heartbeat", "task": "CLEAN-A", "attempt": 1, "tokens": 1000}
+{"timestamp": "2026-01-01T00:04:00.000Z", "event": "test_run", "task": "CLEAN-A", "attempt": 1, "signature": "sigCLEAN001", "reason": "all green"}
+{"timestamp": "2026-01-01T00:05:00.000Z", "event": "commit", "task": "CLEAN-A", "attempt": 1, "sha": "c1e0000000000000000000000000000000000a"}
+{"timestamp": "2026-01-01T00:06:00.000Z", "event": "merged", "task": "CLEAN-A", "attempt": 1, "sha": "c1e0000000000000000000000000000000000a"}
+{"timestamp": "2026-01-01T00:10:00.000Z", "event": "started", "task": "CLEAN-B", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T00:12:00.000Z", "event": "test_run", "task": "CLEAN-B", "attempt": 1, "signature": "sigCLEAN010", "reason": "1 failing"}
+{"timestamp": "2026-01-01T00:13:00.000Z", "event": "retried", "task": "CLEAN-B", "attempt": 2}
+{"timestamp": "2026-01-01T00:20:00.000Z", "event": "started", "task": "CLEAN-B", "attempt": 2, "role": "impl"}
+{"timestamp": "2026-01-01T00:22:00.000Z", "event": "test_run", "task": "CLEAN-B", "attempt": 2, "signature": "sigCLEAN011", "reason": "different failure now"}
+{"timestamp": "2026-01-01T00:24:00.000Z", "event": "commit", "task": "CLEAN-B", "attempt": 2, "sha": "c1e0000000000000000000000000000000000b"}
+{"timestamp": "2026-01-01T00:25:00.000Z", "event": "merged", "task": "CLEAN-B", "attempt": 2, "sha": "c1e0000000000000000000000000000000000b"}
+{"timestamp": "2026-01-01T00:30:00.000Z", "event": "started", "task": "CLEAN-C", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T00:32:00.000Z", "event": "test_run", "task": "CLEAN-C", "attempt": 1, "reason": "metric=50"}
+{"timestamp": "2026-01-01T00:33:00.000Z", "event": "retried", "task": "CLEAN-C", "attempt": 2}
+{"timestamp": "2026-01-01T00:40:00.000Z", "event": "started", "task": "CLEAN-C", "attempt": 2, "role": "impl"}
+{"timestamp": "2026-01-01T00:42:00.000Z", "event": "test_run", "task": "CLEAN-C", "attempt": 2, "reason": "metric=65"}
+{"timestamp": "2026-01-01T00:43:00.000Z", "event": "retried", "task": "CLEAN-C", "attempt": 3}
+{"timestamp": "2026-01-01T00:50:00.000Z", "event": "started", "task": "CLEAN-C", "attempt": 3, "role": "impl"}
+{"timestamp": "2026-01-01T00:52:00.000Z", "event": "test_run", "task": "CLEAN-C", "attempt": 3, "reason": "metric=80"}
+{"timestamp": "2026-01-01T00:54:00.000Z", "event": "commit", "task": "CLEAN-C", "attempt": 3, "sha": "c1e0000000000000000000000000000000000c"}
+{"timestamp": "2026-01-01T00:55:00.000Z", "event": "merged", "task": "CLEAN-C", "attempt": 3, "sha": "c1e0000000000000000000000000000000000c"}
+{"timestamp": "2026-01-01T01:00:00.000Z", "event": "started", "task": "CLEAN-D", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T01:05:00.000Z", "event": "heartbeat", "task": "CLEAN-D", "attempt": 1, "tokens": 10000}
+{"timestamp": "2026-01-01T01:06:00.000Z", "event": "commit", "task": "CLEAN-D", "attempt": 1, "sha": "c1e0000000000000000000000000000000000d"}
+{"timestamp": "2026-01-01T01:10:00.000Z", "event": "heartbeat", "task": "CLEAN-D", "attempt": 1, "tokens": 20000}
+{"timestamp": "2026-01-01T01:11:00.000Z", "event": "merged", "task": "CLEAN-D", "attempt": 1, "sha": "c1e0000000000000000000000000000000000d"}
+{"timestamp": "2026-01-01T01:40:00.000Z", "event": "started", "task": "CLEAN-REG", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T01:44:00.000Z", "event": "commit", "task": "CLEAN-REG", "attempt": 1, "sha": "c1eaaa0000000000000000000000000000000a"}
+{"timestamp": "2026-01-01T01:45:00.000Z", "event": "merged", "task": "CLEAN-REG", "attempt": 1, "sha": "c1eaaa0000000000000000000000000000000a"}
+{"timestamp": "2026-01-01T01:50:00.000Z", "event": "started", "task": "CLEAN-REG", "attempt": 2, "role": "impl"}
+{"timestamp": "2026-01-01T01:54:00.000Z", "event": "commit", "task": "CLEAN-REG", "attempt": 2, "sha": "c1ebbb0000000000000000000000000000000b"}
+{"timestamp": "2026-01-01T01:55:00.000Z", "event": "merged", "task": "CLEAN-REG", "attempt": 2, "sha": "c1ebbb0000000000000000000000000000000b"}
+{"timestamp": "2026-01-01T02:00:00.000Z", "event": "started", "task": "CLEAN-E", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T02:05:00.000Z", "event": "review_verdict", "task": "CLEAN-E", "attempt": 1, "role": "reviewer", "reason": "approve"}
+{"timestamp": "2026-01-01T02:06:00.000Z", "event": "commit", "task": "CLEAN-E", "attempt": 1, "sha": "c1e0000000000000000000000000000000000e"}
+{"timestamp": "2026-01-01T02:07:00.000Z", "event": "merged", "task": "CLEAN-E", "attempt": 1, "sha": "c1e0000000000000000000000000000000000e"}
+{"timestamp": "2026-01-01T02:20:00.000Z", "event": "started", "task": "CLEAN-F", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T02:22:00.000Z", "event": "test_run", "task": "CLEAN-F", "attempt": 1, "reason": "all green"}
+{"timestamp": "2026-01-01T02:24:00.000Z", "event": "commit", "task": "CLEAN-F", "attempt": 1, "sha": "c1e0000000000000000000000000000000000f"}
+{"timestamp": "2026-01-01T02:25:00.000Z", "event": "merged", "task": "CLEAN-F", "attempt": 1, "sha": "c1e0000000000000000000000000000000000f"}
+{"timestamp": "2026-01-01T02:30:00.000Z", "event": "queued", "task": "CLEAN-G"}
+{"timestamp": "2026-01-01T02:31:00.000Z", "event": "started", "task": "CLEAN-G", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T02:35:00.000Z", "event": "test_run", "task": "CLEAN-G", "attempt": 1, "reason": "all green"}
+{"timestamp": "2026-01-01T02:36:00.000Z", "event": "commit", "task": "CLEAN-G", "attempt": 1, "sha": "c1e0000000000000000000000000000000000g"}
+{"timestamp": "2026-01-01T02:37:00.000Z", "event": "merged", "task": "CLEAN-G", "attempt": 1, "sha": "c1e0000000000000000000000000000000000g"}
