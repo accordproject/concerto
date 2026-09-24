@@ -37,19 +37,57 @@
 //   - journal.jsonl lines are read one at a time; any line that isn't
 //     valid JSON, or isn't one of {launched, started, result}, is
 //     skipped (counted and reported, not fatal).
-//   - `label` is parsed as "<task>:<role>" (split on the first ':').
-//     A label with no ':' becomes task=<label>, role=null. A missing
-//     label becomes task=null, role=null and the pair is still emitted
-//     (with a note) so nothing is silently dropped.
+//   - `label` is usually "<task>:<role>" (split on the first ':'), e.g.
+//     "P0-02:review". But not every label follows that order: a dispatcher
+//     commit step was observed as "commit:P0-01" -- role first, task
+//     second. Since a task ID always looks like queue.yaml's own
+//     `<LETTERS><digits>-<digits>` shape (e.g. "P0-01") and a role never
+//     does, parseLabel() checks which side of the ':' matches that shape
+//     and takes THAT side as the task, whichever order it's in, instead of
+//     assuming a fixed order. A label with no ':' becomes task=<label>,
+//     role=null. A missing label becomes task=null, role=null and the
+//     pair is still emitted (with a note) so nothing is silently dropped.
 //   - `attempt` isn't in the journal, so it is inferred as "the nth time
-//     this task id has started so far in this journal" (1-based). Pass
-//     --attempts-from-events to instead continue numbering after
-//     whatever attempts already exist for that task in an existing
-//     events.jsonl.
+//     this task has actually been re-attempted so far in this journal".
+//     Only roles that represent a new attempt at the work itself (no role,
+//     or one of ATTEMPT_ROLES: implement/fix/retry/reimplement) advance
+//     the counter; review-type roles (review/re-review/rereview) and the
+//     commit role are agent calls *about* the current attempt, not new
+//     attempts, so they reuse whatever attempt number is already current
+//     for that task (a review before any attempt was recorded is flagged
+//     as an anomaly instead of guessing attempt=1). Getting this wrong
+//     previously made every review count as its own attempt, so a task
+//     with one implementation plus one fix and two reviews looked like it
+//     had reached attempt 4. Pass --attempts-from-events to instead
+//     continue numbering after whatever attempts already exist for that
+//     task in an existing events.jsonl.
+//   - A "commit" role does not get a started/finished agent pair at all
+//     (it is the dispatcher's own commit-per-write step, not a task
+//     attempt); it becomes a single 'commit' event on the task's current
+//     attempt instead, which is what lets stuck.mjs's burning rule reset
+//     on it. The journal does not carry the commit SHA, so `sha` is left
+//     null and `reason` says to check git log.
+//   - A "review"/"re-review" role's result is additionally turned into a
+//     'review_verdict' event (reason "approve" or "reject"), so
+//     stuck.mjs's review_churn rule can fire from imported data. The
+//     verdict is inferred, in priority order, from the result payload's
+//     `approved`/`pass`/`passed` boolean, a `verdict` string
+//     (reject/fail/block vs. approve/pass/accept/lgtm), then
+//     `exit_condition_met`, then `status` (blocked/failed/reject vs.
+//     done/approved/pass) -- documented here as a best-effort heuristic
+//     over an unspecified review-result shape, not a fixed schema.
 //   - Token totals are the sum, over every transcript line with a
 //     `message.usage`, of input_tokens + output_tokens +
-//     cache_creation_input_tokens + cache_read_input_tokens. This is a
-//     coarse "tokens touched" figure, not a billing figure.
+//     cache_creation_input_tokens -- deliberately excluding
+//     cache_read_input_tokens. Prompt caching means most of a long agent
+//     conversation's history shows up as cache_read_input_tokens on every
+//     single turn (the same earlier context, re-read again and again);
+//     summing that across a transcript with many turns multiplies the same
+//     context by the turn count and produces totals in the tens of
+//     millions for an ordinary task. Excluding it gives a "new tokens this
+//     task actually produced or wrote to cache" figure, which is what a
+//     token-budget rule like stuck.mjs's burning is meant to track. This is
+//     still a coarse figure, not a billing figure.
 //   - No model identifier is ever read out of a transcript into an
 //     output event: this script does not know and does not care which
 //     model ran an agent, by design.
@@ -105,12 +143,11 @@ function findMeta(journalDir, agentId) {
 function usageTotal(usage) {
   if (!usage || typeof usage !== 'object') return 0;
   const n = (v) => (typeof v === 'number' ? v : 0);
-  return (
-    n(usage.input_tokens) +
-    n(usage.output_tokens) +
-    n(usage.cache_creation_input_tokens) +
-    n(usage.cache_read_input_tokens)
-  );
+  // cache_read_input_tokens is deliberately excluded -- see the header
+  // comment's "Token totals" note: it is the same earlier conversation
+  // re-read on every turn, and summing it across a transcript inflates the
+  // total by roughly the turn count.
+  return n(usage.input_tokens) + n(usage.output_tokens) + n(usage.cache_creation_input_tokens);
 }
 
 /** Summarise a transcript file: {startTs, endTs, tokens, lines} or null if unreadable/empty. */
@@ -149,11 +186,63 @@ function summariseTranscript(transcriptPath) {
   return { startTs, endTs, tokens, lines: lines.length };
 }
 
+// A task ID always looks like queue.yaml's own shape: letters, digits,
+// a dash, digits (e.g. "P0-01", "P12-3"). A role word never does.
+const TASK_ID_RE = /^[A-Za-z]+\d*-\d+$/;
+
 function parseLabel(label) {
   if (!label) return { task: null, role: null };
   const idx = label.indexOf(':');
   if (idx === -1) return { task: label, role: null };
-  return { task: label.slice(0, idx), role: label.slice(idx + 1) };
+  const a = label.slice(0, idx);
+  const b = label.slice(idx + 1);
+  const aIsTask = TASK_ID_RE.test(a);
+  const bIsTask = TASK_ID_RE.test(b);
+  if (bIsTask && !aIsTask) {
+    // Observed order for some dispatcher steps, e.g. "commit:P0-01".
+    return { task: b, role: a || null };
+  }
+  // Default/observed order for agent labels, e.g. "P0-02:review".
+  return { task: a, role: b || null };
+}
+
+// Roles that represent a brand-new attempt at doing the work, as opposed
+// to an agent call *about* an existing attempt (reviewing it, or
+// committing its files).
+const ATTEMPT_ROLES = new Set(['implement', 'fix', 'retry', 'reimplement']);
+const REVIEW_ROLES = new Set(['review', 're-review', 'rereview']);
+const COMMIT_ROLE = 'commit';
+
+function isAttemptRole(role) {
+  return role === null || role === undefined || ATTEMPT_ROLES.has(role.toLowerCase());
+}
+
+function normalizedRole(role) {
+  return role ? role.toLowerCase() : role;
+}
+
+/** Best-effort verdict extraction from a review-role agent's result payload.
+ *  Returns { ok: boolean, source: string } or null if no signal is found.
+ *  The result schema for a review-type agent call isn't fixed by the plan,
+ *  so this checks several plausible shapes in order of confidence -- see
+ *  the header comment's "review_verdict" note. */
+function extractReviewVerdict(result) {
+  if (!result || typeof result !== 'object') return null;
+  if (typeof result.approved === 'boolean') return { ok: result.approved, source: 'approved' };
+  if (typeof result.pass === 'boolean') return { ok: result.pass, source: 'pass' };
+  if (typeof result.passed === 'boolean') return { ok: result.passed, source: 'passed' };
+  if (typeof result.verdict === 'string') {
+    if (/reject|fail|block/i.test(result.verdict)) return { ok: false, source: 'verdict' };
+    if (/approve|pass|accept|lgtm/i.test(result.verdict)) return { ok: true, source: 'verdict' };
+  }
+  if (typeof result.exit_condition_met === 'boolean') {
+    return { ok: result.exit_condition_met, source: 'exit_condition_met' };
+  }
+  if (typeof result.status === 'string') {
+    if (/blocked|failed|reject/i.test(result.status)) return { ok: false, source: 'status' };
+    if (/^done$|approved|pass/i.test(result.status)) return { ok: true, source: 'status' };
+  }
+  return null;
 }
 
 function nowIso() {
@@ -218,11 +307,25 @@ function importJournal(journalDir, opts) {
     const resultRec = results.get(key);
     const agentId = (startedRec && startedRec.agentId) || (resultRec && resultRec.agentId) || null;
     const label = startedRec && startedRec.label;
-    const { task, role } = parseLabel(label);
+    const { task, role: rawRole } = parseLabel(label);
+    const role = normalizedRole(rawRole);
 
-    const attempt = task
-      ? (attemptCounters.set(task, (attemptCounters.get(task) || 0) + 1), attemptCounters.get(task))
-      : null;
+    let attempt = null;
+    let attemptAnomaly = null;
+    if (task) {
+      if (isAttemptRole(role)) {
+        attemptCounters.set(task, (attemptCounters.get(task) || 0) + 1);
+        attempt = attemptCounters.get(task);
+      } else {
+        // Review/commit-type roles are agent calls about the current
+        // attempt, not a new one: reuse whatever attempt is already
+        // current for this task instead of incrementing.
+        attempt = attemptCounters.get(task) || null;
+        if (attempt === null) {
+          attemptAnomaly = `role "${rawRole}" seen before any attempt was recorded for ${task}`;
+        }
+      }
+    }
 
     let startTs = null;
     let endTs = null;
@@ -276,8 +379,33 @@ function importJournal(journalDir, opts) {
       missingStart++;
       reasonBits.push('no matching "started" journal line');
     }
+    if (attemptAnomaly) reasonBits.push(attemptAnomaly);
 
     const workflowRunId = opts.workflowRunId || path.basename(journalDir);
+    const transcriptPathForEvent = agentId ? (findTranscript(journalDir, agentId) || null) : null;
+
+    if (role === COMMIT_ROLE) {
+      // The dispatcher's own commit-per-write step, not a task attempt:
+      // one 'commit' event on the task's current attempt, not a
+      // started/finished agent pair. The journal carries no SHA.
+      emitted.push({
+        timestamp: endTs,
+        event: 'commit',
+        task,
+        attempt,
+        role: rawRole,
+        sha: null,
+        source: 'import-workflow-journal',
+        label: label || null,
+        workflow_run_id: workflowRunId,
+        transcript: transcriptPathForEvent,
+        reason: ['sha not carried in the workflow journal; see git log', ...reasonBits]
+          .filter(Boolean)
+          .join(' | ') || null,
+      });
+      if (!resultRec && startedRec) stillOpen++;
+      continue;
+    }
 
     if (startedRec) {
       emitted.push({
@@ -285,11 +413,11 @@ function importJournal(journalDir, opts) {
         event: 'started',
         task,
         attempt,
-        role,
+        role: rawRole,
         source: 'import-workflow-journal',
         label: label || null,
         workflow_run_id: workflowRunId,
-        transcript: agentId ? (findTranscript(journalDir, agentId) || null) : null,
+        transcript: transcriptPathForEvent,
         ...(reasonBits.length ? { reason: reasonBits.join('; ') } : {}),
       });
     }
@@ -305,17 +433,35 @@ function importJournal(journalDir, opts) {
         event: 'finished',
         task,
         attempt,
-        role,
+        role: rawRole,
         tokens,
         duration_ms: durationMs,
         source: 'import-workflow-journal',
         label: label || null,
         workflow_run_id: workflowRunId,
-        transcript: agentId ? (findTranscript(journalDir, agentId) || null) : null,
+        transcript: transcriptPathForEvent,
         reason: [status ? `status=${status}` : null, summary, ...reasonBits]
           .filter(Boolean)
           .join(' | ') || null,
       });
+
+      if (REVIEW_ROLES.has(role)) {
+        const verdict = extractReviewVerdict(result);
+        if (verdict) {
+          emitted.push({
+            timestamp: endTs,
+            event: 'review_verdict',
+            task,
+            attempt,
+            role: rawRole,
+            source: 'import-workflow-journal',
+            label: label || null,
+            workflow_run_id: workflowRunId,
+            transcript: transcriptPathForEvent,
+            reason: `${verdict.ok ? 'approve' : 'reject'} (inferred from result.${verdict.source})`,
+          });
+        }
+      }
     } else if (startedRec) {
       stillOpen++;
     }

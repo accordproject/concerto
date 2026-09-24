@@ -1,5 +1,3 @@
-{"timestamp": "2026-01-01T00:00:00.000Z", "event": "started", "task": "SILENT-1", "attempt": 1, "role": "impl"}
-{"timestamp": "2026-01-01T00:05:00.000Z", "event": "heartbeat", "task": "SILENT-1", "attempt": 1}
 {"timestamp": "2026-01-01T00:10:00.000Z", "event": "started", "task": "LOOP-1", "attempt": 1, "role": "impl"}
 {"timestamp": "2026-01-01T00:12:00.000Z", "event": "test_run", "task": "LOOP-1", "attempt": 1, "signature": "sigLOOP001", "reason": "1 failing"}
 {"timestamp": "2026-01-01T00:13:00.000Z", "event": "failed", "task": "LOOP-1", "attempt": 1, "reason": "assertion failed"}
@@ -21,13 +19,12 @@
 {"timestamp": "2026-01-01T01:10:00.000Z", "event": "started", "task": "BURN-1", "attempt": 1, "role": "impl"}
 {"timestamp": "2026-01-01T01:20:00.000Z", "event": "heartbeat", "task": "BURN-1", "attempt": 1, "tokens": 600000}
 {"timestamp": "2026-01-01T01:30:00.000Z", "event": "heartbeat", "task": "BURN-1", "attempt": 1, "tokens": 500000}
-{"timestamp": "2026-01-01T01:35:00.000Z", "event": "blocked", "task": "BURN-1", "attempt": 1, "reason": "stopped: over token budget with no commit"}
-{"timestamp": "2026-01-01T01:40:00.000Z", "event": "started", "task": "REGRESSION-1", "attempt": 1, "role": "impl"}
-{"timestamp": "2026-01-01T01:44:00.000Z", "event": "commit", "task": "REGRESSION-1", "attempt": 1, "sha": "aaa1110000000000000000000000000000000a"}
-{"timestamp": "2026-01-01T01:45:00.000Z", "event": "merged", "task": "REGRESSION-1", "attempt": 1, "sha": "aaa1110000000000000000000000000000000a"}
-{"timestamp": "2026-01-01T01:50:00.000Z", "event": "started", "task": "REGRESSION-1", "attempt": 2, "role": "impl"}
-{"timestamp": "2026-01-01T01:54:00.000Z", "event": "commit", "task": "REGRESSION-1", "attempt": 2, "sha": "bbb2220000000000000000000000000000000b"}
-{"timestamp": "2026-01-01T01:55:00.000Z", "event": "merged", "task": "REGRESSION-1", "attempt": 2, "sha": "bbb2220000000000000000000000000000000b"}
+{"timestamp": "2026-01-01T01:40:00.000Z", "event": "started", "task": "REG-BASE", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T01:44:00.000Z", "event": "commit", "task": "REG-BASE", "attempt": 1, "sha": "aaa1110000000000000000000000000000000a"}
+{"timestamp": "2026-01-01T01:45:00.000Z", "event": "merged", "task": "REG-BASE", "attempt": 1, "sha": "aaa1110000000000000000000000000000000a"}
+{"timestamp": "2026-01-01T01:50:00.000Z", "event": "started", "task": "REGRESSION-1", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T01:54:00.000Z", "event": "commit", "task": "REGRESSION-1", "attempt": 1, "sha": "bbb2220000000000000000000000000000000b"}
+{"timestamp": "2026-01-01T01:55:00.000Z", "event": "merged", "task": "REGRESSION-1", "attempt": 1, "sha": "bbb2220000000000000000000000000000000b"}
 {"timestamp": "2026-01-01T02:00:00.000Z", "event": "started", "task": "REVIEW_CHURN-1", "attempt": 1, "role": "impl"}
 {"timestamp": "2026-01-01T02:05:00.000Z", "event": "review_verdict", "task": "REVIEW_CHURN-1", "attempt": 1, "role": "reviewer", "reason": "reject: needs more coverage"}
 {"timestamp": "2026-01-01T02:06:00.000Z", "event": "retried", "task": "REVIEW_CHURN-1", "attempt": 2}

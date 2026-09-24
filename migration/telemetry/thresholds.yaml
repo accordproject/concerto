@@ -45,6 +45,31 @@ global_stall:
   description: "No plan §0 metric has moved across N hours of merges."
   response: "Flag it in the hourly report."
   window_hours: 2
+  # Real leaf field names as migration/bin/status.mjs actually writes them
+  # into metrics.jsonl's `metrics` object (checked against metrics.jsonl on
+  # 2026-09-24), not guessed ones. concerto_core_tests writes
+  # passing/tests/failing counts (no pass_pct field); nyc_coverage writes
+  # four *_pct fields; each Rust repo's llvm_cov writes workspace_lines_pct;
+  # ledger writes weighted_pct_rust_plus_hybrid. The oracle/mutants/
+  # conformance *_pct paths are listed ahead of the tasks that will populate
+  # them (P0-05/P0-07/P5-06); until then they are simply absent from a row
+  # and are ignored, not treated as unmoving.
+  metric_paths:
+    - concerto_core_tests.overall.passing
+    - concerto_core_tests.overall.tests
+    - concerto_core_tests.overall.failing
+    - nyc_coverage.statements_pct
+    - nyc_coverage.branches_pct
+    - nyc_coverage.functions_pct
+    - nyc_coverage.lines_pct
+    - rust.concerto-rust.llvm_cov.workspace_lines_pct
+    - rust.concerto-validate-rs.llvm_cov.workspace_lines_pct
+    - ledger.weighted_pct_rust_plus_hybrid
+    - oracle.native.pass_pct
+    - oracle.wasm.pass_pct
+    - oracle.corpus_coverage_of_reference.pct
+    - mutants.catch_rate_pct
+    - conformance.pass_pct
 
 review_churn:
   description: "The same task is rejected by review N times."

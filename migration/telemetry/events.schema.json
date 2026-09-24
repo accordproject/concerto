@@ -64,6 +64,10 @@
       "type": ["string", "null"],
       "description": "Failure signature: sha1(test full title + '\\n' + first error line), as produced by record-run.mjs. Present on test_run/failed events tied to a specific failing test."
     },
+    "dedup_key": {
+      "type": ["string", "null"],
+      "description": "Present only on 'stuck' events: stuck.mjs's canonical fingerprint of the evidence behind the finding (e.g. the anchor commit timestamp for 'burning', the failure signature for 'looping'). Used to suppress re-appending the same still-open finding on the next evaluation cycle; it is not a moment in time, so an unchanged condition keeps the same key across runs."
+    },
     "cause": {
       "type": ["string", "null"],
       "enum": [

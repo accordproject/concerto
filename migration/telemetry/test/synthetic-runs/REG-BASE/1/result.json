@@ -1,0 +1,26 @@
+{
+  "task": "REG-BASE",
+  "attempt": 1,
+  "label": "synthetic fixture",
+  "recordedAt": "2026-01-01T01:44:00.000Z",
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "pending": 0
+  },
+  "tests": [
+    {
+      "suite": "mocha",
+      "fullTitle": "Foo::testA",
+      "title": "testA",
+      "status": "pass"
+    },
+    {
+      "suite": "mocha",
+      "fullTitle": "Foo::testB",
+      "title": "testB",
+      "status": "pass"
+    }
+  ]
+}

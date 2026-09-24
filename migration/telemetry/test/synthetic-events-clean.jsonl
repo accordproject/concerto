@@ -44,3 +44,9 @@
 {"timestamp": "2026-01-01T02:35:00.000Z", "event": "test_run", "task": "CLEAN-G", "attempt": 1, "reason": "all green"}
 {"timestamp": "2026-01-01T02:36:00.000Z", "event": "commit", "task": "CLEAN-G", "attempt": 1, "sha": "c1e0000000000000000000000000000000000g"}
 {"timestamp": "2026-01-01T02:37:00.000Z", "event": "merged", "task": "CLEAN-G", "attempt": 1, "sha": "c1e0000000000000000000000000000000000g"}
+{"timestamp": "2026-01-01T02:38:00.000Z", "event": "started", "task": "CLEAN-BURN-MERGED", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T02:38:10.000Z", "event": "heartbeat", "task": "CLEAN-BURN-MERGED", "attempt": 1, "tokens": 1500000}
+{"timestamp": "2026-01-01T02:38:20.000Z", "event": "merged", "task": "CLEAN-BURN-MERGED", "attempt": 1, "sha": "c1e00000000000000000000000000000000h1"}
+{"timestamp": "2026-01-01T02:39:00.000Z", "event": "started", "task": "CLEAN-BURN-FAILED", "attempt": 1, "role": "impl"}
+{"timestamp": "2026-01-01T02:39:10.000Z", "event": "heartbeat", "task": "CLEAN-BURN-FAILED", "attempt": 1, "tokens": 2000000}
+{"timestamp": "2026-01-01T02:39:20.000Z", "event": "failed", "task": "CLEAN-BURN-FAILED", "attempt": 1, "reason": "gave up"}

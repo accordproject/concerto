@@ -16,6 +16,18 @@
 // twice (once to check what *would* fire, once for real, so the second
 // run's fresh 'stuck' events don't get counted as duplicates).
 //
+// Idempotence: the dispatcher is expected to run this every cycle, so
+// every rule below computes a `dedupKey` alongside its finding -- a
+// canonical fingerprint of the evidence, not of the moment it was
+// evaluated (e.g. the stale activity's own timestamp for 'silent', not how
+// long ago that now is). Before appending, main() drops any finding whose
+// (cause, task, dedupKey) already has a matching 'stuck' event on record,
+// so re-running against an unchanged log adds nothing, and a task that
+// reaches a terminal state is naturally "retired" too: its evidence stops
+// changing, so its dedupKey stops changing, so nothing new is ever
+// recorded for it again (burning additionally hard-skips terminal tasks;
+// see checkBurning).
+//
 // Task/attempt status model (derived purely from events.jsonl, since
 // this script does not read migration/queue.yaml -- that belongs to the
 // dispatcher, and this owned path only sees the append-only logs):
@@ -38,6 +50,32 @@ const TERMINAL = new Set(['merged', 'failed', 'blocked']);
 const QUEUED = new Set(['queued', 'retried']);
 const RUNNING = new Set(['started', 'heartbeat', 'test_run', 'commit']);
 
+// global_stall.metric_paths: the real leaf field names status.mjs actually
+// writes into metrics.jsonl's `metrics` object (verified against
+// migration/telemetry/metrics.jsonl rows on 2026-09-24), not guessed names.
+// Covers plan §0's test pass counts, nyc, rust coverage per repo and the
+// ledger weight; oracle/mutants/conformance pct fields are included ahead
+// of the tasks that populate them (P0-05/P0-07/P5-06) -- until then they
+// are simply absent from a row and flattenNumeric() ignores absent keys,
+// so listing them early is harmless.
+const DEFAULT_GLOBAL_STALL_METRIC_PATHS = [
+  'concerto_core_tests.overall.passing',
+  'concerto_core_tests.overall.tests',
+  'concerto_core_tests.overall.failing',
+  'nyc_coverage.statements_pct',
+  'nyc_coverage.branches_pct',
+  'nyc_coverage.functions_pct',
+  'nyc_coverage.lines_pct',
+  'rust.concerto-rust.llvm_cov.workspace_lines_pct',
+  'rust.concerto-validate-rs.llvm_cov.workspace_lines_pct',
+  'ledger.weighted_pct_rust_plus_hybrid',
+  'oracle.native.pass_pct',
+  'oracle.wasm.pass_pct',
+  'oracle.corpus_coverage_of_reference.pct',
+  'mutants.catch_rate_pct',
+  'conformance.pass_pct',
+];
+
 const DEFAULT_THRESHOLDS = {
   silent: { no_activity_minutes: 20 },
   looping: { consecutive_attempts: 3 },
@@ -45,12 +83,7 @@ const DEFAULT_THRESHOLDS = {
   burning: { tokens_without_commit: 1000000 },
   global_stall: {
     window_hours: 2,
-    metric_paths: [
-      'ledger.weighted_pct_rust_plus_hybrid',
-      'oracle.corpus_coverage_of_reference.pct',
-      'concerto_core_tests.overall.pass_pct',
-      'rust.concerto-rust.llvm_cov.lines_pct',
-    ],
+    metric_paths: DEFAULT_GLOBAL_STALL_METRIC_PATHS,
   },
   review_churn: { rejections: 2 },
   external: {
@@ -111,6 +144,11 @@ function checkSilent(tasks, nowIso, thresholds) {
         task,
         cause: 'silent',
         reason: `no activity since ${last.event}@${last.timestamp} (${gapMin.toFixed(1)} min ago, threshold ${thresholds.silent.no_activity_minutes})`,
+        // Keyed on the stale activity's own timestamp, not on the ever-growing
+        // gap: re-evaluating the same silence a minute later must not count
+        // as a new finding. A new key (so a new finding) only appears once
+        // some activity happens and then the task goes silent again.
+        dedupKey: last.timestamp,
       });
     }
   }
@@ -137,6 +175,12 @@ function checkLooping(tasks, thresholds) {
         task,
         cause: 'looping',
         reason: `same failure signature (${lastN[0]}) on the last ${n} attempts (${attempts.slice(-n).join(', ')})`,
+        // Keyed on the signature alone: once this exact signature has been
+        // flagged as looping for this task, further attempts that keep
+        // failing the same way (or a task that has since gone terminal,
+        // where the last-N window never changes) must not re-fire on every
+        // evaluation cycle. A genuinely new signature is a new finding.
+        dedupKey: lastN[0],
       });
     }
   }
@@ -173,6 +217,9 @@ function checkPlateau(tasks, thresholds) {
         task,
         cause: 'plateau',
         reason: `metric stuck at ${lastN[0]} for the last ${n} attempts (${attempts.slice(-n).join(', ')})`,
+        // Keyed on the stuck value: re-evaluating an unchanged plateau (or
+        // one on a task that has since gone terminal) must not re-fire.
+        dedupKey: String(lastN[0]),
       });
     }
   }
@@ -180,9 +227,21 @@ function checkPlateau(tasks, thresholds) {
 }
 
 // ---- rule: burning --------------------------------------------------------
+// Burning is about an *active* task racking up spend with nothing to show
+// for it. A task that has already reached a terminal state (merged,
+// failed or blocked) is not "burning" any more, whatever its lifetime
+// token total looks like: merged means it finished successfully (a large
+// total across its whole history is just cost, not a runaway signal, and
+// it has no later commit to reset the counter); failed/blocked means the
+// task is already stopped and, in the failed/blocked case, may well have
+// been stopped *by* an earlier stuck rule -- re-flagging it as burning
+// forever after achieves nothing and pollutes the log.
 function checkBurning(tasks, thresholds) {
   const findings = [];
   for (const [task, evs] of tasks) {
+    const last = latestNonMeta(evs);
+    if (last && TERMINAL.has(last.event)) continue;
+
     // Tokens accumulated since the most recent 'commit' (or since the
     // start of this task's history if it has never committed).
     let sinceCommit = 0;
@@ -198,6 +257,11 @@ function checkBurning(tasks, thresholds) {
         task,
         cause: 'burning',
         reason: `${sinceCommit} tokens used since ${lastCommitIdx === -1 ? 'task start' : 'last commit'} (threshold ${thresholds.burning.tokens_without_commit})`,
+        // Keyed on the anchor commit (or "no-commit" if there has never
+        // been one): as long as no new commit lands, the burn is the same
+        // ongoing episode and must fire only once, even though the token
+        // sum itself keeps climbing every cycle as more heartbeats arrive.
+        dedupKey: lastCommitIdx === -1 ? 'no-commit' : `since:${evs[lastCommitIdx].timestamp}`,
       });
     }
   }
@@ -214,29 +278,49 @@ function loadRunResult(runsDir, task, attempt) {
   }
 }
 
+// The plan's rule is "a test that passed at the previous merge *into the
+// integration branch* (any task's merge) and fails now" -- the integration
+// branch has one linear history of merges across every task, not one per
+// task. Comparing a task only against its own earlier merges (as an
+// earlier version of this rule did) means it almost never fires in
+// practice, since a real task normally merges exactly once: the check
+// must walk ALL 'merged' events across every task, in chronological order,
+// and compare each merge's test run against the one immediately before it
+// on the integration branch, whichever task that was.
 function checkRegression(tasks, runsDir) {
-  const findings = [];
+  const allMerges = [];
   for (const [task, evs] of tasks) {
-    const merges = evs
-      .filter((e) => e.event === 'merged' && typeof e.attempt === 'number')
-      .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
-    for (let i = 1; i < merges.length; i++) {
-      const prev = loadRunResult(runsDir, task, merges[i - 1].attempt);
-      const curr = loadRunResult(runsDir, task, merges[i].attempt);
-      if (!prev || !curr) continue;
-      const prevPass = new Set(
-        (prev.tests || []).filter((t) => t.status === 'pass').map((t) => t.fullTitle)
-      );
-      const nowFailing = (curr.tests || []).filter(
-        (t) => t.status === 'fail' && prevPass.has(t.fullTitle)
-      );
-      for (const t of nowFailing) {
-        findings.push({
-          task,
-          cause: 'regression',
-          reason: `"${t.fullTitle}" passed at merge attempt ${merges[i - 1].attempt} (${merges[i - 1].sha || 'no sha'}) but fails at attempt ${merges[i].attempt} (${merges[i].sha || 'no sha'})`,
-        });
+    for (const e of evs) {
+      if (e.event === 'merged' && typeof e.attempt === 'number') {
+        allMerges.push({ task, attempt: e.attempt, timestamp: e.timestamp, sha: e.sha || null });
       }
+    }
+  }
+  allMerges.sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
+
+  const findings = [];
+  for (let i = 1; i < allMerges.length; i++) {
+    const prevMerge = allMerges[i - 1];
+    const currMerge = allMerges[i];
+    const prev = loadRunResult(runsDir, prevMerge.task, prevMerge.attempt);
+    const curr = loadRunResult(runsDir, currMerge.task, currMerge.attempt);
+    if (!prev || !curr) continue;
+    const prevPass = new Set(
+      (prev.tests || []).filter((t) => t.status === 'pass').map((t) => t.fullTitle)
+    );
+    const nowFailing = (curr.tests || []).filter(
+      (t) => t.status === 'fail' && prevPass.has(t.fullTitle)
+    );
+    for (const t of nowFailing) {
+      findings.push({
+        task: currMerge.task,
+        cause: 'regression',
+        reason: `"${t.fullTitle}" passed at the previous integration-branch merge (${prevMerge.task} attempt ${prevMerge.attempt}, ${prevMerge.sha || 'no sha'}) but fails at this merge (${currMerge.task} attempt ${currMerge.attempt}, ${currMerge.sha || 'no sha'})`,
+        // Keyed on the specific pair of merges and the specific test: each
+        // merge in the integration branch's history happens once, so this
+        // is naturally stable across re-evaluations without extra state.
+        dedupKey: `${prevMerge.task}@${prevMerge.attempt}->${currMerge.task}@${currMerge.attempt}:${t.fullTitle}`,
+      });
     }
   }
   return findings;
@@ -248,7 +332,7 @@ function checkRegression(tasks, runsDir) {
 // so it can't be the reason the queue isn't deadlocked.
 function checkDeadlockWithSilent(tasks, silentTaskNames) {
   let running = 0;
-  let queued = 0;
+  const queuedTasks = [];
   let anyOpen = false;
   for (const [task, evs] of tasks) {
     const last = latestNonMeta(evs);
@@ -256,17 +340,23 @@ function checkDeadlockWithSilent(tasks, silentTaskNames) {
     if (TERMINAL.has(last.event)) continue;
     anyOpen = true;
     if (QUEUED.has(last.event)) {
-      queued++;
+      queuedTasks.push(task);
     } else if (RUNNING.has(last.event)) {
       if (!silentTaskNames.has(task)) running++;
     }
   }
-  if (anyOpen && running === 0 && queued > 0) {
+  if (anyOpen && running === 0 && queuedTasks.length > 0) {
+    queuedTasks.sort();
     return [
       {
         task: null,
         cause: 'deadlock',
-        reason: `${queued} task(s) queued, 0 actively running, queue not finished`,
+        reason: `${queuedTasks.length} task(s) queued, 0 actively running, queue not finished`,
+        // Keyed on the exact set of still-queued tasks: as long as the
+        // same tasks are stuck queued with nothing running, this is the
+        // same ongoing deadlock, not a new one each cycle. It fires again
+        // once the queued set actually changes.
+        dedupKey: queuedTasks.join(','),
       },
     ];
   }
@@ -323,6 +413,12 @@ function checkGlobalStall(metricsRows, thresholds) {
       task: null,
       cause: 'global_stall',
       reason: `no tracked §0 metric moved across ${(spanMs / 3600000).toFixed(1)}h of merges (${windowRows.length} rows checked)`,
+      // Keyed on the window's last row: metrics.jsonl only grows on merges
+      // or once an hour, so re-evaluating between new rows must not
+      // re-fire; a genuinely new row (whether it breaks the stall or
+      // extends it) produces a new key, matching the plan's "flag it in
+      // the hourly report" cadence.
+      dedupKey: `${last.timestamp}:${windowRows.length}`,
     },
   ];
 }
@@ -340,6 +436,10 @@ function checkReviewChurn(tasks, thresholds) {
         task,
         cause: 'review_churn',
         reason: `rejected ${rejections.length} time(s) in review (threshold ${n})`,
+        // Keyed on the count reached: stable across re-evaluations until a
+        // further rejection pushes the count up, which is worth a new
+        // finding.
+        dedupKey: String(rejections.length),
       });
     }
   }
@@ -360,6 +460,10 @@ function checkExternal(tasks, thresholds) {
           task,
           cause: 'external',
           reason: `blocked event matched external-failure keyword "${hit}": ${e.reason}`,
+          // Keyed on the specific blocked event's own timestamp: the same
+          // blocked event must not re-fire on every cycle; a later, new
+          // 'blocked' event is a new external failure worth its own finding.
+          dedupKey: e.timestamp,
         });
         break; // one finding per task is enough
       }
@@ -395,10 +499,35 @@ function main() {
   const reviewChurn = checkReviewChurn(tasks, thresholds);
   const external = checkExternal(tasks, thresholds);
 
-  const findings = [
+  const allFindings = [
     ...silent, ...looping, ...plateau, ...burning, ...regression,
     ...deadlock, ...globalStall, ...reviewChurn, ...external,
   ];
+
+  // Dedup: a 'stuck' event already recorded for this (task, cause) with the
+  // same evidence (dedupKey) is the same ongoing condition, not a new one --
+  // the dispatcher runs this every cycle, so without this every rule that
+  // still matches would re-append forever. A prior 'stuck' event that
+  // predates this field (no dedup_key at all) is treated as an unconditional
+  // match too, so upgrading an existing events.jsonl doesn't itself cause a
+  // burst of "new" duplicates for conditions already on record.
+  const seenKeys = new Set();
+  for (const e of events) {
+    if (e.event !== 'stuck') continue;
+    const taskKey = e.task ?? '';
+    if (Object.prototype.hasOwnProperty.call(e, 'dedup_key')) {
+      seenKeys.add(`${e.cause}::${taskKey}::${e.dedup_key ?? ''}`);
+    } else {
+      seenKeys.add(`${e.cause}::${taskKey}::*`);
+    }
+  }
+
+  const findings = allFindings.filter((f) => {
+    const taskKey = f.task ?? '';
+    const key = `${f.cause}::${taskKey}::${f.dedupKey ?? ''}`;
+    const legacyKey = `${f.cause}::${taskKey}::*`;
+    return !seenKeys.has(key) && !seenKeys.has(legacyKey);
+  });
 
   const stuckEvents = findings.map((f) => ({
     timestamp: nowIso,
@@ -406,6 +535,7 @@ function main() {
     task: f.task,
     cause: f.cause,
     reason: f.reason,
+    dedup_key: f.dedupKey ?? null,
     source: 'stuck.mjs',
   }));
 
