@@ -249,28 +249,53 @@ function buildOptionsFor(target) {
         // one directory above the package's dist/ entirely (also checked by
         // requiring the actual built chunk, not just read from the source).
         // `globalThis.module.require` rewrites only that one pattern, to the
-        // engine directory's real, absolute location (computed here, once,
-        // from `nodeOutdir`) plus the extension a real `require` call needs —
-        // `/index.mjs` with no subpath, `<subpath>.mjs` with one — and defers
-        // to a second, ordinary `createRequire` for every other specifier (a
-        // dependency, or a relative import a future view adds that isn't
-        // chunked away from its own directory); nothing else in the graph
-        // calls `module.require` with an `engine` specifier. Requiring an
-        // `.mjs` file this way needs Node's synchronous ESM require (stable
-        // since Node 22.12/23; this repo's `engines.node` floor predates that,
-        // recorded as a limitation in PORTING.md 1.5 rather than worked around
-        // here).
+        // engine directory's real location, plus the extension a real
+        // `require` call needs — `/index.mjs` with no subpath, `<subpath>.mjs`
+        // with one — and defers to a second, ordinary `createRequire` for
+        // every other specifier (a dependency, or a relative import a future
+        // view adds that isn't chunked away from its own directory); nothing
+        // else in the graph calls `module.require` with an `engine`
+        // specifier.
+        //
+        // The engine directory is located at runtime, never baked in as this
+        // build machine's absolute `nodeOutdir` path: the banner text is
+        // identical in every output file, but each file's own `import.meta.url`
+        // is real at runtime wherever the published package ends up (an npm
+        // tarball, another checkout, CI), so the closure below walks upward
+        // from *this file's own* directory — an entry file sits at the outdir
+        // root or one level under it (e.g. `introspect/`), a shared chunk is
+        // hoisted to the outdir root — until it finds the `engine/` directory
+        // that sits next to the outdir root, and caches that answer per file
+        // since every call from the same module resolves the same directory.
+        // Requiring an `.mjs` file this way needs Node's synchronous ESM
+        // require (stable since Node 22.12/23; this repo's `engines.node`
+        // floor predates that, recorded as a limitation in PORTING.md 1.5
+        // rather than worked around here).
         ...(isNode
             ? { banner: { js: [
                 'import { createRequire as __createRequire } from "module";',
                 'const require = __createRequire(import.meta.url);',
                 ...(isConcertoCore ? [
-                    `const __engineDir = ${JSON.stringify(path.join(nodeOutdir, 'engine'))};`,
                     'if (typeof globalThis.module === "undefined" && typeof process !== "undefined" && process.env?.CONCERTO_ENGINE === "rust") {',
                     '    globalThis.__concertoEngineRequire = __createRequire(import.meta.url);',
+                    '    let __engineDir;',
                     '    globalThis.module = { require(specifier) {',
                     '        const m = /^\\.\\.?\\/engine(\\/.*)?$/.exec(specifier);',
                     '        if (!m) { return globalThis.__concertoEngineRequire(specifier); }',
+                    '        if (!__engineDir) {',
+                    '            const { fileURLToPath } = globalThis.__concertoEngineRequire("node:url");',
+                    '            const path = globalThis.__concertoEngineRequire("node:path");',
+                    '            const fs = globalThis.__concertoEngineRequire("node:fs");',
+                    '            let dir = path.dirname(fileURLToPath(import.meta.url));',
+                    '            while (!fs.existsSync(path.join(dir, "engine", "index.mjs"))) {',
+                    '                const parent = path.dirname(dir);',
+                    '                if (parent === dir) {',
+                    '                    throw new Error(`Cannot locate the concerto-core engine directory from ${import.meta.url}`);',
+                    '                }',
+                    '                dir = parent;',
+                    '            }',
+                    '            __engineDir = path.join(dir, "engine");',
+                    '        }',
                     '        return globalThis.__concertoEngineRequire(__engineDir + (m[1] ? `${m[1]}.mjs` : "/index.mjs"));',
                     '    } };',
                     '}',

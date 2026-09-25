@@ -49,6 +49,7 @@ test.describe('Concerto built engine module with the WASM engine', () => {
     test.beforeAll(async () => {
         server = await startEsmServer([
             { prefix: '/concerto-core/', dir: path.join(PACKAGES_ROOT, 'concerto-core/dist/esm-browser') },
+            { prefix: '/concerto-cto/', dir: path.join(PACKAGES_ROOT, 'concerto-cto/dist/esm-browser') },
             { prefix: '/concerto-util/', dir: path.join(PACKAGES_ROOT, 'concerto-util/dist/esm-browser') },
             { prefix: '/concerto-engine/', dir: WASM_PKG_DIR },
         ]);
@@ -124,51 +125,118 @@ test.describe('Concerto built engine module with the WASM engine', () => {
             content: JSON.stringify({
                 imports: {
                     '@accordproject/concerto-util': `${server.baseUrl}/concerto-util/index.mjs`,
+                    // ModelManager.addCTOModel needs the CTO parser, external
+                    // to concerto-core's browser bundle the same way
+                    // concerto-util is (browser-bundles.spec.ts).
+                    '@accordproject/concerto-cto': `${server.baseUrl}/concerto-cto/index.mjs`,
                 },
             }),
         });
 
         const result = await page.evaluate(async (baseUrl) => {
-            // modelutil.ts's `module.require('./engine')` reaches this —
-            // the piece P4-11a adds: scripts/browser-module-shim.js reads
-            // this same `globalThis.module` when a consumer's own bundler
-            // does not already provide one. `holder` is filled in below,
-            // once engine/index.mjs has actually loaded; `globalThis.module`
-            // itself has to be in place before that import (or any other),
-            // because the injected shim module reads `globalThis.module`
-            // exactly once, the first time anything imports it.
-            const holder: { rust?: unknown } = {};
-            (globalThis as any).module = {
-                require(specifier: string) {
-                    if (/^\.\.?\/engine$/.test(specifier)) {
-                        return holder;
-                    }
-                    throw new Error(`Dynamic module.require of "${specifier}" is not supported`);
-                },
-            };
-
             // Stand in for what src/engine/rust.ts's bare
             // `require('@accordproject/concerto-engine')` needs, exactly as
-            // the first test does.
+            // the first test does — and for src/engine/views.ts's own bare
+            // `require('../introspect/numbervalidator')` (built as
+            // `__require("../introspect/numbervalidator.mjs")`), the engine's
+            // reach back into the *public* graph so the snapshot it rebuilds
+            // is a real NumberValidator/StringValidator instance, sharing
+            // class identity with the rest of the public modules rather than
+            // a copy private to the engine build.
             const engineModule = await import(`${baseUrl}/concerto-engine/concerto-engine.mjs`);
+            const crossBoundaryModules = new Map<string, unknown>([
+                ['../introspect/numbervalidator.mjs', await import(`${baseUrl}/concerto-core/introspect/numbervalidator.mjs`)],
+                ['../introspect/stringvalidator.mjs', await import(`${baseUrl}/concerto-core/introspect/stringvalidator.mjs`)],
+            ]);
             (globalThis as any).process = { env: { CONCERTO_ENGINE: 'rust' } };
             (globalThis as any).require = (name: string) => {
                 if (name === '@accordproject/concerto-engine') {
                     return engineModule;
                 }
+                if (crossBoundaryModules.has(name)) {
+                    return crossBoundaryModules.get(name);
+                }
                 throw new Error(`Dynamic require of "${name}" is not supported`);
             };
 
-            const { rust } = await import(`${baseUrl}/concerto-core/engine/index.mjs`);
-            holder.rust = rust;
+            // modelutil.ts, introspect/numbervalidator.ts and
+            // introspect/scalardeclaration.ts call module.require with
+            // './engine', '../engine' and '../engine/views' respectively —
+            // the specifiers scripts/build-esm.js's own module.require
+            // resolves in a real deployment. This stub stands in for a
+            // consumer's bundler (browser-module-shim.js's contract), but it
+            // must still resolve every subpath the same way the built
+            // package actually lays the engine out —
+            // dist/esm-browser/engine/<subpath>.mjs, fetched from
+            // concerto-core's own served directory below with a genuine
+            // dynamic `import()` — rather than handing back a copy of
+            // engine/index.mjs the test already imported some other way.
+            // `module.require` is synchronous (CommonJS), so every subpath
+            // is fetched up front and only looked up, never imported, inside
+            // the stub itself.
+            // globalThis.module has to be in place before ANY built module —
+            // including the engine's own — is imported: browser-module-shim.js
+            // is injected into every concerto-core browser build (the public
+            // one and the engine's own internal one), reads whatever
+            // globalThis.module holds exactly once, the first time anything
+            // in that build imports it, and caches that reading (a plain
+            // esbuild lazy-init, not a live re-check) for the page's whole
+            // lifetime. Setting it up first, with the specifier-driven
+            // resolution below already wired in, means every subsequent
+            // import — the preload just below, and the public entry point
+            // after it — reads the real one.
+            const engineModules = new Map<string, unknown>();
+            (globalThis as any).module = {
+                require(specifier: string) {
+                    const m = /^\.\.?\/engine(\/.*)?$/.exec(specifier);
+                    if (!m) {
+                        throw new Error(`Dynamic module.require of "${specifier}" is not supported`);
+                    }
+                    const subpath = m[1] ? m[1].slice(1) : 'index';
+                    if (!engineModules.has(subpath)) {
+                        throw new Error(`Engine module "${subpath}" was not preloaded`);
+                    }
+                    return engineModules.get(subpath);
+                },
+            };
+            const engineSubpaths = ['index', 'views'];
+            for (const subpath of engineSubpaths) {
+                engineModules.set(subpath, await import(`${baseUrl}/concerto-core/engine/${subpath}.mjs`));
+            }
 
-            // Now go through the *public* entry point, never engine/index.mjs
-            // directly.
-            const { ModelUtil } = await import(`${baseUrl}/concerto-core/index.mjs`);
+            // Now go through the *public* entry point only, never
+            // engine/index.mjs directly: ModelUtil exercises the module-level
+            // rust binding ('./engine'), and validating a real model with a
+            // scalar range exercises ModelManager, ModelFile and
+            // ScalarDeclaration's '../engine/views' snapshot path together
+            // with numbervalidator.ts's '../engine'.
+            const { ModelUtil, ModelManager } = await import(`${baseUrl}/concerto-core/index.mjs`);
+
+            const modelManager = new ModelManager();
+            modelManager.addCTOModel(
+                'namespace test@1.0.0\n' +
+                'scalar PositiveInteger extends Integer range=[0,]\n' +
+                'concept Thing identified by id {\n' +
+                '  o String id\n' +
+                '  o PositiveInteger n\n' +
+                '}\n',
+                'test.cto'
+            );
+            const scalarDeclaration = modelManager.getType('test@1.0.0.PositiveInteger');
+            const validator = scalarDeclaration.getValidator();
+
             return {
                 capitalized: ModelUtil.capitalizeFirstLetter('vehicle'),
                 validIdentifier: ModelUtil.isValidIdentifier('Vehicle'),
                 invalidIdentifier: ModelUtil.isValidIdentifier('1Vehicle'),
+                scalarType: scalarDeclaration.getType(),
+                // Not the validator's constructor name: esbuild's ESM output
+                // renames a top-level class when its name collides with
+                // another one bundled elsewhere in the graph, so the rebuilt
+                // NumberValidator's own class identity is checked by what it
+                // does, not by its (possibly renamed) constructor.name.
+                lowerBound: validator?.getLowerBound?.(),
+                upperBound: validator?.getUpperBound?.(),
             };
         }, server.baseUrl);
 
@@ -177,6 +245,9 @@ test.describe('Concerto built engine module with the WASM engine', () => {
             capitalized: 'Vehicle',
             validIdentifier: true,
             invalidIdentifier: false,
+            scalarType: 'Integer',
+            lowerBound: 0,
+            upperBound: null,
         });
     });
 });
