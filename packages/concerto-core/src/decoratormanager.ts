@@ -34,6 +34,22 @@ import type ModelFile from './introspect/modelfile';
 import type { DecoratorCommand } from './types';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// See src/modelutil.ts for why this is loaded this way (dist/, bundler and
+// CJS/ESM notes); the same considerations apply here unchanged.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
+// The rust-mode view functions (src/engine/views.ts), typed `never` for the
+// same reason as `rust` above (PORTING.md 1.5, "Why never"): the return types
+// the declaration build infers stay exactly those of the TS bodies.
+type EngineViews = { [view: string]: (...args: any[]) => never };
+
 const DCS_VERSION = '0.4.0';
 
 const DCS_MODEL = `concerto version ">3.0.0"
@@ -195,9 +211,17 @@ class DecoratorManager {
             DCS_MODEL,
             'decoratorcommands@0.3.0.cto'
         );
-        const factory = new Factory(validationModelManager);
-        const serializer = new Serializer(factory, validationModelManager);
-        serializer.fromJSON(decoratorCommandSet);
+        /* istanbul ignore if */
+        if (rust) {
+            // The structural check only (src/dcs/mod.rs `validate`); the
+            // validationModelManager above is still built the TS way (CTO
+            // parsing is not ported) and returned unchanged.
+            rust.decoratorManagerValidate(decoratorCommandSet, modelFiles?.map((mf: ModelFile) => mf.getAst()));
+        } else {
+            const factory = new Factory(validationModelManager);
+            const serializer = new Serializer(factory, validationModelManager);
+            serializer.fromJSON(decoratorCommandSet);
+        }
         return validationModelManager;
     }
 
@@ -208,6 +232,10 @@ class DecoratorManager {
      * @returns {object} the migrated DecoratorCommandSet object
      */
     static migrateTo(decoratorCommandSet, version) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.decoratorManagerMigrateTo(decoratorCommandSet);
+        }
         if (decoratorCommandSet instanceof Object) {
             for (let key in decoratorCommandSet) {
                 if (key === '$class' && decoratorCommandSet[key].includes('org.accordproject.decoratorcommands')) {
@@ -393,6 +421,11 @@ class DecoratorManager {
             options.disableMetamodelValidation = true;
         }
 
+        /* istanbul ignore if */
+        if (rust) {
+            return (loadEngine('./engine/views') as EngineViews).decoratorManagerDecorateModels(modelManager, decoratorCommandSets, options);
+        }
+
         this.migrateAndValidate(modelManager, decoratorCommandSets, options?.migrate, options?.validate, options?.validateCommands);
 
         // Flatten commands across all command sets so decorators can be applied in a single AST scan.
@@ -496,6 +529,10 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
+        /* istanbul ignore if */
+        if (rust) {
+            return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractDecorators(modelManager, options);
+        }
         const sourceAst = modelManager.getAst(true, true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL);
         const collectionResp = decoratorExtrator.extract();
@@ -519,6 +556,10 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
+        /* istanbul ignore if */
+        if (rust) {
+            return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractVocabularies(modelManager, options);
+        }
         const sourceAst = modelManager.getAst(true, true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB);
         const collectionResp = decoratorExtrator.extract();
@@ -541,6 +582,10 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
+        /* istanbul ignore if */
+        if (rust) {
+            return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractNonVocabDecorators(modelManager, options);
+        }
         const sourceAst = modelManager.getAst(true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB);
         const collectionResp = decoratorExtrator.extract();
@@ -662,6 +707,10 @@ class DecoratorManager {
      * the test and values arrays is not empty (i.e. they have values in common)
      */
     static falsyOrEqual(test, values) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.decoratorManagerFalsyOrEqual(test, values);
+        }
         return Array.isArray(test)
             ? intersect(test, values).length > 0
             : test
@@ -797,6 +846,14 @@ class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property, command) {
+        /* istanbul ignore if */
+        if (rust) {
+            // Mutates a detached clone across the boundary; copy the result
+            // back onto `property` so callers that hold onto it (as every
+            // test does) see the same mutation the TS body makes in place.
+            Object.assign(property, rust.decoratorManagerExecutePropertyCommand(property, command));
+            return;
+        }
         const { target, decorator, type } = command;
         if(target.properties || target.property || target.type) {
             if (
