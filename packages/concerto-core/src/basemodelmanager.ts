@@ -426,10 +426,28 @@ class BaseModelManager {
         // rustHandle itself is unavailable.
         /* istanbul ignore if */
         if (rust && this.rustHandle) {
-            this.rustHandle.validateAst(
-                JSON.stringify(modelFile.getAst()),
-                modelFile.getName() ?? undefined,
-            );
+            const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
+            try {
+                this.rustHandle.validateAst(
+                    JSON.stringify(modelFile.getAst()),
+                    modelFile.getName() ?? undefined,
+                );
+            } catch (err) {
+                // rustHandle's own validate_ast leaves its copy of the
+                // metamodel registered on a failed check, matching the TS
+                // body below (whose deleteModelFile call after the re-throw
+                // is unreachable) -- see concerto-wasm's validateAst doc
+                // comment. Mirror that same leak into this.modelFiles here,
+                // so TS and rustHandle agree on getNamespaces() the way TS
+                // mode's own this.modelFiles/rustHandle mirror already does;
+                // MetaModelNamespace is excluded from _rustMirrorEligible,
+                // so this only writes this.modelFiles, never rustHandle
+                // (which already holds its own copy).
+                if (!alreadyHasMetamodel) {
+                    this.addModelFile(this.metamodelModelFile, undefined, MetaModelNamespace, true);
+                }
+                throw err;
+            }
             return;
         }
         const { version: modelFileVersion } = ModelUtil.parseNamespace(ModelUtil.getNamespace(modelFile.getAst().$class));
