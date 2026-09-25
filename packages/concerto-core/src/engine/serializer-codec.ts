@@ -75,6 +75,70 @@ function isTypedLike(v): boolean {
         typeof v.$type === 'string';
 }
 
+// A UTF-16 code unit in D800-DFFF that is not half of a surrogate pair.
+// `JSON.stringify` writes one as a `\udXXX` escape, which serde_json (the
+// engine's JSON reader) rejects outright, and Rust strings cannot hold one
+// anyway (PORTING.md 3.1, DV-004).
+const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+
+/**
+ * Throws `EngineFastPathUnsupported` for a string the engine cannot receive
+ * unchanged: one with a lone surrogate. The caller falls back to the TS
+ * path, which keeps it as is.
+ * @param {string} s the string (a value, an object key or a map key)
+ */
+function checkString(s: string): void {
+    if (LONE_SURROGATE.test(s)) {
+        throw new EngineFastPathUnsupported('lone-surrogate');
+    }
+}
+
+/**
+ * Throws `EngineFastPathUnsupported` for an object key the codec cannot
+ * carry: a lone surrogate (`checkString`), or `__proto__`. On the TS side
+ * `out['__proto__'] = x` would set the prototype instead of an own
+ * property, so the key would vanish (and `ResourceValidator`'s "Unexpected
+ * properties ... __proto__" check with it); rather than special-case it
+ * across the boundary, the whole call falls back to the TS path, which
+ * treats it exactly as ts mode does.
+ * @param {string} key the key
+ */
+function checkKey(key: string): void {
+    if (key === '__proto__') {
+        throw new EngineFastPathUnsupported('proto-key');
+    }
+    checkString(key);
+}
+
+/**
+ * `obj[key] = value` as an own, enumerable, writable, configurable data
+ * property, whatever `key` is (`__proto__` included), so a decoded object
+ * never gets a prototype from its data.
+ * @param {object} obj the object
+ * @param {string} key the key
+ * @param {*} value the value
+ */
+function setOwn(obj: object, key: string, value: unknown): void {
+    Object.defineProperty(obj, key, { value, enumerable: true, writable: true, configurable: true });
+}
+
+/**
+ * Throws `EngineFastPathUnsupported` unless `text`, the output of
+ * `JSON.stringify`, is JSON the engine can read: `JSON.stringify` escapes
+ * a lone surrogate as `\udXXX` and writes a valid pair as raw characters,
+ * so any such escape not itself escaped (an odd run of backslashes before
+ * it) is a lone surrogate. Used for text that was not built by
+ * `encodeValue` (a model file's AST).
+ * @param {string} text the JSON text
+ * @return {string} `text`
+ */
+function checkJsonText(text: string): string {
+    if (/(?:^|[^\\])(?:\\\\)*\\u[dD][89a-fA-F][0-9a-fA-F]{2}/.test(text)) {
+        throw new EngineFastPathUnsupported('lone-surrogate');
+    }
+    return text;
+}
+
 // The three own properties a "typed" value never carries across (they are
 // handles the engine has no use for; `$validator` is rebuilt on decode from
 // the serializer's own options instead).
@@ -96,6 +160,7 @@ function encodeTyped(v, seen: Set<object>) {
         if (TYPED_SKIP.has(key)) {
             continue;
         }
+        checkKey(key);
         fields[key] = encodeValue(v[key], seen);
     }
     return { [TAG]: 'typed', ctor: ctorName, fqn: v.getFullyQualifiedType(), fields };
@@ -129,7 +194,11 @@ function encodeValue(v, seen: Set<object> = new Set()) {
     if (v === undefined) {
         return { [TAG]: 'undefined' };
     }
-    if (v === null || typeof v === 'boolean' || typeof v === 'string') {
+    if (typeof v === 'string') {
+        checkString(v);
+        return v;
+    }
+    if (v === null || typeof v === 'boolean') {
         return v;
     }
     if (typeof v === 'number') {
@@ -170,6 +239,7 @@ function encodeValue(v, seen: Set<object> = new Set()) {
         visit(v, seen);
         const out = {};
         for (const key of Object.keys(v)) {
+            checkKey(key);
             out[key] = encodeValue(v[key], seen);
         }
         return out;
@@ -222,7 +292,7 @@ function materializeTyped(node, modelManager: BaseModelManager) {
         if (skip.has(key)) {
             continue;
         }
-        resource[key] = decodeValue(fields[key], modelManager);
+        setOwn(resource, key, decodeValue(fields[key], modelManager));
     }
     return resource;
 }
@@ -243,7 +313,7 @@ function decodeValue(v, modelManager: BaseModelManager) {
     if (!Object.prototype.hasOwnProperty.call(v, TAG)) {
         const out = {};
         for (const key of Object.keys(v)) {
-            out[key] = decodeValue(v[key], modelManager);
+            setOwn(out, key, decodeValue(v[key], modelManager));
         }
         return out;
     }
@@ -277,4 +347,4 @@ function decodeValue(v, modelManager: BaseModelManager) {
     }
 }
 
-export { EngineFastPathUnsupported, encodeValue, decodeValue };
+export { EngineFastPathUnsupported, encodeValue, decodeValue, checkString, checkJsonText };

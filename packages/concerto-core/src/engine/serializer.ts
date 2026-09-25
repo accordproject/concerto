@@ -35,7 +35,7 @@
 // of its own.
 
 import { rust } from './index';
-import { EngineFastPathUnsupported, encodeValue, decodeValue } from './serializer-codec';
+import { EngineFastPathUnsupported, encodeValue, decodeValue, checkString, checkJsonText } from './serializer-codec';
 import Factory from '../factory';
 
 // Types needed for TypeScript generation.
@@ -84,7 +84,14 @@ function handleFor(modelManager: BaseModelManager): any {
     const ModelManagerHandle = (rust as any).ModelManagerHandle;
     const handle = new ModelManagerHandle();
     for (const modelFile of modelFiles) {
-        handle.addModel(JSON.stringify(modelFile.getAst()), modelFile.getName());
+        // A lone surrogate in the AST (a string default, a regex) or in the
+        // file name cannot cross unchanged (serializer-codec.ts
+        // `checkJsonText`): fall back to the visitor path.
+        const name = modelFile.getName();
+        if (typeof name === 'string') {
+            checkString(name);
+        }
+        handle.addModel(checkJsonText(JSON.stringify(modelFile.getAst())), name);
     }
     handles.set(modelManager, { handle, modelFiles });
     return handle;

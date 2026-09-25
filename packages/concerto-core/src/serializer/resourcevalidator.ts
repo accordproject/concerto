@@ -419,9 +419,11 @@ class ResourceValidator {
             /* istanbul ignore if */
             if (rust) {
                 try {
+                    const codec = loadEngine('../engine/serializer-codec');
+                    codec.checkString(String(field.getType()));
                     invalid = !rust.resourceValidatorPrimitiveValid(
                         field.getType(),
-                        JSON.stringify(loadEngine('../engine/serializer-codec').encodeValue(obj)),
+                        JSON.stringify(codec.encodeValue(obj)),
                     );
                     delegated = true;
                 } catch (err) {

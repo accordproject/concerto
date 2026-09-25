@@ -248,6 +248,7 @@ class JSONGenerator {
         if (rust) {
             try {
                 const codec = loadEngine('../engine/serializer-codec');
+                codec.checkString(String(field.getType()));
                 const options = { utcOffset: this.utcOffset };
                 const resultText = rust.generatorConvertPrimitive(
                     field.getType(),

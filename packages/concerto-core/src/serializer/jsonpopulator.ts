@@ -397,6 +397,11 @@ class JSONPopulator {
         if (rust) {
             try {
                 const codec = loadEngine('../engine/serializer-codec');
+                // The type name and the path cross as plain strings (and the
+                // path appears in the message): a lone surrogate in either
+                // would reach Rust as U+FFFD, so fall back.
+                codec.checkString(String(field.getType()));
+                codec.checkString(path);
                 const options = { utcOffset: this.utcOffset, strictQualifiedDateTimes: this.strictQualifiedDateTimes };
                 const resultText = rust.populatorConvertPrimitive(
                     field.getType(),
