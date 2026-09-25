@@ -361,7 +361,25 @@ class BaseModelManager {
                     this.validateAst(modelFile);
                 }
 
-                // Semantic validation of the model file
+                // Semantic validation of the model file.
+                //
+                // P4-08 review (accordproject/concerto-rust#67): this was
+                // tried as a delegation to `rustHandle.addModelWithDefinitions`
+                // -- which both mirrors and validates in one call -- with TS
+                // validation only as a fallback when rustHandle rejected the
+                // mirror write or was untrustworthy. Replaying the oracle
+                // corpus (migration/oracle, ops ModelManager.addModel(File)
+                // and .validateModelFiles) against that version found
+                // rustHandle *silently accepting* several classes of model
+                // TS correctly rejects (an identifier field that does not
+                // exist or is not a String, a declared type clashing with an
+                // imported one, an undeclared referenced type): P2-09's gap
+                // audit already tracks these as open Rust validation gaps.
+                // Trusting rustHandle's success here would have skipped TS's
+                // check for exactly those cases, silently letting invalid
+                // models through in rust mode. So validation stays fully in
+                // TS until those gaps close; only the (already mirror-only,
+                // best-effort) write below talks to rustHandle.
                 modelFile.validate();
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
@@ -548,6 +566,30 @@ class BaseModelManager {
             // re-validate all the model files
             if (!disableValidation) {
                 this.validateModelFiles();
+            }
+
+            // Mirror the newly added files into rustHandle (P4-08,
+            // accordproject/concerto-rust#67): unlike addModelFile,
+            // addModelFile is never called here (this method adds every
+            // file to this.modelFiles directly, in whatever order the
+            // caller gave, precisely so cross-file dependency order does
+            // not matter -- see the method doc), so without this,
+            // rustHandle never learned about any namespace added through
+            // addModelFiles at all. TS has already validated (or was asked
+            // not to) above, so -- exactly as addModelFile's own mirror
+            // write does -- this only needs to keep rustHandle's state in
+            // sync, and never re-validates itself.
+            /* istanbul ignore if */
+            if (rust && this.rustHandle) {
+                newModelFiles.forEach((m) => {
+                    if (this._rustMirrorEligible(m.getNamespace())) {
+                        this._mirrorToRust(() => this.rustHandle!.addModelWithDefinitions(
+                            JSON.stringify(m.getAst()),
+                            m.getDefinitions() ?? undefined,
+                            m.getName() ?? undefined,
+                        ));
+                    }
+                });
             }
 
             // return the model files.
