@@ -34,7 +34,9 @@
 //
 // `encodeValue` throws `EngineFastPathUnsupported` for anything it cannot
 // express this way (a stubbed instance, a class other than the three
-// listed above, a function, a symbol); the fast path catches it and falls
+// listed above, a function, a symbol, or an object or array reached twice:
+// a cycle or a shared reference, whose identity a JSON tree cannot carry);
+// the fast path catches it and falls
 // back to the TS visitor path, exactly as an unconverted call would run.
 
 import dayjs from '../dayjs-setup';
@@ -84,7 +86,7 @@ const TYPED_SKIP = new Set(['$modelManager', '$classDeclaration', '$validator'])
  * @param {object} v the instance
  * @return {object} its wire encoding
  */
-function encodeTyped(v) {
+function encodeTyped(v, seen: Set<object>) {
     const ctorName = v.constructor && v.constructor.name;
     if (ctorName !== 'Resource' && ctorName !== 'ValidatedResource' && ctorName !== 'Relationship') {
         throw new EngineFastPathUnsupported(`typed-class:${ctorName}`);
@@ -94,17 +96,36 @@ function encodeTyped(v) {
         if (TYPED_SKIP.has(key)) {
             continue;
         }
-        fields[key] = encodeValue(v[key]);
+        fields[key] = encodeValue(v[key], seen);
     }
     return { [TAG]: 'typed', ctor: ctorName, fqn: v.getFullyQualifiedType(), fields };
 }
 
 /**
+ * Marks `v` as visited on this encode, throwing `EngineFastPathUnsupported`
+ * if it was already visited: a cycle (`vehicle.logEntries[0].vehicle ===
+ * vehicle`) would recurse forever, and a value shared between two places
+ * (the same `Resource` as a field of two parents, which `toJSON`'s
+ * `deduplicateResources` relies on) would cross as two independent copies,
+ * losing the identity the TS visitors see. Either way the fast path cannot
+ * express it, so the caller falls back to the visitor path.
+ * @param {object} v the object or array about to be encoded
+ * @param {Set<object>} seen the objects already visited on this encode
+ */
+function visit(v: object, seen: Set<object>): void {
+    if (seen.has(v)) {
+        throw new EngineFastPathUnsupported('shared-or-cyclic-reference');
+    }
+    seen.add(v);
+}
+
+/**
  * A JS runtime value as the wire value the engine reads (module doc).
  * @param {*} v the value
+ * @param {Set<object>} [seen] the objects already visited on this encode (see `visit`)
  * @return {*} its wire encoding
  */
-function encodeValue(v) {
+function encodeValue(v, seen: Set<object> = new Set()) {
     if (v === undefined) {
         return { [TAG]: 'undefined' };
     }
@@ -121,10 +142,12 @@ function encodeValue(v) {
         return v;
     }
     if (Array.isArray(v)) {
-        return v.map(encodeValue);
+        visit(v, seen);
+        return v.map((item) => encodeValue(item, seen));
     }
     if (v instanceof Map) {
-        return { [TAG]: 'map', entries: [...v.entries()].map(([k, x]) => [encodeValue(k), encodeValue(x)]) };
+        visit(v, seen);
+        return { [TAG]: 'map', entries: [...v.entries()].map(([k, x]) => [encodeValue(k, seen), encodeValue(x, seen)]) };
     }
     if (isDayjsLike(v)) {
         const valid = v.isValid();
@@ -133,7 +156,8 @@ function encodeValue(v) {
             : { [TAG]: 'dayjs', valid: false };
     }
     if (isTypedLike(v)) {
-        return encodeTyped(v);
+        visit(v, seen);
+        return encodeTyped(v, seen);
     }
     if (typeof v === 'function' || typeof v === 'symbol') {
         throw new EngineFastPathUnsupported(`unsupported-value:${typeof v}`);
@@ -143,9 +167,10 @@ function encodeValue(v) {
         if (proto !== Object.prototype && proto !== null) {
             throw new EngineFastPathUnsupported(`instance:${(v.constructor && v.constructor.name) || 'Object'}`);
         }
+        visit(v, seen);
         const out = {};
         for (const key of Object.keys(v)) {
-            out[key] = encodeValue(v[key]);
+            out[key] = encodeValue(v[key], seen);
         }
         return out;
     }

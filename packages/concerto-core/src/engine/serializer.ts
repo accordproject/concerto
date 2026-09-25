@@ -66,6 +66,16 @@ const handles = new WeakMap<BaseModelManager, CachedHandle>();
  * @return {object} the handle
  */
 function handleFor(modelManager: BaseModelManager): any {
+    // A model manager built with an alternative regular expression engine
+    // (`new ModelManager({ regExp })`, e.g. XRegExp) validates `regex=`
+    // string fields with that engine (introspect/stringvalidator.ts
+    // `regExpHook`), which the engine-side ModelManager built below cannot
+    // call: it would validate with its own ECMAScript dialect instead and
+    // could accept or reject different strings. Fall back to the visitor
+    // path, which honours the hook.
+    if ((modelManager as any).options?.regExp) {
+        throw new EngineFastPathUnsupported('model-manager-regExp-option');
+    }
     const modelFiles = modelManager.getModelFiles(false);
     const cached = handles.get(modelManager);
     if (cached && cached.modelFiles.length === modelFiles.length && cached.modelFiles.every((mf, i) => mf === modelFiles[i])) {

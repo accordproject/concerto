@@ -116,17 +116,19 @@ class Serializer {
             throw new Error(Globalize.formatMessage('serializer-tojson-notcobject'));
         }
 
-        options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
-
         // Fast path (P4-10; PORTING.md section 5 row 6, D7): one engine call
         // for the whole document, instead of one per field through
         // ResourceValidator/JSONGenerator's visitors. Falls back to the
         // visitor path below on anything the engine cannot cross
-        // (EngineFastPathUnsupported), exactly as calling the visitors
-        // directly still does for callers/tests that need them.
+        // (EngineFastPathUnsupported: a cycle or shared reference, a model
+        // manager with a custom `regExp` engine, a value the wire codec
+        // cannot carry), exactly as calling the visitors directly still
+        // does for callers/tests that need them.
+        /* istanbul ignore if */
         if (rust) {
             try {
-                return loadEngine('./engine/serializer').fastToJson(this.modelManager, resource, options);
+                const merged = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
+                return loadEngine('./engine/serializer').fastToJson(this.modelManager, resource, merged);
             } catch (err) {
                 if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
                     throw err;
@@ -193,6 +195,7 @@ class Serializer {
         // anything the engine cannot cross (EngineFastPathUnsupported),
         // exactly as calling the visitor directly still does for
         // callers/tests that need it.
+        /* istanbul ignore if */
         if (rust) {
             try {
                 return loadEngine('./engine/serializer').fastFromJson(this.modelManager, jsonObject, options);

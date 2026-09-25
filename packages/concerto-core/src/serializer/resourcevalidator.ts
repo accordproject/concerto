@@ -407,41 +407,61 @@ class ResourceValidator {
         }
 
         if(field.isPrimitive()) {
+            let invalid = false;
             // P4-10: delegated to the engine (module preamble). A pure
             // typeof/isFinite check over the value alone, so this is safe
             // for a field built by a test stub too. A value the wire codec
-            // cannot express (a function; `checkItem` already reported
-            // `symbol` above) is never a valid primitive either way.
-            const invalid = rust
-                ? (() => {
-                    try {
-                        return !rust.resourceValidatorPrimitiveValid(
-                            field.getType(),
-                            JSON.stringify(loadEngine('../engine/serializer-codec').encodeValue(obj)),
-                        );
-                    } catch (err) {
-                        if (err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported') {
-                            return true;
-                        }
+            // cannot express (a function, a duck-typed date that is not a
+            // dayjs, a shared reference) falls back to the TS switch below,
+            // exactly as the whole-document fast path falls back on the
+            // same `EngineFastPathUnsupported`.
+            let delegated = false;
+            /* istanbul ignore if */
+            if (rust) {
+                try {
+                    invalid = !rust.resourceValidatorPrimitiveValid(
+                        field.getType(),
+                        JSON.stringify(loadEngine('../engine/serializer-codec').encodeValue(obj)),
+                    );
+                    delegated = true;
+                } catch (err) {
+                    if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
                         throw err;
                     }
-                })()
-                : (() => {
-                    switch(field.getType()) {
-                    case 'String':
-                        return dataType !== 'string';
-                    case 'Long':
-                    case 'Integer':
-                    case 'Double':
-                        return dataType !== 'number' || !isFinite(obj);
-                    case 'Boolean':
-                        return dataType !== 'boolean';
-                    case 'DateTime':
-                        return !(typeof obj === 'object' && typeof obj.isBefore === 'function');
-                    default:
-                        return false;
+                }
+            }
+
+            /* istanbul ignore else */
+            if (!delegated) {
+                switch(field.getType()) {
+                case 'String':
+                    if(dataType !== 'string') {
+                        invalid = true;
                     }
-                })();
+                    break;
+                case 'Long':
+                case 'Integer':
+                case 'Double': {
+                    if(dataType !== 'number') {
+                        invalid = true;
+                    }
+                    if (!isFinite(obj)) {
+                        invalid = true;
+                    }
+                }
+                    break;
+                case 'Boolean':
+                    if(dataType !== 'boolean') {
+                        invalid = true;
+                    }
+                    break;
+                case 'DateTime':
+                    if(!(typeof obj === 'object' && typeof obj.isBefore === 'function')) {
+                        invalid = true;
+                    }
+                    break;
+                }
+            }
             if (invalid) {
                 ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
             }

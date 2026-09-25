@@ -387,6 +387,13 @@ class JSONPopulator {
         // never a valid primitive either way, so it falls through to the
         // TS switch below, exactly as the whole-document fast path falls
         // back on the same `EngineFastPathUnsupported`.
+        //
+        // Every arm of the switch except DateTime-from-a-string returns
+        // `json` itself (an already-built dayjs, a number, a string, an
+        // enum value), so once the engine has accepted the value the view
+        // returns the caller's own object, not a copy decoded from the
+        // wire: identity (`result === json`) is what TS gives.
+        /* istanbul ignore if */
         if (rust) {
             try {
                 const codec = loadEngine('../engine/serializer-codec');
@@ -397,6 +404,9 @@ class JSONPopulator {
                     JSON.stringify(codec.encodeValue(options)),
                     path,
                 );
+                if (field.getType() !== 'DateTime' || typeof json !== 'string') {
+                    return json;
+                }
                 return codec.decodeValue(JSON.parse(resultText), parameters.modelManager);
             } catch (err) {
                 if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {

@@ -241,7 +241,10 @@ class JSONGenerator {
         // lookup is needed, so this is safe for a field built by a test
         // stub too. A value the wire codec cannot express falls through to
         // the TS switch below, exactly as the whole-document fast path
-        // falls back on the same `EngineFastPathUnsupported`.
+        // falls back on the same `EngineFastPathUnsupported`. Every arm but
+        // DateTime returns `obj` itself, so the view does too once the
+        // engine has accepted it (identity, as in TS).
+        /* istanbul ignore if */
         if (rust) {
             try {
                 const codec = loadEngine('../engine/serializer-codec');
@@ -251,6 +254,9 @@ class JSONGenerator {
                     JSON.stringify(codec.encodeValue(obj)),
                     JSON.stringify(codec.encodeValue(options)),
                 );
+                if (field.getType() !== 'DateTime') {
+                    return obj;
+                }
                 return codec.decodeValue(JSON.parse(resultText), undefined as any);
             } catch (err) {
                 if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
