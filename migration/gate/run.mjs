@@ -136,10 +136,13 @@ function judgeStatusThresholds(status) {
   const m = status.metrics;
   const ledgerPct = m.ledger && m.ledger.weighted_pct_rust_plus_hybrid;
   const llvmCov = m.rust && m.rust['concerto-rust'] && m.rust['concerto-rust'].llvm_cov;
+  // §0.6 is judged on the concerto-core crate's own lines %, which
+  // status.mjs keys by crate directory ('concerto-core'), not by package
+  // name. No fallback to the workspace figure: a missing per-crate number
+  // means the criterion was not judged.
   const llvmCovPct =
-    llvmCov && llvmCov.available
-      ? (llvmCov.per_crate_lines_pct && llvmCov.per_crate_lines_pct['accordproject-concerto-core']) ??
-        llvmCov.workspace_lines_pct
+    llvmCov && llvmCov.available && llvmCov.per_crate_lines_pct
+      ? llvmCov.per_crate_lines_pct['concerto-core'] ?? null
       : null;
   const conformance = m.conformance;
   const conformanceOk = conformance && conformance.available ? conformance.failed === 0 : null;
@@ -152,7 +155,7 @@ function judgeStatusThresholds(status) {
   const tagFailing = (tag) => (byTag && byTag.available && byTag.tally && byTag.tally[tag] ? byTag.tally[tag].failing : null);
   return {
     ledger_weighted_pct_rust_plus_hybrid: { value: ledgerPct ?? null, floor: 70, meets: checkFloor(ledgerPct, 70) },
-    llvm_cov_lines_pct: { value: llvmCovPct ?? null, floor: 90, meets: checkFloor(llvmCovPct, 90) },
+    llvm_cov_lines_pct: { crate: 'concerto-core', value: llvmCovPct ?? null, floor: 90, meets: checkFloor(llvmCovPct, 90) },
     conformance_all_scenarios_pass: { value: conformance && conformance.available ? { total: conformance.total_scenarios, failed: conformance.failed } : null, meets: conformanceOk },
     core_tests_tag_B_pass: { failing: tagFailing('B'), meets: tagOk('B') },
     core_tests_tag_W_pass: { failing: tagFailing('W'), meets: tagOk('W') },

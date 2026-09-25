@@ -169,7 +169,7 @@ for the numbers as found.
   ```
   cargo llvm-cov --workspace --summary-only   # in concerto-rust
   ```
-  **Expected:** `concerto-core`'s (`accordproject-concerto-core`) lines %
+  **Expected:** `concerto-core`'s (`accordproject-concerto-core`; `status.json` keys it as `per_crate_lines_pct['concerto-core']`) lines %
   ≥ 90. Needs the `llvm-tools-preview` rustup component and `cargo-llvm-cov`
   installed — a missing tool is an environment gap to fix, not a §0 failure,
   but it means the criterion has **not been judged** and must be reported as
@@ -233,9 +233,10 @@ each item is one of:
   reason. As of 2026-09-25 those are: the `ModelLoader #loadModelFromUrl
   should load models` network test failing with a network-shaped error
   (owner: the sandboxed environment, not a migration task); the two stale
-  `concerto-wasm` smoke checks (accordproject/concerto-rust#150); and up to
-  31 `DecoratorManager.decorateModels`/`extractDecorators` disagreements in
-  the WASM oracle leg (P4-09a, accordproject/concerto-rust#157).
+  `concerto-wasm` smoke checks (accordproject/concerto-rust#150); and the
+  31 WASM-oracle-leg disagreements filed as P4-09a
+  (accordproject/concerto-rust#157), pinned by fixture path (25
+  DecoratorManager, 6 ModelManager).
 - **unexpected** — anything else, including a failure the runner cannot
   break down (unparsable output, a failure count that does not match the
   identified failures, a truncated list, a metric that was not judged).
