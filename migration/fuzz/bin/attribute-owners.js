@@ -38,6 +38,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { expectedDivergence } = require('../lib/expected-divergences');
 
 const CLUSTERS_FILE = path.join(__dirname, '..', 'results', 'triage-clusters.json');
 
@@ -54,16 +55,22 @@ const OWNERS = {
             { task: 'P3-01a', issue: 'accordproject/concerto-rust#56', state: 'closed' },
             { task: 'P4-10', issue: 'accordproject/concerto-rust#69', state: 'closed' },
         ],
-        // Resolved (2026-09-25): the one theme that made every Serializer.fromJSON
-        // divergence in this run (the non-string $class case, DV-015) is now a
-        // maintainer-accepted, documented divergence (accordproject/concerto-rust#156)
-        // — bin/fuzz.js and bin/triage.js exclude it via lib/expected-divergences.js,
-        // so it no longer reaches this file as an unresolved cluster at all. This
-        // entry stays only as a fallback for a *different* Serializer.fromJSON
-        // divergence that lib/expected-divergences.js's narrow match does not cover
-        // (every ledger-attributed task above is merged and closed, so that would
-        // still need a new follow-up issue, same as T1 did before #156).
-        status: 'resolved via accordproject/concerto-rust#156 (DV-015): the non-string-$class case is now an excluded, expected divergence, not an unowned cluster. A differently-shaped Serializer.fromJSON divergence would still be unowned (every ledger task above is closed) and need a new issue.',
+        // Partially resolved (2026-09-25): accordproject/concerto-rust#156 (DV-015)
+        // only covers the narrow TS `TypeError: fqn.lastIndexOf is not a function`
+        // signature (a non-string `$class`, e.g. `true`) — 7 of T1's 98 clusters,
+        // 1,694 of 2,754 divergences. #156's own issue text says the sibling case,
+        // where `$class` *is* a string but names no real type (TS raises
+        // `TypeNotFoundException: Namespace is not defined for type "…"` instead of
+        // the `TypeError`), is "unaffected by this issue" — the maintainer's DV-015
+        // decision does not extend to it. lib/expected-divergences.js matches only
+        // the TypeError/lastIndexOf pair, so this file falls through to the
+        // per-cluster check in main() below (via expectedDivergence()) rather than a
+        // single status for every Serializer.fromJSON cluster: a cluster whose
+        // sample matches DV-015 is marked resolved; every other Serializer.fromJSON
+        // cluster (91 clusters, 1,060 divergences — 90 TypeNotFoundException
+        // clusters plus 1 unrelated ValidationException cluster) keeps the status
+        // below, since every ledger-attributed task above is merged and closed.
+        status: 'unowned: every ledger-attributed task is merged and closed, and accordproject/concerto-rust#156 (DV-015) does not cover this signature (only the TS TypeError/lastIndexOf case is maintainer-accepted) — a new follow-up issue/decision is needed. See TRIAGE.md T1.',
     },
     'ModelManager.fromAst': {
         theme: 'T2',
@@ -88,11 +95,20 @@ const OWNERS = {
 };
 OWNERS['ModelManager.addModelFile'] = OWNERS['ModelManager.fromAst'];
 
+// A cluster resolved by lib/expected-divergences.js (accordproject/
+// concerto-rust#156, DV-015) gets this owner instead of OWNERS[c.op] — see
+// the long comment on OWNERS['Serializer.fromJSON'] above for why the two
+// are not the same thing for this op.
+const DV015_OWNER = {
+    theme: 'T1',
+    status: 'resolved via accordproject/concerto-rust#156 (DV-015): maintainer-accepted, documented divergence — excluded by bin/fuzz.js/bin/triage.js as an expected divergence, not an unowned cluster.',
+};
+
 function main() {
     const data = JSON.parse(fs.readFileSync(CLUSTERS_FILE, 'utf8'));
     let unowned = 0;
     for (const c of data.clusters) {
-        c.owner = OWNERS[c.op] || null;
+        c.owner = expectedDivergence(c.sample) ? DV015_OWNER : (OWNERS[c.op] || null);
         if (!c.owner) { unowned++; }
     }
     fs.writeFileSync(CLUSTERS_FILE, JSON.stringify(data, null, 2));

@@ -31,6 +31,16 @@
  * Rust's explicit "$class that is not a string" rejection instead of
  * reproducing TS's uncaught `TypeError` from `ModelUtil.getShortName`/
  * `getNamespace` calling `fqn.lastIndexOf` with no type check.
+ *
+ * This deliberately does NOT match the sibling case where `$class` is a
+ * string but names no real type (TS raises `TypeNotFoundException:
+ * Namespace is not defined for type "…"` instead of the `TypeError` above,
+ * while Rust still raises the same `Error: a $class that is not a string:
+ * <value>` for values like `true`/`""`/FQN-shaped strings that are likely
+ * arrays). #156's own issue text says that case is "unaffected by this
+ * issue" — the maintainer's DV-015 decision does not cover it, so it must
+ * keep counting as an unresolved divergence (see TRIAGE.md T1) until there
+ * is a decision for it too.
  */
 const EXPECTED = [
     {

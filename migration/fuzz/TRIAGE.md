@@ -78,19 +78,38 @@ those tasks is merged and closed (P2-01 #45, P4-03 #62, P3-01a #56, P4-10 #69), 
 *open* task owns this theme. The stage-1 exit condition ("every cluster has an owner
 or a new issue") is met for all 98 of T1's clusters through #156.
 
-**Decision (maintainer, 2026-09-25, on #156): keep Rust's clearer error.** Of the two
-options #156 laid out — (a) faithfully reproduce TS's crash-y `TypeError` text, or
-(b) accept the divergence and document it — the maintainer picked (b), with a twist:
-this is recorded in `DIVERGENCES.md` (`accordproject/concerto-rust`) as `DV-015`,
-classified `maintainer-accepted` rather than `ts-bug` — an explicit, approved
-exception to PORTING.md's "no improvements" rule, not the `ts-bug` precedent of
-DV-008/DV-010. Rust is *not* changed; TS is *not* changed. The fuzz harness now treats
-this signature as an expected, documented divergence: `bin/fuzz.js` and `bin/triage.js`
-match it narrowly against `lib/expected-divergences.js` (same op, same TS `TypeError`
-class and exact message, same Rust `Error` class and message prefix) and no longer
-count it in `divergences`/`clusterCount` — it is recorded separately (`fuzz.js`'s
-`expectedDivergences` counter, `results/expected-divergences.jsonl`). So none of T1's
-2,754 divergences (98 clusters) are unresolved any more; they are expected.
+**Decision (maintainer, 2026-09-25, on #156): keep Rust's clearer error — for the
+`TypeError`/`lastIndexOf` signature only.** Of the two options #156 laid out — (a)
+faithfully reproduce TS's crash-y `TypeError` text, or (b) accept the divergence and
+document it — the maintainer picked (b), with a twist: this is recorded in
+`DIVERGENCES.md` (`accordproject/concerto-rust`) as `DV-015`, classified
+`maintainer-accepted` rather than `ts-bug` — an explicit, approved exception to
+PORTING.md's "no improvements" rule, not the `ts-bug` precedent of DV-008/DV-010. Rust
+is *not* changed; TS is *not* changed. The fuzz harness treats this exact signature as
+an expected, documented divergence: `bin/fuzz.js` and `bin/triage.js` match it
+narrowly against `lib/expected-divergences.js` (same op, same TS `TypeError` class and
+exact message `fqn.lastIndexOf is not a function`, same Rust `Error` class and message
+prefix) and no longer count it in `divergences`/`clusterCount` — it is recorded
+separately (`fuzz.js`'s `expectedDivergences` counter, `results/expected-divergences.jsonl`).
+
+**This resolves only 7 of T1's 98 clusters (1,694 of 2,754 divergences).** #156's own
+issue text is explicit that the sibling case — `$class` *is* a string but names no
+real type, so TS raises `TypeNotFoundException: Namespace is not defined for type
+"…"` instead of the `TypeError` — is "unaffected by this issue"; the maintainer's
+DV-015 decision does not cover it. Re-running `bin/triage.js` on the committed
+`results/divergences.jsonl` confirms **91 clusters (1,060 divergences) are still
+reported as unresolved**: 90 of those are exactly this `TypeNotFoundException`
+signature (Rust still raises `Error: a $class that is not a string: <value>` for
+values like `true`, `""`, and FQN-shaped strings such as `org.test@1.0.0.C` — the
+FQN-shaped ones are most likely arrays, since a JS array has its own `lastIndexOf`
+and so reaches `TypeNotFoundException` instead of the `TypeError` that DV-015
+covers); the 91st is one unrelated `Serializer.fromJSON` divergence (`ts=ok`,
+`rust=ValidationException`, a `DateTime` field type mismatch — not a `$class` issue at
+all, and not something #156 or DV-015 addresses either). **These 91 clusters are not
+resolved and need their own maintainer decision** — raised back on #156 rather than
+folded into `lib/expected-divergences.js`'s narrow match, since DV-015 does not extend
+to them. See `bin/attribute-owners.js`, which distinguishes the two groups per cluster
+rather than giving every `Serializer.fromJSON` cluster the same status.
 
 Representative seed: `data/Serializer.fromJSON/05598770d4c6f12c4d5dcf8e.json`,
 mutationSeed 29 (see `results/divergences.jsonl` for the full set, recorded before this
@@ -200,8 +219,14 @@ is correct, and every cluster has an owner or a new issue":
 - **Every cluster has an owner or a new issue**, checked directly in
   `results/triage-clusters.json` (409/409 clusters carry a non-null `owner`):
   - T1 (98 clusters): accordproject/concerto-rust#156 (new issue, filed this
-    revision) — resolved: maintainer-accepted (`DIVERGENCES.md` DV-015 in
-    `accordproject/concerto-rust`), now excluded as an expected divergence.
+    revision) is the owner for all 98, but **only 7 clusters (1,694 divergences)
+    are actually resolved** — the maintainer's DV-015 decision on #156 covers only
+    the TS `TypeError`/`fqn.lastIndexOf` signature, excluded as an expected
+    divergence. The other **91 clusters (1,060 divergences) are still unresolved**
+    (90 are the sibling `TypeNotFoundException`/"not a string" signature #156's own
+    text says is out of that decision's scope; 1 is an unrelated
+    `ValidationException` case) and need a further maintainer decision — #156 is
+    their owning issue, but not yet their resolution.
   - T2 (311 clusters): accordproject/concerto-rust#144 (closed) and #67 (open) —
     see T2's owner section for why both, not just one.
   - T3 (0 clusters, no divergences): vacuously satisfied.
@@ -213,8 +238,11 @@ coordinator's two-stage decision.
 ## What this triage does not do
 
 - **No product code is fixed.** Per the coordinator's stage-1 scope, product-code
-  fixes stay with the owning tasks named above (T1: #156, resolved — a
-  `maintainer-accepted` `DIVERGENCES.md` row, not a code fix; T2: #144 closed / #67
+  fixes stay with the owning tasks named above (T1: #156 — the `TypeError`/
+  `lastIndexOf` signature (7 clusters, 1,694 divergences) is resolved as a
+  `maintainer-accepted` `DIVERGENCES.md` row (DV-015), not a code fix; the
+  `TypeNotFoundException` signature (91 clusters, 1,060 divergences) is **not**
+  resolved and awaits a further decision on the same issue; T2: #144 closed / #67
   open).
 - **The corpus and `baseline.tsv` are untouched**, as instructed.
 - **Not every individual divergence was manually inspected** — minimisation
