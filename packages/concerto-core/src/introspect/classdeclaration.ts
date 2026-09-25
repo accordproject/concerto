@@ -512,6 +512,10 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} subclass declarations.
      */
     getAssignableClassDeclarations(): ClassDeclaration[] {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.classDeclarationGetAssignableClassDeclarations(this) as ClassDeclaration[];
+        }
         const results = new Set<ClassDeclaration>();
         const modelManager = this.getModelFile().getModelManager();
         const introspector = new Introspector(modelManager);
@@ -550,6 +554,10 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} direct subclass declarations.
      */
     getDirectSubclasses(): ClassDeclaration[] {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.classDeclarationGetDirectSubclasses(this) as ClassDeclaration[];
+        }
         const modelManager = this.getModelFile().getModelManager();
         const introspector = new Introspector(modelManager);
         const allClassDeclarations = introspector.getClassDeclarations();
@@ -661,6 +669,10 @@ class ClassDeclaration extends Declaration {
      * @throws {IllegalModelException} if the property path is invalid or the property does not exist
      */
     getNestedProperty(propertyPath: string): Property {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.classDeclarationGetNestedProperty(this, propertyPath) as Property;
+        }
 
         const propertyNames = propertyPath.split('.');
         let classDeclaration: ClassDeclaration = this;
