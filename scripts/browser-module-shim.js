@@ -13,22 +13,29 @@
  */
 
 /*
- * Injected into the browser ESM build (see scripts/build-esm.js) to bind the
- * free `module` identifier the rust-mode views read: `module.require(specifier)`
- * (modelutil.ts, introspect/numbervalidator.ts, introspect/scalardeclaration.ts;
+ * Injected into concerto-core's browser ESM build (see scripts/build-esm.js)
+ * to bind the free `module` identifier the rust-mode views read in
+ * `loadEngine`: `module.require(specifier)` (modelutil.ts, introspect/*.ts;
  * P4-11a, PORTING.md 1.5, OD-11). That call is a property read on a free
- * identifier, never a literal `require(...)`, so it never gives esbuild's ESM
- * output a `require` call to shim with `__require` — but it does need a
- * `module` to read `.require` off, and a browser has neither Node's `module`
- * object nor anything to build one from (no `require`, no `createRequire`).
+ * identifier, never a literal `require(...)`, so esbuild's ESM output never
+ * gets a `require` call to shim with `__require`.
  *
- * The shim defers to a real `globalThis.module` whenever the page has one — a
- * downstream bundler's own CommonJS interop, or a test harness standing in for
- * one (e2e/tests/wasm-engine.spec.ts) — exactly the same contract
- * src/engine/rust.ts already relies on for its own bare
- * `require('@accordproject/concerto-engine')` in this build. Nothing in the
- * default (CONCERTO_ENGINE=ts) mode reads `module` at all, so a page that
- * never sets rust mode never calls the fallback.
+ * Browser rust mode needs a bundler, or a host that supplies a synchronous
+ * `require`. The views load the engine synchronously, and a browser cannot
+ * load an ES module synchronously, so this build does NOT load
+ * dist/esm-browser/engine/*.mjs by itself. This shim only forwards to the
+ * `globalThis.module` that the bundler or host provides. That `require` must
+ * resolve './engine', '../engine' and '../engine/<subpath>' to the matching
+ * dist/esm-browser/engine/*.mjs module. It must also resolve the engine's own
+ * `require`s, such as '@accordproject/concerto-engine' in src/engine/rust.ts,
+ * the same way. e2e/tests/wasm-engine.spec.ts stands in for that bundler.
+ * Node ESM (dist/esm/index.mjs) needs none of this: its build banner
+ * resolves the engine itself.
+ *
+ * The shim reads `globalThis.module` once, when this build first imports it,
+ * so the bundler or host must set it before importing concerto-core. Nothing
+ * in the default (CONCERTO_ENGINE=ts) mode reads `module` at all, so a page
+ * that never sets rust mode never calls the fallback.
  */
 
 const globals = typeof globalThis !== 'undefined' ? globalThis : {};
@@ -42,10 +49,10 @@ const fallback = {
      */
     require(specifier) {
         throw new Error(
-            `Cannot load "${specifier}": CONCERTO_ENGINE=rust through the browser ESM graph needs a ` +
-            'CommonJS-style require, which this page does not provide. Set globalThis.module = ' +
-            '{ require: ... } before importing this module (see e2e/tests/wasm-engine.spec.ts), or ' +
-            'load it through a bundler that resolves module.require itself.'
+            `Cannot load "${specifier}": CONCERTO_ENGINE=rust in a browser needs a bundler, or a host ` +
+            'that supplies a synchronous require; the browser ESM build cannot load the engine by ' +
+            'itself. Bundle concerto-core, or set globalThis.module = { require: ... } before ' +
+            'importing it (see e2e/tests/wasm-engine.spec.ts).'
         );
     },
 };

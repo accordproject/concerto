@@ -42,15 +42,20 @@ import type ScalarDeclaration from './scalardeclaration';
 // `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
 // bundles exactly as before (PORTING.md 1.5).
 //
-// rust mode also works through the public ESM and browser entry points
-// (dist/esm/index.mjs, dist/esm-browser/index.mjs; P4-11a). scripts/build-esm.js
-// binds a `module` there too — Node's via `createRequire(import.meta.url)`,
-// the browser's via a `globalThis.module` a consumer (or a test harness)
-// provides — so this same `module.require(specifier)` resolves; it never
-// needed the bare `require` a bundler would try to shim. The banner is
-// added per output file, entry or chunk, anchored to that file's own
-// location, so the relative specifier above still matches wherever esbuild
-// places this code.
+// rust mode through the public ESM entry points (P4-11a, PORTING.md 1.5):
+// - Node ESM (dist/esm/index.mjs) works unaided. scripts/build-esm.js's Node
+//   banner sets a `globalThis.module` whose `require` resolves the engine
+//   specifiers. It does not rely on the relative specifier above matching
+//   the output file's location (esbuild hoists shared views into chunks at
+//   the outdir root, where `../engine` would point outside dist/). Instead
+//   it rewrites `./engine`, `../engine` and `../engine/<subpath>` to the
+//   engine directory it finds at runtime from the file's own import.meta.url.
+// - The browser (dist/esm-browser/index.mjs) needs a bundler, or a host that
+//   supplies a synchronous `require`. This call is synchronous and a browser
+//   cannot load an ES module synchronously, so the browser ESM graph does not
+//   load dist/esm-browser/engine/*.mjs by itself. scripts/browser-module-shim.js
+//   reads `module.require` from the `globalThis.module` that the bundler or
+//   host provides, and throws if there is none.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */

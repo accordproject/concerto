@@ -222,7 +222,10 @@ function buildOptionsFor(target) {
         // `import ... from "module"`, which would break downstream bundlers.
         //
         // P4-11a (PORTING.md 1.5, OD-11) also makes rust mode's
-        // `module.require(specifier)` work here: Node's native ESM has no
+        // `module.require(specifier)` work in this Node ESM build, unaided
+        // (the browser build cannot do this; see browser-module-shim.js
+        // below: browser rust mode needs a bundler or a host-provided
+        // synchronous require). Node's native ESM has no
         // `module` global, so without help the property read throws. The
         // banner only *assigns* `globalThis.module` — inside a check for
         // `CONCERTO_ENGINE=rust`, so a ts-mode consumer's process is never
@@ -311,14 +314,17 @@ function buildOptionsFor(target) {
                 // fully specified once the importing module is a .mjs file.
                 // Binding it here keeps the browser build self-contained.
                 //
-                // browser-module-shim.js binds `module` the same way, only for
-                // concerto-core (the one package with src/engine/): the
+                // browser-module-shim.js binds `module` too, only for
+                // concerto-core (the one package with src/engine/), for the
                 // rust-mode views' `module.require(specifier)` calls (P4-11a).
-                // A browser has neither Node's `module` nor a `require` to
-                // build one from, so it defers to a `globalThis.module` a
-                // consumer's bundler (or, in e2e/tests/wasm-engine.spec.ts, the
-                // test harness) provides, exactly as it already must for
-                // src/engine/rust.ts's own bare `require('@accordproject/concerto-engine')`.
+                // Unlike the Node banner, it does not resolve the engine:
+                // those calls are synchronous and a browser cannot load an ES
+                // module synchronously. Browser rust mode needs a bundler, or
+                // a host that supplies a synchronous `require`, through
+                // `globalThis.module`, just as src/engine/rust.ts's own bare
+                // `require('@accordproject/concerto-engine')` already does.
+                // e2e/tests/wasm-engine.spec.ts stands in for that bundler.
+                // The browser graph never loads the engine by itself.
                 inject: [
                     path.join(__dirname, 'browser-process-shim.js'),
                     ...(isConcertoCore ? [path.join(__dirname, 'browser-module-shim.js')] : []),
