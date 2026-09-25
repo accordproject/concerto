@@ -56,6 +56,10 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     Validator: (p) => new BaseException(p.message, undefined, p.errorType),
     Error: (p) => new Error(p.message),
     JsTypeError: (p) => new TypeError(p.message),
+    // error/mod.rs `ErrorKind::JsRangeError` (task accordproject/concerto-rust#151,
+    // P2-08b): a JS `RangeError(message)`, the same relationship JsTypeError
+    // above has to TypeError.
+    JsRangeError: (p) => new RangeError(p.message),
 };
 
 /**

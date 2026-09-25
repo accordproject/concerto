@@ -160,13 +160,51 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
 }
 
 /**
+ * Restores a `decorators` field the TS extractor leaves present-but-`undefined`
+ * (`decoratorextractor.ts` `filterOutDecorators`'s `Action.EXTRACT_ALL` branch
+ * assigns `decl.decorators = undefined` rather than deleting the key) after
+ * the Rust extractor's `filter_out_decorators` (`concerto-rust` `dcs/extractor.rs`)
+ * deletes the key outright (`map.remove("decorators")`) instead. Both are
+ * `undefined` when read and identical once JSON-serialised, but the oracle
+ * distinguishes a present-and-`undefined` field from an absent one (task
+ * accordproject/concerto-rust#157), so a node whose *source* counterpart had
+ * a (truthy) `decorators` field, and whose extracted counterpart now has
+ * none, gets that field set back to `undefined` here — matching the TS shape
+ * without touching the Rust engine's own behaviour or its JSON output.
+ * @param {object} sourceNode the pre-extraction AST node (declaration,
+ * property, or map key/value type)
+ * @param {object} resultNode the corresponding post-extraction AST node
+ */
+function restoreUndefinedDecorators(sourceNode: any, resultNode: any): void {
+    if (!sourceNode || !resultNode || typeof resultNode !== 'object') {
+        return;
+    }
+    if (sourceNode.decorators && !('decorators' in resultNode)) {
+        resultNode.decorators = undefined;
+    }
+    if (Array.isArray(sourceNode.properties) && Array.isArray(resultNode.properties)) {
+        sourceNode.properties.forEach((sourceProperty: any, i: number) => {
+            restoreUndefinedDecorators(sourceProperty, resultNode.properties[i]);
+        });
+    }
+    if (sourceNode.key && resultNode.key) {
+        restoreUndefinedDecorators(sourceNode.key, resultNode.key);
+    }
+    if (sourceNode.value && resultNode.value) {
+        restoreUndefinedDecorators(sourceNode.value, resultNode.value);
+    }
+}
+
+/**
  * The three DecoratorManager.extract* methods in rust mode, after the TS
  * body's option defaults. The AST is resolved here, on the TS side, as each
  * ts-mode body resolves its own `getAst(true, ...)`, with the system
  * namespaces left out as in `decoratorManagerDecorateModels`. Rust returns
  * the stripped models' AST, loaded here into a new ModelManager, and the
  * extracted command sets and vocabularies; each caller returns the fields
- * its TS body returns, in the same order.
+ * its TS body returns, in the same order. When `options.removeDecoratorsFromModel`
+ * is set, `restoreUndefinedDecorators` re-shapes the stripped declarations to
+ * match the TS extractor exactly (see its doc comment).
  * @param {string} binding the concerto-wasm binding to call
  * @param {object} modelManager the input ModelManager
  * @param {object} options the extract options, defaults applied
@@ -174,7 +212,26 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
  */
 function decoratorManagerExtract(binding: string, modelManager: any, options: any): any {
     const { default: ModelManager } = require('../modelmanager');
-    const result = rust![binding](modelManager.getAst(true, false).models, options);
+    const sourceModels = modelManager.getAst(true, false).models;
+    const result = rust![binding](sourceModels, options);
+    if (options?.removeDecoratorsFromModel) {
+        // result.modelManager.models also carries the Rust engine's own
+        // system namespaces (its doc comment above: "the Rust-side manager
+        // carries its own copy of them"), which sourceModels (system
+        // namespaces excluded, `getAst`'s second argument false) does not,
+        // so the two arrays line up by namespace, not by index.
+        const sourceByNamespace = new Map<string, any>(sourceModels.map((m: any) => [m.namespace, m]));
+        result.modelManager.models.forEach((resultModel: any) => {
+            const sourceModel = sourceByNamespace.get(resultModel.namespace);
+            // The model (namespace) itself can carry decorators
+            // (`decoratorextractor.ts` `processModels`), as well as its
+            // declarations.
+            restoreUndefinedDecorators(sourceModel, resultModel);
+            (resultModel.declarations || []).forEach((resultDecl: any, j: number) => {
+                restoreUndefinedDecorators(sourceModel?.declarations?.[j], resultDecl);
+            });
+        });
+    }
     const updatedModelManager = new ModelManager();
     updatedModelManager.fromAst(result.modelManager);
     result.modelManager = updatedModelManager;
