@@ -99,7 +99,7 @@ Do the work there, commit with a DCO sign-off (git commit --signoff) in every re
       let r = res
       let rev = await agent(`${RULES}
 
-You are an ADVERSARIAL REVIEWER for ${it.id} (${TRACKER}#${it.number}); read the issue body for the task and exit condition. Default to pass=false if unsure.
+You are an ADVERSARIAL REVIEWER for ${it.id} (${TRACKER}#${it.number}); read the issue body for the task and exit condition. Default to pass=false if unsure. Pushing the branch, opening the draft PR and posting the issue's status comment are done by the later handoff step, not by the implementer. Never report their absence as a finding.
 Implementer report:\n${JSON.stringify(r, null, 1)}
 Inspect the worktrees and commits. Do NOT re-run a test or build command that the implementer report already evidences for the current commit: the same command, the commit SHA, and pass/fail counts or output. Accept that evidence. Re-run a command only if its evidence is missing or vague, names a different commit or command, or conflicts with what you see in the diff. Spend your effort on reading the diff, and on checks the implementer did not run. Look for vacuous passes, missing inputs treated as success, hard-coded numbers, test edits, or scope creep. Do not modify files.`,
         { label: `${it.id}:review`, phase: 'Review', model: 'opus', schema: REVIEW })
@@ -112,7 +112,7 @@ Fix these BLOCKING review findings for ${it.id} in the existing worktrees (${JSO
         if (fixed) r = fixed
         rev = await agent(`${RULES}
 
-Re-review ${it.id} after fixes. Previously blocking:\n${blocking.map(x => '- ' + x.description).join('\n')}\nReport:\n${JSON.stringify(r, null, 1)}\nDo NOT re-run a test or build command that the implementer report already evidences for the current commit: the same command, the commit SHA, and pass/fail counts or output. Accept that evidence. Re-run a command only if its evidence is missing or vague, names a different commit or command, or conflicts with what you see in the diff. Spend your effort on reading the diff, and on checks the implementer did not run. Do not modify files.`,
+Re-review ${it.id} after fixes. Pushing the branch, opening the draft PR and posting the issue's status comment are done by the later handoff step, not by the implementer. Never report their absence as a finding. Previously blocking:\n${blocking.map(x => '- ' + x.description).join('\n')}\nReport:\n${JSON.stringify(r, null, 1)}\nDo NOT re-run a test or build command that the implementer report already evidences for the current commit: the same command, the commit SHA, and pass/fail counts or output. Accept that evidence. Re-run a command only if its evidence is missing or vague, names a different commit or command, or conflicts with what you see in the diff. Spend your effort on reading the diff, and on checks the implementer did not run. Do not modify files.`,
           { label: `${it.id}:re-review`, phase: 'Review', model: 'opus', schema: REVIEW })
       }
       return { r, rev }
