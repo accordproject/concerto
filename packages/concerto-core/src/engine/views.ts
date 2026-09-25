@@ -81,4 +81,31 @@ function propertyProcess(property: any): void {
         : null;
 }
 
-export { scalarDeclarationProcess, propertyProcess };
+/**
+ * Field.process in rust mode, after `super.process()` (Property's, already
+ * run): Rust computes the validator and the default value, the identical
+ * selection `scalarDeclarationProcess` makes for `ScalarDeclaration` — a
+ * `NumberValidator` is rebuilt from its snapshot; a `StringValidator` is
+ * still built by its TS constructor until P2-02 ports it.
+ * @param {object} field the Field being processed
+ */
+function fieldProcess(field: any): void {
+    const snapshot = rust!.fieldProcess(field);
+    field.validator = null;
+    if (snapshot.validator?.kind === 'NumberValidator') {
+        const { NumberValidator } = require('../introspect/numbervalidator');
+        const validator = Object.create(NumberValidator.prototype);
+        // The fields the Validator and NumberValidator constructors set.
+        validator.validator = field.ast.validator;
+        validator.field = field;
+        validator.lowerBound = snapshot.validator.lowerBound;
+        validator.upperBound = snapshot.validator.upperBound;
+        field.validator = validator;
+    } else if (snapshot.validator?.kind === 'StringValidator') {
+        const { StringValidator } = require('../introspect/stringvalidator');
+        field.validator = new StringValidator(field, field.ast.validator, field.ast.lengthValidator);
+    }
+    field.defaultValue = snapshot.defaultValue;
+}
+
+export { scalarDeclarationProcess, propertyProcess, fieldProcess };

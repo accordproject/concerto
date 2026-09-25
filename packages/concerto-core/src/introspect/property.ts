@@ -192,6 +192,12 @@ class Property extends Decorated {
     validate(classDecl: ClassDeclaration) {
         super.validate();
 
+        /* istanbul ignore if */
+        if (rust) {
+            rust.propertyValidate(this, classDecl);
+            return;
+        }
+
         if(this.type) {
             classDecl.getModelFile().resolveType( 'property ' + this.getFullyQualifiedName(), this.type);
         }

@@ -26,6 +26,20 @@ import type Validator from './validator';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// Its bindings are typed `never` so that a view leaves the member's inferred
+// return type, and so the .d.ts, exactly as the TS body makes it. See
+// property.ts's own copy of this comment for the bundler/webpack reasoning
+// this loader relies on.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 /**
  * Class representing the definition of a Field. A Field is owned
  * by a ClassDeclaration and has a name, type and additional metadata
@@ -60,6 +74,12 @@ class Field extends Property {
      */
     process() {
         super.process();
+
+        /* istanbul ignore if */
+        if (rust) {
+            loadEngine('../engine/views').fieldProcess(this);
+            return;
+        }
 
         this.validator = null;
 
