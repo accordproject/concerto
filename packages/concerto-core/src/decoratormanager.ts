@@ -45,6 +45,10 @@ const loadEngine = (specifier: string) =>
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } | null =
     typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
+// The rust-mode view functions (src/engine/views.ts), typed `never` for the
+// same reason as `rust` above (PORTING.md 1.5, "Why never"): the return types
+// the declaration build infers stay exactly those of the TS bodies.
+type EngineViews = { [view: string]: (...args: any[]) => never };
 
 const DCS_VERSION = '0.4.0';
 
@@ -207,6 +211,7 @@ class DecoratorManager {
             DCS_MODEL,
             'decoratorcommands@0.3.0.cto'
         );
+        /* istanbul ignore if */
         if (rust) {
             // The structural check only (src/dcs/mod.rs `validate`); the
             // validationModelManager above is still built the TS way (CTO
@@ -227,6 +232,7 @@ class DecoratorManager {
      * @returns {object} the migrated DecoratorCommandSet object
      */
     static migrateTo(decoratorCommandSet, version) {
+        /* istanbul ignore if */
         if (rust) {
             return rust.decoratorManagerMigrateTo(decoratorCommandSet);
         }
@@ -415,23 +421,9 @@ class DecoratorManager {
             options.disableMetamodelValidation = true;
         }
 
+        /* istanbul ignore if */
         if (rust) {
-            // Metamodel resolution itself is not ported (src/dcs/mod.rs
-            // `decorate_models`'s doc comment), but the ModelManager this
-            // phase runs against is still the TS one (P4-08 has not
-            // converted it yet), so resolution can run here, on the TS
-            // side, exactly as the ts-mode body below does, and the
-            // already-resolved AST handed across. System namespaces are
-            // still left out (the second argument false): the Rust-side
-            // manager already carries its own copy of them, and re-adding
-            // one is a duplicate-namespace error there.
-            const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, false) : modelManager.getAst(true, false);
-            const decoratedAst = rust.decoratorManagerDecorateModels(ast.models, decoratorCommandSets, options ?? {});
-            const newModelManager = new ModelManager({
-                decoratorValidation: modelManager.getDecoratorValidation()
-            });
-            newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
-            return newModelManager;
+            return (loadEngine('./engine/views') as EngineViews).decoratorManagerDecorateModels(modelManager, decoratorCommandSets, options);
         }
 
         this.migrateAndValidate(modelManager, decoratorCommandSets, options?.migrate, options?.validate, options?.validateCommands);
@@ -537,19 +529,9 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
+        /* istanbul ignore if */
         if (rust) {
-            // Resolved here, on the TS side, exactly as the ts-mode body
-            // below does with its own unconditional `getAst(true, true)`
-            // (decorateModels's rust-mode comment explains why system
-            // namespaces are still left out here).
-            const result = rust.decoratorManagerExtractDecorators(modelManager.getAst(true, false).models, options) as { modelManager: any; decoratorCommandSet: unknown[]; vocabularies: string[] };
-            const updatedModelManager = new ModelManager();
-            updatedModelManager.fromAst(result.modelManager);
-            return {
-                modelManager: updatedModelManager,
-                decoratorCommandSet: result.decoratorCommandSet,
-                vocabularies: result.vocabularies
-            };
+            return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractDecorators(modelManager, options);
         }
         const sourceAst = modelManager.getAst(true, true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL);
@@ -574,18 +556,9 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
+        /* istanbul ignore if */
         if (rust) {
-            // Resolved here, on the TS side, exactly as the ts-mode body
-            // below does with its own unconditional `getAst(true, true)`
-            // (decorateModels's rust-mode comment explains why system
-            // namespaces are still left out here).
-            const result = rust.decoratorManagerExtractVocabularies(modelManager.getAst(true, false).models, options) as { modelManager: any; vocabularies: string[] };
-            const updatedModelManager = new ModelManager();
-            updatedModelManager.fromAst(result.modelManager);
-            return {
-                modelManager: updatedModelManager,
-                vocabularies: result.vocabularies
-            };
+            return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractVocabularies(modelManager, options);
         }
         const sourceAst = modelManager.getAst(true, true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB);
@@ -609,14 +582,9 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
+        /* istanbul ignore if */
         if (rust) {
-            const result = rust.decoratorManagerExtractNonVocabDecorators(modelManager.getAst(false, false).models, options) as { modelManager: any; decoratorCommandSet: unknown[] };
-            const updatedModelManager = new ModelManager();
-            updatedModelManager.fromAst(result.modelManager);
-            return {
-                modelManager: updatedModelManager,
-                decoratorCommandSet: result.decoratorCommandSet
-            };
+            return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractNonVocabDecorators(modelManager, options);
         }
         const sourceAst = modelManager.getAst(true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB);
@@ -739,6 +707,7 @@ class DecoratorManager {
      * the test and values arrays is not empty (i.e. they have values in common)
      */
     static falsyOrEqual(test, values) {
+        /* istanbul ignore if */
         if (rust) {
             return rust.decoratorManagerFalsyOrEqual(test, values);
         }
@@ -877,6 +846,7 @@ class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property, command) {
+        /* istanbul ignore if */
         if (rust) {
             // Mutates a detached clone across the boundary; copy the result
             // back onto `property` so callers that hold onto it (as every

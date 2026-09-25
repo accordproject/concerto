@@ -108,4 +108,105 @@ function fieldProcess(field: any): void {
     field.defaultValue = snapshot.defaultValue;
 }
 
-export { scalarDeclarationProcess, propertyProcess, fieldProcess };
+/**
+ * DecoratorManager.decorateModels in rust mode, after the TS body's
+ * `skipValidationAndResolution` handling. Metamodel resolution itself is not
+ * ported (concerto-rust src/dcs/mod.rs `decorate_models`'s doc comment), but
+ * the ModelManager this phase runs against is still the TS one (P4-08 has not
+ * converted it), so resolution runs here, on the TS side, exactly as the
+ * ts-mode body does (`resolveMetaModel` unless
+ * `options.disableMetamodelResolution`), and the already-resolved AST is
+ * handed across. System namespaces are left out (`getAst`'s second argument
+ * false): the Rust-side manager carries its own copy of them, and re-adding
+ * one is a duplicate-namespace error there. The decorated AST comes back and
+ * is loaded into a new ModelManager, as the TS body does.
+ * @param {object} modelManager the input ModelManager
+ * @param {object[]} decoratorCommandSets the decorator command sets, as an array
+ * @param {object} [options] the decorateModels options
+ * @return {object} a new ModelManager with the decorations applied
+ */
+function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets: any[], options?: any): any {
+    const { default: ModelManager } = require('../modelmanager');
+    const ast = modelManager.getAst(!options?.disableMetamodelResolution, false);
+    const decoratedAst = rust!.decoratorManagerDecorateModels(ast.models, decoratorCommandSets, options ?? {});
+    const newModelManager = new ModelManager({
+        decoratorValidation: modelManager.getDecoratorValidation()
+    });
+    newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
+    return newModelManager;
+}
+
+/**
+ * The three DecoratorManager.extract* methods in rust mode, after the TS
+ * body's option defaults. The AST is resolved here, on the TS side, as each
+ * ts-mode body resolves its own `getAst(true, ...)`, with the system
+ * namespaces left out as in `decoratorManagerDecorateModels`. Rust returns
+ * the stripped models' AST, loaded here into a new ModelManager, and the
+ * extracted command sets and vocabularies; each caller returns the fields
+ * its TS body returns, in the same order.
+ * @param {string} binding the concerto-wasm binding to call
+ * @param {object} modelManager the input ModelManager
+ * @param {object} options the extract options, defaults applied
+ * @return {object} the binding's result, with `modelManager` materialised
+ */
+function decoratorManagerExtract(binding: string, modelManager: any, options: any): any {
+    const { default: ModelManager } = require('../modelmanager');
+    const result = rust![binding](modelManager.getAst(true, false).models, options);
+    const updatedModelManager = new ModelManager();
+    updatedModelManager.fromAst(result.modelManager);
+    result.modelManager = updatedModelManager;
+    return result;
+}
+
+/**
+ * DecoratorManager.extractDecorators in rust mode (see decoratorManagerExtract).
+ * @param {object} modelManager the input ModelManager
+ * @param {object} options the extract options, defaults applied
+ * @return {object} `{modelManager, decoratorCommandSet, vocabularies}`
+ */
+function decoratorManagerExtractDecorators(modelManager: any, options: any): any {
+    const result = decoratorManagerExtract('decoratorManagerExtractDecorators', modelManager, options);
+    return {
+        modelManager: result.modelManager,
+        decoratorCommandSet: result.decoratorCommandSet,
+        vocabularies: result.vocabularies
+    };
+}
+
+/**
+ * DecoratorManager.extractVocabularies in rust mode (see decoratorManagerExtract).
+ * @param {object} modelManager the input ModelManager
+ * @param {object} options the extract options, defaults applied
+ * @return {object} `{modelManager, vocabularies}`
+ */
+function decoratorManagerExtractVocabularies(modelManager: any, options: any): any {
+    const result = decoratorManagerExtract('decoratorManagerExtractVocabularies', modelManager, options);
+    return {
+        modelManager: result.modelManager,
+        vocabularies: result.vocabularies
+    };
+}
+
+/**
+ * DecoratorManager.extractNonVocabDecorators in rust mode (see decoratorManagerExtract).
+ * @param {object} modelManager the input ModelManager
+ * @param {object} options the extract options, defaults applied
+ * @return {object} `{modelManager, decoratorCommandSet}`
+ */
+function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: any): any {
+    const result = decoratorManagerExtract('decoratorManagerExtractNonVocabDecorators', modelManager, options);
+    return {
+        modelManager: result.modelManager,
+        decoratorCommandSet: result.decoratorCommandSet
+    };
+}
+
+export {
+    scalarDeclarationProcess,
+    propertyProcess,
+    fieldProcess,
+    decoratorManagerDecorateModels,
+    decoratorManagerExtractDecorators,
+    decoratorManagerExtractVocabularies,
+    decoratorManagerExtractNonVocabDecorators,
+};
