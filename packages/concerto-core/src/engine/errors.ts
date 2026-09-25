@@ -26,6 +26,7 @@ import { BaseException } from '@accordproject/concerto-util';
 import IllegalModelException from '../introspect/illegalmodelexception';
 import TypeNotFoundException from '../typenotfoundexception';
 import ValidationException from '../serializer/validationexception';
+import MetamodelException from '../metamodelexception';
 
 /**
  * The error payload the engine hands to the factory.
@@ -56,6 +57,16 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     Validator: (p) => new BaseException(p.message, undefined, p.errorType),
     Error: (p) => new Error(p.message),
     JsTypeError: (p) => new TypeError(p.message),
+    // A JS `RangeError` the V8 engine raises in the TS code (PORTING.md
+    // 2.5): a stack overflow at a TS recursion point with no cycle check.
+    // Added alongside `Metamodel` below since concerto-rust's `error/mod.rs`
+    // (P2-08b/P4-08b) added both `ErrorKind` variants without a matching
+    // entry here; the coordinator's P4-08 comment flagged `JsRangeError` as
+    // possibly still missing.
+    JsRangeError: (p) => new RangeError(p.message),
+    // `MetamodelException(message)` (P4-08b): thrown by
+    // `BaseModelManager.validateAst`.
+    Metamodel: (p) => new MetamodelException(p.message),
 };
 
 /**

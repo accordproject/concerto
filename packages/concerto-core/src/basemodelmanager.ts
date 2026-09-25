@@ -363,23 +363,27 @@ class BaseModelManager {
 
                 // Semantic validation of the model file.
                 //
-                // P4-08 review (accordproject/concerto-rust#67): this was
-                // tried as a delegation to `rustHandle.addModelWithDefinitions`
-                // -- which both mirrors and validates in one call -- with TS
-                // validation only as a fallback when rustHandle rejected the
-                // mirror write or was untrustworthy. Replaying the oracle
-                // corpus (migration/oracle, ops ModelManager.addModel(File)
-                // and .validateModelFiles) against that version found
-                // rustHandle *silently accepting* several classes of model
-                // TS correctly rejects (an identifier field that does not
-                // exist or is not a String, a declared type clashing with an
-                // imported one, an undeclared referenced type): P2-09's gap
-                // audit already tracks these as open Rust validation gaps.
-                // Trusting rustHandle's success here would have skipped TS's
-                // check for exactly those cases, silently letting invalid
-                // models through in rust mode. So validation stays fully in
-                // TS until those gaps close; only the (already mirror-only,
-                // best-effort) write below talks to rustHandle.
+                // P4-08 step 3 (accordproject/concerto-rust#67): tried
+                // again after P4-08a (#173) closed the 6 known
+                // silently-accepted-invalid-model gaps in
+                // `rustHandle.addModelWithDefinitions(..., validate: true)`.
+                // Replaying the wider test suite against that delegation
+                // (`test/introspect/decorators.js`, `decoratorValidation:
+                // {missingDecorator: 'error'}`) found a *new* class of
+                // silent accept: `rustHandle`'s validation does not know
+                // about `ModelManagerOptions` at all (the call passes only
+                // the AST, definitions and file name -- never `this.options`),
+                // so an option-gated check like the decorator
+                // undeclared-type-ref one TS's `modelFile.validate()` runs
+                // is skipped entirely in rust mode. That is a second,
+                // broader instance of exactly the "trusting rustHandle's
+                // success would silently let invalid models through" risk
+                // the P4-08 review already flagged once -- so validation
+                // stays fully in TS, as it was before this attempt; only
+                // the (already mirror-only, best-effort) write below talks
+                // to rustHandle. Revisit once rustHandle's validation is
+                // options-aware (a P2-09-tracked gap, not yet filed as its
+                // own task at the time of this comment).
                 modelFile.validate();
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
@@ -389,6 +393,7 @@ class BaseModelManager {
                     JSON.stringify(modelFile.getAst()),
                     modelFile.getDefinitions() ?? undefined,
                     modelFile.getName() ?? undefined,
+                    false,
                 ));
             }
         } else {
@@ -406,6 +411,27 @@ class BaseModelManager {
      * @private
      */
     validateAst(modelFile) {
+        // P4-08 step 2 (accordproject/concerto-rust#67): delegates to
+        // rustHandle.validateAst (P4-08b, concerto-wasm), which runs the
+        // same version check plus structural (metamodel) check as the TS
+        // body below, over the AST alone -- it needs no registered model
+        // file, so a stale or partially mirrored rustHandle (a W test's
+        // stub ModelFile never reached it: see _mirrorToRust) is not a
+        // reason to distrust it here the way a read over `this.modelFiles`
+        // would be; only `rust` (engine mode) gates delegation. A thrown
+        // error already arrives as the mapped `MetamodelException` (or
+        // other TS exception class, src/engine/errors.ts) via the host
+        // error factory, so it propagates unchanged -- this never falls
+        // back to the TS body on a genuine validation failure, only when
+        // rustHandle itself is unavailable.
+        /* istanbul ignore if */
+        if (rust && this.rustHandle) {
+            this.rustHandle.validateAst(
+                JSON.stringify(modelFile.getAst()),
+                modelFile.getName() ?? undefined,
+            );
+            return;
+        }
         const { version: modelFileVersion } = ModelUtil.parseNamespace(ModelUtil.getNamespace(modelFile.getAst().$class));
         const { version: metamodelVersion } = ModelUtil.parseNamespace(MetaModelNamespace);
 
@@ -607,6 +633,12 @@ class BaseModelManager {
      * Validates all models files in this model manager
      */
     validateModelFiles() {
+        // P4-08 step 3 (accordproject/concerto-rust#67): not delegated to
+        // rustHandle.modelFileValidate, for the same reason addModelFile's
+        // own semantic validation is not (see the comment there):
+        // rustHandle's validation is not aware of `ModelManagerOptions`
+        // (e.g. `decoratorValidation`), so trusting a rustHandle success
+        // here would silently skip option-gated TS checks in rust mode.
         for (let ns in this.modelFiles) {
             this.modelFiles[ns].validate();
         }
