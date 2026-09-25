@@ -57,7 +57,7 @@ const OWNERS = {
             { task: 'P3-01a', issue: 'accordproject/concerto-rust#56', state: 'closed' },
             { task: 'P4-10', issue: 'accordproject/concerto-rust#69', state: 'closed' },
         ],
-        status: 'unowned: every ledger-attributed task is merged and closed, and this cluster does not match either of the two known Serializer.fromJSON $class themes (DV-015/#156, #160) — needs its own look.',
+        status: 'unowned: every ledger-attributed task is merged and closed, and this cluster does not match a known Serializer.fromJSON theme (the $class divergence, owned by #156, is excluded before clustering; the DateTime outlier is caught by clusterOverride) — needs its own look.',
     },
     'ModelManager.fromAst': {
         theme: 'T2',
@@ -82,36 +82,64 @@ const OWNERS = {
 };
 OWNERS['ModelManager.addModelFile'] = OWNERS['ModelManager.fromAst'];
 
-// accordproject/concerto-rust#160: filed during this review-fix pass, once
-// re-deriving the 98 "T1" clusters against lib/expected-divergences.js's
-// narrow #156 match found that only 7 of them (1,694 of 2,754 divergences)
-// are the DV-015 crash #156 actually decided on. The other 91 — a
-// non-string $class (array/object) that TS resolves to a *different*,
-// non-crashing outcome (TypeNotFoundException) via Array.prototype's own
-// lastIndexOf, plus one unrelated ts=ok/rust=error DateTime outlier folded
-// into the same op — were never covered by #156's sign-off and needed a
-// new issue of their own, same as T1 needed #156 in the first place.
-const OWNER_160 = {
-    theme: 'T1b (Serializer.fromJSON, non-crash $class / unrelated outlier)',
-    ledger: 'same as Serializer.fromJSON above',
+// accordproject/concerto-rust#156's decision (comment 5837231174) covers
+// "a non-string $class" as a whole, and lib/expected-divergences.js now
+// matches on that basis (both the TypeError crash and the array's
+// TypeNotFoundException — see that file's header). So every T1 cluster
+// whose divergence *is* a non-string $class — crash or not — is excluded
+// before clustering ever sees it, and is owned by #156, not by this file.
+//
+// accordproject/concerto-rust#160 was filed for what looked, before that
+// widening, like a second theme, but turned out to be two different
+// things folded together by the original per-op triage: (a) the
+// array/object $class cases, which the widened #156 match now covers, and
+// (b) one genuinely unrelated cluster — ts=ok on TS, `rust=error
+// (ValidationException)` on a DateTime field — that has nothing to do with
+// `$class` at all. That cluster must NOT be attributed to #160 (an issue
+// about the $class decision) just because it happens to share the
+// `Serializer.fromJSON` op; #160's own body already flags it as needing
+// "its own look", not as resolved by #160's ask. It is a real Rust
+// correctness gap (Rust rejects a document TS accepts) and stays unowned
+// here until it gets its own issue.
+const OWNER_DATETIME_OUTLIER = {
+    theme: 'T1c (Serializer.fromJSON, ts=ok / rust=ValidationException DateTime outlier)',
+    ledger: 'unrelated to $class; not covered by #156 or #160',
     tasks: [],
-    status: 'owned: accordproject/concerto-rust#160 (new issue, filed this revision) — not covered by #156, which is scoped to the TypeError crash signature only.',
-    issue: 'accordproject/concerto-rust#160',
+    status: 'unowned: a genuine Rust correctness gap (Rust rejects a document TS accepts), mistakenly folded into the $class theme by the original per-op triage. Noted, not resolved, in accordproject/concerto-rust#160\'s body. Needs its own issue — do not attribute to #156 or #160.',
+    issue: null,
 };
 
 /**
- * Per-cluster override for Serializer.fromJSON, where a single per-op
- * OWNERS entry can't tell two different bugs apart (accordproject/
- * concerto-rust#76 review: "assign owners per cluster rather than per op
- * where they differ"). Clusters whose divergence is the DV-015 crash never
- * reach this file at all (bin/fuzz.js / bin/triage.js exclude them via
- * lib/expected-divergences.js before clustering); every other
- * Serializer.fromJSON cluster here is owned by #160.
+ * @param {object} d a divergence-shaped record ({ts, rust, ...}, same shape
+ *   as a cluster's `sample`)
+ * @returns {boolean} true for the one known ts=ok/rust=ValidationException
+ *   DateTime outlier shape, false otherwise
+ */
+function isDateTimeOutlier(d) {
+    const t = d && d.ts;
+    const r = d && d.rust && d.rust.error;
+    if (!t || !('ok' in t)) { return false; }
+    if (!r || r.class !== 'ValidationException') { return false; }
+    return typeof r.message === 'string' && r.message.includes('DateTime');
+}
+
+/**
+ * Per-cluster override, so a single per-op OWNERS entry can't silently
+ * conflate two different bugs that happen to share an op
+ * (accordproject/concerto-rust#76 review: "assign owners per cluster
+ * rather than per op where they differ"). Clusters whose divergence is a
+ * non-string $class (crash or array/object) never reach this file at all —
+ * bin/fuzz.js / bin/triage.js exclude them via lib/expected-divergences.js
+ * before clustering, and they are owned by #156. This only recognises the
+ * one cluster shape that is NOT a $class divergence; every other cluster
+ * falls back to OWNERS[op].
  * @param {object} cluster a results/triage-clusters.json cluster
  * @returns {object|null} an owner override, or null to fall back to OWNERS[op]
  */
 function clusterOverride(cluster) {
-    if (cluster.op === 'Serializer.fromJSON') { return OWNER_160; }
+    if (cluster.op === 'Serializer.fromJSON' && isDateTimeOutlier(cluster.sample)) {
+        return OWNER_DATETIME_OUTLIER;
+    }
     return null;
 }
 

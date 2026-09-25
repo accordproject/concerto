@@ -6,8 +6,8 @@
   "planned": 60000,
   "ran": 60000,
   "agree": 54752,
-  "divergences": 3554,
-  "expectedDivergences": 1694,
+  "divergences": 2495,
+  "expectedDivergences": 2753,
   "harnessErrorsTs": 0,
   "harnessErrorsRust": 0,
   "byOp": {
@@ -20,8 +20,8 @@
     "Serializer.fromJSON": {
       "ran": 12454,
       "agree": 9700,
-      "divergences": 1060,
-      "expectedDivergences": 1694
+      "divergences": 1,
+      "expectedDivergences": 2753
     },
     "ModelManager.fromAst": {
       "ran": 19313,

@@ -45,12 +45,16 @@ lib/
   expected-divergences.js
                 signatures the maintainer has explicitly accepted as permanent,
                 documented divergences (each citing the DIVERGENCES.md row in
-                accordproject/concerto-rust that records the decision), matched
-                narrowly (same op, same TS error class/exact message, same Rust
-                error class/message prefix). bin/fuzz.js and bin/triage.js both use
-                it to exclude a matching case *before* it is ever counted as an
-                unresolved divergence. See accordproject/concerto-rust#156 (DV-015)
-                for how the first entry was added.
+                accordproject/concerto-rust that records the decision). Matched on
+                whatever the decision actually scoped — the first entry (DV-015,
+                accordproject/concerto-rust#156) covers a non-string $class as a
+                whole (both TS's TypeError crash and, for an array $class, TS's
+                non-crashing TypeNotFoundException), discriminated by Rust's
+                distinctive "a $class that is not a string" rejection rather than
+                by matching the TS side alone — see the file's header for why a
+                narrower, TS-shape-only match under-covered the decision. bin/fuzz.js
+                and bin/triage.js both use it to exclude a matching case *before* it
+                is ever counted as an unresolved divergence.
 bin/
   fuzz.js       the driver: fast-check picks (seedIndex, mutationSeed) pairs
                 deterministically from --run-seed, lib/mutate.js applies them,
@@ -72,10 +76,13 @@ bin/
   attribute-owners.js
                 writes each cluster's `owner` field from a fixed op -> ledger-row
                 -> GitHub-issue table (see the file for how it was resolved), with a
-                `clusterOverride` for cases where one op hides two different bugs
-                with two different owners (Serializer.fromJSON's T1b, owned by #160,
-                is not the same as its T1 crash, which is excluded before clustering
-                and never reaches this file at all).
+                `clusterOverride` that checks a cluster's actual sample shape, not
+                just its op, so an unrelated cluster sharing an op with a resolved
+                theme isn't silently attributed to that theme's owner (the one
+                Serializer.fromJSON cluster that survives lib/expected-divergences.js
+                — a ts=ok/rust=ValidationException DateTime outlier that has nothing
+                to do with $class — is left explicitly unowned rather than being
+                folded into #156 or #160).
   finalize-triage.js
                 one-off helper: prints TRIAGE.md's headline table from
                 results/run-42.json, then chains triage.js, minimize-clusters.js

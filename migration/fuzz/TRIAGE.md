@@ -24,113 +24,151 @@ point(s), the ledger's `planned_task` column for those rows, and that task's Git
 issue and state, resolved by hand against `accordproject/concerto-rust` (see the
 script for the full table and how each number was found).
 
-**Second review fix (this revision, accordproject/concerto-rust#76 review of
-1299fb5cf/1f855d75b):** implementing #156's maintainer decision
-(`migration/fuzz/lib/expected-divergences.js`, matched *narrowly* on the exact TS
-`TypeError: fqn.lastIndexOf is not a function` / Rust `a $class that is not a string`
-pair) found that the previous revision's "T1: 98 clusters, 2,754 divergences, all
-owned by #156" was wrong in a way that mattered: only **7 of those 98 clusters
-(1,694 divergences) are the crash #156 actually decided on.** The other 91 clusters
-(1,060 divergences) are a different bug (see T1/T1b below) that was never covered by
-#156's sign-off and has been filed as accordproject/concerto-rust#160. `bin/fuzz.js`
-and `bin/triage.js` now exclude only the narrowly-matched 7-cluster/1,694-divergence
-set (written to `results/expected-divergences.jsonl` instead of
-`results/divergences.jsonl`) — nothing else moves. `results/divergences.jsonl` is now
-3,554 lines (was 5,248); `results/triage-clusters.json` is 402 clusters (was 409) and
-every one still carries a `minimized` reproducer (unchanged from the previous
-revision — the fix only changes which clusters exist and their `owner`, not their
-minimisation) and an `owner`. This also settles the previous revision's "34 T1
-clusters need 2-3 edits, not 1" finding precisely: **all 7 of the true DV-015/#156
-clusters minimise to exactly 1 edit** (verified below); the 34 multi-edit clusters
-are all in the 91-cluster T1b/#160 group, which the earlier revision had merged into
-"T1" without checking the TS error class.
+**Second review fix (concerto 1299fb5cf/1f855d75b review):** implementing #156's
+maintainer decision (`migration/fuzz/lib/expected-divergences.js`, matched at the
+time *narrowly* on the exact TS `TypeError: fqn.lastIndexOf is not a function` /
+Rust `a $class that is not a string` pair) found that the then-current revision's
+"T1: 98 clusters, 2,754 divergences, all owned by #156" needed correcting: only 7 of
+those 98 clusters (1,694 divergences) matched that exact pair. The other 91 clusters
+(1,060 divergences) were filed as a separate issue, accordproject/concerto-rust#160,
+pending its own decision.
+
+**Third review fix (this revision, accordproject/concerto-rust#76 comment
+5837234282):** that split was itself a misreading of #156's decision. #156's own
+issue body lists `true`, a number, `null`, an array **and an object** as in-scope
+non-string `$class` values, and the maintainer's decision comment says plainly that
+matching the pair should mean "the 2,754 T1 cases stop counting as unresolved" — not
+1,694 of them. `lib/expected-divergences.js`'s matcher was narrower than the decision
+it was implementing: it required TS's exact `TypeError` crash, but an array `$class`
+doesn't crash TS at all (`Array.prototype.lastIndexOf` exists, so TS instead raises a
+normal `TypeNotFoundException`) even though it is exactly the same underlying bug (no
+type check before `ModelUtil.getShortName`/`getNamespace`) and gets exactly the same
+Rust rejection. The matcher now recognises both TS-side shapes, discriminated by
+Rust's distinctive `a $class that is not a string: <value>` message (see that file's
+header for the reasoning) — so **all 98 T1 clusters (2,753 of T1's 2,754
+divergences) are now owned by #156**, not split across #156 and #160.
+
+**The one exception, and why it matters:** T1's 98th cluster (1 divergence) is
+`ts=ok`, `rust=error(ValidationException)`, a `DateTime`-field mismatch — it has
+nothing to do with `$class` at all, and does **not** match the widened matcher (there
+is no Rust "`a $class that is not a string`" message to key on). The original,
+per-op triage had folded it into "T1" anyway because it shares the
+`Serializer.fromJSON` op, and the previous revision's fix compounded that by
+attributing every non-DV-015 `Serializer.fromJSON` cluster — this one included — to
+#160 unconditionally (`bin/attribute-owners.js`'s `clusterOverride` matched on `op`
+alone). That is a real Rust correctness gap (Rust rejects a document TS accepts), and
+#160 is about the `$class` decision, not about this outlier; filing it there would
+have buried a genuine bug inside an unrelated issue. `clusterOverride` now checks the
+cluster's actual shape, not its op, and this one cluster is left explicitly unowned
+(see its `owner.status` in `results/triage-clusters.json`) pending its own issue.
+
+**accordproject/concerto-rust#160's status after this fix:** the 90 array/object
+`$class` clusters it was filed for are now covered by #156's widened sign-off and no
+longer need #160's own decision. Only the one DateTime outlier it also mentioned
+remains genuinely open, and is tracked as unowned above rather than under #160 or
+#156.
+
+Net effect on the numbers: `lib/expected-divergences.js` now excludes 2,753 of T1's
+2,754 divergences (97 of 98 clusters) as DV-015/#156, not 1,694 (7 clusters).
+`results/divergences.jsonl` is now 2,495 lines (was 3,554; 5,248 in the original,
+pre-DV-015 run); `results/expected-divergences.jsonl` is 2,753 lines (was 1,694).
+`results/triage-clusters.json` is 312 clusters (was 402), and every surviving cluster
+keeps its previously-computed `minimized` reproducer unchanged (only which clusters
+exist, and their `owner`, changed) plus a corrected `owner`.
 
 ## Headline
 
 | op | ran | agree | divergences | expected (DV-015/#156) |
 |---|---|---|---|---|
 | Resource.validate | 15,942 | 15,942 | 0 | 0 |
-| Serializer.fromJSON | 12,454 | 9,700 | 1,060 | 1,694 |
+| Serializer.fromJSON | 12,454 | 9,700 | 1 | 2,753 |
 | ModelManager.fromAst | 19,313 | 17,684 | 1,629 | 0 |
 | ModelManager.addModelFile | 12,291 | 11,426 | 865 | 0 |
-| **total** | **60,000** | **54,752** | **3,554** | **1,694** |
+| **total** | **60,000** | **54,752** | **2,495** | **2,753** |
 
 `harnessErrorsTs`/`harnessErrorsRust` are both 0 in this run (previously
 `harnessErrorsRust` was 643, all silently-dropped `addModelFile` cases — see below):
 the `decodeMF` fix (README.md) means a `ModelFile`-construction rejection is now
 compared as an outcome, not dropped. `addModelFile` now shows its true count:
 11,426 agree + 865 divergences = 12,291 ran, with nothing uncompared. `agree` above is
-unchanged from the original run — "expected" cases were `agree`d never; they are a
+unchanged from the original run — "expected" cases were never `agree`d; they are a
 subset of what used to be counted as `divergences` before the harness recognised them
-as maintainer-accepted. 402 distinct signature clusters (`results/triage-clusters.json`)
-over the 3,554 still-unresolved divergences.
+as maintainer-accepted. 312 distinct signature clusters (`results/triage-clusters.json`)
+over the 2,495 still-unresolved divergences.
 
 ## Themes
 
 Three themes account for effectively all clusters:
 
-### T1 — `Serializer.fromJSON`: a non-string `$class` crash (1,694 divergences → now 0 unresolved; resolved via #156)
+### T1 — `Serializer.fromJSON`: a non-string `$class` (2,753 of 2,754 divergences resolved via #156; 1 unrelated outlier still open)
 
 TS's `Serializer.fromJSON` reaches `ModelUtil.getShortName`/`getNamespace`
 (`packages/concerto-core/src/modelutil.ts:119,143`), which calls
-`fqn.lastIndexOf('.')` on the instance's `$class` with no type check. A mutated,
-non-string, *scalar* `$class` (`true`, a number — anything without its own
-`.lastIndexOf`) makes V8 throw `TypeError: fqn.lastIndexOf is not a function` — a TS
-bug (no counterpart in the spec).
+`fqn.lastIndexOf('.')` on the instance's `$class` with no type check. This shows up
+in two shapes, both from the same missing type check:
+- A *scalar* non-string `$class` (`true`, a number, `null`, a plain object — anything
+  without its own `.lastIndexOf`) makes V8 throw `TypeError: fqn.lastIndexOf is not a
+  function` — a TS bug (no counterpart in the spec). 7 clusters, 1,694 divergences.
+- An *array* `$class` (e.g. `["org.test@1.0.0.C"]`) does not crash TS at all, because
+  `Array.prototype.lastIndexOf` also exists: it searches for an *element* equal to
+  `'.'`, finds none, returns `-1`, and `getShortName` returns the array itself
+  unsliced. That array is later stringified into a plain string, and TS raises an
+  ordinary `TypeNotFoundException: Namespace is not defined for type
+  "org.test@1.0.0.C"` — a normal rejection, not a crash. 90 clusters, 1,059
+  divergences (56 minimise to 1 edit, 31 to 2, 3 to 3 — this is where the "34
+  clusters need 2-3 edits" review finding actually lands; none of the 7 crash
+  clusters need more than 1 edit).
 
 Rust's `instance/serializer.rs` and `instance/populator.rs`
 (`accordproject/concerto-rust`, both reached from the P4-10 Serializer fast path)
-explicitly check `$class`'s type and raise a plain `Error: a $class that is not a
-string: <value>` — arguably *more* correct than TS, but not byte-for-byte the same
-class or message, so every such case diverged.
+explicitly check `$class`'s type up front and raise a plain `Error: a $class that is
+not a string: <value>` regardless of which TS-side shape it is — arguably *more*
+correct than TS either way, but not byte-for-byte the same class or message, so both
+shapes diverged.
 
 **Resolved: accordproject/concerto-rust#156. Maintainer decision (2026-09-25): keep
 Rust's clearer error; do not port the TS crash** — an explicit, approved exception to
 PORTING.md 7.3's "no improvements" rule, recorded as `DIVERGENCES.md` DV-015
 (category `maintainer-accepted`, a new category added to PORTING.md 7.3 for exactly
-this kind of sign-off). `migration/fuzz/lib/expected-divergences.js` now matches this
-exact `(TypeError, "fqn.lastIndexOf is not a function") ↔ (Error, "a $class that is
-not a string: …")` pair, and `bin/fuzz.js`/`bin/triage.js` exclude it before a case is
-ever counted as an unresolved divergence — it is written to
+this kind of sign-off). #156's own issue body scopes "a non-string `$class`" to
+include `true`, a number, `null`, an array *and* an object, and the decision comment
+asks the harness to treat the pairing so "the 2,754 T1 cases stop counting as
+unresolved" — so `migration/fuzz/lib/expected-divergences.js` matches on Rust's
+distinctive `a $class that is not a string: …` message paired with *either* TS shape
+(the `TypeError` crash or the array's `TypeNotFoundException`), not only the exact
+crash pair. `bin/fuzz.js`/`bin/triage.js` exclude a match before a case is ever
+counted as an unresolved divergence — it is written to
 `results/expected-divergences.jsonl` instead. Rust also gained two tests pinning the
 message (`instance::serializer::tests::a_non_string_class_on_the_document_is_an_explicit_error`,
-`..._a_non_string_class_on_a_nested_field_is_an_explicit_error`).
+`..._a_non_string_class_on_a_nested_field_is_an_explicit_error`); the array-`$class`
+shape (`json!([])`) is covered by the same DV-015 tests, since it is the same Rust
+code path and the same maintainer decision.
 
 Representative seed: `data/Serializer.fromJSON/05598770d4c6f12c4d5dcf8e.json`,
-mutationSeed 29. **Minimised** (`results/triage-clusters.json` — before the fix below
-split it out of the file): all 7 of T1's true clusters reduce to a single edit,
-`{"kind":"set","path":["$class"],"value":<true|1|-1|NaN|...>}`.
+mutationSeed 29 (crash shape); `data/Serializer.fromJSON/019ca6f000af29c0d09ac831.json`,
+mutationSeed 2639346688 (array shape).
 
-**Correction (this revision):** the previous revision of this file said "all 98
-[what it called T1] clusters reduce to a single edit" and attributed all 98 to #156.
-Both were wrong once re-checked against the narrow #156 match: only **7** clusters
-(1,694 divergences) are this crash, and all 7 do reduce to 1 edit. The other 91
-clusters the previous revision folded into "T1" are a different bug — see T1b.
+**The one cluster that is genuinely not this bug:** T1's remaining 98th cluster (1
+divergence) is `ts=ok`, `rust=error(ValidationException)`,
+`"Expected value at path \`$.t\` to be of type \`DateTime\`"` — it has nothing to do
+with `$class`, does not match the widened matcher (there is no Rust "`a $class that
+is not a string`" message to key on), and is a genuine correctness gap (Rust rejects
+a document TS accepts). An earlier revision of this triage folded it into "T1"
+because it shares the `Serializer.fromJSON` op, and a later revision compounded that
+by attributing it to #160 unconditionally by op. It is neither #156's nor #160's —
+see "Correction" below and the unowned entry in `results/triage-clusters.json`.
 
-### T1b — `Serializer.fromJSON`: a non-crashing, non-string `$class` (array/object), plus one outlier (1,060 divergences, owned by new issue #160)
-
-**Not the same bug as T1**, discovered while implementing #156's harness change: when
-a mutated `$class` is an **array** (e.g. `["org.test@1.0.0.C"]`), TS does *not* crash,
-because `Array.prototype.lastIndexOf` also exists — it searches for an *element* equal
-to `'.'`, finds none, returns `-1`, and `getShortName` returns the array itself
-unsliced. That array is later stringified into a plain string, and TS raises an
-ordinary `TypeNotFoundException: Namespace is not defined for type "org.test@1.0.0.C"`
-— a normal rejection, not a crash. Rust still rejects it up front with the same `a
-$class that is not a string: …` as T1's crash case, so it still diverges, but against
-a *different* TS outcome kind and message (`TypeNotFoundException`, not `TypeError`).
-90 of T1b's 91 clusters are this shape (56 minimise to 1 edit, 31 to 2, 3 to 3 — this,
-not T1, is where the previous revision's "34 clusters need 2-3 edits" review finding
-actually belongs). The 91st cluster (1 divergence) is unrelated to `$class` entirely:
-`ts=ok`, `rust=error(ValidationException)`, `"Expected value at path \`$.t\` to be of
-type \`DateTime\`"` — a genuine correctness gap that the previous revision's per-op
-clustering happened to lump in with T1 too.
-
-**Owner: accordproject/concerto-rust#160 (new issue, filed this revision).** #156's
-sign-off is scoped narrowly to the `TypeError`/crash signature
-(`lib/expected-divergences.js`'s exact match) and explicitly does not cover this;
-`bin/attribute-owners.js` now attributes T1b clusters to #160 per-cluster (not via the
-op-level `OWNERS` table, which would otherwise wrongly point every
-`Serializer.fromJSON` cluster at the same place — see its `clusterOverride`).
+**Correction (this revision, accordproject/concerto-rust#76 comment 5837234282):** a
+previous revision of this file said only 7 of T1's 98 clusters (1,694 divergences)
+were covered by #156, and filed the other 91 as a new issue, #160, pending its own
+decision. That read #156's decision too narrowly against its own stated scope and
+goal (see above) — the array shape is the same underlying bug and the same Rust
+rejection, so it belongs to #156 too. 90 of those 91 clusters are now recognised as
+DV-015/#156; the 91st (the DateTime outlier) was never part of either bug and is
+tracked separately, unowned, above. accordproject/concerto-rust#160 itself is not
+edited by this fix (issue bodies aren't edited by this task), but its array/object
+`$class` content is superseded by this widened #156 sign-off; only the DateTime
+outlier it also mentioned is still an open question.
 
 ### T2 — `ModelManager.fromAst`/`addModelFile`: AST deserialisation and validation gaps (2,494 divergences: 1,629 + 865, unchanged this revision)
 
@@ -229,19 +267,27 @@ The coordinator's stage-1 exit condition (comment 5835650999 on #76) is "the har
 is correct, and every cluster has an owner or a new issue":
 - **The harness is correct**: the `decodeMF` fix is in (see README.md), verified
   against the full canonical corpus with 0 regressions, and `harnessErrorsTs`/
-  `harnessErrorsRust` are both 0 on the 60,000-case run above. This revision adds
-  `lib/expected-divergences.js` so a maintainer-accepted signature (#156) is excluded
-  *before* clustering, not counted as unresolved and not left for a human to notice
-  is "owned" by a closed decision.
-- **Every cluster has an owner or a new issue**, checked directly in
-  `results/triage-clusters.json` (402/402 clusters carry a non-null `owner`; T1's
-  7 clusters no longer appear in this file at all, since they are excluded as
-  expected divergences rather than being unresolved-but-owned):
-  - T1b (91 clusters, corrected from the previous revision's "T1"):
-    accordproject/concerto-rust#160 (new issue, filed this revision).
+  `harnessErrorsRust` are both 0 on the 60,000-case run above. `lib/expected-divergences.js`
+  matches #156's full decision (both the crash and the array shape, keyed on Rust's
+  distinctive rejection message — see that file's header), so a maintainer-accepted
+  signature is excluded *before* clustering, not counted as unresolved and not left
+  for a human to notice is "owned" by a closed decision.
+- **Every cluster has an owner, or is explicitly flagged as needing a new issue**,
+  checked directly in `results/triage-clusters.json` (312/312 clusters carry a
+  non-null `owner` object; T1's 97 DV-015/#156 clusters no longer appear in this file
+  at all, since they are excluded as expected divergences rather than
+  unresolved-but-owned):
+  - T1's one remaining cluster (the DateTime outlier): left explicitly unowned
+    (`owner.issue: null`) rather than attributed to #156 or #160 — it needs its own
+    new issue, not yet filed.
   - T2 (311 clusters): accordproject/concerto-rust#144 (closed) and #67 (open) —
     see T2's owner section for why both, not just one.
   - T3 (0 clusters, no divergences): vacuously satisfied.
+
+accordproject/concerto-rust#160 is not this triage's owner for anything after this
+fix: its array/object `$class` content is now covered by #156, and the DateTime
+outlier it also raised is tracked here as its own unowned item, not resolved by
+#160.
 
 This is a different claim from the *issue*'s own exit condition (1,000,000 cases, no
 unresolved divergence) — that one stays unmet by design; it is stage 2's job, per the
@@ -252,21 +298,21 @@ coordinator's two-stage decision.
 Per the coordinator's minor review note: scanned every cluster's sample TS/Rust
 message against `DIVERGENCES.md`'s existing rows (circular inheritance/`RangeError`/
 stack overflow, `dayjs`/`DateTime`/legacy-date keywords, `Infinity`, lone surrogates,
-regex/Unicode). None of the 402 clusters' messages match an existing row's keywords
-except the one `DateTime` outlier already folded into T1b/#160 above — no cluster here
-duplicates an already-documented, already-accepted divergence.
+regex/Unicode). None of the 312 surviving clusters' messages match an existing row's
+keywords except the one unowned `DateTime` outlier discussed under T1 above — no
+cluster here duplicates an already-documented, already-accepted divergence.
 
 ## What this triage does not do
 
 - **No product code is fixed**, other than the DV-015 sign-off itself (a test
   addition, not a behaviour change — Rust's rejection was already there; #156 decided
   to keep it, not to change it). Per the coordinator's stage-1 scope, remaining
-  product-code fixes stay with the owning tasks named above (T1b: #160, new; T2:
-  #144 closed / #67 open).
+  product-code fixes stay with the owning tasks named above (T1's DateTime outlier:
+  unowned, needs a new issue; T2: #144 closed / #67 open).
 - **The corpus and `baseline.tsv` are untouched**, as instructed.
 - **Not every individual divergence was manually inspected** — minimisation
   (`bin/minimize-clusters.js`) re-verifies each cluster's *sample* still reproduces
-  its exact signature and shrinks it, but does not re-inspect the other 4,839
+  its exact signature and shrinks it, but does not re-inspect the other 2,183
   divergences a cluster's `count` summarises, beyond the T2 "Rust too permissive" case
   singled out above. A cluster count is not a severity ranking by itself (a common,
   low-severity message-text mismatch can outnumber a rare correctness gap), which is
