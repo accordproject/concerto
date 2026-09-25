@@ -28,6 +28,7 @@ Rules for every migration agent:
 - Work only in the git worktree created for your task. Never change branches in the shared clones.
 - Never run 'npm test' in concerto-core; run mocha with nyc using --temp-dir/--report-dir under your worktree.
 - Faithful work: do what the issue says, nothing extra. Model names in commit trailers are fine.
+- Whenever you run cargo test in concerto-rust, export CONCERTO_ORACLE_FIXTURES=${WS}/concerto/migration/oracle/fixtures. Worktrees are nested too deep for the oracle harness to find the corpus on its own, and without the corpus the harness skips the oracle and still reports ok. An oracle result without that variable set is not evidence.
 - Every commit in every repo needs a DCO sign-off (git commit --signoff). concerto, concerto-rust and concerto-validate-rs all run the DCO check.`
 
 const ISSUE_LIST = {
