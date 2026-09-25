@@ -34,7 +34,21 @@ It keeps going until no ready issues are left, or until it has run the configure
 - Rust builds and the concerto-core suite are CPU-heavy, so err low.
 
 ## Adding more workers
-Any other environment can run the same script with a different worker name, for example another cloud session with `worker: "cloud-2"`. Ask the coordinator to start labelling issues `worker:cloud-2`.
+Any other environment can run a worker under its own name, for example `worker: "cloud-3"`. Ask the coordinator to start labelling issues `worker:cloud-3`. Workers only take issues that carry their own worker label, so they never collide.
+
+## Cloud workers (Claude Code on the web)
+Cloud sessions have no `gh` CLI; they reach GitHub through the GitHub MCP tools. Run **`cloud-worker-workflow.js`**, not the local script.
+- **Never edit `cloud-worker-workflow.js` by hand.** It is generated from `local-worker-workflow.js`. After changing the local script, run `node migration/worker/make-cloud-worker.mjs` and commit both files. The generator refuses to write if any `gh` use is left untranslated.
+- **Setup:** start a session in the migration environment with `concerto`, `concerto-rust` and `concerto-validate-rs`, then:
+  1. Check out `claude/tender-pascal-ocwf9q` in each repo, and clone `concerto-conformance` next to them.
+  2. Install the canonical oracle corpus:
+     - Download it with `curl -sSL -H 'Accept: application/octet-stream' https://api.github.com/repos/accordproject/concerto-rust/releases/assets/587625306 -o corpus.tgz`. The session proxy authenticates the request.
+     - Check its sha256 is `e8a2bf72c7775a2d45123dea7b6ff897823c74a108603f5412251ced2619fce1`.
+     - Run `tar xzf` on it at the concerto root and delete the `._*` files it creates.
+  3. Pre-approve `Workflow`, `mcp__github`, and `Bash(git *)`, `Bash(cargo *)`, `Bash(npm *)`, `Bash(node *)` and `Bash(npx *)` in `/root/.claude/settings.json`, so scheduled runs don't wait for approval.
+- **Run:** say *"Use a workflow: run the workflow script at `/home/user/concerto/migration/worker/cloud-worker-workflow.js` with args `{"worker": "cloud-3", "workspace": "/home/user", "rounds": 10, "maxPerRound": 3}`"*. `git pull` the integration branch first so you run the latest rules.
+- **Keep it running:** add an hourly routine that re-runs the worker when no run is in progress. Session cron jobs are lost when an idle session is shut down, so the routine is what keeps a cloud worker going overnight.
+- **CPU:** a cloud container has about 4 cores. Use `maxPerRound: 2`–`3`.
 
 ## Stopping
 Stop the workflow from `/workflows`. Tasks already claimed stay labelled `mig:claimed`. To hand them back, relabel them `mig:ready`, or let the coordinator reassign them.
