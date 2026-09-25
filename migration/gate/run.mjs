@@ -42,6 +42,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { classifyStep, parseJsonDocuments, verdictLabel } from './classify.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATION_ROOT = path.resolve(__dirname, '..');
@@ -148,13 +149,52 @@ function judgeStatusThresholds(status) {
     const t = byTag.tally && byTag.tally[tag];
     return t ? t.failing === 0 : null;
   };
+  const tagFailing = (tag) => (byTag && byTag.available && byTag.tally && byTag.tally[tag] ? byTag.tally[tag].failing : null);
   return {
     ledger_weighted_pct_rust_plus_hybrid: { value: ledgerPct ?? null, floor: 70, meets: checkFloor(ledgerPct, 70) },
     llvm_cov_lines_pct: { value: llvmCovPct ?? null, floor: 90, meets: checkFloor(llvmCovPct, 90) },
     conformance_all_scenarios_pass: { value: conformance && conformance.available ? { total: conformance.total_scenarios, failed: conformance.failed } : null, meets: conformanceOk },
-    core_tests_tag_B_pass: { meets: tagOk('B') },
-    core_tests_tag_W_pass: { meets: tagOk('W') },
+    core_tests_tag_B_pass: { failing: tagFailing('B'), meets: tagOk('B') },
+    core_tests_tag_W_pass: { failing: tagFailing('W'), meets: tagOk('W') },
   };
+}
+
+// Tag map (migration/tags/test-tags.tsv), keyed by fullTitle and by
+// `<file relative to packages/concerto-core/test>::<fullTitle>`, the same
+// way status.mjs keys it.
+function loadTagMap() {
+  const tagsPath = path.join(MIGRATION_ROOT, 'tags', 'test-tags.tsv');
+  if (!fs.existsSync(tagsPath)) return null;
+  const lines = fs.readFileSync(tagsPath, 'utf8').split('\n').filter(Boolean);
+  const header = lines[0].split('\t');
+  const idx = Object.fromEntries(header.map((h, i) => [h, i]));
+  const map = new Map();
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split('\t');
+    const file = cols[idx.file], title = cols[idx.test_title], tag = cols[idx.tag];
+    if (!title || !tag) continue;
+    map.set(title, tag);
+    map.set(`${file}::${title}`, tag);
+  }
+  return map;
+}
+
+const CORE_TEST_DIR = path.join(CONCERTO_ROOT, 'packages', 'concerto-core', 'test');
+function tagOf(map, relFile, fullTitle) {
+  return (map && ((relFile && map.get(`${relFile}::${fullTitle}`)) || map.get(fullTitle))) || 'untagged';
+}
+
+/** The failing tests from a mocha JSON reporter result, with file, tag and error message. */
+function mochaFailures(mocha, tagMap) {
+  return (mocha.failures || []).map((t) => {
+    const relFile = t.file ? path.relative(CORE_TEST_DIR, t.file) : null;
+    return {
+      file: relFile,
+      fullTitle: t.fullTitle,
+      tag: tagOf(tagMap, relFile, t.fullTitle),
+      message: t.err && (t.err.message || t.err.stack) ? String(t.err.message || t.err.stack) : '',
+    };
+  });
 }
 
 function stepStatus(opts, reportDir) {
@@ -177,10 +217,20 @@ function stepStatus(opts, reportDir) {
     if (fs.existsSync(logsDir)) fs.cpSync(logsDir, path.join(reportDir, 'logs'), { recursive: true });
     thresholds = judgeStatusThresholds(status);
   }
+  // The CONCERTO_ENGINE=ts run's own failing tests (status.mjs keeps its
+  // parsed mocha JSON under logs/concerto-core/), so a failed tag-tally
+  // threshold can be classified by which tests actually failed.
+  let tsFailures = null;
+  const mochaPath = path.join(reportDir, 'logs', 'concerto-core', 'mocha-results.json');
+  if (fs.existsSync(mochaPath)) {
+    try {
+      tsFailures = mochaFailures(JSON.parse(fs.readFileSync(mochaPath, 'utf8')), loadTagMap());
+    } catch { /* leave null: the classifier treats an unreadable list as unexpected */ }
+  }
   // ok requires: the script itself ran cleanly, status.json was produced,
   // and every §0 threshold it carries was both judged (not `na`) and met.
   const ok = res.ok && thresholds != null && Object.values(thresholds).every((t) => t.meets === true);
-  return { name: 'status.mjs (full run)', ok, exit: res.status, log: path.relative(reportDir, logFile), status, thresholds };
+  return { name: 'status.mjs (full run)', ok, exit: res.status, log: path.relative(reportDir, logFile), status, thresholds, ts_failures: tsFailures };
 }
 
 // ---------------------------------------------------------------------------
@@ -210,25 +260,14 @@ function stepCoreSuiteRust(opts, reportDir) {
   fs.writeFileSync(path.join(reportDir, 'core-suite-rust-raw-stdout.log'), res.stdout);
 
   let by_tag = null;
-  const tagsPath = path.join(MIGRATION_ROOT, 'tags', 'test-tags.tsv');
-  if (mocha && fs.existsSync(tagsPath)) {
-    const lines = fs.readFileSync(tagsPath, 'utf8').split('\n').filter(Boolean);
-    const header = lines[0].split('\t');
-    const idx = Object.fromEntries(header.map((h, i) => [h, i]));
-    const map = new Map();
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split('\t');
-      const file = cols[idx.file], title = cols[idx.test_title], tag = cols[idx.tag];
-      if (!title || !tag) continue;
-      map.set(title, tag);
-      map.set(`${file}::${title}`, tag);
-    }
+  const map = loadTagMap();
+  if (mocha && map) {
     const failedTitles = new Set((mocha.failures || []).map((t) => t.fullTitle));
     const pendingTitles = new Set((mocha.pending || []).map((t) => t.fullTitle));
     const tally = {};
     for (const t of mocha.tests || []) {
-      const relFile = t.file ? path.relative(path.join(coreDir, 'test'), t.file) : null;
-      const tag = (relFile && map.get(`${relFile}::${t.fullTitle}`)) || map.get(t.fullTitle) || 'untagged';
+      const relFile = t.file ? path.relative(CORE_TEST_DIR, t.file) : null;
+      const tag = tagOf(map, relFile, t.fullTitle);
       tally[tag] = tally[tag] || { tests: 0, passing: 0, failing: 0, pending: 0 };
       tally[tag].tests++;
       tally[tag][failedTitles.has(t.fullTitle) ? 'failing' : pendingTitles.has(t.fullTitle) ? 'pending' : 'passing']++;
@@ -242,6 +281,7 @@ function stepCoreSuiteRust(opts, reportDir) {
     exit: res.status,
     stats: mocha ? mocha.stats : null,
     by_tag,
+    failures: mocha ? mochaFailures(mocha, map) : null,
     log: path.relative(reportDir, logFile),
   };
 }
@@ -374,7 +414,10 @@ function stepOracleWasm(opts, reportDir) {
     ok: res.ok && replay != null && replay.pass === replay.total && replay.total > 0 && replay.fail === 0 && replay.harness_error === 0,
     exit: res.status,
     log: path.relative(reportDir, logFile),
-    replay: replay ? { total: replay.total, pass: replay.pass, fail: replay.fail, harness_error: replay.harness_error, agreement_pct: replay.agreement_pct } : null,
+    replay: replay
+      ? { total: replay.total, pass: replay.pass, fail: replay.fail, harness_error: replay.harness_error, agreement_pct: replay.agreement_pct, failures_truncated: replay.failures_truncated }
+      : null,
+    failures: replay && Array.isArray(replay.failures) ? replay.failures.map((f) => ({ file: f.file, op: f.op, status: f.status, detail: f.detail })) : null,
   };
 }
 
@@ -404,6 +447,16 @@ function stepWasm(opts, reportDir) {
     ? run('npm', ['run', 'smoke:node'], { cwd: wasmDir, timeoutMs: 5 * 60 * 1000, logFile: smokeLog })
     : { ok: false, status: null };
 
+  // smoke:node prints one JSON document per runtime ({runtime, rows: [{name,
+  // ok, detail}]}); keep the failing rows so the classifier can match them.
+  let smokeFailures = null;
+  if (smokeRes.stdout != null) {
+    const docs = parseJsonDocuments(smokeRes.stdout).filter((d) => d && Array.isArray(d.rows));
+    if (docs.length > 0) {
+      smokeFailures = docs.flatMap((d) => d.rows.filter((r) => !r.ok).map((r) => ({ runtime: d.runtime, name: r.name, detail: r.detail ?? null })));
+    }
+  }
+
   const withinBudget = bytes != null && bytes <= BUDGET;
   return {
     name: 'WASM build (size budget) + smoke:node',
@@ -417,6 +470,7 @@ function stepWasm(opts, reportDir) {
     within_budget: bytes != null ? withinBudget : null,
     install_ok: installRes.ok,
     smoke_ok: smokeRes.ok,
+    smoke_failures: smokeFailures,
     logs: {
       build: path.relative(reportDir, buildLog),
       install: path.relative(reportDir, installLog),
@@ -469,16 +523,6 @@ function stepCorpusProvenance(opts) {
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
-function classify(key, expectedPendingReasons) {
-  // Match on the step's own object key ('status', 'core_suite_rust', ...),
-  // which is unique per step — unlike substrings of the human-readable
-  // `name`, which can collide (e.g. core_suite_rust's name mentions
-  // "status.mjs" in passing, which used to falsely match status's own
-  // reason first).
-  const hit = expectedPendingReasons.find((r) => r.key === key);
-  return hit ? `expected-pending: ${hit.reason}` : 'unexpected';
-}
-
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -490,13 +534,14 @@ async function main() {
   steps.guardrails = stepGuardrails(reportDir);
   if (!opts.skipConformanceInstall) steps.conformance_install = stepConformanceInstall(opts, reportDir);
   if (!opts.skipStatus) steps.status = stepStatus(opts, reportDir);
+  // Build concerto-wasm before anything that loads pkg/concerto-engine.cjs
+  // (the CONCERTO_ENGINE=rust suite and the WASM oracle leg), so both run
+  // against the module built from --rust-root, never a stale leftover.
+  if (!opts.skipWasm) steps.wasm = stepWasm(opts, reportDir);
   steps.core_suite_rust = stepCoreSuiteRust(opts, reportDir);
   steps.oracle_native = stepOracleNative(opts, reportDir);
   if (!opts.skipOracleCoverage) steps.oracle_coverage = stepOracleCoverage(opts, reportDir);
-  if (!opts.skipWasm) {
-    steps.wasm = stepWasm(opts, reportDir);
-    steps.oracle_wasm = stepOracleWasm(opts, reportDir);
-  }
+  if (!opts.skipWasm) steps.oracle_wasm = stepOracleWasm(opts, reportDir);
 
   // §0.6 cargo-mutants (validation modules) is not run by this script: it is
   // task P5-06's own long-running job, not part of the mechanical dry run.
@@ -505,10 +550,12 @@ async function main() {
     na: 'not run by this dry run — long-running, owned by task P5-06; cargo-mutants is installed in this environment for that task to use',
   };
 
-  const expectedPendingReasons = [
-    { key: 'status', reason: 'CONCERTO_ENGINE=rust mode and downstream metrics depend on Phase 4 groups; P4-08 (#67, ModelFile/BaseModelManager views) has not landed' },
-    { key: 'core_suite_rust', reason: "as of this dry run its only failure is the known network test (ModelLoader #loadModelFromUrl, HTTP 403 in sandboxed environments) - same failure as CONCERTO_ENGINE=ts; check core-suite-rust.log's failure list before treating a non-zero exit here as new" },
-  ];
+  // Failure-driven classification (see classify.mjs): every failing step
+  // is broken into failing items, each matched against a small, explicit
+  // set of known failures with an owner; anything else is `unexpected`.
+  const classification = {};
+  for (const [key, st] of Object.entries(steps)) classification[key] = classifyStep(key, st);
+  const skipped = Object.entries(opts).filter(([k, v]) => k.startsWith('skip') && v === true).map(([k]) => k);
 
   const report = {
     generated_at: new Date().toISOString(),
@@ -516,23 +563,29 @@ async function main() {
     plan_issue: 'accordproject/concerto-rust#29',
     task_issue: 'accordproject/concerto-rust#145',
     options: opts,
+    skipped_steps: skipped,
     steps,
+    classification,
   };
   fs.writeFileSync(path.join(reportDir, 'report.json'), JSON.stringify(report, null, 2) + '\n');
 
   const lines = [];
   lines.push(`# Gate dry run — ${report.generated_at}`);
   lines.push('');
-  lines.push('Dry run of migration/gate/run.mjs (task P5-01a). Not the final gate (P5-01) — failures below are triaged as expected-pending, environment-gap, or unexpected.');
+  lines.push('Dry run of migration/gate/run.mjs (task P5-01a). Not the final gate (P5-01). Each failing step is broken into failing items; an item is expected-pending only if it is in a known, owned set (migration/gate/classify.mjs), otherwise unexpected.');
+  lines.push('');
+  lines.push(`- skip flags used: ${skipped.length ? skipped.join(', ') : 'none (every step enabled)'}`);
   lines.push('');
   for (const [key, s] of Object.entries(steps)) {
     if (s == null) continue;
-    const ok = 'ok' in s ? s.ok : s.na ? null : true;
-    const label = s.na ? `SKIPPED/NA: ${s.na}` : ok ? 'PASS' : classify(key, expectedPendingReasons);
+    const c = classification[key];
     lines.push(`## ${s.name || key}`);
-    lines.push(`- verdict: ${label}`);
+    lines.push(`- verdict: ${verdictLabel(c)}`);
     if ('exit' in s) lines.push(`- exit code: ${s.exit}`);
     if ('log' in s) lines.push(`- log: ${s.log}`);
+    for (const it of c.items) {
+      lines.push(`  - ${it.verdict}: ${it.item}${it.owner ? ` (owner: ${it.owner})` : ''}: ${it.reason}`);
+    }
     lines.push('');
   }
   fs.writeFileSync(path.join(reportDir, 'report.md'), lines.join('\n') + '\n');
