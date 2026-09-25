@@ -43,7 +43,7 @@
 const fs = require('fs');
 const path = require('path');
 const { AsyncLocalStorage } = require('async_hooks');
-const { getSrcCore, SRC_ROOT, CORE_PKG_DIR } = require('./core');
+const { getSrcCore, SRC_ROOT, CORE_PKG_DIR, REPO_DIR } = require('./core');
 const codec = require('./codec');
 const { opTable } = require('./ops');
 const { canonicalise } = require('./canon');
@@ -147,7 +147,7 @@ function asyncBuildStep(spec, mm, args, call) {
     let enc = null;
     state.suspended++;
     try {
-        enc = { method: spec.method, args: args.map((a) => store.pack(encodeIn(a, newCtx(mm)))) };
+        enc = { method: spec.method, args: portableStepArgs(spec.method, args).map((a) => store.pack(encodeIn(a, newCtx(mm)))) };
     } catch (e) {
         r.tainted = e instanceof NonPlain ? 'step-nonplain:' + e.reason : 'step-encoder-error:' + String(e && e.message).slice(0, 60);
         bump(stats.tainted, spec.op, r.tainted);
@@ -399,7 +399,7 @@ function recordCall(spec, target, args, invoke) {
             } else {
                 state.suspended++;
                 try {
-                    stepEnc = { method: spec.method, args: args.map((a) => store.pack(encodeIn(a, newCtx(mmTarget)))) };
+                    stepEnc = { method: spec.method, args: portableStepArgs(spec.method, args).map((a) => store.pack(encodeIn(a, newCtx(mmTarget)))) };
                 } catch (e) {
                     stepTaint = e instanceof NonPlain ? 'step-nonplain:' + e.reason : 'step-encoder-error:' + String(e && e.message).slice(0, 60);
                 } finally {
@@ -698,6 +698,78 @@ function wrapFunction(spec, orig) {
     return wrapper;
 }
 
+// Checkout roots a recorded fileName may fall under. An absolute path is not
+// portable across machines or worktrees (task accordproject/concerto-rust#113:
+// two independent recordings of the same commit landed in different
+// worktrees, so an absolute fileName baked one worktree's path into the
+// fixture content and its id). CONFORMANCE_DIR matches the env var
+// drivers/conformance.spec.js reads, so both agree on the checkout location.
+const CONFORMANCE_DIR = process.env.CONFORMANCE_DIR || '/home/user/concerto-conformance';
+const PORTABLE_ROOTS = [
+    { label: 'repo', dir: REPO_DIR },
+    { label: 'conformance', dir: CONFORMANCE_DIR },
+];
+
+/**
+ * Make a `fileName` constructor argument portable: a relative path is
+ * already portable and passes through unchanged; an absolute path under a
+ * known checkout root is rewritten relative to that root as `<label>/...`
+ * (forward slashes, so it is also stable across POSIX/Windows). An absolute
+ * path outside every known root cannot be made portable.
+ * @param {*} fileName the raw fileName argument (usually a string, or undefined)
+ * @returns {*} a portable fileName, unchanged when it is not an absolute path
+ * @throws {NonPlain} 'nonportable-path' when an absolute path matches no known root
+ */
+function portableFileName(fileName) {
+    if (typeof fileName !== 'string' || !path.isAbsolute(fileName)) {
+        return fileName;
+    }
+    for (const { label, dir } of PORTABLE_ROOTS) {
+        const rel = path.relative(dir, fileName);
+        if (rel && !rel.startsWith('..') && !path.isAbsolute(rel)) {
+            return `<${label}>/${rel.split(path.sep).join('/')}`;
+        }
+    }
+    throw new NonPlain('nonportable-path');
+}
+
+// Argument positions that may carry a fileName string, for the model-manager
+// step methods that take one. Mostly the same call shapes as
+// bin/build-cto-cache.js's CTO_ENTRY_POINTS (which does not need
+// `addModelFile` since it never hands a string to the CTO parser); but
+// `addModelFile(modelFile, cto?, fileName?, disableValidation?)` still takes
+// a plain fileName as its third argument, purely for record-keeping, and
+// that leaked an absolute path into a fixture too (task
+// accordproject/concerto-rust#113: `ModelLoader.loadModelManager` passes the
+// caller's own absolute path straight through to `addModelFile`).
+const FILENAME_ARG_INDEX = { addCTOModel: 1, addModel: 2, addModelFile: 2, updateModelFile: 1, validateModelFile: 1 };
+
+/**
+ * Make a model-manager step's arguments portable: rewrite the fileName
+ * argument (if the method takes one, and a string was given) the same way
+ * a ModelFile constructor's is (`portableFileName`), so a step recorded into
+ * a ModelManager's recipe (and later embedded verbatim in any fixture whose
+ * input is that manager) never bakes in an absolute, machine-specific path.
+ * @param {string} method the ModelManager method name (spec.method)
+ * @param {Array} args the raw call arguments
+ * @returns {Array} args, copied only when a rewrite is needed
+ * @throws {NonPlain} propagated from portableFileName for a nonportable path
+ */
+function portableStepArgs(method, args) {
+    if (method === 'addModelFiles' && Array.isArray(args[1])) {
+        const out = args.slice();
+        out[1] = args[1].map((f) => portableFileName(f));
+        return out;
+    }
+    const idx = FILENAME_ARG_INDEX[method];
+    if (idx === undefined || typeof args[idx] !== 'string') {
+        return args;
+    }
+    const out = args.slice();
+    out[idx] = portableFileName(args[idx]);
+    return out;
+}
+
 /**
  * Snapshot what a constructor needs to attach a recipe.
  * @param {string} cls class name
@@ -740,7 +812,7 @@ function ctorSnapshot(cls, args, nested) {
                     mm,
                     ast: store.pack(encodePlain(args[1])),
                     definitions: encodePlain(args[2]),
-                    fileName: encodePlain(args[3]),
+                    fileName: encodePlain(portableFileName(args[3])),
                 };
             } catch (e) {
                 return { nonplain: 'modelfile-args:' + (e instanceof NonPlain ? e.reason : 'encoder-error') };
