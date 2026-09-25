@@ -38,17 +38,50 @@ lib/
                 writes one newline-delimited result per request to stdout. Batching
                 many cases through one process amortises ts-node/wasm start-up.
   run-batch.js  spawns one worker.js per engine per batch and pairs up results by id.
+  signature.js  the cluster-signature function (op, TS outcome kind, Rust outcome
+                kind, templated message) shared by bin/triage.js and
+                bin/minimize-clusters.js, so both agree on what "the same cluster"
+                means.
 bin/
   fuzz.js       the driver: fast-check picks (seedIndex, mutationSeed) pairs
                 deterministically from --run-seed, lib/mutate.js applies them,
                 both engines run, and canonical outcomes are diffed with
                 migration/oracle/lib/canon.js's sortedStringify.
+  triage.js     clusters results/divergences.jsonl by signature (lib/signature.js)
+                and writes results/triage-clusters.json: {sig, op, count, sample}
+                per cluster, sample being the first divergence seen.
+  minimize-clusters.js
+                for each cluster, re-derives lib/mutate.js's edit trace for its
+                sample (mutateTraced()) and runs ddmin over it: drop one edit,
+                replay the rest through both engines (a persistent lib/worker.js
+                per engine, reused across every cluster), keep the drop only if
+                the result still canonicalises to the same cluster signature.
+                Writes each cluster's `minimized` field: the smallest edit list
+                found, as engine-agnostic {kind, path, value?, index?} ops
+                (lib/mutate.js's applyEdits()) plus the resulting document — a
+                reproducer that needs no seed, run-seed or PRNG to replay.
+  attribute-owners.js
+                writes each cluster's `owner` field from a fixed op -> ledger-row
+                -> GitHub-issue table (see the file for how it was resolved).
+  finalize-triage.js
+                one-off helper: prints TRIAGE.md's headline table from
+                results/run-42.json, then chains triage.js, minimize-clusters.js
+                (only if FIXTURES_DIR/CONCERTO_ENGINE_MODULE are set) and
+                attribute-owners.js.
 results/
   run-*.json          one run's summary (planned/ran/agree/divergences/harness errors,
                       broken down by op).
   divergences.jsonl   one line per unresolved divergence: {op, seedFile,
                       mutationSeed, ts: <canonical outcome>, rust: <canonical outcome>}.
                       Reproduce with the "Reproducing a divergence" recipe below.
+  triage-clusters.json
+                      one entry per signature cluster: {sig, op, count, sample,
+                      minimized, owner}. `sample` is bin/triage.js's raw first
+                      hit (seed + mutationSeed); `minimized` is
+                      bin/minimize-clusters.js's shrunk, seed-free reproducer
+                      (edits + the resulting document); `owner` is
+                      bin/attribute-owners.js's ledger-derived task/issue
+                      attribution, or null if the op has no ledger mapping yet.
 ```
 
 ## Targeted ops
@@ -97,6 +130,22 @@ const inputs = withMutatedDoc(seed, mutatedDoc);
 // then adapter.run(seed.op, unpackedInputs) per engine, as lib/worker.js does.
 ```
 
+## Reproducing a minimized cluster
+
+`results/triage-clusters.json`'s `minimized.edits` need no seed, run-seed or
+PRNG — they are already a concrete edit list, applied directly to the
+fixture's own document:
+
+```js
+const { getAt, withMutatedDoc } = require('./lib/seeds');
+const { applyEdits } = require('./lib/mutate');
+const seedLike = { raw: JSON.parse(fs.readFileSync(path.join(fixturesDir, cluster.minimized.seedFile))), path: TARGETS.find((t) => t.op === cluster.op).path };
+const doc = getAt(seedLike.raw.inputs, seedLike.path);
+const mutatedDoc = applyEdits(doc, cluster.minimized.edits); // === cluster.minimized.doc
+const inputs = withMutatedDoc(seedLike, mutatedDoc);
+// then adapter.run(cluster.op, unpackedInputs) per engine, as lib/worker.js does.
+```
+
 ## Why only these ops, and why lenses instead of hand-built cases
 
 The corpus already records, for real models and real instances, the exact recipe
@@ -123,8 +172,10 @@ P5-05 lands in two stages:
 
 - **Stage 1 (this PR):** the harness, a fix for the `decodeMF`/harness-error bug the
   first review found (see below), and `TRIAGE.md`: the unresolved divergences from a
-  60,000-case run, clustered by signature, each with a minimised seed and either an
-  owning task or a note that none exists yet. No product code is fixed here.
+  60,000-case run, clustered by signature, each with a minimised reproducer
+  (`bin/minimize-clusters.js`) and an owner attributed through the ledger
+  (`bin/attribute-owners.js`) — an open task, or, where the ledger's owning tasks are
+  all closed, a newly filed follow-up issue. No product code is fixed here.
 - **Stage 2 (later, before or with P5-01):** once the owning tasks land their fixes,
   a full 1,000,000-case run with (by then) no unresolved divergences — sharded or
   parallelised, since one core manages roughly 60-70 cases/s.

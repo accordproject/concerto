@@ -30,28 +30,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const { signatureOf } = require('../lib/signature');
 
 const file = process.argv[2] || path.join(__dirname, '..', 'results', 'divergences.jsonl');
-
-function outcomeKind(canon) {
-    if (canon && typeof canon === 'object' && 'error' in canon) {
-        return { verdict: 'error', cls: canon.error && canon.error.class || 'unknown' };
-    }
-    if (canon && typeof canon === 'object' && 'ok' in canon) {
-        return { verdict: 'ok', cls: null };
-    }
-    return { verdict: 'other:' + JSON.stringify(canon).slice(0, 40), cls: null };
-}
-
-function template(msg) {
-    if (typeof msg !== 'string') { return ''; }
-    return msg
-        .replace(/'[^']*'/g, "'…'")
-        .replace(/"[^"]*"/g, '"…"')
-        .replace(/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi, '<uuid>')
-        .replace(/\b\d+\b/g, '<n>')
-        .slice(0, 160);
-}
 
 function main() {
     const lines = fs.readFileSync(file, 'utf8').split('\n').filter((l) => l.trim());
@@ -59,11 +40,7 @@ function main() {
     for (const line of lines) {
         let d;
         try { d = JSON.parse(line); } catch (e) { continue; }
-        const t = outcomeKind(d.ts);
-        const r = outcomeKind(d.rust);
-        const tMsg = d.ts && d.ts.error ? template(d.ts.error.message) : '';
-        const rMsg = d.rust && d.rust.error ? template(d.rust.error.message) : '';
-        const sig = [d.op, `ts=${t.verdict}${t.cls ? '(' + t.cls + ')' : ''}`, `rust=${r.verdict}${r.cls ? '(' + r.cls + ')' : ''}`, tMsg && `ts:"${tMsg}"`, rMsg && `rust:"${rMsg}"`].filter(Boolean).join(' | ');
+        const sig = signatureOf(d);
         if (!clusters.has(sig)) {
             clusters.set(sig, { sig, op: d.op, count: 0, sample: d });
         }
