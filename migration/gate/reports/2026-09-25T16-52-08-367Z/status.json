@@ -1,0 +1,311 @@
+{
+  "$schema": "migration/status/status.json",
+  "generated_at": "2026-09-25T16:57:10.668Z",
+  "requested_at_sha": null,
+  "fast": false,
+  "runtime_ms": 300228,
+  "repos": {
+    "concerto": {
+      "path": "/home/user/wt/P5-01a/concerto",
+      "commit": "c318bab69db98213696f63a0f08ff21f89797b7f",
+      "commit_used": "c318bab69db98213696f63a0f08ff21f89797b7f"
+    },
+    "concerto-rust": {
+      "path": "/home/user/wt/P5-01a/concerto-rust",
+      "commit": "8a0cd4fbe40404582c6d15edd7faee93ce43ca37"
+    },
+    "concerto-validate-rs": {
+      "path": "/home/user/wt/P5-01a/concerto-validate-rs",
+      "commit": "c8e27378fc3983844b33d760e6adb4a49669b7d3"
+    },
+    "concerto-conformance": {
+      "path": "/home/user/wt/P5-01a/concerto-conformance",
+      "commit": "93396426fd5854e9c691fdef6bf557a026cbb8c4"
+    }
+  },
+  "metrics": {
+    "queue": {
+      "available": true,
+      "total": 56,
+      "counts": {
+        "done": 11,
+        "in_progress": 4,
+        "pending": 41
+      },
+      "by_priority": {
+        "P0": {
+          "done": 9,
+          "in_progress": 2,
+          "pending": 9
+        },
+        "P1": {
+          "done": 2,
+          "pending": 24,
+          "in_progress": 2
+        },
+        "P2": {
+          "pending": 7
+        },
+        "P3": {
+          "pending": 1
+        }
+      }
+    },
+    "concerto_core_tests": {
+      "overall": {
+        "available": true,
+        "engine": "ts",
+        "suites": 411,
+        "tests": 1308,
+        "passing": 1299,
+        "failing": 1,
+        "pending": 8,
+        "duration_ms": 4945
+      },
+      "by_tag": {
+        "available": true,
+        "tally": {
+          "B": {
+            "tests": 956,
+            "passing": 949,
+            "failing": 1,
+            "pending": 6
+          },
+          "M": {
+            "tests": 80,
+            "passing": 78,
+            "failing": 0,
+            "pending": 2
+          },
+          "W": {
+            "tests": 272,
+            "passing": 272,
+            "failing": 0,
+            "pending": 0
+          }
+        }
+      },
+      "engine_modes": {
+        "ts": {
+          "available": true,
+          "engine": "ts",
+          "suites": 411,
+          "tests": 1308,
+          "passing": 1299,
+          "failing": 1,
+          "pending": 8,
+          "duration_ms": 4945
+        },
+        "rust": {
+          "available": false,
+          "reason": "CONCERTO_ENGINE=rust is not implemented yet (P4-02, engine shim, has not landed)"
+        }
+      }
+    },
+    "nyc_coverage": {
+      "available": true,
+      "statements_pct": 98.98,
+      "branches_pct": 95.7,
+      "functions_pct": 99.18,
+      "lines_pct": 98.99,
+      "thresholds": {
+        "statements": 99,
+        "branches": 94.8,
+        "functions": 99,
+        "lines": 99
+      },
+      "gate_status": "FAILS: statements, lines below threshold"
+    },
+    "oracle": {
+      "reference": {
+        "available": true,
+        "engine": "reference@5.0.0",
+        "total": 15850,
+        "pass": 15850,
+        "fail": 0,
+        "harness_error": 0,
+        "pass_pct": 100,
+        "by_source": {
+          "conformance": {
+            "total": 815,
+            "pass": 815,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "data": {
+            "total": 10231,
+            "pass": 10231,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "gaps": {
+            "total": 658,
+            "pass": 658,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "lifted": {
+            "total": 64,
+            "pass": 64,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "unit": {
+            "total": 4082,
+            "pass": 4082,
+            "fail": 0,
+            "harness_error": 0
+          }
+        }
+      },
+      "native": {
+        "available": false,
+        "reason": "no native oracle adapter exists yet (P1-07 has not landed)"
+      },
+      "wasm": {
+        "available": false,
+        "reason": "no WASM oracle adapter exists yet (P4-01/P4-02 have not landed)"
+      },
+      "corpus_coverage_of_reference": {
+        "available": false,
+        "reason": "migration/oracle/results/ has not been produced yet (P0-05 in progress)"
+      },
+      "mutants": {
+        "available": true,
+        "detected": 13,
+        "total": 13,
+        "catch_rate_pct": 100,
+        "all_mutants_detected": true,
+        "harness_checks_ok": true
+      }
+    },
+    "rust": {
+      "concerto-rust": {
+        "cargo_test": {
+          "available": true,
+          "command_exit_ok": true,
+          "totals": {
+            "passed": 753,
+            "failed": 0
+          },
+          "per_crate": {
+            "concerto_core": {
+              "passed": 689,
+              "failed": 0
+            },
+            "derive": {
+              "passed": 3,
+              "failed": 0
+            },
+            "oracle": {
+              "passed": 32,
+              "failed": 0
+            },
+            "traits": {
+              "passed": 8,
+              "failed": 0
+            },
+            "concerto_macros": {
+              "passed": 11,
+              "failed": 0
+            },
+            "concerto_metamodel": {
+              "passed": 0,
+              "failed": 0
+            },
+            "debug": {
+              "passed": 1,
+              "failed": 0
+            },
+            "numeric_widening": {
+              "passed": 5,
+              "failed": 0
+            },
+            "round_trip": {
+              "passed": 4,
+              "failed": 0
+            },
+            "concerto_vocabulary": {
+              "passed": 0,
+              "failed": 0
+            }
+          }
+        },
+        "llvm_cov": {
+          "available": true,
+          "workspace_lines_pct": 92.37,
+          "per_crate_lines_pct": {
+            "concerto-core": 92.35,
+            "concerto-macros": 99.22,
+            "concerto-metamodel": 0,
+            "concerto-vocabulary": 0
+          }
+        }
+      },
+      "concerto-validate-rs": {
+        "cargo_test": {
+          "available": true,
+          "command_exit_ok": true,
+          "totals": {
+            "passed": 11,
+            "failed": 0
+          },
+          "per_crate": {
+            "concerto_validator_rs": {
+              "passed": 6,
+              "failed": 0
+            },
+            "concerto_validator": {
+              "passed": 0,
+              "failed": 0
+            },
+            "cli_tests": {
+              "passed": 5,
+              "failed": 0
+            }
+          }
+        },
+        "llvm_cov": {
+          "available": true,
+          "workspace_lines_pct": 73.38,
+          "per_crate_lines_pct": {
+            "lib.rs": 100,
+            "main.rs": 0,
+            "model_manager": 82.41,
+            "validator.rs": 100
+          }
+        }
+      }
+    },
+    "ledger": {
+      "available": true,
+      "rows": 508,
+      "full_weight": {
+        "total_weight": 6588.5,
+        "weight_by_classification": {
+          "RUST": 3715,
+          "HYBRID": 1826,
+          "TS": 1047.5
+        },
+        "weighted_pct_rust_plus_hybrid": 84.1
+      },
+      "d1_denominator_weight": 6498.5,
+      "d1_excluded": {
+        "members": 60,
+        "weight": 90
+      },
+      "weighted_pct_rust_plus_hybrid": 85.3,
+      "weighted_pct_rust_only": 57.2
+    },
+    "mutants": {
+      "available": false,
+      "reason": "cargo-mutants has not been run in this environment; the ledger/judge self-check is task P0-05, and the ≥85% catch-rate gate is task P5-06"
+    },
+    "conformance": {
+      "available": true,
+      "total_scenarios": 75,
+      "passed": 75,
+      "failed": 0
+    }
+  }
+}

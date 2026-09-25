@@ -1,0 +1,1600 @@
+{
+ "engine": "rust-wasm",
+ "total": 16085,
+ "pass": 16054,
+ "fail": 31,
+ "harness_error": 0,
+ "by_source": {
+  "conformance": {
+   "total": 815,
+   "pass": 815,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "data": {
+   "total": 10231,
+   "pass": 10207,
+   "fail": 24,
+   "harness_error": 0
+  },
+  "gaps": {
+   "total": 658,
+   "pass": 656,
+   "fail": 2,
+   "harness_error": 0
+  },
+  "lifted": {
+   "total": 299,
+   "pass": 299,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "unit": {
+   "total": 4082,
+   "pass": 4077,
+   "fail": 5,
+   "harness_error": 0
+  }
+ },
+ "by_op": {
+  "ModelFile.getName": {
+   "total": 76,
+   "pass": 76,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.new": {
+   "total": 196,
+   "pass": 196,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addCTOModel": {
+   "total": 1417,
+   "pass": 1414,
+   "fail": 3,
+   "harness_error": 0
+  },
+  "ModelManager.addModel": {
+   "total": 173,
+   "pass": 173,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addModelFile": {
+   "total": 92,
+   "pass": 92,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.validateModelFiles": {
+   "total": 376,
+   "pass": 374,
+   "fail": 2,
+   "harness_error": 0
+  },
+  "Serializer.fromJSON": {
+   "total": 2074,
+   "pass": 2074,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Serializer.new": {
+   "total": 162,
+   "pass": 162,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Serializer.toJSON": {
+   "total": 1776,
+   "pass": 1776,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isClassDeclaration": {
+   "total": 422,
+   "pass": 422,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isEnum": {
+   "total": 381,
+   "pass": 381,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isIdentified": {
+   "total": 330,
+   "pass": 330,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isSystemIdentified": {
+   "total": 158,
+   "pass": 158,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DcsConverter.jsonToYaml": {
+   "total": 22,
+   "pass": 22,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getFullyQualifiedName": {
+   "total": 493,
+   "pass": 493,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getName": {
+   "total": 369,
+   "pass": 369,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getNamespace": {
+   "total": 327,
+   "pass": 327,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isClassDeclaration": {
+   "total": 89,
+   "pass": 89,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.decorateModels": {
+   "total": 1301,
+   "pass": 1299,
+   "fail": 2,
+   "harness_error": 0
+  },
+  "DecoratorManager.extractDecorators": {
+   "total": 59,
+   "pass": 37,
+   "fail": 22,
+   "harness_error": 0
+  },
+  "DecoratorManager.extractNonVocabDecorators": {
+   "total": 55,
+   "pass": 55,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.extractVocabularies": {
+   "total": 69,
+   "pass": 69,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.jsonToYaml": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.validate": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newResource": {
+   "total": 1395,
+   "pass": 1395,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MetaModel.modelManagerFromMetaModel": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MetaModel.validateMetaModel": {
+   "total": 12,
+   "pass": 12,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAllDeclarations": {
+   "total": 124,
+   "pass": 124,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addModelFiles": {
+   "total": 52,
+   "pass": 52,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.fromAst": {
+   "total": 37,
+   "pass": 36,
+   "fail": 1,
+   "harness_error": 0
+  },
+  "ModelManager.getAst": {
+   "total": 132,
+   "pass": 132,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getModels": {
+   "total": 112,
+   "pass": 112,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getType": {
+   "total": 682,
+   "pass": 682,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.new": {
+   "total": 12,
+   "pass": 12,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.validate": {
+   "total": 73,
+   "pass": 73,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getProperties": {
+   "total": 88,
+   "pass": 88,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getProperty": {
+   "total": 209,
+   "pass": 209,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "CollectionSizeValidator.compatibleWith": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getModelFile": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorated.getDecorator": {
+   "total": 78,
+   "pass": 78,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorated.getDecorators": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newConcept": {
+   "total": 47,
+   "pass": 47,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newRelationship": {
+   "total": 37,
+   "pass": 37,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getScalarField": {
+   "total": 17,
+   "pass": 17,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getValidator": {
+   "total": 83,
+   "pass": 83,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getFullyQualifiedTypeName": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getImportURI": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getType": {
+   "total": 34,
+   "pass": 34,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelLoader.loadModelManager": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelLoader.loadModelManagerFromModelFiles": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addDecoratorFactory": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.deleteModelFile": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.filter": {
+   "total": 20,
+   "pass": 20,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.updateExternalModels": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.updateModelFile": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.validateModelFile": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.writeModelsToFileSystem": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isAssignableTo": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "NumberValidator.compatibleWith": {
+   "total": 9,
+   "pass": 9,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "NumberValidator.validate": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getFullyQualifiedTypeName": {
+   "total": 63,
+   "pass": 63,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getSizeValidator": {
+   "total": 34,
+   "pass": 34,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Relationship.fromURI": {
+   "total": 18,
+   "pass": 18,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.instanceOf": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.setPropertyValue": {
+   "total": 53,
+   "pass": 53,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getDefaultValue": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getType": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getValidator": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isScalarDeclaration": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.new": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.toString": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "StringValidator.compatibleWith": {
+   "total": 29,
+   "pass": 29,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "StringValidator.validate": {
+   "total": 29,
+   "pass": 29,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "TypeNotFoundException.new": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "StringValidator.getRegex": {
+   "total": 15,
+   "pass": 15,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "AssetDeclaration.declarationKind": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "AstModelManager.new": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "BaseModelManager.new": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getAllSuperTypeDeclarations": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getAssignableClassDeclarations": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getDirectSubclasses": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getIdentifierFieldName": {
+   "total": 40,
+   "pass": 40,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getNestedProperty": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getOwnProperties": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getSuperType": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getSuperTypeDeclaration": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isAbstract": {
+   "total": 32,
+   "pass": 32,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isEvent": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isExplicitlyIdentified": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isMapDeclaration": {
+   "total": 66,
+   "pass": 66,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.validate": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "CollectionSizeValidator.getMaxSize": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "CollectionSizeValidator.getMinSize": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ConceptDeclaration.declarationKind": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DateTimeUtil.setCurrentTime": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DcsConverter.yamlToJson": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isEnum": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isMapDeclaration": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isScalarDeclaration": {
+   "total": 50,
+   "pass": 50,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorator.getArguments": {
+   "total": 43,
+   "pass": 43,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorator.validate": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.executePropertyCommand": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.falsyOrEqual": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.migrateTo": {
+   "total": 1,
+   "pass": 0,
+   "fail": 1,
+   "harness_error": 0
+  },
+  "DecoratorManager.yamlToJson": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EnumDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EnumDeclaration.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EnumValueDeclaration.isEnumValue": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EventDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newEvent": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newTransaction": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getDefaultValue": {
+   "total": 28,
+   "pass": 28,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.isField": {
+   "total": 100,
+   "pass": 100,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.isTypeScalar": {
+   "total": 113,
+   "pass": 113,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.getFullyQualifiedIdentifier": {
+   "total": 21,
+   "pass": 21,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.getIdentifier": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.getTimestamp": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.isRelationship": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.isResource": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.setIdentifier": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.toURI": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Introspector.getClassDeclaration": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Introspector.getClassDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Introspector.getModelManager": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.getKey": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.getValue": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.isMapDeclaration": {
+   "total": 8,
+   "pass": 8,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.validate": {
+   "total": 34,
+   "pass": 34,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.getNamespace": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.getParent": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.getType": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.validate": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.getNamespace": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.getParent": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.getType": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.validate": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAssetDeclaration": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAssetDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAst": {
+   "total": 29,
+   "pass": 29,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getClassDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getConcertoVersion": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getDefinitions": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getEnumDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getEventDeclaration": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getEventDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getImportedType": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getImports": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getModelManager": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getNamespace": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getParticipantDeclaration": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getScalarDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getTransactionDeclaration": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getTransactionDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isDefined": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isExternal": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isImportedType": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isLocalType": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isModelFile": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isSystemModelFile": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.resolveImport": {
+   "total": 8,
+   "pass": 8,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.validate": {
+   "total": 17,
+   "pass": 17,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.clearModelFiles": {
+   "total": 72,
+   "pass": 72,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.derivesFrom": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getAssetDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getAssignableConcreteTypes": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getConceptDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getEnumDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getEventDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getMapDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getNamespaces": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getParticipantDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getTransactionDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.isAssignableTo": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.resolveMetaModel": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.resolveType": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.capitalizeFirstLetter": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.getFullyQualifiedName": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.getNamespace": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.getShortName": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isPrimitiveType": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isPrivateSystemProperty": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isSystemProperty": {
+   "total": 28,
+   "pass": 28,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isValidIdentifier": {
+   "total": 9,
+   "pass": 9,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isValidMapKey": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isValidMapValue": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.parseNamespace": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.removeNamespaceVersionFromFullyQualifiedName": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ParticipantDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getFullyQualifiedName": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getName": {
+   "total": 245,
+   "pass": 245,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getNamespace": {
+   "total": 18,
+   "pass": 18,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getParent": {
+   "total": 21,
+   "pass": 21,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getType": {
+   "total": 66,
+   "pass": 66,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isArray": {
+   "total": 92,
+   "pass": 92,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isOptional": {
+   "total": 154,
+   "pass": 154,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isPrimitive": {
+   "total": 73,
+   "pass": 73,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isTypeEnum": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Relationship.isRelationship": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Relationship.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "RelationshipDeclaration.isRelationship": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "RelationshipDeclaration.toString": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.addArrayValue": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.isConcept": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.isIdentifiable": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.isResource": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.toJSON": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.toString": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getIdentifierFieldName": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getSuperType": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getSuperTypeDeclaration": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isAbstract": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isAsset": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isConcept": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isEvent": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isIdentified": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isParticipant": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isSystemIdentified": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isTransaction": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "TransactionDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getClassDeclaration": {
+   "total": 42,
+   "pass": 42,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getFullyQualifiedType": {
+   "total": 68,
+   "pass": 68,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getNamespace": {
+   "total": 20,
+   "pass": 20,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getType": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  }
+ },
+ "failures": [
+  {
+   "file": "data/DecoratorManager.decorateModels/72c098eaee106ff450b622a0.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.effects: expected {\"args\":{\"1\":{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet\",\"commands\":[{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.Command\",\"decorator\":{\"$class\":\"concerto.metamod… got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/20c4693168cd7ea28c006d3c.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/25f485f573c21a354335018f.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.properties.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/2696574863be411bb3ac8930.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/2d33be223246ab6740c1a3ad.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/3818ca566e9fb509422fda71.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/4f40028754a604dadfb0ca67.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.1.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/5135b15bab782c9a3dc4f762.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/5692c5d7b52a3d08c9774521.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.properties.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/5e14a3de5a8ce5c7aba08073.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.properties.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/766a245c8b9526931a526069.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/85221faaefcbdea76e0d72a7.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.3.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/88f5e279a932086ce3bc73fc.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/8f0b13f3f0d6d0bb823055f1.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.1.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/aa67bb22b5d75c11a8388099.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/aca25539ac788419d65596d3.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/d192a7be50d765c4ef95532e.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/d542a295303cf0fee1f6ab26.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.properties.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/d7d8467e4ed9f1e7ef258a5b.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/DecoratorManager.extractDecorators/f82f8e467af3d5fb4ba5320e.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.properties.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "data/ModelManager.addCTOModel/3489b297183571e117d7f7e0.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"TypeError\""
+  },
+  {
+   "file": "data/ModelManager.addCTOModel/8ed239b8c40c1636d8664c45.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"TypeError\""
+  },
+  {
+   "file": "data/ModelManager.addCTOModel/9dffbd170fa2d61402e91246.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"TypeError\""
+  },
+  {
+   "file": "data/ModelManager.validateModelFiles/95929468f5b2bf9fbfa2d6ff.json",
+   "status": "fail",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"TypeError\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"Validator error for field `s`. gaps.strv2@1.0.0.C.s: Invalid regular expression: /(/: Unterminated group\" got \"Validator error for field `s`. gaps.strv2@1.0.0.C.s: Invalid regular expression: /(/: Unbalanced parenthesis\""
+  },
+  {
+   "file": "gaps/ModelManager.validateModelFiles/d31238c92ac69b9d872bc810.json",
+   "status": "fail",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"Relationship must have a type \" got \"Undeclared type \\\"\\\" in \\\"property gaps.rel@1.0.0.Person.home\\\". \""
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/c7a0e9377fb2dc82e348db67.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.effects: expected {\"args\":{\"1\":{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet\",\"commands\":[{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.Command\",\"decorator\":{\"$class\":\"concerto.metamod… got undefined"
+  },
+  {
+   "file": "unit/DecoratorManager.extractDecorators/46451c56c9b7ee5d67de2474.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "unit/DecoratorManager.extractDecorators/ac37d0cc2ee62446130cfd10.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.1.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "unit/DecoratorManager.extractDecorators/f4ab7364c6184205f16051e8.json",
+   "status": "fail",
+   "op": "DecoratorManager.extractDecorators",
+   "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+  },
+  {
+   "file": "unit/DecoratorManager.migrateTo/6a8bfe76d6aee5f63bb7b743.json",
+   "status": "fail",
+   "op": "DecoratorManager.migrateTo",
+   "detail": "$.effects: expected {\"args\":{\"0\":{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet\",\"commands\":[{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.Command\",\"decorator\":{\"$class\":\"concerto.metamod… got undefined"
+  }
+ ],
+ "agreement_pct": 99.8073,
+ "seconds": 209.7,
+ "failures_truncated": false
+}

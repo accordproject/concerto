@@ -121,6 +121,42 @@ function stepGuardrails(reportDir) {
 // Step: full status.mjs (§0.1, §0.2, §0.3 reference replay, §0.4 ledger read,
 // §0.6 rust tests/llvm-cov, §0.7 conformance)
 // ---------------------------------------------------------------------------
+// status.mjs itself never applies a §0 threshold to what it collects — it
+// always exits 0 unless it throws, whatever its metrics say (it just
+// records numbers). So this step has to apply the thresholds itself, per
+// CHECKLIST.md, rather than trusting the exit code as the verdict. A metric
+// that came back `na` (tool missing, --fast used, ...) counts as NOT judged
+// — never silently treated as a pass.
+function checkFloor(value, floor) {
+  return typeof value === 'number' && Number.isFinite(value) ? value >= floor : null;
+}
+
+function judgeStatusThresholds(status) {
+  const m = status.metrics;
+  const ledgerPct = m.ledger && m.ledger.weighted_pct_rust_plus_hybrid;
+  const llvmCov = m.rust && m.rust['concerto-rust'] && m.rust['concerto-rust'].llvm_cov;
+  const llvmCovPct =
+    llvmCov && llvmCov.available
+      ? (llvmCov.per_crate_lines_pct && llvmCov.per_crate_lines_pct['accordproject-concerto-core']) ??
+        llvmCov.workspace_lines_pct
+      : null;
+  const conformance = m.conformance;
+  const conformanceOk = conformance && conformance.available ? conformance.failed === 0 : null;
+  const byTag = m.concerto_core_tests && m.concerto_core_tests.by_tag;
+  const tagOk = (tag) => {
+    if (!byTag || !byTag.available) return null;
+    const t = byTag.tally && byTag.tally[tag];
+    return t ? t.failing === 0 : null;
+  };
+  return {
+    ledger_weighted_pct_rust_plus_hybrid: { value: ledgerPct ?? null, floor: 70, meets: checkFloor(ledgerPct, 70) },
+    llvm_cov_lines_pct: { value: llvmCovPct ?? null, floor: 90, meets: checkFloor(llvmCovPct, 90) },
+    conformance_all_scenarios_pass: { value: conformance && conformance.available ? { total: conformance.total_scenarios, failed: conformance.failed } : null, meets: conformanceOk },
+    core_tests_tag_B_pass: { meets: tagOk('B') },
+    core_tests_tag_W_pass: { meets: tagOk('W') },
+  };
+}
+
 function stepStatus(opts, reportDir) {
   const args = [path.join(MIGRATION_ROOT, 'bin', 'status.mjs')];
   if (opts.fast) args.push('--fast');
@@ -132,14 +168,19 @@ function stepStatus(opts, reportDir) {
     logFile,
   });
   let status = null;
+  let thresholds = null;
   const statusJsonPath = path.join(MIGRATION_ROOT, 'status', 'status.json');
   if (fs.existsSync(statusJsonPath)) {
     status = JSON.parse(fs.readFileSync(statusJsonPath, 'utf8'));
     fs.copyFileSync(statusJsonPath, path.join(reportDir, 'status.json'));
     const logsDir = path.join(MIGRATION_ROOT, 'status', 'logs');
     if (fs.existsSync(logsDir)) fs.cpSync(logsDir, path.join(reportDir, 'logs'), { recursive: true });
+    thresholds = judgeStatusThresholds(status);
   }
-  return { name: 'status.mjs (full run)', ok: res.ok, exit: res.status, log: path.relative(reportDir, logFile), status };
+  // ok requires: the script itself ran cleanly, status.json was produced,
+  // and every §0 threshold it carries was both judged (not `na`) and met.
+  const ok = res.ok && thresholds != null && Object.values(thresholds).every((t) => t.meets === true);
+  return { name: 'status.mjs (full run)', ok, exit: res.status, log: path.relative(reportDir, logFile), status, thresholds };
 }
 
 // ---------------------------------------------------------------------------
@@ -230,28 +271,42 @@ function stepOracleNative(opts, reportDir) {
 }
 
 // ---------------------------------------------------------------------------
+// Shared: the JS oracle tools (coverage.sh, replay.js) don't read
+// CONCERTO_ORACLE_FIXTURES at all (that's Rust-only, see PORTING.md OD-7);
+// they always resolve migration/oracle/fixtures relative to this checkout.
+// From a worktree that's empty (gitignored), so make sure it resolves to
+// the canonical corpus before running either tool, or the step silently
+// "passes" against near-nothing (single-digit % coverage).
+// ---------------------------------------------------------------------------
+function ensureFixturesSymlink(opts) {
+  const fixturesLink = path.join(MIGRATION_ROOT, 'oracle', 'fixtures');
+  if (!fs.existsSync(fixturesLink) && fs.existsSync(opts.oracleFixtures)) {
+    fs.symlinkSync(opts.oracleFixtures, fixturesLink);
+    return { ok: true };
+  }
+  if (fs.existsSync(fixturesLink) && fs.realpathSync(fixturesLink) !== fs.realpathSync(opts.oracleFixtures)) {
+    return {
+      ok: false,
+      na: `${fixturesLink} exists and does not resolve to the canonical corpus (${opts.oracleFixtures}); refusing to run against the wrong corpus`,
+    };
+  }
+  return { ok: true };
+}
+
+// §0.3's floor: statements/functions/lines >= 99, branches >= 94.8 (the unit
+// suite's own coverage of the reference, per CHECKLIST.md §3).
+const ORACLE_COVERAGE_FLOOR = { statements: 99, functions: 99, lines: 99, branches: 94.8 };
+
+// ---------------------------------------------------------------------------
 // Step: oracle corpus coverage of the reference (§0.3 coverage floor)
 // ---------------------------------------------------------------------------
 function stepOracleCoverage(opts, reportDir) {
   const workDir = path.join(reportDir, 'oracle-coverage-work');
   const logFile = path.join(reportDir, 'oracle-coverage.log');
+  const name = 'oracle corpus coverage of the reference (§0.3 floor)';
 
-  // The JS oracle tools (coverage.sh -> replay.js) don't read
-  // CONCERTO_ORACLE_FIXTURES at all (that's Rust-only, see PORTING.md OD-7);
-  // they always resolve migration/oracle/fixtures relative to this
-  // checkout. From a worktree that's empty (gitignored), so make sure it
-  // resolves to the canonical corpus before running, or this step silently
-  // "passes" against near-nothing (single-digit % coverage).
-  const fixturesLink = path.join(MIGRATION_ROOT, 'oracle', 'fixtures');
-  if (!fs.existsSync(fixturesLink) && fs.existsSync(opts.oracleFixtures)) {
-    fs.symlinkSync(opts.oracleFixtures, fixturesLink);
-  } else if (fs.existsSync(fixturesLink) && fs.realpathSync(fixturesLink) !== fs.realpathSync(opts.oracleFixtures)) {
-    return {
-      name: 'oracle corpus coverage of the reference (§0.3 floor)',
-      ok: false,
-      na: `${fixturesLink} exists and does not resolve to the canonical corpus (${opts.oracleFixtures}); refusing to run coverage.sh against the wrong corpus`,
-    };
-  }
+  const link = ensureFixturesSymlink(opts);
+  if (!link.ok) return { name, ok: false, na: link.na };
 
   const res = run(
     'bash',
@@ -263,11 +318,64 @@ function stepOracleCoverage(opts, reportDir) {
   // a previous (possibly unrelated) invocation as if it were fresh.
   const coveragePath = path.join(MIGRATION_ROOT, 'oracle', 'results', 'coverage.json');
   let coverage = null;
+  let meetsFloor = null;
   if (res.ok && fs.existsSync(coveragePath)) {
     coverage = JSON.parse(fs.readFileSync(coveragePath, 'utf8'));
     fs.copyFileSync(coveragePath, path.join(reportDir, 'oracle-coverage.json'));
+    const corpus = coverage.corpus || {};
+    meetsFloor = {};
+    for (const metric of Object.keys(ORACLE_COVERAGE_FLOOR)) {
+      const pct = corpus[metric] && corpus[metric].pct;
+      meetsFloor[metric] = typeof pct === 'number' && pct >= ORACLE_COVERAGE_FLOOR[metric];
+    }
   }
-  return { name: 'oracle corpus coverage of the reference (§0.3 floor)', ok: res.ok, log: path.relative(reportDir, logFile), coverage };
+  // The step only "passes" when coverage.sh exited 0 AND every §0.3 floor
+  // metric is actually met — an exit-0 run against below-floor coverage is
+  // not a pass just because the shell script didn't error.
+  const ok = res.ok && meetsFloor != null && Object.values(meetsFloor).every(Boolean);
+  return {
+    name,
+    ok,
+    exit: res.status,
+    log: path.relative(reportDir, logFile),
+    coverage,
+    floor: ORACLE_COVERAGE_FLOOR,
+    meets_floor: meetsFloor,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Step: oracle corpus through the JS/WASM binding (§0.3 WASM leg —
+// CHECKLIST.md §3 "WASM (JS binding)": replay.js --engine
+// migration/oracle/lib/rust-adapter.js, driven by the built concerto-engine
+// module via CONCERTO_ENGINE_MODULE, same as stepCoreSuiteRust's B/W run).
+// ---------------------------------------------------------------------------
+function stepOracleWasm(opts, reportDir) {
+  const name = 'oracle WASM/JS-binding leg (§0.3, replay.js --engine rust-adapter.js)';
+  const engineCjs = path.join(opts.rustRoot, 'concerto-wasm', 'pkg', 'concerto-engine.cjs');
+  if (!fs.existsSync(engineCjs)) {
+    return { name, ok: false, na: `${engineCjs} not built yet (run concerto-wasm/build.sh first)` };
+  }
+  const link = ensureFixturesSymlink(opts);
+  if (!link.ok) return { name, ok: false, na: link.na };
+
+  const adapterPath = path.join(MIGRATION_ROOT, 'oracle', 'lib', 'rust-adapter.js');
+  const reportPath = path.join(reportDir, 'oracle-replay-wasm.json');
+  const logFile = path.join(reportDir, 'oracle-wasm.log');
+  const res = run(
+    'node',
+    [path.join(MIGRATION_ROOT, 'oracle', 'bin', 'replay.js'), '--engine', adapterPath, '--report', reportPath],
+    { cwd: CONCERTO_ROOT, env: { CONCERTO_ENGINE_MODULE: engineCjs }, timeoutMs: 20 * 60 * 1000, logFile }
+  );
+  let replay = null;
+  if (fs.existsSync(reportPath)) replay = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+  return {
+    name,
+    ok: res.ok && replay != null && replay.pass === replay.total && replay.total > 0 && replay.fail === 0 && replay.harness_error === 0,
+    exit: res.status,
+    log: path.relative(reportDir, logFile),
+    replay: replay ? { total: replay.total, pass: replay.pass, fail: replay.fail, harness_error: replay.harness_error, agreement_pct: replay.agreement_pct } : null,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -296,12 +404,17 @@ function stepWasm(opts, reportDir) {
     ? run('npm', ['run', 'smoke:node'], { cwd: wasmDir, timeoutMs: 5 * 60 * 1000, logFile: smokeLog })
     : { ok: false, status: null };
 
+  const withinBudget = bytes != null && bytes <= BUDGET;
   return {
     name: 'WASM build (size budget) + smoke:node',
+    // A pass needs every leg green: the build itself, staying within the
+    // size budget, npm install, and the smoke suite — not just "the shell
+    // command that ran last exited 0".
+    ok: buildRes.ok && withinBudget && installRes.ok && smokeRes.ok,
     build_ok: buildRes.ok,
     size_bytes: bytes,
     size_budget_bytes: BUDGET,
-    within_budget: bytes != null ? bytes <= BUDGET : null,
+    within_budget: bytes != null ? withinBudget : null,
     install_ok: installRes.ok,
     smoke_ok: smokeRes.ok,
     logs: {
@@ -336,12 +449,18 @@ function stepCorpusProvenance(opts) {
       fileCount = Number(execFileSync('sh', ['-c', `find "${opts.oracleFixtures}" -type f | wc -l`], { encoding: 'utf8' }).trim());
     } catch { /* leave null */ }
   }
+  const expectedFileCount = 16704;
   return {
     name: 'oracle corpus provenance (must be the canonical corpus, never self-recorded)',
+    // A pass needs the fixtures directory to exist AND have exactly the
+    // canonical file count — this never re-hashes the corpus (that was
+    // verified once at extraction time, see CANONICAL_CORPUS_SHA256 below),
+    // but a wrong or missing/partial corpus must not read as a pass.
+    ok: exists && fileCount === expectedFileCount,
     fixtures_dir: opts.oracleFixtures,
     exists,
     file_count: fileCount,
-    expected_file_count: 16704,
+    expected_file_count: expectedFileCount,
     manifest_present: fs.existsSync(manifestPath),
     note: 'This checks the fixtures directory is populated as expected; it does not re-hash the corpus (that was verified once at extraction time against ' + CANONICAL_CORPUS_SHA256 + ').',
   };
@@ -350,9 +469,13 @@ function stepCorpusProvenance(opts) {
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
-function classify(name, ok, expectedPendingReasons) {
-  if (ok) return 'pass';
-  const hit = expectedPendingReasons.find((r) => name.includes(r.match));
+function classify(key, expectedPendingReasons) {
+  // Match on the step's own object key ('status', 'core_suite_rust', ...),
+  // which is unique per step — unlike substrings of the human-readable
+  // `name`, which can collide (e.g. core_suite_rust's name mentions
+  // "status.mjs" in passing, which used to falsely match status's own
+  // reason first).
+  const hit = expectedPendingReasons.find((r) => r.key === key);
   return hit ? `expected-pending: ${hit.reason}` : 'unexpected';
 }
 
@@ -370,7 +493,10 @@ async function main() {
   steps.core_suite_rust = stepCoreSuiteRust(opts, reportDir);
   steps.oracle_native = stepOracleNative(opts, reportDir);
   if (!opts.skipOracleCoverage) steps.oracle_coverage = stepOracleCoverage(opts, reportDir);
-  if (!opts.skipWasm) steps.wasm = stepWasm(opts, reportDir);
+  if (!opts.skipWasm) {
+    steps.wasm = stepWasm(opts, reportDir);
+    steps.oracle_wasm = stepOracleWasm(opts, reportDir);
+  }
 
   // §0.6 cargo-mutants (validation modules) is not run by this script: it is
   // task P5-06's own long-running job, not part of the mechanical dry run.
@@ -380,8 +506,8 @@ async function main() {
   };
 
   const expectedPendingReasons = [
-    { match: 'status.mjs', reason: 'CONCERTO_ENGINE=rust mode and downstream metrics depend on Phase 4 groups; P4-08 (#67, ModelFile/BaseModelManager views) has not landed' },
-    { match: 'CONCERTO_ENGINE=rust', reason: "as of this dry run its only failure is the known network test (ModelLoader #loadModelFromUrl, HTTP 403 in sandboxed environments) - same failure as CONCERTO_ENGINE=ts; check core-suite-rust.log's failure list before treating a non-zero exit here as new" },
+    { key: 'status', reason: 'CONCERTO_ENGINE=rust mode and downstream metrics depend on Phase 4 groups; P4-08 (#67, ModelFile/BaseModelManager views) has not landed' },
+    { key: 'core_suite_rust', reason: "as of this dry run its only failure is the known network test (ModelLoader #loadModelFromUrl, HTTP 403 in sandboxed environments) - same failure as CONCERTO_ENGINE=ts; check core-suite-rust.log's failure list before treating a non-zero exit here as new" },
   ];
 
   const report = {
@@ -402,7 +528,7 @@ async function main() {
   for (const [key, s] of Object.entries(steps)) {
     if (s == null) continue;
     const ok = 'ok' in s ? s.ok : s.na ? null : true;
-    const label = s.na ? `SKIPPED/NA: ${s.na}` : ok ? 'PASS' : classify(key, false, expectedPendingReasons);
+    const label = s.na ? `SKIPPED/NA: ${s.na}` : ok ? 'PASS' : classify(key, expectedPendingReasons);
     lines.push(`## ${s.name || key}`);
     lines.push(`- verdict: ${label}`);
     if ('exit' in s) lines.push(`- exit code: ${s.exit}`);
