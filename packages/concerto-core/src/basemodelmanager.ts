@@ -384,6 +384,44 @@ class BaseModelManager {
                 // to rustHandle. Revisit once rustHandle's validation is
                 // options-aware (a P2-09-tracked gap, not yet filed as its
                 // own task at the time of this comment).
+                //
+                // P4-08 step 4 (accordproject/concerto-rust#67, review pass):
+                // tried gating delegation on `decoratorValidation` actually
+                // being at its default (both levels `undefined`, so TS's own
+                // option gate never fires either) -- confirmed by reading
+                // concerto-wasm/src/lib.rs that `ModelManagerHandle` has no
+                // `setDecoratorValidation`/equivalent binding at all, so
+                // Rust's manager (which *does* fully implement
+                // `decorator_validation`, concerto-core/src/model_manager.rs
+                // `set_decorator_validation`, `validation.rs`) never learns
+                // this manager's option regardless. But replaying the wider
+                // suite with that narrower gate active still regressed 7
+                // tests in `CONCERTO_ENGINE=rust` mode, for reasons beyond
+                // the decorator gap: (1) `dangerouslyAllowReservedSystemTypeNamesInUserModels`
+                // is equally unpassed to `rustHandle`, so a model that
+                // relies on it (test/introspect/modelfile.js's own case)
+                // disagrees the same way; (2) several `test/modelmanager.js`
+                // cases build a `sinon.createStubInstance(ModelFile)` whose
+                // `getAst()` returns a minimal stub object (no `namespace`)
+                // and assert `sinon.assert.calledOnce(mf1.validate)` --
+                // calling `rustHandle.modelFileValidateDetached` instead of
+                // `modelFile.validate()` both fails to parse that stub AST
+                // (`IllegalModelException: model missing 'namespace'`) and
+                // never invokes the stubbed `validate`, so the assertion
+                // fails too. `test/**` cannot be edited to accommodate this
+                // (project rule), and there is no existing "is this a real
+                // ModelFile or a white-box test double" detection to gate
+                // on (PORTING.md's context-trait fallback covers exactly
+                // this class of problem elsewhere, e.g. `_mirrorToRust`'s
+                // own doc, but nothing here yet distinguishes a stub from a
+                // real instance well enough to trust a `catch` and silently
+                // re-run the TS body -- a genuine validation failure and a
+                // stub confusing Rust are not distinguishable from the
+                // thrown error alone). Reverted; validation stays fully TS.
+                // Unblocking this needs, at minimum, a concerto-wasm binding
+                // for `decoratorValidation`/`dangerouslyAllowReservedSystemTypeNamesInUserModels`
+                // (out of this task's owned paths -- concerto-core only) and
+                // a designed stub-vs-real fallback for the W tests above.
                 modelFile.validate();
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
