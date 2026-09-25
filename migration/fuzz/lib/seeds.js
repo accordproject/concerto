@@ -37,10 +37,15 @@ const { blobStore } = require(path.join(__dirname, '..', '..', 'oracle', 'lib', 
 // model/instance content (mutating the wrong thing produces harness errors,
 // not divergences). `Resource.validate`'s target is a `typed` recipe whose
 // `fields` map is the resource's own (plain) property values, so that is
-// the lens, not the whole target.
+// the lens, not the whole target. `ModelManager.addModelFile`'s single arg
+// is itself an `@@oracle: 'mfnew'` recipe node (its `mm` and `ast` fields
+// are the actual model-manager-ref and model AST); the lens has to reach
+// past that marker to `args[0].ast`, or `mutate.js`'s refusal to recurse
+// into an `@@oracle`-marked node leaves zero mutable slots and every case
+// replays the corpus fixture unchanged.
 const TARGETS = [
     { op: 'ModelManager.fromAst', path: ['args', 0], kind: 'model' },
-    { op: 'ModelManager.addModelFile', path: ['args', 0], kind: 'model' },
+    { op: 'ModelManager.addModelFile', path: ['args', 0, 'ast'], kind: 'model' },
     { op: 'Serializer.fromJSON', path: ['args', 0], kind: 'instance' },
     { op: 'Resource.validate', path: ['target', 'fields'], kind: 'instance' },
 ];
