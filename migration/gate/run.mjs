@@ -491,6 +491,19 @@ function stepConformanceInstall(opts, reportDir) {
 }
 
 // ---------------------------------------------------------------------------
+// Step: install the frozen oracle reference (published concerto-core 5.0.0,
+// pinned by migration/oracle/reference/package-lock.json) so coverage.sh can
+// instrument it. node_modules is gitignored, so a fresh checkout or worktree
+// never has it; README.md's documented one-time `npm ci`.
+// ---------------------------------------------------------------------------
+function stepOracleReferenceInstall(reportDir) {
+  const refDir = path.join(MIGRATION_ROOT, 'oracle', 'reference');
+  const logFile = path.join(reportDir, 'oracle-reference-npm-ci.log');
+  const res = run('npm', ['ci', '--no-audit', '--no-fund'], { cwd: refDir, timeoutMs: 10 * 60 * 1000, logFile });
+  return { name: 'oracle reference npm ci (frozen concerto-core 5.0.0)', ok: res.ok, exit: res.status, log: path.relative(reportDir, logFile) };
+}
+
+// ---------------------------------------------------------------------------
 // Corpus provenance check (never trust a corpus that isn't the canonical one)
 // ---------------------------------------------------------------------------
 const CANONICAL_CORPUS_SHA256 = 'e8a2bf72c7775a2d45123dea7b6ff897823c74a108603f5412251ced2619fce1';
@@ -540,7 +553,10 @@ async function main() {
   if (!opts.skipWasm) steps.wasm = stepWasm(opts, reportDir);
   steps.core_suite_rust = stepCoreSuiteRust(opts, reportDir);
   steps.oracle_native = stepOracleNative(opts, reportDir);
-  if (!opts.skipOracleCoverage) steps.oracle_coverage = stepOracleCoverage(opts, reportDir);
+  if (!opts.skipOracleCoverage) {
+    steps.oracle_reference_install = stepOracleReferenceInstall(reportDir);
+    steps.oracle_coverage = stepOracleCoverage(opts, reportDir);
+  }
   if (!opts.skipWasm) steps.oracle_wasm = stepOracleWasm(opts, reportDir);
 
   // §0.6 cargo-mutants (validation modules) is not run by this script: it is
@@ -583,8 +599,19 @@ async function main() {
     lines.push(`- verdict: ${verdictLabel(c)}`);
     if ('exit' in s) lines.push(`- exit code: ${s.exit}`);
     if ('log' in s) lines.push(`- log: ${s.log}`);
-    for (const it of c.items) {
-      lines.push(`  - ${it.verdict}: ${it.item}${it.owner ? ` (owner: ${it.owner})` : ''}: ${it.reason}`);
+    // Unexpected items one per line; expected items grouped by known entry
+    // (full per-item lists are in report.json's `classification`).
+    for (const it of c.items.filter((i) => i.verdict !== 'expected-pending')) {
+      lines.push(`  - ${it.verdict}: ${it.item}: ${it.reason}`);
+    }
+    const groups = new Map();
+    for (const it of c.items.filter((i) => i.verdict === 'expected-pending')) {
+      if (!groups.has(it.known_id)) groups.set(it.known_id, []);
+      groups.get(it.known_id).push(it);
+    }
+    for (const [id, its] of groups) {
+      const shown = its.length === 1 ? its[0].item : `${its.length} items (${id})`;
+      lines.push(`  - expected-pending: ${shown} (owner: ${its[0].owner}): ${its[0].reason}`);
     }
     lines.push('');
   }

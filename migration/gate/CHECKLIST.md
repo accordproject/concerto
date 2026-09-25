@@ -222,16 +222,30 @@ for the numbers as found.
 
 ## Failure classification (used by `run.mjs`'s report)
 
-Every check above that does not come back green is classified as one of:
+Classification is failure-driven and lives in `migration/gate/classify.mjs`
+(unit tests: `node --test migration/gate/test/*.test.mjs`). Each failing
+step is broken into failing *items* (a §0 threshold, a mocha test fullTitle,
+a WASM smoke check, an oracle fixture, a WASM build/budget/install leg), and
+each item is one of:
 
-- **expected-pending** — the check depends on a task that has not landed
-  yet (name the task and issue). As of this dry run (2026-09-25), the known
-  expected-pending set is everything that needs P4-08 (#67, ModelFile /
-  BaseModelManager views) — `CONCERTO_ENGINE=rust` mode for that group's B
-  and W tests, and anything downstream of it.
-- **environment-gap** — the check could not run because a tool is missing
-  or misconfigured in this sandbox (e.g. `cargo-llvm-cov` not installed).
-  Fixed once and then re-run; never counted as a product failure.
-- **unexpected** — anything else. Filed as a new issue (or, if it is
-  squarely inside an in-flight task's owned paths, routed to that task's
-  issue as a comment) per this task's exit condition.
+- **expected-pending** — the item matches an entry in one of the small,
+  explicit `KNOWN_*` sets in `classify.mjs`, each naming its owner and
+  reason. As of 2026-09-25 those are: the `ModelLoader #loadModelFromUrl
+  should load models` network test failing with a network-shaped error
+  (owner: the sandboxed environment, not a migration task); the two stale
+  `concerto-wasm` smoke checks (accordproject/concerto-rust#150); and up to
+  31 `DecoratorManager.decorateModels`/`extractDecorators` disagreements in
+  the WASM oracle leg (P4-09a, accordproject/concerto-rust#157).
+- **unexpected** — anything else, including a failure the runner cannot
+  break down (unparsable output, a failure count that does not match the
+  identified failures, a truncated list, a metric that was not judged).
+  Filed as a new issue, or routed to the owning task's issue, per this
+  task's exit condition.
+
+A step is expected-pending only if every one of its failing items is. P4-08
+(#67) has no entry: nothing currently failing is owned by it (its exit
+condition is its group's B/W tests and oracle fixtures under
+`CONCERTO_ENGINE=rust`, which pass today apart from the network test, and
+`status.mjs` runs `CONCERTO_ENGINE=ts` only). A step whose tool is missing
+is reported as NOT RUN, never as a pass. The report lists any `--skip-*`
+flags used.

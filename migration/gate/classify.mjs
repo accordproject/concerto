@@ -79,17 +79,54 @@ export const KNOWN_WASM_SMOKE_FAILURES = [
 
 /**
  * Oracle fixtures known to disagree through the WASM/JS binding (replay.js
- * --engine rust-adapter.js), matched on op. The count is pinned: more
- * disagreements than tracked is a regression, not the known gap.
+ * --engine rust-adapter.js), pinned by fixture path. These are exactly the 31
+ * disagreements the 2026-09-25T16-52-08-367Z dry run found (concerto-rust @
+ * 8a0cd4f), which the coordinator filed as P4-09a (#157). Despite #157's
+ * title, 25 are DecoratorManager ops and 6 are ModelManager ops; all 31 are
+ * in #157's scope ("all 31 agree through the WASM leg, or each is documented
+ * with an owner"). Any fixture not listed here is unexpected, so a new
+ * disagreement cannot hide behind a tracked one.
  */
 export const KNOWN_ORACLE_WASM_DISAGREEMENTS = {
-  id: 'oracle-wasm-decorator-manager',
-  ops: ['DecoratorManager.decorateModels', 'DecoratorManager.extractDecorators'],
-  maxCount: 31,
+  id: 'oracle-wasm-p4-09a',
   owner: 'P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)',
   reason:
-    'DecoratorManager.decorateModels/extractDecorators disagree through the WASM binding only ' +
-    '(native cargo oracle passes on the same corpus); tracked as P4-09a',
+    'one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a ' +
+    '(native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)',
+  // [fixture path relative to the corpus root, op]
+  fixtures: [
+    ["data/DecoratorManager.decorateModels/72c098eaee106ff450b622a0.json", "DecoratorManager.decorateModels"],
+    ["unit/DecoratorManager.decorateModels/c7a0e9377fb2dc82e348db67.json", "DecoratorManager.decorateModels"],
+    ["data/DecoratorManager.extractDecorators/20c4693168cd7ea28c006d3c.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/25f485f573c21a354335018f.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/2696574863be411bb3ac8930.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/2d33be223246ab6740c1a3ad.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/3818ca566e9fb509422fda71.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/4f40028754a604dadfb0ca67.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/5135b15bab782c9a3dc4f762.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/5692c5d7b52a3d08c9774521.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/5e14a3de5a8ce5c7aba08073.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/766a245c8b9526931a526069.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/85221faaefcbdea76e0d72a7.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/88f5e279a932086ce3bc73fc.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/8f0b13f3f0d6d0bb823055f1.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/aa67bb22b5d75c11a8388099.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/aca25539ac788419d65596d3.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/d192a7be50d765c4ef95532e.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/d542a295303cf0fee1f6ab26.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/d7d8467e4ed9f1e7ef258a5b.json", "DecoratorManager.extractDecorators"],
+    ["data/DecoratorManager.extractDecorators/f82f8e467af3d5fb4ba5320e.json", "DecoratorManager.extractDecorators"],
+    ["unit/DecoratorManager.extractDecorators/46451c56c9b7ee5d67de2474.json", "DecoratorManager.extractDecorators"],
+    ["unit/DecoratorManager.extractDecorators/ac37d0cc2ee62446130cfd10.json", "DecoratorManager.extractDecorators"],
+    ["unit/DecoratorManager.extractDecorators/f4ab7364c6184205f16051e8.json", "DecoratorManager.extractDecorators"],
+    ["unit/DecoratorManager.migrateTo/6a8bfe76d6aee5f63bb7b743.json", "DecoratorManager.migrateTo"],
+    ["data/ModelManager.addCTOModel/3489b297183571e117d7f7e0.json", "ModelManager.addCTOModel"],
+    ["data/ModelManager.addCTOModel/8ed239b8c40c1636d8664c45.json", "ModelManager.addCTOModel"],
+    ["data/ModelManager.addCTOModel/9dffbd170fa2d61402e91246.json", "ModelManager.addCTOModel"],
+    ["gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json", "ModelManager.fromAst"],
+    ["data/ModelManager.validateModelFiles/95929468f5b2bf9fbfa2d6ff.json", "ModelManager.validateModelFiles"],
+    ["gaps/ModelManager.validateModelFiles/d31238c92ac69b9d872bc810.json", "ModelManager.validateModelFiles"],
+  ],
 };
 
 // ---------------------------------------------------------------------------
@@ -227,18 +264,10 @@ function oracleWasmItems(step) {
     return items;
   }
   const K = KNOWN_ORACLE_WASM_DISAGREEMENTS;
-  let knownCount = 0;
+  const known = new Set(K.fixtures.map(([file]) => file));
   for (const f of failures) {
     const label = `oracle fixture: ${f.file} (${f.op})`;
-    if (K.ops.includes(f.op)) {
-      knownCount++;
-      items.push(expected(label, K));
-    } else {
-      items.push(unexpected(label, `not in the known-disagreement set: ${truncate(f.detail)}`));
-    }
-  }
-  if (knownCount > K.maxCount) {
-    items.push(unexpected('oracle WASM replay: DecoratorManager count', `${knownCount} DecoratorManager disagreements, more than the ${K.maxCount} tracked by ${K.owner}`));
+    items.push(known.has(f.file) ? expected(label, K) : unexpected(label, `not in the known-disagreement set: ${truncate(f.detail)}`));
   }
   if (items.length === 0) items.push(unexpected('oracle WASM replay', `replay.js exited ${step.exit} with no failing fixture`));
   return items;

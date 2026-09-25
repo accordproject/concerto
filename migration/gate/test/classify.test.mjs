@@ -188,28 +188,29 @@ function oracleWasmStep(failures, extra = {}) {
     failures,
   };
 }
-const decoFailures = (n) =>
-  Array.from({ length: n }, (_, i) => ({ file: `data/DecoratorManager.decorateModels/${i}.json`, op: 'DecoratorManager.decorateModels', detail: 'x' }));
+const KNOWN = KNOWN_ORACLE_WASM_DISAGREEMENTS.fixtures.map(([file, op]) => ({ file, op, detail: 'x' }));
 
-test('oracle_wasm: the tracked DecoratorManager disagreements → expected-pending, owner P4-09a', () => {
-  const c = classifyStep('oracle_wasm', oracleWasmStep(decoFailures(31)));
+test('oracle_wasm: all 31 pinned P4-09a disagreements → expected-pending, owner P4-09a', () => {
+  assert.equal(KNOWN.length, 31);
+  const c = classifyStep('oracle_wasm', oracleWasmStep(KNOWN));
   assert.equal(c.verdict, 'expected-pending');
   assert.match(c.owners.join(), /P4-09a/);
 });
 
-test('oracle_wasm: more DecoratorManager disagreements than tracked → unexpected', () => {
-  const c = classifyStep('oracle_wasm', oracleWasmStep(decoFailures(KNOWN_ORACLE_WASM_DISAGREEMENTS.maxCount + 1)));
-  assert.equal(c.verdict, 'unexpected');
+test('oracle_wasm: a subset of the pinned set (some fixed) → expected-pending', () => {
+  assert.equal(classifyStep('oracle_wasm', oracleWasmStep(KNOWN.slice(0, 5))).verdict, 'expected-pending');
 });
 
-test('oracle_wasm: a disagreement in another op → unexpected', () => {
-  const f = [...decoFailures(3), { file: 'data/Serializer.toJSON/a.json', op: 'Serializer.toJSON', detail: 'y' }];
-  assert.equal(classifyStep('oracle_wasm', oracleWasmStep(f)).verdict, 'unexpected');
+test('oracle_wasm: a new DecoratorManager disagreement outside the pinned 31 → unexpected', () => {
+  const extra = { file: 'data/DecoratorManager.decorateModels/ffffffffffffffffffffffff.json', op: 'DecoratorManager.decorateModels', detail: 'y' };
+  const c = classifyStep('oracle_wasm', oracleWasmStep([...KNOWN, extra]));
+  assert.equal(c.verdict, 'unexpected');
+  assert.equal(c.items.filter((i) => i.verdict === 'unexpected').length, 1);
 });
 
 test('oracle_wasm: truncated failure list or harness errors → unexpected', () => {
-  assert.equal(classifyStep('oracle_wasm', oracleWasmStep(decoFailures(3), { failures_truncated: true })).verdict, 'unexpected');
-  assert.equal(classifyStep('oracle_wasm', oracleWasmStep(decoFailures(3), { harness_error: 1 })).verdict, 'unexpected');
+  assert.equal(classifyStep('oracle_wasm', oracleWasmStep(KNOWN.slice(0, 3), { failures_truncated: true })).verdict, 'unexpected');
+  assert.equal(classifyStep('oracle_wasm', oracleWasmStep(KNOWN.slice(0, 3), { harness_error: 1 })).verdict, 'unexpected');
 });
 
 // --- everything else -----------------------------------------------------------
