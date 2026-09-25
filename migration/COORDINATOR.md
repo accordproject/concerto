@@ -76,3 +76,5 @@ Or run it by hand when convenient.
   - ledger 85.3% (RUST-only 57.2%).
 - **Integration PRs:** accordproject/concerto-rust#78 and accordproject/concerto#1327, both green, both drafts awaiting human review at the end.
 - **Upstream, already merged:** concerto-conformance #37 and #38 (the Rust harness).
+
+**Oracle CTO cache (2026-09-25):** the CTO cache is derived from the pinned corpus by `migration/oracle/bin/build-cto-cache.js`, which P2-09b (accordproject/concerto-rust#153) changed. After extracting `oracle-corpus-p107-06aa375`, or whenever that script changes, run `npm ci` in `migration/oracle/reference`, then `node migration/oracle/bin/build-cto-cache.js`. A stale cache shows about 89 false `addModel`/`updateExternalModels` regressions. The fixtures themselves never change.
