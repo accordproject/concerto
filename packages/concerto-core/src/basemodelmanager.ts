@@ -433,17 +433,29 @@ class BaseModelManager {
                     modelFile.getName() ?? undefined,
                 );
             } catch (err) {
-                // rustHandle's own validate_ast leaves its copy of the
-                // metamodel registered on a failed check, matching the TS
-                // body below (whose deleteModelFile call after the re-throw
-                // is unreachable) -- see concerto-wasm's validateAst doc
-                // comment. Mirror that same leak into this.modelFiles here,
-                // so TS and rustHandle agree on getNamespaces() the way TS
-                // mode's own this.modelFiles/rustHandle mirror already does;
+                // rustHandle's own validate_ast (concerto-core
+                // ModelManager::validate_ast) only leaks its copy of the
+                // metamodel when the *structural* check
+                // (`deserialize_ast`) fails after the version check already
+                // passed -- a version-mismatch failure returns before the
+                // metamodel is ever inserted, so rustHandle never registers
+                // it, matching the TS body below (its own version check,
+                // lines above, throws before `alreadyHasMetamodel` is even
+                // read). Mirroring the leak unconditionally on every error
+                // (an earlier pass's bug, review comment on P4-08,
+                // accordproject/concerto-rust#67) would register the
+                // metamodel in `this.modelFiles` on a version mismatch that
+                // rustHandle itself never registered, permanently failing
+                // `_rustMirrorTrustworthy()`'s parity check afterwards.
+                // Ask rustHandle for the ground truth instead of
+                // re-deriving TS's own control flow: mirror into
+                // `this.modelFiles` only when rustHandle's own handle
+                // now actually holds `MetaModelNamespace`.
                 // MetaModelNamespace is excluded from _rustMirrorEligible,
-                // so this only writes this.modelFiles, never rustHandle
-                // (which already holds its own copy).
-                if (!alreadyHasMetamodel) {
+                // so this only ever writes this.modelFiles, never
+                // rustHandle (which already holds its own copy in the case
+                // that reaches it).
+                if (!alreadyHasMetamodel && this.rustHandle.modelFileId(MetaModelNamespace) !== undefined) {
                     this.addModelFile(this.metamodelModelFile, undefined, MetaModelNamespace, true);
                 }
                 throw err;
