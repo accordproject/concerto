@@ -118,6 +118,11 @@ class BaseModelManager {
      // in ts mode, and null here in rust mode until the constructor creates
      // it.
      rustHandle: { [binding: string]: (...args: any[]) => any } | null;
+     // rust mode only (P4-08): set once a `_mirrorToRust` write has failed
+     // (see `_mirrorToRust`/`_rustMirrorTrustworthy`), so a stale mirror
+     // read never answers from `rustHandle` again until `clearModelFiles`
+     // starts it over.
+     _rustMirrorStale: boolean;
     /**
      * Create the ModelManager.
      * @constructor
@@ -139,6 +144,7 @@ class BaseModelManager {
         this.decoratorFactories = [];
         this.options = options;
         this.rustHandle = null;
+        this._rustMirrorStale = false;
         /* istanbul ignore if */
         if (rust) {
             this.rustHandle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
@@ -265,6 +271,15 @@ class BaseModelManager {
      * `derivesFrom`, `isAssignableTo` and `getNamespaces` fall back to their
      * TS body themselves when a stale or partial mirror makes rustHandle
      * unusable for a given call.
+     *
+     * A swallowed failure permanently marks `_rustMirrorStale` (review on
+     * P4-08, accordproject/concerto-rust#67): the write that failed may have
+     * been an *update* to a namespace rustHandle already had, so the
+     * `getNamespaces().length` parity check in `_rustMirrorTrustworthy`
+     * alone cannot see it -- that check's count would still match, and
+     * every later read would then silently answer from that namespace's old
+     * content instead of falling back to TS. Only `clearModelFiles` (a fresh
+     * `rustHandle`) clears the flag.
      * @param {Function} fn - the mirror write to run
      * @private
      */
@@ -272,25 +287,28 @@ class BaseModelManager {
         try {
             fn();
         } catch (e) {
+            this._rustMirrorStale = true;
             debug('_mirrorToRust', 'rustHandle mirror failed, continuing on the TS-only state', e);
         }
     }
 
     /**
-     * Whether `rustHandle`'s mirror is complete enough to answer a read: a
-     * cheap parity check (P4-08) against `this.modelFiles`, the source of
-     * truth `_mirrorToRust` can never make stale. A write `_mirrorToRust`
-     * swallowed leaves rustHandle short a namespace without throwing
-     * anywhere a later read would notice, so a read that trusts rustHandle
-     * without this check could silently answer from an incomplete model --
-     * wrong, not merely absent, for `isAssignableTo`/`derivesFrom`'s boolean
-     * results in particular, which do not otherwise surface a mismatch as a
-     * thrown error the caller would catch and fall back from.
+     * Whether `rustHandle`'s mirror is complete enough to answer a read
+     * (P4-08): `_rustMirrorStale` catches a swallowed write failure of any
+     * kind (add, update or delete -- see `_mirrorToRust`), and the
+     * `getNamespaces().length` parity check against `this.modelFiles`, the
+     * source of truth `_mirrorToRust` can never make stale, is kept as a
+     * belt-and-braces check for any divergence that reaches rustHandle by a
+     * path other than `_mirrorToRust` (none exists today, but a read that
+     * trusts rustHandle without it could silently answer from an incomplete
+     * model -- wrong, not merely absent, for `isAssignableTo`/`derivesFrom`'s
+     * boolean results in particular, which do not otherwise surface a
+     * mismatch as a thrown error the caller would catch and fall back from).
      * @return {boolean} true if rustHandle mirrors every namespace TS has
      * @private
      */
     _rustMirrorTrustworthy() {
-        if (!this.rustHandle) {
+        if (!this.rustHandle || this._rustMirrorStale) {
             return false;
         }
         try {
@@ -743,6 +761,7 @@ class BaseModelManager {
             // since the fresh handle's own constructor already has them.
             this.rustHandle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
         }
+        this._rustMirrorStale = false;
         this.addDecoratorModel();
         this.addRootModel();
     }
