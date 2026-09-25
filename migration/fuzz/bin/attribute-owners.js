@@ -78,7 +78,8 @@ const OWNERS = {
                 note: 'view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c',
             },
         ],
-        status: 'owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2',
+        status: 'owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2',
+        issue: 'accordproject/concerto-rust#67',
     },
 };
 OWNERS['ModelManager.addModelFile'] = OWNERS['ModelManager.fromAst'];
@@ -106,16 +107,19 @@ OWNERS['ModelManager.addModelFile'] = OWNERS['ModelManager.fromAst'];
 // (Expected value at path … to be of type DateTime) in rust mode where ts
 // mode accepts it") and now records the NUL case explicitly. DV-009's own
 // example, "Nov 28 2022", gives the identical signature on the same seed.
-// Not a TS bug (V8 behaviour), not a new Rust bug: owned by DV-009.
+// Not a TS bug (V8 behaviour); inside DV-009's documented envelope. Per the
+// coordinator (#76 comment 5838054200) it still gets its own issue, which
+// asks the plan owner to confirm DV-009 (or to port V8's NUL rule):
+// accordproject/concerto-rust#169.
 const OWNER_DATETIME_DV009 = {
     theme: 'T1c (Serializer.fromJSON, ts=ok / rust=ValidationException DateTime: V8 Date.parse leniency)',
-    ledger: 'P3-01+P4-10 (src/serializer.ts Serializer.fromJSON, src/serializer/jsonpopulator.ts JSONPopulator.convertToObject: "type checks, integer/strict-datetime rules and messages in Rust") — the accepted gap is DIVERGENCES.md DV-009',
+    ledger: 'P3-01+P4-10 (src/serializer.ts Serializer.fromJSON, src/serializer/jsonpopulator.ts JSONPopulator.convertToObject: "type checks, integer/strict-datetime rules and messages in Rust")',
     tasks: [
         { task: 'P4-10', issue: 'accordproject/concerto-rust#69', state: 'closed', note: 'added DV-009\'s rust-mode Serializer.fromJSON leg (concerto-rust 16ab0b1)' },
     ],
     dv: 'DV-009',
-    status: 'owned: documented engine divergence DIVERGENCES.md DV-009 (accordproject/concerto-rust). The input is a DateTime string with an embedded NUL; V8\'s Date parser stops at U+0000 and accepts the prefix, the Rust parser rejects it. Reproduced with DV-009\'s own example "Nov 28 2022" on the same seed (same signature).',
-    issue: null,
+    status: 'owned: new issue accordproject/concerto-rust#169 (plan-owner decision: accept under DIVERGENCES.md DV-009, or port V8\'s rule). The input is a DateTime string with an embedded NUL; V8\'s Date parser stops at U+0000 and accepts the prefix, the Rust parser rejects the whole string. DV-009\'s own example "Nov 28 2022" gives the same signature on the same seed.',
+    issue: 'accordproject/concerto-rust#169',
 };
 
 /**

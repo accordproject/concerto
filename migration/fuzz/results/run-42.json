@@ -1,13 +1,14 @@
 {
-  "started": "2026-09-25T16:56:40.491Z",
+  "started": "2026-09-25T19:11:44.108Z",
   "fixturesDir": "/home/user/concerto/migration/oracle/fixtures",
-  "engineModule": "/home/user/wt/P5-05/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+  "engineModule": "/home/user/wt/P5-05fix/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
   "runSeed": 42,
   "planned": 60000,
   "ran": 60000,
-  "agree": 54752,
-  "divergences": 2495,
+  "agree": 54876,
+  "divergences": 2371,
   "expectedDivergences": 2753,
+  "harnessErrorCases": 0,
   "harnessErrorsTs": 0,
   "harnessErrorsRust": 0,
   "byOp": {
@@ -15,27 +16,38 @@
       "ran": 15942,
       "agree": 15942,
       "divergences": 0,
-      "expectedDivergences": 0
+      "expectedDivergences": 0,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
     },
     "Serializer.fromJSON": {
       "ran": 12454,
       "agree": 9700,
       "divergences": 1,
-      "expectedDivergences": 2753
+      "expectedDivergences": 2753,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
     },
     "ModelManager.fromAst": {
       "ran": 19313,
-      "agree": 17684,
-      "divergences": 1629,
-      "expectedDivergences": 0
+      "agree": 17808,
+      "divergences": 1505,
+      "expectedDivergences": 0,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
     },
     "ModelManager.addModelFile": {
       "ran": 12291,
       "agree": 11426,
       "divergences": 865,
-      "expectedDivergences": 0
+      "expectedDivergences": 0,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
     }
   },
-  "finished": "2026-09-25T17:10:49.256Z",
-  "_note": "Recomputed by this review-fix pass (not a fresh bin/fuzz.js run): the original run's divergences.jsonl was split by lib/expected-divergences.js's DV-015 matcher (accordproject/concerto-rust#156) into results/divergences.jsonl (3,554 still-unresolved) and results/expected-divergences.jsonl (1,694 maintainer-accepted, added this revision). ran/agree/harnessErrors* are unchanged from the original run; only the divergences/expectedDivergences split is new. A fresh bin/fuzz.js run would now report these counts directly."
+  "finished": "2026-09-25T19:27:39.949Z"
 }

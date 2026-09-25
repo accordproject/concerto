@@ -1,7 +1,7 @@
 {
-  "totalDivergences": 3554,
-  "excludedAsExpected": 1059,
-  "clusterCount": 312,
+  "totalDivergences": 2371,
+  "excludedAsExpected": 0,
+  "clusterCount": 309,
   "clusters": [
     {
       "sig": "ModelManager.addModelFile | ts=ok | rust=error(TypeError) | rust:\"this.name.toString is not a function\"",
@@ -325,7 +325,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -660,7 +661,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -829,149 +831,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
-      }
-    },
-    {
-      "sig": "ModelManager.fromAst | ts=error(BaseException) | rust=error(BaseException) | ts:\"Validator error for field `s`. gaps.strv2@<n>.<n>.<n>.C.s: Invalid regular expression: /(/: Unterminated group\" | rust:\"Validator error for field `s`. gaps.strv2@<n>.<n>.<n>.C.s: Invalid regular expression: /(/: Unbalanced parenthesis\"",
-      "op": "ModelManager.fromAst",
-      "count": 122,
-      "sample": {
-        "op": "ModelManager.fromAst",
-        "seedFile": "gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json",
-        "mutationSeed": 19,
-        "ts": {
-          "error": {
-            "class": "BaseException",
-            "component": "@accordproject/concerto-util",
-            "location": null,
-            "message": "Validator error for field `s`. gaps.strv2@1.0.0.C.s: Invalid regular expression: /(/: Unterminated group"
-          }
-        },
-        "rust": {
-          "error": {
-            "class": "BaseException",
-            "component": "@accordproject/concerto-util",
-            "location": null,
-            "message": "Validator error for field `s`. gaps.strv2@1.0.0.C.s: Invalid regular expression: /(/: Unbalanced parenthesis"
-          }
-        }
-      },
-      "minimized": {
-        "editCount": 1,
-        "originalEditCount": 1,
-        "edits": [
-          {
-            "kind": "add",
-            "path": [
-              "models",
-              0,
-              "declarations_dup"
-            ],
-            "value": [
-              {
-                "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                "name": "C",
-                "isAbstract": false,
-                "properties": [
-                  {
-                    "$class": "concerto.metamodel@1.0.0.StringProperty",
-                    "name": "s",
-                    "isArray": false,
-                    "isOptional": false,
-                    "validator": {
-                      "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
-                      "pattern": "(",
-                      "flags": ""
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "seedFile": "gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json",
-        "doc": {
-          "$class": "concerto.metamodel@1.0.0.Models",
-          "models": [
-            {
-              "$class": "concerto.metamodel@1.0.0.Model",
-              "decorators": [],
-              "namespace": "gaps.strv2@1.0.0",
-              "imports": [],
-              "declarations": [
-                {
-                  "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                  "name": "C",
-                  "isAbstract": false,
-                  "properties": [
-                    {
-                      "$class": "concerto.metamodel@1.0.0.StringProperty",
-                      "name": "s",
-                      "isArray": false,
-                      "isOptional": false,
-                      "validator": {
-                        "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
-                        "pattern": "(",
-                        "flags": ""
-                      }
-                    }
-                  ]
-                }
-              ],
-              "declarations_dup": [
-                {
-                  "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                  "name": "C",
-                  "isAbstract": false,
-                  "properties": [
-                    {
-                      "$class": "concerto.metamodel@1.0.0.StringProperty",
-                      "name": "s",
-                      "isArray": false,
-                      "isOptional": false,
-                      "validator": {
-                        "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
-                        "pattern": "(",
-                        "flags": ""
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "owner": {
-        "theme": "T2",
-        "ledger": "P2-08+P4-08 (src/basemodelmanager.ts BaseModelManager.fromAst/addModelFile, src/introspect/modelfile.ts ModelFile.fromAst)",
-        "tasks": [
-          {
-            "task": "P2-08",
-            "issue": "accordproject/concerto-rust#52",
-            "state": "closed"
-          },
-          {
-            "task": "P2-08b",
-            "issue": "accordproject/concerto-rust#129",
-            "state": "closed",
-            "note": "scope was validateModelFile/updateModelFile/deleteModelFile, getModels, filter, resolveType, derivesFrom — does not cover fromAst/addModelFile"
-          },
-          {
-            "task": "P2-08c",
-            "issue": "accordproject/concerto-rust#144",
-            "state": "closed",
-            "note": "root-cause fix for introspect/property.rs, scalar.rs, model_file.rs, validation.rs — the exact files this theme's stack traces name; not reverified against these fuzz-found clusters"
-          },
-          {
-            "task": "P4-08",
-            "issue": "accordproject/concerto-rust#67",
-            "state": "open",
-            "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
-          }
-        ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -1083,7 +944,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -1251,7 +1113,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -1399,7 +1262,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -1551,7 +1415,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -1699,7 +1564,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -1846,7 +1712,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -1994,7 +1861,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -2260,7 +2128,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -2375,7 +2244,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -2493,7 +2363,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -2760,7 +2631,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -3080,7 +2952,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -3175,7 +3048,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -3275,7 +3149,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -3380,7 +3255,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -3497,7 +3373,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -3606,7 +3483,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -3711,7 +3589,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -3812,7 +3691,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -3929,7 +3809,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -4101,7 +3982,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -4269,7 +4151,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -4414,7 +4297,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -4516,7 +4400,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -4632,7 +4517,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -4781,7 +4667,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -4876,7 +4763,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -4976,7 +4864,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -5085,7 +4974,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -5199,7 +5089,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -5319,7 +5210,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -5422,7 +5314,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -5597,7 +5490,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -5716,7 +5610,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -5878,7 +5773,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -6072,7 +5968,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -6177,7 +6074,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -6288,7 +6186,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -6389,7 +6288,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -6499,7 +6399,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -6615,7 +6516,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -6715,7 +6617,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -6843,7 +6746,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -6948,7 +6852,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -7053,7 +6958,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -7206,7 +7112,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -7306,7 +7213,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -7427,7 +7335,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -7619,7 +7528,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -7731,7 +7641,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -7843,7 +7754,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -7935,7 +7847,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -8203,7 +8116,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -8363,7 +8277,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -8470,7 +8385,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -8585,7 +8501,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -8717,7 +8634,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -8850,7 +8768,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -8997,7 +8916,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -9112,7 +9032,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -9284,7 +9205,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -9400,7 +9322,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -9563,7 +9486,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -9751,7 +9675,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -9859,7 +9784,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -9962,7 +9888,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -10283,7 +10210,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -10430,7 +10358,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -10616,7 +10545,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -10721,7 +10651,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -11041,7 +10972,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -11204,7 +11136,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -11309,7 +11242,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -11435,7 +11369,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -11621,7 +11556,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -11726,7 +11662,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -11831,7 +11768,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -11926,7 +11864,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -12038,7 +11977,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -12191,7 +12131,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -12294,7 +12235,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -12418,7 +12360,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -12524,7 +12467,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -12643,7 +12587,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -12804,7 +12749,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -12909,7 +12855,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -13009,7 +12956,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -13112,7 +13060,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -13241,7 +13190,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -13345,7 +13295,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -13494,7 +13445,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -13611,7 +13563,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -13711,7 +13664,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -13829,7 +13783,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -14025,7 +13980,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -14137,7 +14093,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -14294,7 +14251,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -14435,7 +14393,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -14545,7 +14504,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -14648,7 +14608,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -14767,7 +14728,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -14885,7 +14847,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -14992,7 +14955,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -15117,7 +15081,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -15267,7 +15232,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -15372,7 +15338,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -15484,7 +15451,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -15596,7 +15564,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -15762,7 +15731,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -15865,7 +15835,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -15965,7 +15936,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -16171,7 +16143,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -16276,7 +16249,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -16429,7 +16403,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -16541,7 +16516,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -16644,7 +16620,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -16752,7 +16729,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -16860,7 +16838,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -16972,7 +16951,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -17100,7 +17080,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -17356,7 +17337,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -17465,7 +17447,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -17565,7 +17548,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -17668,7 +17652,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -17773,7 +17758,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -17881,7 +17867,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -18017,7 +18004,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -18120,7 +18108,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -18293,7 +18282,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -18387,7 +18377,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -18498,7 +18489,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -18595,7 +18587,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -18784,7 +18777,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -18893,7 +18887,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -19004,7 +18999,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -19112,7 +19108,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -19220,7 +19217,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -19376,7 +19374,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -19552,7 +19551,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -19683,7 +19683,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -19815,7 +19816,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -19923,7 +19925,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -20031,7 +20034,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -20208,7 +20212,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -20316,7 +20321,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -20437,7 +20443,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -20559,7 +20566,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -20666,7 +20674,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -20869,7 +20878,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -20986,7 +20996,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -21098,7 +21109,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -21210,7 +21222,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -21386,7 +21399,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -21538,7 +21552,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -21695,7 +21710,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -21810,7 +21826,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -21989,7 +22006,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -22096,7 +22114,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -22199,7 +22218,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -22389,7 +22409,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -22539,7 +22560,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -22725,7 +22747,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -22902,7 +22925,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -23048,7 +23072,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -23216,7 +23241,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -23384,7 +23410,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -23498,7 +23525,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -23621,7 +23649,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -23777,7 +23806,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -23880,7 +23910,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -23991,7 +24022,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -24094,7 +24126,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -24218,7 +24251,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -24344,7 +24378,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -24452,7 +24487,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -24610,7 +24646,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -24768,7 +24805,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -24928,7 +24966,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -25087,7 +25126,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -25199,7 +25239,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -25310,7 +25351,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -25433,7 +25475,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -25565,7 +25608,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -25691,7 +25735,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -25799,7 +25844,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -25959,7 +26005,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -26116,7 +26163,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -26228,7 +26276,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -26427,7 +26476,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -26585,7 +26635,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -26693,7 +26744,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -26818,7 +26870,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -26957,7 +27010,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -27083,7 +27137,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -27268,7 +27323,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -27376,7 +27432,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -27583,7 +27640,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -27735,7 +27793,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -27937,7 +27996,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -28117,7 +28177,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -28249,7 +28310,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -28426,7 +28488,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -28542,7 +28605,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -28658,7 +28722,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -28801,7 +28866,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -28910,7 +28976,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -29096,7 +29163,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -29249,7 +29317,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -29349,7 +29418,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -29481,7 +29551,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -29638,7 +29709,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -29867,7 +29939,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -29992,7 +30065,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -30204,7 +30278,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -30370,7 +30445,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -30478,7 +30554,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -30590,7 +30667,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -30732,7 +30810,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -30896,7 +30975,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -31004,7 +31084,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -31066,7 +31147,7 @@
       },
       "owner": {
         "theme": "T1c (Serializer.fromJSON, ts=ok / rust=ValidationException DateTime: V8 Date.parse leniency)",
-        "ledger": "P3-01+P4-10 (src/serializer.ts Serializer.fromJSON, src/serializer/jsonpopulator.ts JSONPopulator.convertToObject: \"type checks, integer/strict-datetime rules and messages in Rust\") — the accepted gap is DIVERGENCES.md DV-009",
+        "ledger": "P3-01+P4-10 (src/serializer.ts Serializer.fromJSON, src/serializer/jsonpopulator.ts JSONPopulator.convertToObject: \"type checks, integer/strict-datetime rules and messages in Rust\")",
         "tasks": [
           {
             "task": "P4-10",
@@ -31076,8 +31157,8 @@
           }
         ],
         "dv": "DV-009",
-        "status": "owned: documented engine divergence DIVERGENCES.md DV-009 (accordproject/concerto-rust). The input is a DateTime string with an embedded NUL; V8's Date parser stops at U+0000 and accepts the prefix, the Rust parser rejects it. Reproduced with DV-009's own example \"Nov 28 2022\" on the same seed (same signature).",
-        "issue": null
+        "status": "owned: new issue accordproject/concerto-rust#169 (plan-owner decision: accept under DIVERGENCES.md DV-009, or port V8's rule). The input is a DateTime string with an embedded NUL; V8's Date parser stops at U+0000 and accepts the prefix, the Rust parser rejects the whole string. DV-009's own example \"Nov 28 2022\" gives the same signature on the same seed.",
+        "issue": "accordproject/concerto-rust#169"
       }
     },
     {
@@ -31208,7 +31289,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -31434,7 +31516,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -31560,7 +31643,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -31689,7 +31773,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -31857,7 +31942,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -32015,7 +32101,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -32123,7 +32210,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -32249,7 +32337,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -32451,7 +32540,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -32556,7 +32646,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -32757,7 +32848,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -32921,7 +33013,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -33087,7 +33180,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -33196,7 +33290,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -33373,7 +33468,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -33499,7 +33595,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -33621,7 +33718,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -33729,7 +33827,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -33834,7 +33933,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -33934,7 +34034,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -34094,7 +34195,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -34197,7 +34299,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -34316,7 +34419,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -34444,7 +34548,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -34572,115 +34677,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
-      }
-    },
-    {
-      "sig": "ModelManager.fromAst | ts=error(BaseException) | rust=error(BaseException) | ts:\"Validator error for field `s`. gaps.strv2@<n>.<n>.<n>.C.s: Invalid regular expression: /((/: Unterminated group\" | rust:\"Validator error for field `s`. gaps.strv2@<n>.<n>.<n>.C.s: Invalid regular expression: /((/: Unbalanced parenthesis\"",
-      "op": "ModelManager.fromAst",
-      "count": 1,
-      "sample": {
-        "op": "ModelManager.fromAst",
-        "seedFile": "gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json",
-        "mutationSeed": 2967876987,
-        "ts": {
-          "error": {
-            "class": "BaseException",
-            "component": "@accordproject/concerto-util",
-            "location": null,
-            "message": "Validator error for field `s`. gaps.strv2@1.0.0.C.s: Invalid regular expression: /((/: Unterminated group"
-          }
-        },
-        "rust": {
-          "error": {
-            "class": "BaseException",
-            "component": "@accordproject/concerto-util",
-            "location": null,
-            "message": "Validator error for field `s`. gaps.strv2@1.0.0.C.s: Invalid regular expression: /((/: Unbalanced parenthesis"
-          }
-        }
-      },
-      "minimized": {
-        "editCount": 1,
-        "originalEditCount": 2,
-        "edits": [
-          {
-            "kind": "set",
-            "path": [
-              "models",
-              0,
-              "declarations",
-              0,
-              "properties",
-              0,
-              "validator",
-              "pattern"
-            ],
-            "value": "(("
-          }
-        ],
-        "seedFile": "gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json",
-        "doc": {
-          "$class": "concerto.metamodel@1.0.0.Models",
-          "models": [
-            {
-              "$class": "concerto.metamodel@1.0.0.Model",
-              "decorators": [],
-              "namespace": "gaps.strv2@1.0.0",
-              "imports": [],
-              "declarations": [
-                {
-                  "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                  "name": "C",
-                  "isAbstract": false,
-                  "properties": [
-                    {
-                      "$class": "concerto.metamodel@1.0.0.StringProperty",
-                      "name": "s",
-                      "isArray": false,
-                      "isOptional": false,
-                      "validator": {
-                        "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
-                        "pattern": "((",
-                        "flags": ""
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "owner": {
-        "theme": "T2",
-        "ledger": "P2-08+P4-08 (src/basemodelmanager.ts BaseModelManager.fromAst/addModelFile, src/introspect/modelfile.ts ModelFile.fromAst)",
-        "tasks": [
-          {
-            "task": "P2-08",
-            "issue": "accordproject/concerto-rust#52",
-            "state": "closed"
-          },
-          {
-            "task": "P2-08b",
-            "issue": "accordproject/concerto-rust#129",
-            "state": "closed",
-            "note": "scope was validateModelFile/updateModelFile/deleteModelFile, getModels, filter, resolveType, derivesFrom — does not cover fromAst/addModelFile"
-          },
-          {
-            "task": "P2-08c",
-            "issue": "accordproject/concerto-rust#144",
-            "state": "closed",
-            "note": "root-cause fix for introspect/property.rs, scalar.rs, model_file.rs, validation.rs — the exact files this theme's stack traces name; not reverified against these fuzz-found clusters"
-          },
-          {
-            "task": "P4-08",
-            "issue": "accordproject/concerto-rust#67",
-            "state": "open",
-            "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
-          }
-        ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -34832,7 +34830,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -34951,7 +34950,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -35059,7 +35059,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -35209,7 +35210,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -35368,7 +35370,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -35468,7 +35471,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -35593,7 +35597,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -35705,7 +35710,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -35869,7 +35875,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -36033,7 +36040,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -36145,7 +36153,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -36257,7 +36266,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -36373,7 +36383,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -36494,7 +36505,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -36675,7 +36687,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -36807,7 +36820,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -36947,7 +36961,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -37109,7 +37124,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -37207,7 +37223,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -37319,7 +37336,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -37484,7 +37502,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -37654,7 +37673,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -37770,7 +37790,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -37911,7 +37932,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -38068,7 +38090,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -38231,7 +38254,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -38402,7 +38426,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -38626,7 +38651,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -38750,7 +38776,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -38885,7 +38912,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -39002,7 +39030,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -39155,7 +39184,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -39304,7 +39334,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -39510,7 +39541,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -39650,7 +39682,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -39811,7 +39844,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -39971,7 +40005,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -40093,7 +40128,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -40198,7 +40234,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -40319,7 +40356,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -40425,7 +40463,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -40528,7 +40567,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -40705,7 +40745,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -40811,7 +40852,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -40916,7 +40958,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -41044,7 +41087,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -41148,7 +41192,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -41332,7 +41377,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -41497,7 +41543,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -41605,7 +41652,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -41711,7 +41759,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -41840,7 +41889,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -41959,7 +42009,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -42158,7 +42209,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -42355,7 +42407,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -42474,7 +42527,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -42582,7 +42636,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -42803,7 +42858,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -42917,112 +42973,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
-      }
-    },
-    {
-      "sig": "ModelManager.fromAst | ts=error(BaseException) | rust=error(BaseException) | ts:\"Validator error for field `s`. gaps.strv2@<n>.<n>.<n>.NaN.s: Invalid regular expression: /(/: Unterminated group\" | rust:\"Validator error for field `s`. gaps.strv2@<n>.<n>.<n>.NaN.s: Invalid regular expression: /(/: Unbalanced parenthesis\"",
-      "op": "ModelManager.fromAst",
-      "count": 1,
-      "sample": {
-        "op": "ModelManager.fromAst",
-        "seedFile": "gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json",
-        "mutationSeed": 2871314049,
-        "ts": {
-          "error": {
-            "class": "BaseException",
-            "component": "@accordproject/concerto-util",
-            "location": null,
-            "message": "Validator error for field `s`. gaps.strv2@1.0.0.NaN.s: Invalid regular expression: /(/: Unterminated group"
-          }
-        },
-        "rust": {
-          "error": {
-            "class": "BaseException",
-            "component": "@accordproject/concerto-util",
-            "location": null,
-            "message": "Validator error for field `s`. gaps.strv2@1.0.0.NaN.s: Invalid regular expression: /(/: Unbalanced parenthesis"
-          }
-        }
-      },
-      "minimized": {
-        "editCount": 1,
-        "originalEditCount": 4,
-        "edits": [
-          {
-            "kind": "set",
-            "path": [
-              "models",
-              0,
-              "declarations",
-              0,
-              "name"
-            ],
-            "value": "NaN"
-          }
-        ],
-        "seedFile": "gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json",
-        "doc": {
-          "$class": "concerto.metamodel@1.0.0.Models",
-          "models": [
-            {
-              "$class": "concerto.metamodel@1.0.0.Model",
-              "decorators": [],
-              "namespace": "gaps.strv2@1.0.0",
-              "imports": [],
-              "declarations": [
-                {
-                  "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                  "name": "NaN",
-                  "isAbstract": false,
-                  "properties": [
-                    {
-                      "$class": "concerto.metamodel@1.0.0.StringProperty",
-                      "name": "s",
-                      "isArray": false,
-                      "isOptional": false,
-                      "validator": {
-                        "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
-                        "pattern": "(",
-                        "flags": ""
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "owner": {
-        "theme": "T2",
-        "ledger": "P2-08+P4-08 (src/basemodelmanager.ts BaseModelManager.fromAst/addModelFile, src/introspect/modelfile.ts ModelFile.fromAst)",
-        "tasks": [
-          {
-            "task": "P2-08",
-            "issue": "accordproject/concerto-rust#52",
-            "state": "closed"
-          },
-          {
-            "task": "P2-08b",
-            "issue": "accordproject/concerto-rust#129",
-            "state": "closed",
-            "note": "scope was validateModelFile/updateModelFile/deleteModelFile, getModels, filter, resolveType, derivesFrom — does not cover fromAst/addModelFile"
-          },
-          {
-            "task": "P2-08c",
-            "issue": "accordproject/concerto-rust#144",
-            "state": "closed",
-            "note": "root-cause fix for introspect/property.rs, scalar.rs, model_file.rs, validation.rs — the exact files this theme's stack traces name; not reverified against these fuzz-found clusters"
-          },
-          {
-            "task": "P4-08",
-            "issue": "accordproject/concerto-rust#67",
-            "state": "open",
-            "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
-          }
-        ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     },
     {
@@ -43210,7 +43162,8 @@
             "note": "view-layer wiring for addModel(s)/validate/validateAst; depends on P2-08c"
           }
         ],
-        "status": "owned: #144 (closed, root-cause fix, unverified against these exact clusters) and #67 (open, view wiring) — see TRIAGE.md T2"
+        "status": "owned: #144 (closed, root-cause fix) and #67 (open; its exit condition is oracle-fixture parity under CONCERTO_ENGINE=rust for addModel(s)/validate/validateAst) — see TRIAGE.md T2",
+        "issue": "accordproject/concerto-rust#67"
       }
     }
   ]

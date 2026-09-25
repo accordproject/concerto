@@ -1,9 +1,9 @@
 {
   "_generatedBy": "migration/fuzz/bin/summarize.js from results/divergences.jsonl (unresolved) and results/expected-divergences.jsonl (maintainer-accepted, documented); do not edit by hand",
-  "total_divergences": 2495,
+  "total_divergences": 2371,
   "expected_divergences": 2753,
   "by_op": {
-    "ModelManager.fromAst": 1629,
+    "ModelManager.fromAst": 1505,
     "ModelManager.addModelFile": 865,
     "Serializer.fromJSON": 1
   },
@@ -14,7 +14,6 @@
     "ModelManager.fromAst | ts=ok rust=Error": 204,
     "ModelManager.addModelFile | ts=ok rust=IllegalModelException": 139,
     "ModelManager.addModelFile | ts=IllegalModelException rust=IllegalModelException": 124,
-    "ModelManager.fromAst | ts=BaseException rust=BaseException": 124,
     "ModelManager.fromAst | ts=ok rust=TypeError": 115,
     "ModelManager.fromAst | ts=BaseException rust=Error": 94,
     "ModelManager.fromAst | ts=BaseException rust=TypeError": 93,
