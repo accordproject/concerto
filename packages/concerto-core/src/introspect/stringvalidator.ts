@@ -28,6 +28,49 @@ import type Field from './field';
 import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// Its bindings are typed `never` so that a view leaves the member's inferred
+// return type, and so the .d.ts, exactly as the TS body makes it.
+//
+// dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
+// with no .d.ts, since it is not public API (tsconfig.build.internal.json;
+// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
+// must never see a specifier it would resolve: `loadEngine` takes a
+// non-literal one (esbuild, rollup and browserify leave it alone) and never
+// names the bare `require` (esbuild's ESM output would add its `__require`
+// shim, which webpack reports as a critical dependency), and webpack folds
+// the `typeof __webpack_require__` test and keeps only the dead-in-Node
+// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
+// bundles exactly as before (PORTING.md 1.5).
+//
+// rust mode works through the CommonJS dist/ only. Through the public ESM and
+// browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
+// not supported yet and is deferred to a follow-up: there `module.require`
+// does not exist, and the relative specifier does not match the flattened
+// chunks' location.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
+/**
+ * The `options.regExp` hook configured on the validator's model manager, if
+ * any: a pluggable RegExp-compatible constructor that must stay in JS
+ * (PORTING.md section 3), so the view only calls the Rust engine's default
+ * ECMAScript regex path (the `regress` crate) when this is absent.
+ * ScalarDeclarations have no parent, so this is only ever set for a Field.
+ * @param {Object} field - the field or scalar declaration this validator is attached to
+ * @returns {Function} the custom RegExp-compatible constructor, or undefined
+ */
+function customRegExp(field: ValidatedElement): RegExp | undefined {
+    const parent = 'getParent' in field ? field.getParent() : undefined;
+    return parent?.getModelFile()?.getModelManager()?.options?.regExp;
+}
+
 /**
  * A Validator to enforce that a string matches a regex
  * @private
@@ -38,9 +81,10 @@ class StringValidator extends Validator{
     declare validator: IStringRegexValidator | undefined;
     // The metamodel makes both bounds optional, so an AST can leave either
     // absent as well as explicitly null.
-    minLength: number | null | undefined;
-    maxLength: number | null | undefined;
-    regex: RegExp | null;
+    // Definitely assigned: by the TS body, or from the Rust snapshot.
+    minLength!: number | null | undefined;
+    maxLength!: number | null | undefined;
+    regex!: RegExp | null;
 
     /**
      * Create a StringValidator.
@@ -52,6 +96,14 @@ class StringValidator extends Validator{
      */
     constructor(field: ValidatedElement, validator?: IStringRegexValidator, lengthValidator?: IStringLengthValidator) {
         super(field, validator);
+
+        /* istanbul ignore if */
+        if (rust && !customRegExp(field)) {
+            Object.assign(this, rust.stringValidatorNew(this, validator, lengthValidator));
+            this.regex = validator ? new RegExp(validator.pattern, validator.flags) : null;
+            return;
+        }
+
         this.minLength = null;
         this.maxLength = null;
         this.regex = null;
@@ -76,8 +128,7 @@ class StringValidator extends Validator{
             try {
                 // ScalarDeclarations have no parent, so the custom RegExp option
                 // is only picked up for properties
-                const parent = 'getParent' in field ? field.getParent() : undefined;
-                const CustomRegExp = (parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp) as typeof RegExp;
+                const CustomRegExp = (customRegExp(field) || RegExp) as typeof RegExp;
                 this.regex = new CustomRegExp(validator.pattern, validator.flags);
             }
             catch (exception) {
@@ -98,6 +149,11 @@ class StringValidator extends Validator{
      * @private
      */
     validate(identifier: string | null, value: string): void {
+        /* istanbul ignore if */
+        if (rust && !customRegExp(this.field)) {
+            rust.stringValidatorValidate(this, identifier, value);
+            return;
+        }
         if(value !== null) {
             //Enforce string length rule first
             if(this.minLength !== null && this.minLength !== undefined && value.length < this.minLength) {
@@ -167,6 +223,10 @@ class StringValidator extends Validator{
      * validator, false otherwise.
      */
     compatibleWith(other: Validator | null): boolean {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.stringValidatorCompatibleWith(this, other, StringValidator);
+        }
         if (!(other instanceof StringValidator)) {
             return false;
         }
