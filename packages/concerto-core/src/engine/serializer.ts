@@ -26,10 +26,13 @@
 // yet), so there is no live Rust ModelManager mirroring the caller's model
 // manager to reuse. This module builds one itself, from the model
 // manager's own `getModelFiles()` ASTs, and caches it on the model manager
-// (a WeakMap) until its declaration count changes -- the same
-// cheap-to-check invalidation the rest of the engine uses `generation()`
-// for, here done by hand since a plain `BaseModelManager` exposes no
-// generation counter of its own.
+// (a WeakMap) until the set of `ModelFile` *instances* it was built from
+// changes -- either because a namespace was added/removed, or because
+// `updateModelFile` (or a clear() plus re-add) replaced a `ModelFile`
+// object under the same namespace. This is the same cheap-to-check
+// invalidation the rest of the engine uses `generation()` for, here done
+// by hand since a plain `BaseModelManager` exposes no generation counter
+// of its own.
 
 import { rust } from './index';
 import { EngineFastPathUnsupported, encodeValue, decodeValue } from './serializer-codec';
@@ -43,20 +46,18 @@ import type { SerializerOptions } from '../types';
 
 interface CachedHandle {
     handle: any;
-    namespaces: string[];
+    // The exact ModelFile *instances* (not just their namespaces) the
+    // handle was built from, in `getModelFiles()` order. `updateModelFile`
+    // (and a clear() plus re-add under the same namespaces) replaces the
+    // object in `BaseModelManager#modelFiles` in place, keeping the
+    // namespace list identical -- so identity of the ModelFile instances,
+    // not just of the namespace strings, is what "declaration count [or
+    // content] changed" has to mean here. A plain reference-equality check
+    // over the array is as cheap as the namespace check it replaces.
+    modelFiles: unknown[];
 }
 
 const handles = new WeakMap<BaseModelManager, CachedHandle>();
-
-/**
- * The namespaces `modelManager` currently has loaded, excluding the system
- * one (`ModelManagerHandle::new` already loads that).
- * @param {BaseModelManager} modelManager the model manager
- * @return {string[]} its user model files' namespaces, in `getModelFiles()` order
- */
-function namespacesOf(modelManager: BaseModelManager): string[] {
-    return modelManager.getModelFiles(false).map((modelFile) => modelFile.getNamespace());
-}
 
 /**
  * A `ModelManagerHandle` (concerto-wasm) with every model `modelManager`
@@ -65,17 +66,17 @@ function namespacesOf(modelManager: BaseModelManager): string[] {
  * @return {object} the handle
  */
 function handleFor(modelManager: BaseModelManager): any {
-    const namespaces = namespacesOf(modelManager);
+    const modelFiles = modelManager.getModelFiles(false);
     const cached = handles.get(modelManager);
-    if (cached && cached.namespaces.length === namespaces.length && cached.namespaces.every((ns, i) => ns === namespaces[i])) {
+    if (cached && cached.modelFiles.length === modelFiles.length && cached.modelFiles.every((mf, i) => mf === modelFiles[i])) {
         return cached.handle;
     }
     const ModelManagerHandle = (rust as any).ModelManagerHandle;
     const handle = new ModelManagerHandle();
-    for (const modelFile of modelManager.getModelFiles(false)) {
+    for (const modelFile of modelFiles) {
         handle.addModel(JSON.stringify(modelFile.getAst()), modelFile.getName());
     }
-    handles.set(modelManager, { handle, namespaces });
+    handles.set(modelManager, { handle, modelFiles });
     return handle;
 }
 

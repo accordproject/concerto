@@ -25,6 +25,7 @@
 import { BaseException } from '@accordproject/concerto-util';
 import IllegalModelException from '../introspect/illegalmodelexception';
 import TypeNotFoundException from '../typenotfoundexception';
+import ValidationException from '../serializer/validationexception';
 
 /**
  * The error payload the engine hands to the factory.
@@ -46,6 +47,12 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     // separately from the rendered `message` the constructor would otherwise
     // recompute a default for.
     TypeNotFound: (p) => new TypeNotFoundException(p.params.typeName, p.message),
+    // `ValidationException(message)` (error/mod.rs `ErrorKind::Validation`
+    // doc): thrown by `ResourceValidator`'s `report*` methods, and by the
+    // populator/generator/validator per-field delegation the P4-10 fast
+    // path and views call into (concerto-core/src/instance/populator.rs
+    // `validation()`).
+    Validation: (p) => new ValidationException(p.message),
     Validator: (p) => new BaseException(p.message, undefined, p.errorType),
     Error: (p) => new Error(p.message),
     JsTypeError: (p) => new TypeError(p.message),
