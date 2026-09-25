@@ -25,6 +25,7 @@
 const fs = require('fs');
 const path = require('path');
 const { CORE_PKG_DIR, SRC_ROOT } = require('../lib/core');
+const { seededRandom } = require('../lib/env');
 
 const S = (m) => require(path.join(SRC_ROOT, m));
 const { ModelManager } = S('modelmanager');
@@ -92,7 +93,20 @@ function exerciseTypes(mm) {
         for (const generate of ['sample', 'empty']) {
             for (const includeOptionalFields of [true, false]) {
                 const id = d.isIdentified() && !d.isSystemIdentified() ? 'id1' : undefined;
-                const r = attempt(() => factory.newResource(d.getNamespace(), d.getName(), id, { generate, includeOptionalFields }));
+                // `generate: 'sample'` draws from Math.random (instancegenerator.ts
+                // / valuegenerator.ts) to build the resource that becomes this
+                // op's *input*, not the op itself, so the recorder's own
+                // seeded window (installed only around the recorded call)
+                // never covers it (accordproject/concerto-rust#113): reseed
+                // here so the sample resource is identical on every recording,
+                // whatever order the suite runs the declarations in.
+                const rnd = seededRandom();
+                let r;
+                try {
+                    r = attempt(() => factory.newResource(d.getNamespace(), d.getName(), id, { generate, includeOptionalFields }));
+                } finally {
+                    rnd.restore();
+                }
                 if (!r) {
                     continue;
                 }
