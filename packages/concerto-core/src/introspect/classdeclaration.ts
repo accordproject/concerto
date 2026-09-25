@@ -225,6 +225,10 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration} The super type, or null if non specified.
      */
     _resolveSuperType(): ClassDeclaration | null {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.classDeclarationResolveSuperType(this) as ClassDeclaration | null;
+        }
         if (!this.superType) {
             return null;
         }
@@ -244,15 +248,6 @@ class ClassDeclaration extends Declaration {
 
         // if super type is not a concept, then check that this type and the super type
         // are of the same type. E.g. an asset cannot extend a participant
-        /* istanbul ignore if */
-        if (rust) {
-            if (!rust.classDeclarationKindsCompatible(this.declarationKind(), classDecl.declarationKind())) {
-                throw new IllegalModelException(`${this.declarationKind()} (${this.getName()}) cannot extend ${classDecl.declarationKind()} (${classDecl.getName()})`, this.modelFile, this.ast.location);
-            }
-            this.superTypeDeclaration = classDecl;
-            return classDecl;
-        }
-
         if (classDecl.declarationKind() !== 'ConceptDeclaration' && this.declarationKind() !== classDecl.declarationKind()) {
             throw new IllegalModelException(`${this.declarationKind()} (${this.getName()}) cannot extend ${classDecl.declarationKind()} (${classDecl.getName()})`, this.modelFile, this.ast.location);
         }
@@ -419,6 +414,10 @@ class ClassDeclaration extends Declaration {
      * @return {string} the name of the id field for this class or null if it does not exist
      */
     getIdentifierFieldName(): string | null {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.classDeclarationGetIdentifierFieldName(this) as string | null;
+        }
         if (this.idField) {
             return this.idField;
         } else {
@@ -475,6 +474,10 @@ class ClassDeclaration extends Declaration {
      * @return {string} the FQN name of the super type or null
      */
     getSuperType(): string | null {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.classDeclarationGetSuperType(this) as string | null;
+        }
         const superTypeDeclaration = this.getSuperTypeDeclaration();
         if (superTypeDeclaration) {
             return superTypeDeclaration.getFullyQualifiedName();
@@ -488,6 +491,10 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration} the super type declaration, or null if there is no super type.
      */
     getSuperTypeDeclaration(): ClassDeclaration | null {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.classDeclarationGetSuperTypeDeclaration(this) as ClassDeclaration | null;
+        }
         if (!this.superType) {
             // No super type.
             return null;
@@ -572,6 +579,10 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} super-type declarations.
      */
     getAllSuperTypeDeclarations(): ClassDeclaration[] {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.classDeclarationGetAllSuperTypeDeclarations(this) as ClassDeclaration[];
+        }
         const results: ClassDeclaration[] = [];
         for (let type: ClassDeclaration | null = this;
             (type = type.getSuperTypeDeclaration());) {
@@ -589,6 +600,10 @@ class ClassDeclaration extends Declaration {
      * @return {Property} the field, or null if it does not exist
      */
     getProperty(name: string): Property | null {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.classDeclarationGetProperty(this, name) as Property | null;
+        }
         let result = this.getOwnProperty(name);
         let classDecl: ClassDeclaration;
 
@@ -611,6 +626,10 @@ class ClassDeclaration extends Declaration {
      * @return {Property[]} the array of fields
      */
     getProperties(): Property[] {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.classDeclarationGetProperties(this) as Property[];
+        }
         let result = this.getOwnProperties();
         let classDecl: ClassDeclaration;
         if (this.superType !== null) {
