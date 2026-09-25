@@ -26,7 +26,7 @@ if any of these holds: the ledger's `category` is `validation`; its name is
 `validate*`, `check*`, `process`, `processType`, `resolve*`, `enforce*`,
 `is*Valid*`, `isCompatible*` or `compatibleWith`; or its body throws (including through
 `reportError`/`handleError`). Pure getters that only matched on a name, such as
-`getType`, are left out. That gives 79 rows in the P2-scope files (`introspect/*`,
+`getType`, are left out. That gives 80 rows in the P2-scope files (`introspect/*`,
 `modelutil.ts`, `model/resourceid.ts`, `basemodelmanager.ts`, `modelmanager.ts`, and
 `introspect/metamodel.ts`, which sits with `validateAst`). The validation-style members
 of the P3/P4 files are listed, without an in-depth audit, in
@@ -45,7 +45,10 @@ of the P3/P4 files are listed, without an in-depth audit, in
   recorded TS error is this member's throw text. A fixture counts as failing if it is on
   the report's failure list. It counts as unsupported if its recipe uses
   `metamodelValidation`, `decoratorValidation` or a decorator factory, or if it is a
-  `ModelManager.addModel` fixture. The report doesn't list unsupported fixtures by id,
+  `ModelManager.addModel` fixture with a recorded error (all 87 of those have a non-string
+  input the CTO cache can't replay; the one `addModel` fixture without either passes and
+  records no error, so it never enters an error-path count). The report doesn't list
+  unsupported fixtures by id,
   so this is a heuristic. It reproduces the report's per-op unsupported counts exactly
   for `addCTOModel` (195), `validateModelFiles` (16), `addModel` (172) and `getType` (11).
   Two members that throw identical text can't be told apart this way ("Duplicate
@@ -67,9 +70,9 @@ of the P3/P4 files are listed, without an in-depth audit, in
 | Mapped | 45 |
 | Mapped, divergence (DV-002, DV-003, DV-013) | 3 |
 | Mapped, pending P2-08c / P2-08d | 19 |
-| Gap | 6 |
+| Gap | 7 |
 | Stays TS (ledger) | 6 |
-| **Total** | **79** |
+| **Total** | **80** |
 
 | TS file(s) | Mapped | Divergence | Pending | Gap | Stays TS |
 |---|---|---|---|---|---|
@@ -82,7 +85,7 @@ of the P3/P4 files are listed, without an in-depth audit, in
 | `introspect/map*.ts` (P2-06) | 1 | | 4 | 1 | |
 | `introspect/decorated.ts`, `decorator.ts`, `decoratorfactory.ts` (P2-07) | 4 | | | 2 | 2 |
 | `introspect/modelfile.ts` (P2-08) | 5 | | 3 | | |
-| `basemodelmanager.ts`, `modelmanager.ts` (P2-08, P2-08b, P3-04) | 11 | | 3 | 1 | 1 |
+| `basemodelmanager.ts`, `modelmanager.ts` (P2-08, P2-08b, P3-04) | 11 | | 3 | 2 | 1 |
 | `introspect/metamodel.ts` (P3-04) | | | | 1 | |
 
 Every row names a Rust counterpart or a written reason. No validation-style member in
@@ -94,14 +97,14 @@ P2 scope is silently unmapped.
 |---|---|---|---|
 | **P2-08c (#144, open)** | 97 oracle failures, listed in [Pending](#pending-p2-08c-144) | 97 fail | 19 "Mapped, pending" rows |
 | **P2-08d (#151, open)** | Self-import message (`ModelManager.addCTOModel` `c1b21256…`); `ClassDeclaration.getIdentifierFieldName` `557a5087…` gives "Type … not found" instead of "Namespace is not defined for type …" | 2 fail | `ModelFile.validate`, `ModelManager.addCTOModel` |
-| **P3-04+P4-08** (P3-04 #59 closed; **P4-08 #67 open**) | The native harness can't replay the `metamodelValidation` option, and `MetaModel.validateMetaModel`/`modelManagerFromMetaModel` have no dispatch entry, so `validate_ast`/`validate_metamodel` have no oracle evidence, only unit tests | 276 unsupported | `validateAst`, `validateMetaModel` |
+| **P3-04+P4-08** (P3-04 #59 closed; **P4-08 #67 open**) | The native harness can't replay the `metamodelValidation` option, and `MetaModel.validateMetaModel`/`modelManagerFromMetaModel` have no dispatch entry, so `validate_ast`/`validate_metamodel` have no oracle evidence, only unit tests | 276 unsupported | `validateAst`, `validateMetaModel`, `addModel` (85) |
 | **No open owner** (report owner P2-07+P4-05; #51 and #64 closed) | The native harness can't replay the `decoratorValidation` option (`tests/oracle/recipe.rs` l.1338), although the engine supports it (`ModelManager::set_decorator_validation`). No fixture checks `Decorator.validate`'s argument checks inside a model load. | 42 unsupported | `Decorator.validate` |
 | **No open owner** (report owner P2-06+P4-07; #50 and #66 closed) | The Rust `MapDeclaration` doesn't read the decorators on a map's key or value | 16 unsupported (`Decorated.getDecorator`) | none directly (TS `MapKeyType`/`MapValueType.validate` don't validate decorators) |
 | **No open owner** (P2-06 closed; `validation.rs` is in P2-08c's owned paths) | F2, F3: `MapDeclaration.validate` never runs the import-clash check, and checks decorators after key/value | none observed | `MapDeclaration.validate` |
 | **No open owner** (P2-07 / P2-03 closed; `validation.rs` is in P2-08c's owned paths) | F1, F4: decorator checks run in a different order from TS | none observed | `ClassDeclaration.validate`, `Decorated.validate` |
 | **No open owner** (P2-04 #48, P4-07 #66 closed) | Ledger drift: `Field.getScalarField` is `RUST` in the ledger, but its logic is still in the TS view and the harness re-implements it | none (17 pass) | `Field.getScalarField` |
-| P1-07a | The CTO cache lacks non-string `addModel` inputs (87) and `net` bodies for `updateExternalModels` (2) | 89 unsupported | `updateExternalModels` |
-| P2-01+P4-03 | Arguments that don't decode (`undefined`/`null`): `isValidIdentifier` 2 (the DV-002 inputs), `isSystemProperty` 2, `getFullyQualifiedName` 1 | 5 unsupported | `isValidIdentifier` |
+| **No open owner** (report owner P1-07a; #91 closed) | The CTO cache lacks non-string `addModel` inputs (87) and `net` bodies for `updateExternalModels` (2) | 89 unsupported | `addModel` (87), `updateExternalModels` (2) |
+| **No open owner** (report owner P2-01+P4-03; #45 and #62 closed) | Arguments that don't decode (`undefined`/`null`): `isValidIdentifier` 2 (the DV-002 inputs), `isSystemProperty` 2, `getFullyQualifiedName` 1 | 5 unsupported | `isValidIdentifier` |
 | P5-06 (mutation testing) | No dedicated unit test for `NumberValidator::new`/`validate`/`compatible_with`, `is_valid_map_key`, `is_valid_map_value`, `get_nested_property`, or the `enforceImportVersioning` and alias-to-primitive loop. Oracle-only coverage today. | none | 7 rows |
 
 "No open owner" means the task that owned the code has closed and no open issue covers the
@@ -136,8 +139,10 @@ item. The coordinator needs to assign it, or record that it's accepted.
   WASM views, the instance validator and `introspect/field.rs`. The `ModelManager` load
   path doesn't use it: `Property::check_validators` and `ScalarDeclaration::check_validators`
   call the pre-port `introspect/mod.rs` `check_domain`/`check_length`/`check_pattern`/`check_size`
-  instead. These throw `IllegalModelException` with Rust wording and skip default
-  values. That is the root cause of P2-08c's two largest groups (30 + 4 failures). It
+  instead (for scalars only String ones: `ScalarDeclaration::check_validators` calls just
+  `check_pattern`/`check_length`, while numeric scalars go through `NumberValidator::new` in
+  `ScalarDeclaration::process`). These throw `IllegalModelException` with Rust wording and skip default
+  values. That is the root cause of P2-08c's groups A (30 failures) and F (4). It
   is recorded here so the P2-08c fix can remove the duplicate path rather than patch
   its messages.
 - **Model-level checks moved to a different phase.** `MapDeclaration.process` and
@@ -153,10 +158,10 @@ One table per TS file or class family. Line numbers are at concerto-rust fc58371
 
 | Member | Ledger | Rust counterpart | Unit tests | Oracle (pass/fail/unsupported) | Status | Notes |
 |---|---|---|---|---|---|---|
-| getNamespace | RUST P2-01 | `model_util.rs` `get_namespace` (l.88) | `get_namespace_check_get_namespace` | op 5/0/0; "FQN is invalid" error path 94 pass (via `DecoratorManager.decorateModels` 88, `DcsConverter.jsonToYaml` 5) | Mapped |  |
-| parseNamespace | RUST P2-01 | `model_util.rs` `parse_namespace` (l.248) | `parse_namespace_valid_with_version`, `_valid_with_version_validation_disabled`, `_invalid_null`, `_invalid_two_at_signs`, `_invalid_version` | op 5/0/0 (error path 3 of them) | Mapped, divergence | DV-003 (d6): TS accepts an unversioned namespace here; Rust follows D6. The unversioned-namespace *ModelFile* failures are a different check (`ModelFile.fromAst`, below). |
-| isAssignableTo | RUST P2-01 | `model_util.rs` `is_assignable_to` (l.364) | `model_manager.rs` `ported_members_run_on_the_arena` (incl. the "Cannot find type" error) | op 6/0/0 | Mapped |  |
-| isValidIdentifier | RUST P2-01 | `model_util.rs` `is_valid_identifier` (l.488) | `id_regex_compiles`, `id_regex_follows_the_ts_classes` | op 7/0/2 (2 unsupported: arguments `undefined`/`null` do not decode, owner P2-01+P4-03) | Mapped, divergence | DV-002 (ts-bug): TS returns `true` for `undefined`/`null`. Rust takes `&str`, so the two undecodable fixtures are exactly the DV-002 inputs. |
+| getNamespace | RUST P2-01 | `model_util.rs` `get_namespace` (l.96) | `get_namespace_check_get_namespace` | op 5/0/0; "FQN is invalid" error path 94 pass (via `DecoratorManager.decorateModels` 88, `DcsConverter.jsonToYaml` 5) | Mapped |  |
+| parseNamespace | RUST P2-01 | `model_util.rs` `parse_namespace` (l.258) | `parse_namespace_valid_with_version`, `_valid_with_version_validation_disabled`, `_invalid_null`, `_invalid_two_at_signs`, `_invalid_version` | op 5/0/0 (error path 3 of them) | Mapped, divergence | DV-003 (d6): TS accepts an unversioned namespace here; Rust follows D6. The unversioned-namespace *ModelFile* failures are a different check (`ModelFile.fromAst`, below). |
+| isAssignableTo | RUST P2-01 | `model_util.rs` `is_assignable_to` (l.365) | `model_manager.rs` `ported_members_run_on_the_arena` (incl. the "Cannot find type" error) | op 6/0/0 | Mapped |  |
+| isValidIdentifier | RUST P2-01 | `model_util.rs` `is_valid_identifier` (l.488) | `id_regex_compiles`, `id_regex_follows_the_ts_classes` | op 7/0/2 (2 unsupported: arguments `undefined`/`null` do not decode; report owner P2-01+P4-03, no open owner: #45 and #62 closed) | Mapped, divergence | DV-002 (ts-bug): TS returns `true` for `undefined`/`null`. Rust takes `&str`, so the two undecodable fixtures are exactly the DV-002 inputs. |
 | isValidMapKey | RUST P2-01 | `model_util.rs` `is_valid_map_key` (l.606) | none found (oracle only) | op 10/0/0 | Mapped | No dedicated unit test; P5-06 input. |
 | isValidMapKeyScalar | RUST P2-01 | `model_util.rs` `is_valid_map_key_scalar` (l.618) | `model_manager.rs` `ported_members_run_on_the_arena` | no op fixtures; the check it serves (`MapKeyType.validate`) is below | Mapped | `validation.rs` `validate_map_key` does not call it: it re-derives the scalar type through `Typed::type_name`. Same answer on every fixture; two implementations of one rule. |
 | isValidMapValue | RUST P2-01 | `model_util.rs` `is_valid_map_value` (l.647) | none found (oracle only) | op 10/0/0 | Mapped | No dedicated unit test; P5-06 input. |
@@ -167,7 +172,7 @@ One table per TS file or class family. Line numbers are at concerto-rust fc58371
 |---|---|---|---|---|---|---|
 | parseUri (module fn) | RUST P2-01 | `instance/resource_id.rs` `parse_uri` (l.70, crate-private) | `parse_uri_splits_scheme_authority_query_and_fragment`, `parse_uri_with_no_scheme_or_authority_is_all_path`, `parse_uri_non_numeric_port_is_invalid_port` (21 tests in the file) | via `Relationship.fromURI` (18/0/0, stays-ts op) | Mapped |  |
 | constructor | HYBRID P2-01 | `instance/resource_id.rs` `ResourceId::new` (l.252) | `resource_id.rs` "ResourceId constructor" tests | "Missing namespace/type/id" error path 3 pass (`Relationship.fromURI`) | Mapped |  |
-| fromURI | RUST P2-01 | `instance/resource_id.rs` `ResourceId::from_uri` (l.297) | `resource_id.rs` fromURI tests | "Invalid URI…" error path 3 pass (`Relationship.fromURI`) | Mapped |  |
+| fromURI | RUST P2-01 | `instance/resource_id.rs` `ResourceId::from_uri` (l.309) | `resource_id.rs` fromURI tests | "Invalid URI…" error path 3 pass (`Relationship.fromURI`) | Mapped |  |
 
 ### src/introspect/validator.ts, numbervalidator.ts, stringvalidator.ts, collectionsizevalidator.ts (P2-02)
 
@@ -205,7 +210,7 @@ One table per TS file or class family. Line numbers are at concerto-rust fc58371
 | Member | Ledger | Rust counterpart | Unit tests | Oracle (pass/fail/unsupported) | Status | Notes |
 |---|---|---|---|---|---|---|
 | Property.process | RUST P2-04 | `introspect/property.rs` `process` (l.56); `TryFrom<&Value> for Property` (l.243) | `process_derives_type_array_and_optional`, `process_object_property_type_is_the_referenced_name`, `process_enum_property_leaves_type_unset`, `process_rejects_an_invalid_identifier`, `a_property_name_must_be_an_identifier`, `unknown_property_kind_errors`, `a_reserved_name_is_rejected_before_the_kind_is_checked` | no direct op; error path 3 fail (`ModelManager.fromAst`) | Mapped, pending | Pending P2-08c: "Invalid property name" wording (Rust `invalid identifier: …` on the load path), "No name for type" (TS plain `Error`), and an `ObjectProperty` with no `type` that TS accepts and Rust rejects. |
-| Field.process | RUST P2-04 | `introspect/field.rs` `process` (l.72) builds the faithful `NumberValidator`/`StringValidator` | `property.rs` `range_lower_above_upper_is_rejected`, `range_with_one_open_end_is_accepted`, `range_without_either_bound_is_rejected`, `negative_string_length_is_rejected`, `string_length_min_above_max_is_rejected`, `a_regex_validator_must_compile` (these test the pre-port load path, not `field.rs`) | see the three validator constructors above | Mapped, pending | `field.rs` `process` is used by the WASM view; `ModelManager` loading goes through `Property::check_validators` instead. Pending P2-08c. |
+| Field.process | RUST P2-04 | `introspect/field.rs` `process` (l.72) builds the faithful `NumberValidator`/`StringValidator` | `property.rs` `range_lower_above_upper_is_rejected`, `range_with_one_open_end_is_accepted`, `range_without_either_bound_is_rejected`, `negative_string_length_is_rejected`, `string_length_min_above_max_is_rejected`, `a_regex_validator_must_compile` (these test the pre-port load path, not `introspect/field.rs`) | see the three validator constructors above | Mapped, pending | `introspect/field.rs` `process` is used by the WASM view; `ModelManager` loading goes through `Property::check_validators` instead. Pending P2-08c. |
 | Field.getScalarField | RUST P2-04 | none in the library: logic stays in the converted TS view (`packages/concerto-core/src/introspect/field.ts` `getScalarField`), and `tests/oracle/ops.rs` `get_scalar_field` (l.2342) re-implements it for the harness | - | op 17/0/0; "is not a scalar property" error path 1 pass | Gap | Ledger drift: the ledger row says RUST P2-04+P4-07; both tasks are closed. Owner: none open, coordinator to decide (reclassify TS, or port). |
 | Property.validate | RUST P2-04 | `validation.rs` `validate_property` (l.455), `check_property_type` (l.733), `check_size_validator_target` (l.906), `undeclared_type_error` (l.1270) | `object_property_of_undeclared_type_fails`, `object_property_of_declared_type_passes`, `size_validator_on_a_non_array_object_property_of_a_non_map_type_is_rejected`, `…_of_a_map_type_is_allowed`, `size_validator_on_a_map_type_imported_from_another_namespace_is_allowed`, `size_validator_on_a_non_array_primitive_or_relationship_is_rejected_by_validation`, `an_inherited_property_is_validated_in_the_subclass_pass` | no direct op; "size validator can only be applied…" error path 7 pass; "Undeclared type" (resolveType) 17 pass / 5 unsupported | Mapped |  |
 | Property.getFullyQualifiedTypeName | RUST P2-04 | `model_manager.rs` `ResolutionContext::get_fully_qualified_type_name` (l.1938); `introspect/model_file.rs` `get_fully_qualified_type_name` (l.450) | `an_aliased_import_s_property_resolves_its_fully_qualified_type_name` | op 63/0/0; error path 2 pass | Mapped |  |
@@ -216,7 +221,7 @@ One table per TS file or class family. Line numbers are at concerto-rust fc58371
 
 | Member | Ledger | Rust counterpart | Unit tests | Oracle (pass/fail/unsupported) | Status | Notes |
 |---|---|---|---|---|---|---|
-| ScalarDeclaration.process | RUST P2-05 | `introspect/scalar.rs` `ScalarDeclaration::process` (l.111); `declaration.rs` `load_scalar` (l.571) | `throws_when_scalar_name_is_a_primitive_type`, `does_not_throw_for_a_valid_scalar_name`, `default_value_*` (3); `declaration.rs` `scalar_with_reversed_range_is_rejected`, `scalar_with_valid_range_is_accepted`, `unknown_scalar_kind_errors` | `ScalarDeclaration.new` 13/0/0; "Invalid scalar name" error path 8 pass | Mapped | A scalar's validator settings go through `ScalarDeclaration::check_validators` (l.373) on the load path, so the P2-08c `BaseException` item applies to scalars too. |
+| ScalarDeclaration.process | RUST P2-05 | `introspect/scalar.rs` `ScalarDeclaration::process` (l.111); `introspect/declaration.rs` `load_scalar` (l.571) | `throws_when_scalar_name_is_a_primitive_type`, `does_not_throw_for_a_valid_scalar_name`, `default_value_*` (3); `declaration.rs` `scalar_with_reversed_range_is_rejected`, `scalar_with_valid_range_is_accepted`, `unknown_scalar_kind_errors` | `ScalarDeclaration.new` 13/0/0; "Invalid scalar name" error path 8 pass | Mapped | Only String scalars reach the pre-port path: `ScalarDeclaration::check_validators` (l.373) calls just `check_pattern`/`check_length`, so P2-08c group A applies to String scalars (their regex and length settings) and not to numeric ones, which `ScalarDeclaration::process` (l.146) builds through the faithful `NumberValidator::new`. |
 | ScalarDeclaration.validate | RUST P2-05 | `scalar.rs` `ScalarDeclaration::validate` (l.300); `validation.rs` `Declaration::Scalar` arm (l.397) | `validate_rejects_a_duplicate_fully_qualified_name`, `validate_accepts_unique_fully_qualified_names`, `duplicate_decorator_on_a_scalar_declaration_is_rejected` | no direct op | Mapped | On the manager pass the duplicate-FQN branch is unreachable (ModelFile.validate scans first); documented in `validation.rs` l.398-409. |
 
 ### src/introspect/mapdeclaration.ts, mapkeytype.ts, mapvaluetype.ts (P2-06)
@@ -268,13 +273,14 @@ One table per TS file or class family. Line numbers are at concerto-rust fc58371
 | updateModelFile | HYBRID P2-08b | `model_manager.rs` `update_model_file` (l.1715) | `update_model_file_replaces_the_registered_file`, `update_model_file_rejects_an_unregistered_namespace` | op 6/0/0; error path 2 pass | Mapped |  |
 | deleteModelFile | RUST P2-08b | `model_manager.rs` `delete_model_file` (l.1742) | `delete_model_file_removes_the_namespace`, `delete_model_file_rejects_an_absent_namespace` | op 5/0/0; error path 1 pass | Mapped |  |
 | addModelFiles | HYBRID P2-08 | `model_manager.rs` `add_models` (l.571), `insert_models` (l.1814) | `add_models_relaxes_import_order`, `add_models_rolls_back_the_whole_batch_on_validation_failure`, `add_models_rolls_back_on_duplicate_namespace_within_the_batch`, `…_against_an_existing_model`, `add_models_leaves_pre_existing_models_validating_on_success` | op 52/0/0 | Mapped |  |
-| updateExternalModels | HYBRID P2-08b | `model_manager.rs` `update_external_models` (l.1779); downloading stays JS | `update_external_models_adds_then_updates_a_namespace`, `…_with_nothing_downloaded_still_validates`, `…_rolls_back_when_validation_fails` | op 4/0/2 | Mapped | The 2 unsupported fixtures need `net` response bodies in the CTO cache (owner P1-07a). |
+| updateExternalModels | HYBRID P2-08b | `model_manager.rs` `update_external_models` (l.1779); downloading stays JS | `update_external_models_adds_then_updates_a_namespace`, `…_with_nothing_downloaded_still_validates`, `…_rolls_back_when_validation_fails` | op 4/0/2 | Mapped | The 2 unsupported fixtures need `net` response bodies in the CTO cache (report owner P1-07a; no open owner, #91 closed). |
 | writeModelsToFileSystem | TS | - | - | op 0/0/3, stays-ts | Stays TS | Ledger TS (file-system I/O). |
 | resolveType | RUST P2-08b | `model_manager.rs` `resolve_type` (l.1417) | `resolve_type_passes_primitives_through`, `resolve_type_resolves_a_local_type`, `resolve_type_rejects_an_unregistered_namespace`, `resolve_type_rejects_an_imported_name` | op 5/0/0; error path 76 pass | Mapped |  |
 | getType | RUST P2-08 | `model_manager.rs` `get_type_declaration` (l.874) | `resolves_by_exact_fqn_only`, `get_type_follows_model_file_get_type` | op 671/0/11 (9 decorator-factory stays-ts, 2 `decoratorValidation`) | Mapped |  |
 | resolveMetaModel | RUST P2-08b | `model_manager.rs` `resolve_meta_model` (l.1575), `resolve_local_names` (l.2476) | `resolve_meta_model_resolves_an_imported_super_type`, `…_rejects_an_unresolvable_name`, `…_rejects_an_import_of_an_undeclared_type`, `…_accepts_an_empty_import_types_from_an_unknown_namespace` | op 4/0/0 | Mapped |  |
 | fromAst | RUST P2-08 | no library fn: `tests/oracle/recipe.rs` (l.1986) composes it from `ModelFile::from_json`, `add_model` and `validate_models` | - | op 16/21/0 | Mapped, pending | All 21 failures are in the P2-08c list. A library entry point is P4-08's to add (#67, open) if the view needs one. |
 | ModelManager.addCTOModel | HYBRID P2-08 | CTO parsing stays JS; the Rust half is `add_model` + `validate_detached_model_file` | (as `addModelFile`) | op 1167/55/195 | Mapped, pending | 54 failures are in the P2-08c list and 1 is P2-08d; 171 unsupported are `metamodelValidation`, 19 `decoratorValidation`, 5 decorator factory. |
+| addModel | HYBRID P2-08 | a string input is parsed in JS (`processFile`); an AST input goes to `model_manager.rs` `add_model` (l.518) + `validation.rs` `validate_detached_model_file` (l.142) (as `addModelFile`) | (as `addModelFile`) | op 1/0/172 | Gap | Almost no native oracle evidence: 87 fixtures have a non-string input that TS parses as `String(input)`, which the P1-07a CTO cache doesn't collect (report owner P1-07a; no open owner, #91 closed), and 85 use the `metamodelValidation` option the harness can't replay (report owner P3-04+P4-08; P4-08 #67 open). Included on the same grounds as `addCTOModel` and `fromAst`: a load entry point that runs validation. |
 | validateAst | RUST P3-04 | `instance/metamodel.rs` `validate_ast` (l.133) | 10 tests in `instance/metamodel.rs` | no fixture replays it natively | Gap | Harness gap: the `metamodelValidation` option is "not modelled by the Rust engine yet", 276 fixtures unsupported (171 `addCTOModel`, 85 `addModel`, …), report owner P3-04+P4-08. P3-04 (#59) is closed, P4-08 (#67) is open. |
 
 ### src/introspect/metamodel.ts (P3-04)
