@@ -56,4 +56,29 @@ function scalarDeclarationProcess(declaration: any): void {
     declaration.defaultValue = snapshot.defaultValue;
 }
 
-export { scalarDeclarationProcess };
+/**
+ * Property.process in rust mode, after super.process(): Rust computes the
+ * name, type, array and optional fields from the AST, in the same order as
+ * the TS body. `type` is left unset when the snapshot omits it (the
+ * `EnumProperty` case, where TS never assigns `this.type`), so `getType()`
+ * reads `undefined` there exactly as ts mode does. `sizeValidator` is still
+ * built here, the same way ts mode does, since `CollectionSizeValidator`'s
+ * own constructor already ports the Rust engine (P0-04b trial).
+ * @param {object} property the Property (or Field/EnumValueDeclaration/
+ * RelationshipDeclaration) being processed
+ */
+function propertyProcess(property: any): void {
+    const snapshot = rust!.propertyProcess(property);
+    property.name = snapshot.name;
+    if ('type' in snapshot) {
+        property.type = snapshot.type;
+    }
+    property.array = snapshot.array;
+    property.optional = snapshot.optional;
+    const { default: CollectionSizeValidator } = require('../introspect/collectionsizevalidator');
+    property.sizeValidator = property.ast.sizeValidator
+        ? new CollectionSizeValidator(property, property.ast.sizeValidator)
+        : null;
+}
+
+export { scalarDeclarationProcess, propertyProcess };
