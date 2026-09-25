@@ -21,7 +21,7 @@
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
     "test": "cross-env TS_NODE_PROJECT=tsconfig.build.json TZ=UTC nyc mocha -r ts-node/register --recursive -t 10000",
     "test:watch": "cross-env TZ=UTC nyc mocha -r ts-node/register --watch --recursive -t 10000",
-    "build": "tsc -p tsconfig.build.json && cpx \"src/*.json\" dist/ && cpx \"src/messages/*.json\" dist/messages/ && npm run build:esm",
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.build.internal.json && cpx \"src/*.json\" dist/ && cpx \"src/messages/*.json\" dist/messages/ && npm run build:esm",
     "build:esm": "node ../../scripts/build-esm.js"
   },
   "repository": {
