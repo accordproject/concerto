@@ -12,21 +12,12 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const Identifiable = require('./identifiable');
-const ModelUtil = require('../modelutil');
-const ResourceId = require('./resourceid');
-import type ModelManager = require('../modelmanager');
-import type ClassDeclaration = require('../introspect/classdeclaration');
-
-// Types needed for TypeScript generation.
-/* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelManager = require('../modelmanager');
-}
-/* eslint-enable no-unused-vars */
+import Identifiable from './identifiable';
+import ModelUtil from '../modelutil';
+import ResourceId from './resourceid';
+import type BaseModelManager from '../basemodelmanager';
+import type ClassDeclaration from '../introspect/classdeclaration';
+import type { Dayjs } from 'dayjs';
 
 /**
  * A Relationship is a typed pointer to an instance. I.e the relationship
@@ -42,6 +33,7 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Relationship extends Identifiable {
+    $class: 'Relationship';
     /**
      * Create an asset. Use the Factory to create instances.
      * <p>
@@ -54,10 +46,10 @@ class Relationship extends Identifiable {
      * @param {string} ns - The namespace this instance.
      * @param {string} type - The type this instance.
      * @param {string} id - The identifier of this instance.
-     * @param {string} timestamp - The timestamp of this instance
+     * @param {Dayjs} [timestamp] - The timestamp of this instance
      * @private
      */
-    constructor(modelManager: ModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id: string, timestamp?: string) {
+    constructor(modelManager: BaseModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id: string, timestamp?: Dayjs | null) {
         super(modelManager, classDeclaration, ns, type, id, timestamp);
         // we use this metatag to identify the instance as a relationship
         this.$class = 'Relationship';
@@ -97,4 +89,5 @@ class Relationship extends Identifiable {
     }
 }
 
-export = Relationship;
+export { Relationship };
+export default Relationship;

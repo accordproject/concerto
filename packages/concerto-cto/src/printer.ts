@@ -70,7 +70,7 @@ function decoratorArgFromMetaModel(mm: IDecoratorLiteral): string {
             break;
         case `${MetaModelNamespace}.DecoratorString`:
             const strRef = mm as IDecoratorString;
-            result += `"${strRef.value}"`;
+            result += toStringLiteral(strRef.value);
             break;
         default:
             result += `${(mm as (IDecoratorNumber | IDecoratorBoolean)).value}`;
@@ -190,8 +190,8 @@ function modifiersFromMetaModel(mm: any): string {
             break;
         case `${MetaModelNamespace}.DateTimeProperty`:
         case `${MetaModelNamespace}.DateTimeScalar`:
-            if (mm.defaultValue) {
-                defaultString += ` default="${mm.defaultValue}"`;
+            if (mm.defaultValue !== undefined) {
+                defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
             break;
         case `${MetaModelNamespace}.DoubleProperty`:
@@ -230,11 +230,11 @@ function modifiersFromMetaModel(mm: any): string {
             break;
         case `${MetaModelNamespace}.StringProperty`:
         case `${MetaModelNamespace}.StringScalar`:
-            if (mm.defaultValue) {
-                defaultString += ` default="${mm.defaultValue}"`;
+            if (mm.defaultValue !== undefined) {
+                defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
             if (mm.validator) {
-                validatorString += ` regex=/${mm.validator.pattern}/${mm.validator.flags || ''}`;
+                validatorString += ` regex=${toRegexLiteral(mm.validator.pattern, mm.validator.flags)}`;
             }
             if (mm.lengthValidator) {
                 const minLength = mm.lengthValidator.minLength !== undefined ? mm.lengthValidator.minLength : '';
@@ -243,13 +243,49 @@ function modifiersFromMetaModel(mm: any): string {
             }
             break;
         case `${MetaModelNamespace}.ObjectProperty`:
-            if (mm.defaultValue) {
+            if (mm.defaultValue !== undefined) {
                 defaultString += ` default="${mm.defaultValue}"`;
             }
             break;
     }
 
+    if (mm.sizeValidator) {
+        const minSize = mm.sizeValidator.minSize !== undefined ? mm.sizeValidator.minSize : '';
+        const maxSize = mm.sizeValidator.maxSize !== undefined ? mm.sizeValidator.maxSize : '';
+        validatorString += ` size=[${minSize},${maxSize}]`;
+    }
+
     return result + defaultString + validatorString;
+}
+
+/**
+ * Format a string as a quoted CTO string literal, escaping any characters that
+ * would otherwise terminate the literal or break parsing.
+ * @param {string} value - string value to quote
+ * @returns {string} CTO-compatible quoted string literal
+ */
+function toStringLiteral(value: string): string {
+    return JSON.stringify(String(value));
+}
+
+/**
+ * Format a regular expression validator as a CTO regex literal. Unescaped
+ * forward slashes and line terminators in the pattern would terminate the
+ * literal early, so the pattern is normalized the same way JavaScript
+ * normalizes RegExp.prototype.source. Patterns that are not valid regular
+ * expressions are emitted unchanged.
+ * @param {string} pattern - the regular expression pattern
+ * @param {string} [flags] - the regular expression flags
+ * @returns {string} CTO-compatible regex literal
+ */
+function toRegexLiteral(pattern: string, flags?: string): string {
+    let source = pattern;
+    try {
+        source = new RegExp(pattern, flags).source;
+    } catch {
+        // Leave invalid patterns untouched rather than throwing while printing
+    }
+    return `/${source}/${flags || ''}`;
 }
 
 /**
@@ -406,7 +442,7 @@ function declFromMetaModel(mm: IDeclaration): string {
  * @param {*} metaModel - the metamodel instance
  * @return {string} the CTO model as a string
  */
-function toCTO(metaModel: IModel): string {
+export function toCTO(metaModel: IModel): string {
     let result = '';
 
     // version
@@ -479,6 +515,7 @@ function toCTO(metaModel: IModel): string {
     return result;
 }
 
-export = {
+const Printer = {
     toCTO,
 };
+export default Printer;

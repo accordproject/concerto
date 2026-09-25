@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import Writer = require('./writer');
+import Writer from './writer';
 
 /**
  * InMemoryWriter stores string representation of files in a map structure.
@@ -67,4 +65,5 @@ class InMemoryWriter extends Writer {
     }
 }
 
-export = InMemoryWriter;
+export { InMemoryWriter };
+export default InMemoryWriter;

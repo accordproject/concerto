@@ -75,6 +75,12 @@ $ concerto compare --old model.cto --new model-with-changes.cto
 
 - Add to your [Node.js project](https://docs.accordproject.org/docs/model-api.html)
 - Add to your [.NET project](https://www.nuget.org/packages/AccordProject.Concerto)
+  
+Install Concerto Skills
+
+```sh
+npx skills add accordproject/skills
+```
 
 ## Structure of the Code
 

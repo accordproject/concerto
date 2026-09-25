@@ -12,10 +12,10 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import type { FileLoader } from './fileloader';
-const debug = require('debug')('concerto:HTTPFileLoader');
+import createDebug from 'debug';
+
+const debug = createDebug('concerto:HTTPFileLoader');
 
 // Ensure fetch is recognized if not in global types
 declare const fetch: (input: string | URL, init?: RequestInit) => Promise<{ ok: boolean; status: number; text(): Promise<string> }>;
@@ -77,4 +77,5 @@ class HTTPFileLoader<T> implements FileLoader<T> {
     }
 }
 
-export = HTTPFileLoader;
+export { HTTPFileLoader };
+export default HTTPFileLoader;

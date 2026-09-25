@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import BaseException = require('./baseexception');
+import BaseException from './baseexception';
 
 /**
  * Exception throws when a Concerto file is semantically invalid
@@ -68,4 +66,5 @@ class BaseFileException extends BaseException {
     }
 }
 
-export = BaseFileException;
+export { BaseFileException };
+export default BaseFileException;

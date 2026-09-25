@@ -12,19 +12,19 @@
  * limitations under the License.
  */
 
-'use strict';
+import Relationship from '../model/relationship';
+import Resource from '../model/resource';
+import Identifiable from '../model/identifiable';
+import { NullUtil as Util } from '@accordproject/concerto-util';
+import ModelUtil from '../modelutil';
+import ValidationException from './validationexception';
+import Globalize from '../globalize';
+import dayjs from '../dayjs-setup';
 
-const Relationship = require('../model/relationship');
-const Resource = require('../model/resource');
-const Identifiable = require('../model/identifiable');
-const Util = require('@accordproject/concerto-util').NullUtil;
-const ModelUtil = require('../modelutil');
-const ValidationException = require('./validationexception');
-const Globalize = require('../globalize');
-
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type { SerializerOptions } from '../types';
+/* eslint-enable no-unused-vars */
 
 /**
  * <p>
@@ -45,7 +45,7 @@ dayjs.extend(utc);
  * @memberof module:concerto-core
  */
 class ResourceValidator {
-    options: any;
+    options: SerializerOptions;
 
     /**
      * ResourceValidator constructor
@@ -56,7 +56,7 @@ class ResourceValidator {
      * are specified for relationship fields into relationships, false by default.
      * @param {boolean} options.permitResourcesForRelationships - Permit resources in the
      */
-    constructor(options) {
+    constructor(options?: SerializerOptions) {
         this.options = options || {};
     }
     /**
@@ -315,6 +315,9 @@ class ResourceValidator {
                 this.checkArray(obj, field,parameters);
             }
             else {
+                if(field.getSizeValidator() && obj instanceof Map) {
+                    field.getSizeValidator().validate(parameters.rootResourceIdentifier, obj.size);
+                }
                 this.checkItem(obj, field,parameters);
             }
         }
@@ -338,6 +341,7 @@ class ResourceValidator {
         const enumDeclaration = field.getParent().getModelFile().getType(field.getType());
 
         if(field.isArray()) {
+            field.getSizeValidator()?.validate(parameters.rootResourceIdentifier, obj.length);
             for(let n=0; n < obj.length; n++) {
                 const item = obj[n];
                 parameters.stack.push(item);
@@ -363,6 +367,8 @@ class ResourceValidator {
         if(!(obj instanceof Array)) {
             ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field);
         }
+
+        field.getSizeValidator()?.validate(parameters.rootResourceIdentifier, obj.length);
 
         for(let n=0; n < obj.length; n++) {
             const item = obj[n];
@@ -462,6 +468,8 @@ class ResourceValidator {
                 ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration);
             }
 
+            relationshipDeclaration.getSizeValidator()?.validate(parameters.rootResourceIdentifier, obj.length);
+
             for(let n=0; n < obj.length; n++) {
                 const item = obj[n];
                 this.checkRelationship(parameters, relationshipDeclaration, item);
@@ -511,7 +519,7 @@ class ResourceValidator {
      */
     static reportFieldTypeViolation(id, propName, value, field) {
         let isArray = field.isArray() ? '[]' : '';
-        let typeOfValue = typeof value;
+        let typeOfValue: string = typeof value;
 
         if(value instanceof Identifiable) {
             typeOfValue = value.getFullyQualifiedType();
@@ -673,4 +681,5 @@ class ResourceValidator {
     }
 }
 
-export = ResourceValidator;
+export { ResourceValidator };
+export default ResourceValidator;

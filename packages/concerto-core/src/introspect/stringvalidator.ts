@@ -12,19 +12,20 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { ErrorCodes } = require('@accordproject/concerto-util');
-const { isNull } = require('@accordproject/concerto-util').NullUtil;
-const Validator = require('./validator');
+import { ErrorCodes, NullUtil } from '@accordproject/concerto-util';
+const { isNull } = NullUtil;
+import Validator from './validator';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const Field = require('./field');
-    const ScalarDeclaration = require('./scalardeclaration');
-}
+import type { ValidatedElement } from './validator';
+import type { IStringLengthValidator, IStringRegexValidator } from '@accordproject/concerto-metamodel';
+/* eslint-enable no-unused-vars */
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type Field from './field';
+import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -34,6 +35,12 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class StringValidator extends Validator{
+    declare validator: IStringRegexValidator | undefined;
+    // The metamodel makes both bounds optional, so an AST can leave either
+    // absent as well as explicitly null.
+    minLength: number | null | undefined;
+    maxLength: number | null | undefined;
+    regex: RegExp | null;
 
     /**
      * Create a StringValidator.
@@ -43,7 +50,7 @@ class StringValidator extends Validator{
      *
      * @throws {IllegalModelException}
      */
-    constructor(field, validator, lengthValidator) {
+    constructor(field: ValidatedElement, validator?: IStringRegexValidator, lengthValidator?: IStringLengthValidator) {
         super(field, validator);
         this.minLength = null;
         this.maxLength = null;
@@ -56,22 +63,25 @@ class StringValidator extends Validator{
             if(this.minLength === null && this.maxLength === null) {
                 // can't specify no upper and lower value
                 this.reportError(field.getName(), 'Invalid string length, minLength and-or maxLength must be specified.');
-            } else if (this.minLength < 0 || this.maxLength < 0) {
+            } else if ((this.minLength ?? 0) < 0 || (this.maxLength ?? 0) < 0) {
                 this.reportError(field.getName(), 'minLength and-or maxLength must be positive integers.');
             } else if (this.minLength === null || this.maxLength === null) {
                 // this is fine and means that we don't need to check whether minLength > maxLength
-            } else if(this.minLength > this.maxLength) {
+            } else if(this.minLength !== undefined && this.maxLength !== undefined && this.minLength > this.maxLength) {
                 this.reportError(field.getName(), 'minLength must be less than or equal to maxLength.');
             }
         }
 
         if (validator) {
             try {
-                const CustomRegExp = field?.parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp;
+                // ScalarDeclarations have no parent, so the custom RegExp option
+                // is only picked up for properties
+                const parent = 'getParent' in field ? field.getParent() : undefined;
+                const CustomRegExp = (parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp) as typeof RegExp;
                 this.regex = new CustomRegExp(validator.pattern, validator.flags);
             }
-            catch (exception: any) {
-                this.reportError(field.getName(), exception.message, ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
+            catch (exception) {
+                this.reportError(field.getName(), (exception as Error).message, ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
             }
         }
 
@@ -87,19 +97,41 @@ class StringValidator extends Validator{
      * @throws {IllegalModelException}
      * @private
      */
-    validate(identifier, value) {
+    validate(identifier: string | null, value: string): void {
         if(value !== null) {
             //Enforce string length rule first
-            if(this.minLength !== null && value.length < this.minLength) {
+            if(this.minLength !== null && this.minLength !== undefined && value.length < this.minLength) {
                 this.reportError(identifier, `The string length of '${value}' should be at least ${this.minLength} characters.`);
             }
-            if(this.maxLength !== null && value.length > this.maxLength) {
+            if(this.maxLength !== null && this.maxLength !== undefined && value.length > this.maxLength) {
                 this.reportError(identifier, `The string length of '${value}' should not exceed ${this.maxLength} characters.`);
             }
 
-            if (this.regex && !this.regex.test(value)) {
+            if (this.regex && !this.matchesRegex(value)) {
                 this.reportError(identifier, `Value '${value}' failed to match validation regex: ${this.regex}`);
             }
+        }
+    }
+
+    /**
+     * Tests a value against the validation regex. Returns true when no regex is
+     * specified.
+     * @param {string} value the value to test
+     * @returns {boolean} true if the value matches the validation regex
+     */
+    matchesRegex(value) {
+        if (!this.regex) {
+            return true;
+        }
+        // `test` advances `lastIndex` when the regex has the global or sticky flag, so
+        // testing the same value twice would otherwise alternate between matching and
+        // not matching. Reset it before and after so that every test is independent of
+        // previous ones, and so that getRegex() never hands out a poisoned object.
+        this.regex.lastIndex = 0;
+        try {
+            return this.regex.test(value);
+        } finally {
+            this.regex.lastIndex = 0;
         }
     }
 
@@ -107,14 +139,14 @@ class StringValidator extends Validator{
      * Returns the minLength for this validator, or null if not specified
      * @returns {number} the min length or null
      */
-    getMinLength() {
+    getMinLength(): number | null | undefined {
         return this.minLength;
     }
     /**
      * Returns the maxLength for this validator, or null if not specified
      * @returns {number} the max length or null
      */
-    getMaxLength() {
+    getMaxLength(): number | null | undefined {
         return this.maxLength;
     }
 
@@ -122,7 +154,7 @@ class StringValidator extends Validator{
      * Returns the RegExp object associated with the string validator, or null if not specified
      * @returns {RegExp} the RegExp object
      */
-    getRegex() {
+    getRegex(): RegExp | null {
         return this.regex;
     }
 
@@ -134,7 +166,7 @@ class StringValidator extends Validator{
      * @returns {boolean} True if this validator is compatible with the other
      * validator, false otherwise.
      */
-    compatibleWith(other) {
+    compatibleWith(other: Validator | null): boolean {
         if (!(other instanceof StringValidator)) {
             return false;
         }
@@ -167,4 +199,5 @@ class StringValidator extends Validator{
     }
 }
 
-export = StringValidator;
+export { StringValidator };
+export default StringValidator;

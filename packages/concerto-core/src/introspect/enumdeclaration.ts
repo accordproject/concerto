@@ -12,16 +12,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import ClassDeclaration = require('./classdeclaration');
+import ClassDeclaration from './classdeclaration';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./modelfile');
-}
+import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -61,4 +56,5 @@ class EnumDeclaration extends ClassDeclaration {
     }
 }
 
-export = EnumDeclaration;
+export { EnumDeclaration };
+export default EnumDeclaration;

@@ -19,18 +19,18 @@ const XRegExp = require('xregexp');
 
 const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const AssetDeclaration = require('../src/introspect/assetdeclaration');
-const ConceptDeclaration = require('../src/introspect/conceptdeclaration');
-const DecoratorFactory = require('../src/introspect/decoratorfactory');
-const EnumDeclaration = require('../src/introspect/enumdeclaration');
-const MapDeclaration = require('../src/introspect/mapdeclaration');
-const EventDeclaration = require('../src/introspect/eventdeclaration');
-const Factory = require('../src/factory');
-const ModelFile = require('../src/introspect/modelfile');
-const ModelManager = require('../src/modelmanager');
-const ParticipantDeclaration = require('../src/introspect/participantdeclaration');
-const Serializer = require('../src/serializer');
-const TypeNotFoundException = require('../src/typenotfoundexception');
+const { AssetDeclaration } = require('../src/introspect/assetdeclaration');
+const { ConceptDeclaration } = require('../src/introspect/conceptdeclaration');
+const { DecoratorFactory } = require('../src/introspect/decoratorfactory');
+const { EnumDeclaration } = require('../src/introspect/enumdeclaration');
+const { MapDeclaration } = require('../src/introspect/mapdeclaration');
+const { EventDeclaration } = require('../src/introspect/eventdeclaration');
+const { Factory } = require('../src/factory');
+const { ModelFile } = require('../src/introspect/modelfile');
+const { ModelManager } = require('../src/modelmanager');
+const { ParticipantDeclaration } = require('../src/introspect/participantdeclaration');
+const { Serializer } = require('../src/serializer');
+const { TypeNotFoundException } = require('../src/typenotfoundexception');
 const Util = require('./composer/composermodelutility');
 const COMPOSER_MODEL = require('./composer/composermodel');
 const ParserUtil = require('./introspect/parserutility');
@@ -41,7 +41,7 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 const tmp = require('tmp-promise');
-const BaseModelManager = require('../src/basemodelmanager');
+const { BaseModelManager } = require('../src/basemodelmanager');
 
 describe('ModelManager', () => {
 
@@ -723,8 +723,10 @@ concept Bar {
 }`, 'internal.cto', true);
             modelManager.getModelFile('org.acme@1.0.0').should.not.be.null;
 
-            // import all external models
-            return modelManager.updateExternalModels().should.be.rejectedWith(Error, 'Failed to load model file. Job: github://external.cto');
+            // import all external models. The exact HTTP status returned by GitHub
+            // for the bad URL can vary (e.g. 400 vs 404), so assert on the stable
+            // failure message rather than pinning a specific status code.
+            return modelManager.updateExternalModels().should.be.rejectedWith(Error, /Failed to load model file\. Job: github:\/\/external\.cto Details: Error: HTTP request failed with status: \d+/);
         });
 
         it('should fail using bad protocol and default model file loader', () => {
@@ -1169,6 +1171,63 @@ concept Bar {
             modelManager.addCTOModel(concertoModel);
             const result = modelManager.derivesFrom('org.accordproject.test@1.0.0.Person', 'concerto@1.0.0.Concept');
             result.should.be.true;
+        });
+    });
+
+    describe('#getAssignableConcreteTypes', () => {
+
+        it('should get assignable concrete types for an abstract base type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.getAssignableConcreteTypes('org.accordproject.test@1.0.0.Person');
+            result.length.should.equal(3);
+            result.map(d => d.getName()).should.include.members(['Employee', 'Manager', 'Customer']);
+        });
+
+        it('should get assignable concrete types for a concrete base type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.getAssignableConcreteTypes('org.accordproject.test@1.0.0.Employee');
+            result.length.should.equal(1);
+            result[0].getName().should.equal('Employee');
+        });
+
+        it('should return empty array for an absent base type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.getAssignableConcreteTypes('org.accordproject.test@1.0.0.DoesNotExist');
+            result.length.should.equal(0);
+        });
+
+    });
+
+    describe('#isAssignableTo', () => {
+
+        it('should return true when fqn is a subclass of the base type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.isAssignableTo('org.accordproject.test@1.0.0.Employee', 'org.accordproject.test@1.0.0.Person');
+            result.should.be.true;
+        });
+
+        it('should return true when fqn is the same concrete base type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.isAssignableTo('org.accordproject.test@1.0.0.Employee', 'org.accordproject.test@1.0.0.Employee');
+            result.should.be.true;
+        });
+
+        it('should return false when fqn is abstract', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.isAssignableTo('org.accordproject.test@1.0.0.Person', 'org.accordproject.test@1.0.0.Person');
+            result.should.be.false;
+        });
+
+        it('should return false for unrelated types', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.isAssignableTo('org.accordproject.test@1.0.0.Product', 'org.accordproject.test@1.0.0.Person');
+            result.should.be.false;
+        });
+
+        it('should return false for an absent candidate type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.isAssignableTo('org.accordproject.test@1.0.0.DoesNotExist', 'org.accordproject.test@1.0.0.Person');
+            result.should.be.false;
         });
     });
 

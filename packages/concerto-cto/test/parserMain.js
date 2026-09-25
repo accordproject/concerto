@@ -124,6 +124,174 @@ describe('parser', () => {
         });
     });
 
+    describe('collection size validator', () => {
+        it('Should not parse size with missing brackets', () => {
+            (() => Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=1,5 }'))
+                .should.throw();
+        });
+
+        it('Should not parse size with missing comma', () => {
+            (() => Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1 5] }'))
+                .should.throw();
+        });
+
+        it('Should not parse size with non-integer values', () => {
+            (() => Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1.5,3] }'))
+                .should.throw();
+        });
+
+        it('Should parse size with various spacing', () => {
+            const variants = [
+                'o String[] x size=[1,5]',
+                'o String[] x size=[ 1, 5 ]',
+                'o String[] x size=[1 , 5]',
+                'o String[] x size=[ 1 ,5 ]',
+            ];
+            variants.forEach(v => {
+                const ast = Parser.parse(`namespace t@1.0.0\nconcept A { ${v} }`, undefined, { skipLocationNodes: true });
+                const prop = ast.declarations[0].properties[0];
+                prop.sizeValidator.minSize.should.equal(1);
+                prop.sizeValidator.maxSize.should.equal(5);
+            });
+        });
+
+        it('Should parse size before other modifiers', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1,5] optional }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.sizeValidator.minSize.should.equal(1);
+            prop.isOptional.should.equal(true);
+        });
+
+        it('Should parse size after range validator', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o Integer[] x range=[0,100] size=[1,5] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.lower.should.equal(0);
+            prop.sizeValidator.minSize.should.equal(1);
+        });
+
+        it('Should parse size after length validator', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x length=[,50] size=[1,5] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.lengthValidator.maxLength.should.equal(50);
+            prop.sizeValidator.minSize.should.equal(1);
+        });
+
+        it('Should parse size with min only', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[3,] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.sizeValidator.minSize.should.equal(3);
+            should.not.exist(prop.sizeValidator.maxSize);
+        });
+
+        it('Should parse size with max only', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[,10] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            should.not.exist(prop.sizeValidator.minSize);
+            prop.sizeValidator.maxSize.should.equal(10);
+        });
+    });
+
+    describe('validator ordering', () => {
+
+        it('Should parse length before regex on String field', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String x length=[1,10] regex=/abc/ }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.pattern.should.equal('abc');
+            prop.lengthValidator.minLength.should.equal(1);
+            prop.lengthValidator.maxLength.should.equal(10);
+        });
+
+        it('Should parse size before regex and length on String array field', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1,5] length=[2,50] regex=/abc/ }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.pattern.should.equal('abc');
+            prop.lengthValidator.minLength.should.equal(2);
+            prop.lengthValidator.maxLength.should.equal(50);
+            prop.sizeValidator.minSize.should.equal(1);
+            prop.sizeValidator.maxSize.should.equal(5);
+        });
+
+        it('Should parse size before range on Integer field', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o Integer[] x size=[1,5] range=[0,100] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.lower.should.equal(0);
+            prop.validator.upper.should.equal(100);
+            prop.sizeValidator.minSize.should.equal(1);
+        });
+
+        it('Should parse size before range on Double field', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o Double[] x size=[1,5] range=[0.0,100.0] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.lower.should.equal(0);
+            prop.validator.upper.should.equal(100);
+            prop.sizeValidator.minSize.should.equal(1);
+        });
+
+        it('Should parse size before range on Long field', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o Long[] x size=[1,5] range=[0,100] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.lower.should.equal(0);
+            prop.validator.upper.should.equal(100);
+            prop.sizeValidator.minSize.should.equal(1);
+        });
+
+        it('Should parse length before regex on String scalar', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nscalar S extends String length=[1,100] regex=/.*/', undefined, { skipLocationNodes: true });
+            const decl = ast.declarations[0];
+            decl.validator.pattern.should.equal('.*');
+            decl.lengthValidator.minLength.should.equal(1);
+            decl.lengthValidator.maxLength.should.equal(100);
+        });
+
+        it('Should produce identical AST regardless of validator order', () => {
+            const ast1 = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x regex=/abc/ length=[1,10] size=[1,5] }', undefined, { skipLocationNodes: true });
+            const ast2 = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1,5] length=[1,10] regex=/abc/ }', undefined, { skipLocationNodes: true });
+            ast1.should.deep.equal(ast2);
+        });
+
+        it('Should not parse a duplicate regex validator on a String field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o String x regex=/a/ regex=/b/ }');
+            }).should.throw(/Duplicate regex validator/);
+        });
+
+        it('Should not parse a duplicate length validator on a String field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o String x length=[1,2] length=[30,40] }');
+            }).should.throw(/Duplicate length validator/);
+        });
+
+        it('Should not parse a duplicate range validator on an Integer field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o Integer x range=[0,10] range=[500,600] }');
+            }).should.throw(/Duplicate range validator/);
+        });
+
+        it('Should not parse a duplicate range validator on a Double field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o Double x range=[0.5,1.5] range=[2.5,3.5] }');
+            }).should.throw(/Duplicate range validator/);
+        });
+
+        it('Should not parse a duplicate range validator on a Long field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o Long x range=[0,10] range=[500,600] }');
+            }).should.throw(/Duplicate range validator/);
+        });
+
+        it('Should not parse a duplicate size validator on a String array field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1,2] size=[9,10] }');
+            }).should.throw(/Duplicate size validator/);
+        });
+
+        it('Should not parse a duplicate regex validator on a String scalar', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nscalar S extends String regex=/a/ regex=/b/');
+            }).should.throw(/Duplicate regex validator/);
+        });
+    });
+
     describe('identifiers', () => {
 
         const acceptedIdentifiers = [

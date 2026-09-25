@@ -12,18 +12,14 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import Property = require('./property');
-const IllegalModelException = require('./illegalmodelexception');
-const ModelUtil = require('../modelutil');
+import Property from './property';
+import IllegalModelException from './illegalmodelexception';
+import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-}
+import type { AstNode } from './decorated';
+import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -41,7 +37,7 @@ class RelationshipDeclaration extends Property {
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
+    constructor(parent: ClassDeclaration, ast: AstNode) {
         super(parent, ast);
     }
 
@@ -51,14 +47,14 @@ class RelationshipDeclaration extends Property {
      * @throws {IllegalModelException}
      * @protected
      */
-    validate(classDecl) {
+    validate(classDecl: ClassDeclaration): void {
         super.validate(classDecl);
         // relationship cannot point to primitive types
         if(!this.getType()) {
             throw new IllegalModelException('Relationship must have a type', classDecl.getModelFile(), this.ast.location);
         }
 
-        let classDeclaration: any = null;
+        let classDeclaration: ClassDeclaration | null = null;
 
         // you can't have a relationship with a primitive...
         if(ModelUtil.isPrimitiveType(this.getType())) {
@@ -96,7 +92,7 @@ class RelationshipDeclaration extends Property {
      * Returns a string representation of this property
      * @return {String} the string version of the property.
      */
-    toString() {
+    toString(): string {
         return 'RelationshipDeclaration {name=' + this.name + ', type=' + this.getFullyQualifiedTypeName() + ', array=' + this.array + ', optional=' + this.optional +'}';
     }
 
@@ -105,9 +101,10 @@ class RelationshipDeclaration extends Property {
      *
      * @return {boolean} true if the class is a relationship
      */
-    isRelationship() {
+    isRelationship(): boolean {
         return true;
     }
 }
 
-export = RelationshipDeclaration;
+export { RelationshipDeclaration };
+export default RelationshipDeclaration;

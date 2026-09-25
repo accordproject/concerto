@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import HTTPFileLoader = require('./httpfileloader');
+import HTTPFileLoader from './httpfileloader';
 
 /**
  * Loads Files from an external source, such as a URL.
@@ -55,4 +53,5 @@ class GitHubFileLoader<T> extends HTTPFileLoader<T> {
     }
 }
 
-export = GitHubFileLoader;
+export { GitHubFileLoader };
+export default GitHubFileLoader;

@@ -12,23 +12,19 @@
  * limitations under the License.
  */
 
-'use strict';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+import Declaration from './declaration';
+import IllegalModelException from './illegalmodelexception';
+import NumberValidator from './numbervalidator';
+import StringValidator from './stringvalidator';
+import { NullUtil as Util } from '@accordproject/concerto-util';
+import ModelUtil from '../modelutil';
 
-const Declaration = require('./declaration');
-const IllegalModelException = require('./illegalmodelexception');
-const NumberValidator = require('./numbervalidator');
-const StringValidator = require('./stringvalidator');
-const Util = require('@accordproject/concerto-util').NullUtil;
-const ModelUtil = require('../modelutil');
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const Validator = require('./validator');
-    const ClassDeclaration = require('./classdeclaration');
-}
+import type Validator from './validator';
+import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -43,6 +39,19 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class ScalarDeclaration extends Declaration {
+    // Populated by process(), which the Declaration constructor calls, so these
+    // carry definite assignment assertions rather than initialisers.
+    // superType, superTypeDeclaration, idField, timestamped and abstract exist
+    // only to mirror ClassDeclaration's shape; the accessors below are
+    // deprecated and answer with constants.
+    superType!: string | null;
+    superTypeDeclaration!: ClassDeclaration | null;
+    idField!: string | null;
+    timestamped!: boolean;
+    abstract!: boolean;
+    validator!: Validator | null;
+    type!: string | null;
+    defaultValue!: string | number | boolean | null;
     /**
      * Process the AST and build the model
      *
@@ -56,7 +65,8 @@ class ScalarDeclaration extends Declaration {
         if (ModelUtil.isPrimitiveType(scalarName)) {
             throw new IllegalModelException(
                 `Invalid scalar name '${scalarName}'. Name conflicts with primitive type.`,
-                this.ast.name.location // Directly use the AST node's location
+                this.modelFile,
+                this.ast.location
             );
         }
         this.superType = null;
@@ -136,7 +146,7 @@ class ScalarDeclaration extends Declaration {
      * @returns {Boolean} false as scalars are never identified
      * @deprecated
      */
-    isIdentified() {
+    isIdentified(): boolean {
         return false;
     }
 
@@ -145,7 +155,7 @@ class ScalarDeclaration extends Declaration {
      * @returns {Boolean} false as scalars are never identified
      * @deprecated
      */
-    isSystemIdentified() {
+    isSystemIdentified(): boolean {
         return false;
     }
 
@@ -154,7 +164,7 @@ class ScalarDeclaration extends Declaration {
      * @return {string} as scalars are never identified
      * @deprecated
      */
-    getIdentifierFieldName() {
+    getIdentifierFieldName(): string | null {
         return null;
     }
 
@@ -164,7 +174,7 @@ class ScalarDeclaration extends Declaration {
      *
      * @return {string} the FQN name of the super type or null
      */
-    getType() {
+    getType(): string | null {
         return this.type;
     }
 
@@ -175,7 +185,7 @@ class ScalarDeclaration extends Declaration {
      * @return {string} the FQN name of the super type or null
      * @deprecated
      */
-    getSuperType() {
+    getSuperType(): string | null {
         return null;
     }
 
@@ -184,7 +194,7 @@ class ScalarDeclaration extends Declaration {
      * @return {ClassDeclaration} the super type declaration, or null if there is no super type.
      * @deprecated
      */
-    getSuperTypeDeclaration() {
+    getSuperTypeDeclaration(): ClassDeclaration | null {
         return null;
     }
 
@@ -192,7 +202,7 @@ class ScalarDeclaration extends Declaration {
      * Returns the validator string for this scalar definition
      * @return {Validator} the validator for the field or null
      */
-    getValidator() {
+    getValidator(): Validator | null {
         return this.validator;
     }
 
@@ -200,7 +210,7 @@ class ScalarDeclaration extends Declaration {
      * Returns the default value for the field or null
      * @return {string | number | null} the default value for the field or null
      */
-    getDefaultValue() {
+    getDefaultValue(): string | number | boolean | null {
         return this.defaultValue;
     }
 
@@ -208,7 +218,7 @@ class ScalarDeclaration extends Declaration {
      * Returns the string representation of this class
      * @return {String} the string representation of the class
      */
-    toString() {
+    toString(): string {
         return 'ScalarDeclaration {id=' + this.getFullyQualifiedName() + '}';
     }
 
@@ -218,7 +228,7 @@ class ScalarDeclaration extends Declaration {
      * @return {boolean} true if the class is abstract
      * @deprecated
      */
-    isAbstract() {
+    isAbstract(): boolean {
         return true;
     }
 
@@ -227,7 +237,7 @@ class ScalarDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is a scalar
      */
-    isScalarDeclaration() {
+    isScalarDeclaration(): boolean {
         return true;
     }
 
@@ -237,7 +247,7 @@ class ScalarDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      * @deprecated
      */
-    isAsset() {
+    isAsset(): boolean {
         return false;
     }
 
@@ -247,7 +257,7 @@ class ScalarDeclaration extends Declaration {
      * @return {boolean} true if the class is a participant
      * @deprecated
      */
-    isParticipant() {
+    isParticipant(): boolean {
         return false;
     }
 
@@ -257,7 +267,7 @@ class ScalarDeclaration extends Declaration {
      * @return {boolean} true if the class is a transaction
      * @deprecated
      */
-    isTransaction() {
+    isTransaction(): boolean {
         return false;
     }
 
@@ -267,7 +277,7 @@ class ScalarDeclaration extends Declaration {
      * @return {boolean} true if the class is an event
      * @deprecated
      */
-    isEvent() {
+    isEvent(): boolean {
         return false;
     }
 
@@ -277,10 +287,11 @@ class ScalarDeclaration extends Declaration {
      * @return {boolean} true if the class is a concept
      * @deprecated
      */
-    isConcept() {
+    isConcept(): boolean {
         return false;
     }
 
 }
 
-export = ScalarDeclaration;
+export { ScalarDeclaration };
+export default ScalarDeclaration;

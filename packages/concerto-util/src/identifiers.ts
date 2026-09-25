@@ -43,9 +43,11 @@ export function normalizeIdentifier(identifier: string | null | undefined, trunc
         throw new Error(`Unsupported identifier type, '${typeof result}'.`);
     }
 
-    // 1. If the identifier begins with a number, add a leading underscore
+    // 1. If the identifier begins with a character that is only valid as a
+    // continuation, a digit, a combining mark or a connector other than _,
+    // add a leading underscore
     result = result
-        .replace(/^\p{Nd}/u, '_$&')
+        .replace(/^(?:\p{Nd}|\p{Mn}|\p{Mc}|(?!_)\p{Pc})/u, '_$&')
 
     // 2. Substitute Whitespace, and joiners
         .replace(/[-‐−@#:;><|/\\\u200c\u200d]/g, '_')

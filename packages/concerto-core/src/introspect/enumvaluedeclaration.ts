@@ -12,16 +12,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import Property = require('./property');
+import Property from './property';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-}
+import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -63,4 +58,5 @@ class EnumValueDeclaration extends Property {
     }
 }
 
-export = EnumValueDeclaration;
+export { EnumValueDeclaration };
+export default EnumValueDeclaration;

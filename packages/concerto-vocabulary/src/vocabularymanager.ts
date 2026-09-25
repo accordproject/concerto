@@ -14,7 +14,7 @@
 
 import YAML from 'yaml';
 import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-import Vocabulary = require('./vocabulary');
+import Vocabulary from './vocabulary';
 import { ModelUtil, ModelManager } from '@accordproject/concerto-core';
 import { parseVocabularyYaml } from './yamlparser';
 
@@ -456,4 +456,5 @@ class VocabularyManager {
     }
 }
 
-export = VocabularyManager;
+export { VocabularyManager };
+export default VocabularyManager;

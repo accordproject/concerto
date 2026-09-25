@@ -12,12 +12,9 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import * as fs from 'fs';
 import * as fsPath from 'path';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const slash = require('slash');
+import slash from 'slash';
 
 /**
  * Writes a set of model files to disk

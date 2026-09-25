@@ -4,6 +4,12 @@ import { getDeclarationType, getPropertyType, getValidatorType } from '../../src
 // This test suite should disappear once we port concerto-core to TypeScript because the error branches will be enforced by the transpiler.
 
 const modelManager = new ModelManager();
+
+// These stubs are deliberately incomplete ASTs - they carry no $class - because
+// the suite exists to reach error branches a well-formed model cannot.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const asAst = (ast: object): any => ast;
+
 const propertyAst = {
     name: 'myProp',
     type: 'Boolean'
@@ -13,12 +19,12 @@ const modelAst = {
     properties: []
 };
 
-const modelFile = new ModelFile(modelManager, modelAst, null, 'test.cto');
+const modelFile = new ModelFile(modelManager, asAst(modelAst), null, 'test.cto');
 
-const classDeclaration = new ClassDeclaration(modelFile, modelAst);
-const property = new Property(classDeclaration, propertyAst);
-const field = new Field(classDeclaration, propertyAst);
-const validator = new Validator(field, {});
+const classDeclaration = new ClassDeclaration(modelFile, asAst(modelAst));
+const property = new Property(classDeclaration, asAst(propertyAst));
+const field = new Field(classDeclaration, asAst(propertyAst));
+const validator = new Validator(field, asAst({}));
 
 test('should throw for unknown class declaration type', () => {
     // Note: The error message format might have slightly changed with TS class toString(), but let's try strict first

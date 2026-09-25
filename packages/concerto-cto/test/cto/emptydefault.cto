@@ -1,0 +1,12 @@
+namespace org.acme@1.0.0
+
+scalar EmptyStringScalar extends String default=""
+
+scalar NonEmptyStringScalar extends String default="something"
+
+concept EmptyDefaults {
+  o String emptyString default=""
+  o String nonEmptyString default="something"
+  o String emptyStringWithLength default="" length=[0,10]
+  o EmptyStringScalar emptyStringScalar
+}

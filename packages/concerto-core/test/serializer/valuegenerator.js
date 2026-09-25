@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ValueGeneratorFactory = require('../../src/serializer/valuegenerator');
+const { ValueGeneratorFactory } = require('../../src/serializer/valuegenerator');
 
 const chai = require('chai');
 const expect = chai.expect;
@@ -205,6 +205,21 @@ describe('ValueGenerator', function() {
                 }
                 if (max) {
                     expect(output.length <= max).to.be.true;
+                }
+            });
+        });
+
+        it('getRegex with string length should return a string that matches a fixed length regex', function() {
+            [
+                [1, 10],
+                [null, 10],
+                [1, null],
+                [3, 3],
+            ].forEach(([min, max]) => {
+                const regex = /^[a-z]{3}$/;
+                for (let i = 0; i < 10; i++) {
+                    const output = ValueGeneratorFactory.sample().getRegex(regex, min, max);
+                    expect(regex.test(output)).to.be.true;
                 }
             });
         });

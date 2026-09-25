@@ -1,0 +1,151 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "test.collectionsize@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Person",
+      "isAbstract": false,
+      "properties": []
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+      "name": "PhoneBook",
+      "key": {
+        "$class": "concerto.metamodel@1.0.0.StringMapKeyType"
+      },
+      "value": {
+        "$class": "concerto.metamodel@1.0.0.StringMapValueType"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Team",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "tags",
+          "isArray": true,
+          "isOptional": false,
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "minSize": 2,
+            "maxSize": 5
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "middle",
+          "isArray": true,
+          "isOptional": true,
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "maxSize": 3
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "scores",
+          "isArray": true,
+          "isOptional": false,
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "minSize": 1
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+          "name": "flags",
+          "isArray": true,
+          "isOptional": false,
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "minSize": 1,
+            "maxSize": 10
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "name": "weights",
+          "isArray": true,
+          "isOptional": true,
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "minSize": 2,
+            "maxSize": 4
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "ids",
+          "isArray": true,
+          "isOptional": false,
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "minSize": 1,
+            "maxSize": 100
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DateTimeProperty",
+          "name": "timestamps",
+          "isArray": true,
+          "isOptional": false,
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "minSize": 1,
+            "maxSize": 5
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "members",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Person"
+          },
+          "isArray": true,
+          "isOptional": false,
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "minSize": 1,
+            "maxSize": 20
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "contacts",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "PhoneBook"
+          },
+          "isArray": false,
+          "isOptional": false,
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "minSize": 1,
+            "maxSize": 50
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "advisors",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Person"
+          },
+          "isArray": true,
+          "isOptional": false,
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "minSize": 1,
+            "maxSize": 3
+          }
+        }
+      ]
+    }
+  ]
+}

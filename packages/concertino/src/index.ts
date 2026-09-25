@@ -49,7 +49,7 @@ export class ConcertinoConverter {
      */
     constructor(options: ConcertinoOptions = {}) {
         this.options = {
-            version: '4.0.0-alpha.2',
+            version: '5.0.0',
             ...options
         };
         this.ajv = new Ajv();
@@ -99,4 +99,4 @@ export class ConcertinoConverter {
 export { convertToConcertino, convertToMetamodel };
 
 // Export types
-export * from './spec/concertino.metamodel@4.0.0-alpha.2';
+export * from './spec/concertino.metamodel@5.0.0';

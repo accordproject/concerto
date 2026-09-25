@@ -12,8 +12,8 @@
  * limitations under the License.
  */
 
-import VocabularyManager = require('./vocabularymanager');
-import Vocabulary = require('./vocabulary');
+import VocabularyManager from './vocabularymanager';
+import Vocabulary from './vocabulary';
 
 export {
     VocabularyManager,

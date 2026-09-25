@@ -12,16 +12,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const Decorator = require('./decorator');
-    const Property = require('./property');
-}
+import type Decorated from './decorated';
+import type { AstNode } from './decorated';
+import type Decorator from './decorator';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -39,10 +34,11 @@ class DecoratorFactory {
      * @param {Object} ast - The AST created by the parser
      * @return {Decorator} The decorator.
      */
-    newDecorator(parent, ast) {
+    newDecorator(parent: Decorated, ast: AstNode): Decorator | null {
         throw new Error('abstract function called');
     }
 
 }
 
-export = DecoratorFactory;
+export { DecoratorFactory };
+export default DecoratorFactory;

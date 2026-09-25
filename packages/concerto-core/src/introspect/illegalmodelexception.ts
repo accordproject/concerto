@@ -12,16 +12,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { BaseFileException } = require('@accordproject/concerto-util');
+import { BaseFileException } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./modelfile');
-}
+import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -65,4 +60,5 @@ class IllegalModelException extends BaseFileException {
     }
 }
 
-export = IllegalModelException;
+export { IllegalModelException };
+export default IllegalModelException;

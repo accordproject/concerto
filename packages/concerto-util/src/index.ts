@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Concerto utility module. Concerto is a framework for defining domain
  * specific models.
@@ -22,42 +20,43 @@
  */
 
 // Exceptions
-import BaseException = require('./baseexception');
-import BaseFileException = require('./basefileexception');
+import BaseException from './baseexception';
+import BaseFileException from './basefileexception';
 
 // Transitive closure downloader
-import FileDownloader = require('./filedownloader');
+import FileDownloader from './filedownloader';
 
 // File Loaders
-import CompositeFileLoader = require('./loaders/compositefileloader');
-import DefaultFileLoader = require('./loaders/defaultfileloader');
-import GitHubFileLoader = require('./loaders/githubfileloader');
-import HTTPFileLoader = require('./loaders/httpfileloader');
+import CompositeFileLoader from './loaders/compositefileloader';
+import DefaultFileLoader from './loaders/defaultfileloader';
+import GitHubFileLoader from './loaders/githubfileloader';
+import HTTPFileLoader from './loaders/httpfileloader';
 export type { FileLoader } from './loaders/fileloader';
 
 // Writers
-import Writer = require('./writer');
-import FileWriter = require('./filewriter');
-import ModelWriter = require('./modelwriter');
-import InMemoryWriter = require('./inmemorywriter');
+import Writer from './writer';
+import FileWriter from './filewriter';
+import * as ModelWriter from './modelwriter';
+export type { WritableModelFile, WriteModelsOptions } from './modelwriter';
+import InMemoryWriter from './inmemorywriter';
 
 // Logger
-import Logger = require('./logger');
+import Logger from './logger';
 
 // TypedStack
-import TypedStack = require('./typedstack');
+import TypedStack from './typedstack';
 
 // Label
-import Label = require('./label');
+import * as Label from './label';
 
 // Identifiers
-import Identifiers = require('./identifiers');
+import * as Identifiers from './identifiers';
 
 // Error codes
-import ErrorCodes = require('./errorcodes');
+import * as ErrorCodes from './errorcodes';
 
 // NullUtil
-import NullUtil = require('./null');
+import NullUtil from './null';
 
 // Warning
 import * as Warning from './warning';

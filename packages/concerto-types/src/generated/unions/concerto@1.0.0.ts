@@ -16,6 +16,7 @@ import type {
 	IMapValueType,
 	IEnumProperty,
 	IProperty,
+	ICollectionSizeValidator,
 	IStringRegexValidator,
 	IStringLengthValidator,
 	IDoubleDomainValidator,
@@ -32,25 +33,26 @@ export interface IConcept {
    $class: string;
 }
 
-export type ConceptUnion = IPosition | 
-IRange | 
-ITypeIdentifier | 
-IDecoratorLiteral | 
-IDecorator | 
-IIdentified | 
-IDeclaration | 
-IMapKeyType | 
-IMapValueType | 
-IEnumProperty | 
-IProperty | 
-IStringRegexValidator | 
-IStringLengthValidator | 
-IDoubleDomainValidator | 
-IIntegerDomainValidator | 
-ILongDomainValidator | 
-IAliasedType | 
-IImport | 
-IModel | 
+export type ConceptUnion = IPosition |
+IRange |
+ITypeIdentifier |
+IDecoratorLiteral |
+IDecorator |
+IIdentified |
+IDeclaration |
+IMapKeyType |
+IMapValueType |
+IEnumProperty |
+IProperty |
+ICollectionSizeValidator |
+IStringRegexValidator |
+IStringLengthValidator |
+IDoubleDomainValidator |
+IIntegerDomainValidator |
+ILongDomainValidator |
+IAliasedType |
+IImport |
+IModel |
 IModels;
 
 export interface IAsset extends IConcept {

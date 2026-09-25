@@ -140,6 +140,54 @@ describe('concertino edge cases and error handling', () => {
         }).toThrow(/Unsupported object type/);
     });
 
+    it('should roundtrip sizeValidator on array and map properties', () => {
+        const converter = new ConcertinoConverter();
+        const ast = {
+            $class: 'concerto.metamodel@1.0.0.Models',
+            models: [{
+                $class: 'concerto.metamodel@1.0.0.Model',
+                namespace: 'org.size@1.0.0',
+                declarations: [{
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Thing',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'tags',
+                            isArray: true,
+                            isOptional: false,
+                            sizeValidator: {
+                                $class: 'concerto.metamodel@1.0.0.CollectionSizeValidator',
+                                minSize: 1,
+                                maxSize: 10
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.IntegerProperty',
+                            name: 'scores',
+                            isArray: true,
+                            isOptional: true,
+                            sizeValidator: {
+                                $class: 'concerto.metamodel@1.0.0.CollectionSizeValidator',
+                                minSize: 2
+                            }
+                        }
+                    ]
+                }]
+            }]
+        };
+
+        const concertino = converter.fromConcertoMetamodel(ast);
+        const declarations = concertino.declarations as any;
+        const props = declarations['org.size@1.0.0.Thing'].properties;
+        expect(props.tags.size).toStrictEqual([1, 10]);
+        expect(props.scores.size).toStrictEqual([2, null]);
+
+        const metamodel = converter.toConcertoMetamodel(concertino);
+        expect(metamodel).toStrictEqual(ast);
+    });
+
     it('should throw for parent === undefined in getInheritanceChain', () => {
         expect(() => {
             // @ts-expect-error purposely invalid

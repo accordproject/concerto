@@ -14,9 +14,9 @@
 
 'use strict';
 
-const Factory = require('../src/factory');
-const ModelManager = require('../src/modelmanager');
-const TypeNotFoundException = require('../src/typenotfoundexception');
+const { Factory } = require('../src/factory');
+const { ModelManager } = require('../src/modelmanager');
+const { TypeNotFoundException } = require('../src/typenotfoundexception');
 const uuid = require('uuid');
 const Util = require('./composer/composermodelutility');
 const dayjs = require('dayjs');
@@ -106,6 +106,19 @@ describe('Factory', function() {
         it('should create a new instance with a specified ID', function() {
             const resource = factory.newResource(namespace, assetName, 'MY_ID_1');
             resource.assetId.should.equal('MY_ID_1');
+        });
+
+        it('should repeatedly create a new instance with an ID matching a global regex', function() {
+            const regexModelManager = new ModelManager();
+            regexModelManager.addCTOModel(`
+            namespace org.acme.regex@1.0.0
+            asset RegexAsset identified by assetId {
+                o String assetId regex=/^[A-Z]{3}$/g
+            }`);
+            const regexFactory = new Factory(regexModelManager);
+            regexFactory.newResource('org.acme.regex@1.0.0', 'RegexAsset', 'ABC').assetId.should.equal('ABC');
+            regexFactory.newResource('org.acme.regex@1.0.0', 'RegexAsset', 'ABC').assetId.should.equal('ABC');
+            regexFactory.newResource('org.acme.regex@1.0.0', 'RegexAsset', 'ABC').assetId.should.equal('ABC');
         });
 
         it('should create a new validating instance by default', function() {

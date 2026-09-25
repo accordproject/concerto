@@ -12,9 +12,15 @@
  * limitations under the License.
  */
 
-'use strict';
+import Identifiable from './identifiable';
 
-const Identifiable = require('./identifiable');
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type BaseModelManager from '../basemodelmanager';
+import type ClassDeclaration from '../introspect/classdeclaration';
+import type { Dayjs } from 'dayjs';
+/* eslint-enable no-unused-vars */
+
 
 /**
  *
@@ -48,10 +54,10 @@ class Resource extends Identifiable {
      * @param {string} ns - The namespace this instance.
      * @param {string} type - The type this instance.
      * @param {string} id - The identifier of this instance.
-     * @param {string} timestamp - The timestamp of this instance
+     * @param {Dayjs} [timestamp] - The timestamp of this instance
      * @private
      */
-    constructor(modelManager, classDeclaration, ns, type, id, timestamp) {
+    constructor(modelManager: BaseModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id?: string, timestamp?: Dayjs | null) {
         super(modelManager, classDeclaration, ns, type, id, timestamp);
     }
 
@@ -102,4 +108,5 @@ class Resource extends Identifiable {
 
 }
 
-export = Resource;
+export { Resource };
+export default Resource;

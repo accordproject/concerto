@@ -14,13 +14,13 @@
 
 'use strict';
 
-const IllegalModelException = require('../../src/introspect/illegalmodelexception');
+const { IllegalModelException } = require('../../src/introspect/illegalmodelexception');
 
-const MapDeclaration = require('../../src/introspect/mapdeclaration');
-const MapKeyType = require('../../src/introspect/mapkeytype');
-const MapValueType = require('../../src/introspect/mapvaluetype');
-const ModelManager = require('../../src/modelmanager');
-const ModelFile = require('../../src/introspect/modelfile');
+const { MapDeclaration } = require('../../src/introspect/mapdeclaration');
+const { MapKeyType } = require('../../src/introspect/mapkeytype');
+const { MapValueType } = require('../../src/introspect/mapvaluetype');
+const { ModelManager } = require('../../src/modelmanager');
+const { ModelFile } = require('../../src/introspect/modelfile');
 
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');

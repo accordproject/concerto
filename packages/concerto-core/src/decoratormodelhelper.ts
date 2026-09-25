@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const decoratorModelAst = require('./decoratormodel.json');
+import decoratorModelAst from './decoratormodel.json';
 
 /**
  * Gets the decorator 'concerto.decorator' model
@@ -33,4 +31,5 @@ function getDecoratorModel() {
     return { decoratorModelFile, decoratorModelCto, decoratorModelAst: ast };
 }
 
-export = { getDecoratorModel };
+export { getDecoratorModel };
+export default { getDecoratorModel };

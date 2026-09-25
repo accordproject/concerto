@@ -16,6 +16,7 @@ import type {
 	IMapValueType,
 	IEnumProperty,
 	IProperty,
+	ICollectionSizeValidator,
 	IStringRegexValidator,
 	IStringLengthValidator,
 	IDoubleDomainValidator,
@@ -39,7 +40,7 @@ import type {
 	IVocabulary,
 	IDecoratorValues,
 	IDecoratorValue
-} from './concertino.metamodel@4.0.0-alpha.2';
+} from './concertino.metamodel@5.0.0';
 
 // interfaces
 export interface IConcept {
@@ -57,6 +58,7 @@ IMapKeyType |
 IMapValueType | 
 IEnumProperty | 
 IProperty | 
+ICollectionSizeValidator | 
 IStringRegexValidator | 
 IStringLengthValidator | 
 IDoubleDomainValidator | 

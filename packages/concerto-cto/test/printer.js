@@ -22,7 +22,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-const { Printer } = require('../src');
+const { Printer, Parser } = require('../src');
 
 /**
  * Get the name and content of all cto files
@@ -87,6 +87,108 @@ describe('parser', () => {
                 }
             ]
         })).should.throw(Error, 'The declaration "Self_Extending" cannot extend itself.');
+    });
+
+    it('Should escape quotes and backslashes in String default values', () => {
+        const cto = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [],
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'C',
+                isAbstract: false,
+                properties: [{
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'quoted',
+                    isArray: false,
+                    isOptional: false,
+                    defaultValue: 'he said "hi"'
+                }, {
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'slashed',
+                    isArray: false,
+                    isOptional: false,
+                    defaultValue: 'a\b'
+                }]
+            }],
+        });
+        cto.should.include('default="he said \\"hi\\""');
+        cto.should.include('default="a\\b"');
+    });
+
+    it('Should produce parseable CTO for String defaults containing quotes', () => {
+        const cto = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [],
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'C',
+                isAbstract: false,
+                properties: [{
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'quoted',
+                    isArray: false,
+                    isOptional: false,
+                    defaultValue: 'he said "hi"'
+                }]
+            }],
+        });
+        const reparsed = Parser.parse(cto);
+        reparsed.declarations[0].properties[0].defaultValue.should.equal('he said "hi"');
+    });
+
+    it('Should escape quotes in decorator string arguments', () => {
+        const cto = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [],
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'C',
+                isAbstract: false,
+                decorators: [{
+                    $class: 'concerto.metamodel@1.0.0.Decorator',
+                    name: 'Term',
+                    arguments: [{
+                        $class: 'concerto.metamodel@1.0.0.DecoratorString',
+                        value: 'he said "hi"'
+                    }]
+                }],
+                properties: []
+            }],
+        });
+        const reparsed = Parser.parse(cto);
+        reparsed.declarations[0].decorators[0].arguments[0].value.should.equal('he said "hi"');
+    });
+
+    it('Should escape forward slashes and line terminators in regex validators', () => {
+        const cto = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [],
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'C',
+                isAbstract: false,
+                properties: [{
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'path',
+                    isArray: false,
+                    isOptional: false,
+                    validator: {
+                        $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
+                        pattern: 'a/b',
+                        flags: ''
+                    }
+                }]
+            }],
+        });
+        cto.should.include('regex=/a\\/b/');
+        const reparsed = Parser.parse(cto);
+        const pattern = reparsed.declarations[0].properties[0].validator.pattern;
+        new RegExp(pattern).test('a/b').should.equal(true);
     });
 
     it('Should handle ImportTypes with aliased types', () => {

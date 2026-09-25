@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 
@@ -182,4 +180,5 @@ class Logger {
     static silly(...args: unknown[]): void{ this.dispatch('silly', ...args); }
 }
 
-export = Logger;
+export { Logger };
+export default Logger;
