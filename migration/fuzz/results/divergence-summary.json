@@ -1,7 +1,8 @@
 {
-  "total_divergences": 5248,
+  "total_divergences": 3554,
+  "expected_divergences": 1694,
+  "_note": "Serializer.fromJSON | ts=TypeError rust=Error (1,694) moved out of by_class_pair and into expected_divergences this revision: it is the DV-015 crash, maintainer-accepted via accordproject/concerto-rust#156, and lib/expected-divergences.js now excludes it before a case is ever counted. Everything else, including the superficially similar ts=TypeNotFoundException rust=Error pair below (a different bug, owned by accordproject/concerto-rust#160), is unchanged.",
   "by_class_pair": {
-    "Serializer.fromJSON | ts=TypeError rust=Error": 1694,
     "Serializer.fromJSON | ts=TypeNotFoundException rust=Error": 1059,
     "ModelManager.addModelFile | ts=ok rust=TypeError": 441,
     "ModelManager.fromAst | ts=IllegalModelException rust=TypeError": 396,

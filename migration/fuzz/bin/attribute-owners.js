@@ -45,8 +45,11 @@ const CLUSTERS_FILE = path.join(__dirname, '..', 'results', 'triage-clusters.jso
 // above); update this table, not the ledger, if a task's issue number
 // changes or a new split lands.
 const OWNERS = {
+    // Serializer.fromJSON has two DIFFERENT ledger-unowned themes, not one —
+    // see below. This entry is the fallback for a cluster this file's
+    // per-cluster rules (below) don't specifically recognise.
     'Serializer.fromJSON': {
-        theme: 'T1',
+        theme: 'T1 (unclassified)',
         ledger: 'P2-01+P4-03 (src/modelutil.ts ModelUtil.getShortName/getNamespace), P3-01+P4-10 (src/serializer.ts Serializer.fromJSON fast path)',
         tasks: [
             { task: 'P2-01', issue: 'accordproject/concerto-rust#45', state: 'closed' },
@@ -54,7 +57,7 @@ const OWNERS = {
             { task: 'P3-01a', issue: 'accordproject/concerto-rust#56', state: 'closed' },
             { task: 'P4-10', issue: 'accordproject/concerto-rust#69', state: 'closed' },
         ],
-        status: 'unowned: every ledger-attributed task is merged and closed; a new follow-up issue is required (see TRIAGE.md T1)',
+        status: 'unowned: every ledger-attributed task is merged and closed, and this cluster does not match either of the two known Serializer.fromJSON $class themes (DV-015/#156, #160) — needs its own look.',
     },
     'ModelManager.fromAst': {
         theme: 'T2',
@@ -79,11 +82,44 @@ const OWNERS = {
 };
 OWNERS['ModelManager.addModelFile'] = OWNERS['ModelManager.fromAst'];
 
+// accordproject/concerto-rust#160: filed during this review-fix pass, once
+// re-deriving the 98 "T1" clusters against lib/expected-divergences.js's
+// narrow #156 match found that only 7 of them (1,694 of 2,754 divergences)
+// are the DV-015 crash #156 actually decided on. The other 91 — a
+// non-string $class (array/object) that TS resolves to a *different*,
+// non-crashing outcome (TypeNotFoundException) via Array.prototype's own
+// lastIndexOf, plus one unrelated ts=ok/rust=error DateTime outlier folded
+// into the same op — were never covered by #156's sign-off and needed a
+// new issue of their own, same as T1 needed #156 in the first place.
+const OWNER_160 = {
+    theme: 'T1b (Serializer.fromJSON, non-crash $class / unrelated outlier)',
+    ledger: 'same as Serializer.fromJSON above',
+    tasks: [],
+    status: 'owned: accordproject/concerto-rust#160 (new issue, filed this revision) — not covered by #156, which is scoped to the TypeError crash signature only.',
+    issue: 'accordproject/concerto-rust#160',
+};
+
+/**
+ * Per-cluster override for Serializer.fromJSON, where a single per-op
+ * OWNERS entry can't tell two different bugs apart (accordproject/
+ * concerto-rust#76 review: "assign owners per cluster rather than per op
+ * where they differ"). Clusters whose divergence is the DV-015 crash never
+ * reach this file at all (bin/fuzz.js / bin/triage.js exclude them via
+ * lib/expected-divergences.js before clustering); every other
+ * Serializer.fromJSON cluster here is owned by #160.
+ * @param {object} cluster a results/triage-clusters.json cluster
+ * @returns {object|null} an owner override, or null to fall back to OWNERS[op]
+ */
+function clusterOverride(cluster) {
+    if (cluster.op === 'Serializer.fromJSON') { return OWNER_160; }
+    return null;
+}
+
 function main() {
     const data = JSON.parse(fs.readFileSync(CLUSTERS_FILE, 'utf8'));
     let unowned = 0;
     for (const c of data.clusters) {
-        c.owner = OWNERS[c.op] || null;
+        c.owner = clusterOverride(c) || OWNERS[c.op] || null;
         if (!c.owner) { unowned++; }
     }
     fs.writeFileSync(CLUSTERS_FILE, JSON.stringify(data, null, 2));

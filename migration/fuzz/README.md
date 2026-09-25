@@ -42,6 +42,15 @@ lib/
                 kind, templated message) shared by bin/triage.js and
                 bin/minimize-clusters.js, so both agree on what "the same cluster"
                 means.
+  expected-divergences.js
+                signatures the maintainer has explicitly accepted as permanent,
+                documented divergences (each citing the DIVERGENCES.md row in
+                accordproject/concerto-rust that records the decision), matched
+                narrowly (same op, same TS error class/exact message, same Rust
+                error class/message prefix). bin/fuzz.js and bin/triage.js both use
+                it to exclude a matching case *before* it is ever counted as an
+                unresolved divergence. See accordproject/concerto-rust#156 (DV-015)
+                for how the first entry was added.
 bin/
   fuzz.js       the driver: fast-check picks (seedIndex, mutationSeed) pairs
                 deterministically from --run-seed, lib/mutate.js applies them,
@@ -62,18 +71,26 @@ bin/
                 reproducer that needs no seed, run-seed or PRNG to replay.
   attribute-owners.js
                 writes each cluster's `owner` field from a fixed op -> ledger-row
-                -> GitHub-issue table (see the file for how it was resolved).
+                -> GitHub-issue table (see the file for how it was resolved), with a
+                `clusterOverride` for cases where one op hides two different bugs
+                with two different owners (Serializer.fromJSON's T1b, owned by #160,
+                is not the same as its T1 crash, which is excluded before clustering
+                and never reaches this file at all).
   finalize-triage.js
                 one-off helper: prints TRIAGE.md's headline table from
                 results/run-42.json, then chains triage.js, minimize-clusters.js
                 (only if FIXTURES_DIR/CONCERTO_ENGINE_MODULE are set) and
                 attribute-owners.js.
 results/
-  run-*.json          one run's summary (planned/ran/agree/divergences/harness errors,
-                      broken down by op).
+  run-*.json          one run's summary (planned/ran/agree/divergences/
+                      expectedDivergences/harness errors, broken down by op).
   divergences.jsonl   one line per unresolved divergence: {op, seedFile,
                       mutationSeed, ts: <canonical outcome>, rust: <canonical outcome>}.
                       Reproduce with the "Reproducing a divergence" recipe below.
+  expected-divergences.jsonl
+                      same shape, plus {dv, issue}: cases that differ but matched
+                      lib/expected-divergences.js (a maintainer-accepted, documented
+                      divergence). Kept for visibility; not unresolved, not clustered.
   triage-clusters.json
                       one entry per signature cluster: {sig, op, count, sample,
                       minimized, owner}. `sample` is bin/triage.js's raw first

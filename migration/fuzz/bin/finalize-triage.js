@@ -32,13 +32,13 @@ const path = require('path');
 
 const runFile = path.join(__dirname, '..', 'results', 'run-42.json');
 const run = JSON.parse(fs.readFileSync(runFile, 'utf8'));
-console.log('| op | ran | agree | divergences |');
-console.log('|---|---|---|---|');
+console.log('| op | ran | agree | divergences | expected |');
+console.log('|---|---|---|---|---|');
 for (const [op, s] of Object.entries(run.byOp)) {
-    console.log(`| ${op} | ${s.ran} | ${s.agree} | ${s.divergences} |`);
+    console.log(`| ${op} | ${s.ran} | ${s.agree} | ${s.divergences} | ${s.expectedDivergences || 0} |`);
 }
 console.log('');
-console.log(`total: ran=${run.ran} agree=${run.agree} divergences=${run.divergences} harnessErrorsTs=${run.harnessErrorsTs} harnessErrorsRust=${run.harnessErrorsRust}`);
+console.log(`total: ran=${run.ran} agree=${run.agree} divergences=${run.divergences} expectedDivergences=${run.expectedDivergences || 0} harnessErrorsTs=${run.harnessErrorsTs} harnessErrorsRust=${run.harnessErrorsRust}`);
 
 const { execSync } = require('child_process');
 execSync(`node ${path.join(__dirname, 'triage.js')} ${path.join(__dirname, '..', 'results', 'divergences.jsonl')} > ${path.join(__dirname, '..', 'results', 'triage-clusters.json')}`);

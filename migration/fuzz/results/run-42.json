@@ -6,30 +6,36 @@
   "planned": 60000,
   "ran": 60000,
   "agree": 54752,
-  "divergences": 5248,
+  "divergences": 3554,
+  "expectedDivergences": 1694,
   "harnessErrorsTs": 0,
   "harnessErrorsRust": 0,
   "byOp": {
     "Resource.validate": {
       "ran": 15942,
       "agree": 15942,
-      "divergences": 0
+      "divergences": 0,
+      "expectedDivergences": 0
     },
     "Serializer.fromJSON": {
       "ran": 12454,
       "agree": 9700,
-      "divergences": 2754
+      "divergences": 1060,
+      "expectedDivergences": 1694
     },
     "ModelManager.fromAst": {
       "ran": 19313,
       "agree": 17684,
-      "divergences": 1629
+      "divergences": 1629,
+      "expectedDivergences": 0
     },
     "ModelManager.addModelFile": {
       "ran": 12291,
       "agree": 11426,
-      "divergences": 865
+      "divergences": 865,
+      "expectedDivergences": 0
     }
   },
-  "finished": "2026-09-25T17:10:49.256Z"
+  "finished": "2026-09-25T17:10:49.256Z",
+  "_note": "Recomputed by this review-fix pass (not a fresh bin/fuzz.js run): the original run's divergences.jsonl was split by lib/expected-divergences.js's DV-015 matcher (accordproject/concerto-rust#156) into results/divergences.jsonl (3,554 still-unresolved) and results/expected-divergences.jsonl (1,694 maintainer-accepted, added this revision). ran/agree/harnessErrors* are unchanged from the original run; only the divergences/expectedDivergences split is new. A fresh bin/fuzz.js run would now report these counts directly."
 }
