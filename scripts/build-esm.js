@@ -242,7 +242,9 @@ function buildOptionsFor(target) {
  *
  * The internal build writes its chunks into the directory itself, so these
  * relative paths hold for the chunks as well; that is why an import leaving
- * the directory from one of its subdirectories is refused.
+ * the directory from one of its subdirectories is refused. So is one that
+ * does not name a `<path>.ts` or `<path>/index.ts` module (a `.js` or `.json`
+ * file, say), which would otherwise be bundled into the directory silently.
  *
  * @param {string} dir - absolute path of the internal source directory
  * @return {object} the plugin
@@ -262,7 +264,7 @@ function externalizePublicModulesPlugin(dir) {
                 }
                 const module = [`${target}.ts`, path.join(target, 'index.ts')].find(file => fs.existsSync(file));
                 if (!module) {
-                    return undefined;
+                    return { errors: [{ text: `${args.path}: build-esm.js only supports a public import of a <path>.ts or <path>/index.ts module from ${dir}; anything else would be bundled into it` }] };
                 }
                 const output = path.relative(args.resolveDir, module).replace(/\.ts$/, '.mjs').split(path.sep).join('/');
                 return { path: output.startsWith('.') ? output : `./${output}`, external: true };

@@ -41,6 +41,12 @@ import type ScalarDeclaration from './scalardeclaration';
 // the `typeof __webpack_require__` test and keeps only the dead-in-Node
 // `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
 // bundles exactly as before (PORTING.md 1.5).
+//
+// rust mode works through the CommonJS dist/ only. Through the public ESM and
+// browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
+// not supported yet and is deferred to a follow-up: there `module.require`
+// does not exist, and the relative specifier does not match the flattened
+// chunks' location.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */

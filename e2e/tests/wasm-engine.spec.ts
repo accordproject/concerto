@@ -17,10 +17,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { startEsmServer, type EsmServer } from './support/esm-static-server';
 
-// Proves that concerto-core's browser ESM graph (dist/esm-browser, the same
-// artifact browser-bundles.spec.ts exercises) can actually load and run the
-// CONCERTO_ENGINE=rust WASM engine in a real browser context, not just build
-// without it (accordproject/concerto-rust#70).
+// Proves that concerto-core's built engine module, dist/esm-browser/engine/
+// index.mjs imported directly, can load and run the CONCERTO_ENGINE=rust WASM
+// engine in a real browser context (accordproject/concerto-rust#70).
+//
+// It does NOT prove that the public browser ESM graph (dist/esm-browser/
+// index.mjs, which browser-bundles.spec.ts exercises) loads the engine: in
+// rust mode the views' `loadEngine` falls back to `module.require`, which does
+// not exist in ESM, so rust mode through the public ESM and browser entry
+// points is not supported yet and is deferred to a follow-up. Only the
+// CommonJS dist/ path runs rust mode through the public API today.
 //
 // packages/concerto-engine (PORTING.md, decision D9) is a local-only link to
 // the WASM package concerto-rust's concerto-wasm/build.sh writes into a
@@ -36,7 +42,7 @@ const PACKAGES_ROOT = path.resolve(__dirname, '../../packages');
 
 const engineBuilt = fs.existsSync(ENGINE_LOADER);
 
-test.describe('Concerto browser ESM graph with the WASM engine', () => {
+test.describe('Concerto built engine module with the WASM engine', () => {
     test.skip(!engineBuilt, `concerto-wasm is not built at ${WASM_PKG_DIR}; run concerto-wasm/build.sh in a concerto-rust checkout next to this one`);
 
     let server: EsmServer;
@@ -53,7 +59,7 @@ test.describe('Concerto browser ESM graph with the WASM engine', () => {
         await server.close();
     });
 
-    test('loads the WASM engine and runs a Rust-backed call through the browser bundle', async ({ page }) => {
+    test('loads the WASM engine and runs a Rust-backed call through dist/esm-browser/engine/index.mjs', async ({ page }) => {
         const pageErrors: string[] = [];
         page.on('pageerror', (e) => pageErrors.push(String(e)));
 
@@ -79,9 +85,10 @@ test.describe('Concerto browser ESM graph with the WASM engine', () => {
             // which a Node consumer's `require`/createRequire satisfies; in a
             // browser it is a bundler's job to make `require` resolve that
             // specifier (an import map cannot, since it is not an import).
-            // Standing in for that bundler step is exactly what this test
-            // exercises: whether the already-loaded WASM module can in fact
-            // be handed back to concerto-core's real engine-selection code.
+            // This test stands in for that bundler step, then imports the
+            // built engine module directly (not through the public index.mjs)
+            // to check that the already-loaded WASM module can be handed back
+            // to concerto-core's real engine-selection code.
             (globalThis as any).process = { env: { CONCERTO_ENGINE: 'rust' } };
             (globalThis as any).require = (name: string) => {
                 if (name === '@accordproject/concerto-engine') {
