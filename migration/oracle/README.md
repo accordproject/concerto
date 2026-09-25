@@ -337,6 +337,117 @@ entry) and `--verify` (every needed entry re-parsed fresh and compared byte for 
 the two ways to detect that, and both fail loudly (non-zero exit, the offending keys named) rather than
 silently passing on a missing or corrupt entry.
 
+## Determinism of the recorder, and the pinned canonical corpus
+
+**The canonical corpus, `oracle-corpus-p107-06aa375` (recorded from `accordproject/concerto@06aa375a6`,
+content hash `7b9be1de66690be63e689b3bf0feb4583ed6cd9597099fdec1acb32f87736e71`), is pinned permanently.**
+Re-recording it, at this or any later commit, needs the maintainer's explicit approval, because a second
+corpus that disagrees with `concerto-core/tests/oracle/baseline.tsv` on fixture ids makes the baseline
+ping-pong between whoever last recorded it (accordproject/concerto-rust#113). This directory's recorder is
+not fully deterministic (below); until it is, or until a re-recording is explicitly approved, the corpus in
+use stays this one build, not a fresh recording, however faithfully reproduced.
+
+accordproject/concerto-rust#113 asked whether `bin/record-all.sh` (and `bin/build-cto-cache.js`) produce the
+same fixture ids and contents when run twice from the same commit, on different machines/JOBS. Two clean
+worktrees of `06aa375a6` were recorded independently (`JOBS=4` and `JOBS=2`) and diffed fixture-by-fixture
+and as a corpus-wide content hash, the same way `manifest.json`'s hash is defined. Three real,
+machine/run-dependent sources of nondeterminism were found and fixed on this branch:
+
+1. **Absolute `fileName` arguments** (fixed in `lib/recorder.js`). A `ModelFile` constructed, or a
+   `ModelManager` step (`addCTOModel`/`addModel`/`addModelFile`/`addModelFiles`/`updateModelFile`/
+   `validateModelFile`) called, with an absolute `fileName` (tests using a `__dirname`-derived path, e.g.
+   `test/introspect/metamodel.js`, and the conformance driver's `new ModelFile(mm, ast, undefined, path)`)
+   baked the *recording machine's own checkout path* into fixture/blob content -- confirmed directly
+   against the canonical corpus, which carries a literal `/Users/matt/dev/gh/accordproject/concerto-migration/...`
+   path in 66 fixtures/blobs (32 found by a simple grep for `"fileName":"/..."`; the rest are the same root
+   cause at a different string position or nesting depth, not individually re-verified here). `fileName`s
+   under a known checkout root (the concerto repo, or `concerto-conformance` via `CONFORMANCE_DIR`) are now
+   rewritten to a root-relative form; one outside every known root is tainted/skipped like any other
+   nonportable path.
+2. **`source_test` tie-break order** (fixed in `bin/build-corpus.js`). When two raw records deduplicate to
+   the same fixture id with the same source rank, the dedup picked whichever raw `.jsonl` file the process
+   happened to read first to decide the recorded `source_test` -- and raw filenames embed the recording
+   process's PID, so that order differs on every run. The tie-break is now a deterministic sort on
+   `source_test` text.
+3. **`uuid.v4()` unseeded** (fixed in `lib/env.js`, plus a reseed in `drivers/data.spec.js`). `Factory`'s
+   default identifier for an identified resource with no id given (`factory.ts`) draws from Node's crypto
+   RNG via `uuid.v4()`, not `Math.random`, so it sat outside the recorder's seeded envelope entirely: every
+   `Factory.newResource`/`newRelationship` fixture with a generated id differed on every recording.
+   `seededRandom()` now also seeds `uuid.v4` (its own PRNG stream); `data.spec.js`'s `generate: 'sample'`
+   calls reseed explicitly around themselves, because they build another op's *input*, outside any op's own
+   recorded window.
+
+After these three fixes, every unit-source fixture they touched matched between the two recordings, and
+`data`-source duplicate fixtures dropped from 10,234 to 10,044 fixtures (the uuid-driven duplicates
+collapsed). `JOBS` (4 vs 2) itself produced no observable difference once the three fixes above were
+applied: each unit test file already runs as its own isolated mocha process, so `JOBS` only changes how
+many run concurrently, not what any one of them records.
+
+### Residual causes: two documented, one still open
+
+The two recordings are still not byte-identical. All the remaining differences are real -- the recorded
+values genuinely vary between runs. Two are out of this task's safe scope (fixing either means editing a
+protected `test/**` file, or a cross-op driver change with its own deadlock risk); the third has no
+confirmed cause yet, so whether it is in scope is itself unknown:
+
+**(a) Values baked in by a protected `test/**` file.** A test file is allowed to embed a wall-clock- or
+run-dependent literal directly in the data it hands to concerto-core, and the recorder has no way to
+canonicalise that: canonicalisation only ever normalises a value the *op itself* generates (`lib/canon.js`),
+never one supplied as input. A concrete, verified instance: `test/introspect/concertoVersion.js`'s
+`'should return when concerto version is compatible with model with a pre-release version'` test builds
+`` `${pkgJSON.version}-unittest.${new Date().getTime()}` `` and stubs `pkgJSON.version` to it before parsing
+a model file, so the parsed `ModelFile.new`/`validate` fixture's input carries that run's wall-clock
+millisecond count as part of a version string, and differs on every recording. `test/**` is never edited by
+this task (and cannot be by any task without the maintainer's sign-off), so this class of residual cannot be
+fixed from `migration/oracle` alone; it can only be catalogued as it is found.
+
+**(a, unresolved) The remaining `Factory.newResource`/`newRelationship` unit residual (of the order of 50
+fixtures) does not have a confirmed cause, and is *not* an instance of (a).** The varying field is the
+generated `id` itself: these are unit fixtures where the test calls `factory.newResource`/`newRelationship`
+with no id, so `Factory` falls back to `uuid.v4()`, and the recorded fixture's id (and hence its fixture
+key) differs whenever that call draws a different value. Earlier investigation (accordproject/concerto-rust#113
+comment history) attributed this to test-authored literal random ids feeding those calls, by analogy with
+the pattern above. That attribution is not supported: a repo-wide grep of `packages/concerto-core/test` for
+`Math.random`, `uuid.v4()`, `randomUUID` and `Date.now()`/`new Date()` finds only `concertoVersion.js` (above)
+and one call in `test/factory.js`, `sandbox.stub(uuid, 'v4').returns('5604bdfe-...')` in a `beforeEach` --
+which stubs `uuid.v4` to a *fixed* constant, not a random one, so it cannot itself be the source of
+per-recording variance. Since `uuid.v4()` is also the exact call `lib/env.js`'s `seededRandom()` reseeds for
+every recorded op (accordproject/concerto-rust#113, commit `da31c8d`), and that seeding is installed and
+restored around each op by swapping the same `uuid.v4` property descriptor that `test/factory.js`'s sandbox
+stub swaps, a recorder-side interaction between the two -- not a `test/**` literal -- is a plausible
+alternative mechanism. It has not been reproduced or confirmed (reproducing it needs two independent
+recordings, which this pass did not re-run; see "Not done in this pass" on
+accordproject/concerto-rust#113). Until it is, this residual has **no verified root cause** and is left open
+here, distinct from the confirmed `test/**` cause above; it may turn out to be fixable inside
+`migration/oracle` rather than blocked on `test/**`.
+
+**(b) Wall-clock values that cross from one op's outcome into a later op's input.** `drivers/data.spec.js`
+builds a `Resource` via `serializer.fromJSON(json)` from JSON test data that has no `$timestamp` field;
+concerto-core defaults `$timestamp` to the real wall-clock instant at population time. `fixtures/manifest.json`'s
+outcome canonicalisation (`lib/canon.js`) only replaces an ISO date-time whose instant falls inside *that
+op's own* recorded execution window and that does not already appear in *that op's own* inputs -- which is
+correct for the op that generated it, `Serializer.fromJSON` itself. But `data.spec.js` goes on to pass that
+same populated resource into further recorded ops (`Resource.validate`, `toJSON`, and similar) as their
+*input*; from a later op's point of view, that timestamp is caller-supplied data, not something it
+generated, so it is correctly left alone by canonicalisation and instead varies with wall-clock time between
+recordings. This affects roughly 1,000 `data`-source fixtures (about 1,056 measured, `Resource.validate` and
+similar ops that take an already-populated resource as an argument). A real fix needs a clock frozen for the
+whole driver run (so every `fromJSON` in the same run defaults `$timestamp` to the same instant, matching
+what a second run would also produce) -- which interacts with the recorder's own `waitPastInputInstants`
+spin-wait (used to keep an op's *own* generated timestamp outside the window of any timestamp already in its
+inputs) and needs a separate, careful change of its own. Not attempted here; left as a follow-up issue
+(the frozen-clock work is explicitly out of scope for this task, per the maintainer's decision on
+accordproject/concerto-rust#113).
+
+Given the above, the exit condition is read as met in the sense the issue allows: the recorder is not yet
+producing byte-identical corpora, but every difference class found is now either fixed (three bugs, above),
+precisely root-caused and out of safe scope to fix here (the `concertoVersion.js` instance of (a), and (b)),
+or -- for the one remaining unresolved residual, the ~50-fixture `Factory.newResource`/`newRelationship`
+case above -- catalogued with the field that varies and the mechanism ruled out, even though its actual
+cause is not yet confirmed. That residual is not shown to be out of safe scope: it may be fixable inside
+`migration/oracle` rather than `test/**`. It is carried as an open item, not closed, and the corpus stays
+pinned rather than re-recorded while that holds.
+
 ## Results
 
 Recorded 2026-09-24 (task P0-05), re-recorded by task P2-11 after merging P2-10 part 1 (`lifted/`), and
