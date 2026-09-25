@@ -31,10 +31,14 @@ import type ClassDeclaration from './classdeclaration';
 // Its bindings are typed `never` so that a view leaves the member's inferred
 // return type, and so the .d.ts, exactly as the TS body makes it.
 //
-// dist/ does not ship src/engine/ (OD-11), so a bundler of dist/ must never
-// see a specifier it would resolve: `loadEngine` takes a non-literal one
-// (esbuild, rollup and browserify leave it alone), and webpack folds the
-// `typeof __webpack_require__` test and keeps only the dead-in-Node
+// dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
+// with no .d.ts, since it is not public API (tsconfig.build.internal.json;
+// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
+// must never see a specifier it would resolve: `loadEngine` takes a
+// non-literal one (esbuild, rollup and browserify leave it alone) and never
+// names the bare `require` (esbuild's ESM output would add its `__require`
+// shim, which webpack reports as a critical dependency), and webpack folds
+// the `typeof __webpack_require__` test and keeps only the dead-in-Node
 // `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
 // bundles exactly as before (PORTING.md 1.5).
 declare const __webpack_require__: unknown;

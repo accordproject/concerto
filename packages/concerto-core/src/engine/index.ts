@@ -20,8 +20,14 @@
 // mode `rust` is null and nothing else in src/engine/ is loaded, so ts mode
 // behaves exactly as before. The whole directory is rust-mode code: it is
 // excluded from coverage (`istanbul ignore file`) and from the declaration
-// build (tsconfig.build.json), and the views load it with `require`, so
-// neither the nyc gate nor the .d.ts snapshot moves (PORTING.md 1.5).
+// build (tsconfig.build.json), so neither the nyc gate nor the .d.ts snapshot
+// moves (PORTING.md 1.5). It still ships, as JavaScript only with no .d.ts
+// (OD-11): tsconfig.build.internal.json compiles it into dist/engine/, and
+// scripts/build-esm.js builds it into dist/esm*/engine/ in a pass of its own,
+// with the public modules it imports kept external, so the `require` calls
+// here never put esbuild's `__require` shim into the public modules' shared
+// chunks. The views load it through a non-literal `loadEngine`, so a ts-mode
+// bundle of dist/ leaves it out.
 
 import type { RustEngine } from './rust';
 

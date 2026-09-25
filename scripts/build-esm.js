@@ -28,40 +28,47 @@ const browserOutdir = path.join(packageDir, 'dist', 'esm-browser');
 const isNodeOnlyPackage = packageJson.name === '@accordproject/concerto-linter';
 
 /**
- * The src/ directories the package's tsconfig.build.json excludes (plain
- * `src/...` paths, no globs), so that the ESM builds compile the same modules
- * as the CJS build.
+ * Reads the `src/...` directories a tsconfig file lists under `key` (plain
+ * paths, or a directory followed by the recursive glob; other globs are
+ * skipped).
+ *
+ * @param {string} file - tsconfig file name, relative to the package
+ * @param {string} key - `include` or `exclude`
+ * @return {string[]} absolute paths of the directories
+ */
+function readSourceDirs(file, key) {
+    const tsconfigPath = path.join(packageDir, file);
+    if (!fs.existsSync(tsconfigPath)) {
+        return [];
+    }
+    return (JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'))[key] || [])
+        .map(entry => entry.replace(/\/\*\*\/\*$/, ''))
+        .filter(entry => entry.startsWith('src/') && !/[*?]/.test(entry))
+        .map(entry => path.join(packageDir, entry));
+}
+
+/**
+ * The src/ directories the package's tsconfig.build.json excludes, so that
+ * the public ESM build compiles exactly the CJS build's public modules.
  *
  * A package can also ship internal modules as JavaScript only, with no .d.ts:
  * tsconfig.build.json excludes them, so they stay out of the declaration
  * build (and out of the API snapshot), and tsconfig.build.internal.json
- * compiles them into dist/ with `declaration: false`. The src/ directories
- * that file includes (each written as src/<dir> plus the recursive glob) are
- * compiled by the ESM builds too. concerto-core does this for src/engine/,
- * the CONCERTO_ENGINE=rust shim of the Rust migration: dist/, dist/esm and
- * dist/esm-browser all carry it (the views load it at runtime through a
- * non-literal specifier), but it is not public API, so no .d.ts is emitted
- * for it (PORTING.md 1.5, OD-11).
+ * compiles them into dist/ with `declaration: false`. concerto-core does this
+ * for src/engine/, the CONCERTO_ENGINE=rust shim of the Rust migration
+ * (PORTING.md 1.5, OD-11).
  *
- * @return {Set<string>} absolute paths of the excluded directories
+ * The internal directories are left out of the public build too and get a
+ * build of their own (buildInternalDir), so that adding them changes neither
+ * the public modules nor the chunks they share: dist/esm and
+ * dist/esm-browser outside engine/ are byte for byte what they were before
+ * the engine shipped. In particular the engine's `require` calls must not
+ * put esbuild's `__require` shim into a shared chunk, which every public
+ * module imports and which webpack reports as a critical dependency.
  */
-function readExcludedSourceDirs() {
-    const readSourceDirs = (file, key) => {
-        const tsconfigPath = path.join(packageDir, file);
-        if (!fs.existsSync(tsconfigPath)) {
-            return [];
-        }
-        return (JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'))[key] || [])
-            .map(entry => entry.replace(/\/\*\*\/\*$/, ''))
-            .filter(entry => entry.startsWith('src/') && !/[*?]/.test(entry))
-            .map(entry => path.join(packageDir, entry));
-    };
-    const internalDirs = new Set(readSourceDirs('tsconfig.build.internal.json', 'include'));
-    return new Set(readSourceDirs('tsconfig.build.json', 'exclude')
-        .filter(dir => !internalDirs.has(dir)));
-}
-
-const excludedSourceDirs = readExcludedSourceDirs();
+const excludedSourceDirs = new Set(readSourceDirs('tsconfig.build.json', 'exclude'));
+const internalSourceDirs = readSourceDirs('tsconfig.build.internal.json', 'include')
+    .filter(dir => excludedSourceDirs.has(dir) && fs.existsSync(dir));
 
 /**
  * Every TypeScript module under src/ is an entry point.
@@ -225,6 +232,71 @@ function buildOptionsFor(target) {
     };
 }
 
+/**
+ * An esbuild plugin for the build of an internal directory: every relative
+ * import that leaves the directory is kept external and pointed at the public
+ * build's output module (`../introspect/numbervalidator` becomes
+ * `../introspect/numbervalidator.mjs`), so the internal modules share the
+ * public modules' instances (and classes, for `instanceof`) instead of
+ * bundling copies, and the public build's output is left alone.
+ *
+ * The internal build writes its chunks into the directory itself, so these
+ * relative paths hold for the chunks as well; that is why an import leaving
+ * the directory from one of its subdirectories is refused.
+ *
+ * @param {string} dir - absolute path of the internal source directory
+ * @return {object} the plugin
+ */
+function externalizePublicModulesPlugin(dir) {
+    const inside = file => file === dir || file.startsWith(dir + path.sep);
+    return {
+        name: 'externalize-public-modules',
+        setup(build) {
+            build.onResolve({ filter: /^\.\.?(\/|$)/ }, args => {
+                const target = path.resolve(args.resolveDir, args.path);
+                if (inside(target) || !inside(args.resolveDir)) {
+                    return undefined;
+                }
+                if (args.resolveDir !== dir) {
+                    return { errors: [{ text: `${args.path}: build-esm.js does not support a public import from a subdirectory of ${dir}` }] };
+                }
+                const module = [`${target}.ts`, path.join(target, 'index.ts')].find(file => fs.existsSync(file));
+                if (!module) {
+                    return undefined;
+                }
+                const output = path.relative(args.resolveDir, module).replace(/\.ts$/, '.mjs').split(path.sep).join('/');
+                return { path: output.startsWith('.') ? output : `./${output}`, external: true };
+            });
+        },
+    };
+}
+
+/**
+ * Builds one internal directory (see internalSourceDirs) for one target, in
+ * its own esbuild pass: its modules are the entry points, the chunks they
+ * share go into the directory's own output, and the public modules they
+ * import stay external, so nothing of the internal build reaches the public
+ * modules or their chunks.
+ *
+ * @param {'node'|'browser'} target - which runtime this build is for
+ * @param {string} outdir - the target's output directory
+ * @param {string} dir - absolute path of the internal source directory
+ * @return {Promise<object>} the esbuild result
+ */
+function buildInternalDir(target, outdir, dir) {
+    const options = buildOptionsFor(target);
+    return esbuild.build({
+        ...options,
+        plugins: [externalizePublicModulesPlugin(dir), ...(options.plugins || [])],
+        entryPoints: collectEntryPoints(dir),
+        outdir,
+        outbase: srcDir,
+        splitting: true,
+        chunkNames: `${path.relative(srcDir, dir).split(path.sep).join('/')}/chunk-[hash]`,
+        outExtension: { '.js': '.mjs' },
+    });
+}
+
 // The async build API is required because browser builds register an esbuild
 // plugin (buildSync cannot use plugins).
 async function main() {
@@ -252,6 +324,9 @@ async function main() {
             // do not work.
             outExtension: { '.js': '.mjs' },
         });
+        for (const dir of internalSourceDirs) {
+            await buildInternalDir(target, outdir, dir);
+        }
     }
 }
 
