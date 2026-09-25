@@ -23,6 +23,35 @@ import type { ICollectionSizeValidator } from '@accordproject/concerto-metamodel
 
 const { isNull } = NullUtil;
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// Its bindings are typed `never` so that a view leaves the member's inferred
+// return type, and so the .d.ts, exactly as the TS body makes it.
+//
+// dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
+// with no .d.ts, since it is not public API (tsconfig.build.internal.json;
+// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
+// must never see a specifier it would resolve: `loadEngine` takes a
+// non-literal one (esbuild, rollup and browserify leave it alone) and never
+// names the bare `require` (esbuild's ESM output would add its `__require`
+// shim, which webpack reports as a critical dependency), and webpack folds
+// the `typeof __webpack_require__` test and keeps only the dead-in-Node
+// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
+// bundles exactly as before (PORTING.md 1.5).
+//
+// rust mode works through the CommonJS dist/ only. Through the public ESM and
+// browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
+// not supported yet and is deferred to a follow-up: there `module.require`
+// does not exist, and the relative specifier does not match the flattened
+// chunks' location.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 /**
  * A Validator to enforce that a collection (array or map) has a size within a specified range.
  * @private
@@ -31,8 +60,9 @@ const { isNull } = NullUtil;
  */
 class CollectionSizeValidator extends Validator {
     declare validator: ICollectionSizeValidator;
-    minSize: number | null;
-    maxSize: number | null;
+    // Definitely assigned: by the TS body, or from the Rust snapshot.
+    minSize!: number | null;
+    maxSize!: number | null;
 
     /**
      * Create a CollectionSizeValidator.
@@ -43,6 +73,13 @@ class CollectionSizeValidator extends Validator {
      */
     constructor(field: ValidatedElement, validator: ICollectionSizeValidator) {
         super(field, validator);
+
+        /* istanbul ignore if */
+        if (rust) {
+            Object.assign(this, rust.collectionSizeValidatorNew(this, validator));
+            return;
+        }
+
         this.minSize = validator.minSize ?? null;
         this.maxSize = validator.maxSize ?? null;
 
@@ -65,6 +102,11 @@ class CollectionSizeValidator extends Validator {
      * @private
      */
     validate(identifier: string | null, value: number): void {
+        /* istanbul ignore if */
+        if (rust) {
+            rust.collectionSizeValidatorValidate(this, identifier, value);
+            return;
+        }
         if(!isNull(this.minSize) && value < this.minSize) {
             this.reportError(identifier, `Collection must contain at least ${this.minSize} elements.`);
         }
@@ -98,6 +140,10 @@ class CollectionSizeValidator extends Validator {
      * validator, false otherwise.
      */
     compatibleWith(other: Validator | null): boolean {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.collectionSizeValidatorCompatibleWith(this, other, CollectionSizeValidator);
+        }
         if (!(other instanceof CollectionSizeValidator)) {
             return false;
         }

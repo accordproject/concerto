@@ -14,6 +14,18 @@
 
 import ModelUtils from '../modelutil';
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// Same non-literal loadEngine as src/modelutil.ts: a bundler must never see a
+// specifier it would resolve (PORTING.md 1.5).
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 const RESOURCE_SCHEME = 'resource';
 
 /**
@@ -149,6 +161,11 @@ class ResourceId {
      * @throws {Error} - On an invalid resource URI.
      */
     static fromURI(uri, legacyNamespace?, legacyType?) {
+        /* istanbul ignore if */
+        if (rust) {
+            const result: { namespace: string, type: string, id: string } = rust.resourceIdFromURI(uri, legacyNamespace, legacyType) as any;
+            return new ResourceId(result.namespace, result.type, result.id);
+        }
         let uriComponents;
         try {
             uriComponents = parseUri(uri);
@@ -186,6 +203,10 @@ class ResourceId {
      * @return {String} A URI.
      */
     toURI() {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.resourceIdToURI(this.namespace, this.type, this.id);
+        }
         const qualifiedType = ModelUtils.getFullyQualifiedName(this.namespace, this.type);
         return RESOURCE_SCHEME + ':' +  qualifiedType + '#' + encodeURI(this.id);
     }
