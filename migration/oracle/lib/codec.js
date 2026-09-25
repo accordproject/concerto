@@ -760,7 +760,23 @@ function makeDecoder(core, runDerived) {
         const ast = decode(node.ast, dctx);
         const defs = decode(node.definitions, dctx);
         const fileName = decode(node.fileName, dctx);
-        return new core.ModelFile(mm, ast, defs, fileName);
+        // `new ModelFile(...)` can itself reject a malformed AST (this is a
+        // real, comparable engine behaviour, not just a decode-time mishap:
+        // task P5-05 fuzzes mutated model ASTs that feed straight into this
+        // constructor via an `mfnew` recipe node). Tag the thrown error
+        // (without otherwise changing it) so a caller that wants to treat
+        // this as part of an op's outcome — rather than as an
+        // unconditional harness error — can recognise it. Callers that
+        // don't look for the tag see exactly the previous behaviour: the
+        // same error, thrown the same way.
+        try {
+            return new core.ModelFile(mm, ast, defs, fileName);
+        } catch (e) {
+            if (e instanceof Error) {
+                e.decodeConstruct = true;
+            }
+            throw e;
+        }
     };
 
     const decodeDecl = (node, dctx) => {

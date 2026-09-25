@@ -38,6 +38,7 @@ const path = require('path');
 const ORACLE_LIB = path.resolve(__dirname, '..', '..', 'oracle', 'lib');
 const { blobStore } = require(path.join(ORACLE_LIB, 'store'));
 const { canonicalise } = require(path.join(ORACLE_LIB, 'canon'));
+const { encodeError } = require(path.join(ORACLE_LIB, 'codec'));
 
 const engineKind = process.env.ENGINE;
 if (engineKind !== 'ts' && engineKind !== 'rust') {
@@ -82,9 +83,26 @@ function runOne(op, rawInputs) {
     try {
         res = adapter.run(op, inputs);
     } catch (e) {
-        // A thrown, uncaught error at the adapter boundary itself (not one
-        // the op's outcome carries) is a harness problem, not a divergence:
-        // report it as such so the parent does not compare it as a verdict.
+        // codec.js's decodeMF tags an error thrown by `new ModelFile(...)`
+        // itself (codec.js, decodeMF) with `decodeConstruct`: for a target
+        // whose lens reaches into an `mfnew` recipe (ModelManager.addModelFile
+        // in seeds.js), that constructor is exactly the code path being
+        // fuzzed, so its rejection is a comparable outcome, not a harness
+        // problem. Encode it the same way adapter.js encodes a thrown op
+        // result, so it diffs against the other engine like any other error.
+        if (e && e.decodeConstruct) {
+            try {
+                const outcome = { error: encodeError(e) };
+                const canon = canonicalise(JSON.parse(JSON.stringify(outcome)), facts, { start: 0, end: 0 });
+                return { ok: true, canon };
+            } catch (e2) {
+                return { ok: false, error: 'outcome not canonicalisable: ' + e2.message };
+            }
+        }
+        // Any other thrown, uncaught error at the adapter boundary itself
+        // (not one the op's outcome carries) is a harness problem, not a
+        // divergence: report it as such so the parent does not compare it
+        // as a verdict.
         return { ok: false, error: 'run threw: ' + (e && e.constructor ? e.constructor.name : '') + ': ' + (e && e.message) };
     }
     if (res && typeof res.then === 'function') {

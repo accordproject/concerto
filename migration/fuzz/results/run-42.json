@@ -1,14 +1,14 @@
 {
-  "started": "2026-09-25T15:46:41.473Z",
+  "started": "2026-09-25T16:56:40.491Z",
   "fixturesDir": "/home/user/concerto/migration/oracle/fixtures",
   "engineModule": "/home/user/wt/P5-05/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
   "runSeed": 42,
   "planned": 60000,
   "ran": 60000,
-  "agree": 51200,
-  "divergences": 4383,
-  "harnessErrorsTs": 3774,
-  "harnessErrorsRust": 643,
+  "agree": 54752,
+  "divergences": 5248,
+  "harnessErrorsTs": 0,
+  "harnessErrorsRust": 0,
   "byOp": {
     "Resource.validate": {
       "ran": 15942,
@@ -27,9 +27,9 @@
     },
     "ModelManager.addModelFile": {
       "ran": 12291,
-      "agree": 7874,
-      "divergences": 0
+      "agree": 11426,
+      "divergences": 865
     }
   },
-  "finished": "2026-09-25T15:57:58.374Z"
+  "finished": "2026-09-25T17:10:49.256Z"
 }

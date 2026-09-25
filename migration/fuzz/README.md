@@ -116,3 +116,42 @@ plain sub-document for each op (e.g. `Resource.validate`'s lens is `target.field
 not the whole `target` recipe), and `lib/mutate.js` additionally refuses to recurse
 *into* any node that itself carries an `@@oracle` marker, so at worst such a node is
 replaced or duplicated whole, never corrupted piecemeal.
+
+## Stage 1 vs stage 2 (coordinator decision on accordproject/concerto-rust#76)
+
+P5-05 lands in two stages:
+
+- **Stage 1 (this PR):** the harness, a fix for the `decodeMF`/harness-error bug the
+  first review found (see below), and `TRIAGE.md`: the unresolved divergences from a
+  60,000-case run, clustered by signature, each with a minimised seed and either an
+  owning task or a note that none exists yet. No product code is fixed here.
+- **Stage 2 (later, before or with P5-01):** once the owning tasks land their fixes,
+  a full 1,000,000-case run with (by then) no unresolved divergences — sharded or
+  parallelised, since one core manages roughly 60-70 cases/s.
+
+### The `decodeMF` harness-error bug
+
+`ModelManager.addModelFile`'s single argument is recorded as an `@@oracle: 'mfnew'`
+recipe node, decoded by `migration/oracle/lib/codec.js`'s `decodeMF` into a real
+`new ModelFile(mm, ast, defs, fileName)` call *before* the op itself runs — this
+happens for every op, not just this one, since every op's arguments are decoded up
+front. For a **mutated** AST, that constructor is itself exactly the code path P5-05
+fuzzes, so its rejection is a real, comparable engine behaviour. But the throw
+happened outside any outcome-shaped try/catch, so `migration/fuzz/lib/worker.js`
+caught it at the `adapter.run()` boundary and reported it as a `harness error`
+(`harnessErrorsTs`/`harnessErrorsRust`) — silently dropped from the comparison,
+never diffed against the other engine, even though on the first 60k-case run **all
+643** of `harnessErrorsRust` were, on inspection, cases where the TS side returned
+`ok` and only Rust's `ModelFile` constructor threw.
+
+The fix (additive, `migration/oracle/lib/codec.js` and `migration/fuzz/lib/worker.js`
+only — `migration/oracle/lib/judge.js` and `bin/replay.js`, which also call
+`decodeMF` for the recorded corpus, are unaffected because a recorded fixture's
+`ModelFile` never fails to construct: it succeeded when the reference recorded it):
+`decodeMF` tags an error thrown by the `ModelFile` constructor with
+`e.decodeConstruct = true`, without otherwise changing it (same object, same class,
+same message — any existing caller that doesn't look for the tag sees identical
+behaviour). `worker.js` checks for the tag around `adapter.run()`; when present, it
+encodes the error the same way `adapter.js` encodes any other thrown-op outcome
+(`codec.encodeError`) and canonicalises it, so it diffs against the other engine like
+any other result instead of disappearing as a harness error.
