@@ -24,6 +24,35 @@ import type { AstNode } from './decorated';
 import type { IDecorator } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// Its bindings are typed `never` so that a view leaves the member's inferred
+// return type, and so the .d.ts, exactly as the TS body makes it.
+//
+// dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
+// with no .d.ts, since it is not public API (tsconfig.build.internal.json;
+// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
+// must never see a specifier it would resolve: `loadEngine` takes a
+// non-literal one (esbuild, rollup and browserify leave it alone) and never
+// names the bare `require` (esbuild's ESM output would add its `__require`
+// shim, which webpack reports as a critical dependency), and webpack folds
+// the `typeof __webpack_require__` test and keeps only the dead-in-Node
+// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
+// bundles exactly as before (PORTING.md 1.5).
+//
+// rust mode works through the CommonJS dist/ only. Through the public ESM and
+// browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
+// not supported yet and is deferred to a follow-up: there `module.require`
+// does not exist, and the relative specifier does not match the flattened
+// chunks' location.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 /**
  * A decorator argument that references a type, produced from a
  * `DecoratorTypeReference` node in the metamodel AST.
@@ -99,6 +128,12 @@ class Decorator {
      * @private
      */
     process() {
+        /* istanbul ignore if */
+        if (rust) {
+            Object.assign(this, rust.decoratorProcess(this.ast));
+            return;
+        }
+
         // a Decorator is always built from a metamodel Decorator node, which
         // always carries a name
         this.name = (this.ast as IDecorator).name;
@@ -132,6 +167,13 @@ class Decorator {
         // ModelFile decorators have no fully qualified name, hence the optional call
         const parent = this.getParent() as Decorated & { getFullyQualifiedName?(): string };
         const decoratedName = parent.getFullyQualifiedName?.();
+
+        /* istanbul ignore if */
+        if (rust) {
+            rust.decoratorValidate(this, mf, decoratedName);
+            return;
+        }
+
         const mm = mf.getModelManager();
         const validationOptions = mm.getDecoratorValidation();
 
