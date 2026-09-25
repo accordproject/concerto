@@ -387,8 +387,8 @@ many run concurrently, not what any one of them records.
 
 The two recordings are still not byte-identical. All the remaining differences are real -- the recorded
 values genuinely vary between runs. Two are out of this task's safe scope (fixing either means editing a
-protected `test/**` file, or a cross-op driver change with its own deadlock risk); the third has no
-confirmed cause yet, so whether it is in scope is itself unknown:
+protected `test/**` file, or a cross-op driver change with its own deadlock risk; (b) has since been fixed,
+below); the third has no confirmed cause yet, so whether it is in scope is itself unknown:
 
 **(a) Values baked in by a protected `test/**` file.** A test file is allowed to embed a wall-clock- or
 run-dependent literal directly in the data it hands to concerto-core, and the recorder has no way to
@@ -431,17 +431,35 @@ same populated resource into further recorded ops (`Resource.validate`, `toJSON`
 *input*; from a later op's point of view, that timestamp is caller-supplied data, not something it
 generated, so it is correctly left alone by canonicalisation and instead varies with wall-clock time between
 recordings. This affects roughly 1,000 `data`-source fixtures (about 1,056 measured, `Resource.validate` and
-similar ops that take an already-populated resource as an argument). A real fix needs a clock frozen for the
-whole driver run (so every `fromJSON` in the same run defaults `$timestamp` to the same instant, matching
-what a second run would also produce) -- which interacts with the recorder's own `waitPastInputInstants`
-spin-wait (used to keep an op's *own* generated timestamp outside the window of any timestamp already in its
-inputs) and needs a separate, careful change of its own. Not attempted here; left as a follow-up issue
-(the frozen-clock work is explicitly out of scope for this task, per the maintainer's decision on
-accordproject/concerto-rust#113).
+similar ops that take an already-populated resource as an argument).
+
+**Fixed since, by a frozen clock (accordproject/concerto-rust#131).** `lib/recorder.js` now calls
+`lib/env.js`'s `freezeClock()` before it loads anything else, so every recording process (each unit test
+file, and each driver) runs on a virtual clock: `Date.now()`, `new Date()` and `Date()` read an instant that
+starts at `FROZEN_EPOCH` (2023-06-15T09:26:53.417Z) and never moves on its own. Constructing a `Date` from
+arguments, `Date.parse`, `Date.UTC` and timers are the real ones. The recorder's `waitPastInputInstants`
+spin-wait, which would never end on a frozen clock, instead steps the virtual instant to 1 ms past the op's
+latest recent input instant, the same condition it used to wait for. Those steps depend only on the
+sequence of recorded ops and their inputs, so two recordings read the same instants at the same points, and
+an op's own generated timestamp still lands in its window and still never equals an input instant (the
+`<now>` canonicalisation is unchanged: 762 `<now>` values with and without the frozen clock). The replay
+side (`lib/judge.js`, `lib/adapter.js`) does not freeze the clock and still spins on the real one.
+
+Verified with two throwaway full recordings of the same commit in scratch directories (all five sources,
+`JOBS=4` and `JOBS=2`, fixtures built with `--out` into the scratch directory, so this directory's
+`fixtures/` was not touched): both have 15,895 fixtures, 1,100 fixture/blob files carrying a frozen-clock
+instant, and no differing fixture carries any date-time. The only remaining fixture differences are 29 unit
+fixtures on each side (`Factory.newResource`/`newRelationship`, `Identifiable.getIdentifier`, `Typed.getType`), all from
+`test/serializer/instancegenerator.js`: their generated ids vary, not the clock, which is the open
+`Factory` residual above. The unit suite, and the data, conformance, gaps and lifted drivers, pass the same
+tests with the frozen clock as without it. The canonical corpus stays pinned: this changes what a *future*
+re-recording would produce (every clock-dependent value becomes a frozen-clock instant), which is why it
+was not re-recorded.
 
 Given the above, the exit condition is read as met in the sense the issue allows: the recorder is not yet
 producing byte-identical corpora, but every difference class found is now either fixed (three bugs, above),
-precisely root-caused and out of safe scope to fix here (the `concertoVersion.js` instance of (a), and (b)),
+precisely root-caused and out of safe scope to fix here (the `concertoVersion.js` instance of (a); (b) was
+fixed since by the frozen clock, accordproject/concerto-rust#131),
 or -- for the one remaining unresolved residual, the ~50-fixture `Factory.newResource`/`newRelationship`
 case above -- catalogued with the field that varies and the mechanism ruled out, even though its actual
 cause is not yet confirmed. That residual is not shown to be out of safe scope: it may be fixable inside
