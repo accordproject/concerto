@@ -34,6 +34,18 @@ import type ModelFile from './introspect/modelfile';
 import type { DecoratorCommand } from './types';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// See src/modelutil.ts for why this is loaded this way (dist/, bundler and
+// CJS/ESM notes); the same considerations apply here unchanged.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
+
 const DCS_VERSION = '0.4.0';
 
 const DCS_MODEL = `concerto version ">3.0.0"
@@ -195,9 +207,16 @@ class DecoratorManager {
             DCS_MODEL,
             'decoratorcommands@0.3.0.cto'
         );
-        const factory = new Factory(validationModelManager);
-        const serializer = new Serializer(factory, validationModelManager);
-        serializer.fromJSON(decoratorCommandSet);
+        if (rust) {
+            // The structural check only (src/dcs/mod.rs `validate`); the
+            // validationModelManager above is still built the TS way (CTO
+            // parsing is not ported) and returned unchanged.
+            rust.decoratorManagerValidate(decoratorCommandSet, modelFiles?.map((mf: ModelFile) => mf.getAst()));
+        } else {
+            const factory = new Factory(validationModelManager);
+            const serializer = new Serializer(factory, validationModelManager);
+            serializer.fromJSON(decoratorCommandSet);
+        }
         return validationModelManager;
     }
 
@@ -208,6 +227,9 @@ class DecoratorManager {
      * @returns {object} the migrated DecoratorCommandSet object
      */
     static migrateTo(decoratorCommandSet, version) {
+        if (rust) {
+            return rust.decoratorManagerMigrateTo(decoratorCommandSet);
+        }
         if (decoratorCommandSet instanceof Object) {
             for (let key in decoratorCommandSet) {
                 if (key === '$class' && decoratorCommandSet[key].includes('org.accordproject.decoratorcommands')) {
@@ -393,6 +415,21 @@ class DecoratorManager {
             options.disableMetamodelValidation = true;
         }
 
+        if (rust) {
+            // Metamodel resolution is not ported (src/dcs/mod.rs
+            // `decorate_models`'s doc comment): this reads the unresolved
+            // AST regardless of options.disableMetamodelResolution, and
+            // sends only the caller's own models — the Rust-side manager
+            // already carries its own copy of the system ones.
+            const ast = modelManager.getAst(false, false);
+            const decoratedAst = rust.decoratorManagerDecorateModels(ast.models, decoratorCommandSets, options ?? {});
+            const newModelManager = new ModelManager({
+                decoratorValidation: modelManager.getDecoratorValidation()
+            });
+            newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
+            return newModelManager;
+        }
+
         this.migrateAndValidate(modelManager, decoratorCommandSets, options?.migrate, options?.validate, options?.validateCommands);
 
         // Flatten commands across all command sets so decorators can be applied in a single AST scan.
@@ -496,6 +533,16 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
+        if (rust) {
+            const result = rust.decoratorManagerExtractDecorators(modelManager.getAst(false, false).models, options) as { modelManager: any; decoratorCommandSet: unknown[]; vocabularies: string[] };
+            const updatedModelManager = new ModelManager();
+            updatedModelManager.fromAst(result.modelManager);
+            return {
+                modelManager: updatedModelManager,
+                decoratorCommandSet: result.decoratorCommandSet,
+                vocabularies: result.vocabularies
+            };
+        }
         const sourceAst = modelManager.getAst(true, true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL);
         const collectionResp = decoratorExtrator.extract();
@@ -519,6 +566,15 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
+        if (rust) {
+            const result = rust.decoratorManagerExtractVocabularies(modelManager.getAst(false, false).models, options) as { modelManager: any; vocabularies: string[] };
+            const updatedModelManager = new ModelManager();
+            updatedModelManager.fromAst(result.modelManager);
+            return {
+                modelManager: updatedModelManager,
+                vocabularies: result.vocabularies
+            };
+        }
         const sourceAst = modelManager.getAst(true, true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB);
         const collectionResp = decoratorExtrator.extract();
@@ -541,6 +597,15 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
+        if (rust) {
+            const result = rust.decoratorManagerExtractNonVocabDecorators(modelManager.getAst(false, false).models, options) as { modelManager: any; decoratorCommandSet: unknown[] };
+            const updatedModelManager = new ModelManager();
+            updatedModelManager.fromAst(result.modelManager);
+            return {
+                modelManager: updatedModelManager,
+                decoratorCommandSet: result.decoratorCommandSet
+            };
+        }
         const sourceAst = modelManager.getAst(true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB);
         const collectionResp = decoratorExtrator.extract();
@@ -662,6 +727,9 @@ class DecoratorManager {
      * the test and values arrays is not empty (i.e. they have values in common)
      */
     static falsyOrEqual(test, values) {
+        if (rust) {
+            return rust.decoratorManagerFalsyOrEqual(test, values);
+        }
         return Array.isArray(test)
             ? intersect(test, values).length > 0
             : test
@@ -797,6 +865,13 @@ class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property, command) {
+        if (rust) {
+            // Mutates a detached clone across the boundary; copy the result
+            // back onto `property` so callers that hold onto it (as every
+            // test does) see the same mutation the TS body makes in place.
+            Object.assign(property, rust.decoratorManagerExecutePropertyCommand(property, command));
+            return;
+        }
         const { target, decorator, type } = command;
         if(target.properties || target.property || target.type) {
             if (
