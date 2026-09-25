@@ -70,29 +70,34 @@ explicitly check `$class`'s type and raise a plain `Error: a $class that is not 
 string: <value>` — arguably *more* correct than TS, but not byte-for-byte the same
 class or message, so every such case diverges.
 
-**Owner (fixed this revision): accordproject/concerto-rust#156 (new issue, filed by
-this session).** The ledger (`migration/ledger/SEAM_LEDGER.tsv`) attributes
-`Serializer.fromJSON`, `ModelUtil.getNamespace`/`getShortName` and the
-`JSONPopulator`/`JSONGenerator` per-field delegation to `planned_task` `P2-01+P4-03`
-and `P3-01+P4-10` — every one of those tasks is merged and closed (P2-01 #45, P4-03
-#62, P3-01a #56, P4-10 #69), so no *open* task owns this theme. The stage-1 exit
-condition ("every cluster has an owner or a new issue") is met for all 98 of T1's
-clusters through #156, not by leaving the decision unrecorded.
-**Needs a decision, not just a fix** (why this is a new issue rather than a fix here):
-either (a) Rust reproduces TS's exact `TypeError`/`TypeNotFoundException` text for
-faithfulness, accepting the crash-y message, or (b) this is recorded as an accepted
-`ts-bug` divergence (Rust's message is strictly more informative and both sides reject
-the input) and a `DIVERGENCES.md` row is added, matching the precedent of DV-008/DV-010
-(TS's uncaught `TypeError`s from missing type checks, ported as-is or logged as
-accepted). #156 lays out both options and links the ledger evidence above; it does not
-pick one, since that call belongs to the plan owner (mttrbrts), not this session.
+**Owner: accordproject/concerto-rust#156 (new issue, filed this revision) — resolved.**
+The ledger (`migration/ledger/SEAM_LEDGER.tsv`) attributes `Serializer.fromJSON`,
+`ModelUtil.getNamespace`/`getShortName` and the `JSONPopulator`/`JSONGenerator`
+per-field delegation to `planned_task` `P2-01+P4-03` and `P3-01+P4-10` — every one of
+those tasks is merged and closed (P2-01 #45, P4-03 #62, P3-01a #56, P4-10 #69), so no
+*open* task owns this theme. The stage-1 exit condition ("every cluster has an owner
+or a new issue") is met for all 98 of T1's clusters through #156.
+
+**Decision (maintainer, 2026-09-25, on #156): keep Rust's clearer error.** Of the two
+options #156 laid out — (a) faithfully reproduce TS's crash-y `TypeError` text, or
+(b) accept the divergence and document it — the maintainer picked (b), with a twist:
+this is recorded in `DIVERGENCES.md` (`accordproject/concerto-rust`) as `DV-015`,
+classified `maintainer-accepted` rather than `ts-bug` — an explicit, approved
+exception to PORTING.md's "no improvements" rule, not the `ts-bug` precedent of
+DV-008/DV-010. Rust is *not* changed; TS is *not* changed. The fuzz harness now treats
+this signature as an expected, documented divergence: `bin/fuzz.js` and `bin/triage.js`
+match it narrowly against `lib/expected-divergences.js` (same op, same TS `TypeError`
+class and exact message, same Rust `Error` class and message prefix) and no longer
+count it in `divergences`/`clusterCount` — it is recorded separately (`fuzz.js`'s
+`expectedDivergences` counter, `results/expected-divergences.jsonl`). So none of T1's
+2,754 divergences (98 clusters) are unresolved any more; they are expected.
 
 Representative seed: `data/Serializer.fromJSON/05598770d4c6f12c4d5dcf8e.json`,
-mutationSeed 29 (see `results/divergences.jsonl` for the full set). **Minimised**
-(`results/triage-clusters.json`, `bin/minimize-clusters.js`): every one of T1's 98
-clusters reduces to a single edit, `{"kind":"set","path":["$class"],"value":<non-string>}`
-— the 1-4 edits fast-check happened to apply were never necessary; only the `$class`
-retype was.
+mutationSeed 29 (see `results/divergences.jsonl` for the full set, recorded before this
+resolution). **Minimised** (`results/triage-clusters.json`, `bin/minimize-clusters.js`):
+every one of T1's 98 clusters reduces to a single edit,
+`{"kind":"set","path":["$class"],"value":<non-string>}` — the 1-4 edits fast-check
+happened to apply were never necessary; only the `$class` retype was.
 
 ### T2 — `ModelManager.fromAst`/`addModelFile`: AST deserialisation and validation gaps (2,494 divergences: 1,629 + 865)
 
@@ -195,7 +200,8 @@ is correct, and every cluster has an owner or a new issue":
 - **Every cluster has an owner or a new issue**, checked directly in
   `results/triage-clusters.json` (409/409 clusters carry a non-null `owner`):
   - T1 (98 clusters): accordproject/concerto-rust#156 (new issue, filed this
-    revision).
+    revision) — resolved: maintainer-accepted (`DIVERGENCES.md` DV-015 in
+    `accordproject/concerto-rust`), now excluded as an expected divergence.
   - T2 (311 clusters): accordproject/concerto-rust#144 (closed) and #67 (open) —
     see T2's owner section for why both, not just one.
   - T3 (0 clusters, no divergences): vacuously satisfied.
@@ -207,7 +213,8 @@ coordinator's two-stage decision.
 ## What this triage does not do
 
 - **No product code is fixed.** Per the coordinator's stage-1 scope, product-code
-  fixes stay with the owning tasks named above (T1: #156, new; T2: #144 closed / #67
+  fixes stay with the owning tasks named above (T1: #156, resolved — a
+  `maintainer-accepted` `DIVERGENCES.md` row, not a code fix; T2: #144 closed / #67
   open).
 - **The corpus and `baseline.tsv` are untouched**, as instructed.
 - **Not every individual divergence was manually inspected** — minimisation

@@ -54,7 +54,16 @@ const OWNERS = {
             { task: 'P3-01a', issue: 'accordproject/concerto-rust#56', state: 'closed' },
             { task: 'P4-10', issue: 'accordproject/concerto-rust#69', state: 'closed' },
         ],
-        status: 'unowned: every ledger-attributed task is merged and closed; a new follow-up issue is required (see TRIAGE.md T1)',
+        // Resolved (2026-09-25): the one theme that made every Serializer.fromJSON
+        // divergence in this run (the non-string $class case, DV-015) is now a
+        // maintainer-accepted, documented divergence (accordproject/concerto-rust#156)
+        // — bin/fuzz.js and bin/triage.js exclude it via lib/expected-divergences.js,
+        // so it no longer reaches this file as an unresolved cluster at all. This
+        // entry stays only as a fallback for a *different* Serializer.fromJSON
+        // divergence that lib/expected-divergences.js's narrow match does not cover
+        // (every ledger-attributed task above is merged and closed, so that would
+        // still need a new follow-up issue, same as T1 did before #156).
+        status: 'resolved via accordproject/concerto-rust#156 (DV-015): the non-string-$class case is now an excluded, expected divergence, not an unowned cluster. A differently-shaped Serializer.fromJSON divergence would still be unowned (every ledger task above is closed) and need a new issue.',
     },
     'ModelManager.fromAst': {
         theme: 'T2',

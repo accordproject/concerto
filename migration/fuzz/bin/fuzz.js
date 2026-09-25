@@ -47,6 +47,7 @@ const { sortedStringify } = require(path.join(ORACLE_LIB, 'canon'));
 const { mutate } = require('../lib/mutate');
 const { loadSeeds, withMutatedDoc, getAt } = require('../lib/seeds');
 const { runBatch } = require('../lib/run-batch');
+const { expectedDivergence } = require('../lib/expected-divergences');
 
 function parseArgs(argv) {
     const o = {
@@ -55,6 +56,7 @@ function parseArgs(argv) {
         runSeed: 1,
         out: path.join(__dirname, '..', 'results', 'run.json'),
         divergences: path.join(__dirname, '..', 'results', 'divergences.jsonl'),
+        expected: path.join(__dirname, '..', 'results', 'expected-divergences.jsonl'),
         fixturesDir: process.env.FIXTURES_DIR,
         engineModule: process.env.CONCERTO_ENGINE_MODULE,
         seedsPerOp: 25,
@@ -67,6 +69,7 @@ function parseArgs(argv) {
         else if (a === '--run-seed') { o.runSeed = Number(next()); }
         else if (a === '--out') { o.out = path.resolve(next()); }
         else if (a === '--divergences') { o.divergences = path.resolve(next()); }
+        else if (a === '--expected') { o.expected = path.resolve(next()); }
         else if (a === '--fixtures-dir') { o.fixturesDir = path.resolve(next()); }
         else if (a === '--engine-module') { o.engineModule = path.resolve(next()); }
         else if (a === '--seeds-per-op') { o.seedsPerOp = Number(next()); }
@@ -106,6 +109,7 @@ async function main() {
 
     fs.mkdirSync(path.dirname(o.out), { recursive: true });
     const divStream = fs.createWriteStream(o.divergences, { flags: 'a' });
+    const expectedStream = fs.createWriteStream(o.expected, { flags: 'a' });
 
     const summary = {
         started: new Date().toISOString(),
@@ -116,6 +120,10 @@ async function main() {
         ran: 0,
         agree: 0,
         divergences: 0,
+        // Cases that differ but match a maintainer-accepted, documented
+        // divergence (migration/fuzz/lib/expected-divergences.js) — not
+        // counted in `divergences` (accordproject/concerto-rust#156, T1).
+        expectedDivergences: 0,
         harnessErrorsTs: 0,
         harnessErrorsRust: 0,
         byOp: {},
@@ -148,7 +156,7 @@ async function main() {
             const t = tsResults.get(c.id);
             const r = rustResults.get(c.id);
             summary.ran++;
-            const byOp = summary.byOp[c.op] || (summary.byOp[c.op] = { ran: 0, agree: 0, divergences: 0 });
+            const byOp = summary.byOp[c.op] || (summary.byOp[c.op] = { ran: 0, agree: 0, divergences: 0, expectedDivergences: 0 });
             byOp.ran++;
             if (!t || !t.ok) { summary.harnessErrorsTs++; continue; }
             if (!r || !r.ok) { summary.harnessErrorsRust++; continue; }
@@ -156,16 +164,27 @@ async function main() {
             if (same) {
                 summary.agree++;
                 byOp.agree++;
+                continue;
+            }
+            const record = {
+                op: c.op,
+                seedFile: c._seed.seedFile,
+                mutationSeed: c._seed.mutationSeed,
+                ts: t.canon,
+                rust: r.canon,
+            };
+            const expected = expectedDivergence(record);
+            if (expected) {
+                // A maintainer-accepted, permanent divergence (see
+                // migration/fuzz/lib/expected-divergences.js): recorded for
+                // visibility, but not an unresolved divergence.
+                summary.expectedDivergences++;
+                byOp.expectedDivergences++;
+                expectedStream.write(JSON.stringify({ ...record, dv: expected.dv, issue: expected.issue }) + '\n');
             } else {
                 summary.divergences++;
                 byOp.divergences++;
-                divStream.write(JSON.stringify({
-                    op: c.op,
-                    seedFile: c._seed.seedFile,
-                    mutationSeed: c._seed.mutationSeed,
-                    ts: t.canon,
-                    rust: r.canon,
-                }) + '\n');
+                divStream.write(JSON.stringify(record) + '\n');
             }
         }
         if ((start / o.batchSize) % 10 === 0) {
@@ -174,9 +193,13 @@ async function main() {
     }
 
     divStream.end();
+    expectedStream.end();
     summary.finished = new Date().toISOString();
     fs.writeFileSync(o.out, JSON.stringify(summary, null, 2));
     console.log('done:', JSON.stringify(summary, null, 2));
+    if (summary.expectedDivergences > 0) {
+        console.log(`\n${summary.expectedDivergences} expected (maintainer-accepted) divergence(s) — see ${o.expected}`);
+    }
     if (summary.divergences > 0) {
         console.log(`\n${summary.divergences} unresolved divergence(s) — see ${o.divergences}`);
     }

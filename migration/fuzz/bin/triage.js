@@ -31,15 +31,23 @@
 const fs = require('fs');
 const path = require('path');
 const { signatureOf } = require('../lib/signature');
+const { expectedDivergence } = require('../lib/expected-divergences');
 
 const file = process.argv[2] || path.join(__dirname, '..', 'results', 'divergences.jsonl');
 
 function main() {
     const lines = fs.readFileSync(file, 'utf8').split('\n').filter((l) => l.trim());
     const clusters = new Map();
+    // A divergences.jsonl generated before lib/expected-divergences.js
+    // existed (or by a version of bin/fuzz.js that predates it) can still
+    // contain cases that are now maintainer-accepted (accordproject/
+    // concerto-rust#156). Filter them out here too, so re-triaging a stale
+    // file doesn't re-report them as unresolved.
+    let expectedCount = 0;
     for (const line of lines) {
         let d;
         try { d = JSON.parse(line); } catch (e) { continue; }
+        if (expectedDivergence(d)) { expectedCount++; continue; }
         const sig = signatureOf(d);
         if (!clusters.has(sig)) {
             clusters.set(sig, { sig, op: d.op, count: 0, sample: d });
@@ -47,7 +55,12 @@ function main() {
         clusters.get(sig).count++;
     }
     const sorted = [...clusters.values()].sort((a, b) => b.count - a.count);
-    console.log(JSON.stringify({ totalDivergences: lines.length, clusterCount: sorted.length, clusters: sorted }, null, 2));
+    console.log(JSON.stringify({
+        totalDivergences: lines.length,
+        excludedAsExpected: expectedCount,
+        clusterCount: sorted.length,
+        clusters: sorted,
+    }, null, 2));
 }
 
 main();
