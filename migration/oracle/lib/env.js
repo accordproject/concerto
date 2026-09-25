@@ -104,23 +104,91 @@ function seededRandom() {
 }
 
 /**
+ * Frozen clock for a whole recording run (accordproject/concerto-rust#131).
+ *
+ * The seeded envelope above only covers one op. A value an op takes from the
+ * wall clock can also escape it: data.spec.js's `Serializer.fromJSON` defaults
+ * a missing `$timestamp` to "now", and the populated resource is then the
+ * *input* of later recorded ops (`Resource.validate`, `toJSON`, ...), where
+ * canonicalisation rightly keeps it as supplied data. So the recorder freezes
+ * the clock for the whole process: `Date.now()`, `new Date()` and `Date()`
+ * read a virtual instant that starts at FROZEN_EPOCH and never moves on its
+ * own. Everything else about `Date` (constructing from arguments, `parse`,
+ * `UTC`, the prototype) is the real one, and timers are untouched.
+ *
+ * The one thing that moves the virtual clock is waitPastInputInstants() below:
+ * it used to spin until the wall clock passed the op's latest recent input
+ * instant, which would never end on a frozen clock. On the frozen clock it
+ * steps the virtual instant to 1 ms past that instant instead. The steps
+ * depend only on the sequence of recorded ops and their inputs, so two
+ * recordings of the same commit read the same instants at the same points.
+ *
+ * FROZEN_EPOCH is an arbitrary instant chosen not to be a round value that
+ * test data is likely to use itself (2020-01-01T00:00:00Z, say), so that the
+ * clock rarely has to step at all.
+ */
+const FROZEN_EPOCH = Date.UTC(2023, 5, 15, 9, 26, 53, 417); // 2023-06-15T09:26:53.417Z
+
+const clock = { frozen: false, now: FROZEN_EPOCH, RealDate: null };
+
+/**
+ * Replace the global Date with one whose "now" is the frozen virtual instant,
+ * for the rest of the process. Idempotent. Must run before anything that
+ * should see the frozen clock captures a reference to `Date`.
+ * @returns {{now: function(): number}} a view of the virtual clock
+ */
+function freezeClock() {
+    if (!clock.frozen) {
+        const RealDate = Date;
+        /**
+         * Date with a frozen "now".
+         * @param {...*} args Date constructor arguments
+         * @returns {Date|string} as the real Date would
+         */
+        function FrozenDate(...args) {
+            if (!new.target) {
+                return new RealDate(clock.now).toString();
+            }
+            return Reflect.construct(RealDate, args.length === 0 ? [clock.now] : args, new.target);
+        }
+        FrozenDate.prototype = RealDate.prototype;
+        FrozenDate.now = () => clock.now;
+        FrozenDate.parse = RealDate.parse;
+        FrozenDate.UTC = RealDate.UTC;
+        Object.defineProperty(FrozenDate, 'name', { value: 'Date' });
+        clock.RealDate = RealDate;
+        clock.frozen = true;
+        global.Date = FrozenDate;
+    }
+    return { now: () => clock.now };
+}
+
+/**
  * Make sure the clock has moved past every recent date-time that occurs in
  * the op's inputs, so a timestamp generated during the op can never coincide
  * with a supplied one (canonicalisation tells them apart by instant).
- * Spins for at most a few milliseconds.
+ * On the real clock this spins for at most a few milliseconds; on the frozen
+ * clock (freezeClock) it steps the virtual instant past them instead, since
+ * spinning would never end.
  * @param {{instants: Set<number>}} facts inputFacts() of the op inputs
  */
 function waitPastInputInstants(facts) {
-    const now = Date.now();
+    const now = clock.frozen ? clock.now : Date.now();
     let latest = -Infinity;
     for (const t of facts.instants) {
         if (t <= now + 5 && t > latest) {
             latest = t;
         }
     }
+    if (clock.frozen) {
+        if (clock.now <= latest) {
+            clock.now = latest + 1;
+        }
+        return;
+    }
     while (Date.now() <= latest) {
         // spin
     }
 }
 
-module.exports = { seededRandom, mulberry32, SEED, waitPastInputInstants };
+module.exports = { seededRandom, mulberry32, SEED, waitPastInputInstants, freezeClock, FROZEN_EPOCH };

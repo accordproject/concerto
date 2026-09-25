@@ -40,6 +40,13 @@
  * responses it fetched (`net`).
  */
 
+// Freeze the clock for the whole run before anything else loads, so that
+// every module, driver and test file of this process sees the frozen Date
+// (lib/env.js freezeClock, accordproject/concerto-rust#131). ORIGINAL_DATE
+// below is therefore the frozen Date: a test that swaps in its own (sinon
+// fake timers) is still detected as a stub.
+require('./env').freezeClock();
+
 const fs = require('fs');
 const path = require('path');
 const { AsyncLocalStorage } = require('async_hooks');
