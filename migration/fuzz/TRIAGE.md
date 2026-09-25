@@ -59,14 +59,34 @@ attributing every non-DV-015 `Serializer.fromJSON` cluster — this one included
 alone). That is a real Rust correctness gap (Rust rejects a document TS accepts), and
 #160 is about the `$class` decision, not about this outlier; filing it there would
 have buried a genuine bug inside an unrelated issue. `clusterOverride` now checks the
-cluster's actual shape, not its op, and this one cluster is left explicitly unowned
-(see its `owner.status` in `results/triage-clusters.json`) pending its own issue.
+cluster's actual shape, not its op; see "Fourth review fix" below for how this one
+cluster is now owned, by DV-009 rather than a new issue.
 
 **accordproject/concerto-rust#160's status after this fix:** the 90 array/object
 `$class` clusters it was filed for are now covered by #156's widened sign-off and no
 longer need #160's own decision. Only the one DateTime outlier it also mentioned
 remains genuinely open, and is tracked as unowned above rather than under #160 or
 #156.
+
+**Fourth review fix (this revision, accordproject/concerto-rust#76 comment
+5838054200 — "file a new issue for the DateTime-outlier T1 cluster ... or an
+escalation"):** the outlier's own mutation trace was checked before filing a new
+issue: the case is `Serializer.fromJSON` on a valid `DateTime` string with a U+0000
+appended (`"1970-01-01T00:00:00.000+00:00\u0000"`). V8's `Date` tokenizer stops
+reading at the embedded NUL and successfully parses the prefix — the same "V8's
+legacy/lenient date parser accepts strings the ECMAScript grammar does not" root
+cause `DIVERGENCES.md` DV-009 (accordproject/concerto-rust, category `engine`)
+already documents and accepts for exactly this `Serializer.fromJSON`/rust-mode leg,
+just not this specific string shape. Rather than file a duplicate issue for a
+divergence category the maintainer has already signed off in DV-009, this fix
+extends DV-009's own text to name the embedded-NUL case explicitly (with this
+cluster's minimised seed as its example) and re-attributes the cluster to DV-009 in
+`results/triage-clusters.json` (`bin/attribute-owners.js`'s `clusterOverride`, keyed
+on the sample's `DateTime` message the same way it was previously keyed to leave the
+cluster unowned). This satisfies "every cluster has an owner **or a new issue**" via
+the first arm, without opening a redundant issue next to DV-009. No product code
+changes; DV-009 was already `engine`/accepted, and this only widens which inputs its
+existing text and the corpus fixtures under DV-009 are understood to cover.
 
 Net effect on the numbers: `lib/expected-divergences.js` now excludes 2,753 of T1's
 2,754 divergences (97 of 98 clusters) as DV-015/#156, not 1,694 (7 clusters).
@@ -156,19 +176,22 @@ is not a string`" message to key on), and is a genuine correctness gap (Rust rej
 a document TS accepts). An earlier revision of this triage folded it into "T1"
 because it shares the `Serializer.fromJSON` op, and a later revision compounded that
 by attributing it to #160 unconditionally by op. It is neither #156's nor #160's —
-see "Correction" below and the unowned entry in `results/triage-clusters.json`.
+it is owned by DV-009 instead; see "Correction" below and the "Fourth review fix"
+section above for how.
 
-**Correction (this revision, accordproject/concerto-rust#76 comment 5837234282):** a
+**Correction (accordproject/concerto-rust#76 comment 5837234282):** a
 previous revision of this file said only 7 of T1's 98 clusters (1,694 divergences)
 were covered by #156, and filed the other 91 as a new issue, #160, pending its own
 decision. That read #156's decision too narrowly against its own stated scope and
 goal (see above) — the array shape is the same underlying bug and the same Rust
 rejection, so it belongs to #156 too. 90 of those 91 clusters are now recognised as
-DV-015/#156; the 91st (the DateTime outlier) was never part of either bug and is
-tracked separately, unowned, above. accordproject/concerto-rust#160 itself is not
-edited by this fix (issue bodies aren't edited by this task), but its array/object
-`$class` content is superseded by this widened #156 sign-off; only the DateTime
-outlier it also mentioned is still an open question.
+DV-015/#156; the 91st (the DateTime outlier) was never part of either bug. A later
+revision ("Fourth review fix" above) found it is the same root cause as the
+already-accepted DV-009 (V8's lenient `Date` parsing) and attributed it there instead
+of filing a new issue. accordproject/concerto-rust#160 itself is not edited by this
+fix (issue bodies aren't edited by this task), but its array/object `$class` content
+is superseded by the widened #156 sign-off, and the DateTime outlier it also
+mentioned is now DV-009's, not #160's.
 
 ### T2 — `ModelManager.fromAst`/`addModelFile`: AST deserialisation and validation gaps (2,494 divergences: 1,629 + 865, unchanged this revision)
 
@@ -274,20 +297,19 @@ is correct, and every cluster has an owner or a new issue":
   for a human to notice is "owned" by a closed decision.
 - **Every cluster has an owner, or is explicitly flagged as needing a new issue**,
   checked directly in `results/triage-clusters.json` (312/312 clusters carry a
-  non-null `owner` object; T1's 97 DV-015/#156 clusters no longer appear in this file
-  at all, since they are excluded as expected divergences rather than
-  unresolved-but-owned):
-  - T1's one remaining cluster (the DateTime outlier): left explicitly unowned
-    (`owner.issue: null`) rather than attributed to #156 or #160 — it needs its own
-    new issue, not yet filed.
+  non-null `owner` object satisfying `hasOwnerOrIssue()`; T1's 97 DV-015/#156
+  clusters no longer appear in this file at all, since they are excluded as expected
+  divergences rather than unresolved-but-owned):
+  - T1's one remaining cluster (the DateTime outlier): owned by DV-009
+    (`owner.status` starts `"owned: ..."`, `owner.dv: "DV-009"`) — see "Fourth review
+    fix" above; not attributed to #156 or #160.
   - T2 (311 clusters): accordproject/concerto-rust#144 (closed) and #67 (open) —
     see T2's owner section for why both, not just one.
   - T3 (0 clusters, no divergences): vacuously satisfied.
 
 accordproject/concerto-rust#160 is not this triage's owner for anything after this
 fix: its array/object `$class` content is now covered by #156, and the DateTime
-outlier it also raised is tracked here as its own unowned item, not resolved by
-#160.
+outlier it also raised is now owned by DV-009, not #160.
 
 This is a different claim from the *issue*'s own exit condition (1,000,000 cases, no
 unresolved divergence) — that one stays unmet by design; it is stage 2's job, per the
@@ -298,17 +320,19 @@ coordinator's two-stage decision.
 Per the coordinator's minor review note: scanned every cluster's sample TS/Rust
 message against `DIVERGENCES.md`'s existing rows (circular inheritance/`RangeError`/
 stack overflow, `dayjs`/`DateTime`/legacy-date keywords, `Infinity`, lone surrogates,
-regex/Unicode). None of the 312 surviving clusters' messages match an existing row's
-keywords except the one unowned `DateTime` outlier discussed under T1 above — no
-cluster here duplicates an already-documented, already-accepted divergence.
+regex/Unicode). One match: the T1 `DateTime` outlier discussed above is DV-009
+(dayjs/V8 lenient date parsing) — its embedded-NUL shape is now folded into DV-009's
+own text rather than left as a fresh, undocumented divergence. No other cluster here
+duplicates an already-documented, already-accepted divergence.
 
 ## What this triage does not do
 
-- **No product code is fixed**, other than the DV-015 sign-off itself (a test
-  addition, not a behaviour change — Rust's rejection was already there; #156 decided
-  to keep it, not to change it). Per the coordinator's stage-1 scope, remaining
-  product-code fixes stay with the owning tasks named above (T1's DateTime outlier:
-  unowned, needs a new issue; T2: #144 closed / #67 open).
+- **No product code is fixed**, other than the DV-015/DV-009 sign-off tests
+  themselves (test/doc additions, not behaviour changes — Rust's rejections were
+  already there; #156 and DV-009 decided to keep them, not to change them). Per the
+  coordinator's stage-1 scope, remaining product-code fixes stay with the owning
+  tasks named above (T1's DateTime outlier: DV-009, accepted, no fix needed; T2: #144
+  closed / #67 open).
 - **The corpus and `baseline.tsv` are untouched**, as instructed.
 - **Not every individual divergence was manually inspected** — minimisation
   (`bin/minimize-clusters.js`) re-verifies each cluster's *sample* still reproduces

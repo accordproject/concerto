@@ -31065,10 +31065,18 @@
         }
       },
       "owner": {
-        "theme": "T1c (Serializer.fromJSON, ts=ok / rust=ValidationException DateTime outlier)",
-        "ledger": "unrelated to $class; not covered by #156 or #160",
-        "tasks": [],
-        "status": "unowned: a genuine Rust correctness gap (Rust rejects a document TS accepts), mistakenly folded into the $class theme by the original per-op triage. Noted, not resolved, in accordproject/concerto-rust#160's body. Needs its own issue — do not attribute to #156 or #160.",
+        "theme": "T1c (Serializer.fromJSON, ts=ok / rust=ValidationException DateTime: V8 Date.parse leniency)",
+        "ledger": "P3-01+P4-10 (src/serializer.ts Serializer.fromJSON, src/serializer/jsonpopulator.ts JSONPopulator.convertToObject: \"type checks, integer/strict-datetime rules and messages in Rust\") — the accepted gap is DIVERGENCES.md DV-009",
+        "tasks": [
+          {
+            "task": "P4-10",
+            "issue": "accordproject/concerto-rust#69",
+            "state": "closed",
+            "note": "added DV-009's rust-mode Serializer.fromJSON leg (concerto-rust 16ab0b1)"
+          }
+        ],
+        "dv": "DV-009",
+        "status": "owned: documented engine divergence DIVERGENCES.md DV-009 (accordproject/concerto-rust). The input is a DateTime string with an embedded NUL; V8's Date parser stops at U+0000 and accepts the prefix, the Rust parser rejects it. Reproduced with DV-009's own example \"Nov 28 2022\" on the same seed (same signature).",
         "issue": null
       }
     },

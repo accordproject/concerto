@@ -38,6 +38,14 @@ lib/
                 writes one newline-delimited result per request to stdout. Batching
                 many cases through one process amortises ts-node/wasm start-up.
   run-batch.js  spawns one worker.js per engine per batch and pairs up results by id.
+  classify.js   outcome classification, free of engines and I/O (unit-tested in
+                test/classify.test.js): classifyThrow() decides, inside a worker,
+                whether an error thrown out of adapter.run() is the engine's verdict
+                (an engine call during input decoding that codec.js tagged — any
+                constructor/accessor, not only `new ModelFile`) or a harness error;
+                classifyCase() turns both workers' results into agree / divergence /
+                expected / harness; tally() counts each case once, per op, with
+                harness errors counted per side.
   signature.js  the cluster-signature function (op, TS outcome kind, Rust outcome
                 kind, templated message) shared by bin/triage.js and
                 bin/minimize-clusters.js, so both agree on what "the same cluster"
@@ -80,17 +88,31 @@ bin/
                 just its op, so an unrelated cluster sharing an op with a resolved
                 theme isn't silently attributed to that theme's owner (the one
                 Serializer.fromJSON cluster that survives lib/expected-divergences.js
-                — a ts=ok/rust=ValidationException DateTime outlier that has nothing
-                to do with $class — is left explicitly unowned rather than being
-                folded into #156 or #160).
+                — a ts=ok/rust=ValidationException DateTime case — is attributed to
+                DIVERGENCES.md DV-009, not to #156 or #160).
+  summarize.js  writes results/divergence-summary.json (counts by op and by
+                TS/Rust outcome class) from divergences.jsonl and
+                expected-divergences.jsonl.
   finalize-triage.js
-                one-off helper: prints TRIAGE.md's headline table from
-                results/run-42.json, then chains triage.js, minimize-clusters.js
-                (only if FIXTURES_DIR/CONCERTO_ENGINE_MODULE are set) and
-                attribute-owners.js.
+                prints TRIAGE.md's headline table from results/run-42.json, then
+                regenerates every derived results file: summarize.js, triage.js,
+                minimize-clusters.js (only if FIXTURES_DIR/CONCERTO_ENGINE_MODULE
+                are set) and attribute-owners.js. Re-running it over the committed
+                run outputs reproduces the committed JSON exactly.
+test/
+  classify.test.js  node --test migration/fuzz/test/*.test.js — outcome
+                classification (ts-ok/rust-throw, ts-throw/rust-ok, both throw
+                with the same or a different class/message, genuine harness errors
+                per side) and codec.js's tagging of engine errors raised while
+                inputs are decoded.
 results/
-  run-*.json          one run's summary (planned/ran/agree/divergences/
-                      expectedDivergences/harness errors, broken down by op).
+  run-*.json          one run's summary: ran = agree + divergences +
+                      expectedDivergences + harnessErrorCases, overall and by op,
+                      plus harnessErrorsTs/harnessErrorsRust per side.
+  harness-errors.jsonl
+                      one line per case with a harness error on either side, both
+                      sides kept ({harnessError} for a failed side, the canonical
+                      outcome for the other) — never silently dropped.
   divergences.jsonl   one line per unresolved divergence: {op, seedFile,
                       mutationSeed, ts: <canonical outcome>, rust: <canonical outcome>}.
                       Reproduce with the "Reproducing a divergence" recipe below.
@@ -104,8 +126,9 @@ results/
                       hit (seed + mutationSeed); `minimized` is
                       bin/minimize-clusters.js's shrunk, seed-free reproducer
                       (edits + the resulting document); `owner` is
-                      bin/attribute-owners.js's ledger-derived task/issue
-                      attribution, or null if the op has no ledger mapping yet.
+                      bin/attribute-owners.js's ledger-derived task/issue (or
+                      DIVERGENCES.md row) attribution; the script exits non-zero if
+                      any cluster has neither an owner nor an issue.
 ```
 
 ## Targeted ops
@@ -230,3 +253,16 @@ behaviour). `worker.js` checks for the tag around `adapter.run()`; when present,
 encodes the error the same way `adapter.js` encodes any other thrown-op outcome
 (`codec.encodeError`) and canonicalises it, so it diffs against the other engine like
 any other result instead of disappearing as a harness error.
+
+**Generalised (stage-1 review fix #4, worker note 5837364211 on #76):** the
+`ModelFile` constructor is not the only engine call made while inputs are decoded —
+`decodeMM`'s model-manager constructor, `mm.getModelFile`, a `declnew` constructor,
+`getAllDeclarations`/`getKey`/`getValue`/`getOwnProperties`/`getDecorators`/the
+validator accessors, and the `Introspector`, `Factory`, `Serializer` and
+`ResourceValidator` constructors are all engine code too. `codec.js` now routes each
+of them through one `engineCall()` helper that applies the same tag (never to a
+`HarnessError` or a replay "state divergence"), and `lib/classify.js`'s
+`classifyThrow()` is the single rule the worker applies. `bin/fuzz.js` no longer stops
+at a TS-side harness error before looking at the Rust side: every case is classified
+once (`lib/classify.js`), harness errors are counted per side and per op, and each
+harness-error case is written to `results/harness-errors.jsonl` with both sides.

@@ -16,10 +16,13 @@
 'use strict';
 
 // Prints the TRIAGE.md headline table row data from results/run-42.json, and
-// writes results/triage-clusters.json from results/divergences.jsonl, then
-// (stage-1 review fix) minimises each cluster's reproducer and attributes an
-// owner through the ledger. Not itself part of the harness; a one-off helper
-// for writing TRIAGE.md.
+// regenerates every derived results file from the committed run outputs
+// (results/divergences.jsonl, results/expected-divergences.jsonl):
+// results/divergence-summary.json (bin/summarize.js) and
+// results/triage-clusters.json (bin/triage.js, then bin/minimize-clusters.js
+// for each cluster's reproducer and bin/attribute-owners.js for its owner).
+// Re-running it over the committed inputs, with the same engine, reproduces
+// the committed JSON exactly (`git diff --exit-code migration/fuzz/results`).
 //
 // The minimise step needs a built Rust/WASM engine and the canonical corpus
 // (README.md "Reproducing a divergence"):
@@ -32,15 +35,16 @@ const path = require('path');
 
 const runFile = path.join(__dirname, '..', 'results', 'run-42.json');
 const run = JSON.parse(fs.readFileSync(runFile, 'utf8'));
-console.log('| op | ran | agree | divergences | expected |');
-console.log('|---|---|---|---|---|');
+console.log('| op | ran | agree | divergences | expected | harness errors (ts / rust) |');
+console.log('|---|---|---|---|---|---|');
 for (const [op, s] of Object.entries(run.byOp)) {
-    console.log(`| ${op} | ${s.ran} | ${s.agree} | ${s.divergences} | ${s.expectedDivergences || 0} |`);
+    console.log(`| ${op} | ${s.ran} | ${s.agree} | ${s.divergences} | ${s.expectedDivergences || 0} | ${s.harnessErrorsTs} / ${s.harnessErrorsRust} |`);
 }
 console.log('');
-console.log(`total: ran=${run.ran} agree=${run.agree} divergences=${run.divergences} expectedDivergences=${run.expectedDivergences || 0} harnessErrorsTs=${run.harnessErrorsTs} harnessErrorsRust=${run.harnessErrorsRust}`);
+console.log(`total: ran=${run.ran} agree=${run.agree} divergences=${run.divergences} expectedDivergences=${run.expectedDivergences || 0} harnessErrorCases=${run.harnessErrorCases} harnessErrorsTs=${run.harnessErrorsTs} harnessErrorsRust=${run.harnessErrorsRust}`);
 
 const { execSync } = require('child_process');
+execSync(`node ${path.join(__dirname, 'summarize.js')}`, { stdio: 'inherit' });
 execSync(`node ${path.join(__dirname, 'triage.js')} ${path.join(__dirname, '..', 'results', 'divergences.jsonl')} > ${path.join(__dirname, '..', 'results', 'triage-clusters.json')}`);
 console.log('wrote results/triage-clusters.json');
 

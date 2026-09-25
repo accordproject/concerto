@@ -57,7 +57,8 @@ const OWNERS = {
             { task: 'P3-01a', issue: 'accordproject/concerto-rust#56', state: 'closed' },
             { task: 'P4-10', issue: 'accordproject/concerto-rust#69', state: 'closed' },
         ],
-        status: 'unowned: every ledger-attributed task is merged and closed, and this cluster does not match a known Serializer.fromJSON theme (the $class divergence, owned by #156, is excluded before clustering; the DateTime outlier is caught by clusterOverride) — needs its own look.',
+        status: 'unowned: every ledger-attributed task is merged and closed, and this cluster does not match a known Serializer.fromJSON theme (the $class divergence, owned by #156, is excluded before clustering; the DV-009 DateTime shape is caught by clusterOverride) — needs its own look.',
+        issue: null,
     },
     'ModelManager.fromAst': {
         theme: 'T2',
@@ -83,37 +84,45 @@ const OWNERS = {
 OWNERS['ModelManager.addModelFile'] = OWNERS['ModelManager.fromAst'];
 
 // accordproject/concerto-rust#156's decision (comment 5837231174) covers
-// "a non-string $class" as a whole, and lib/expected-divergences.js now
-// matches on that basis (both the TypeError crash and the array's
-// TypeNotFoundException — see that file's header). So every T1 cluster
-// whose divergence *is* a non-string $class — crash or not — is excluded
-// before clustering ever sees it, and is owned by #156, not by this file.
+// "a non-string $class" as a whole, and lib/expected-divergences.js matches
+// on that basis (both the TypeError crash and the array's
+// TypeNotFoundException — see that file's header). Every cluster whose
+// divergence *is* a non-string $class is excluded before clustering ever
+// sees it, and is owned by #156 (DV-015), not by this file.
 //
-// accordproject/concerto-rust#160 was filed for what looked, before that
-// widening, like a second theme, but turned out to be two different
-// things folded together by the original per-op triage: (a) the
-// array/object $class cases, which the widened #156 match now covers, and
-// (b) one genuinely unrelated cluster — ts=ok on TS, `rust=error
-// (ValidationException)` on a DateTime field — that has nothing to do with
-// `$class` at all. That cluster must NOT be attributed to #160 (an issue
-// about the $class decision) just because it happens to share the
-// `Serializer.fromJSON` op; #160's own body already flags it as needing
-// "its own look", not as resolved by #160's ask. It is a real Rust
-// correctness gap (Rust rejects a document TS accepts) and stays unowned
-// here until it gets its own issue.
-const OWNER_DATETIME_OUTLIER = {
-    theme: 'T1c (Serializer.fromJSON, ts=ok / rust=ValidationException DateTime outlier)',
-    ledger: 'unrelated to $class; not covered by #156 or #160',
-    tasks: [],
-    status: 'unowned: a genuine Rust correctness gap (Rust rejects a document TS accepts), mistakenly folded into the $class theme by the original per-op triage. Noted, not resolved, in accordproject/concerto-rust#160\'s body. Needs its own issue — do not attribute to #156 or #160.',
+// The one Serializer.fromJSON cluster that survives is unrelated to $class:
+// ts=ok, rust=error(ValidationException) "Expected value at path `$.t` to be
+// of type `DateTime`". Reproduced and characterised (P5-05 stage-1 review
+// fix #4): the mutation appends U+0000 to a valid DateTime string
+// ("1970-01-01T00:00:00.000+00:00\u0000"). TS's non-strict DateTime path
+// (the Serializer default, strictQualifiedDateTimes !== true) is
+// dayjs.utc(string) -> new Date(string), and V8's date tokenizer reads
+// U+0000 as the end of its input, so the string parses as its prefix (so
+// does "...\u0000junk"; "...\u0001" is NaN on both sides). The Rust port's
+// date_parse (concerto-core/src/instance/dayjs.rs) deliberately covers only
+// the ECMAScript format plus the V8 extensions the corpus reaches, and
+// rejects everything else — which is exactly DIVERGENCES.md DV-009 (category
+// `engine`), whose row already names this outcome ("a ValidationException
+// (Expected value at path … to be of type DateTime) in rust mode where ts
+// mode accepts it") and now records the NUL case explicitly. DV-009's own
+// example, "Nov 28 2022", gives the identical signature on the same seed.
+// Not a TS bug (V8 behaviour), not a new Rust bug: owned by DV-009.
+const OWNER_DATETIME_DV009 = {
+    theme: 'T1c (Serializer.fromJSON, ts=ok / rust=ValidationException DateTime: V8 Date.parse leniency)',
+    ledger: 'P3-01+P4-10 (src/serializer.ts Serializer.fromJSON, src/serializer/jsonpopulator.ts JSONPopulator.convertToObject: "type checks, integer/strict-datetime rules and messages in Rust") — the accepted gap is DIVERGENCES.md DV-009',
+    tasks: [
+        { task: 'P4-10', issue: 'accordproject/concerto-rust#69', state: 'closed', note: 'added DV-009\'s rust-mode Serializer.fromJSON leg (concerto-rust 16ab0b1)' },
+    ],
+    dv: 'DV-009',
+    status: 'owned: documented engine divergence DIVERGENCES.md DV-009 (accordproject/concerto-rust). The input is a DateTime string with an embedded NUL; V8\'s Date parser stops at U+0000 and accepts the prefix, the Rust parser rejects it. Reproduced with DV-009\'s own example "Nov 28 2022" on the same seed (same signature).',
     issue: null,
 };
 
 /**
  * @param {object} d a divergence-shaped record ({ts, rust, ...}, same shape
  *   as a cluster's `sample`)
- * @returns {boolean} true for the one known ts=ok/rust=ValidationException
- *   DateTime outlier shape, false otherwise
+ * @returns {boolean} true for the ts=ok/rust=ValidationException DateTime
+ *   shape DV-009 describes, false otherwise
  */
 function isDateTimeOutlier(d) {
     const t = d && d.ts;
@@ -138,21 +147,39 @@ function isDateTimeOutlier(d) {
  */
 function clusterOverride(cluster) {
     if (cluster.op === 'Serializer.fromJSON' && isDateTimeOutlier(cluster.sample)) {
-        return OWNER_DATETIME_OUTLIER;
+        return OWNER_DATETIME_DV009;
     }
     return null;
 }
 
+/**
+ * The stage-1 exit condition's per-cluster half (coordinator comment
+ * 5835650999 on accordproject/concerto-rust#76): "every cluster has an owner
+ * or a new issue". An owner is an owning task/issue or a documented
+ * DIVERGENCES.md row (owner.status 'owned: ...'); a cluster with no owner,
+ * or with an 'unowned' status and no issue filed for it, fails the check.
+ * @param {object|null} owner a cluster's owner
+ * @returns {boolean} true if the cluster satisfies the condition
+ */
+function hasOwnerOrIssue(owner) {
+    if (!owner) { return false; }
+    if (owner.issue) { return true; }
+    return typeof owner.status === 'string' && owner.status.startsWith('owned:');
+}
+
 function main() {
     const data = JSON.parse(fs.readFileSync(CLUSTERS_FILE, 'utf8'));
-    let unowned = 0;
+    let failing = 0;
     for (const c of data.clusters) {
         c.owner = clusterOverride(c) || OWNERS[c.op] || null;
-        if (!c.owner) { unowned++; }
+        if (!hasOwnerOrIssue(c.owner)) {
+            failing++;
+            console.error(`attribute-owners: no owner or issue for cluster ${c.sig}`);
+        }
     }
     fs.writeFileSync(CLUSTERS_FILE, JSON.stringify(data, null, 2));
-    console.log(`attribute-owners: ${data.clusters.length} clusters, ${unowned} with no ledger mapping for their op`);
-    if (unowned) { process.exitCode = 1; }
+    console.log(`attribute-owners: ${data.clusters.length} clusters, ${failing} without an owner or a new issue`);
+    if (failing) { process.exitCode = 1; }
 }
 
 main();
