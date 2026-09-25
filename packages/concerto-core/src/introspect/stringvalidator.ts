@@ -224,7 +224,7 @@ class StringValidator extends Validator{
      */
     compatibleWith(other: Validator | null): boolean {
         /* istanbul ignore if */
-        if (rust) {
+        if (rust && !customRegExp(this.field) && !(other instanceof StringValidator && customRegExp(other.field))) {
             return rust.stringValidatorCompatibleWith(this, other, StringValidator);
         }
         if (!(other instanceof StringValidator)) {
