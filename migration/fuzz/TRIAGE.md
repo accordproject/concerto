@@ -11,7 +11,7 @@ product code is changed here.
 against the canonical corpus (`oracle-corpus-p107-06aa375`), with the TS side from
 this branch's `packages/concerto-core/src` and a WASM engine built from this task's
 concerto-rust branch (`claude/tender-pascal-ocwf9q-cloud-2-P5-05-156fix`, the
-integration branch plus DV-015/DV-009 docs and tests, no behaviour change). Summary:
+integration branch plus DV-015 docs and tests, no behaviour change). Summary:
 `results/run-42.json`. The raw outputs are `results/divergences.jsonl` (unresolved),
 `results/expected-divergences.jsonl` (maintainer-accepted, documented) and
 `results/harness-errors.jsonl` (empty for this run). Each line carries a reproducible
@@ -114,13 +114,14 @@ It minimises to one edit, `t = "1970-01-01T00:00:00.000+00:00\u0000"`:
 - Rust's `date_parse` (`concerto-core/src/instance/dayjs.rs`) matches the whole
   string, so it rejects it.
 
-This is not a TS bug. It falls inside the documented `engine` divergence DV-009:
-Rust covers the ECMAScript format plus only the V8 extensions the corpus reaches.
-DV-009's own example, `Nov 28 2022`, gives the identical signature on this seed.
-concerto-rust's `DIVERGENCES.md` now names the NUL case under DV-009, and a `dayjs.rs`
-test pins it. #169 asks the plan owner either to confirm DV-009 or to port V8's rule.
-If DV-009 is confirmed, stage 2 can add the signature to
-`lib/expected-divergences.js`.
+This is not a TS bug. It reads like the same root cause as the documented `engine`
+divergence DV-009 (Rust covers the ECMAScript format plus only the V8 extensions the
+corpus reaches), and DV-009's own example, `Nov 28 2022`, gives the identical
+signature on this seed — but DV-009's text does not name the embedded-NUL shape, and
+widening an `engine` row is the reviewer's call (PORTING.md 7.3), not a worker's.
+`DIVERGENCES.md` is unchanged here. #169 asks the plan owner either to confirm this
+falls under DV-009 (and to extend its row) or to port V8's NUL rule instead. If
+confirmed, stage 2 can add the signature to `lib/expected-divergences.js`.
 
 ### T2: `ModelManager.fromAst`/`addModelFile`, 2,370 divergences in 308 clusters
 
@@ -184,7 +185,7 @@ DV-001 to DV-015, including circular inheritance and `RangeError`,
 `$class`, not an instance's, and the 9 whose TS message is an invalid-regex error have
 no DV row. Two rows match:
 - DV-015, for T1a/T1b, which is excluded as expected.
-- DV-009, for T1c (#169).
+- DV-009 in substance, for T1c. DV-009's text doesn't name the embedded-NUL shape, so #169 asks the plan owner to confirm it.
 
 No T2 cluster duplicates a documented row.
 

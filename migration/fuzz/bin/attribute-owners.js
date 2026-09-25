@@ -102,15 +102,18 @@ OWNERS['ModelManager.addModelFile'] = OWNERS['ModelManager.fromAst'];
 // does "...\u0000junk"; "...\u0001" is NaN on both sides). The Rust port's
 // date_parse (concerto-core/src/instance/dayjs.rs) deliberately covers only
 // the ECMAScript format plus the V8 extensions the corpus reaches, and
-// rejects everything else — which is exactly DIVERGENCES.md DV-009 (category
-// `engine`), whose row already names this outcome ("a ValidationException
-// (Expected value at path … to be of type DateTime) in rust mode where ts
-// mode accepts it") and now records the NUL case explicitly. DV-009's own
-// example, "Nov 28 2022", gives the identical signature on the same seed.
-// Not a TS bug (V8 behaviour); inside DV-009's documented envelope. Per the
-// coordinator (#76 comment 5838054200) it still gets its own issue, which
-// asks the plan owner to confirm DV-009 (or to port V8's NUL rule):
-// accordproject/concerto-rust#169.
+// rejects everything else — which reads like DIVERGENCES.md DV-009 (category
+// `engine`), whose row already names this general outcome ("a
+// ValidationException (Expected value at path … to be of type DateTime) in
+// rust mode where ts mode accepts it"), though DV-009's text does not name
+// the embedded-NUL shape specifically. DV-009's own example, "Nov 28 2022",
+// gives the identical signature on the same seed. Not a TS bug (V8
+// behaviour); possibly inside DV-009's envelope, but widening an `engine`
+// row needs the reviewer's sign-off (PORTING.md 7.3), not a worker's own
+// call. Per the coordinator (#76 comment 5838054200) it gets its own issue,
+// which asks the plan owner to confirm DV-009 covers it (or to port V8's NUL
+// rule instead): accordproject/concerto-rust#169. DIVERGENCES.md is not
+// touched here pending that decision.
 const OWNER_DATETIME_DV009 = {
     theme: 'T1c (Serializer.fromJSON, ts=ok / rust=ValidationException DateTime: V8 Date.parse leniency)',
     ledger: 'P3-01+P4-10 (src/serializer.ts Serializer.fromJSON, src/serializer/jsonpopulator.ts JSONPopulator.convertToObject: "type checks, integer/strict-datetime rules and messages in Rust")',
