@@ -30,20 +30,35 @@ const isNodeOnlyPackage = packageJson.name === '@accordproject/concerto-linter';
 /**
  * The src/ directories the package's tsconfig.build.json excludes (plain
  * `src/...` paths, no globs), so that the ESM builds compile the same modules
- * as the CJS build. concerto-core excludes src/engine/, the CONCERTO_ENGINE=rust
- * shim of the Rust migration, which dist/ does not ship yet.
+ * as the CJS build.
+ *
+ * A package can also ship internal modules as JavaScript only, with no .d.ts:
+ * tsconfig.build.json excludes them, so they stay out of the declaration
+ * build (and out of the API snapshot), and tsconfig.build.internal.json
+ * compiles them into dist/ with `declaration: false`. The src/ directories
+ * that file includes (each written as src/<dir> plus the recursive glob) are
+ * compiled by the ESM builds too. concerto-core does this for src/engine/,
+ * the CONCERTO_ENGINE=rust shim of the Rust migration: dist/, dist/esm and
+ * dist/esm-browser all carry it (the views load it at runtime through a
+ * non-literal specifier), but it is not public API, so no .d.ts is emitted
+ * for it (PORTING.md 1.5, OD-11).
  *
  * @return {Set<string>} absolute paths of the excluded directories
  */
 function readExcludedSourceDirs() {
-    const tsconfigPath = path.join(packageDir, 'tsconfig.build.json');
-    if (!fs.existsSync(tsconfigPath)) {
-        return new Set();
-    }
-    const excludes = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8')).exclude || [];
-    return new Set(excludes
-        .filter(entry => entry.startsWith('src/') && !/[*?]/.test(entry))
-        .map(entry => path.join(packageDir, entry)));
+    const readSourceDirs = (file, key) => {
+        const tsconfigPath = path.join(packageDir, file);
+        if (!fs.existsSync(tsconfigPath)) {
+            return [];
+        }
+        return (JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'))[key] || [])
+            .map(entry => entry.replace(/\/\*\*\/\*$/, ''))
+            .filter(entry => entry.startsWith('src/') && !/[*?]/.test(entry))
+            .map(entry => path.join(packageDir, entry));
+    };
+    const internalDirs = new Set(readSourceDirs('tsconfig.build.internal.json', 'include'));
+    return new Set(readSourceDirs('tsconfig.build.json', 'exclude')
+        .filter(dir => !internalDirs.has(dir)));
 }
 
 const excludedSourceDirs = readExcludedSourceDirs();
