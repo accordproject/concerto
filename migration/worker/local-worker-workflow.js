@@ -31,6 +31,7 @@ Rules for every migration agent:
 - Oracle corpus: ${WS}/concerto/migration/oracle/fixtures must be the CANONICAL corpus from the draft release oracle-corpus-p107-06aa375 in ${TRACKER}. That's tarball sha256 e8a2bf72c7775a2d45123dea7b6ff897823c74a108603f5412251ced2619fce1, 16,704 files, recorded from concerto 06aa375a6. If it's missing, download it (gh release download oracle-corpus-p107-06aa375 -R ${TRACKER} -p '*.tgz'), check the sha256, and tar xzf it at the concerto checkout root. NEVER record your own corpus: no record-all.sh, no build-cto-cache.js. A self-recorded corpus drifts from baseline.tsv.
 - baseline.tsv (concerto-core/tests/oracle/) is only ever regenerated, with ORACLE_UPDATE_BASELINE=1 on a full oracle run against the canonical corpus. Never hand-edit or hand-merge it. On a merge conflict, take the integration branch's version, then regenerate.
 - Whenever you run cargo test in concerto-rust, export CONCERTO_ORACLE_FIXTURES=${WS}/concerto/migration/oracle/fixtures. Worktrees are nested too deep for the oracle harness to find the corpus on its own, and without the corpus the harness skips the oracle and still reports ok. An oracle result without that variable set is not evidence.
+- NEVER edit the body or title of any issue, including the task issue and the plan (#29). Report status only as a new comment. Labels are changed only by the claim, handoff and merge steps.
 - Every commit in every repo needs a DCO sign-off (git commit --signoff). concerto, concerto-rust and concerto-validate-rs all run the DCO check.`
 
 const ISSUE_LIST = {
