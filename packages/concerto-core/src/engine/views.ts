@@ -56,4 +56,56 @@ function scalarDeclarationProcess(declaration: any): void {
     declaration.defaultValue = snapshot.defaultValue;
 }
 
-export { scalarDeclarationProcess };
+/**
+ * Property.process in rust mode, after super.process(): Rust computes the
+ * name, type, array and optional fields from the AST, in the same order as
+ * the TS body. `type` is left unset when the snapshot omits it (the
+ * `EnumProperty` case, where TS never assigns `this.type`), so `getType()`
+ * reads `undefined` there exactly as ts mode does. `sizeValidator` is still
+ * built here, the same way ts mode does, since `CollectionSizeValidator`'s
+ * own constructor already ports the Rust engine (P0-04b trial).
+ * @param {object} property the Property (or Field/EnumValueDeclaration/
+ * RelationshipDeclaration) being processed
+ */
+function propertyProcess(property: any): void {
+    const snapshot = rust!.propertyProcess(property);
+    property.name = snapshot.name;
+    if ('type' in snapshot) {
+        property.type = snapshot.type;
+    }
+    property.array = snapshot.array;
+    property.optional = snapshot.optional;
+    const { default: CollectionSizeValidator } = require('../introspect/collectionsizevalidator');
+    property.sizeValidator = property.ast.sizeValidator
+        ? new CollectionSizeValidator(property, property.ast.sizeValidator)
+        : null;
+}
+
+/**
+ * Field.process in rust mode, after `super.process()` (Property's, already
+ * run): Rust computes the validator and the default value, the identical
+ * selection `scalarDeclarationProcess` makes for `ScalarDeclaration` — a
+ * `NumberValidator` is rebuilt from its snapshot; a `StringValidator` is
+ * still built by its TS constructor until P2-02 ports it.
+ * @param {object} field the Field being processed
+ */
+function fieldProcess(field: any): void {
+    const snapshot = rust!.fieldProcess(field);
+    field.validator = null;
+    if (snapshot.validator?.kind === 'NumberValidator') {
+        const { NumberValidator } = require('../introspect/numbervalidator');
+        const validator = Object.create(NumberValidator.prototype);
+        // The fields the Validator and NumberValidator constructors set.
+        validator.validator = field.ast.validator;
+        validator.field = field;
+        validator.lowerBound = snapshot.validator.lowerBound;
+        validator.upperBound = snapshot.validator.upperBound;
+        field.validator = validator;
+    } else if (snapshot.validator?.kind === 'StringValidator') {
+        const { StringValidator } = require('../introspect/stringvalidator');
+        field.validator = new StringValidator(field, field.ast.validator, field.ast.lengthValidator);
+    }
+    field.defaultValue = snapshot.defaultValue;
+}
+
+export { scalarDeclarationProcess, propertyProcess, fieldProcess };

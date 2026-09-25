@@ -24,6 +24,18 @@ import type ModelFile from './modelfile';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// See property.ts's own copy of this comment for the bundler/webpack
+// reasoning this loader relies on.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 /**
  * MapDeclaration defines a Map data structure, which allows storage of a collection
  * of values, where each value is associated and indexed with a unique key.
@@ -58,6 +70,14 @@ class MapDeclaration extends Declaration {
      */
     process() {
         super.process();
+
+        /* istanbul ignore if */
+        if (rust) {
+            rust.mapDeclarationProcess(this);
+            this.key = new MapKeyType(this, this.ast.key);
+            this.value = new MapValueType(this, this.ast.value);
+            return;
+        }
 
         if (!this.ast.key || !this.ast.value) {
             throw new IllegalModelException(`MapDeclaration must contain Key & Value properties ${this.ast.name}`, this.modelFile, this.ast.location);

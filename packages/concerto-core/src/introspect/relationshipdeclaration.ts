@@ -22,6 +22,18 @@ import type { AstNode } from './decorated';
 import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// See property.ts's own copy of this comment for the bundler/webpack
+// reasoning this loader relies on.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 /**
  * Class representing a relationship between model elements
  * @extends Property
@@ -49,6 +61,13 @@ class RelationshipDeclaration extends Property {
      */
     validate(classDecl: ClassDeclaration): void {
         super.validate(classDecl);
+
+        /* istanbul ignore if */
+        if (rust) {
+            rust.relationshipDeclarationValidate(this, classDecl);
+            return;
+        }
+
         // relationship cannot point to primitive types
         if(!this.getType()) {
             throw new IllegalModelException('Relationship must have a type', classDecl.getModelFile(), this.ast.location);
