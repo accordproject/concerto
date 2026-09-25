@@ -109,6 +109,29 @@ function fieldProcess(field: any): void {
 }
 
 /**
+ * Field.getScalarField in rust mode, after the `this.scalarField` cache
+ * check (still done by the view, since the cached instance stays a JS
+ * object) — the P2-09 partial audit found this still TS although the
+ * ledger says RUST (P2-04+P4-07, both closed). Rust resolves the field's
+ * type (calling back into `field`'s own `ModelFile`, not yet Rust-backed),
+ * checks it is a scalar declaration and, if so, returns the synthetic
+ * field's AST: the scalar's own AST with `$class` swapped for the matching
+ * `*Property` class and `name` set to the field's own name. This
+ * constructs the `Field` instance and sets `array` from `field.isArray()`,
+ * exactly as the TS body's `new Field(this.getParent(), fieldAst)` and
+ * `this.scalarField.array = this.isArray()` do.
+ * @param {object} field the Field whose scalar field is being unboxed
+ * @return {object} the synthetic Field instance
+ */
+function fieldGetScalarField(field: any): any {
+    const { Field } = require('../introspect/field');
+    const fieldAst = rust!.fieldGetScalarField(field);
+    const scalarField = new Field(field.getParent(), fieldAst);
+    scalarField.array = field.isArray();
+    return scalarField;
+}
+
+/**
  * DecoratorManager.decorateModels in rust mode, after the TS body's
  * `skipValidationAndResolution` handling. Metamodel resolution itself is not
  * ported (concerto-rust src/dcs/mod.rs `decorate_models`'s doc comment), but
@@ -205,6 +228,7 @@ export {
     scalarDeclarationProcess,
     propertyProcess,
     fieldProcess,
+    fieldGetScalarField,
     decoratorManagerDecorateModels,
     decoratorManagerExtractDecorators,
     decoratorManagerExtractVocabularies,

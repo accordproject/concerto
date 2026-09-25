@@ -182,6 +182,14 @@ class Field extends Property {
         if(this.scalarField) {
             return this.scalarField;
         }
+
+        /* istanbul ignore if */
+        if (rust) {
+            const scalarField: Field = loadEngine('../engine/views').fieldGetScalarField(this);
+            this.scalarField = scalarField;
+            return scalarField;
+        }
+
         if (!this.isTypeScalar()) {
             throw new Error(`Field ${this.name} is not a scalar property.`);
         }
