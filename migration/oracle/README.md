@@ -383,11 +383,12 @@ collapsed). `JOBS` (4 vs 2) itself produced no observable difference once the th
 applied: each unit test file already runs as its own isolated mocha process, so `JOBS` only changes how
 many run concurrently, not what any one of them records.
 
-### Two residual causes, documented rather than fixed
+### Residual causes: two documented, one still open
 
-The two recordings are still not byte-identical. Both remaining differences are real -- the recorded values
-genuinely vary between runs -- and both are out of this task's safe scope (fixing either means editing a
-protected `test/**` file, or a cross-op driver change with its own deadlock risk):
+The two recordings are still not byte-identical. All the remaining differences are real -- the recorded
+values genuinely vary between runs. Two are out of this task's safe scope (fixing either means editing a
+protected `test/**` file, or a cross-op driver change with its own deadlock risk); the third has no
+confirmed cause yet, so whether it is in scope is itself unknown:
 
 **(a) Values baked in by a protected `test/**` file.** A test file is allowed to embed a wall-clock- or
 run-dependent literal directly in the data it hands to concerto-core, and the recorder has no way to
@@ -398,14 +399,27 @@ never one supplied as input. A concrete, verified instance: `test/introspect/con
 a model file, so the parsed `ModelFile.new`/`validate` fixture's input carries that run's wall-clock
 millisecond count as part of a version string, and differs on every recording. `test/**` is never edited by
 this task (and cannot be by any task without the maintainer's sign-off), so this class of residual cannot be
-fixed from `migration/oracle` alone; it can only be catalogued as it is found. Earlier investigation
-(accordproject/concerto-rust#113 comment history) also attributed part of the `Factory.newResource`/
-`newRelationship` unit residual (of the order of 50 fixtures) to test-authored literal random ids feeding
-`factory.newResource`/`newRelationship`, by analogy with the pattern above; a repo-wide grep of
-`packages/concerto-core/test` for `Math.random`, `uuid.v4()`, `randomUUID` and `Date.now()`/`new Date()`
-finds no other occurrence beyond `concertoVersion.js`, so that specific attribution is not independently
-confirmed here and the exact mechanism for the rest of that residual is still open; it is documented as
-unresolved rather than asserted.
+fixed from `migration/oracle` alone; it can only be catalogued as it is found.
+
+**(a, unresolved) The remaining `Factory.newResource`/`newRelationship` unit residual (of the order of 50
+fixtures) does not have a confirmed cause, and is *not* an instance of (a).** The varying field is the
+generated `id` itself: these are unit fixtures where the test calls `factory.newResource`/`newRelationship`
+with no id, so `Factory` falls back to `uuid.v4()`, and the recorded fixture's id (and hence its fixture
+key) differs whenever that call draws a different value. Earlier investigation (accordproject/concerto-rust#113
+comment history) attributed this to test-authored literal random ids feeding those calls, by analogy with
+the pattern above. That attribution is not supported: a repo-wide grep of `packages/concerto-core/test` for
+`Math.random`, `uuid.v4()`, `randomUUID` and `Date.now()`/`new Date()` finds only `concertoVersion.js` (above)
+and one call in `test/factory.js`, `sandbox.stub(uuid, 'v4').returns('5604bdfe-...')` in a `beforeEach` --
+which stubs `uuid.v4` to a *fixed* constant, not a random one, so it cannot itself be the source of
+per-recording variance. Since `uuid.v4()` is also the exact call `lib/env.js`'s `seededRandom()` reseeds for
+every recorded op (accordproject/concerto-rust#113, commit `da31c8d`), and that seeding is installed and
+restored around each op by swapping the same `uuid.v4` property descriptor that `test/factory.js`'s sandbox
+stub swaps, a recorder-side interaction between the two -- not a `test/**` literal -- is a plausible
+alternative mechanism. It has not been reproduced or confirmed (reproducing it needs two independent
+recordings, which this pass did not re-run; see "Not done in this pass" on
+accordproject/concerto-rust#113). Until it is, this residual has **no verified root cause** and is left open
+here, distinct from the confirmed `test/**` cause above; it may turn out to be fixable inside
+`migration/oracle` rather than blocked on `test/**`.
 
 **(b) Wall-clock values that cross from one op's outcome into a later op's input.** `drivers/data.spec.js`
 builds a `Resource` via `serializer.fromJSON(json)` from JSON test data that has no `$timestamp` field;
@@ -426,9 +440,13 @@ inputs) and needs a separate, careful change of its own. Not attempted here; lef
 accordproject/concerto-rust#113).
 
 Given the above, the exit condition is read as met in the sense the issue allows: the recorder is not yet
-producing byte-identical corpora, but every difference class found is now either fixed (three bugs, above)
-or precisely root-caused and out of safe scope to fix here, and the corpus stays pinned rather than
-re-recorded while that holds.
+producing byte-identical corpora, but every difference class found is now either fixed (three bugs, above),
+precisely root-caused and out of safe scope to fix here (the `concertoVersion.js` instance of (a), and (b)),
+or -- for the one remaining unresolved residual, the ~50-fixture `Factory.newResource`/`newRelationship`
+case above -- catalogued with the field that varies and the mechanism ruled out, even though its actual
+cause is not yet confirmed. That residual is not shown to be out of safe scope: it may be fixable inside
+`migration/oracle` rather than `test/**`. It is carried as an open item, not closed, and the corpus stays
+pinned rather than re-recorded while that holds.
 
 ## Results
 
