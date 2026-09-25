@@ -37,7 +37,7 @@ export default {
     then: {
         function: pattern,
         functionOptions: {
-            notMatch: '/^(String|Double|Integer|Long|DateTime|Boolean|scalar|concept|enum|asset|participant|transaction|event|map|optional|length|regex|range|default)$/i'
+            notMatch: '/^(String|Double|Integer|Long|DateTime|Boolean|scalar|concept|enum|asset|participant|transaction|event|map|optional|length|regex|range|default)$/'
         },
     },
 };
