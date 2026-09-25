@@ -28,6 +28,7 @@ git -C <repo> merge --no-ff --signoff -m "Merge <task> (#<pr>) into the migratio
 ```
 **Fast checks before pushing:**
 - **Rust repos:** `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`.
+- **concerto-rust, concerto-wasm** (not a workspace member): `cargo fmt --manifest-path concerto-wasm/Cargo.toml -- --check`, `cargo clippy --manifest-path concerto-wasm/Cargo.toml --target wasm32-unknown-unknown -- -D warnings`.
 - **concerto:**
   - `node migration/bin/check-guardrails.mjs --base-ref origin/main`;
   - the concerto-core suite in TS mode, expecting 1299 passing and 1 known network failure (`ModelLoader #loadModelFromUrl`) in sandboxed environments;
