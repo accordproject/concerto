@@ -707,6 +707,27 @@ function encodePlainSafe(v) {
  * @returns {function} decode(value, dctx)
  */
 function makeDecoder(core, runDerived) {
+    // Every call below into the engine's own public API (a constructor or
+    // accessor of `core`) goes through engineCall(): an error it throws is
+    // tagged `decodeConstruct = true` and rethrown unchanged (same object,
+    // class and message), so a caller that wants to treat an engine
+    // rejection raised while the inputs are being decoded as part of the
+    // op's outcome (task P5-05's fuzz worker, whose mutated documents reach
+    // these calls) can tell it apart from a genuine harness failure — a
+    // HarnessError or a replay "state divergence", which are never tagged.
+    // Callers that don't look for the tag see exactly the previous
+    // behaviour: the same error, thrown the same way.
+    const engineCall = (f) => {
+        try {
+            return f();
+        } catch (e) {
+            if (e instanceof Error && !(e instanceof HarnessError) && !e.divergence) {
+                e.decodeConstruct = true;
+            }
+            throw e;
+        }
+    };
+
     const decodeMM = (node, dctx) => {
         let mm;
         if (node.derived) {
@@ -723,7 +744,7 @@ function makeDecoder(core, runDerived) {
                 throw new HarnessError('unknown model manager kind ' + node.kind);
             }
             const options = node.options === undefined ? undefined : decode(node.options, { mms: new Map() });
-            mm = node.options === undefined ? new Cls() : new Cls(options);
+            mm = engineCall(() => (node.options === undefined ? new Cls() : new Cls(options)));
         }
         dctx.mms.set(node.id, mm);
         for (const step of node.steps || []) {
@@ -749,7 +770,7 @@ function makeDecoder(core, runDerived) {
     const decodeMF = (node, dctx) => {
         const mm = decode(node.mm, dctx);
         if (node[M] === 'mfref') {
-            const mf = mm.getModelFile(node.ns);
+            const mf = engineCall(() => mm.getModelFile(node.ns));
             if (!mf) {
                 const err = new Error('state divergence: model file ' + node.ns + ' not registered after replay');
                 err.divergence = true;
@@ -760,7 +781,11 @@ function makeDecoder(core, runDerived) {
         const ast = decode(node.ast, dctx);
         const defs = decode(node.definitions, dctx);
         const fileName = decode(node.fileName, dctx);
-        return new core.ModelFile(mm, ast, defs, fileName);
+        // `new ModelFile(...)` can itself reject a malformed AST (this is a
+        // real, comparable engine behaviour, not just a decode-time mishap:
+        // task P5-05 fuzzes mutated model ASTs that feed straight into this
+        // constructor via an `mfnew` recipe node). See engineCall().
+        return engineCall(() => new core.ModelFile(mm, ast, defs, fileName));
     };
 
     const decodeDecl = (node, dctx) => {
@@ -769,10 +794,12 @@ function makeDecoder(core, runDerived) {
             if (!Cls) {
                 throw new HarnessError('unknown declnew class ' + node.cls);
             }
-            return new Cls(decodeMF(node.mf, dctx), decode(node.ast, dctx));
+            const mf = decodeMF(node.mf, dctx);
+            const ast = decode(node.ast, dctx);
+            return engineCall(() => new Cls(mf, ast));
         }
         const mf = decodeMF(node.mf, dctx);
-        const d = mf.getAllDeclarations()[node.index];
+        const d = engineCall(() => mf.getAllDeclarations())[node.index];
         if (!d || d.getName() !== node.name) {
             const err = new Error('state divergence: declaration ' + node.name + ' not found');
             err.divergence = true;
@@ -795,7 +822,8 @@ function makeDecoder(core, runDerived) {
             } else if (k === '$classDeclaration') {
                 t[k] = decl;
             } else if (k === '$validator') {
-                t[k] = new core.ResourceValidator(decode(node.validatorOptions, dctx));
+                const validatorOptions = decode(node.validatorOptions, dctx);
+                t[k] = engineCall(() => new core.ResourceValidator(validatorOptions));
             } else {
                 t[k] = decode(node.fields[k], dctx);
             }
@@ -865,12 +893,12 @@ function makeDecoder(core, runDerived) {
         case 'propref': {
             const decl = decodeDecl(v.decl, dctx);
             if (v.part === 'key') {
-                return decl.getKey();
+                return engineCall(() => decl.getKey());
             }
             if (v.part === 'value') {
-                return decl.getValue();
+                return engineCall(() => decl.getValue());
             }
-            const p = decl.getOwnProperties()[v.index];
+            const p = engineCall(() => decl.getOwnProperties())[v.index];
             if (!p || p.getName() !== v.name) {
                 const err = new Error('state divergence: property ' + v.name + ' not found');
                 err.divergence = true;
@@ -880,7 +908,7 @@ function makeDecoder(core, runDerived) {
         }
         case 'decoref': {
             const parent = decode(v.parent, dctx);
-            const d = parent.getDecorators()[v.index];
+            const d = engineCall(() => parent.getDecorators())[v.index];
             if (!d) {
                 const err = new Error('state divergence: decorator ' + v.index + ' not found');
                 err.divergence = true;
@@ -890,7 +918,7 @@ function makeDecoder(core, runDerived) {
         }
         case 'validatorref': {
             const owner = decode(v.owner, dctx);
-            const val = v.part === 'size' ? owner.getSizeValidator() : owner.getValidator();
+            const val = engineCall(() => (v.part === 'size' ? owner.getSizeValidator() : owner.getValidator()));
             if (!val) {
                 const err = new Error('state divergence: validator not found');
                 err.divergence = true;
@@ -898,12 +926,19 @@ function makeDecoder(core, runDerived) {
             }
             return val;
         }
-        case 'introspector': return new core.Introspector(decode(v.mm, dctx));
-        case 'factory': return new core.Factory(decode(v.mm, dctx));
+        case 'introspector': {
+            const mm = decode(v.mm, dctx);
+            return engineCall(() => new core.Introspector(mm));
+        }
+        case 'factory': {
+            const mm = decode(v.mm, dctx);
+            return engineCall(() => new core.Factory(mm));
+        }
         case 'serializer': {
             const mm = decode(v.mm, dctx);
             const factory = decode(v.factory, dctx);
-            return new core.Serializer(factory, mm, decode(v.defaultOptions, dctx));
+            const defaultOptions = decode(v.defaultOptions, dctx);
+            return engineCall(() => new core.Serializer(factory, mm, defaultOptions));
         }
         case 'typed': return decodeTyped(v, dctx);
         case 'blob':
