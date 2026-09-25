@@ -100,7 +100,18 @@ async function main() {
             const prev = seen.get(id);
             if (prev) {
                 prev.occurrences++;
-                if (rank(rec.source) < rank(prev.source)) {
+                // Which raw record "wins" (becomes the fixture's recorded
+                // source_test) must not depend on the order the raw .jsonl
+                // files were processed in: that order is only stable within
+                // a source (SOURCE_ORDER, then filename), and raw filenames
+                // embed the recording process's PID (accordproject/concerto-rust#113),
+                // so a tie on source rank alone picked whichever process
+                // happened to run first -- different on every recording. Once
+                // source rank ties, break on source_test text, which is a
+                // property of the test itself and so identical however the
+                // recording was scheduled.
+                const srcRank = rank(rec.source) - rank(prev.source);
+                if (srcRank < 0 || (srcRank === 0 && rec.source_test < prev.source_test)) {
                     prev.source = rec.source;
                     prev.source_test = rec.source_test;
                 }
