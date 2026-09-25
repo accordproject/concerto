@@ -1,0 +1,35 @@
+{
+  "started": "2026-09-25T15:30:49.390Z",
+  "fixturesDir": "/home/user/concerto/migration/oracle/fixtures",
+  "engineModule": "/home/user/wt/P5-05/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+  "runSeed": 42,
+  "planned": 60000,
+  "ran": 60000,
+  "agree": 55617,
+  "divergences": 4383,
+  "harnessErrorsTs": 0,
+  "harnessErrorsRust": 0,
+  "byOp": {
+    "Resource.validate": {
+      "ran": 15942,
+      "agree": 15942,
+      "divergences": 0
+    },
+    "Serializer.fromJSON": {
+      "ran": 12454,
+      "agree": 9700,
+      "divergences": 2754
+    },
+    "ModelManager.fromAst": {
+      "ran": 19313,
+      "agree": 17684,
+      "divergences": 1629
+    },
+    "ModelManager.addModelFile": {
+      "ran": 12291,
+      "agree": 12291,
+      "divergences": 0
+    }
+  },
+  "finished": "2026-09-25T15:42:21.367Z"
+}

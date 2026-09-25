@@ -1,0 +1,25 @@
+{
+  "total_divergences": 4383,
+  "by_class_pair": {
+    "Serializer.fromJSON | ts=TypeError rust=Error": 1694,
+    "Serializer.fromJSON | ts=TypeNotFoundException rust=Error": 1059,
+    "ModelManager.fromAst | ts=IllegalModelException rust=TypeError": 396,
+    "ModelManager.fromAst | ts=IllegalModelException rust=IllegalModelException": 316,
+    "ModelManager.fromAst | ts=ok rust=Error": 204,
+    "ModelManager.fromAst | ts=BaseException rust=BaseException": 124,
+    "ModelManager.fromAst | ts=ok rust=TypeError": 115,
+    "ModelManager.fromAst | ts=BaseException rust=Error": 94,
+    "ModelManager.fromAst | ts=BaseException rust=TypeError": 93,
+    "ModelManager.fromAst | ts=TypeError rust=TypeError": 83,
+    "ModelManager.fromAst | ts=ok rust=IllegalModelException": 69,
+    "ModelManager.fromAst | ts=Error rust=TypeError": 51,
+    "ModelManager.fromAst | ts=BaseException rust=IllegalModelException": 26,
+    "ModelManager.fromAst | ts=TypeError rust=IllegalModelException": 25,
+    "ModelManager.fromAst | ts=Error rust=IllegalModelException": 21,
+    "ModelManager.fromAst | ts=ok rust=BaseException": 7,
+    "ModelManager.fromAst | ts=Error rust=Error": 2,
+    "ModelManager.fromAst | ts=TypeError rust=ok": 2,
+    "Serializer.fromJSON | ts=ok rust=ValidationException": 1,
+    "ModelManager.fromAst | ts=TypeError rust=BaseException": 1
+  }
+}
