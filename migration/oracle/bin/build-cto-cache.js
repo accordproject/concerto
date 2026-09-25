@@ -38,6 +38,18 @@
  * inherit the same methods but their `processFile` never runs `Parser.parse`,
  * so a string argument there is AST-shaped input, not CTO text.
  *
+ * `addModel`'s `modelInput` is not always a string (its JSDoc: "Model (as a
+ * string or object)"); `ctoProcessFile` still runs it through the parser,
+ * coerced with `String()` first, so a non-string input is collected too
+ * (P2-09b), as the text `String()` gives it -- for the corpus today, always
+ * `"[object Object]"`, an AST object having no custom `toString`. This
+ * script also collects every successful (2xx) response body recorded in a
+ * fixture's `net` map (`BaseModelManager.updateExternalModels`'s downloads,
+ * oracle-gaps-driver.js; P2-08b), under the file name the download derives
+ * from its URL (`downloadedFileName`, kept in step with `tests/oracle/recipe.rs`
+ * `downloaded_file_name`) -- a non-2xx response never reaches the parser, so
+ * it needs no entry.
+ *
  * Each CTO text is parsed with the frozen reference `concerto-cto` 5.0.0 (the
  * one the oracle recorded with), exactly as `ModelManager`'s `ctoProcessFile`
  * does: `Parser.parse(cto, fileName ?? 'UNKNOWN', { skipLocationNodes })`.
@@ -134,6 +146,75 @@ function keyFor(cto, fileName, skipLocationNodes) {
 }
 
 /**
+ * TS `String(data)`: the coercion `ctoProcessFile` applies to an `addModel`
+ * input that is not already a string (modelmanager.ts: `const content =
+ * typeof data === 'string' ? data : String(data);`). This runs in Node, so
+ * native `String()` already matches V8 exactly for every JS value it can see
+ * directly (an object without a custom `toString`/`Symbol.toPrimitive`
+ * coerces to `"[object Object]"`, an array joins its elements with commas,
+ * ...). The one value it cannot see natively is this codec's own
+ * `{"@@oracle":"undefined"}` marker for JS `undefined` (README "Value
+ * encoding"); decoded first, so it coerces to `"undefined"` and not
+ * `"[object Object]"`.
+ * @param {*} v a resolved (blob-unpacked) fixture value
+ * @returns {string} the string `ctoProcessFile` would parse
+ */
+function jsToString(v) {
+    if (v && typeof v === 'object' && v['@@oracle'] === 'undefined') {
+        return String(undefined);
+    }
+    return String(v);
+}
+
+/**
+ * `BaseModelManager.updateExternalModels`'s recorded network responses
+ * (`inputs.net`, URL -> `{status, body}`, oracle-gaps-driver.js): a
+ * successful (2xx) body reaches `ctoProcessFile` under a file name derived
+ * from the URL exactly as `tests/oracle/recipe.rs` `downloaded_file_name`
+ * computes it (P2-08b), so this generator's cache key agrees with the native
+ * harness's lookup key. A non-2xx response never reaches the parser --
+ * `HTTPFileLoader.load` throws first (`recipe.rs` `update_external_models`)
+ * -- so it needs no cache entry.
+ * @param {string} url the URL fetched (already `github://` -> `https://raw...`
+ *   rewritten in the recording, the same URL the harness looks the response
+ *   up by)
+ * @returns {string} the `@host.path.with.dots` file name `processFile`
+ *   receives, matching `recipe.rs` `downloaded_file_name`
+ */
+function downloadedFileName(url) {
+    const afterScheme = url.includes('://') ? url.slice(url.indexOf('://') + 3) : url;
+    const rest = afterScheme.split(/[?#]/)[0];
+    const slash = rest.indexOf('/');
+    const host = slash === -1 ? rest : rest.slice(0, slash);
+    const filePath = slash === -1 ? '/' : '/' + rest.slice(slash + 1);
+    return '@' + (host.toLowerCase() + filePath).replace(/\//g, '.');
+}
+
+/**
+ * Every successful (2xx) response body in a fixture's recorded `net` map,
+ * as the `{cto, fileName}` pair `updateExternalModels` would hand the
+ * parser.
+ * @param {object} net URL -> `{status, body}` map (`inputs.net`)
+ * @returns {{cto: string, fileName: string}[]} the entries to cache
+ */
+function netCtoEntries(net) {
+    if (!net || typeof net !== 'object') {
+        return [];
+    }
+    const out = [];
+    for (const [url, response] of Object.entries(net)) {
+        if (!response || typeof response.status !== 'number' || typeof response.body !== 'string') {
+            continue;
+        }
+        if (response.status < 200 || response.status >= 300) {
+            continue;
+        }
+        out.push({ cto: response.body, fileName: downloadedFileName(url) });
+    }
+    return out;
+}
+
+/**
  * One entry per `ModelManager` method that can reach `ctoProcessFile`
  * (`this.processFile(fileName, modelInput)` where `modelInput` is a CTO
  * string), keyed by the method's bare name -- which is how it appears both as
@@ -150,10 +231,18 @@ const CTO_ENTRY_POINTS = {
         ? [{ cto: args[0], fileName: typeof args[1] === 'string' ? args[1] : null }]
         : [],
     // addModel(modelInput, cto?, fileName?, disableValidation?) -- processFile parses
-    // modelInput, not the optional cto convenience argument.
-    addModel: (args) => (Array.isArray(args) && typeof args[0] === 'string')
-        ? [{ cto: args[0], fileName: typeof args[2] === 'string' ? args[2] : null }]
-        : [],
+    // modelInput, not the optional cto convenience argument. modelInput is not always a
+    // string (its JSDoc: "Model (as a string or object)"); ctoProcessFile still parses it,
+    // coerced with String() first (P2-09b -- this used to be collected only when modelInput
+    // was already a string, leaving every non-string addModel input without a cache entry).
+    addModel: (args) => {
+        if (!Array.isArray(args)) {
+            return [];
+        }
+        const modelInput = args.length > 0 ? args[0] : undefined;
+        const cto = typeof modelInput === 'string' ? modelInput : jsToString(modelInput);
+        return [{ cto, fileName: typeof args[2] === 'string' ? args[2] : null }];
+    },
     // updateModelFile(modelFile, fileName?, disableValidation?) -- only when modelFile is a string.
     updateModelFile: (args) => (Array.isArray(args) && typeof args[0] === 'string')
         ? [{ cto: args[0], fileName: typeof args[1] === 'string' ? args[1] : null }]
@@ -228,6 +317,32 @@ function collect(fixturesDir) {
     }
 
     /**
+     * As [`record`], but for an op's recorded `net` responses
+     * (`updateExternalModels` only -- see [`netCtoEntries`]) rather than its
+     * `args`.
+     * @param {string} opName the op name, bare or class-qualified (as `record`)
+     * @param {object} net URL -> `{status, body}` map (`inputs.net`), or absent
+     * @param {{options: object, kind: string}} mmCtx the owning model manager's recipe context
+     * @returns {boolean} whether at least one triple was recorded
+     */
+    function recordNet(opName, net, mmCtx) {
+        const bareName = typeof opName === 'string' ? opName.slice(opName.lastIndexOf('.') + 1) : null;
+        if (bareName !== 'updateExternalModels' || !mmCtx || mmCtx.kind !== 'ModelManager' || !net) {
+            return false;
+        }
+        const skipLocationNodes = mmCtx.options && mmCtx.options.skipLocationNodes !== undefined ? mmCtx.options.skipLocationNodes : null;
+        let found = false;
+        for (const { cto, fileName } of netCtoEntries(net)) {
+            const key = keyFor(cto, fileName, skipLocationNodes);
+            if (!needed.has(key)) {
+                needed.set(key, { cto, fileName, skipLocationNodes });
+            }
+            found = true;
+        }
+        return found;
+    }
+
+    /**
      * Walk a resolved (blob-free) fixture value for calls into
      * `ctoProcessFile`, both inside `mm` recipe steps and inside any `{op,
      * inputs}` shape (a `derived` spec, or the fixture root itself).
@@ -262,6 +377,9 @@ function collect(fixturesDir) {
                 if (record(v.derived.op, v.derived.inputs && v.derived.inputs.args, mmCtx)) {
                     found = true;
                 }
+                if (recordNet(v.derived.op, v.derived.inputs && v.derived.inputs.net, mmCtx)) {
+                    found = true;
+                }
                 if (walk(v.derived, mmCtx)) {
                     found = true;
                 }
@@ -272,6 +390,9 @@ function collect(fixturesDir) {
             const target = v.inputs.target;
             const targetCtx = target && target['@@oracle'] === 'mm' ? { options: target.options || {}, kind: target.kind } : ambientCtx;
             if (record(v.op, v.inputs.args, targetCtx)) {
+                found = true;
+            }
+            if (recordNet(v.op, v.inputs.net, targetCtx)) {
                 found = true;
             }
         }
