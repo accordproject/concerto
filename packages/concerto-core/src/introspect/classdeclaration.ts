@@ -113,7 +113,8 @@ class ClassDeclaration extends Declaration {
 
         // The superType/idField decision below has no dependency on the
         // ast.properties loop that follows (Field/RelationshipDeclaration/
-        // EnumValueDeclaration views, kept in TS; Property views are P4-07),
+        // EnumValueDeclaration views, constructed in TS; since P4-07 those
+        // Property views delegate their own process/validate to the engine),
         // so it is made once, up front, either by the Rust engine or by the
         // unchanged TS body, and the loop stays a single copy shared by both
         // engines.
