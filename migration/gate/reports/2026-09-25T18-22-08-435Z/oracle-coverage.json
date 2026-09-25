@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-25T17:00:26.005Z",
+ "generated_at": "2026-09-25T18:33:23.486Z",
  "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
  "corpus": {
   "statements": {
@@ -27,13 +27,13 @@
  "corpus_src": {
   "statements": {
    "pct": 97.96,
-   "covered": 3362,
-   "total": 3432
+   "covered": 3363,
+   "total": 3433
   },
   "branches": {
    "pct": 95.7,
-   "covered": 1850,
-   "total": 1933
+   "covered": 1851,
+   "total": 1934
   },
   "functions": {
    "pct": 94.27,
@@ -42,13 +42,13 @@
   },
   "lines": {
    "pct": 97.95,
-   "covered": 3308,
-   "total": 3377
+   "covered": 3309,
+   "total": 3378
   }
  },
  "corpus_reference_vs_src": {
   "branch_layout_mismatches": 1082,
-  "branch_hit_disagreements": 162,
+  "branch_hit_disagreements": 163,
   "disagreements": [
    {
     "file": "src/decoratormanager.ts",
@@ -322,13 +322,13 @@
  "unit_suite": {
   "statements": {
    "pct": 98.98,
-   "covered": 3400,
-   "total": 3435
+   "covered": 3401,
+   "total": 3436
   },
   "branches": {
    "pct": 95.7,
-   "covered": 1850,
-   "total": 1933
+   "covered": 1851,
+   "total": 1934
   },
   "functions": {
    "pct": 99.18,
@@ -337,8 +337,8 @@
   },
   "lines": {
    "pct": 98.99,
-   "covered": 3346,
-   "total": 3380
+   "covered": 3347,
+   "total": 3381
   }
  },
  "unit_suite_source": "nyc run of the unit suite over the workspace src/ (same command as baseline.json)",

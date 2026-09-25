@@ -1,18 +1,18 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-25T16:57:10.668Z",
+  "generated_at": "2026-09-25T18:29:44.415Z",
   "requested_at_sha": null,
   "fast": false,
-  "runtime_ms": 300228,
+  "runtime_ms": 452993,
   "repos": {
     "concerto": {
       "path": "/home/user/wt/P5-01a/concerto",
-      "commit": "c318bab69db98213696f63a0f08ff21f89797b7f",
-      "commit_used": "c318bab69db98213696f63a0f08ff21f89797b7f"
+      "commit": "a0e89a9fe2106da356e911e7319228c84706d6ea",
+      "commit_used": "a0e89a9fe2106da356e911e7319228c84706d6ea"
     },
     "concerto-rust": {
       "path": "/home/user/wt/P5-01a/concerto-rust",
-      "commit": "8a0cd4fbe40404582c6d15edd7faee93ce43ca37"
+      "commit": "eb37a020d7014c9e939c31367bc8d56f927559e6"
     },
     "concerto-validate-rs": {
       "path": "/home/user/wt/P5-01a/concerto-validate-rs",
@@ -60,7 +60,7 @@
         "passing": 1299,
         "failing": 1,
         "pending": 8,
-        "duration_ms": 4945
+        "duration_ms": 6967
       },
       "by_tag": {
         "available": true,
@@ -94,7 +94,7 @@
           "passing": 1299,
           "failing": 1,
           "pending": 8,
-          "duration_ms": 4945
+          "duration_ms": 6967
         },
         "rust": {
           "available": false,
@@ -167,8 +167,58 @@
         "reason": "no WASM oracle adapter exists yet (P4-01/P4-02 have not landed)"
       },
       "corpus_coverage_of_reference": {
-        "available": false,
-        "reason": "migration/oracle/results/ has not been produced yet (P0-05 in progress)"
+        "available": true,
+        "generated_at": "2026-09-25T18:17:51.574Z",
+        "corpus": {
+          "statements": {
+            "pct": 95.38,
+            "covered": 3269,
+            "total": 3427
+          },
+          "branches": {
+            "pct": 95.85,
+            "covered": 1759,
+            "total": 1835
+          },
+          "functions": {
+            "pct": 94.26,
+            "covered": 575,
+            "total": 610
+          },
+          "lines": {
+            "pct": 95.34,
+            "covered": 3215,
+            "total": 3372
+          }
+        },
+        "unit_suite": {
+          "statements": {
+            "pct": 98.98,
+            "covered": 3401,
+            "total": 3436
+          },
+          "branches": {
+            "pct": 95.7,
+            "covered": 1851,
+            "total": 1934
+          },
+          "functions": {
+            "pct": 99.18,
+            "covered": 606,
+            "total": 611
+          },
+          "lines": {
+            "pct": 98.99,
+            "covered": 3347,
+            "total": 3381
+          }
+        },
+        "thresholds": {
+          "statements": 99,
+          "branches": 94.8,
+          "functions": 99,
+          "lines": 99
+        }
       },
       "mutants": {
         "available": true,
@@ -185,12 +235,12 @@
           "available": true,
           "command_exit_ok": true,
           "totals": {
-            "passed": 753,
+            "passed": 801,
             "failed": 0
           },
           "per_crate": {
             "concerto_core": {
-              "passed": 689,
+              "passed": 737,
               "failed": 0
             },
             "derive": {
@@ -233,9 +283,9 @@
         },
         "llvm_cov": {
           "available": true,
-          "workspace_lines_pct": 92.37,
+          "workspace_lines_pct": 92.75,
           "per_crate_lines_pct": {
-            "concerto-core": 92.35,
+            "concerto-core": 92.74,
             "concerto-macros": 99.22,
             "concerto-metamodel": 0,
             "concerto-vocabulary": 0

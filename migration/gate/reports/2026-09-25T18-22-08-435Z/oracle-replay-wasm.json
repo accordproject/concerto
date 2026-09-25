@@ -1,8 +1,8 @@
 {
  "engine": "rust-wasm",
  "total": 16085,
- "pass": 16054,
- "fail": 31,
+ "pass": 16055,
+ "fail": 30,
  "harness_error": 0,
  "by_source": {
   "conformance": {
@@ -19,8 +19,8 @@
   },
   "gaps": {
    "total": 658,
-   "pass": 656,
-   "fail": 2,
+   "pass": 657,
+   "fail": 1,
    "harness_error": 0
   },
   "lifted": {
@@ -213,8 +213,8 @@
   },
   "ModelManager.fromAst": {
    "total": 37,
-   "pass": 36,
-   "fail": 1,
+   "pass": 37,
+   "fail": 0,
    "harness_error": 0
   },
   "ModelManager.getAst": {
@@ -1552,12 +1552,6 @@
    "detail": "$.error.class: expected \"IllegalModelException\" got \"TypeError\""
   },
   {
-   "file": "gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json",
-   "status": "fail",
-   "op": "ModelManager.fromAst",
-   "detail": "$.error.message: expected \"Validator error for field `s`. gaps.strv2@1.0.0.C.s: Invalid regular expression: /(/: Unterminated group\" got \"Validator error for field `s`. gaps.strv2@1.0.0.C.s: Invalid regular expression: /(/: Unbalanced parenthesis\""
-  },
-  {
    "file": "gaps/ModelManager.validateModelFiles/d31238c92ac69b9d872bc810.json",
    "status": "fail",
    "op": "ModelManager.validateModelFiles",
@@ -1594,7 +1588,7 @@
    "detail": "$.effects: expected {\"args\":{\"0\":{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet\",\"commands\":[{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.Command\",\"decorator\":{\"$class\":\"concerto.metamod… got undefined"
   }
  ],
- "agreement_pct": 99.8073,
- "seconds": 209.7,
+ "agreement_pct": 99.8135,
+ "seconds": 282.5,
  "failures_truncated": false
 }
