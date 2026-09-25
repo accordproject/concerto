@@ -416,12 +416,16 @@ class DecoratorManager {
         }
 
         if (rust) {
-            // Metamodel resolution is not ported (src/dcs/mod.rs
-            // `decorate_models`'s doc comment): this reads the unresolved
-            // AST regardless of options.disableMetamodelResolution, and
-            // sends only the caller's own models — the Rust-side manager
-            // already carries its own copy of the system ones.
-            const ast = modelManager.getAst(false, false);
+            // Metamodel resolution itself is not ported (src/dcs/mod.rs
+            // `decorate_models`'s doc comment), but the ModelManager this
+            // phase runs against is still the TS one (P4-08 has not
+            // converted it yet), so resolution can run here, on the TS
+            // side, exactly as the ts-mode body below does, and the
+            // already-resolved AST handed across. System namespaces are
+            // still left out (the second argument false): the Rust-side
+            // manager already carries its own copy of them, and re-adding
+            // one is a duplicate-namespace error there.
+            const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, false) : modelManager.getAst(true, false);
             const decoratedAst = rust.decoratorManagerDecorateModels(ast.models, decoratorCommandSets, options ?? {});
             const newModelManager = new ModelManager({
                 decoratorValidation: modelManager.getDecoratorValidation()
@@ -534,7 +538,11 @@ class DecoratorManager {
             ...options
         };
         if (rust) {
-            const result = rust.decoratorManagerExtractDecorators(modelManager.getAst(false, false).models, options) as { modelManager: any; decoratorCommandSet: unknown[]; vocabularies: string[] };
+            // Resolved here, on the TS side, exactly as the ts-mode body
+            // below does with its own unconditional `getAst(true, true)`
+            // (decorateModels's rust-mode comment explains why system
+            // namespaces are still left out here).
+            const result = rust.decoratorManagerExtractDecorators(modelManager.getAst(true, false).models, options) as { modelManager: any; decoratorCommandSet: unknown[]; vocabularies: string[] };
             const updatedModelManager = new ModelManager();
             updatedModelManager.fromAst(result.modelManager);
             return {
@@ -567,7 +575,11 @@ class DecoratorManager {
             ...options
         };
         if (rust) {
-            const result = rust.decoratorManagerExtractVocabularies(modelManager.getAst(false, false).models, options) as { modelManager: any; vocabularies: string[] };
+            // Resolved here, on the TS side, exactly as the ts-mode body
+            // below does with its own unconditional `getAst(true, true)`
+            // (decorateModels's rust-mode comment explains why system
+            // namespaces are still left out here).
+            const result = rust.decoratorManagerExtractVocabularies(modelManager.getAst(true, false).models, options) as { modelManager: any; vocabularies: string[] };
             const updatedModelManager = new ModelManager();
             updatedModelManager.fromAst(result.modelManager);
             return {
