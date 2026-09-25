@@ -21,12 +21,11 @@ import { startEsmServer, type EsmServer } from './support/esm-static-server';
 // index.mjs imported directly, can load and run the CONCERTO_ENGINE=rust WASM
 // engine in a real browser context (accordproject/concerto-rust#70).
 //
-// It does NOT prove that the public browser ESM graph (dist/esm-browser/
-// index.mjs, which browser-bundles.spec.ts exercises) loads the engine: in
-// rust mode the views' `loadEngine` falls back to `module.require`, which does
-// not exist in ESM, so rust mode through the public ESM and browser entry
-// points is not supported yet and is deferred to a follow-up. Only the
-// CommonJS dist/ path runs rust mode through the public API today.
+// A second test below proves the follow-up (P4-11a, accordproject/concerto-rust#115):
+// the public browser ESM graph (dist/esm-browser/index.mjs, the same entry
+// point browser-bundles.spec.ts exercises in ts mode) also loads and uses the
+// engine, through the views' `module.require(specifier)` and
+// scripts/browser-module-shim.js — not by importing engine/index.mjs directly.
 //
 // packages/concerto-engine (PORTING.md, decision D9) is a local-only link to
 // the WASM package concerto-rust's concerto-wasm/build.sh writes into a
@@ -109,6 +108,72 @@ test.describe('Concerto built engine module with the WASM engine', () => {
         expect(pageErrors).toEqual([]);
         expect(result).toEqual({
             hasRust: true,
+            capitalized: 'Vehicle',
+            validIdentifier: true,
+            invalidIdentifier: false,
+        });
+    });
+
+    test('loads the WASM engine and runs a Rust-backed call through the public dist/esm-browser/index.mjs entry point', async ({ page }) => {
+        const pageErrors: string[] = [];
+        page.on('pageerror', (e) => pageErrors.push(String(e)));
+
+        await page.goto(server.baseUrl);
+        await page.addScriptTag({
+            type: 'importmap',
+            content: JSON.stringify({
+                imports: {
+                    '@accordproject/concerto-util': `${server.baseUrl}/concerto-util/index.mjs`,
+                },
+            }),
+        });
+
+        const result = await page.evaluate(async (baseUrl) => {
+            // modelutil.ts's `module.require('./engine')` reaches this —
+            // the piece P4-11a adds: scripts/browser-module-shim.js reads
+            // this same `globalThis.module` when a consumer's own bundler
+            // does not already provide one. `holder` is filled in below,
+            // once engine/index.mjs has actually loaded; `globalThis.module`
+            // itself has to be in place before that import (or any other),
+            // because the injected shim module reads `globalThis.module`
+            // exactly once, the first time anything imports it.
+            const holder: { rust?: unknown } = {};
+            (globalThis as any).module = {
+                require(specifier: string) {
+                    if (/^\.\.?\/engine$/.test(specifier)) {
+                        return holder;
+                    }
+                    throw new Error(`Dynamic module.require of "${specifier}" is not supported`);
+                },
+            };
+
+            // Stand in for what src/engine/rust.ts's bare
+            // `require('@accordproject/concerto-engine')` needs, exactly as
+            // the first test does.
+            const engineModule = await import(`${baseUrl}/concerto-engine/concerto-engine.mjs`);
+            (globalThis as any).process = { env: { CONCERTO_ENGINE: 'rust' } };
+            (globalThis as any).require = (name: string) => {
+                if (name === '@accordproject/concerto-engine') {
+                    return engineModule;
+                }
+                throw new Error(`Dynamic require of "${name}" is not supported`);
+            };
+
+            const { rust } = await import(`${baseUrl}/concerto-core/engine/index.mjs`);
+            holder.rust = rust;
+
+            // Now go through the *public* entry point, never engine/index.mjs
+            // directly.
+            const { ModelUtil } = await import(`${baseUrl}/concerto-core/index.mjs`);
+            return {
+                capitalized: ModelUtil.capitalizeFirstLetter('vehicle'),
+                validIdentifier: ModelUtil.isValidIdentifier('Vehicle'),
+                invalidIdentifier: ModelUtil.isValidIdentifier('1Vehicle'),
+            };
+        }, server.baseUrl);
+
+        expect(pageErrors).toEqual([]);
+        expect(result).toEqual({
             capitalized: 'Vehicle',
             validIdentifier: true,
             invalidIdentifier: false,

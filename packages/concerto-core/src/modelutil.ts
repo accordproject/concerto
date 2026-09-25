@@ -42,11 +42,15 @@ import type ModelFile from './introspect/modelfile';
 // `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
 // bundles exactly as before (PORTING.md 1.5).
 //
-// rust mode works through the CommonJS dist/ only. Through the public ESM and
-// browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
-// not supported yet and is deferred to a follow-up: there `module.require`
-// does not exist, and the relative specifier does not match the flattened
-// chunks' location.
+// rust mode also works through the public ESM and browser entry points
+// (dist/esm/index.mjs, dist/esm-browser/index.mjs; P4-11a). scripts/build-esm.js
+// binds a `module` there too — Node's via `createRequire(import.meta.url)`,
+// the browser's via a `globalThis.module` a consumer (or a test harness)
+// provides — so this same `module.require(specifier)` resolves; it never
+// needed the bare `require` a bundler would try to shim. The banner is
+// added per output file, entry or chunk, anchored to that file's own
+// location, so the relative specifier above still matches wherever esbuild
+// places this code.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */
