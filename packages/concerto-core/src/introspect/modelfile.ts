@@ -51,9 +51,14 @@ export type FilterFunction = (declaration: Declaration) => boolean;
 // reasoning this loader relies on.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
+// P5-06: memoised per specifier (see introspect/property.ts).
+/* istanbul ignore next */
+const engineModules: { [specifier: string]: any } = {};
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => any } | null =
     typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
@@ -127,9 +132,39 @@ class ModelFile extends Decorated {
         // Set up the decorators.
         this.process();
         // Populate from the AST
-        this.fromAst(this.ast);
+        let lazy = false;
+        /* istanbul ignore if */
+        if (rust) {
+            const views = loadEngine('../engine/views');
+            // P5-06a lazy-views spike (engine/views.ts `stageModelFile`):
+            // when Rust loads the AST without error, only the namespace and
+            // imports are populated here, and the declaration views are
+            // built on first use.
+            lazy = views.stageModelFile(this);
+            if (lazy) {
+                this._fromAstHeader(this.ast);
+            } else {
+                // P5-06: every property's engine snapshot in one call, read by
+                // the property views fromAst builds (engine/views.ts
+                // `beginModelFile`).
+                const saved = views.beginModelFile(this.ast);
+                try {
+                    this.fromAst(this.ast);
+                } finally {
+                    views.endModelFile(saved);
+                }
+            }
+        } else {
+            this.fromAst(this.ast);
+        }
         // Check version compatibility
         this.isCompatibleVersion();
+
+        /* istanbul ignore if */
+        if (lazy) {
+            loadEngine('../engine/views').deferDeclarations(this);
+            return;
+        }
 
         // Now build local types from Declarations
         this.localTypes = new Map();
@@ -171,22 +206,31 @@ class ModelFile extends Decorated {
      * @internal
      */
     _rustHandleId(): number | undefined {
-        const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorTrustworthy?: () => boolean; modelFiles?: Record<string, unknown> };
+        const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorTrustworthy?: () => boolean; _rustModelFileId?: (namespace: string) => number | undefined; modelFiles?: Record<string, unknown> };
         /* istanbul ignore next */
-        if (!rust || !manager || !manager.rustHandle || typeof manager._rustMirrorTrustworthy !== 'function' || !manager._rustMirrorTrustworthy()) {
+        if (!rust || !manager || !manager.rustHandle || typeof manager._rustMirrorTrustworthy !== 'function') {
             return undefined;
         }
         // A ModelFile detached from its manager's own registration -- most
         // notably `filter()`'s result before it is ever added -- must never
         // answer from a same-namespace mirror that belongs to a different
-        // (unfiltered) ModelFile object.
+        // (unfiltered) ModelFile object. Checked before the mirror's own
+        // trustworthiness, which reads rustHandle (P5-06a: a ModelFile being
+        // added is not registered yet, and needs no boundary call to say so).
         /* istanbul ignore next */
         if (!manager.modelFiles || manager.modelFiles[this.namespace] !== this) {
             return undefined;
         }
         /* istanbul ignore next */
+        if (!manager._rustMirrorTrustworthy()) {
+            return undefined;
+        }
+        /* istanbul ignore next */
         try {
-            return manager.rustHandle.modelFileId(this.namespace);
+            // P5-06: memoised per rustHandle epoch where the manager offers it.
+            return typeof manager._rustModelFileId === 'function'
+                ? manager._rustModelFileId(this.namespace)
+                : manager.rustHandle.modelFileId(this.namespace);
         } catch (e) {
             return undefined;
         }
@@ -357,11 +401,16 @@ class ModelFile extends Decorated {
         /* istanbul ignore next */
         if (rust && manager && manager.rustHandle && !manager._rustMirrorStale) {
             try {
-                manager.rustHandle.modelFileValidateDetached(
-                    JSON.stringify(this.getAst()),
-                    this.getDefinitions() ?? undefined,
-                    this.getName() ?? undefined,
-                );
+                // P5-06a: the file Rust already loaded (staged, or registered
+                // from its stage) is validated without sending the AST again
+                // (engine/views.ts `validateLoaded`).
+                if (!loadEngine('../engine/views').validateLoaded(this, manager.rustHandle)) {
+                    manager.rustHandle.modelFileValidateDetached(
+                        JSON.stringify(this.getAst()),
+                        this.getDefinitions() ?? undefined,
+                        this.getName() ?? undefined,
+                    );
+                }
                 return;
             } catch (e) {
                 if (e instanceof IllegalModelException) {
@@ -881,6 +930,24 @@ class ModelFile extends Decorated {
      * @private
      */
     fromAst(ast: AstNode) {
+        this._fromAstHeader(ast);
+
+        // declarations is an optional field
+        if (!ast.declarations) {
+            return;
+        }
+
+        this._fromAstDeclarations(ast);
+    }
+
+    /**
+     * The part of fromAst before the declarations: the namespace, its
+     * version and the imports.
+     * @param {object} ast - the AST obtained from the parser
+     * @private
+     * @internal
+     */
+    _fromAstHeader(ast: AstNode) {
         const nsInfo = ModelUtil.parseNamespace(ast.namespace);
 
         const namespaceParts = nsInfo.name.split('.');
@@ -946,12 +1013,15 @@ class ModelFile extends Decorated {
                 this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
             }
         });
+    }
 
-        // declarations is an optional field
-        if (!ast.declarations) {
-            return;
-        }
-
+    /**
+     * The part of fromAst that builds the declarations.
+     * @param {object} ast - the AST obtained from the parser, with declarations
+     * @private
+     * @internal
+     */
+    _fromAstDeclarations(ast: AstNode) {
         for(let n=0; n < ast.declarations.length; n++) {
             let thing = ast.declarations[n];
 
