@@ -15,6 +15,25 @@
 import { TypedStack } from '@accordproject/concerto-util';
 import Resource from './resource';
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode
+// (src/engine/index.ts), loaded through the same non-literal, memoised
+// `loadEngine` as serializer/resourcevalidator.ts (PORTING.md 1.5). P5-06b:
+// `validate()` first tries the engine's whole-resource fast path
+// (src/engine/serializer.ts `fastValidate`), one call instead of one per
+// field, and keeps its own visitor path below for everything else.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const engineModules: { [specifier: string]: any } = {};
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
+/* istanbul ignore next */
+const rust: unknown =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ResourceValidator from '../serializer/resourcevalidator';
@@ -122,6 +141,18 @@ class ValidatedResource extends Resource {
      * @throws {Error} - if the instance if invalid with respect to the model
      */
     validate() {
+        /* istanbul ignore if */
+        if (rust) {
+            try {
+                if (loadEngine('../engine/serializer').fastValidate(this)) {
+                    return;
+                }
+            } catch (err) {
+                if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+                    throw err;
+                }
+            }
+        }
         const classDeclaration = this.getClassDeclaration();
         const parameters:any = {};
         parameters.stack = new TypedStack(this);

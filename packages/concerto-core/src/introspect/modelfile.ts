@@ -51,9 +51,14 @@ export type FilterFunction = (declaration: Declaration) => boolean;
 // reasoning this loader relies on.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
+// P5-06: memoised per specifier (see introspect/property.ts).
+/* istanbul ignore next */
+const engineModules: { [specifier: string]: any } = {};
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => any } | null =
     typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
@@ -127,7 +132,21 @@ class ModelFile extends Decorated {
         // Set up the decorators.
         this.process();
         // Populate from the AST
-        this.fromAst(this.ast);
+        /* istanbul ignore if */
+        if (rust) {
+            // P5-06: every property's engine snapshot in one call, read by
+            // the property views fromAst builds (engine/views.ts
+            // `beginModelFile`).
+            const views = loadEngine('../engine/views');
+            const saved = views.beginModelFile(this.ast);
+            try {
+                this.fromAst(this.ast);
+            } finally {
+                views.endModelFile(saved);
+            }
+        } else {
+            this.fromAst(this.ast);
+        }
         // Check version compatibility
         this.isCompatibleVersion();
 
@@ -171,7 +190,7 @@ class ModelFile extends Decorated {
      * @internal
      */
     _rustHandleId(): number | undefined {
-        const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorTrustworthy?: () => boolean; modelFiles?: Record<string, unknown> };
+        const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorTrustworthy?: () => boolean; _rustModelFileId?: (namespace: string) => number | undefined; modelFiles?: Record<string, unknown> };
         /* istanbul ignore next */
         if (!rust || !manager || !manager.rustHandle || typeof manager._rustMirrorTrustworthy !== 'function' || !manager._rustMirrorTrustworthy()) {
             return undefined;
@@ -186,7 +205,10 @@ class ModelFile extends Decorated {
         }
         /* istanbul ignore next */
         try {
-            return manager.rustHandle.modelFileId(this.namespace);
+            // P5-06: memoised per rustHandle epoch where the manager offers it.
+            return typeof manager._rustModelFileId === 'function'
+                ? manager._rustModelFileId(this.namespace)
+                : manager.rustHandle.modelFileId(this.namespace);
         } catch (e) {
             return undefined;
         }

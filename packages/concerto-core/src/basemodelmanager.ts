@@ -66,6 +66,40 @@ const loadEngine = (specifier: string) =>
 const rust: { [binding: string]: (...args: any[]) => never } | null =
     typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
 
+/**
+ * What has been read from one rustHandle (P5-06), valid while its `epoch()`
+ * is unchanged: every binding that can change a handle bumps its epoch
+ * (concerto-wasm `ModelManagerHandle::epoch`), so a read taken at one epoch
+ * is still the handle's answer at that epoch.
+ */
+interface RustHandleReads {
+    epoch: number;
+    namespaces: Set<string>;
+    namespaceCount: number;
+    modelFileIds: Map<string, number | undefined>;
+}
+
+/* istanbul ignore next */
+const rustHandleReadCache = new WeakMap<object, RustHandleReads>();
+
+/**
+ * The reads cached for a rustHandle, refreshed when its epoch has moved.
+ * @param {object} handle - the rustHandle
+ * @return {RustHandleReads} its current reads
+ * @private
+ */
+/* istanbul ignore next */
+function rustHandleReads(handle: { [binding: string]: (...args: any[]) => any }): RustHandleReads {
+    const epoch = handle.epoch();
+    let reads = rustHandleReadCache.get(handle);
+    if (!reads || reads.epoch !== epoch) {
+        const namespaces: string[] = handle.getNamespaces();
+        reads = { epoch, namespaces: new Set(namespaces), namespaceCount: namespaces.length, modelFileIds: new Map() };
+        rustHandleReadCache.set(handle, reads);
+    }
+    return reads;
+}
+
 // How to create a modelfile from the external content
 const defaultProcessFile = (name: string | null, data: unknown): ModelFileSource => {
     return {
@@ -369,16 +403,39 @@ class BaseModelManager {
             return false;
         }
         try {
-            const rustNamespaces: string[] = this.rustHandle.getNamespaces();
+            // P5-06: rustHandle's namespaces are read across the boundary
+            // only when its epoch has moved since the last read
+            // (`rustHandleReads`); the comparison against this.modelFiles,
+            // which can change without rustHandle knowing, still runs on
+            // every call.
+            const reads = rustHandleReads(this.rustHandle);
             const tsNamespaces = Object.keys(this.modelFiles);
-            if (rustNamespaces.length !== tsNamespaces.length) {
+            if (reads.namespaceCount !== tsNamespaces.length) {
                 return false;
             }
-            const rustNamespaceSet = new Set(rustNamespaces);
-            return tsNamespaces.every((ns) => rustNamespaceSet.has(ns));
+            return tsNamespaces.every((ns) => reads.namespaces.has(ns));
         } catch (e) {
             return false;
         }
+    }
+
+    /**
+     * `rustHandle.modelFileId(namespace)`, memoised for as long as
+     * rustHandle's epoch is unchanged (P5-06; see `rustHandleReads`).
+     * @param {string} namespace - the namespace to look up
+     * @return {number|undefined} its model file handle, or undefined
+     * @private
+     * @internal
+     */
+    /* istanbul ignore next */
+    _rustModelFileId(namespace: string): number | undefined {
+        const reads = rustHandleReads(this.rustHandle!);
+        if (reads.modelFileIds.has(namespace)) {
+            return reads.modelFileIds.get(namespace);
+        }
+        const id = this.rustHandle!.modelFileId(namespace);
+        reads.modelFileIds.set(namespace, id);
+        return id;
     }
 
     /**
