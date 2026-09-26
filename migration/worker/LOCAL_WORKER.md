@@ -28,6 +28,9 @@ It keeps going until no ready issues are left, or until it has run the configure
 - The worker never merges to `main`.
 - The worker leaves some tasks for the coordinator: any task whose review failed (`mig:blocked`), and any task whose CI failed, timed out or hit a merge conflict (still `mig:in-review`, with a comment on the issue).
 
+## Long runs
+An agent turn is too short for a full gate run, a large fuzz campaign or a full coverage run. For these, the implementer starts the command detached with `nohup`, writing a log and an exit-code marker under `<worktree>/.longrun/`, and returns status `waiting`. The workflow then polls the markers in cheap wait steps of about 25 minutes each, up to about 6.5 hours per task. When every marker exists, it resumes the implementer to finish from the outputs. If the jobs are still running after the last wait step, the task ends as `partial` with the job list in its blockers.
+
 ## Sizing parallelism
 - A workflow runs at most min(16, CPUs − 2) agents at once. `maxPerRound` caps how many tasks each round claims.
 - On an 8-core machine, `maxPerRound: 3` keeps implementers and reviewers flowing without starving the test runs.
