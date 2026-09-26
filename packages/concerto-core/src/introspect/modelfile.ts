@@ -347,6 +347,18 @@ class ModelFile extends Decorated {
                 return;
             } catch (e) {
                 if (e instanceof IllegalModelException) {
+                    // rustHandle's `modelFile` (errors.ts's ErrorPayload)
+                    // is not this ModelFile, so `IllegalModelException`'s own
+                    // constructor already baked a message and fileName
+                    // without this file's name into `e`. Re-wrap with `this`
+                    // so the public exception carries the same
+                    // "File '<name>': " prefix and `fileName` that the TS
+                    // validate() body (below) produces for the identical
+                    // failure -- delegating to Rust must not change the
+                    // shape of the exception callers see.
+                    if (e.getFileName() !== this.getName()) {
+                        throw new IllegalModelException(e.getShortMessage(), this, e.getFileLocation());
+                    }
                     throw e;
                 }
                 debug('validate', 'rustHandle.modelFileValidateDetached failed with a non-model error, falling back to the TS body', e);
