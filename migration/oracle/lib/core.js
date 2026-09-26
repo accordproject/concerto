@@ -101,6 +101,8 @@ function loadCore(root, label) {
         RelationshipDeclaration: pick(req('introspect/relationshipdeclaration'), 'RelationshipDeclaration'),
         EnumValueDeclaration: pick(req('introspect/enumvaluedeclaration'), 'EnumValueDeclaration'),
         TypeNotFoundException: pick(req('typenotfoundexception'), 'TypeNotFoundException'),
+        // task P2-11b: the exported SecurityException constructor.
+        SecurityException: pick(req('securityexception'), 'SecurityException'),
         // task accordproject/concerto-rust#94: decorator factories as model
         // manager steps, and the async ModelLoader statics.
         DecoratorFactory: pick(req('introspect/decoratorfactory'), 'DecoratorFactory'),
@@ -117,6 +119,23 @@ function loadCore(root, label) {
 
 let srcCore = null;
 let refCore = null;
+
+/**
+ * Load a build through its package entry point (`index`), as every consumer
+ * of concerto-core does (task P2-11b). The modules above are then the same
+ * instances the entry point re-exports (Node caches each module once), so
+ * nothing about how an op runs changes; but the entry point itself is
+ * executed, so a coverage run of the reference counts `src/index.ts` (86
+ * statements of re-exports) as the corpus reaching it, rather than as never
+ * loaded. Used by the replay adapters only: the recorder (lib/recorder.js)
+ * does not load the entry point, so the class exports it replaces with
+ * recording proxies are not captured by `index` before it does.
+ * @param {object} core module set from loadCore()
+ * @returns {object} the entry point's exports
+ */
+function loadEntryPoint(core) {
+    return core.req('index');
+}
 
 /**
  * Register ts-node exactly as the unit suite does (tsconfig.build.json).
@@ -149,8 +168,9 @@ function getSrcCore() {
 function getRefCore() {
     if (!refCore) {
         refCore = loadCore(REF_ROOT, 'reference@5.0.0');
+        loadEntryPoint(refCore);
     }
     return refCore;
 }
 
-module.exports = { loadCore, getSrcCore, getRefCore, ORACLE_DIR, REPO_DIR, CORE_PKG_DIR, SRC_ROOT, REF_ROOT, REF_PKG_DIR };
+module.exports = { loadCore, loadEntryPoint, getSrcCore, getRefCore, ORACLE_DIR, REPO_DIR, CORE_PKG_DIR, SRC_ROOT, REF_ROOT, REF_PKG_DIR };
