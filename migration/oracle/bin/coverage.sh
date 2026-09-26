@@ -14,10 +14,18 @@
 #    same code as the reference, as a cross-check: coverage-gaps.js reports
 #    every branch on which the two runs disagree.
 #
-# With --with-suite it also runs the unit suite under nyc over src/ (same
-# command as migration/baseline.json) to learn which branches the suite
-# covers. Then writes migration/oracle/coverage-gaps.json and
-# migration/oracle/results/coverage.json.
+# With --with-suite it also runs the unit suite under nyc (same command as
+# migration/baseline.json) to learn which branches the suite covers -- over
+# the frozen v5.0.0 reference source, exactly as leg 1 above does, and NOT
+# over the workspace src/ (which has diverged since v5.0.0: engine views in
+# modelutil.ts, numbervalidator.ts and scalardeclaration.ts) and NOT over
+# leg 2's cross-check src/. Comparing a workspace-src suite run branch-by-id
+# against the reference's branch map reports spurious "unexplained" branches
+# for every layout mismatch between the two, so the suite leg instead runs
+# over a scratch copy of packages/concerto-core whose src/ is replaced with
+# `git archive v5.0.0 -- packages/concerto-core/src` (test/ is unchanged
+# since v5.0.0, so the same tests run; README.md "Coverage"). Then writes
+# migration/oracle/coverage-gaps.json and migration/oracle/results/coverage.json.
 set -euo pipefail
 WORK="${1:?usage: coverage.sh <work dir> [--with-suite]}"
 ORACLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -28,6 +36,34 @@ NYC="$REPO_DIR/node_modules/.bin/nyc"
 mkdir -p "$WORK"
 WORK="$(cd "$WORK" && pwd)"
 export TZ=UTC
+
+# 0. Build the workspace's own compiled output. Leg 2 (corpus -> workspace
+# src/, via ts-node) requires concerto-core's *dependencies* -
+# @accordproject/concerto-util and @accordproject/concerto-cto - through
+# node_modules, so ts-node's type checker needs their dist/*.d.ts already
+# built (a fresh checkout/worktree has none: `npm ci` alone does not build
+# workspace packages), or it fails with TS2307 "Cannot find module" and the
+# whole leg silently reports 0% coverage. The suite leg (below) also
+# requires concerto-core's own dist/index.js (its package.json "main"),
+# since the unit tests load the package through its entry point, not via
+# ts-node. The suite leg's test/decoratormanager.js additionally requires
+# @accordproject/concerto-vocabulary through node_modules (it is not a
+# concerto-core package.json dependency, only a workspace sibling resolved
+# via the root node_modules symlink), and mocha loads test files with plain
+# `require`, not ts-node, so an unbuilt dist/ there is a hard
+# MODULE_NOT_FOUND at load time, before any test runs -- not a coverage gap.
+# Building here, once, up front covers all three legs.
+#
+# -w is given the package NAME (not the "packages/<dir>" path) because npm
+# resolves a path given to -w relative to the process's cwd, not to
+# --prefix: once the script below `cd`s into packages/concerto-core (for
+# leg 2 and the suite leg), a `-w packages/concerto-core` there fails with
+# "No workspaces found" even though --prefix "$REPO_DIR" is correct. The
+# package name matches regardless of cwd.
+npm run build -w @accordproject/concerto-util --prefix "$REPO_DIR" >/dev/null
+npm run build -w @accordproject/concerto-cto --prefix "$REPO_DIR" >/dev/null
+npm run build -w @accordproject/concerto-vocabulary --prefix "$REPO_DIR" >/dev/null
+npm run build -w @accordproject/concerto-core --prefix "$REPO_DIR" >/dev/null
 
 # 1. corpus -> frozen reference. --cwd is the reference package so that its
 # dist/ is instrumented even though it lives under node_modules; src/**/*.ts
@@ -52,11 +88,68 @@ grep -E 'engine=|Statements|Branches|Functions|Lines' "$WORK/corpus-coverage.log
 
 SUITE_ARGS=()
 if [[ "${2:-}" == "--with-suite" ]]; then
-  rm -rf "$WORK/suite-nyc-tmp" "$WORK/suite-nyc-report"
+  # Point the suite leg at the v5.0.0 reference src, as leg 1 (corpus ->
+  # frozen reference) already does: swap packages/concerto-core/src for the
+  # frozen tag's own src/ (test/ is unchanged since v5.0.0), run the suite,
+  # then restore the workspace src/ exactly as it was, whatever it held.
+  rm -rf "$WORK/suite-nyc-tmp" "$WORK/suite-nyc-report" "$WORK/suite-src-backup"
+  mv "$CORE_DIR/src" "$WORK/suite-src-backup"
+  restore_workspace_src() {
+    rm -rf "$CORE_DIR/src"
+    mv "$WORK/suite-src-backup" "$CORE_DIR/src"
+    # dist/ was just rebuilt from the swapped-in v5.0.0 src below; rebuild it
+    # again from the restored workspace src so the worktree isn't left with a
+    # dist/ that silently disagrees with its own src/ once this script exits.
+    npm run build -w @accordproject/concerto-core --prefix "$REPO_DIR" >/dev/null
+  }
+  trap restore_workspace_src EXIT
+  mkdir -p "$CORE_DIR/src"
+  git -C "$REPO_DIR" archive v5.0.0 -- packages/concerto-core/src \
+    | tar -x -C "$CORE_DIR/src" --strip-components=3
+  # src/engine/** (the migration's engine views, P4-11) postdates v5.0.0, so
+  # it isn't in the archive above; tsconfig.build.internal.json unconditionally
+  # includes "src/engine/**/*", and tsc fails the whole build with TS18003 "No
+  # inputs were found" if that directory is missing. Carry the workspace's
+  # current engine/ over into the swapped-in tree so the build has something to
+  # compile there; it isn't exercised by the v5.0.0 test/ suite either way.
+  cp -R "$WORK/suite-src-backup/engine" "$CORE_DIR/src/engine"
+  # The unit tests load the package through its package.json "main"
+  # (dist/index.js), not via ts-node, so dist/ must be rebuilt from the
+  # swapped-in v5.0.0 src before running them - otherwise mocha runs against
+  # whatever dist/ happened to be built from before this leg (the workspace's
+  # diverged src/), defeating the whole point of the swap.
+  npm run build -w @accordproject/concerto-core --prefix "$REPO_DIR" >/dev/null
+  set +e
   npx nyc --temp-dir "$WORK/suite-nyc-tmp" --report-dir "$WORK/suite-nyc-report" \
     --reporter json --reporter json-summary --reporter text-summary --check-coverage=false \
-    mocha -r ts-node/register --recursive -t 10000 --reporter dot test/ > "$WORK/suite-coverage.log" 2>&1 || true
-  grep -E 'passing|failing|Statements|Branches|Functions|Lines' "$WORK/suite-coverage.log"
+    mocha -r ts-node/register --recursive -t 10000 --reporter dot test/ > "$WORK/suite-coverage.log" 2>&1
+  suite_status=$?
+  set -e
+  grep -E 'passing|failing|Statements|Branches|Functions|Lines' "$WORK/suite-coverage.log" || true
+
+  # A crashed or empty suite (e.g. a MODULE_NOT_FOUND at load time, before
+  # mocha reports anything) must fail the script loudly instead of quietly
+  # producing near-zero coverage that coverage-gaps.js then reads as a
+  # "clean" suite leg with no unexplained branches. Check the exit status,
+  # that at least one test passed, that none failed, and that the reported
+  # coverage is non-trivial -- any one of these being off means the suite
+  # didn't actually run over the swapped-in v5.0.0 src/test.
+  passing_count="$(grep -oE '[0-9]+ passing' "$WORK/suite-coverage.log" | grep -oE '^[0-9]+' | tail -1 || true)"
+  failing_count="$(grep -oE '[0-9]+ failing' "$WORK/suite-coverage.log" | grep -oE '^[0-9]+' | tail -1 || true)"
+  statements_pct="$(grep -m1 'Statements' "$WORK/suite-coverage.log" | grep -oE '[0-9]+(\.[0-9]+)?' | head -1 || true)"
+  suite_ok=1
+  if [[ "$suite_status" -ne 0 ]]; then suite_ok=0; fi
+  if [[ -z "${passing_count:-}" || "${passing_count:-0}" -eq 0 ]]; then suite_ok=0; fi
+  if [[ -n "${failing_count:-}" && "${failing_count:-0}" -ne 0 ]]; then suite_ok=0; fi
+  if [[ -z "${statements_pct:-}" ]] || ! awk -v p="${statements_pct:-0}" 'BEGIN{exit !(p>50)}'; then suite_ok=0; fi
+  if [[ "$suite_ok" -ne 1 ]]; then
+    echo "coverage.sh: unit suite leg failed to produce a real run" \
+      "(exit=$suite_status passing=${passing_count:-0} failing=${failing_count:-0} statements=${statements_pct:-0}%)," \
+      "see $WORK/suite-coverage.log" >&2
+    exit 1
+  fi
+  restore_workspace_src
+  trap - EXIT
   SUITE_ARGS=(--suite "$WORK/suite-nyc-report/coverage-final.json" --suite-summary "$WORK/suite-nyc-report/coverage-summary.json")
 fi
 
