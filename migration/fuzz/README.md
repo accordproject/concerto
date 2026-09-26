@@ -60,7 +60,12 @@ lib/
                 non-crashing TypeNotFoundException), discriminated by Rust's
                 distinctive "a $class that is not a string" rejection rather than
                 by matching the TS side alone — see the file's header for why a
-                narrower, TS-shape-only match under-covered the decision. bin/fuzz.js
+                narrower, TS-shape-only match under-covered the decision. The
+                second (DV-017, accordproject/concerto-rust#218) covers a
+                RelationshipProperty with a missing or null `type` on a model-loading
+                op: TS's TypeError "Cannot read properties of undefined|null (reading
+                'name')" paired with Rust's "Relationship <name> must have a type"
+                IllegalModelException. bin/fuzz.js
                 and bin/triage.js both use it to exclude a matching case *before* it
                 is ever counted as an unresolved divergence.
 bin/
