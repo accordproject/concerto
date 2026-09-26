@@ -262,8 +262,11 @@ function referenceAdapter() {
  * @returns {object} adapter
  */
 function srcAdapter() {
-    const { getSrcCore } = require('./core');
-    return coreAdapter(getSrcCore(), 'src');
+    const { getSrcCore, loadEntryPoint } = require('./core');
+    const core = getSrcCore();
+    // Through the entry point, like the reference adapter (task P2-11b).
+    loadEntryPoint(core);
+    return coreAdapter(core, 'src');
 }
 
 module.exports = { coreAdapter, referenceAdapter, srcAdapter };

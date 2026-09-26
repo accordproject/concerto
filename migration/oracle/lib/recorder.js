@@ -101,10 +101,13 @@ const state = {
 const mmRecipes = new WeakMap();
 const mfRecipes = new WeakMap();
 const declRecipes = new WeakMap();
+// task P2-11b: exceptions built from plain constructor arguments ({cls, args}).
+const errRecipes = new WeakMap();
 const tracker = {
     mmRecipe: (mm) => mmRecipes.get(mm) || null,
     mfRecipe: (mf) => mfRecipes.get(mf) || null,
     declRecipe: (d) => declRecipes.get(d) || null,
+    errRecipe: (e) => errRecipes.get(e) || null,
 };
 
 // The async op (if any) on whose behalf the current code runs.
@@ -785,11 +788,22 @@ function portableStepArgs(method, args) {
  * @returns {object} snapshot
  */
 function ctorSnapshot(cls, args, nested) {
-    if (cls === 'Serializer' || cls === 'TypeNotFoundException') {
-        // Neither carries a recipe: a Serializer is encoded from its model
-        // manager, factory and default options whenever it is an input, and
-        // an exception is only ever an outcome.
+    if (cls === 'Serializer') {
+        // No recipe: a Serializer is encoded from its model manager, factory
+        // and default options whenever it is an input.
         return null;
+    }
+    if (cls === 'TypeNotFoundException' || cls === 'SecurityException') {
+        // An exception is rebuilt from its constructor arguments when it is
+        // an input (task P2-11b: `errnew`), provided they are plain data.
+        state.suspended++;
+        try {
+            return { cls, args: args.map((a) => encodePlain(a)) };
+        } catch (e) {
+            return null;
+        } finally {
+            state.suspended--;
+        }
     }
     if (cls === 'ScalarDeclaration') {
         // Only a declaration built by the recorded constructor op carries a
@@ -859,6 +873,12 @@ function attachRecipe(cls, obj, snap, nested, subclass) {
     if (cls === 'ScalarDeclaration') {
         if (!subclass) {
             declRecipes.set(obj, snap);
+        }
+        return;
+    }
+    if (cls === 'TypeNotFoundException' || cls === 'SecurityException') {
+        if (!subclass) {
+            errRecipes.set(obj, snap);
         }
         return;
     }
@@ -939,6 +959,7 @@ proxyClass(core.modelFileModule, 'ModelFile', ops.get('ModelFile.new'));
 proxyClass(core.req('serializer'), 'Serializer', ops.get('Serializer.new'));
 proxyClass(core.req('typenotfoundexception'), 'TypeNotFoundException', ops.get('TypeNotFoundException.new'));
 proxyClass(core.req('introspect/scalardeclaration'), 'ScalarDeclaration', ops.get('ScalarDeclaration.new'));
+proxyClass(core.req('securityexception'), 'SecurityException', ops.get('SecurityException.new'));
 
 // Test titles: every mocha runnable (test or hook) sets the current title.
 try {

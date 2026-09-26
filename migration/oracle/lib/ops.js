@@ -53,6 +53,10 @@ const MM_QUERIES = [
     // falsy, where it throws (no file name, or no path) before touching the
     // disk; see WRITES_TO_DISK below.
     'writeModelsToFileSystem',
+    // task P2-11b: public accessors that were missing from this list, so no
+    // call to them was ever recorded, whatever the input. accept takes a
+    // visitor, recorded only as an encodable kind (lib/encodable.js).
+    'isModelManager', 'isAliasedTypeEnabled', 'getModelFileByFileName', 'getFactory', 'accept',
 ];
 // Ops that would write files for a truthy first argument (the directory).
 // The recorder skips such calls ('writes-to-disk') and an adapter refuses to
@@ -84,7 +88,8 @@ const MODELFILE_METHODS = [
     'getImportURI',
 ];
 const FACTORY_METHODS = ['newResource', 'newConcept', 'newRelationship', 'newTransaction', 'newEvent'];
-const SERIALIZER_METHODS = ['fromJSON', 'toJSON'];
+// setDefaultOptions (task P2-11b): a public method missing from this list.
+const SERIALIZER_METHODS = ['fromJSON', 'toJSON', 'setDefaultOptions'];
 
 const MODELUTIL_STATICS = [
     'getShortName', 'getNamespace', 'parseNamespace', 'importFullyQualifiedNames', 'isPrimitiveType',
@@ -104,11 +109,15 @@ const INTROSPECTION_CLASSES = [
     'Property', 'Field', 'RelationshipDeclaration', 'EnumValueDeclaration', 'MapKeyType',
     'MapValueType', 'Decorator', 'Validator', 'StringValidator', 'NumberValidator',
     'CollectionSizeValidator', 'Typed', 'Identifiable', 'Resource', 'Relationship', 'Introspector',
+    // task P2-11b: getTypeName, on an exception built by its recorded
+    // constructor op (an `errnew` input, lib/codec.js).
+    'TypeNotFoundException',
 ];
-// Construction-time internals and visitor entry points (their arguments are
-// visitors, never plain data).
+// Construction-time internals. Visitor entry points (accept) are recorded
+// since task P2-11b, but only with a visitor built by lib/encodable.js; any
+// other visitor is code, and the call is skipped as nonplain.
 const INTROSPECTION_EXCLUDE = new Set([
-    'constructor', 'accept', 'process', 'processType', 'fromAst', 'addTimestampField', 'addIdentifierField',
+    'constructor', 'process', 'processType', 'fromAst', 'addTimestampField', 'addIdentifierField',
     'assignFieldDefaults',
 ]);
 // Instance methods that change their receiver: the receiver's state after
@@ -277,7 +286,9 @@ function opTable(core) {
     // constructor, the only way to a ScalarDeclaration whose AST has no scalar
     // $class. The result is summarised; as an input it is encoded as a
     // `declnew` recipe (its model file and AST).
-    for (const cls of ['ModelManager', 'BaseModelManager', 'AstModelManager', 'ModelFile', 'Serializer', 'TypeNotFoundException', 'ScalarDeclaration']) {
+    // SecurityException.new (task P2-11b): the exported constructor, recorded
+    // like TypeNotFoundException.new (its result is an error value).
+    for (const cls of ['ModelManager', 'BaseModelManager', 'AstModelManager', 'ModelFile', 'Serializer', 'TypeNotFoundException', 'ScalarDeclaration', 'SecurityException']) {
         ops.set(cls + '.new', {
             op: cls + '.new', kind: 'ctor', cls,
             exec: (c, target, args) => new (c[cls])(...args),

@@ -25,12 +25,15 @@ drivers/          data.spec.js (test/data, test/1.0.0), conformance.spec.js (con
                   gaps.spec.js (task P2-11: targeted inputs closing coverage-gaps.json branches;
                   task accordproject/concerto-rust#94 added predicates, factories, async ops),
                   lifted.spec.js (task P2-10: runs lifted/*.scenarios.js),
+                  supplement.spec.js (task P2-11b: the additive corpus supplement, see "Corpus supplement"),
                   unit-setup.js (global chai set-up for per-file unit runs)
 lifted/           task P2-10: black-box scenarios replacing white-box unit tests (see lifted/README.md)
 bin/              record-all.sh, build-corpus.js, replay.js, coverage.sh, coverage-gaps.js, self-check.js,
                   cto-cache.js (P0-04b trial version, kept as-is, not used by anything else any more),
-                  build-cto-cache.js (CTO -> AST cache for the native Rust harness, OD-9; task P1-07a)
-fixtures/         the corpus: <source>/<op>/<id>.json, blobs/, manifest.json
+                  build-cto-cache.js (CTO -> AST cache for the native Rust harness, OD-9; task P1-07a),
+                  record-supplement.sh, build-supplement.js (task P2-11b: the additive corpus supplement)
+fixtures/         the corpus: <source>/<op>/<id>.json, blobs/, manifest.json; supplement/<op>/<id>.json and
+                  supplement/manifest.json (task P2-11b, additive, blobs inlined)
 cto-cache/        the CTO -> AST cache: <aa>/<sha256>.json (generated; see "CTO -> AST cache" below)
 results/          replay-reference.json, coverage.json, self-check.json, cto-cache.json
 coverage-gaps.json  every branch the corpus does not reach on the reference
@@ -52,8 +55,9 @@ Run from anywhere; `<work>` is a scratch directory for raw records and logs.
 | Judge self-check (mutants) | `node migration/oracle/bin/self-check.js --report migration/oracle/results/self-check.json` |
 | Build/refresh the CTO -> AST cache | `node migration/oracle/bin/build-cto-cache.js` |
 | Check the CTO -> AST cache is complete | `node migration/oracle/bin/build-cto-cache.js --check` |
+| Record the additive supplement next to the pinned corpus (task P2-11b) | `migration/oracle/bin/record-supplement.sh <work> <oracle-corpus-*.tgz> <pin content hash>` |
 
-`replay.js` exits non-zero unless every fixture passes. Options: `--source unit|data|conformance`,
+`replay.js` exits non-zero unless every fixture passes. Options: `--source unit|data|conformance|supplement`,
 `--op <op>`, `--fixtures <dir>`, `--max-failures N`. Set `ORACLE_VERBOSE=1` to see engine log output.
 
 ## How the corpus is recorded
@@ -157,6 +161,8 @@ Plain JSON is itself. Everything else is an object with an `"@@oracle"` kind:
 | `declnew` | a declaration built by a recorded constructor op, not part of its model file: `{cls: "ScalarDeclaration", mf, ast}`, rebuilt as `new ScalarDeclaration(mf, ast)` |
 | `predicate` | a filter predicate over a declaration: `{kind: "fqn-in", names}` is true when the declaration's fully qualified name is in `names` |
 | `decoratorfactory` | a `DecoratorFactory`: `{kind: "base"}` is the exported base class (its `newDecorator` throws `Error('abstract function called')`); `{kind: "names", names}` returns `new Decorator(parent, ast)` when `ast.name` is in `names`, and `null` otherwise |
+| `visitor` | (task P2-11b) the argument of an `accept(visitor, parameters)` op: `{kind: "pair"}` is a visitor whose `visit(thing, parameters)` returns `[thing, parameters]` |
+| `errnew` | (task P2-11b) an exception built from plain constructor arguments: `{cls: "TypeNotFoundException" \| "SecurityException", args}`, rebuilt as `new <cls>(...args)` |
 | `factory`, `serializer`, `introspector` | rebuilt from their model manager (and the serializer's default options) |
 | `typed` | a Resource, ValidatedResource or Relationship: its handles plus every own property in order |
 | outcome only: `ModelManager`, `ModelFile`, `Declaration`, `Property`, `Decorator`, `Validator`, `object`, `function`, `throws` | summaries of handles returned by an op (e.g. a model manager's full AST) |
@@ -181,11 +187,11 @@ harness implements it directly: a predicate is a set of fully qualified names, a
 
 | Family | Ops |
 |---|---|
-| Model managers | `ModelManager.new`, `BaseModelManager.new`, `AstModelManager.new`; steps `addModel`, `addCTOModel`, `addModelFile`, `addModelFiles`, `updateModelFile`, `deleteModelFile`, `clearModelFiles`, `fromAst`, `validateModelFiles`, `addDecoratorFactory`; async `updateExternalModels` (its effect on the model manager is `effects.target`); queries `validateModelFile`, `getType`, `resolveType`, `getAst`, `getModels`, `getNamespaces`, `derivesFrom`, `isAssignableTo`, `getAssignableConcreteTypes`, `resolveMetaModel`, `get*Declarations`, `getDecoratorValidation`, `filter` (with a `predicate`), `writeModelsToFileSystem` (only with no directory) |
+| Model managers | `ModelManager.new`, `BaseModelManager.new`, `AstModelManager.new`; steps `addModel`, `addCTOModel`, `addModelFile`, `addModelFiles`, `updateModelFile`, `deleteModelFile`, `clearModelFiles`, `fromAst`, `validateModelFiles`, `addDecoratorFactory`; async `updateExternalModels` (its effect on the model manager is `effects.target`); queries `validateModelFile`, `getType`, `resolveType`, `getAst`, `getModels`, `getNamespaces`, `derivesFrom`, `isAssignableTo`, `getAssignableConcreteTypes`, `resolveMetaModel`, `get*Declarations`, `getDecoratorValidation`, `filter` (with a `predicate`), `writeModelsToFileSystem` (only with no directory); task P2-11b: `isModelManager`, `isAliasedTypeEnabled`, `getModelFileByFileName`, `getFactory`, `accept` (with a `visitor`) |
 | Model files | `ModelFile.new`, `validate`, `getType`, `resolveType`, `isLocalType`, `isImportedType`, `resolveImport`, `getFullyQualifiedTypeName`, `getLocalType`, `isDefined`, and every other public accessor |
 | Model loader | async `ModelLoader.loadModelManager`, `ModelLoader.loadModelManagerFromModelFiles` |
-| Introspection | `ScalarDeclaration.new` (the exported constructor; its result is a `declnew` input); every public method of `Declaration`, `ClassDeclaration` and subclasses, `MapDeclaration`, `ScalarDeclaration`, `Property`, `Field`, `RelationshipDeclaration`, `EnumValueDeclaration`, `MapKeyType`, `MapValueType`, `Decorated`, `Decorator`, the validators, `Introspector` |
-| Instances | `Factory.newResource/newConcept/newRelationship/newTransaction/newEvent`, `TypeNotFoundException.new` (recorded as an error value), `Serializer.new` (the constructor; a successful one is summarised as `{"@@oracle":"object","ctor":"Serializer"}`), `Serializer.fromJSON/toJSON`, `Resource.validate/setPropertyValue/addArrayValue/instanceOf/toJSON`, `Typed`/`Identifiable`/`Resource`/`Relationship` accessors, `Relationship.fromURI` |
+| Introspection | `ScalarDeclaration.new` (the exported constructor; its result is a `declnew` input); every public method (task P2-11b: including `accept`, with a `visitor`) of `Declaration`, `ClassDeclaration` and subclasses, `MapDeclaration`, `ScalarDeclaration`, `Property`, `Field`, `RelationshipDeclaration`, `EnumValueDeclaration`, `MapKeyType`, `MapValueType`, `Decorated`, `Decorator`, the validators, `Introspector` |
+| Instances | `Factory.newResource/newConcept/newRelationship/newTransaction/newEvent`, `TypeNotFoundException.new` (recorded as an error value), `Serializer.new` (the constructor; a successful one is summarised as `{"@@oracle":"object","ctor":"Serializer"}`), `Serializer.fromJSON/toJSON`, `Resource.validate/setPropertyValue/addArrayValue/instanceOf/toJSON`, `Typed`/`Identifiable`/`Resource`/`Relationship` accessors, `Relationship.fromURI`; task P2-11b: `Serializer.setDefaultOptions`, `SecurityException.new` (an error value, like `TypeNotFoundException.new`), `TypeNotFoundException.getTypeName` (on an `errnew` receiver) |
 | Statics | every `ModelUtil` static, every `DecoratorManager` static, `MetaModel.newMetaModelManager/validateMetaModel/modelManagerFromMetaModel`, `DcsConverter.jsonToYaml/yamlToJson`, `DateTimeUtil.setCurrentTime` |
 
 ## Adding an engine adapter
@@ -465,6 +471,69 @@ case above -- catalogued with the field that varies and the mechanism ruled out,
 cause is not yet confirmed. That residual is not shown to be out of safe scope: it may be fixable inside
 `migration/oracle` rather than `test/**`. It is carried as an open item, not closed, and the corpus stays
 pinned rather than re-recorded while that holds.
+
+## Corpus supplement (task P2-11b)
+
+The pinned canonical corpus stays exactly as released (above). Coverage that it does not reach is added
+by an **additive supplement**: fixtures recorded by `drivers/supplement.spec.js` alone (source
+`supplement`), under `fixtures/supplement/<op>/<id>.json`, so `CONCERTO_ORACLE_FIXTURES` still names one
+directory. Both harnesses walk `fixtures/` recursively and skip every `manifest.json`, and
+`bin/build-cto-cache.js` reads `supplement` as one more source directory, so neither needed a change.
+
+`bin/record-supplement.sh <work> <oracle-corpus-*.tgz> <pin content hash>` runs the driver under
+`lib/recorder.js` (frozen clock, seeded random and uuid) and then `bin/build-supplement.js`, which:
+
+* checks the pin before and after it writes: every file the tarball holds under `fixtures/` and
+  `cto-cache/` is present, and their content hash (as CORPUS.md defines it: the sha256 of the sorted
+  `"<sha256>  <path>"` lines, paths from the checkout root) equals the pin's. The cache files count
+  because the pin's hash covers them; `build-cto-cache.js` only adds entries, so it still matches after a
+  rebuild;
+* deduplicates exactly as `build-corpus.js` does, drops a record whose id is a pinned fixture's with
+  identical content, and fails on an id shared with a different pinned fixture;
+* inlines every blob, because both harnesses resolve blobs only from the pinned `fixtures/blobs/`;
+* writes `fixtures/supplement/manifest.json` (counts, dropped duplicates, skipped calls, and the
+  supplement's own content hash, defined as the pin's).
+
+Record from a checkout whose `packages/concerto-core/src` is the frozen reference's source
+(`git archive v5.0.0 packages/concerto-core/src`, restored afterwards). Recording from the workspace
+`src/` (ts mode, `CONCERTO_ENGINE` unset) gave a byte-identical supplement.
+
+**What the driver adds.** Public accessors and constructors the pinned corpus never called: the
+`Declaration` accessors a map declaration inherits, `MapKeyType`/`MapValueType` `isKey`/`isValue`,
+`Field.toString`, `NumberValidator.toString`, `StringValidator.matchesRegex`, `Decorator.isDecorator`,
+`ModelFile.getExternalImports`, `DecoratorManager.isNamespaceTargetEnabled`; ops that were missing from
+`lib/ops.js` (`ModelManager.isModelManager`, `isAliasedTypeEnabled`, `getModelFileByFileName`,
+`getFactory`, `Serializer.setDefaultOptions`, `SecurityException.new`,
+`TypeNotFoundException.getTypeName` on an `errnew` receiver); `accept` on every visitable, with the
+encodable `visitor` kind; and rejected inputs (`ScalarDeclaration.validate` on a model file added without
+validation that repeats a name, ASTs through `fromAst` whose class has no `properties` array, extends
+itself, or aliases an import to a primitive type name, `Relationship.fromURI` with a query or user info,
+and a few instance edge cases).
+
+**Measuring through the entry point.** The replay adapters (`referenceAdapter`, `srcAdapter`) now load
+the build through its `index` first (`lib/core.js` `loadEntryPoint`), as consumers do. Before, the
+adapter required each module directly, so `src/index.ts` (86 statements of re-exports) and the
+module-level statements of `securityexception.ts` counted as never run. The recorder does not load the
+entry point, so the exports it replaces with recording proxies are not captured first.
+
+**Result** (`coverage.sh --with-suite`, pinned corpus plus supplement, 2026-09-26): 16,242 fixtures, all
+pass against the frozen reference and against `src/`.
+
+| Metric | Pinned corpus → reference (before) | Pinned + supplement → reference | §0.3 floor |
+|---|---:|---:|---:|
+| Statements | 95.38% (3269/3427) | **99.21% (3400/3427)** | 99 |
+| Branches | 95.85% (1759/1835) | **96.34% (1768/1835)** | 94.8 |
+| Functions | 94.26% (575/610) | **99.01% (604/610)** | 99 |
+| Lines | 95.34% (3215/3372) | **99.19% (3345/3372)** | 99 |
+
+The six functions left are abstract base methods that every concrete subclass overrides, so no object
+the public API builds runs them: `Declaration.toString`, `ClassDeclaration.declarationKind`,
+`Decorated.getModelFile`, `Validator.validate`, `Validator.compatibleWith` (no public path builds a
+plain `Validator`) and `Identifiable.toString` (`Resource` and `Relationship` override it). The 27
+statements left are those six, the ones `gap-reasons.json` already records as stub-only or
+internal-only, the root and decorator model load failures in `basemodelmanager.ts`, the unversioned
+namespace checks there (the `ModelFile` constructor rejects an unversioned namespace first), and a few
+error paths no public input was found to reach.
 
 ## Results
 

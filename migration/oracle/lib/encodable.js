@@ -17,7 +17,7 @@
 /**
  * Language-neutral encodings for public-API arguments that are code in
  * JavaScript (task accordproject/concerto-rust#94): a filter predicate and a
- * DecoratorFactory. Each is a small tagged kind whose meaning is defined here
+ * DecoratorFactory, and (task P2-11b) a visitor. Each is a small tagged kind whose meaning is defined here
  * and in README.md ("Value encoding"), so any engine's harness can build the
  * same behaviour from the fixture without running JavaScript.
  *
@@ -31,6 +31,11 @@
  *       a DecoratorFactory whose newDecorator(parent, ast) returns a plain
  *       Decorator built from (parent, ast) when ast.name is one of `names`,
  *       and null otherwise
+ *   {"@@oracle":"visitor","kind":"pair"}
+ *       (task P2-11b) a visitor, the argument of every public accept(visitor,
+ *       parameters): an object whose visit(thing, parameters) returns the
+ *       two-element array [thing, parameters], so the outcome of accept
+ *       shows what it dispatched to the visitor, and with which parameters
  *
  * A driver builds such a value with predicate() or decoratorFactory(); the
  * value is registered here, and the recorder's encoder looks it up, so only a
@@ -127,6 +132,40 @@ function decoratorFactory(core, spec) {
 }
 
 /**
+ * Build the visitor an encoding describes (task P2-11b).
+ * @param {object} enc {kind}
+ * @returns {object} visitor with a visit(thing, parameters) method
+ */
+function buildVisitor(enc) {
+    if (!enc || enc.kind !== 'pair') {
+        const err = new Error('unknown visitor kind ' + (enc && enc.kind));
+        err.name = 'HarnessError';
+        throw err;
+    }
+    const visitor = {
+        /**
+         * @param {object} thing the object accept() was called on
+         * @param {*} parameters the parameters accept() was given
+         * @returns {Array} [thing, parameters]
+         */
+        visit(thing, parameters) {
+            return [thing, parameters];
+        },
+    };
+    REGISTRY.set(visitor, { [M]: 'visitor', kind: 'pair' });
+    return visitor;
+}
+
+/**
+ * A visitor for a driver.
+ * @param {object} spec {kind: 'pair'}
+ * @returns {object} registered visitor
+ */
+function visitor(spec) {
+    return buildVisitor(spec);
+}
+
+/**
  * The encoding of a registered value.
  * @param {*} v value
  * @returns {object|null} a copy of its encoding, or null when not registered
@@ -139,4 +178,4 @@ function encodingOf(v) {
     return enc ? JSON.parse(JSON.stringify(enc)) : null;
 }
 
-module.exports = { predicate, decoratorFactory, buildPredicate, buildDecoratorFactory, encodingOf };
+module.exports = { predicate, decoratorFactory, visitor, buildPredicate, buildDecoratorFactory, buildVisitor, encodingOf };
