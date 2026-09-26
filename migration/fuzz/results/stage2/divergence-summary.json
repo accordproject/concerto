@@ -10,7 +10,7 @@
   "by_class_pair": {
     "ModelManager.addModelFile | ts=ok rust=TypeError": 7428,
     "ModelManager.fromAst | ts=IllegalModelException rust=TypeError": 7036,
-    "ModelManager.fromAst | ts=IllegalModelException rust=IllegalModelException": 4571,
+    "ModelManager.fromAst | ts=IllegalModelException rust=IllegalModelException": 4474,
     "ModelManager.fromAst | ts=ok rust=Error": 3010,
     "ModelManager.addModelFile | ts=ok rust=IllegalModelException": 2637,
     "ModelManager.addModelFile | ts=IllegalModelException rust=IllegalModelException": 1906,
@@ -24,11 +24,12 @@
     "ModelManager.addModelFile | ts=ok rust=Error": 808,
     "ModelManager.fromAst | ts=BaseException rust=IllegalModelException": 506,
     "ModelManager.fromAst | ts=TypeError rust=IllegalModelException": 346,
-    "ModelManager.fromAst | ts=Error rust=IllegalModelException": 251,
+    "ModelManager.fromAst | ts=Error rust=IllegalModelException": 254,
     "ModelManager.addModelFile | ts=BaseException rust=Error": 191,
     "ModelManager.addModelFile | ts=TypeError rust=ok": 155,
     "ModelManager.addModelFile | ts=Error rust=IllegalModelException": 137,
     "ModelManager.fromAst | ts=ok rust=BaseException": 125,
+    "ModelManager.fromAst | ts=IllegalModelException rust=ok": 100,
     "ModelManager.addModelFile | ts=Error rust=TypeError": 79,
     "ModelManager.addModelFile | ts=TypeError rust=IllegalModelException": 66,
     "ModelManager.addModelFile | ts=TypeError rust=TypeError": 53,
@@ -39,7 +40,6 @@
     "ModelManager.fromAst | ts=IllegalModelException rust=Error": 9,
     "Serializer.fromJSON | ts=ok rust=ValidationException": 8,
     "ModelManager.addModelFile | ts=ok rust=BaseException": 6,
-    "ModelManager.fromAst | ts=IllegalModelException rust=ok": 6,
     "ModelManager.fromAst | ts=TypeError rust=Error": 5
   },
   "expected_by_dv": {

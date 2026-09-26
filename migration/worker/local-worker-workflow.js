@@ -117,17 +117,29 @@ Continue in the same worktrees (${JSON.stringify(r.worktrees)}): read the logs a
 }
 
 const seen = new Set()
+const usedIds = new Map()
 const outcomes = []
 
 for (let round = 1; round <= ROUNDS; round++) {
   phase('Fetch')
   const found = await agent(
 `Use the gh CLI to list OPEN issues in ${TRACKER} with ALL of the labels: migration, mig:ready, worker:${WORKER}.
-For each, read the body and return: number, task id (e.g. P2-03, from the title), title, the implementing model from its model:* label, and the repos it touches (from the body).
+For each, read the body and return: number, task id including any sub-label (e.g. P2-03, P2-11b-U4, P5-05-T2a; the full id from the title, never just its P-number prefix), title, the implementing model from its model:* label, and the repos it touches (from the body).
 Skip issues whose "Depends on" issues are not all closed or labelled mig:done. Skip these already-handled numbers: ${[...seen].join(', ') || 'none'}.
 Return at most ${MAX_PER_ROUND}, highest priority (P0 before P1 ...) first.`,
     { label: `fetch:round-${round}`, phase: 'Fetch', model: 'haiku', effort: 'low', schema: ISSUE_LIST })
   const items = ((found && found.issues) || []).filter(i => !seen.has(i.number))
+  // Task ids name worktrees and branches, so they must be unique: sibling tasks such as P5-05-T2a and P5-05-T2c
+  // can come back from the fetch step with the same id. Sanitise, then add the title sub-label, then the issue number.
+  for (const i of items) {
+    let id = String(i.id || "").replace(/[^A-Za-z0-9-]/g, "") || ("T" + i.number)
+    if (usedIds.has(id) && usedIds.get(id) !== i.number) {
+      const m = String(i.title || "").match(/\b(T\d+[a-z]?|U\d+|F\d+)\b/)
+      if (m && !id.endsWith("-" + m[1])) id = id + "-" + m[1]
+    }
+    if (usedIds.has(id) && usedIds.get(id) !== i.number) id = id + "-" + i.number
+    usedIds.set(id, i.number); i.id = id
+  }
   if (!items.length) { log(`Round ${round}: no ready issues for worker:${WORKER}; stopping.`); break }
   items.forEach(i => seen.add(i.number))
   log(`Round ${round}: ${items.map(i => i.id).join(', ')}`)

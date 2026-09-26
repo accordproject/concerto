@@ -33,9 +33,16 @@ import type { AstNode } from './decorated';
 // this loader relies on.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
+// P5-06: memoised per specifier, so a call site on a per-element or
+// per-instance path (propertyProcess, fastFromJson, ...) resolves the module
+// once rather than on every call.
+/* istanbul ignore next */
+const engineModules: { [specifier: string]: any } = {};
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } | null =
     typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;

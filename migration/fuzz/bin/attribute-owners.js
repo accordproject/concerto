@@ -44,6 +44,8 @@ const CLUSTERS_FILE = path.join(__dirname, '..', 'results', 'triage-clusters.jso
 // Resolved 2026-09-25 against accordproject/concerto-rust (see comment
 // above); update this table, not the ledger, if a task's issue number
 // changes or a new split lands.
+const OWNERS_T2_LEDGER_NOTE = 'P2-08+P4-08 (src/basemodelmanager.ts BaseModelManager.fromAst/addModelFile, src/introspect/modelfile.ts ModelFile.fromAst)';
+
 const OWNERS = {
     // Serializer.fromJSON has two DIFFERENT ledger-unowned themes, not one —
     // see below. This entry is the fallback for a cluster this file's
@@ -177,16 +179,18 @@ function hasOwnerOrIssue(owner) {
 // Stage 2 (accordproject/concerto-rust#76 comment 5843986603): clusters in
 // areas that in-flight work will change are not final — they are marked
 // `pending-rerun` with that owner, and the shards are re-run once it lands.
-// Keyed by owner.issue. P4-08 (#67) converts ModelFile and BaseModelManager
-// (fromAst/addModelFile/addModel(s)/validate) to views over the Rust engine,
-// which is exactly where every T2 cluster's TS-vs-Rust difference lives.
-// P2-11b (#190) is the other in-flight item the coordinator named: it adds
-// an oracle-corpus supplement, which changes the corpus this harness draws
-// seeds from; a cluster is attributed to it only by an explicit
-// new owner entry (none so far — see TRIAGE.md).
-const PENDING_RERUN = {
-    'accordproject/concerto-rust#67': { task: 'P4-08', issue: 'accordproject/concerto-rust#67', reason: 'P4-08 (open, in flight) converts ModelFile and BaseModelManager to Rust-backed views; these clusters are in fromAst/addModelFile, which it changes. Re-run the stage-2 shards after it merges.' },
-};
+// Keyed by owner.issue.
+//
+// P4-08 (#67) and P2-11b (#190), the two in-flight items the coordinator
+// named, have both now landed (comment 5846093489), so this map is empty:
+// nothing is pending-rerun any more in the re-run this file now attributes.
+// T2's clusters (below, OWNER_T2_*) were pending-rerun on #67 in the first
+// stage-2 run; the re-run (accordproject/concerto-rust#76 comment
+// 5846093489, this file's `--stage2` pass against concerto-rust
+// 80581e8) reproduces the same clusters at the same rate on top of #67, so
+// they are new findings (#217/#218/#219), not a recurrence to re-attribute
+// to the now-closed #67.
+const PENDING_RERUN = {};
 
 // Stage 2: a Serializer.fromJSON ts=ok / rust=ValidationException DateTime
 // cluster whose minimised reproducer sets the DateTime field to a lone
@@ -214,6 +218,52 @@ function isLoneNumberDateTime(cluster) {
     return m.edits.every((e) => e.kind === 'set' && typeof e.value === 'string' && /^\s*[+-]?\d+\s*$/.test(e.value));
 }
 
+// Stage-2 re-run (accordproject/concerto-rust#76 comment 5846093489), after
+// P4-08 (#67) and P2-11b (#190) both landed: every T2 cluster
+// (ModelManager.fromAst/addModelFile) that was pending-rerun on #67 in the
+// first stage-2 run still reproduces, at the same rate, on top of #67. That
+// makes #67 the wrong owner (it's closed and didn't change this), so each
+// cluster is re-attributed by outcome shape to one of three new issues filed
+// from this re-run, mirroring the split the reviewer asked for on the first
+// stage-2 report (comment 5844969173): "serde AST strictness", "validator-rule
+// differences" and "Rust accepting inputs TS rejects" are all instances of
+// the ts=ok/rust=reject and ts=reject/rust=ok split below; the third bucket
+// (both reject, class/message differs) wasn't named there but is the
+// remainder and gets its own issue rather than staying unattributed.
+const OWNER_T2_TOO_STRICT = {
+    theme: 'T2a (ModelManager.fromAst/addModelFile, ts=ok / rust=reject: Rust rejects a mutated AST TS accepts)',
+    ledger: OWNERS_T2_LEDGER_NOTE,
+    status: 'owned: new issue accordproject/concerto-rust#217 (not #67\'s: #67 merged and this still reproduces at the same rate). Unguarded field access in the AST/view glue, and serde AST deserialisation stricter than TS\'s untyped walk.',
+    issue: 'accordproject/concerto-rust#217',
+};
+const OWNER_T2_TOO_PERMISSIVE = {
+    theme: 'T2b (ModelManager.fromAst/addModelFile, ts=reject / rust=ok: Rust accepts a mutated AST TS rejects)',
+    ledger: OWNERS_T2_LEDGER_NOTE,
+    status: 'owned: new issue accordproject/concerto-rust#218 (not #67\'s: #67 merged and this still reproduces at the same rate). Rust is more permissive than TS on a handful of malformed ASTs; worth checking whether TS or Rust is at fault case by case.',
+    issue: 'accordproject/concerto-rust#218',
+};
+const OWNER_T2_MESSAGE_MISMATCH = {
+    theme: 'T2c (ModelManager.fromAst/addModelFile, both reject, class or message differs)',
+    ledger: OWNERS_T2_LEDGER_NOTE,
+    status: 'owned: new issue accordproject/concerto-rust#219 (not #67\'s: #67 merged and this still reproduces at the same rate). Both engines correctly refuse the model; only the exception class or message text differs.',
+    issue: 'accordproject/concerto-rust#219',
+};
+
+/**
+ * @param {object} cluster a results/triage-clusters.json cluster
+ * @returns {object|null} the T2 stage-2 owner for this cluster's ts=ok/rust=ok
+ *   outcome shape, or null if `cluster` isn't a T2 op
+ */
+function t2Override(cluster) {
+    if (cluster.op !== 'ModelManager.fromAst' && cluster.op !== 'ModelManager.addModelFile') { return null; }
+    const s = cluster.sample;
+    const tsOk = s && s.ts && 'ok' in s.ts;
+    const rustOk = s && s.rust && 'ok' in s.rust;
+    if (tsOk && !rustOk) { return OWNER_T2_TOO_STRICT; }
+    if (!tsOk && rustOk) { return OWNER_T2_TOO_PERMISSIVE; }
+    return OWNER_T2_MESSAGE_MISMATCH;
+}
+
 function main() {
     const argv = process.argv.slice(2);
     const stage2 = argv.includes('--stage2');
@@ -230,10 +280,25 @@ function main() {
         if (stage2 && c.op === 'Serializer.fromJSON' && isDateTimeOutlier(c.sample) && isLoneNumberDateTime(c)) {
             override = OWNER_DV009_LONE_NUMBER;
         }
+        if (stage2 && override === null) {
+            // T2's owner in stage 2 is never the OWNERS[op] fallback (which
+            // still says #67, open) — #67 has merged, so every T2 cluster is
+            // re-attributed by outcome shape (see t2Override).
+            override = t2Override(c);
+        }
         c.owner = override || OWNERS[c.op] || null;
         if (stage2) {
             const p = c.owner && PENDING_RERUN[c.owner.issue];
-            c.status = p ? 'pending-rerun' : (c.owner && c.owner.dv && !c.owner.issue ? 'documented' : 'unresolved');
+            // 'documented' - a DIVERGENCES.md row covers it, no issue needed.
+            // 'pending-rerun' - blocked on in-flight work named in PENDING_RERUN.
+            // 'owned' - has its own issue (new or pre-existing) and isn't
+            //   blocked on anything else; still an open bug, just not
+            //   'unresolved' (which means no owner/issue was found at all).
+            // 'unresolved' - no owner/issue: attribute-owners fails the run.
+            c.status = p ? 'pending-rerun'
+                : (c.owner && c.owner.dv && !c.owner.issue) ? 'documented'
+                    : (c.owner && c.owner.issue) ? 'owned'
+                        : 'unresolved';
             if (p) { c.pendingRerun = p; pending++; } else { delete c.pendingRerun; }
         }
         if (!hasOwnerOrIssue(c.owner)) {
@@ -242,7 +307,7 @@ function main() {
         }
     }
     fs.writeFileSync(clustersFile, JSON.stringify(data, null, 2));
-    console.log(`attribute-owners: ${data.clusters.length} clusters, ${failing} without an owner or a new issue${stage2 ? `, ${pending} pending-rerun, ${data.clusters.filter((c) => c.status === 'documented').length} documented, ${data.clusters.filter((c) => c.status === 'unresolved').length} unresolved` : ''}`);
+    console.log(`attribute-owners: ${data.clusters.length} clusters, ${failing} without an owner or a new issue${stage2 ? `, ${pending} pending-rerun, ${data.clusters.filter((c) => c.status === 'documented').length} documented, ${data.clusters.filter((c) => c.status === 'owned').length} owned (new issue), ${data.clusters.filter((c) => c.status === 'unresolved').length} unresolved` : ''}`);
     if (failing) { process.exitCode = 1; }
 }
 

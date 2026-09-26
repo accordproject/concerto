@@ -1,0 +1,153 @@
+{
+  "harness": "run-ts.mjs",
+  "recorded_at": "2026-09-26T16:06:35.841Z",
+  "machine": {
+    "platform": "linux",
+    "arch": "x64",
+    "cpus": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "cpu_count": 4,
+    "total_mem_gb": 17,
+    "node": "v22.22.2"
+  },
+  "concerto_commit": "77189c4366deb86d44bd62f7debd74d48e158ee9",
+  "concerto_engine": "rust",
+  "sample_opts": {
+    "warmup": 5,
+    "samples": 30
+  },
+  "workloads": {
+    "load_validate": {
+      "concerto-core-test-data": {
+        "load": {
+          "samples": 30,
+          "n": 35,
+          "median_ms": 1.4864467285714285,
+          "mean_ms": 1.590341559047619,
+          "stddev_ms": 0.3083986298190789,
+          "min_ms": 1.2128034285714286,
+          "max_ms": 2.1671939142857144,
+          "cv": 0.19391974514189542
+        },
+        "validate": {
+          "samples": 30,
+          "n": 35,
+          "median_ms": 2.080334414285714,
+          "mean_ms": 2.137618582857143,
+          "stddev_ms": 0.36042681646617386,
+          "min_ms": 1.7151000571428572,
+          "max_ms": 3.716381514285714,
+          "cv": 0.1686113787355025
+        },
+        "validateError": null,
+        "n": 35
+      },
+      "conformance": {
+        "load": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.6705036585365853,
+          "mean_ms": 0.6973134365853658,
+          "stddev_ms": 0.1121343443036451,
+          "min_ms": 0.5669584390243902,
+          "max_ms": 1.2108424390243901,
+          "cv": 0.16080909734473114
+        },
+        "validate": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.8792406829268292,
+          "mean_ms": 0.9330310829268295,
+          "stddev_ms": 0.15114562630981362,
+          "min_ms": 0.7487945365853659,
+          "max_ms": 1.4457980975609754,
+          "cv": 0.16199420263222553
+        },
+        "validateError": null,
+        "n": 41
+      },
+      "synthetic-large": {
+        "load": {
+          "samples": 30,
+          "n": 1,
+          "median_ms": 77.343968,
+          "mean_ms": 79.31347246666664,
+          "stddev_ms": 14.786474994695508,
+          "min_ms": 65.355917,
+          "max_ms": 141.757434,
+          "cv": 0.1864308109938053
+        },
+        "validate": {
+          "samples": 30,
+          "n": 1,
+          "median_ms": 98.1330445,
+          "mean_ms": 103.53605769999999,
+          "stddev_ms": 15.558904827136027,
+          "min_ms": 90.66777,
+          "max_ms": 147.425382,
+          "cv": 0.1502752294492282
+        },
+        "validateError": null,
+        "n": 1
+      }
+    },
+    "validate_ast": {
+      "concerto-core-test-data": {
+        "validateAst": {
+          "samples": 30,
+          "n": 34,
+          "median_ms": 4.350094558823528,
+          "mean_ms": 4.562124006862746,
+          "stddev_ms": 0.5319723090311618,
+          "min_ms": 4.0803557058823525,
+          "max_ms": 6.5563464117647055,
+          "cv": 0.11660627993253198
+        },
+        "n": 34,
+        "totalInSet": 35
+      },
+      "conformance": {
+        "validateAst": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 2.923605024390244,
+          "mean_ms": 3.107877605691057,
+          "stddev_ms": 0.4598099834179926,
+          "min_ms": 2.725870756097561,
+          "max_ms": 4.496613756097561,
+          "cv": 0.14794983643371337
+        },
+        "n": 41,
+        "totalInSet": 41
+      },
+      "synthetic-large": {
+        "validateAst": null,
+        "n": 1,
+        "error": "validateAst rejects every model in this set"
+      }
+    },
+    "instance_validate": {
+      "populate_and_validate": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.133734775,
+        "mean_ms": 0.13502262846666666,
+        "stddev_ms": 0.0077793409566243015,
+        "min_ms": 0.123421482,
+        "max_ms": 0.157729178,
+        "cv": 0.05761509048496123
+      },
+      "validate_only": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.064795519,
+        "mean_ms": 0.06552082940000001,
+        "stddev_ms": 0.0031252847421276734,
+        "min_ms": 0.060468744,
+        "max_ms": 0.074899496,
+        "cv": 0.047699102266365284
+      },
+      "n": 500
+    }
+  },
+  "note": "P5-06 before run: recorded from a git-archive export of this concerto commit (no .git, so run-ts.mjs could not read the commit itself and recorded null; set afterwards); rust engine built from concerto-rust 2fdd791 (origin/claude/tender-pascal-ocwf9q) with its unchanged build.sh, loaded through CONCERTO_ENGINE_MODULE."
+}

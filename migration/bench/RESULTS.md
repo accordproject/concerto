@@ -1,3 +1,145 @@
+# P5-06: after the performance pass (2026-09-26)
+
+Task P5-06 (accordproject/concerto-rust#220, under the migration plan
+accordproject/concerto-rust#29) re-ran the P5-04 suite unchanged: the same
+`run-ts.mjs` script and fixtures, and the same `cargo bench`, on the same
+kind of machine. Each figure is run on this machine back to back, before
+and after the change. The profile breakdown the changes are based on is on
+the issue.
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 cores, 15 GiB, Linux |
+| Toolchain | Node v22.22.2, rustc 1.94.1, wasm-bindgen 0.2.128, binaryen 132 |
+| Before | `concerto` `77189c436`, `concerto-rust` `2fdd791` (both `origin/claude/tender-pascal-ocwf9q`), built as-is |
+| After | the P5-06 commits on top of those heads (`concerto-rust` `5e3f330`) |
+| TS-API runs | `results/*-P5-06-{before,after}-{ts,rust-engine}.json`: two runs of each, `run-ts.mjs` defaults (5 warm-up + 30 samples) |
+| Crate runs | `concerto-rust`'s `benches/results/*-rust-P5-06-{before,after}.json` (criterion defaults) |
+
+## Through the TS public API (the exit condition's comparison)
+
+Medians, µs per model or per instance. `load+validate` is `run-ts.mjs`'s
+`validate` metric, which times a fresh load and `validateModelFiles()`
+together. "TS" is the TS reference. Its code path is unchanged by P5-06,
+and its "after" runs are shown; the "before" runs agree within noise. The
+ratios use the mean of the two runs.
+
+| Model set | Metric | TS, run 1 / 2 | Rust engine before, run 1 / 2 | Rust engine after, run 1 / 2 | before / TS | **after / TS** | speed-up |
+|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | load | 33.0 / 53.8 | 1356.3 / 1486.4 | 642.9 / 512.9 | 40.4× | **13.3×** | 2.5× |
+| concerto-core-test-data | load+validate | 66.6 / 66.7 | 2048.4 / 2080.3 | 1125.0 / 1140.1 | 27.8× | **17.0×** | 1.8× |
+| concerto-core-test-data | validateAst | 638.1 / 671.8 | 4097.7 / 4350.1 | 1116.1 / 1099.8 | 6.5× | **1.7×** | 3.8× |
+| conformance | load | 15.9 / 16.0 | 677.7 / 670.5 | 413.0 / 374.5 | 41.9× | **24.6×** | 1.7× |
+| conformance | load+validate | 27.7 / 24.0 | 883.1 / 879.2 | 509.8 / 575.9 | 34.4× | **21.0×** | 1.6× |
+| conformance | validateAst | 244.8 / 254.8 | 3009.0 / 2923.6 | 616.6 / 632.3 | 11.7× | **2.5×** | 4.8× |
+| synthetic-large | load | 697.1 / 676.0 | 70268.3 / 77344.0 | 27890.4 / 27526.6 | 105.6× | **40.4×** | 2.7× |
+| synthetic-large | load+validate | 2263.5 / 2167.2 | 94772.7 / 98133.0 | 37687.0 / 38850.8 | 42.4× | **17.3×** | 2.5× |
+| synthetic-large | validateAst | SKIPPED | SKIPPED | SKIPPED | - | - | - |
+| (synthetic, 500) | fromJSON | 8.7 / 8.1 | 129.4 / 133.7 | 47.2 / 49.3 | 16.5× | **5.7×** | 2.7× |
+| (synthetic, 500) | resource.validate() | 3.5 / 2.0 | 71.5 / 64.8 | 18.2 / 19.6 | 32.8× | **6.8×** | 3.6× |
+
+The Rust engine through the TS API is now 1.6× to 4.8× faster than before
+P5-06. It is still slower than the TS reference on every operation: 1.7×
+to 2.5× on validateAst, 5.7× to 6.8× on instance fromJSON/validate, and
+13× to 40× on model load and validate. **The exit condition (≤ 1.0× on all
+of these) is not met.** The best achieved ratios are in the "after / TS"
+column.
+`synthetic-large` validateAst is still rejected by both engines, as in
+P5-04: its `DateTimeProperty` default value fails `validateAst`'s strict
+check.
+
+JS->WASM calls per operation, counted with a wrapper around the engine
+module. The counts are for a first load, before any memo is warm.
+
+| Operation | Before | After |
+|---|---|---|
+| `new ModelManager()` | 558 | 266 |
+| load, concerto-core-test-data (per model) | 103.7 | 62.2 |
+| load, conformance (per model) | 20.6 | 15.4 |
+| load, synthetic-large (one model) | 5,271 | 1,179 |
+| validateModelFiles / validateAst (per model) | 1.1 / 1.1 | 1.1 / 1.1 |
+
+## The Rust crate directly (criterion)
+
+The same benches as Table A below: medians in µs per model or per
+instance. These figures are the crate's own speed-up; they do not measure
+the boundary.
+
+| Benchmark | Before | After | Speed-up |
+|---|---|---|---|
+| load, concerto-core-test-data | 96.4 | 50.6 | 1.90× |
+| validate, concerto-core-test-data | 67.8 | 57.0 | 1.19× |
+| load, conformance | 37.7 | 21.8 | 1.73× |
+| validate, conformance | 35.7 | 24.4 | 1.46× |
+| load, synthetic-large | 5567.7 | 2789.7 | 2.00× |
+| validate, synthetic-large | 3667.6 | 3317.2 | 1.11× |
+| `ModelFile::from_json`, concerto-core-test-data | 101.0 | 47.7 | 2.12× |
+| `ModelFile::from_json`, conformance | 33.5 | 18.6 | 1.80× |
+| `ModelFile::from_json`, synthetic-large | 6538.3 | 2653.3 | 2.46× |
+| `validate_instance` (500) | 4.2 | 2.3 | 1.85× |
+
+## What changed
+
+All of these are performance-only. Results and errors are unchanged:
+- The oracle replays 16,242 fixtures with 0 regressions, and `baseline.tsv`
+  is unchanged after `ORACLE_UPDATE_BASELINE=1`.
+- The concerto-core suite passes 1,299 of 1,300 tests in both modes. The
+  one failure is `ModelLoader #loadModelFromUrl`, which needs the network
+  and gets HTTP 403 in this sandbox; it fails the same way on the unchanged
+  base.
+- The API snapshot is byte-identical.
+
+The changes, by where the time was going:
+- **Module resolution.** `loadEngine` is memoised per specifier, and the
+  per-element `require`s in the views are cached.
+- **Crossings.**
+  - `modelFilePropertySnapshots` gives each `ModelFile` view every
+    property's `propertyProcess`/`fieldProcess` snapshot in one call. The
+    per-property bindings stay as the fallback, so errors come from the
+    same call as before.
+  - The pure string `ModelUtil` delegations are memoised by argument.
+  - `ModelManagerHandle.epoch()` lets the views cache `getNamespaces()` and
+    `modelFileId()` between mutations.
+- **The crate.** Changes to `concerto-core` itself:
+  - Declaration, property and scalar nodes are deserialised from borrowed
+    JSON instead of clones.
+  - `is_valid_identifier` has an ASCII fast path.
+  - The system and metamodel model files are cached.
+  - Compiled `StringValidator` regexes are cached.
+  - Super-type chains are memoised, and property lookup no longer clones
+    every inherited property.
+- **The WASM build** is optimised for speed (`opt-level = 3`,
+  `wasm-opt -O3`). The module is 2.56 MB, inside the 4 MiB budget.
+
+## Why load/validate cannot reach parity yet
+
+In rust mode, `concerto-core` builds the full TS view graph of every model
+file, as the TS reference does. It then also sends the whole AST across the
+boundary (`JSON.stringify`, then a serde parse and `ModelFile::from_json`
+in WASM):
+- once for the property snapshots;
+- once for the `rustHandle` mirror (P4-08);
+- once more for `ModelFile.validate()`'s `modelFileValidateDetached`.
+
+Each of those whole-AST round trips alone costs about as much as the TS
+reference's entire load of the same model set. Through the public API,
+load and validate therefore stay slower than TS for as long as both the TS
+graph and the Rust mirror exist.
+
+In the profile after this change:
+- The two load-time round trips are about 45% of rust-mode load for
+  `synthetic-large`.
+- The remaining per-declaration crossings are about 10%:
+  `classDeclarationProcess`, `decoratorProcess`, and the synthetic
+  `$identifier`/`$timestamp` fields' `propertyProcess`.
+- `new ModelManager()` building the system models' views is about 10%.
+
+Closing that gap means not materialising the TS graph in rust mode (the
+P5-02 direction), or views that read lazily from the Rust arena instead of
+being built eagerly. That is beyond a performance-only change.
+
+---
+
 # Baseline: TS vs Rust (task P5-04)
 
 Committed baseline for accordproject/concerto-rust#75 (task P5-04, under

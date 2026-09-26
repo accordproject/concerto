@@ -1,15 +1,20 @@
 {
-  "_about": "P5-05 stage 2 (accordproject/concerto-rust#76): the exact commits the 1,000,000-case run used",
+  "_about": "P5-05 stage 2 RE-RUN (accordproject/concerto-rust#76 comment 5846093489), after P4-08 (#67) and P2-11b (#190) landed: the exact commits the second 1,000,000-case run used",
   "concerto": {
     "branch": "claude/tender-pascal-ocwf9q",
-    "commit": "2b1e969654951040f6c52412baf18f9f751d9386",
-    "note": "TS side: packages/concerto-core/src via ts-node; harness: migration/fuzz at this commit plus this PR's bin/run-shards.js and bin/aggregate-shards.js (driver/aggregation only, no change to case generation or classification)"
+    "commit": "051fa25a488a41db81d37aeceee6bb78b2cc1064",
+    "note": "TS side: packages/concerto-core/src via ts-node; harness: migration/fuzz at this commit (bin/run-shards.js and bin/aggregate-shards.js unchanged from the first stage-2 run: driver/aggregation only, no change to case generation or classification). Includes P4-08 and the P2-11b baseline.tsv add-only regeneration."
   },
   "concerto-rust": {
     "branch": "claude/tender-pascal-ocwf9q",
-    "commit": "418c72d7669c5ec23f59fe8649da10b22cbcdb66",
-    "note": "Rust side: concerto-wasm/pkg/concerto-engine.cjs built fresh from this commit with `sh concerto-wasm/build.sh` (fresh target dir, wasm-bindgen 0.2.128; wasm-opt not on PATH, so the module is unoptimised: 1,553,810 bytes, same code)"
+    "commit": "80581e8436f7163a67bbfb9b1ef5e67568bf5e0d",
+    "note": "Rust side: concerto-wasm/pkg/concerto-engine.cjs built fresh from this commit with `sh concerto-wasm/build.sh` (fresh target dir, wasm-bindgen 0.2.122; wasm-opt not on PATH, so the module is unoptimised, same code). Includes P4-08 (ModelFile/BaseModelManager views)."
   },
-  "corpus": "oracle-corpus-p107-06aa375 (canonical copy, 16,704 files: 16,085 fixtures + 618 blobs + manifest.json), with migration/ledger/ at the concerto commit above; CTO cache rebuilt with migration/oracle/bin/build-cto-cache.js (705 CTO texts, --check OK; manifest not committed)",
-  "fastCheck": "4.10.2"
+  "corpus": "oracle-corpus-p107-06aa375 (canonical pin, 16,704 files), with migration/ledger/ at the concerto commit above; the P2-11b supplement (fixtures/supplement/, 157 fixtures) is present on disk but NOT drawn from, per the coordinator's instruction to keep the stage-2 seed set unchanged for comparability (lib/seeds.js still lists only data/conformance/unit/gaps/lifted). CTO cache rebuilt with migration/oracle/bin/build-cto-cache.js (--check OK; manifest not committed).",
+  "fastCheck": "4.10.2",
+  "rerunOf": {
+    "concerto": "2b1e969654951040f6c52412baf18f9f751d9386",
+    "concerto-rust": "418c72d7669c5ec23f59fe8649da10b22cbcdb66",
+    "reason": "first stage-2 run (accordproject/concerto-rust#76 comment 5844927009), before P4-08/#67 and P2-11b/#190 landed; that report is superseded by this file and by triage-clusters.json/run-summary.json/divergence-summary.json in this directory"
+  }
 }
