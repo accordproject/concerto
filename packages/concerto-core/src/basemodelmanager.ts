@@ -619,6 +619,7 @@ class BaseModelManager {
         const originalModelFiles = {};
         Object.assign(originalModelFiles, this.modelFiles);
         let newModelFiles: ModelFileInstance[] = [];
+        const mirroredNamespaces = new Set<string>();
 
         try {
             // create the model files
@@ -669,6 +670,7 @@ class BaseModelManager {
             if (rust && this.rustHandle) {
                 newModelFiles.forEach((m) => {
                     if (this._rustMirrorEligible(m.getNamespace())) {
+                        mirroredNamespaces.add(m.getNamespace());
                         this._mirrorToRust(() => this.rustHandle!.addModelWithDefinitions(
                             JSON.stringify(m.getAst()),
                             m.getDefinitions() ?? undefined,
@@ -694,10 +696,24 @@ class BaseModelManager {
             // allowed to break the TS invariant" contract -- a
             // partially-mirrored or now-invalid batch must not leave
             // rustHandle out of sync with `this.modelFiles`, which the lines
-            // above already rolled back.
+            // above already rolled back. Only namespaces this batch actually
+            // attempted to mirror (`mirroredNamespaces`) are deleted here: the
+            // failure that landed us in this catch can happen before the
+            // mirror loop above ever runs (a duplicate namespace via
+            // `_throwAlreadyExists`, an unversioned namespace, or a parse
+            // error on a later file in the batch), in which case
+            // `newModelFiles` can contain namespaces that were never mirrored
+            // at all. Calling `deleteModelFile` on those throws (rustHandle
+            // never heard of them), which used to set `_rustMirrorStale =
+            // true` even though rustHandle and `this.modelFiles` were still
+            // in agreement, permanently forcing `ModelFile.validate()` back
+            // onto the TS body for the rest of the manager's life.
             /* istanbul ignore if */
             if (rust && this.rustHandle) {
                 newModelFiles.forEach((m) => {
+                    if (!mirroredNamespaces.has(m.getNamespace())) {
+                        return;
+                    }
                     try {
                         this.rustHandle!.deleteModelFile(m.getNamespace());
                     } catch (e) {
