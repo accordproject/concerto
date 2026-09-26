@@ -21,6 +21,28 @@ import ValidationException from './validationexception';
 import Globalize from '../globalize';
 import dayjs from '../dayjs-setup';
 
+// CONCERTO_ENGINE=rust (task P4-10, accordproject/concerto-rust#69): see
+// jsonpopulator.ts's identical preamble. `checkItem`'s primitive-type
+// switch delegates its type-validity check to the engine, one field at a
+// time; the visitor shell (and its own `reportFieldTypeViolation`, which
+// needs the `Field` and `rootResourceIdentifier` -- neither crosses this
+// call) stays here.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+// P5-06: memoised per specifier, so a call site on a per-element or
+// per-instance path (propertyProcess, fastFromJson, ...) resolves the module
+// once rather than on every call.
+/* istanbul ignore next */
+const engineModules: { [specifier: string]: any } = {};
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => any } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type { SerializerOptions } from '../types';
@@ -393,34 +415,61 @@ class ResourceValidator {
 
         if(field.isPrimitive()) {
             let invalid = false;
-
-            switch(field.getType()) {
-            case 'String':
-                if(dataType !== 'string') {
-                    invalid = true;
-                }
-                break;
-            case 'Long':
-            case 'Integer':
-            case 'Double': {
-                if(dataType !== 'number') {
-                    invalid = true;
-                }
-                if (!isFinite(obj)) {
-                    invalid = true;
+            // P4-10: delegated to the engine (module preamble). A pure
+            // typeof/isFinite check over the value alone, so this is safe
+            // for a field built by a test stub too. A value the wire codec
+            // cannot express (a function, a duck-typed date that is not a
+            // dayjs, a shared reference) falls back to the TS switch below,
+            // exactly as the whole-document fast path falls back on the
+            // same `EngineFastPathUnsupported`.
+            let delegated = false;
+            /* istanbul ignore if */
+            if (rust) {
+                try {
+                    const codec = loadEngine('../engine/serializer-codec');
+                    codec.checkString(String(field.getType()));
+                    invalid = !rust.resourceValidatorPrimitiveValid(
+                        field.getType(),
+                        JSON.stringify(codec.encodeValue(obj)),
+                    );
+                    delegated = true;
+                } catch (err) {
+                    if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+                        throw err;
+                    }
                 }
             }
-                break;
-            case 'Boolean':
-                if(dataType !== 'boolean') {
-                    invalid = true;
+
+            /* istanbul ignore else */
+            if (!delegated) {
+                switch(field.getType()) {
+                case 'String':
+                    if(dataType !== 'string') {
+                        invalid = true;
+                    }
+                    break;
+                case 'Long':
+                case 'Integer':
+                case 'Double': {
+                    if(dataType !== 'number') {
+                        invalid = true;
+                    }
+                    if (!isFinite(obj)) {
+                        invalid = true;
+                    }
                 }
-                break;
-            case 'DateTime':
-                if(!(typeof obj === 'object' && typeof obj.isBefore === 'function')) {
-                    invalid = true;
+                    break;
+                case 'Boolean':
+                    if(dataType !== 'boolean') {
+                        invalid = true;
+                    }
+                    break;
+                case 'DateTime':
+                    if(!(typeof obj === 'object' && typeof obj.isBefore === 'function')) {
+                        invalid = true;
+                    }
+                    break;
                 }
-                break;
             }
             if (invalid) {
                 ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);

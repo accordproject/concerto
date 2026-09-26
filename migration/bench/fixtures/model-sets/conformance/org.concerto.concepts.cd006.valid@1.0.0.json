@@ -1,0 +1,76 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "org.concerto.concepts.cd006.valid@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Product",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "productId",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 98,
+              "line": 4,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 122,
+              "line": 5,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "name",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 122,
+              "line": 5,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 137,
+              "line": 6,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        }
+      ],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 53,
+          "line": 3,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 138,
+          "line": 6,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "productId"
+      }
+    }
+  ]
+}

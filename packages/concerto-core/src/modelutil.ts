@@ -27,6 +27,79 @@ import Globalize from './globalize';
 import type ModelFile from './introspect/modelfile';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// Its bindings are typed `never` so that a view leaves the member's inferred
+// return type, and so the .d.ts, exactly as the TS body makes it.
+//
+// dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
+// with no .d.ts, since it is not public API (tsconfig.build.internal.json;
+// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
+// must never see a specifier it would resolve: `loadEngine` takes a
+// non-literal one (esbuild, rollup and browserify leave it alone) and never
+// names the bare `require` (esbuild's ESM output would add its `__require`
+// shim, which webpack reports as a critical dependency), and webpack folds
+// the `typeof __webpack_require__` test and keeps only the dead-in-Node
+// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
+// bundles exactly as before (PORTING.md 1.5).
+//
+// rust mode through the public ESM entry points (P4-11a, PORTING.md 1.5):
+// - Node ESM (dist/esm/index.mjs) works unaided. scripts/build-esm.js's Node
+//   banner sets a `globalThis.module` whose `require` resolves the engine
+//   specifiers. It does not rely on the relative specifier above matching
+//   the output file's location (esbuild hoists shared views into chunks at
+//   the outdir root, where `../engine` would point outside dist/). Instead
+//   it rewrites `./engine`, `../engine` and `../engine/<subpath>` to the
+//   engine directory it finds at runtime from the file's own import.meta.url.
+// - The browser (dist/esm-browser/index.mjs) needs a bundler, or a host that
+//   supplies a synchronous `require`. This call is synchronous and a browser
+//   cannot load an ES module synchronously, so the browser ESM graph does not
+//   load dist/esm-browser/engine/*.mjs by itself. scripts/browser-module-shim.js
+//   reads `module.require` from the `globalThis.module` that the bundler or
+//   host provides, and throws if there is none.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
+
+// P5-06: the pure string-to-value members below cross into the engine once
+// per distinct argument rather than once per call (a model load calls
+// isSystemProperty/isValidIdentifier/getFullyQualifiedName for every
+// property of every declaration). Only string arguments are memoised, and
+// only a result the engine returned (a throw is never cached), so every
+// other call, and every error, goes to the engine exactly as before. Each
+// member's memo is cleared once it reaches ENGINE_MEMO_LIMIT entries.
+/* istanbul ignore next */
+const engineMemo: { [binding: string]: Map<string, unknown> } = {};
+const ENGINE_MEMO_LIMIT = 4096;
+
+/**
+ * `rust[binding](...args)`, memoised under `key` (see engineMemo).
+ * @param {string} binding - the engine binding to call
+ * @param {string} key - the memo key: the call's string arguments, unambiguously joined
+ * @param {...string} args - the arguments
+ * @return {*} the binding's result
+ * @private
+ */
+/* istanbul ignore next */
+function memoisedEngineCall(binding: string, key: string, ...args: string[]): unknown {
+    let memo = engineMemo[binding];
+    if (!memo) {
+        memo = engineMemo[binding] = new Map();
+    } else if (memo.has(key)) {
+        return memo.get(key);
+    }
+    const result = rust![binding](...args);
+    if (memo.size >= ENGINE_MEMO_LIMIT) {
+        memo.clear();
+    }
+    memo.set(key, result);
+    return result;
+}
+
 const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
 
 const privateReservedProperties = [
@@ -73,6 +146,10 @@ class ModelUtil {
      * @return {string} - the string after the last dot
      */
     static getShortName(fqn) {
+        /* istanbul ignore if */
+        if (rust) {
+            return (typeof fqn === 'string' ? memoisedEngineCall('modelUtilGetShortName', fqn, fqn) : rust.modelUtilGetShortName(fqn)) as never;
+        }
         let result = fqn;
         let dotIndex = fqn.lastIndexOf('.');
         if (dotIndex > -1) {
@@ -89,6 +166,10 @@ class ModelUtil {
      * or the empty string if there is no dot
      */
     static getNamespace(fqn) {
+        /* istanbul ignore if */
+        if (rust) {
+            return (typeof fqn === 'string' ? memoisedEngineCall('modelUtilGetNamespace', fqn, fqn) : rust.modelUtilGetNamespace(fqn)) as never;
+        }
         if (!fqn) {
             throw new Error(Globalize.formatMessage('modelutil-getnamespace-nofnq'));
         }
@@ -120,6 +201,10 @@ class ModelUtil {
      * @returns {ParseNamespaceResult} the result of parsing
      */
     static parseNamespace(ns: string, options?: { disableVersionParsing?: boolean }) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilParseNamespace(ns, options);
+        }
         if(!ns) {
             throw new Error('Namespace is null or undefined.');
         }
@@ -159,6 +244,10 @@ class ModelUtil {
      * @private
      */
     static importFullyQualifiedNames(imp) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilImportFullyQualifiedNames(imp);
+        }
         return MetaModelUtil.importFullyQualifiedNames(imp);
     }
 
@@ -169,6 +258,10 @@ class ModelUtil {
      * @private
      */
     static isPrimitiveType(typeName) {
+        /* istanbul ignore if */
+        if (rust) {
+            return (typeof typeName === 'string' ? memoisedEngineCall('modelUtilIsPrimitiveType', typeName, typeName) : rust.modelUtilIsPrimitiveType(typeName)) as never;
+        }
         const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
         return (primitiveTypes.indexOf(typeName) >= 0);
     }
@@ -184,6 +277,10 @@ class ModelUtil {
      * @private
      */
     static isAssignableTo(modelFile, typeName, property) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsAssignableTo(modelFile, typeName, property);
+        }
         const propertyTypeName = property.getFullyQualifiedTypeName();
 
         const isDirectMatch = (typeName === propertyTypeName);
@@ -207,6 +304,10 @@ class ModelUtil {
      * @private
      */
     static capitalizeFirstLetter(string) {
+        /* istanbul ignore if */
+        if (rust) {
+            return (typeof string === 'string' ? memoisedEngineCall('modelUtilCapitalizeFirstLetter', string, string) : rust.modelUtilCapitalizeFirstLetter(string)) as never;
+        }
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
@@ -217,6 +318,10 @@ class ModelUtil {
      * @private
      */
     static isEnum(field) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsEnum(field);
+        }
         const modelFile = field.getParent().getModelFile();
         const typeDeclaration = modelFile.getType(field.getType());
         return typeDeclaration?.isEnum();
@@ -229,6 +334,10 @@ class ModelUtil {
      * @private
      */
     static isMap(field) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsMap(field);
+        }
         const modelFile = field.getParent().getModelFile();
         const typeDeclaration = modelFile.getType(field.getType());
         return typeDeclaration?.isMapDeclaration?.();
@@ -241,6 +350,10 @@ class ModelUtil {
      * @private
      */
     static isScalar(field) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsScalar(field);
+        }
         const modelFile = field.getParent().getModelFile();
         const declaration = modelFile.getType(field.getType());
         return declaration?.isScalarDeclaration?.();
@@ -252,6 +365,10 @@ class ModelUtil {
      * @returns {boolean} true if the identifier is valid.
      */
     static isValidIdentifier(name: string | undefined): name is string {
+        /* istanbul ignore if */
+        if (rust) {
+            return (typeof name === 'string' ? memoisedEngineCall('modelUtilIsValidIdentifier', name, name) : rust.modelUtilIsValidIdentifier(name)) as never;
+        }
         return ID_REGEX.test(name as string);
     }
 
@@ -262,6 +379,12 @@ class ModelUtil {
      * @returns {string} the fully qualified type name.
      */
     static getFullyQualifiedName(namespace, type) {
+        /* istanbul ignore if */
+        if (rust) {
+            return (typeof namespace === 'string' && typeof type === 'string'
+                ? memoisedEngineCall('modelUtilGetFullyQualifiedName', `${namespace.length}:${namespace}${type}`, namespace, type)
+                : rust.modelUtilGetFullyQualifiedName(namespace, type)) as never;
+        }
         if (namespace) {
             return `${namespace}.${type}`;
         } else {
@@ -276,6 +399,10 @@ class ModelUtil {
      * @returns {string} the fully qualified name minus the namespace version
      */
     static removeNamespaceVersionFromFullyQualifiedName(fqn) {
+        /* istanbul ignore if */
+        if (rust) {
+            return (typeof fqn === 'string' ? memoisedEngineCall('modelUtilRemoveNamespaceVersionFromFullyQualifiedName', fqn, fqn) : rust.modelUtilRemoveNamespaceVersionFromFullyQualifiedName(fqn)) as never;
+        }
         if(ModelUtil.isPrimitiveType(fqn)) {
             return fqn;
         }
@@ -293,6 +420,10 @@ class ModelUtil {
      * @private
      */
     static isSystemProperty(propertyName) {
+        /* istanbul ignore if */
+        if (rust) {
+            return (typeof propertyName === 'string' ? memoisedEngineCall('modelUtilIsSystemProperty', propertyName, propertyName) : rust.modelUtilIsSystemProperty(propertyName)) as never;
+        }
         return reservedProperties.includes(propertyName);
     }
 
@@ -304,6 +435,10 @@ class ModelUtil {
      * @private
      */
     static isPrivateSystemProperty(propertyName) {
+        /* istanbul ignore if */
+        if (rust) {
+            return (typeof propertyName === 'string' ? memoisedEngineCall('modelUtilIsPrivateSystemProperty', propertyName, propertyName) : rust.modelUtilIsPrivateSystemProperty(propertyName)) as never;
+        }
         return privateReservedProperties.includes(propertyName);
     }
 
@@ -314,6 +449,10 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key
     */
     static isValidMapKey(key) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsValidMapKey(key);
+        }
         return [
             `${MetaModelNamespace}.StringMapKeyType`,
             `${MetaModelNamespace}.DateTimeMapKeyType`,
@@ -328,6 +467,10 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
     static isValidMapKeyScalar(decl) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsValidMapKeyScalar(decl);
+        }
         return (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.StringScalar`)  ||
         (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.DateTimeScalar`);
     }
@@ -339,6 +482,10 @@ class ModelUtil {
      * @return {boolean} true if the Value is a valid Map Value
      */
     static isValidMapValue(value) {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.modelUtilIsValidMapValue(value);
+        }
         return [
             `${MetaModelNamespace}.BooleanMapValueType`,
             `${MetaModelNamespace}.DateTimeMapValueType`,

@@ -1,0 +1,115 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "org.concerto.collections.valid.col002@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+      "name": "PhoneBook",
+      "key": {
+        "$class": "concerto.metamodel@1.0.0.StringMapKeyType",
+        "location": {
+          "$class": "concerto.metamodel@1.0.0.Range",
+          "start": {
+            "offset": 72,
+            "line": 4,
+            "column": 3,
+            "$class": "concerto.metamodel@1.0.0.Position"
+          },
+          "end": {
+            "offset": 82,
+            "line": 5,
+            "column": 3,
+            "$class": "concerto.metamodel@1.0.0.Position"
+          }
+        }
+      },
+      "value": {
+        "$class": "concerto.metamodel@1.0.0.StringMapValueType",
+        "location": {
+          "$class": "concerto.metamodel@1.0.0.Range",
+          "start": {
+            "offset": 82,
+            "line": 5,
+            "column": 3,
+            "$class": "concerto.metamodel@1.0.0.Position"
+          },
+          "end": {
+            "offset": 92,
+            "line": 6,
+            "column": 1,
+            "$class": "concerto.metamodel@1.0.0.Position"
+          }
+        }
+      },
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 55,
+          "line": 3,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 93,
+          "line": 6,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "ContactList",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "contacts",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "PhoneBook"
+          },
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 118,
+              "line": 9,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 153,
+              "line": 10,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "sizeValidator": {
+            "$class": "concerto.metamodel@1.0.0.CollectionSizeValidator",
+            "minSize": 1,
+            "maxSize": 5
+          }
+        }
+      ],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 95,
+          "line": 8,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 154,
+          "line": 10,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      }
+    }
+  ]
+}

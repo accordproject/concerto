@@ -1,0 +1,41 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "org.acme@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "Car",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "id",
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "id"
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "category",
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "type": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "Missing"
+              },
+              "isArray": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-09-26T08:48:11.797Z",
+  "fixturesDir": "fixtures",
+  "cacheDir": "cto-cache",
+  "ctoParserVersion": "5.0.0",
+  "fixturesScanned": 16242,
+  "fixturesWithCto": 15348,
+  "uniqueCtoTexts": 712,
+  "entries": {
+    "ast": 611,
+    "error": 101,
+    "total": 712
+  },
+  "written": 79,
+  "reused": 633,
+  "contentHash": "198c040379c88989e4327e88ebd6fc2185f587ef31cf78a7a9c8940b46ed0d6d",
+  "note": "fixturesWithCto (15348) differs from the 13006 the issue and README's corpus snapshot record. That figure counted only fixtures reaching addCTOModel; on the canonical unit+data+conformance corpus (fixtures/lifted and fixtures/gaps excluded) this generator reproduces it exactly when scoped to that one entry point. The figure here also counts fixtures reaching ModelManager's other four entry points into ctoProcessFile -- addModel, addModelFiles, updateModelFile and validateModelFile -- which parse CTO text just as addCTOModel does and were previously missing from the cache (see git history). It also moves with the corpus itself: a re-recording or a P2-10/P2-11 addition under fixtures/lifted or fixtures/gaps changes both fixturesScanned and fixturesWithCto."
+}

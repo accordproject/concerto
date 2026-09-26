@@ -1,0 +1,472 @@
+{
+ "fixtures": "fixtures",
+ "baseline": {
+  "total": 15850,
+  "pass": 15850,
+  "fail": 0,
+  "harness_error": 0
+ },
+ "mutants": [
+  {
+   "name": "error-message-changed",
+   "description": "IllegalModelException messages gain a trailing full stop",
+   "detected": true,
+   "failing_fixtures": 638,
+   "harness_errors": 0,
+   "by_op": {
+    "ModelFile.new": 3,
+    "ModelManager.addCTOModel": 211,
+    "ModelManager.validateModelFiles": 135,
+    "DecoratorManager.decorateModels": 225,
+    "ModelManager.addModelFiles": 2,
+    "ClassDeclaration.getProperties": 1,
+    "ModelLoader.loadModelManager": 1,
+    "ModelLoader.loadModelManagerFromModelFiles": 1,
+    "ModelManager.filter": 6,
+    "ModelManager.fromAst": 14,
+    "ScalarDeclaration.new": 7,
+    "ClassDeclaration.getNestedProperty": 1,
+    "ClassDeclaration.validate": 1,
+    "MapDeclaration.validate": 8,
+    "ModelFile.resolveImport": 1,
+    "ModelFile.validate": 11,
+    "ModelManager.addModelFile": 6,
+    "ModelManager.resolveType": 3,
+    "ModelManager.validateModelFile": 1
+   },
+   "example": {
+    "file": "conformance/ModelFile.new/0f0cab71f4b29d6aaa7ae23a.json",
+    "detail": "$.error.message: expected \"Invalid field name '$class' File 'concepts/models/CLASS_DECLARATION_002/class_declaration_002_invalid_$class_type.json': line 3 column 1, to line 5 column 2. \" got \"Invalid field name '$class' File 'concepts/models/CLASS_DECLARATION_002/class_declaration_002_invalid_$class_type.json': line 3 column 1, to line 5 column 2. .\""
+   }
+  },
+  {
+   "name": "verdict-flipped",
+   "description": "validateModelFiles reports success when the reference throws, and vice versa",
+   "detected": true,
+   "failing_fixtures": 376,
+   "harness_errors": 0,
+   "by_op": {
+    "ModelManager.validateModelFiles": 376
+   },
+   "example": {
+    "file": "conformance/ModelManager.validateModelFiles/0067c292caa33573dcf9f35e.json",
+    "detail": "$.error: expected undefined got {\"class\":\"IllegalModelException\",\"component\":\"@accordproject/concerto-core\",\"location\":null,\"message\":\"mutant\"}"
+   }
+  },
+  {
+   "name": "identifier-check-dropped",
+   "description": "in-engine: ModelUtil.isValidIdentifier always returns true",
+   "detected": true,
+   "failing_fixtures": 5,
+   "harness_errors": 0,
+   "by_op": {
+    "ModelManager.fromAst": 3,
+    "ModelUtil.isValidIdentifier": 2
+   },
+   "example": {
+    "file": "gaps/ModelManager.fromAst/5b5ea304cec625abe1294892.json",
+    "detail": "$.error: expected {\"class\":\"IllegalModelException\",\"component\":\"@accordproject/concerto-core\",\"location\":null,\"message\":\"Invalid property name '1bad' \"} got undefined"
+   }
+  },
+  {
+   "name": "abstract-check-dropped",
+   "description": "in-engine: ClassDeclaration.isAbstract always returns false",
+   "detected": true,
+   "failing_fixtures": 180,
+   "harness_errors": 0,
+   "by_op": {
+    "Factory.newResource": 168,
+    "Resource.validate": 1,
+    "Serializer.toJSON": 1,
+    "ClassDeclaration.isAbstract": 6,
+    "ClassDeclaration.toString": 1,
+    "Factory.newConcept": 1,
+    "ModelManager.getAssignableConcreteTypes": 1,
+    "ModelManager.isAssignableTo": 1
+   },
+   "example": {
+    "file": "data/Factory.newResource/02a8b19ed647c0ef213bba9c.json",
+    "detail": "$.error: expected {\"class\":\"Error\",\"component\":null,\"location\":null,\"message\":\"Cannot instantiate the abstract type \\\"AnimalMovement\\\" in the \\\"com.composer@1.0.0\\\" namespace.\"} got undefined"
+   }
+  },
+  {
+   "name": "canonical-result-altered",
+   "description": "Serializer.toJSON results lose their $class key",
+   "detected": true,
+   "failing_fixtures": 1670,
+   "harness_errors": 0,
+   "by_op": {
+    "Serializer.toJSON": 1670
+   },
+   "example": {
+    "file": "conformance/Serializer.toJSON/0825dd5ba870100a74ee27c7.json",
+    "detail": "$.ok.$class: expected \"org.acme.collections@1.0.0.BoundedTags\" got undefined"
+   }
+  },
+  {
+   "name": "error-class-swapped",
+   "description": "TypeNotFoundException is reported as a plain Error",
+   "detected": true,
+   "failing_fixtures": 285,
+   "harness_errors": 0,
+   "by_op": {
+    "Serializer.fromJSON": 212,
+    "DecoratorManager.decorateModels": 46,
+    "DecoratorManager.jsonToYaml": 2,
+    "DecoratorManager.validate": 3,
+    "ModelManager.getType": 14,
+    "ClassDeclaration.getIdentifierFieldName": 1,
+    "DecoratorManager.yamlToJson": 1,
+    "Factory.newConcept": 2,
+    "Factory.newRelationship": 2,
+    "Relationship.fromURI": 2
+   },
+   "example": {
+    "file": "conformance/Serializer.fromJSON/25ac911b99783b746552aeaf.json",
+    "detail": "$.error.class: expected \"TypeNotFoundException\" got \"Error\""
+   }
+  },
+  {
+   "name": "optional-field-rule-dropped",
+   "description": "in-engine: Property.isOptional always returns true (missing required fields accepted)",
+   "detected": true,
+   "failing_fixtures": 11326,
+   "harness_errors": 0,
+   "by_op": {
+    "ModelManager.addCTOModel": 543,
+    "ModelManager.validateModelFiles": 376,
+    "Serializer.fromJSON": 1377,
+    "Serializer.new": 81,
+    "Serializer.toJSON": 1231,
+    "ClassDeclaration.isClassDeclaration": 339,
+    "ClassDeclaration.isEnum": 298,
+    "ClassDeclaration.isIdentified": 258,
+    "ClassDeclaration.isSystemIdentified": 149,
+    "Declaration.getFullyQualifiedName": 349,
+    "Declaration.getName": 293,
+    "Declaration.getNamespace": 255,
+    "Declaration.isClassDeclaration": 32,
+    "DecoratorManager.decorateModels": 1155,
+    "DecoratorManager.extractDecorators": 59,
+    "DecoratorManager.extractNonVocabDecorators": 55,
+    "DecoratorManager.extractVocabularies": 69,
+    "Factory.newResource": 1152,
+    "MetaModel.modelManagerFromMetaModel": 4,
+    "ModelFile.getAllDeclarations": 65,
+    "ModelManager.addModelFiles": 31,
+    "ModelManager.fromAst": 2,
+    "ModelManager.getAst": 48,
+    "ModelManager.getModels": 48,
+    "ModelManager.getType": 479,
+    "Resource.validate": 14,
+    "Factory.newConcept": 36,
+    "ModelLoader.loadModelManager": 9,
+    "ModelLoader.loadModelManagerFromModelFiles": 7,
+    "ModelManager.filter": 13,
+    "ModelManager.updateExternalModels": 5,
+    "AssetDeclaration.declarationKind": 4,
+    "ClassDeclaration.getAllSuperTypeDeclarations": 3,
+    "ClassDeclaration.getAssignableClassDeclarations": 5,
+    "ClassDeclaration.getDirectSubclasses": 3,
+    "ClassDeclaration.getIdentifierFieldName": 39,
+    "ClassDeclaration.getNestedProperty": 4,
+    "ClassDeclaration.getOwnProperties": 6,
+    "ClassDeclaration.getProperties": 85,
+    "ClassDeclaration.getProperty": 112,
+    "ClassDeclaration.getSuperType": 4,
+    "ClassDeclaration.getSuperTypeDeclaration": 1,
+    "ClassDeclaration.isAbstract": 32,
+    "ClassDeclaration.isEvent": 2,
+    "ClassDeclaration.isExplicitlyIdentified": 2,
+    "ClassDeclaration.isMapDeclaration": 66,
+    "ClassDeclaration.toString": 1,
+    "ClassDeclaration.validate": 7,
+    "CollectionSizeValidator.getMinSize": 1,
+    "ConceptDeclaration.declarationKind": 3,
+    "Declaration.getModelFile": 15,
+    "Declaration.isEnum": 5,
+    "Declaration.isMapDeclaration": 2,
+    "Declaration.isScalarDeclaration": 50,
+    "Decorated.getDecorator": 74,
+    "Decorated.getDecorators": 5,
+    "Decorator.getArguments": 43,
+    "Decorator.validate": 2,
+    "DecoratorManager.validate": 1,
+    "DecoratorManager.yamlToJson": 2,
+    "EnumDeclaration.declarationKind": 1,
+    "EnumDeclaration.toString": 1,
+    "EnumValueDeclaration.isEnumValue": 1,
+    "EventDeclaration.declarationKind": 1,
+    "Factory.newEvent": 5,
+    "Factory.newRelationship": 31,
+    "Factory.newTransaction": 10,
+    "Field.getDefaultValue": 28,
+    "Field.getScalarField": 10,
+    "Field.getValidator": 12,
+    "Field.isField": 100,
+    "Field.isTypeScalar": 113,
+    "Identifiable.getFullyQualifiedIdentifier": 21,
+    "Identifiable.getIdentifier": 23,
+    "Identifiable.getTimestamp": 2,
+    "Identifiable.isRelationship": 1,
+    "Identifiable.isResource": 1,
+    "Identifiable.setIdentifier": 16,
+    "Identifiable.toURI": 6,
+    "Introspector.getClassDeclaration": 13,
+    "Introspector.getClassDeclarations": 1,
+    "Introspector.getModelManager": 1,
+    "MapDeclaration.declarationKind": 1,
+    "MapDeclaration.getKey": 10,
+    "MapDeclaration.getValue": 11,
+    "MapDeclaration.isMapDeclaration": 8,
+    "MapDeclaration.toString": 1,
+    "MapDeclaration.validate": 34,
+    "MapKeyType.getNamespace": 3,
+    "MapKeyType.getParent": 3,
+    "MapKeyType.getType": 6,
+    "MapKeyType.toString": 1,
+    "MapKeyType.validate": 1,
+    "MapValueType.getNamespace": 3,
+    "MapValueType.getParent": 3,
+    "MapValueType.getType": 7,
+    "MapValueType.toString": 1,
+    "MapValueType.validate": 1,
+    "ModelFile.getAssetDeclaration": 4,
+    "ModelFile.getAssetDeclarations": 2,
+    "ModelFile.getAst": 23,
+    "ModelFile.getClassDeclarations": 1,
+    "ModelFile.getDefinitions": 1,
+    "ModelFile.getEnumDeclarations": 1,
+    "ModelFile.getEventDeclaration": 6,
+    "ModelFile.getEventDeclarations": 2,
+    "ModelFile.getImportedType": 2,
+    "ModelFile.getImports": 2,
+    "ModelFile.getModelManager": 4,
+    "ModelFile.getName": 5,
+    "ModelFile.getNamespace": 13,
+    "ModelFile.getParticipantDeclaration": 2,
+    "ModelFile.getScalarDeclarations": 1,
+    "ModelFile.getTransactionDeclaration": 5,
+    "ModelFile.getTransactionDeclarations": 2,
+    "ModelFile.getType": 33,
+    "ModelFile.isDefined": 3,
+    "ModelFile.isExternal": 2,
+    "ModelFile.isImportedType": 11,
+    "ModelFile.isLocalType": 2,
+    "ModelFile.isModelFile": 1,
+    "ModelFile.isSystemModelFile": 1,
+    "ModelFile.new": 91,
+    "ModelFile.resolveImport": 8,
+    "ModelFile.validate": 14,
+    "ModelManager.addModelFile": 13,
+    "ModelManager.clearModelFiles": 72,
+    "ModelManager.deleteModelFile": 3,
+    "ModelManager.derivesFrom": 6,
+    "ModelManager.getAssetDeclarations": 1,
+    "ModelManager.getAssignableConcreteTypes": 3,
+    "ModelManager.getConceptDeclarations": 2,
+    "ModelManager.getEnumDeclarations": 1,
+    "ModelManager.getEventDeclarations": 1,
+    "ModelManager.getMapDeclarations": 1,
+    "ModelManager.getNamespaces": 4,
+    "ModelManager.getParticipantDeclarations": 2,
+    "ModelManager.getTransactionDeclarations": 1,
+    "ModelManager.isAssignableTo": 5,
+    "ModelManager.resolveMetaModel": 2,
+    "ModelManager.resolveType": 5,
+    "ModelManager.updateModelFile": 3,
+    "ModelManager.validateModelFile": 4,
+    "ModelUtil.isAssignableTo": 5,
+    "ParticipantDeclaration.declarationKind": 1,
+    "Property.getFullyQualifiedName": 1,
+    "Property.getFullyQualifiedTypeName": 60,
+    "Property.getName": 245,
+    "Property.getNamespace": 18,
+    "Property.getParent": 21,
+    "Property.getSizeValidator": 21,
+    "Property.getType": 66,
+    "Property.isArray": 92,
+    "Property.isOptional": 154,
+    "Property.isPrimitive": 73,
+    "Property.isTypeEnum": 23,
+    "Relationship.fromURI": 16,
+    "Relationship.isRelationship": 2,
+    "Relationship.toString": 1,
+    "RelationshipDeclaration.isRelationship": 11,
+    "RelationshipDeclaration.toString": 3,
+    "Resource.addArrayValue": 6,
+    "Resource.isConcept": 3,
+    "Resource.isIdentifiable": 2,
+    "Resource.isResource": 1,
+    "Resource.setPropertyValue": 51,
+    "Resource.toJSON": 7,
+    "Resource.toString": 3,
+    "ScalarDeclaration.getDefaultValue": 3,
+    "ScalarDeclaration.getIdentifierFieldName": 1,
+    "ScalarDeclaration.getSuperType": 1,
+    "ScalarDeclaration.getSuperTypeDeclaration": 1,
+    "ScalarDeclaration.getValidator": 1,
+    "ScalarDeclaration.isAbstract": 1,
+    "ScalarDeclaration.isAsset": 1,
+    "ScalarDeclaration.isConcept": 1,
+    "ScalarDeclaration.isEvent": 1,
+    "ScalarDeclaration.isIdentified": 1,
+    "ScalarDeclaration.isParticipant": 1,
+    "ScalarDeclaration.isSystemIdentified": 1,
+    "ScalarDeclaration.isTransaction": 1,
+    "ScalarDeclaration.new": 8,
+    "ScalarDeclaration.toString": 1,
+    "TransactionDeclaration.declarationKind": 1,
+    "Typed.getClassDeclaration": 42,
+    "Typed.getFullyQualifiedType": 68,
+    "Typed.getNamespace": 20,
+    "Typed.getType": 11
+   },
+   "example": {
+    "file": "conformance/ModelManager.addCTOModel/008019040852c37fdf8439be.json",
+    "detail": "$.error: expected undefined got {\"class\":\"IllegalModelException\",\"component\":\"@accordproject/concerto-core\",\"location\":null,\"message\":\"Identifying fields cannot be optional. File 'concepts/models/PROPERTY_002/property_002_type_exist…"
+   }
+  },
+  {
+   "name": "datetime-shifted",
+   "description": "in-engine: DateTime values are serialised one millisecond late",
+   "detected": true,
+   "failing_fixtures": 585,
+   "harness_errors": 0,
+   "by_op": {
+    "Serializer.toJSON": 584,
+    "Resource.toJSON": 1
+   },
+   "example": {
+    "file": "conformance/Serializer.toJSON/1a45a969cb5d728c62ee40a7.json",
+    "detail": "$.ok.created: expected \"2024-01-15T10:30:00.000Z\" got \"2024-01-15T10:30:00.001Z\""
+   }
+  },
+  {
+   "name": "filter-imports-unpruned",
+   "description": "in-engine: ModelManager.filter keeps every import, whatever the predicate says about the imported type",
+   "detected": true,
+   "failing_fixtures": 12,
+   "must_flag": {
+    "what": "a ModelManager.filter fixture",
+    "failing": 12
+   },
+   "harness_errors": 0,
+   "by_op": {
+    "ModelManager.filter": 12
+   },
+   "example": {
+    "file": "gaps/ModelManager.filter/2f02b9ada4c1646ea481a8c2.json",
+    "detail": "$.ok.ast.models.3.imports.0.types.1: expected undefined got \"A3\""
+   }
+  },
+  {
+   "name": "offline-flag-inverted",
+   "description": "in-engine: ModelLoader resolves external models when offline, and only validates when online",
+   "detected": true,
+   "failing_fixtures": 4,
+   "must_flag": {
+    "what": "a ModelLoader fixture",
+    "failing": 4
+   },
+   "harness_errors": 0,
+   "by_op": {
+    "ModelLoader.loadModelManager": 2,
+    "ModelLoader.loadModelManagerFromModelFiles": 2
+   },
+   "example": {
+    "file": "gaps/ModelLoader.loadModelManager/8e974dece6d7bf6edaef2ea9.json",
+    "detail": "state divergence: fetched https://oracle.invalid/gaps/ext.cto, which the reference did not fetch"
+   }
+  },
+  {
+   "name": "async-rejection-swallowed",
+   "description": "an async op whose promise rejects is reported as resolving to undefined",
+   "detected": true,
+   "failing_fixtures": 6,
+   "must_flag": {
+    "what": "a ModelManager.updateExternalModels fixture",
+    "failing": 3
+   },
+   "harness_errors": 0,
+   "by_op": {
+    "ModelLoader.loadModelManager": 2,
+    "ModelLoader.loadModelManagerFromModelFiles": 1,
+    "ModelManager.updateExternalModels": 3
+   },
+   "example": {
+    "file": "gaps/ModelLoader.loadModelManager/8e974dece6d7bf6edaef2ea9.json",
+    "detail": "$.error: expected {\"class\":\"IllegalModelException\",\"component\":\"@accordproject/concerto-core\",\"location\":null,\"message\":\"Namespace is not defined for type \\\"gaps.ext@1.0.0.E\\\". File '@oracle.invalid.gaps.loader.cto': \"… got undefined"
+   }
+  },
+  {
+   "name": "decorator-factories-ignored",
+   "description": "in-engine: a model manager reports no decorator factories, so addDecoratorFactory has no effect",
+   "detected": true,
+   "failing_fixtures": 9,
+   "must_flag": {
+    "what": "a fixture with an addDecoratorFactory step",
+    "failing": 9
+   },
+   "harness_errors": 0,
+   "by_op": {
+    "ModelManager.addCTOModel": 3,
+    "ModelManager.getAst": 2,
+    "ModelManager.getType": 4
+   },
+   "example": {
+    "file": "gaps/ModelManager.addCTOModel/55b72831f71abb0e02ab6af1.json",
+    "detail": "$.error: expected {\"class\":\"Error\",\"component\":null,\"location\":null,\"message\":\"abstract function called\"} got undefined"
+   }
+  },
+  {
+   "name": "scalar-type-fallback-changed",
+   "description": "in-engine: a ScalarDeclaration whose AST has no scalar $class gets type String instead of null",
+   "detected": true,
+   "failing_fixtures": 2,
+   "must_flag": {
+    "what": "a ScalarDeclaration.new fixture or one built on its result",
+    "failing": 2
+   },
+   "harness_errors": 0,
+   "by_op": {
+    "ScalarDeclaration.getType": 2
+   },
+   "example": {
+    "file": "gaps/ScalarDeclaration.getType/b3bdf1483151e54cf51ed495.json",
+    "detail": "$.ok: expected null got \"String\""
+   }
+  }
+ ],
+ "harness_checks": [
+  {
+   "check": "fixture input blob missing",
+   "fixture": "data/ClassDeclaration.isClassDeclaration/007373edb88734ede64e82d7.json",
+   "verdict": "harness-error",
+   "ok": true
+  },
+  {
+   "check": "fixture without inputs",
+   "verdict": "harness-error",
+   "ok": true
+  },
+  {
+   "check": "fixture file missing",
+   "verdict": "harness-error",
+   "ok": true
+  },
+  {
+   "check": "fixture references unknown blob",
+   "verdict": "harness-error",
+   "ok": true
+  },
+  {
+   "check": "async fixture with a malformed network response",
+   "fixture": "gaps/ModelLoader.loadModelManager/8324f187f7103a7fc429384e.json",
+   "verdict": "harness-error",
+   "ok": true
+  }
+ ],
+ "all_mutants_detected": true,
+ "harness_checks_ok": true
+}

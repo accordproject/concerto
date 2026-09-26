@@ -30,6 +30,9 @@ import Globalize from '../globalize';
 import Decorated from './decorated';
 import packageJson from '../../package.json';
 
+import debugLib from 'debug';
+const debug = debugLib('concerto:ModelFile');
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type BaseModelManager from '../basemodelmanager';
@@ -42,6 +45,23 @@ import type { IImportType, IModel } from '@accordproject/concerto-metamodel';
  * A predicate over a Declaration, used by ModelFile#filter.
  */
 export type FilterFunction = (declaration: Declaration) => boolean;
+
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// See classdeclaration.ts's own copy of this comment for the bundler/webpack
+// reasoning this loader relies on.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+// P5-06: memoised per specifier (see introspect/property.ts).
+/* istanbul ignore next */
+const engineModules: { [specifier: string]: any } = {};
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => any } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
 
 /**
  * Class representing a Model File. A Model File contains a single namespace
@@ -112,7 +132,21 @@ class ModelFile extends Decorated {
         // Set up the decorators.
         this.process();
         // Populate from the AST
-        this.fromAst(this.ast);
+        /* istanbul ignore if */
+        if (rust) {
+            // P5-06: every property's engine snapshot in one call, read by
+            // the property views fromAst builds (engine/views.ts
+            // `beginModelFile`).
+            const views = loadEngine('../engine/views');
+            const saved = views.beginModelFile(this.ast);
+            try {
+                this.fromAst(this.ast);
+            } finally {
+                views.endModelFile(saved);
+            }
+        } else {
+            this.fromAst(this.ast);
+        }
         // Check version compatibility
         this.isCompatibleVersion();
 
@@ -145,11 +179,57 @@ class ModelFile extends Decorated {
     }
 
     /**
+     * The handle of this ModelFile's own namespace in `this.modelManager`'s
+     * `rustHandle` (P4-08), when that mirror is trustworthy
+     * (`BaseModelManager#_rustMirrorTrustworthy`) and already holds this
+     * namespace. `undefined` otherwise -- including for a `ModelFile` built
+     * by a white-box test on a stubbed `modelManager`, whose
+     * `_rustMirrorTrustworthy` is itself undefined and so falsy here.
+     * @return {number | undefined} the handle, or undefined to fall back to TS
+     * @private
+     * @internal
+     */
+    _rustHandleId(): number | undefined {
+        const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorTrustworthy?: () => boolean; _rustModelFileId?: (namespace: string) => number | undefined; modelFiles?: Record<string, unknown> };
+        /* istanbul ignore next */
+        if (!rust || !manager || !manager.rustHandle || typeof manager._rustMirrorTrustworthy !== 'function' || !manager._rustMirrorTrustworthy()) {
+            return undefined;
+        }
+        // A ModelFile detached from its manager's own registration -- most
+        // notably `filter()`'s result before it is ever added -- must never
+        // answer from a same-namespace mirror that belongs to a different
+        // (unfiltered) ModelFile object.
+        /* istanbul ignore next */
+        if (!manager.modelFiles || manager.modelFiles[this.namespace] !== this) {
+            return undefined;
+        }
+        /* istanbul ignore next */
+        try {
+            // P5-06: memoised per rustHandle epoch where the manager offers it.
+            return typeof manager._rustModelFileId === 'function'
+                ? manager._rustModelFileId(this.namespace)
+                : manager.rustHandle.modelFileId(this.namespace);
+        } catch (e) {
+            return undefined;
+        }
+    }
+
+    /**
      * Returns the semantic version
      * @returns {string} the semantic version or null if the namespace for the model file is
      * unversioned
      */
     getVersion(): string | null | undefined {
+        const id = this._rustHandleId();
+        /* istanbul ignore if */
+        if (id !== undefined) {
+            try {
+                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+                return manager.rustHandle.modelFileGetVersion(id) ?? null;
+            } catch (e) {
+                debug('getVersion', 'rustHandle.modelFileGetVersion failed, falling back to the TS field', e);
+            }
+        }
         return this.version;
     }
 
@@ -157,7 +237,17 @@ class ModelFile extends Decorated {
      * Returns true if the ModelFile is a system namespace
      * @returns {Boolean} true if this is a system model file
      */
-    isSystemModelFile() {
+    isSystemModelFile(): boolean {
+        const id = this._rustHandleId();
+        /* istanbul ignore if */
+        if (id !== undefined) {
+            try {
+                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+                return manager.rustHandle.modelFileIsSystemModelFile(id);
+            } catch (e) {
+                debug('isSystemModelFile', 'rustHandle.modelFileIsSystemModelFile failed, falling back to the TS body', e);
+            }
+        }
         return this.namespace.startsWith('concerto@') || this.namespace === 'concerto';
     }
 
@@ -191,6 +281,16 @@ class ModelFile extends Decorated {
      * @private
      */
     getExternalImports(): Record<string, string> {
+        const id = this._rustHandleId();
+        /* istanbul ignore if */
+        if (id !== undefined) {
+            try {
+                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+                return manager.rustHandle.modelFileGetExternalImports(id);
+            } catch (e) {
+                debug('getExternalImports', 'rustHandle.modelFileGetExternalImports failed, falling back to the TS field', e);
+            }
+        }
         return this.importUriMap;
     }
 
@@ -220,6 +320,16 @@ class ModelFile extends Decorated {
      * this ModelFile
      */
     getImports(): string[] {
+        const id = this._rustHandleId();
+        /* istanbul ignore if */
+        if (id !== undefined) {
+            try {
+                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+                return manager.rustHandle.modelFileGetImports(id);
+            } catch (e) {
+                debug('getImports', 'rustHandle.modelFileGetImports failed, falling back to the TS body', e);
+            }
+        }
         let result: string[] = [];
         this.imports.forEach( imp => {
             result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
@@ -234,6 +344,67 @@ class ModelFile extends Decorated {
      * @protected
      */
     validate() {
+        // P4-08 (accordproject/concerto-rust#67, maintainer decision
+        // 2026-09-26): delegates fully to Rust in rust mode, unconditionally,
+        // now that P4-08a/b/e closed the gaps the earlier attempts (see the
+        // history in `BaseModelManager.addModelFile`) hit -- rustHandle's
+        // validation is now told about `decoratorValidation` and
+        // `dangerouslyAllowReservedSystemTypeNamesInUserModels`
+        // (`BaseModelManager`'s constructor), so it no longer silently skips
+        // an option-gated TS check the way step 4's narrower attempt still
+        // could.
+        //
+        // This is this real `ModelFile`'s own prototype method, so it is
+        // never what a white-box test's `sinon.createStubInstance(ModelFile)`
+        // collaborator runs: sinon replaces `validate` with its own stub
+        // function entirely for such an object, and `BaseModelManager`'s call
+        // sites (`addModelFile`/`addModelFiles`'s `validateModelFiles`) still
+        // call `modelFile.validate()` unchanged, so a stub's `validate` spy
+        // is invoked exactly as before. The collaborator fallback below (no
+        // `rustHandle`, e.g. ts mode, or a real-but-detached `ModelFile`
+        // built against a plain manager) is not a way to keep such a spy
+        // "working" for a real instance; a genuine validation failure throws
+        // the mapped `IllegalModelException` (src/engine/errors.ts) and
+        // propagates unchanged.
+        //
+        // A stale or partially mirrored rustHandle (`_rustMirrorStale`) still
+        // falls back to the TS body: unlike a read (whose worst case is
+        // answering slightly stale data), a false "namespace not found"
+        // triggered by rustHandle simply not having learned about a
+        // just-added sibling file yet (see `BaseModelManager.addModelFiles`,
+        // which mirrors the whole batch into rustHandle before validating any
+        // of it for exactly this reason) must never surface as a spurious
+        // validation failure.
+        const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorStale?: boolean };
+        /* istanbul ignore next */
+        if (rust && manager && manager.rustHandle && !manager._rustMirrorStale) {
+            try {
+                manager.rustHandle.modelFileValidateDetached(
+                    JSON.stringify(this.getAst()),
+                    this.getDefinitions() ?? undefined,
+                    this.getName() ?? undefined,
+                );
+                return;
+            } catch (e) {
+                if (e instanceof IllegalModelException) {
+                    // rustHandle's `modelFile` (errors.ts's ErrorPayload)
+                    // is not this ModelFile, so `IllegalModelException`'s own
+                    // constructor already baked a message and fileName
+                    // without this file's name into `e`. Re-wrap with `this`
+                    // so the public exception carries the same
+                    // "File '<name>': " prefix and `fileName` that the TS
+                    // validate() body (below) produces for the identical
+                    // failure -- delegating to Rust must not change the
+                    // shape of the exception callers see.
+                    if (e.getFileName() !== this.getName()) {
+                        throw new IllegalModelException(e.getShortMessage(), this, e.getFileLocation());
+                    }
+                    throw e;
+                }
+                debug('validate', 'rustHandle.modelFileValidateDetached failed with a non-model error, falling back to the TS body', e);
+            }
+        }
+
         super.validate();
 
         // A dictionary of imports to versions to track unique namespaces
@@ -344,8 +515,21 @@ class ModelFile extends Decorated {
      * @private
      */
     isLocalType(type) {
-        let result = (type && this.getLocalType(type) !== null);
-        return result;
+        /* istanbul ignore if */
+        if (!type) {
+            return false;
+        }
+        const id = this._rustHandleId();
+        /* istanbul ignore if */
+        if (id !== undefined) {
+            try {
+                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+                return manager.rustHandle.modelFileIsLocalType(id, type);
+            } catch (e) {
+                debug('isLocalType', 'rustHandle.modelFileIsLocalType failed, falling back to the TS body', e);
+            }
+        }
+        return this.getLocalType(type) !== null;
     }
 
     /**
@@ -889,6 +1073,46 @@ class ModelFile extends Decorated {
      * @private
      */
     filter(predicate: FilterFunction, modelManager: BaseModelManager): ModelFile | null {
+        const id = this._rustHandleId();
+        /* istanbul ignore if */
+        if (id !== undefined) {
+            try {
+                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+                const sourceManager = this.getModelManager();
+                // A scratch handle, never `modelManager`'s own `rustHandle`:
+                // `filter`'s result is returned *detached* (TS never adds it
+                // to `modelManager` here -- `BaseModelManager.filter` does
+                // that later, via `addModelFiles`), so writing straight into
+                // `modelManager`'s real mirror here would register a
+                // namespace there ahead of the TS side, breaking the
+                // namespace-set invariant `_rustMirrorTrustworthy` relies on.
+                const scratch = new (rust!.ModelManagerHandle as unknown as { new (): { [binding: string]: (...args: any[]) => any } })();
+                // The Rust predicate carries no Declaration objects of its
+                // own -- it calls back with each candidate's
+                // fully-qualified name (its own namespace, not necessarily
+                // this file's, for a declaration reached while pruning an
+                // import) -- so look the FQN back up to the real TS
+                // Declaration before calling the original predicate.
+                const wrappedPredicate = (fqn: string): boolean => {
+                    const namespace = ModelUtil.getNamespace(fqn);
+                    const shortName = ModelUtil.getShortName(fqn);
+                    const sourceFile = sourceManager.getModelFile(namespace);
+                    const decl = sourceFile ? sourceFile.getLocalType(shortName) : null;
+                    if (!decl) {
+                        return false;
+                    }
+                    return predicate(decl);
+                };
+                const filteredId = manager.rustHandle.modelFileFilter(id, wrappedPredicate, scratch);
+                if (filteredId === undefined) {
+                    return null;
+                }
+                const filteredSnapshot = JSON.parse(scratch.modelFileSnapshot(filteredId));
+                return new ModelFile(modelManager, filteredSnapshot.ast, undefined, this.fileName);
+            } catch (e) {
+                debug('filter', 'rustHandle.modelFileFilter failed, falling back to the TS body', e);
+            }
+        }
         const declarations: AstNode[] = [];
         for (const declaration of this.declarations) {
             if (predicate(declaration)) {

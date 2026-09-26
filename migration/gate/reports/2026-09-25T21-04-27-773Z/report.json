@@ -1,0 +1,1436 @@
+{
+  "generated_at": "2026-09-25T21:21:26.398Z",
+  "task": "P5-01a",
+  "plan_issue": "accordproject/concerto-rust#29",
+  "task_issue": "accordproject/concerto-rust#145",
+  "options": {
+    "oracleFixtures": "/home/user/concerto/migration/oracle/fixtures",
+    "rustRoot": "/home/user/wt/P5-01b/concerto-rust",
+    "validateRsRoot": "/home/user/wt/P5-01b/concerto-validate-rs",
+    "conformanceRoot": "/home/user/wt/P5-01b/concerto-conformance",
+    "skipStatus": false,
+    "skipOracleCoverage": false,
+    "skipWasm": false,
+    "skipConformanceInstall": false,
+    "fast": false
+  },
+  "skipped_steps": [],
+  "steps": {
+    "corpus_provenance": {
+      "name": "oracle corpus provenance (must be the canonical corpus, never self-recorded)",
+      "ok": true,
+      "fixtures_dir": "/home/user/concerto/migration/oracle/fixtures",
+      "exists": true,
+      "file_count": 16704,
+      "expected_file_count": 16704,
+      "manifest_present": true,
+      "note": "This checks the fixtures directory is populated as expected; it does not re-hash the corpus (that was verified once at extraction time against e8a2bf72c7775a2d45123dea7b6ff897823c74a108603f5412251ced2619fce1)."
+    },
+    "guardrails": {
+      "name": "guardrails (§0.5 API snapshot + guardrails)",
+      "ok": true,
+      "exit": 0,
+      "log": "guardrails.log"
+    },
+    "conformance_install": {
+      "name": "conformance npm install",
+      "ok": true,
+      "log": "conformance-npm-install.log"
+    },
+    "status": {
+      "name": "status.mjs (full run)",
+      "ok": false,
+      "exit": 0,
+      "log": "status-run.log",
+      "status": {
+        "$schema": "migration/status/status.json",
+        "generated_at": "2026-09-25T21:12:56.334Z",
+        "requested_at_sha": null,
+        "fast": false,
+        "runtime_ms": 505507,
+        "repos": {
+          "concerto": {
+            "path": "/home/user/wt/P5-01b/concerto",
+            "commit": "cf01b466c7ddf68d263a5897e2d6cff83d5c3632",
+            "commit_used": "cf01b466c7ddf68d263a5897e2d6cff83d5c3632"
+          },
+          "concerto-rust": {
+            "path": "/home/user/wt/P5-01b/concerto-rust",
+            "commit": "3f2b571b69059d573a479adc42e5843cb5c514af"
+          },
+          "concerto-validate-rs": {
+            "path": "/home/user/wt/P5-01b/concerto-validate-rs",
+            "commit": "c8e27378fc3983844b33d760e6adb4a49669b7d3"
+          },
+          "concerto-conformance": {
+            "path": "/home/user/wt/P5-01b/concerto-conformance",
+            "commit": "93396426fd5854e9c691fdef6bf557a026cbb8c4"
+          }
+        },
+        "metrics": {
+          "queue": {
+            "available": true,
+            "total": 56,
+            "counts": {
+              "done": 11,
+              "in_progress": 4,
+              "pending": 41
+            },
+            "by_priority": {
+              "P0": {
+                "done": 9,
+                "in_progress": 2,
+                "pending": 9
+              },
+              "P1": {
+                "done": 2,
+                "pending": 24,
+                "in_progress": 2
+              },
+              "P2": {
+                "pending": 7
+              },
+              "P3": {
+                "pending": 1
+              }
+            }
+          },
+          "concerto_core_tests": {
+            "overall": {
+              "available": true,
+              "engine": "ts",
+              "suites": 411,
+              "tests": 1308,
+              "passing": 1299,
+              "failing": 1,
+              "pending": 8,
+              "duration_ms": 5805
+            },
+            "by_tag": {
+              "available": true,
+              "tally": {
+                "B": {
+                  "tests": 956,
+                  "passing": 949,
+                  "failing": 1,
+                  "pending": 6
+                },
+                "M": {
+                  "tests": 80,
+                  "passing": 78,
+                  "failing": 0,
+                  "pending": 2
+                },
+                "W": {
+                  "tests": 272,
+                  "passing": 272,
+                  "failing": 0,
+                  "pending": 0
+                }
+              }
+            },
+            "engine_modes": {
+              "ts": {
+                "available": true,
+                "engine": "ts",
+                "suites": 411,
+                "tests": 1308,
+                "passing": 1299,
+                "failing": 1,
+                "pending": 8,
+                "duration_ms": 5805
+              },
+              "rust": {
+                "available": false,
+                "reason": "CONCERTO_ENGINE=rust is not implemented yet (P4-02, engine shim, has not landed)"
+              }
+            }
+          },
+          "nyc_coverage": {
+            "available": true,
+            "statements_pct": 98.98,
+            "branches_pct": 95.7,
+            "functions_pct": 99.18,
+            "lines_pct": 98.99,
+            "thresholds": {
+              "statements": 99,
+              "branches": 94.8,
+              "functions": 99,
+              "lines": 99
+            },
+            "gate_status": "FAILS: statements, lines below threshold"
+          },
+          "oracle": {
+            "reference": {
+              "available": true,
+              "engine": "reference@5.0.0",
+              "total": 15850,
+              "pass": 15850,
+              "fail": 0,
+              "harness_error": 0,
+              "pass_pct": 100,
+              "by_source": {
+                "conformance": {
+                  "total": 815,
+                  "pass": 815,
+                  "fail": 0,
+                  "harness_error": 0
+                },
+                "data": {
+                  "total": 10231,
+                  "pass": 10231,
+                  "fail": 0,
+                  "harness_error": 0
+                },
+                "gaps": {
+                  "total": 658,
+                  "pass": 658,
+                  "fail": 0,
+                  "harness_error": 0
+                },
+                "lifted": {
+                  "total": 64,
+                  "pass": 64,
+                  "fail": 0,
+                  "harness_error": 0
+                },
+                "unit": {
+                  "total": 4082,
+                  "pass": 4082,
+                  "fail": 0,
+                  "harness_error": 0
+                }
+              }
+            },
+            "native": {
+              "available": false,
+              "reason": "no native oracle adapter exists yet (P1-07 has not landed)"
+            },
+            "wasm": {
+              "available": false,
+              "reason": "no WASM oracle adapter exists yet (P4-01/P4-02 have not landed)"
+            },
+            "corpus_coverage_of_reference": {
+              "available": true,
+              "generated_at": "2026-09-24T18:31:02.846Z",
+              "corpus": {
+                "statements": {
+                  "pct": 95.36,
+                  "covered": 3268,
+                  "total": 3427
+                },
+                "branches": {
+                  "pct": 95.85,
+                  "covered": 1759,
+                  "total": 1835
+                },
+                "functions": {
+                  "pct": 94.09,
+                  "covered": 574,
+                  "total": 610
+                },
+                "lines": {
+                  "pct": 95.31,
+                  "covered": 3214,
+                  "total": 3372
+                }
+              },
+              "unit_suite": {
+                "statements": {
+                  "pct": 99.01,
+                  "covered": 3308,
+                  "total": 3341
+                },
+                "branches": {
+                  "pct": 95.8,
+                  "covered": 1758,
+                  "total": 1835
+                },
+                "functions": {
+                  "pct": 99.34,
+                  "covered": 606,
+                  "total": 610
+                },
+                "lines": {
+                  "pct": 99.02,
+                  "covered": 3254,
+                  "total": 3286
+                }
+              },
+              "thresholds": {
+                "statements": 99,
+                "branches": 94.8,
+                "functions": 99,
+                "lines": 99
+              }
+            },
+            "mutants": {
+              "available": true,
+              "detected": 13,
+              "total": 13,
+              "catch_rate_pct": 100,
+              "all_mutants_detected": true,
+              "harness_checks_ok": true
+            }
+          },
+          "rust": {
+            "concerto-rust": {
+              "cargo_test": {
+                "available": true,
+                "command_exit_ok": true,
+                "totals": {
+                  "passed": 819,
+                  "failed": 0
+                },
+                "per_crate": {
+                  "concerto_core": {
+                    "passed": 755,
+                    "failed": 0
+                  },
+                  "derive": {
+                    "passed": 3,
+                    "failed": 0
+                  },
+                  "oracle": {
+                    "passed": 32,
+                    "failed": 0
+                  },
+                  "traits": {
+                    "passed": 8,
+                    "failed": 0
+                  },
+                  "concerto_macros": {
+                    "passed": 11,
+                    "failed": 0
+                  },
+                  "concerto_metamodel": {
+                    "passed": 0,
+                    "failed": 0
+                  },
+                  "debug": {
+                    "passed": 1,
+                    "failed": 0
+                  },
+                  "numeric_widening": {
+                    "passed": 5,
+                    "failed": 0
+                  },
+                  "round_trip": {
+                    "passed": 4,
+                    "failed": 0
+                  },
+                  "concerto_vocabulary": {
+                    "passed": 0,
+                    "failed": 0
+                  }
+                }
+              },
+              "llvm_cov": {
+                "available": true,
+                "workspace_lines_pct": 93.41,
+                "per_crate_lines_pct": {
+                  "concerto-core": 93.41,
+                  "concerto-macros": 99.22,
+                  "concerto-metamodel": 0,
+                  "concerto-vocabulary": 0
+                }
+              }
+            },
+            "concerto-validate-rs": {
+              "cargo_test": {
+                "available": true,
+                "command_exit_ok": true,
+                "totals": {
+                  "passed": 11,
+                  "failed": 0
+                },
+                "per_crate": {
+                  "concerto_validator_rs": {
+                    "passed": 6,
+                    "failed": 0
+                  },
+                  "concerto_validator": {
+                    "passed": 0,
+                    "failed": 0
+                  },
+                  "cli_tests": {
+                    "passed": 5,
+                    "failed": 0
+                  }
+                }
+              },
+              "llvm_cov": {
+                "available": true,
+                "workspace_lines_pct": 73.38,
+                "per_crate_lines_pct": {
+                  "lib.rs": 100,
+                  "main.rs": 0,
+                  "model_manager": 82.41,
+                  "validator.rs": 100
+                }
+              }
+            }
+          },
+          "ledger": {
+            "available": true,
+            "rows": 508,
+            "full_weight": {
+              "total_weight": 6588.5,
+              "weight_by_classification": {
+                "RUST": 3715,
+                "HYBRID": 1826,
+                "TS": 1047.5
+              },
+              "weighted_pct_rust_plus_hybrid": 84.1
+            },
+            "d1_denominator_weight": 6498.5,
+            "d1_excluded": {
+              "members": 60,
+              "weight": 90
+            },
+            "weighted_pct_rust_plus_hybrid": 85.3,
+            "weighted_pct_rust_only": 57.2
+          },
+          "mutants": {
+            "available": false,
+            "reason": "cargo-mutants has not been run in this environment; the ledger/judge self-check is task P0-05, and the ≥85% catch-rate gate is task P5-06"
+          },
+          "conformance": {
+            "available": true,
+            "total_scenarios": 75,
+            "passed": 75,
+            "failed": 0
+          }
+        }
+      },
+      "thresholds": {
+        "ledger_weighted_pct_rust_plus_hybrid": {
+          "value": 85.3,
+          "floor": 70,
+          "meets": true
+        },
+        "llvm_cov_lines_pct": {
+          "crate": "concerto-core",
+          "value": 93.41,
+          "floor": 90,
+          "meets": true
+        },
+        "conformance_all_scenarios_pass": {
+          "value": {
+            "total": 75,
+            "failed": 0
+          },
+          "meets": true
+        },
+        "core_tests_tag_B_pass": {
+          "failing": 1,
+          "meets": false
+        },
+        "core_tests_tag_W_pass": {
+          "failing": 0,
+          "meets": true
+        }
+      },
+      "ts_failures": [
+        {
+          "file": "modelloader.js",
+          "fullTitle": "ModelLoader #loadModelFromUrl should load models",
+          "tag": "B",
+          "message": "HTTP request failed with status: 403"
+        }
+      ]
+    },
+    "wasm": {
+      "name": "WASM build (size budget) + smoke:node",
+      "ok": true,
+      "build_ok": true,
+      "size_bytes": 1546369,
+      "size_budget_bytes": 4194304,
+      "within_budget": true,
+      "install_ok": true,
+      "smoke_ok": true,
+      "smoke_failures": [],
+      "logs": {
+        "build": "wasm-build.log",
+        "install": "wasm-npm-install.log",
+        "smoke": "wasm-smoke.log"
+      }
+    },
+    "core_suite_rust": {
+      "name": "concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run — status.mjs's own engine_modes.rust is stale)",
+      "ok": false,
+      "exit": 1,
+      "stats": {
+        "suites": 411,
+        "tests": 1308,
+        "passes": 1299,
+        "pending": 8,
+        "failures": 1,
+        "start": "2026-09-25T21:14:00.798Z",
+        "end": "2026-09-25T21:14:15.489Z",
+        "duration": 14691
+      },
+      "by_tag": {
+        "B": {
+          "tests": 956,
+          "passing": 949,
+          "failing": 1,
+          "pending": 6
+        },
+        "M": {
+          "tests": 80,
+          "passing": 78,
+          "failing": 0,
+          "pending": 2
+        },
+        "W": {
+          "tests": 272,
+          "passing": 272,
+          "failing": 0,
+          "pending": 0
+        }
+      },
+      "failures": [
+        {
+          "file": "modelloader.js",
+          "fullTitle": "ModelLoader #loadModelFromUrl should load models",
+          "tag": "B",
+          "message": "HTTP request failed with status: 403"
+        }
+      ],
+      "log": "core-suite-rust.log"
+    },
+    "oracle_native": {
+      "name": "oracle native (cargo test --test oracle, §0.3 native leg)",
+      "ok": true,
+      "passed": 32,
+      "failed": 0,
+      "log": "oracle-native.log"
+    },
+    "oracle_reference_install": {
+      "name": "oracle reference npm ci (frozen concerto-core 5.0.0)",
+      "ok": true,
+      "exit": 0,
+      "log": "oracle-reference-npm-ci.log"
+    },
+    "oracle_coverage": {
+      "name": "oracle corpus coverage of the reference (§0.3 floor)",
+      "ok": false,
+      "exit": 0,
+      "log": "oracle-coverage.log",
+      "coverage": {
+        "generated_at": "2026-09-25T21:17:43.358Z",
+        "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
+        "corpus": {
+          "statements": {
+            "pct": 95.38,
+            "covered": 3269,
+            "total": 3427
+          },
+          "branches": {
+            "pct": 95.85,
+            "covered": 1759,
+            "total": 1835
+          },
+          "functions": {
+            "pct": 94.26,
+            "covered": 575,
+            "total": 610
+          },
+          "lines": {
+            "pct": 95.34,
+            "covered": 3215,
+            "total": 3372
+          }
+        },
+        "corpus_src_driver": "the same corpus, bin/replay.js --engine src under nyc (workspace src/ through ts-node)",
+        "corpus_src": {
+          "statements": {
+            "pct": 97.96,
+            "covered": 3363,
+            "total": 3433
+          },
+          "branches": {
+            "pct": 95.7,
+            "covered": 1851,
+            "total": 1934
+          },
+          "functions": {
+            "pct": 94.27,
+            "covered": 576,
+            "total": 611
+          },
+          "lines": {
+            "pct": 97.95,
+            "covered": 3309,
+            "total": 3378
+          }
+        },
+        "corpus_reference_vs_src": {
+          "branch_layout_mismatches": 1082,
+          "branch_hit_disagreements": 163,
+          "disagreements": [
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "2[1]",
+              "reference": 744
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "3[1]",
+              "reference": 222,
+              "src": 0
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "8[2]",
+              "reference": 423
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "8[3]",
+              "reference": 701
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "8[4]",
+              "reference": 746
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "8[5]",
+              "reference": 310
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "9[1]",
+              "reference": 0,
+              "src": 3221
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "11[1]",
+              "reference": 351,
+              "src": 0
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "21[0]",
+              "reference": 0,
+              "src": 3
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "24[0]",
+              "reference": 3,
+              "src": 0
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "25[1]",
+              "reference": 0,
+              "src": 947
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "26[1]",
+              "reference": 7523,
+              "src": 0
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "28[1]",
+              "reference": 845,
+              "src": 0
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "31[1]",
+              "reference": 95
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "32[1]",
+              "reference": 1410
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "33[1]",
+              "reference": 1147
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "39[2]",
+              "reference": 767
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "42[2]",
+              "reference": 736
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "53[1]",
+              "reference": 1344
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "59[1]",
+              "reference": 0,
+              "src": 1760
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "64[2]",
+              "reference": 449
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "66[1]",
+              "reference": 217,
+              "src": 0
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "69[2]",
+              "reference": 3872
+            },
+            {
+              "file": "src/decoratormanager.ts",
+              "branch": "72[2]",
+              "reference": 2479
+            },
+            {
+              "file": "src/modelutil.ts",
+              "branch": "0[1]",
+              "reference": 9
+            },
+            {
+              "file": "src/modelutil.ts",
+              "branch": "2[1]",
+              "reference": 15
+            },
+            {
+              "file": "src/modelutil.ts",
+              "branch": "5[1]",
+              "reference": 13561
+            },
+            {
+              "file": "src/modelutil.ts",
+              "branch": "12[2]",
+              "reference": 193215
+            },
+            {
+              "file": "src/modelutil.ts",
+              "branch": "14[1]",
+              "reference": 2
+            },
+            {
+              "file": "src/modelutil.ts",
+              "branch": "15[1]",
+              "reference": 1
+            },
+            {
+              "file": "src/modelutil.ts",
+              "branch": "16[1]",
+              "reference": 351
+            },
+            {
+              "file": "src/modelutil.ts",
+              "branch": "16[2]",
+              "reference": 157
+            },
+            {
+              "file": "src/modelutil.ts",
+              "branch": "16[3]",
+              "reference": 130
+            },
+            {
+              "file": "src/serializer.ts",
+              "branch": "4[1]",
+              "reference": 847
+            },
+            {
+              "file": "src/serializer.ts",
+              "branch": "8[1]",
+              "reference": 4375
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "1[1]",
+              "reference": 681007
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "6[0]",
+              "reference": 0,
+              "src": 187952
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "9[0]",
+              "reference": 166409,
+              "src": 0
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "11[2]",
+              "reference": 1475444
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "11[3]",
+              "reference": 1240881
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "11[4]",
+              "reference": 1137410
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "11[5]",
+              "reference": 1006381
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "11[6]",
+              "reference": 991581
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "14[0]",
+              "reference": 0,
+              "src": 2731054
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "16[1]",
+              "reference": 534793
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "17[0]",
+              "reference": 5,
+              "src": 0
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "20[0]",
+              "reference": 0,
+              "src": 5
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "23[0]",
+              "reference": 7,
+              "src": 0
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "24[2]",
+              "reference": 117
+            },
+            {
+              "file": "src/introspect/classdeclaration.ts",
+              "branch": "28[1]",
+              "reference": 0,
+              "src": 109538
+            }
+          ]
+        },
+        "unit_suite": {
+          "statements": {
+            "pct": 98.98,
+            "covered": 3401,
+            "total": 3436
+          },
+          "branches": {
+            "pct": 95.7,
+            "covered": 1851,
+            "total": 1934
+          },
+          "functions": {
+            "pct": 99.18,
+            "covered": 606,
+            "total": 611
+          },
+          "lines": {
+            "pct": 98.99,
+            "covered": 3347,
+            "total": 3381
+          }
+        },
+        "unit_suite_source": "nyc run of the unit suite over the workspace src/ (same command as baseline.json)",
+        "baseline_json": {
+          "statements_pct": 98.95,
+          "statements_fraction": "3306/3341",
+          "branches_pct": 95.8,
+          "branches_fraction": "1758/1835",
+          "functions_pct": 99.18,
+          "functions_fraction": "605/610",
+          "lines_pct": 98.96,
+          "lines_fraction": "3252/3286"
+        },
+        "thresholds": {
+          "statements": 99,
+          "branches": 94.8,
+          "functions": 99,
+          "lines": 99
+        },
+        "uncovered_branches": 76,
+        "uncovered_branches_covered_by_suite": 27,
+        "covered_by_suite_by_category": {
+          "unexplained": 16,
+          "stub-only": 3,
+          "internal-only": 8
+        },
+        "covered_by_suite_by_destination": {
+          "not handed off": 16,
+          "P2-10 (accordproject/concerto-rust#54)": 11
+        },
+        "unexplained_covered_by_suite": [
+          "src/decoratormanager.ts:316:9[1]",
+          "src/decoratormanager.ts:409:21[0]",
+          "src/decoratormanager.ts:427:25[1]",
+          "src/decoratormanager.ts:738:59[1]",
+          "src/introspect/classdeclaration.ts:101:6[0]",
+          "src/introspect/classdeclaration.ts:170:14[0]",
+          "src/introspect/classdeclaration.ts:211:20[0]",
+          "src/introspect/classdeclaration.ts:252:28[1]",
+          "src/introspect/classdeclaration.ts:445:45[1]",
+          "src/introspect/classdeclaration.ts:482:48[1]",
+          "src/introspect/declaration.ts:104:4[0]",
+          "src/introspect/declaration.ts:114:8[1]",
+          "src/introspect/decorator.ts:110:2[1]",
+          "src/introspect/scalardeclaration.ts:134:12[0]",
+          "src/introspect/stringvalidator.ts:123:22[0]",
+          "src/serializer/jsonpopulator.ts:374:38[1]"
+        ],
+        "stale_reasons": []
+      },
+      "floor": {
+        "statements": 99,
+        "functions": 99,
+        "lines": 99,
+        "branches": 94.8
+      },
+      "meets_floor": {
+        "statements": false,
+        "functions": false,
+        "lines": false,
+        "branches": true
+      }
+    },
+    "oracle_wasm": {
+      "name": "oracle WASM/JS-binding leg (§0.3, replay.js --engine rust-adapter.js)",
+      "ok": false,
+      "exit": 1,
+      "log": "oracle-wasm.log",
+      "replay": {
+        "total": 16085,
+        "pass": 16055,
+        "fail": 30,
+        "harness_error": 0,
+        "agreement_pct": 99.8135,
+        "failures_truncated": false
+      },
+      "failures": [
+        {
+          "file": "data/DecoratorManager.decorateModels/72c098eaee106ff450b622a0.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.effects: expected {\"args\":{\"1\":{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet\",\"commands\":[{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.Command\",\"decorator\":{\"$class\":\"concerto.metamod… got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/20c4693168cd7ea28c006d3c.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/25f485f573c21a354335018f.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.properties.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/2696574863be411bb3ac8930.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/2d33be223246ab6740c1a3ad.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/3818ca566e9fb509422fda71.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/4f40028754a604dadfb0ca67.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.1.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/5135b15bab782c9a3dc4f762.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/5692c5d7b52a3d08c9774521.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.properties.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/5e14a3de5a8ce5c7aba08073.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.properties.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/766a245c8b9526931a526069.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/85221faaefcbdea76e0d72a7.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.3.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/88f5e279a932086ce3bc73fc.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/8f0b13f3f0d6d0bb823055f1.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.1.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/aa67bb22b5d75c11a8388099.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/aca25539ac788419d65596d3.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/d192a7be50d765c4ef95532e.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/d542a295303cf0fee1f6ab26.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.properties.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/d7d8467e4ed9f1e7ef258a5b.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/DecoratorManager.extractDecorators/f82f8e467af3d5fb4ba5320e.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.properties.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "data/ModelManager.addCTOModel/3489b297183571e117d7f7e0.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"TypeError\""
+        },
+        {
+          "file": "data/ModelManager.addCTOModel/8ed239b8c40c1636d8664c45.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"TypeError\""
+        },
+        {
+          "file": "data/ModelManager.addCTOModel/9dffbd170fa2d61402e91246.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"TypeError\""
+        },
+        {
+          "file": "data/ModelManager.validateModelFiles/95929468f5b2bf9fbfa2d6ff.json",
+          "op": "ModelManager.validateModelFiles",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"TypeError\""
+        },
+        {
+          "file": "gaps/ModelManager.validateModelFiles/d31238c92ac69b9d872bc810.json",
+          "op": "ModelManager.validateModelFiles",
+          "status": "fail",
+          "detail": "$.error.message: expected \"Relationship must have a type \" got \"Undeclared type \\\"\\\" in \\\"property gaps.rel@1.0.0.Person.home\\\". \""
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/c7a0e9377fb2dc82e348db67.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.effects: expected {\"args\":{\"1\":{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet\",\"commands\":[{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.Command\",\"decorator\":{\"$class\":\"concerto.metamod… got undefined"
+        },
+        {
+          "file": "unit/DecoratorManager.extractDecorators/46451c56c9b7ee5d67de2474.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "unit/DecoratorManager.extractDecorators/ac37d0cc2ee62446130cfd10.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.1.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "unit/DecoratorManager.extractDecorators/f4ab7364c6184205f16051e8.json",
+          "op": "DecoratorManager.extractDecorators",
+          "status": "fail",
+          "detail": "$.ok.modelManager.ast.models.2.declarations.0.decorators: expected {\"@@oracle\":\"undefined\"} got undefined"
+        },
+        {
+          "file": "unit/DecoratorManager.migrateTo/6a8bfe76d6aee5f63bb7b743.json",
+          "op": "DecoratorManager.migrateTo",
+          "status": "fail",
+          "detail": "$.effects: expected {\"args\":{\"0\":{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet\",\"commands\":[{\"$class\":\"org.accordproject.decoratorcommands@0.4.0.Command\",\"decorator\":{\"$class\":\"concerto.metamod… got undefined"
+        }
+      ]
+    },
+    "cargo_mutants": {
+      "name": "cargo-mutants on validation modules (§0.6 catch rate)",
+      "na": "not run by this dry run — long-running, owned by task P5-06; cargo-mutants is installed in this environment for that task to use"
+    }
+  },
+  "classification": {
+    "corpus_provenance": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "guardrails": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "conformance_install": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "status": {
+      "verdict": "expected-pending",
+      "items": [
+        {
+          "item": "test: modelloader.js :: ModelLoader #loadModelFromUrl should load models",
+          "verdict": "expected-pending",
+          "owner": "environment (sandboxed network egress), not a migration task",
+          "reason": "fetches a model over HTTPS; sandboxed environments block outbound requests (HTTP 403 from the egress proxy). Fails identically under CONCERTO_ENGINE=ts and =rust; passes with network access.",
+          "known_id": "modelloader-network"
+        }
+      ],
+      "owners": [
+        "environment (sandboxed network egress), not a migration task"
+      ]
+    },
+    "wasm": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "core_suite_rust": {
+      "verdict": "expected-pending",
+      "items": [
+        {
+          "item": "test: modelloader.js :: ModelLoader #loadModelFromUrl should load models",
+          "verdict": "expected-pending",
+          "owner": "environment (sandboxed network egress), not a migration task",
+          "reason": "fetches a model over HTTPS; sandboxed environments block outbound requests (HTTP 403 from the egress proxy). Fails identically under CONCERTO_ENGINE=ts and =rust; passes with network access.",
+          "known_id": "modelloader-network"
+        }
+      ],
+      "owners": [
+        "environment (sandboxed network egress), not a migration task"
+      ]
+    },
+    "oracle_native": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "oracle_reference_install": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "oracle_coverage": {
+      "verdict": "unexpected",
+      "items": [
+        {
+          "item": "oracle coverage: statements",
+          "verdict": "unexpected",
+          "owner": null,
+          "reason": "95.38% < floor 99%; no open task owns it (corpus-currency question routed to the maintainer)"
+        },
+        {
+          "item": "oracle coverage: functions",
+          "verdict": "unexpected",
+          "owner": null,
+          "reason": "94.26% < floor 99%; no open task owns it (corpus-currency question routed to the maintainer)"
+        },
+        {
+          "item": "oracle coverage: lines",
+          "verdict": "unexpected",
+          "owner": null,
+          "reason": "95.34% < floor 99%; no open task owns it (corpus-currency question routed to the maintainer)"
+        }
+      ],
+      "owners": []
+    },
+    "oracle_wasm": {
+      "verdict": "expected-pending",
+      "items": [
+        {
+          "item": "oracle fixture: data/DecoratorManager.decorateModels/72c098eaee106ff450b622a0.json (DecoratorManager.decorateModels)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/20c4693168cd7ea28c006d3c.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/25f485f573c21a354335018f.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/2696574863be411bb3ac8930.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/2d33be223246ab6740c1a3ad.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/3818ca566e9fb509422fda71.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/4f40028754a604dadfb0ca67.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/5135b15bab782c9a3dc4f762.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/5692c5d7b52a3d08c9774521.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/5e14a3de5a8ce5c7aba08073.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/766a245c8b9526931a526069.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/85221faaefcbdea76e0d72a7.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/88f5e279a932086ce3bc73fc.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/8f0b13f3f0d6d0bb823055f1.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/aa67bb22b5d75c11a8388099.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/aca25539ac788419d65596d3.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/d192a7be50d765c4ef95532e.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/d542a295303cf0fee1f6ab26.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/d7d8467e4ed9f1e7ef258a5b.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/DecoratorManager.extractDecorators/f82f8e467af3d5fb4ba5320e.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/ModelManager.addCTOModel/3489b297183571e117d7f7e0.json (ModelManager.addCTOModel)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/ModelManager.addCTOModel/8ed239b8c40c1636d8664c45.json (ModelManager.addCTOModel)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/ModelManager.addCTOModel/9dffbd170fa2d61402e91246.json (ModelManager.addCTOModel)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: data/ModelManager.validateModelFiles/95929468f5b2bf9fbfa2d6ff.json (ModelManager.validateModelFiles)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: gaps/ModelManager.validateModelFiles/d31238c92ac69b9d872bc810.json (ModelManager.validateModelFiles)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: unit/DecoratorManager.decorateModels/c7a0e9377fb2dc82e348db67.json (DecoratorManager.decorateModels)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: unit/DecoratorManager.extractDecorators/46451c56c9b7ee5d67de2474.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: unit/DecoratorManager.extractDecorators/ac37d0cc2ee62446130cfd10.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: unit/DecoratorManager.extractDecorators/f4ab7364c6184205f16051e8.json (DecoratorManager.extractDecorators)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        },
+        {
+          "item": "oracle fixture: unit/DecoratorManager.migrateTo/6a8bfe76d6aee5f63bb7b743.json (DecoratorManager.migrateTo)",
+          "verdict": "expected-pending",
+          "owner": "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)",
+          "reason": "one of the 31 WASM-leg oracle disagreements found on 2026-09-25 and tracked as P4-09a (native cargo oracle passes the same fixtures, so the gap is in the binding/shim path)",
+          "known_id": "oracle-wasm-p4-09a"
+        }
+      ],
+      "owners": [
+        "P4-09a, accordproject/concerto-rust#157 (open, worker:local-matt)"
+      ]
+    },
+    "cargo_mutants": {
+      "verdict": "not-run",
+      "reason": "not run by this dry run — long-running, owned by task P5-06; cargo-mutants is installed in this environment for that task to use",
+      "items": [],
+      "owners": []
+    }
+  }
+}

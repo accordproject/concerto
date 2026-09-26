@@ -1,0 +1,1712 @@
+{
+ "summary": {
+  "generated_at": "2026-09-26T09:34:20.095Z",
+  "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
+  "corpus": {
+   "statements": {
+    "pct": 99.21,
+    "covered": 3400,
+    "total": 3427
+   },
+   "branches": {
+    "pct": 96.34,
+    "covered": 1768,
+    "total": 1835
+   },
+   "functions": {
+    "pct": 99.01,
+    "covered": 604,
+    "total": 610
+   },
+   "lines": {
+    "pct": 99.19,
+    "covered": 3345,
+    "total": 3372
+   }
+  },
+  "corpus_src_driver": "the same corpus, bin/replay.js --engine src under nyc (workspace src/ through ts-node)",
+  "corpus_src": {
+   "statements": {
+    "pct": 99.23,
+    "covered": 3495,
+    "total": 3522
+   },
+   "branches": {
+    "pct": 96.22,
+    "covered": 1861,
+    "total": 1934
+   },
+   "functions": {
+    "pct": 99.01,
+    "covered": 605,
+    "total": 611
+   },
+   "lines": {
+    "pct": 99.22,
+    "covered": 3440,
+    "total": 3467
+   }
+  },
+  "corpus_reference_vs_src": {
+   "branch_layout_mismatches": 541,
+   "branch_hit_disagreements": 155,
+   "disagreements": [
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "2[1]",
+     "reference": 744
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "3[1]",
+     "reference": 222,
+     "src": 0
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "8[2]",
+     "reference": 423
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "8[3]",
+     "reference": 701
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "8[4]",
+     "reference": 746
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "8[5]",
+     "reference": 310
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "9[1]",
+     "reference": 0,
+     "src": 3221
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "11[1]",
+     "reference": 351,
+     "src": 0
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "21[0]",
+     "reference": 0,
+     "src": 3
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "24[0]",
+     "reference": 3,
+     "src": 0
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "25[1]",
+     "reference": 0,
+     "src": 947
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "26[1]",
+     "reference": 7523,
+     "src": 0
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "28[1]",
+     "reference": 845,
+     "src": 0
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "31[1]",
+     "reference": 95
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "32[1]",
+     "reference": 1410
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "33[1]",
+     "reference": 1147
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "39[2]",
+     "reference": 767
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "42[2]",
+     "reference": 736
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "53[1]",
+     "reference": 1344
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "59[1]",
+     "reference": 0,
+     "src": 1760
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "64[2]",
+     "reference": 449
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "66[1]",
+     "reference": 217,
+     "src": 0
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "69[2]",
+     "reference": 3872
+    },
+    {
+     "file": "src/decoratormanager.ts",
+     "branch": "72[2]",
+     "reference": 2479
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "0[1]",
+     "reference": 9
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "2[1]",
+     "reference": 15
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "5[1]",
+     "reference": 13561
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "12[2]",
+     "reference": 193215
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "14[1]",
+     "reference": 2
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "15[1]",
+     "reference": 1
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "16[1]",
+     "reference": 351
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "16[2]",
+     "reference": 157
+    },
+    {
+     "file": "src/modelutil.ts",
+     "branch": "16[3]",
+     "reference": 130
+    },
+    {
+     "file": "src/serializer.ts",
+     "branch": "4[1]",
+     "reference": 848
+    },
+    {
+     "file": "src/serializer.ts",
+     "branch": "8[1]",
+     "reference": 4381
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "1[1]",
+     "reference": 685266
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "11[2]",
+     "reference": 1485809
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "11[3]",
+     "reference": 1249475
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "11[4]",
+     "reference": 1145408
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "11[5]",
+     "reference": 1013518
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "11[6]",
+     "reference": 998718
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "14[0]",
+     "reference": 0,
+     "src": 2747288
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "16[1]",
+     "reference": 535139
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "17[0]",
+     "reference": 5,
+     "src": 0
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "24[2]",
+     "reference": 117
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "28[1]",
+     "reference": 0,
+     "src": 109788
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "31[1]",
+     "reference": 75630,
+     "src": 0
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "34[1]",
+     "reference": 20
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "36[2]",
+     "reference": 548790
+    },
+    {
+     "file": "src/introspect/classdeclaration.ts",
+     "branch": "42[1]",
+     "reference": 1951315
+    }
+   ]
+  },
+  "unit_suite": {
+   "statements": {
+    "pct": 99.01,
+    "covered": 3308,
+    "total": 3341
+   },
+   "branches": {
+    "pct": 95.8,
+    "covered": 1758,
+    "total": 1835
+   },
+   "functions": {
+    "pct": 99.34,
+    "covered": 606,
+    "total": 610
+   },
+   "lines": {
+    "pct": 99.02,
+    "covered": 3254,
+    "total": 3286
+   }
+  },
+  "unit_suite_source": "nyc run of the unit suite over the workspace src/ (same command as baseline.json)",
+  "baseline_json": {
+   "statements_pct": 98.95,
+   "statements_fraction": "3306/3341",
+   "branches_pct": 95.8,
+   "branches_fraction": "1758/1835",
+   "functions_pct": 99.18,
+   "functions_fraction": "605/610",
+   "lines_pct": 98.96,
+   "lines_fraction": "3252/3286"
+  },
+  "thresholds": {
+   "statements": 99,
+   "branches": 94.8,
+   "functions": 99,
+   "lines": 99
+  },
+  "uncovered_branches": 67,
+  "uncovered_branches_covered_by_suite": 12,
+  "covered_by_suite_by_category": {
+   "stub-only": 4,
+   "internal-only": 8
+  },
+  "covered_by_suite_by_destination": {
+   "P2-10 (accordproject/concerto-rust#54)": 12
+  },
+  "unexplained_covered_by_suite": [],
+  "stale_reasons": []
+ },
+ "note": "Every branch of concerto-core src the oracle corpus does not reach on the frozen reference. covered_by_suite marks branches the unit suite does reach; each of those carries the category, the task it is handed to and the verified reason from gap-reasons.json (categories are defined there).",
+ "categories": {
+  "stub-only": "The unit suite reaches the branch only through a sinon stub, a sinon stub instance or a monkey-patched method, forcing a state no object built through the public API can be in. Handed to P2-10 (accordproject/concerto-rust#54).",
+  "internal-only": "Reached only by calling an internal (@private) method or constructor directly, with arguments no public operation passes. Handed to P2-10 (accordproject/concerto-rust#54)."
+ },
+ "per_file": {
+  "src/astmodelmanager.ts": {
+   "uncovered_branches": 1,
+   "uncovered_statement_lines": [],
+   "uncovered_functions": []
+  },
+  "src/basemodelmanager.ts": {
+   "uncovered_branches": 10,
+   "uncovered_statement_lines": [
+    148,
+    208,
+    250,
+    356,
+    410
+   ],
+   "uncovered_functions": []
+  },
+  "src/decoratorextractor.ts": {
+   "uncovered_branches": 7,
+   "uncovered_statement_lines": [
+    337
+   ],
+   "uncovered_functions": []
+  },
+  "src/decoratormanager.ts": {
+   "uncovered_branches": 6,
+   "uncovered_statement_lines": [],
+   "uncovered_functions": []
+  },
+  "src/factory.ts": {
+   "uncovered_branches": 1,
+   "uncovered_statement_lines": [],
+   "uncovered_functions": []
+  },
+  "src/modelmanager.ts": {
+   "uncovered_branches": 1,
+   "uncovered_statement_lines": [],
+   "uncovered_functions": []
+  },
+  "src/introspect/classdeclaration.ts": {
+   "uncovered_branches": 5,
+   "uncovered_statement_lines": [
+    61,
+    171
+   ],
+   "uncovered_functions": [
+    "(anonymous_1)"
+   ]
+  },
+  "src/introspect/declaration.ts": {
+   "uncovered_branches": 5,
+   "uncovered_statement_lines": [
+    105,
+    199
+   ],
+   "uncovered_functions": [
+    "(anonymous_13)"
+   ]
+  },
+  "src/introspect/decorated.ts": {
+   "uncovered_branches": 0,
+   "uncovered_statement_lines": [
+    75
+   ],
+   "uncovered_functions": [
+    "(anonymous_2)"
+   ]
+  },
+  "src/introspect/decorator.ts": {
+   "uncovered_branches": 2,
+   "uncovered_statement_lines": [],
+   "uncovered_functions": []
+  },
+  "src/introspect/field.ts": {
+   "uncovered_branches": 1,
+   "uncovered_statement_lines": [
+    195
+   ],
+   "uncovered_functions": []
+  },
+  "src/introspect/modelfile.ts": {
+   "uncovered_branches": 3,
+   "uncovered_statement_lines": [
+    475,
+    947
+   ],
+   "uncovered_functions": []
+  },
+  "src/introspect/property.ts": {
+   "uncovered_branches": 2,
+   "uncovered_statement_lines": [
+    210,
+    214
+   ],
+   "uncovered_functions": []
+  },
+  "src/introspect/relationshipdeclaration.ts": {
+   "uncovered_branches": 1,
+   "uncovered_statement_lines": [
+    80
+   ],
+   "uncovered_functions": []
+  },
+  "src/introspect/validator.ts": {
+   "uncovered_branches": 0,
+   "uncovered_statement_lines": [
+    122
+   ],
+   "uncovered_functions": [
+    "(anonymous_4)",
+    "(anonymous_5)"
+   ]
+  },
+  "src/model/identifiable.ts": {
+   "uncovered_branches": 0,
+   "uncovered_statement_lines": [
+    114
+   ],
+   "uncovered_functions": [
+    "(anonymous_6)"
+   ]
+  },
+  "src/model/resourceid.ts": {
+   "uncovered_branches": 5,
+   "uncovered_statement_lines": [],
+   "uncovered_functions": []
+  },
+  "src/serializer/instancegenerator.ts": {
+   "uncovered_branches": 1,
+   "uncovered_statement_lines": [
+    120
+   ],
+   "uncovered_functions": []
+  },
+  "src/serializer/jsonpopulator.ts": {
+   "uncovered_branches": 9,
+   "uncovered_statement_lines": [],
+   "uncovered_functions": []
+  },
+  "src/serializer/resourcevalidator.ts": {
+   "uncovered_branches": 4,
+   "uncovered_statement_lines": [
+    280,
+    284,
+    441
+   ],
+   "uncovered_functions": []
+  },
+  "src/serializer/valuegenerator.ts": {
+   "uncovered_branches": 3,
+   "uncovered_statement_lines": [
+    81,
+    82,
+    103,
+    172
+   ],
+   "uncovered_functions": []
+  }
+ },
+ "branches": [
+  {
+   "file": "src/astmodelmanager.ts",
+   "line": 23,
+   "type": "binary-expr",
+   "branch": "0[1]",
+   "location": {
+    "start": {
+     "line": 23,
+     "column": 26
+    },
+    "end": {
+     "line": 23,
+     "column": 35
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/basemodelmanager.ts",
+   "line": 37,
+   "type": "binary-expr",
+   "branch": "0[1]",
+   "location": {
+    "start": {
+     "line": 37,
+     "column": 56
+    },
+    "end": {
+     "line": 37,
+     "column": 70
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/basemodelmanager.ts",
+   "line": 62,
+   "type": "binary-expr",
+   "branch": "1[1]",
+   "location": {
+    "start": {
+     "line": 62,
+     "column": 26
+    },
+    "end": {
+     "line": 62,
+     "column": 35
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/basemodelmanager.ts",
+   "line": 145,
+   "type": "binary-expr",
+   "branch": "5[1]",
+   "location": {
+    "start": {
+     "line": 145,
+     "column": 61
+    },
+    "end": {
+     "line": 145,
+     "column": 76
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/basemodelmanager.ts",
+   "line": 147,
+   "type": "if",
+   "branch": "6[0]",
+   "location": {
+    "start": {
+     "line": 147,
+     "column": 8
+    },
+    "end": {
+     "line": 149,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/basemodelmanager.ts",
+   "line": 205,
+   "type": "binary-expr",
+   "branch": "8[1]",
+   "location": {
+    "start": {
+     "line": 205,
+     "column": 76
+    },
+    "end": {
+     "line": 205,
+     "column": 96
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/basemodelmanager.ts",
+   "line": 207,
+   "type": "if",
+   "branch": "9[0]",
+   "location": {
+    "start": {
+     "line": 207,
+     "column": 8
+    },
+    "end": {
+     "line": 209,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/basemodelmanager.ts",
+   "line": 249,
+   "type": "if",
+   "branch": "12[0]",
+   "location": {
+    "start": {
+     "line": 249,
+     "column": 8
+    },
+    "end": {
+     "line": 251,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/basemodelmanager.ts",
+   "line": 355,
+   "type": "if",
+   "branch": "22[0]",
+   "location": {
+    "start": {
+     "line": 355,
+     "column": 12
+    },
+    "end": {
+     "line": 357,
+     "column": 13
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/basemodelmanager.ts",
+   "line": 409,
+   "type": "if",
+   "branch": "27[0]",
+   "location": {
+    "start": {
+     "line": 409,
+     "column": 16
+    },
+    "end": {
+     "line": 411,
+     "column": 17
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/basemodelmanager.ts",
+   "line": 508,
+   "type": "cond-expr",
+   "branch": "35[1]",
+   "location": {
+    "start": {
+     "line": 508,
+     "column": 159
+    },
+    "end": {
+     "line": 508,
+     "column": 172
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratorextractor.ts",
+   "line": 73,
+   "type": "default-arg",
+   "branch": "0[0]",
+   "location": {
+    "start": {
+     "line": 73,
+     "column": 131
+    },
+    "end": {
+     "line": 73,
+     "column": 168
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratorextractor.ts",
+   "line": 80,
+   "type": "cond-expr",
+   "branch": "1[1]",
+   "location": {
+    "start": {
+     "line": 80,
+     "column": 90
+    },
+    "end": {
+     "line": 80,
+     "column": 127
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratorextractor.ts",
+   "line": 172,
+   "type": "if",
+   "branch": "14[1]",
+   "location": {
+    "start": {
+     "line": 172,
+     "column": 16
+    },
+    "end": {
+     "line": 174,
+     "column": 17
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratorextractor.ts",
+   "line": 336,
+   "type": "if",
+   "branch": "48[0]",
+   "location": {
+    "start": {
+     "line": 336,
+     "column": 16
+    },
+    "end": {
+     "line": 338,
+     "column": 17
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratorextractor.ts",
+   "line": 425,
+   "type": "if",
+   "branch": "61[1]",
+   "location": {
+    "start": {
+     "line": 425,
+     "column": 8
+    },
+    "end": {
+     "line": 434,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratorextractor.ts",
+   "line": 435,
+   "type": "if",
+   "branch": "63[1]",
+   "location": {
+    "start": {
+     "line": 435,
+     "column": 8
+    },
+    "end": {
+     "line": 444,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratorextractor.ts",
+   "line": 509,
+   "type": "binary-expr",
+   "branch": "70[1]",
+   "location": {
+    "start": {
+     "line": 509,
+     "column": 46
+    },
+    "end": {
+     "line": 509,
+     "column": 47
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratormanager.ts",
+   "line": 211,
+   "type": "if",
+   "branch": "1[1]",
+   "location": {
+    "start": {
+     "line": 211,
+     "column": 8
+    },
+    "end": {
+     "line": 223,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratormanager.ts",
+   "line": 316,
+   "type": "cond-expr",
+   "branch": "9[1]",
+   "location": {
+    "start": {
+     "line": 316,
+     "column": 96
+    },
+    "end": {
+     "line": 316,
+     "column": 117
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratormanager.ts",
+   "line": 409,
+   "type": "cond-expr",
+   "branch": "21[0]",
+   "location": {
+    "start": {
+     "line": 409,
+     "column": 57
+    },
+    "end": {
+     "line": 409,
+     "column": 84
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratormanager.ts",
+   "line": 415,
+   "type": "cond-expr",
+   "branch": "23[1]",
+   "location": {
+    "start": {
+     "line": 415,
+     "column": 73
+    },
+    "end": {
+     "line": 415,
+     "column": 98
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratormanager.ts",
+   "line": 427,
+   "type": "cond-expr",
+   "branch": "25[1]",
+   "location": {
+    "start": {
+     "line": 427,
+     "column": 82
+    },
+    "end": {
+     "line": 427,
+     "column": 95
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/decoratormanager.ts",
+   "line": 738,
+   "type": "if",
+   "branch": "59[1]",
+   "location": {
+    "start": {
+     "line": 738,
+     "column": 12
+    },
+    "end": {
+     "line": 740,
+     "column": 13
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/factory.ts",
+   "line": 122,
+   "type": "if",
+   "branch": "8[1]",
+   "location": {
+    "start": {
+     "line": 122,
+     "column": 12
+    },
+    "end": {
+     "line": 131,
+     "column": 13
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/classdeclaration.ts",
+   "line": 170,
+   "type": "if",
+   "branch": "14[0]",
+   "location": {
+    "start": {
+     "line": 170,
+     "column": 8
+    },
+    "end": {
+     "line": 172,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/classdeclaration.ts",
+   "line": 252,
+   "type": "if",
+   "branch": "28[1]",
+   "location": {
+    "start": {
+     "line": 252,
+     "column": 16
+    },
+    "end": {
+     "line": 267,
+     "column": 17
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/classdeclaration.ts",
+   "line": 445,
+   "type": "if",
+   "branch": "45[1]",
+   "location": {
+    "start": {
+     "line": 445,
+     "column": 12
+    },
+    "end": {
+     "line": 449,
+     "column": 13
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/classdeclaration.ts",
+   "line": 482,
+   "type": "if",
+   "branch": "48[1]",
+   "location": {
+    "start": {
+     "line": 482,
+     "column": 12
+    },
+    "end": {
+     "line": 486,
+     "column": 13
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/classdeclaration.ts",
+   "line": 610,
+   "type": "if",
+   "branch": "61[1]",
+   "location": {
+    "start": {
+     "line": 610,
+     "column": 8
+    },
+    "end": {
+     "line": 612,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/declaration.ts",
+   "line": 104,
+   "type": "if",
+   "branch": "4[0]",
+   "location": {
+    "start": {
+     "line": 104,
+     "column": 8
+    },
+    "end": {
+     "line": 106,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/declaration.ts",
+   "line": 114,
+   "type": "binary-expr",
+   "branch": "8[1]",
+   "location": {
+    "start": {
+     "line": 114,
+     "column": 15
+    },
+    "end": {
+     "line": 114,
+     "column": 37
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/declaration.ts",
+   "line": 115,
+   "type": "binary-expr",
+   "branch": "8[2]",
+   "location": {
+    "start": {
+     "line": 115,
+     "column": 15
+    },
+    "end": {
+     "line": 115,
+     "column": 43
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/declaration.ts",
+   "line": 116,
+   "type": "binary-expr",
+   "branch": "8[3]",
+   "location": {
+    "start": {
+     "line": 116,
+     "column": 15
+    },
+    "end": {
+     "line": 116,
+     "column": 43
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/declaration.ts",
+   "line": 117,
+   "type": "binary-expr",
+   "branch": "8[4]",
+   "location": {
+    "start": {
+     "line": 117,
+     "column": 15
+    },
+    "end": {
+     "line": 117,
+     "column": 37
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/decorator.ts",
+   "line": 73,
+   "type": "if",
+   "branch": "0[1]",
+   "location": {
+    "start": {
+     "line": 73,
+     "column": 8
+    },
+    "end": {
+     "line": 75,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/decorator.ts",
+   "line": 110,
+   "type": "if",
+   "branch": "2[1]",
+   "location": {
+    "start": {
+     "line": 110,
+     "column": 16
+    },
+    "end": {
+     "line": 120,
+     "column": 17
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/field.ts",
+   "line": 194,
+   "type": "switch",
+   "branch": "8[6]",
+   "location": {
+    "start": {
+     "line": 194,
+     "column": 8
+    },
+    "end": {
+     "line": 195,
+     "column": 75
+    }
+   },
+   "covered_by_suite": true,
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getScalarField()'s `Unrecognized scalar type` default. ModelFile only builds a ScalarDeclaration for the six scalar $classes (modelfile.ts, the switch in fromAst), so a real scalar field always matches a case. The unit suite forces it with sinon.createStubInstance(ScalarDeclaration) given a hand-made ast.$class FooScalar (test/introspect/scalars.js 'should throw for unknown scalar type'). "
+  },
+  {
+   "file": "src/introspect/modelfile.ts",
+   "line": 474,
+   "type": "if",
+   "branch": "28[0]",
+   "location": {
+    "start": {
+     "line": 474,
+     "column": 8
+    },
+    "end": {
+     "line": 476,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/modelfile.ts",
+   "line": 909,
+   "type": "if",
+   "branch": "63[1]",
+   "location": {
+    "start": {
+     "line": 909,
+     "column": 8
+    },
+    "end": {
+     "line": 949,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/modelfile.ts",
+   "line": 929,
+   "type": "if",
+   "branch": "69[1]",
+   "location": {
+    "start": {
+     "line": 929,
+     "column": 16
+    },
+    "end": {
+     "line": 945,
+     "column": 17
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/introspect/property.ts",
+   "line": 209,
+   "type": "if",
+   "branch": "14[0]",
+   "location": {
+    "start": {
+     "line": 209,
+     "column": 8
+    },
+    "end": {
+     "line": 211,
+     "column": 9
+    }
+   },
+   "covered_by_suite": true,
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "Property.getFullyQualifiedTypeName() on a property with no parent. Every Property the public API returns is built by its ClassDeclaration, which always sets the parent. The unit suite forces it with sinon.stub(field, 'getParent') (test/introspect/property_ex.js '#getFullyQualifiedTypeName'). "
+  },
+  {
+   "file": "src/introspect/property.ts",
+   "line": 213,
+   "type": "if",
+   "branch": "15[0]",
+   "location": {
+    "start": {
+     "line": 213,
+     "column": 8
+    },
+    "end": {
+     "line": 215,
+     "column": 9
+    }
+   },
+   "covered_by_suite": true,
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "Property.getFullyQualifiedTypeName() on a property whose parent has no ModelFile. A declaration built by ModelFile always has its model file. The unit suite forces it with sinon.stub(person, 'getModelFile') (test/introspect/property_ex.js). "
+  },
+  {
+   "file": "src/introspect/relationshipdeclaration.ts",
+   "line": 79,
+   "type": "if",
+   "branch": "3[0]",
+   "location": {
+    "start": {
+     "line": 79,
+     "column": 12
+    },
+    "end": {
+     "line": 81,
+     "column": 13
+    }
+   },
+   "covered_by_suite": true,
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "RelationshipDeclaration.validate()'s `points to a missing type` throw. With real objects Property.validate() (called first) already rejects a missing type (`Type ... is not defined`, `No type ... in namespace`, checked against src with a relationship to a missing local, imported and unregistered type), and the other-namespace lookup throws rather than returning null. The unit suite reaches it by replacing modelManager.getType with a function returning null (test/introspect/relationshipdeclaration.js). "
+  },
+  {
+   "file": "src/model/resourceid.ts",
+   "line": 42,
+   "type": "binary-expr",
+   "branch": "1[1]",
+   "location": {
+    "start": {
+     "line": 42,
+     "column": 47
+    },
+    "end": {
+     "line": 42,
+     "column": 51
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/model/resourceid.ts",
+   "line": 58,
+   "type": "if",
+   "branch": "5[1]",
+   "location": {
+    "start": {
+     "line": 58,
+     "column": 12
+    },
+    "end": {
+     "line": 61,
+     "column": 13
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/model/resourceid.ts",
+   "line": 69,
+   "type": "cond-expr",
+   "branch": "7[1]",
+   "location": {
+    "start": {
+     "line": 69,
+     "column": 69
+    },
+    "end": {
+     "line": 69,
+     "column": 70
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/model/resourceid.ts",
+   "line": 70,
+   "type": "cond-expr",
+   "branch": "8[1]",
+   "location": {
+    "start": {
+     "line": 70,
+     "column": 52
+    },
+    "end": {
+     "line": 70,
+     "column": 54
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/model/resourceid.ts",
+   "line": 87,
+   "type": "if",
+   "branch": "12[1]",
+   "location": {
+    "start": {
+     "line": 87,
+     "column": 12
+    },
+    "end": {
+     "line": 92,
+     "column": 13
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/modelmanager.ts",
+   "line": 29,
+   "type": "default-arg",
+   "branch": "0[0]",
+   "location": {
+    "start": {
+     "line": 29,
+     "column": 55
+    },
+    "end": {
+     "line": 29,
+     "column": 57
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/serializer/instancegenerator.ts",
+   "line": 119,
+   "type": "if",
+   "branch": "13[0]",
+   "location": {
+    "start": {
+     "line": 119,
+     "column": 8
+    },
+    "end": {
+     "line": 121,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/serializer/jsonpopulator.ts",
+   "line": 129,
+   "type": "cond-expr",
+   "branch": "7[1]",
+   "location": {
+    "start": {
+     "line": 129,
+     "column": 108
+    },
+    "end": {
+     "line": 129,
+     "column": 112
+    }
+   },
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "JSONPopulator's constructor defaulting strictQualifiedDateTimes when it is undefined. Its only call site, Serializer.fromJSON (serializer.ts:196), always passes a boolean (`options.strictQualifiedDateTimes === true`), so only a direct `new JSONPopulator(...)` reaches it, as test/serializer/jsonpopulator.js does. "
+  },
+  {
+   "file": "src/serializer/jsonpopulator.ts",
+   "line": 131,
+   "type": "if",
+   "branch": "8[1]",
+   "location": {
+    "start": {
+     "line": 131,
+     "column": 8
+    },
+    "end": {
+     "line": 133,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/serializer/jsonpopulator.ts",
+   "line": 171,
+   "type": "binary-expr",
+   "branch": "15[1]",
+   "location": {
+    "start": {
+     "line": 171,
+     "column": 28
+    },
+    "end": {
+     "line": 171,
+     "column": 65
+    }
+   },
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (parameters.path = new TypedStack('$'))` in visitClassDeclaration. Serializer.fromJSON enters through accept() -> visit(), which seeds parameters.path first (jsonpopulator.ts:144), so the path is always set here; only calling visitClassDeclaration directly without a path reaches it (test/serializer/jsonpopulator.js). Listed not-liftable by P2-10 (root object path injection) in lifted/MAP.tsv."
+  },
+  {
+   "file": "src/serializer/jsonpopulator.ts",
+   "line": 178,
+   "type": "if",
+   "branch": "16[1]",
+   "location": {
+    "start": {
+     "line": 178,
+     "column": 12
+    },
+    "end": {
+     "line": 186,
+     "column": 13
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/serializer/jsonpopulator.ts",
+   "line": 200,
+   "type": "binary-expr",
+   "branch": "17[1]",
+   "location": {
+    "start": {
+     "line": 200,
+     "column": 28
+    },
+    "end": {
+     "line": 200,
+     "column": 65
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/serializer/jsonpopulator.ts",
+   "line": 281,
+   "type": "binary-expr",
+   "branch": "24[1]",
+   "location": {
+    "start": {
+     "line": 281,
+     "column": 28
+    },
+    "end": {
+     "line": 281,
+     "column": 65
+    }
+   },
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in visitField: as line 171, visit() has always seeded the path; only a direct visitField call without one reaches it. Listed not-liftable by P2-10 in lifted/MAP.tsv."
+  },
+  {
+   "file": "src/serializer/jsonpopulator.ts",
+   "line": 363,
+   "type": "binary-expr",
+   "branch": "32[1]",
+   "location": {
+    "start": {
+     "line": 363,
+     "column": 28
+    },
+    "end": {
+     "line": 363,
+     "column": 65
+    }
+   },
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in convertToObject: reached from visitField after visit() has seeded the path; only a direct call without one reaches it."
+  },
+  {
+   "file": "src/serializer/jsonpopulator.ts",
+   "line": 374,
+   "type": "if",
+   "branch": "38[1]",
+   "location": {
+    "start": {
+     "line": 374,
+     "column": 19
+    },
+    "end": {
+     "line": 380,
+     "column": 13
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/serializer/jsonpopulator.ts",
+   "line": 439,
+   "type": "binary-expr",
+   "branch": "47[1]",
+   "location": {
+    "start": {
+     "line": 439,
+     "column": 28
+    },
+    "end": {
+     "line": 439,
+     "column": 65
+    }
+   },
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in visitRelationshipDeclaration: as line 171, only a direct call without a seeded path reaches it."
+  },
+  {
+   "file": "src/serializer/resourcevalidator.ts",
+   "line": 214,
+   "type": "if",
+   "branch": "19[1]",
+   "location": {
+    "start": {
+     "line": 214,
+     "column": 8
+    },
+    "end": {
+     "line": 216,
+     "column": 9
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/serializer/resourcevalidator.ts",
+   "line": 278,
+   "type": "if",
+   "branch": "31[0]",
+   "location": {
+    "start": {
+     "line": 278,
+     "column": 20
+    },
+    "end": {
+     "line": 281,
+     "column": 21
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/serializer/resourcevalidator.ts",
+   "line": 278,
+   "type": "binary-expr",
+   "branch": "32[1]",
+   "location": {
+    "start": {
+     "line": 278,
+     "column": 64
+    },
+    "end": {
+     "line": 278,
+     "column": 101
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/serializer/resourcevalidator.ts",
+   "line": 283,
+   "type": "if",
+   "branch": "33[0]",
+   "location": {
+    "start": {
+     "line": 283,
+     "column": 20
+    },
+    "end": {
+     "line": 285,
+     "column": 21
+    }
+   },
+   "covered_by_suite": false
+  },
+  {
+   "file": "src/serializer/valuegenerator.ts",
+   "line": 80,
+   "type": "if",
+   "branch": "3[0]",
+   "location": {
+    "start": {
+     "line": 80,
+     "column": 4
+    },
+    "end": {
+     "line": 83,
+     "column": 5
+    }
+   },
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getRange()'s swap when max < min. Its callers pass validator bounds, and model validation already rejects inverted bounds: NumberValidator's constructor throws when lower > upper and StringValidator's when minLength > maxLength (so no model with them can be loaded; see the inverted-bound fixtures earlier in drivers/gaps.spec.js). Only a direct getRange(1.0, 0.0, 'Double') reaches it (test/serializer/valuegenerator.js 'should reverse arguments'). "
+  },
+  {
+   "file": "src/serializer/valuegenerator.ts",
+   "line": 102,
+   "type": "switch",
+   "branch": "5[3]",
+   "location": {
+    "start": {
+     "line": 102,
+     "column": 4
+    },
+    "end": {
+     "line": 103,
+     "column": 17
+    }
+   },
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getRange()'s default case for a type other than Long, Integer or Double. InstanceGenerator calls it only for those three types and generateString only with 'Integer'; only a direct call on the value generator reaches it (test/serializer/valuegenerator.js). "
+  },
+  {
+   "file": "src/serializer/valuegenerator.ts",
+   "line": 171,
+   "type": "if",
+   "branch": "14[0]",
+   "location": {
+    "start": {
+     "line": 171,
+     "column": 4
+    },
+    "end": {
+     "line": 173,
+     "column": 5
+    }
+   },
+   "covered_by_suite": true,
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getRegexString()'s `if (!regex) return ''`. Both callers (instancegenerator.ts:145 and :172) check `validator.regex` before calling getRegex, so only a direct getRegex(undefined) on the value generator reaches it (test/serializer/valuegenerator.js). "
+  }
+ ]
+}

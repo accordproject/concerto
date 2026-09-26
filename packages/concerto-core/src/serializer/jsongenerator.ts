@@ -17,6 +17,26 @@ import Typed from '../model/typed';
 import ModelUtil from '../modelutil';
 import { NullUtil as Util } from '@accordproject/concerto-util';
 
+// CONCERTO_ENGINE=rust (task P4-10, accordproject/concerto-rust#69): see
+// jsonpopulator.ts's identical preamble. `convertToJSON`'s per-field
+// coercion delegates to the engine, one field at a time; the visitor
+// shell stays here.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+// P5-06: memoised per specifier, so a call site on a per-element or
+// per-instance path (propertyProcess, fastFromJson, ...) resolves the module
+// once rather than on every call.
+/* istanbul ignore next */
+const engineModules: { [specifier: string]: any } = {};
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => any } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 /**
  * Converts the contents of a Resource to JSON. The parameters
  * object should contain the keys
@@ -224,6 +244,35 @@ class JSONGenerator {
      * @return {Object} the text JSON safe representation
      */
     convertToJSON(field, obj) {
+        // P4-10: delegated to the engine (module preamble). No declaration
+        // lookup is needed, so this is safe for a field built by a test
+        // stub too. A value the wire codec cannot express falls through to
+        // the TS switch below, exactly as the whole-document fast path
+        // falls back on the same `EngineFastPathUnsupported`. Every arm but
+        // DateTime returns `obj` itself, so the view does too once the
+        // engine has accepted it (identity, as in TS).
+        /* istanbul ignore if */
+        if (rust) {
+            try {
+                const codec = loadEngine('../engine/serializer-codec');
+                codec.checkString(String(field.getType()));
+                const options = { utcOffset: this.utcOffset };
+                const resultText = rust.generatorConvertPrimitive(
+                    field.getType(),
+                    JSON.stringify(codec.encodeValue(obj)),
+                    JSON.stringify(codec.encodeValue(options)),
+                );
+                if (field.getType() !== 'DateTime') {
+                    return obj;
+                }
+                return codec.decodeValue(JSON.parse(resultText), undefined as any);
+            } catch (err) {
+                if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+                    throw err;
+                }
+            }
+        }
+
         switch (field.getType()) {
         case 'DateTime':
         {

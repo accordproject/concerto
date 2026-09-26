@@ -1,0 +1,47 @@
+name: migration-guardrails
+
+# P0-02(B): guards the Rust migration's invariants on every PR — see
+# RUST_MIGRATION_PLAN.md §2.1 and §4 (task P0-02). Fails the build if a PR:
+#   - touches packages/concerto-core/test/**
+#   - changes the `nyc` coverage-threshold block in
+#     packages/concerto-core/package.json
+#   - changes the exported symbol list of packages/concerto-core/src/index.ts
+#   - drifts from the committed concerto-core API (.d.ts) snapshot under
+#     migration/api-snapshot/
+#
+# This is intentionally separate from the package's own CI so it keeps
+# working (and stays easy to find) regardless of how that pipeline evolves
+# during the migration.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check-guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # check-guardrails.mjs diffs against origin/${{ github.base_ref }},
+          # so history back to the merge base must be present.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install workspace dependencies
+        run: npm ci
+
+      # concerto-core's .d.ts build (API snapshot rule) imports the other
+      # workspace packages, so they must be built first, as build.yml does.
+      - name: Build workspace packages
+        run: npm run build
+
+      - name: Run migration guardrails
+        run: |
+          node migration/bin/check-guardrails.mjs --base-ref "origin/${{ github.base_ref }}"

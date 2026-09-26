@@ -1,0 +1,52 @@
+
+> @accordproject/concerto-vocabulary@5.0.0 prebuild
+> npm-run-all clean
+
+
+> @accordproject/concerto-vocabulary@5.0.0 clean
+> rimraf dist
+
+
+> @accordproject/concerto-vocabulary@5.0.0 build
+> tsc -p tsconfig.build.json && npm run build:esm
+
+
+> @accordproject/concerto-vocabulary@5.0.0 build:esm
+> node ../../scripts/build-esm.js
+
+
+  dist/esm/chunk-3VH3UOGB.mjs         16.3kb
+  dist/esm/chunk-7RW3VXN4.mjs          6.2kb
+  dist/esm/chunk-TA74NV57.mjs          1.0kb
+  dist/esm/index.mjs                   401b 
+  dist/esm/vocabularymanager.mjs       379b 
+  dist/esm/vocabulary.mjs              282b 
+  dist/esm/yamlparser.mjs              245b 
+  dist/esm/chunk-3VH3UOGB.mjs.map     27.6kb
+  dist/esm/chunk-7RW3VXN4.mjs.map     11.8kb
+  dist/esm/chunk-TA74NV57.mjs.map      2.9kb
+  dist/esm/index.mjs.map                93b 
+  dist/esm/vocabulary.mjs.map           93b 
+  dist/esm/vocabularymanager.mjs.map    93b 
+  dist/esm/yamlparser.mjs.map           93b 
+
+⚡ Done in 8ms
+
+  dist/esm-browser/chunk-DSN2E4MW.mjs         208.2kb
+  dist/esm-browser/chunk-2FE6COGH.mjs          75.6kb
+  dist/esm-browser/chunk-CKXQ5OWJ.mjs           6.2kb
+  dist/esm-browser/chunk-K2X7J5YP.mjs           2.4kb
+  dist/esm-browser/index.mjs                    406b 
+  dist/esm-browser/vocabularymanager.mjs        301b 
+  dist/esm-browser/vocabulary.mjs               204b 
+  dist/esm-browser/yamlparser.mjs               167b 
+  dist/esm-browser/chunk-DSN2E4MW.mjs.map     430.1kb
+  dist/esm-browser/chunk-2FE6COGH.mjs.map     116.1kb
+  dist/esm-browser/chunk-CKXQ5OWJ.mjs.map      11.8kb
+  dist/esm-browser/chunk-K2X7J5YP.mjs.map       2.6kb
+  dist/esm-browser/index.mjs.map                857b 
+  dist/esm-browser/vocabulary.mjs.map            93b 
+  dist/esm-browser/vocabularymanager.mjs.map     93b 
+  dist/esm-browser/yamlparser.mjs.map            93b 
+
+⚡ Done in 47ms

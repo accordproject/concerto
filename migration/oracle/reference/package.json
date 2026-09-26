@@ -1,0 +1,12 @@
+{
+  "name": "concerto-oracle-reference",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Frozen behavioural reference for the oracle (plan D10): the published concerto-core 5.0.0 from npm, never the workspace build.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@accordproject/concerto-core": "5.0.0",
+    "@accordproject/concerto-cto": "5.0.0",
+    "@accordproject/concerto-util": "5.0.0"
+  }
+}

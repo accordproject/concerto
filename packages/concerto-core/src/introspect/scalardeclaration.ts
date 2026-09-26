@@ -27,6 +27,51 @@ import type Validator from './validator';
 import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// Its bindings are typed `never` so that a view leaves the member's inferred
+// return type, and so the .d.ts, exactly as the TS body makes it.
+//
+// dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
+// with no .d.ts, since it is not public API (tsconfig.build.internal.json;
+// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
+// must never see a specifier it would resolve: `loadEngine` takes a
+// non-literal one (esbuild, rollup and browserify leave it alone) and never
+// names the bare `require` (esbuild's ESM output would add its `__require`
+// shim, which webpack reports as a critical dependency), and webpack folds
+// the `typeof __webpack_require__` test and keeps only the dead-in-Node
+// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
+// bundles exactly as before (PORTING.md 1.5).
+//
+// rust mode through the public ESM entry points (P4-11a, PORTING.md 1.5):
+// - Node ESM (dist/esm/index.mjs) works unaided. scripts/build-esm.js's Node
+//   banner sets a `globalThis.module` whose `require` resolves the engine
+//   specifiers. It does not rely on the relative specifier above matching
+//   the output file's location (esbuild hoists shared views into chunks at
+//   the outdir root, where `../engine` would point outside dist/). Instead
+//   it rewrites `./engine`, `../engine` and `../engine/<subpath>` to the
+//   engine directory it finds at runtime from the file's own import.meta.url.
+// - The browser (dist/esm-browser/index.mjs) needs a bundler, or a host that
+//   supplies a synchronous `require`. This call is synchronous and a browser
+//   cannot load an ES module synchronously, so the browser ESM graph does not
+//   load dist/esm-browser/engine/*.mjs by itself. scripts/browser-module-shim.js
+//   reads `module.require` from the `globalThis.module` that the bundler or
+//   host provides, and throws if there is none.
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+// P5-06: memoised per specifier, so a call site on a per-element or
+// per-instance path (propertyProcess, fastFromJson, ...) resolves the module
+// once rather than on every call.
+/* istanbul ignore next */
+const engineModules: { [specifier: string]: any } = {};
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 /**
  * ScalarDeclaration defines the structure (model/schema) of composite data.
  * It is composed of a set of Properties, may have an identifying field, and may
@@ -60,6 +105,12 @@ class ScalarDeclaration extends Declaration {
      */
     process() {
         super.process();
+
+        /* istanbul ignore if */
+        if (rust) {
+            loadEngine('../engine/views').scalarDeclarationProcess(this);
+            return;
+        }
 
         const scalarName = this.getName(); // Get the local name of the scalar
         if (ModelUtil.isPrimitiveType(scalarName)) {
@@ -124,6 +175,12 @@ class ScalarDeclaration extends Declaration {
      */
     validate() {
         super.validate();
+
+        /* istanbul ignore if */
+        if (rust) {
+            rust.scalarDeclarationValidate(this);
+            return;
+        }
 
         const declarations = this.getModelFile().getAllDeclarations();
         const declarationNames = declarations.map(
@@ -219,6 +276,10 @@ class ScalarDeclaration extends Declaration {
      * @return {String} the string representation of the class
      */
     toString(): string {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.scalarDeclarationToString(this);
+        }
         return 'ScalarDeclaration {id=' + this.getFullyQualifiedName() + '}';
     }
 
