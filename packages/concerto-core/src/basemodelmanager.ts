@@ -171,6 +171,30 @@ class BaseModelManager {
 
         if(options?.addMetamodel) {
             this.addModelFile(this.metamodelModelFile);
+            // P4-08 (accordproject/concerto-rust#67): `_rustMirrorEligible`
+            // excludes `MetaModelNamespace` on the assumption that
+            // rustHandle's own constructor already preloads it the way it
+            // preloads the decorator/root system models (`EXCLUDE_NS`) --
+            // it does not (concerto-wasm's `ModelManagerHandle::new`/
+            // `ModelManager::new` load only `concerto@1.0.0` and
+            // `concerto.decorator@1.0.0`). Since `ModelFile.validate()` now
+            // delegates fully to Rust (maintainer decision, 2026-09-26), a
+            // model that imports from `concerto.metamodel@1.0.0` (e.g.
+            // `DecoratorManager`'s own `DCS_MODEL`, via a manager built with
+            // `addMetamodel: true`) needs rustHandle's own manager to
+            // resolve that namespace too, not just `this.modelFiles`.
+            // Mirror it explicitly here, guarded against the case where
+            // `validateAst`'s own leak-tracking (above) already registered
+            // it in rustHandle.
+            /* istanbul ignore if */
+            if (rust && this.rustHandle && this.rustHandle.modelFileId(MetaModelNamespace) === undefined) {
+                this._mirrorToRust(() => this.rustHandle!.addModelWithDefinitions(
+                    JSON.stringify(this.metamodelModelFile.getAst()),
+                    this.metamodelModelFile.getDefinitions() ?? undefined,
+                    this.metamodelModelFile.getName() ?? undefined,
+                    false,
+                ));
+            }
         }
     }
 
