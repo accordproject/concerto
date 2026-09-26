@@ -26,6 +26,7 @@ import { BaseException } from '@accordproject/concerto-util';
 import IllegalModelException from '../introspect/illegalmodelexception';
 import TypeNotFoundException from '../typenotfoundexception';
 import ValidationException from '../serializer/validationexception';
+import MetamodelException from '../metamodelexception';
 
 /**
  * The error payload the engine hands to the factory.
@@ -60,6 +61,9 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     // P2-08b): a JS `RangeError(message)`, the same relationship JsTypeError
     // above has to TypeError.
     JsRangeError: (p) => new RangeError(p.message),
+    // `MetamodelException(message)` (P4-08b): thrown by
+    // `BaseModelManager.validateAst`.
+    Metamodel: (p) => new MetamodelException(p.message),
 };
 
 /**
