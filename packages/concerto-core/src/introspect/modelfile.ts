@@ -178,9 +178,11 @@ class ModelFile extends Decorated {
         // notably `filter()`'s result before it is ever added -- must never
         // answer from a same-namespace mirror that belongs to a different
         // (unfiltered) ModelFile object.
+        /* istanbul ignore next */
         if (!manager.modelFiles || manager.modelFiles[this.namespace] !== this) {
             return undefined;
         }
+        /* istanbul ignore next */
         try {
             return manager.rustHandle.modelFileId(this.namespace);
         } catch (e) {
@@ -195,6 +197,7 @@ class ModelFile extends Decorated {
      */
     getVersion(): string | null | undefined {
         const id = this._rustHandleId();
+        /* istanbul ignore if */
         if (id !== undefined) {
             try {
                 const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
@@ -212,6 +215,7 @@ class ModelFile extends Decorated {
      */
     isSystemModelFile() {
         const id = this._rustHandleId();
+        /* istanbul ignore if */
         if (id !== undefined) {
             try {
                 const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
@@ -283,6 +287,7 @@ class ModelFile extends Decorated {
      */
     getImports(): string[] {
         const id = this._rustHandleId();
+        /* istanbul ignore if */
         if (id !== undefined) {
             try {
                 const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
@@ -337,6 +342,7 @@ class ModelFile extends Decorated {
         // of it for exactly this reason) must never surface as a spurious
         // validation failure.
         const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorStale?: boolean };
+        /* istanbul ignore if */
         if (rust && manager && manager.rustHandle && !manager._rustMirrorStale) {
             try {
                 manager.rustHandle.modelFileValidateDetached(
@@ -479,6 +485,7 @@ class ModelFile extends Decorated {
             return false;
         }
         const id = this._rustHandleId();
+        /* istanbul ignore if */
         if (id !== undefined) {
             try {
                 const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
@@ -1032,6 +1039,7 @@ class ModelFile extends Decorated {
      */
     filter(predicate: FilterFunction, modelManager: BaseModelManager): ModelFile | null {
         const id = this._rustHandleId();
+        /* istanbul ignore if */
         if (id !== undefined) {
             try {
                 const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };

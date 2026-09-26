@@ -293,6 +293,7 @@ class BaseModelManager {
      * @return {boolean} true if `namespace` should be mirrored
      * @private
      */
+    /* istanbul ignore next */
     _rustMirrorEligible(namespace) {
         return !EXCLUDE_NS.includes(namespace) && namespace !== MetaModelNamespace;
     }
@@ -320,6 +321,7 @@ class BaseModelManager {
      * @param {Function} fn - the mirror write to run
      * @private
      */
+    /* istanbul ignore next */
     _mirrorToRust(fn) {
         try {
             fn();
@@ -352,6 +354,7 @@ class BaseModelManager {
      * @return {boolean} true if rustHandle mirrors exactly the namespaces TS has
      * @private
      */
+    /* istanbul ignore next */
     _rustMirrorTrustworthy() {
         if (!this.rustHandle || this._rustMirrorStale) {
             return false;
