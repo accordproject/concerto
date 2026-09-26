@@ -145,13 +145,26 @@ class BaseModelManager {
         this.options = options;
         this.rustHandle = null;
         this._rustMirrorStale = false;
+        this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
         /* istanbul ignore if */
         if (rust) {
             this.rustHandle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
+            // P4-08 (accordproject/concerto-rust#67, maintainer decision
+            // 2026-09-26): propagate both TS validation options rustHandle's
+            // own validation was previously blind to (P4-08e/#189 added the
+            // decorator-validation binding; the reserved-system-type-names
+            // one already existed) *before* addDecoratorModel/addRootModel
+            // below mirror anything into it, so `ModelFile.validate()`'s
+            // Rust delegation (introspect/modelfile.ts) and rustHandle's own
+            // add/validate paths see the same options TS's own validate()
+            // body reads from `this.options`/`this.decoratorValidation`.
+            this.rustHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels(
+                !!options?.dangerouslyAllowReservedSystemTypeNamesInUserModels
+            );
+            this.rustHandle.setDecoratorValidation(this.decoratorValidation);
         }
         this.addDecoratorModel();
         this.addRootModel();
-        this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
 
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
         this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace);
@@ -377,65 +390,29 @@ class BaseModelManager {
 
                 // Semantic validation of the model file.
                 //
-                // P4-08 step 3 (accordproject/concerto-rust#67): tried
-                // again after P4-08a (#173) closed the 6 known
-                // silently-accepted-invalid-model gaps in
-                // `rustHandle.addModelWithDefinitions(..., validate: true)`.
-                // Replaying the wider test suite against that delegation
-                // (`test/introspect/decorators.js`, `decoratorValidation:
-                // {missingDecorator: 'error'}`) found a *new* class of
-                // silent accept: `rustHandle`'s validation does not know
-                // about `ModelManagerOptions` at all (the call passes only
-                // the AST, definitions and file name -- never `this.options`),
-                // so an option-gated check like the decorator
-                // undeclared-type-ref one TS's `modelFile.validate()` runs
-                // is skipped entirely in rust mode. That is a second,
-                // broader instance of exactly the "trusting rustHandle's
-                // success would silently let invalid models through" risk
-                // the P4-08 review already flagged once -- so validation
-                // stays fully in TS, as it was before this attempt; only
-                // the (already mirror-only, best-effort) write below talks
-                // to rustHandle. Revisit once rustHandle's validation is
-                // options-aware (a P2-09-tracked gap, not yet filed as its
-                // own task at the time of this comment).
+                // P4-08 steps 3-4 (accordproject/concerto-rust#67) tried
+                // replacing this call site's `modelFile.validate()` with a
+                // direct `rustHandle.addModelWithDefinitions(..., validate:
+                // true)`/`modelFileValidateDetached` call, and reverted both
+                // times: `rustHandle`'s validation didn't yet know about
+                // `ModelManagerOptions` (`decoratorValidation`,
+                // `dangerouslyAllowReservedSystemTypeNamesInUserModels`), and
+                // bypassing this call site entirely also skipped a
+                // `sinon.createStubInstance(ModelFile)` collaborator's
+                // stubbed `validate` outright, failing the several
+                // `test/modelmanager.js` cases that assert
+                // `sinon.assert.calledOnce(mf1.validate)`.
                 //
-                // P4-08 step 4 (accordproject/concerto-rust#67, review pass):
-                // tried gating delegation on `decoratorValidation` actually
-                // being at its default (both levels `undefined`, so TS's own
-                // option gate never fires either) -- confirmed by reading
-                // concerto-wasm/src/lib.rs that `ModelManagerHandle` has no
-                // `setDecoratorValidation`/equivalent binding at all, so
-                // Rust's manager (which *does* fully implement
-                // `decorator_validation`, concerto-core/src/model_manager.rs
-                // `set_decorator_validation`, `validation.rs`) never learns
-                // this manager's option regardless. But replaying the wider
-                // suite with that narrower gate active still regressed 7
-                // tests in `CONCERTO_ENGINE=rust` mode, for reasons beyond
-                // the decorator gap: (1) `dangerouslyAllowReservedSystemTypeNamesInUserModels`
-                // is equally unpassed to `rustHandle`, so a model that
-                // relies on it (test/introspect/modelfile.js's own case)
-                // disagrees the same way; (2) several `test/modelmanager.js`
-                // cases build a `sinon.createStubInstance(ModelFile)` whose
-                // `getAst()` returns a minimal stub object (no `namespace`)
-                // and assert `sinon.assert.calledOnce(mf1.validate)` --
-                // calling `rustHandle.modelFileValidateDetached` instead of
-                // `modelFile.validate()` both fails to parse that stub AST
-                // (`IllegalModelException: model missing 'namespace'`) and
-                // never invokes the stubbed `validate`, so the assertion
-                // fails too. `test/**` cannot be edited to accommodate this
-                // (project rule), and there is no existing "is this a real
-                // ModelFile or a white-box test double" detection to gate
-                // on (PORTING.md's context-trait fallback covers exactly
-                // this class of problem elsewhere, e.g. `_mirrorToRust`'s
-                // own doc, but nothing here yet distinguishes a stub from a
-                // real instance well enough to trust a `catch` and silently
-                // re-run the TS body -- a genuine validation failure and a
-                // stub confusing Rust are not distinguishable from the
-                // thrown error alone). Reverted; validation stays fully TS.
-                // Unblocking this needs, at minimum, a concerto-wasm binding
-                // for `decoratorValidation`/`dangerouslyAllowReservedSystemTypeNamesInUserModels`
-                // (out of this task's owned paths -- concerto-core only) and
-                // a designed stub-vs-real fallback for the W tests above.
+                // Maintainer decision (2026-09-26), once P4-08e (#189) added
+                // the missing `setDecoratorValidation` binding (the reserved-
+                // system-type-names one already existed): keep calling
+                // `modelFile.validate()` here unchanged -- a stub's spy still
+                // sees exactly one call, since sinon replaces `validate`
+                // wholesale for such an object -- and instead delegate fully
+                // to Rust *inside* `ModelFile.prototype.validate()` itself
+                // (introspect/modelfile.ts), which only a real instance ever
+                // runs. `BaseModelManager`'s constructor now propagates both
+                // options to `rustHandle` before this call can be reached.
                 modelFile.validate();
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
@@ -671,22 +648,23 @@ class BaseModelManager {
                 }
             }
 
-            // re-validate all the model files
-            if (!disableValidation) {
-                this.validateModelFiles();
-            }
-
             // Mirror the newly added files into rustHandle (P4-08,
-            // accordproject/concerto-rust#67): unlike addModelFile,
-            // addModelFile is never called here (this method adds every
-            // file to this.modelFiles directly, in whatever order the
-            // caller gave, precisely so cross-file dependency order does
-            // not matter -- see the method doc), so without this,
-            // rustHandle never learned about any namespace added through
-            // addModelFiles at all. TS has already validated (or was asked
-            // not to) above, so -- exactly as addModelFile's own mirror
-            // write does -- this only needs to keep rustHandle's state in
-            // sync, and never re-validates itself.
+            // accordproject/concerto-rust#67) *before* validating: unlike
+            // addModelFile, addModelFile is never called here (this method
+            // adds every file to this.modelFiles directly, in whatever order
+            // the caller gave, precisely so cross-file dependency order does
+            // not matter -- see the method doc), so without this, rustHandle
+            // never learned about any namespace added through addModelFiles
+            // at all. Since `ModelFile.validate()` (introspect/modelfile.ts)
+            // now delegates fully to Rust (maintainer decision, 2026-09-26)
+            // and a file in this batch may import from *another* file in the
+            // very same batch, every one of them must already be visible to
+            // rustHandle's own manager before validateModelFiles() below
+            // validates any of them, the same way this.modelFiles is already
+            // fully populated above first. `addModelWithDefinitions`'s own
+            // `validate` flag stays false: this is a structural mirror write
+            // only, and TS's own validateModelFiles() below is still what
+            // decides pass/fail.
             /* istanbul ignore if */
             if (rust && this.rustHandle) {
                 newModelFiles.forEach((m) => {
@@ -695,9 +673,15 @@ class BaseModelManager {
                             JSON.stringify(m.getAst()),
                             m.getDefinitions() ?? undefined,
                             m.getName() ?? undefined,
+                            false,
                         ));
                     }
                 });
+            }
+
+            // re-validate all the model files
+            if (!disableValidation) {
+                this.validateModelFiles();
             }
 
             // return the model files.
@@ -705,6 +689,22 @@ class BaseModelManager {
         } catch (err) {
             this.modelFiles = {};
             Object.assign(this.modelFiles, originalModelFiles);
+            // Undo any rustHandle mirroring this batch made, best-effort
+            // (P4-08): matches `_mirrorToRust`'s own "the mirror is never
+            // allowed to break the TS invariant" contract -- a
+            // partially-mirrored or now-invalid batch must not leave
+            // rustHandle out of sync with `this.modelFiles`, which the lines
+            // above already rolled back.
+            /* istanbul ignore if */
+            if (rust && this.rustHandle) {
+                newModelFiles.forEach((m) => {
+                    try {
+                        this.rustHandle!.deleteModelFile(m.getNamespace());
+                    } catch (e) {
+                        this._rustMirrorStale = true;
+                    }
+                });
+            }
             throw err;
         } finally {
             debug(NAME, newModelFiles);
@@ -715,12 +715,13 @@ class BaseModelManager {
      * Validates all models files in this model manager
      */
     validateModelFiles() {
-        // P4-08 step 3 (accordproject/concerto-rust#67): not delegated to
-        // rustHandle.modelFileValidate, for the same reason addModelFile's
-        // own semantic validation is not (see the comment there):
-        // rustHandle's validation is not aware of `ModelManagerOptions`
-        // (e.g. `decoratorValidation`), so trusting a rustHandle success
-        // here would silently skip option-gated TS checks in rust mode.
+        // P4-08 (accordproject/concerto-rust#67, maintainer decision
+        // 2026-09-26): this call site is unchanged -- each file's own
+        // `validate()` (introspect/modelfile.ts) now delegates fully to Rust
+        // for a real `ModelFile` in rust mode, since `rustHandle` is told
+        // about `ModelManagerOptions` (`decoratorValidation`,
+        // `dangerouslyAllowReservedSystemTypeNamesInUserModels`) by
+        // `BaseModelManager`'s constructor.
         for (let ns in this.modelFiles) {
             this.modelFiles[ns].validate();
         }

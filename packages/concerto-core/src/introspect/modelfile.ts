@@ -305,6 +305,54 @@ class ModelFile extends Decorated {
      * @protected
      */
     validate() {
+        // P4-08 (accordproject/concerto-rust#67, maintainer decision
+        // 2026-09-26): delegates fully to Rust in rust mode, unconditionally,
+        // now that P4-08a/b/e closed the gaps the earlier attempts (see the
+        // history in `BaseModelManager.addModelFile`) hit -- rustHandle's
+        // validation is now told about `decoratorValidation` and
+        // `dangerouslyAllowReservedSystemTypeNamesInUserModels`
+        // (`BaseModelManager`'s constructor), so it no longer silently skips
+        // an option-gated TS check the way step 4's narrower attempt still
+        // could.
+        //
+        // This is this real `ModelFile`'s own prototype method, so it is
+        // never what a white-box test's `sinon.createStubInstance(ModelFile)`
+        // collaborator runs: sinon replaces `validate` with its own stub
+        // function entirely for such an object, and `BaseModelManager`'s call
+        // sites (`addModelFile`/`addModelFiles`'s `validateModelFiles`) still
+        // call `modelFile.validate()` unchanged, so a stub's `validate` spy
+        // is invoked exactly as before. The collaborator fallback below (no
+        // `rustHandle`, e.g. ts mode, or a real-but-detached `ModelFile`
+        // built against a plain manager) is not a way to keep such a spy
+        // "working" for a real instance; a genuine validation failure throws
+        // the mapped `IllegalModelException` (src/engine/errors.ts) and
+        // propagates unchanged.
+        //
+        // A stale or partially mirrored rustHandle (`_rustMirrorStale`) still
+        // falls back to the TS body: unlike a read (whose worst case is
+        // answering slightly stale data), a false "namespace not found"
+        // triggered by rustHandle simply not having learned about a
+        // just-added sibling file yet (see `BaseModelManager.addModelFiles`,
+        // which mirrors the whole batch into rustHandle before validating any
+        // of it for exactly this reason) must never surface as a spurious
+        // validation failure.
+        const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorStale?: boolean };
+        if (rust && manager && manager.rustHandle && !manager._rustMirrorStale) {
+            try {
+                manager.rustHandle.modelFileValidateDetached(
+                    JSON.stringify(this.getAst()),
+                    this.getDefinitions() ?? undefined,
+                    this.getName() ?? undefined,
+                );
+                return;
+            } catch (e) {
+                if (e instanceof IllegalModelException) {
+                    throw e;
+                }
+                debug('validate', 'rustHandle.modelFileValidateDetached failed with a non-model error, falling back to the TS body', e);
+            }
+        }
+
         super.validate();
 
         // A dictionary of imports to versions to track unique namespaces
