@@ -2,12 +2,144 @@
 
 Plan: accordproject/concerto-rust#29 §2.5, §4 (Phase 5). Issue:
 accordproject/concerto-rust#76. Coordinator decision (#76 comment 5835650999): land
-P5-05 in two stages. **Stage 2** (the 1,000,000-case run, released early by the
-coordinator in #76 comment 5843986603) is reported first, below; **stage 1**'s
-report (the harness and the 60,000-case triage) follows it unchanged. No product code
-is changed by either.
+P5-05 in two stages. Stage 2 (the 1,000,000-case run, released early by the
+coordinator in #76 comment 5843986603) was run twice: once before P4-08 (#67) and
+P2-11b (#190) landed, and once after (comment 5846093489), to see whether either
+change resolved the T2 clusters the first run deferred as `pending-rerun`. **The
+stage-2 re-run is reported first, below**, then the superseded first stage-2 run,
+then **stage 1**'s report (the harness and the 60,000-case triage) unchanged. No
+product code is changed by any of the three.
 
-# Stage 2: the 1,000,000-case run
+# Stage 2 re-run: the second 1,000,000-case run
+
+## Run
+
+Same plan as the first stage-2 run (below): ten shards of 100,000 cases, run-seeds
+**1001-1010**, batch size 1000, 25 seeds per op, driven by `bin/run-shards.js`. Only
+the engines and the corpus's ledger/CTO-cache changed; the seed set is deliberately
+unchanged (the coordinator's instruction: "keep the stage-2 seed set unchanged so the
+runs stay comparable" — `lib/seeds.js` still draws only from `data/`, `conformance/`,
+`unit/`, `gaps/` and `lifted/`, not the new `fixtures/supplement/`).
+
+- **concerto:** `claude/tender-pascal-ocwf9q` at `051fa25a488a41db81d37aeceee6bb78b2cc1064`
+  (includes P4-08 and the P2-11b add-only `baseline.tsv` regeneration).
+- **concerto-rust:** `claude/tender-pascal-ocwf9q` at
+  `80581e8436f7163a67bbfb9b1ef5e67568bf5e0d` (includes P4-08, ModelFile/BaseModelManager
+  views), with `concerto-wasm` built fresh from it (`sh concerto-wasm/build.sh`, its own
+  target dir, wasm-bindgen 0.2.122; wasm-opt not on PATH, so unoptimised).
+- **Corpus:** the canonical `oracle-corpus-p107-06aa375` (16,704 files), with
+  `migration/ledger/` alongside and the CTO cache rebuilt. The P2-11b supplement
+  (`fixtures/supplement/`, 157 fixtures) is present on disk but not drawn from, per the
+  coordinator's instruction above.
+
+`results/stage2/commits.json` records the same details, plus the first run's commits
+under `rerunOf` for cross-reference.
+
+| shard | run-seed | ran | agree | divergences | expected (DV-015) | harness errors (ts / rust) |
+|---|---|---|---|---|---|---|
+| 1 | 1001 | 100,000 | 91,591 | 3,804 | 4,605 | 0 / 0 |
+| 2 | 1002 | 100,000 | 91,288 | 3,943 | 4,769 | 0 / 0 |
+| 3 | 1003 | 100,000 | 91,501 | 3,811 | 4,688 | 0 / 0 |
+| 4 | 1004 | 100,000 | 91,439 | 3,887 | 4,674 | 0 / 0 |
+| 5 | 1005 | 100,000 | 91,530 | 3,866 | 4,604 | 0 / 0 |
+| 6 | 1006 | 100,000 | 91,439 | 3,858 | 4,703 | 0 / 0 |
+| 7 | 1007 | 100,000 | 91,492 | 3,854 | 4,654 | 0 / 0 |
+| 8 | 1008 | 100,000 | 91,370 | 3,881 | 4,749 | 0 / 0 |
+| 9 | 1009 | 100,000 | 91,404 | 3,792 | 4,804 | 0 / 0 |
+| 10 | 1010 | 100,000 | 91,485 | 3,921 | 4,594 | 0 / 0 |
+| **total** | | **1,000,000** | **914,539** | **38,617** | **46,844** | **0 / 0** |
+
+| op | ran | agree | divergences | expected | harness errors (ts / rust) |
+|---|---|---|---|---|---|
+| ModelManager.fromAst | 321,562 | 297,434 | 24,128 | 0 | 0 / 0 |
+| ModelManager.addModelFile | 206,674 | 192,193 | 14,481 | 0 | 0 / 0 |
+| Serializer.fromJSON | 207,957 | 161,105 | 8 | 46,844 | 0 / 0 |
+| Resource.validate | 263,807 | 263,807 | 0 | 0 | 0 / 0 |
+
+These per-shard and per-op totals are, case for case, almost identical to the first
+stage-2 run's (38,617 vs 38,617 divergences; 46,844 vs 46,844 expected — see the
+totals table in the superseded section below). Neither P4-08 nor P2-11b measurably
+changed the TS/Rust divergence rate on this seed set.
+
+`results/stage2/{state.json,commits.json,run-summary.json,divergence-summary.json,
+triage-clusters.json}` are all overwritten in place with this run's output (the
+first run's numbers are quoted verbatim in the superseded section below, and in
+`commits.json`'s `rerunOf`, for history). `node bin/finalize-stage2.js --raw-dir
+<dir>` regenerates them from the raw shard outputs and a second run reproduces them
+byte for byte (checked).
+
+## Clusters
+
+The 38,617 unresolved divergences form **1,086 signature clusters** (11 more than the
+first run's 1,075 — the same theme, reaching slightly different message/path variants
+on the same seeds because the AST/glue code changed under P4-08). All 1,086 were
+minimised, 0 stale.
+
+`bin/attribute-owners.js --stage2` no longer treats P4-08 (#67) as in-flight — it has
+merged — so `PENDING_RERUN` is now empty. Every T2 cluster (`ModelManager.fromAst`/
+`addModelFile`) that was `pending-rerun` on #67 is re-attributed by outcome shape to
+one of three **new** issues filed from this re-run, since the clusters are unchanged
+by #67 and re-deferring them to a closed issue would be wrong:
+
+| status | clusters | cases | owner |
+|---|---|---|---|
+| `owned` (new issue) | 1,084 | 38,609 | see T2a/T2b/T2c below |
+| `documented` | 2 | 8 | DIVERGENCES.md **DV-009** (`engine`) |
+| `pending-rerun` | **0** | **0** | none — #67 and #190 have both landed |
+| `unresolved` | **0** | **0** | none, so no cluster lacks an owner or issue |
+
+### T2a: Rust rejects a mutated AST TS accepts — accordproject/concerto-rust#217, 69 clusters, 17,229 cases
+
+`ts=ok`, `rust=reject`. Unguarded field access in the AST/view glue
+(`this.name.toString is not a function`, `Cannot read properties of undefined/null
+(reading '…')`) and serde AST deserialisation stricter than TS's untyped walk
+(`invalid type: …`, `Invalid property name`). Nearly identical to the first stage-2
+run's same-shaped bucket (71 clusters, 17,237 cases) — #217's body has the top 5
+clusters and minimised reproducers.
+
+### T2b: Rust accepts a mutated AST TS rejects — accordproject/concerto-rust#218, 6 clusters, 287 cases
+
+`ts=reject`, `rust=ok`. The more concerning direction: Rust silently accepts a model
+TS's validation refuses (`Duplicate decorator`), plus a few where TS itself crashes on
+an unguarded field (arguably a TS bug, not a Rust permissiveness bug — #218's body
+flags this for the plan owner's judgement). Nearly identical to the first run's bucket
+(5 clusters, 193 cases).
+
+### T2c: both reject, class or message differs — accordproject/concerto-rust#219, 1,009 clusters, 21,093 cases
+
+Both engines correctly refuse the mutated AST, but with a different exception class
+and/or message text. This is new: the first stage-2 run left this bucket attributed to
+#67 alongside T2a (999 clusters, 21,187 cases in that run); it gets its own issue here
+because #67 (now closed) never covered it and lumping it with T2a would misstate which
+finding is which. Lowest severity of the three — neither engine loads the bad model —
+but some pairs (a domain exception on one side, an unguarded-access `TypeError` on the
+other) may share T2a's root cause; #219's body suggests triage order.
+
+### T1 and T3
+
+Unchanged from the first stage-2 run: T1a/T1b (DV-015, 46,844 expected cases), T1c
+(fixed, 0 cases), T1d (DV-009, 2 clusters/8 cases, unchanged), and `Resource.validate`
+(0 divergences in 263,807 cases). See the superseded section below for the detail;
+none of it is re-derived here since P4-08/P2-11b don't touch `Serializer.fromJSON` or
+`Resource.validate`.
+
+## Stage-2 re-run status against the exit condition
+
+The coordinator's exit condition for this re-run (#76 comment 5846093489) is **0
+unresolved, and every pending-rerun cluster resolved or given an owner or issue**.
+Both halves hold: `results/stage2/triage-clusters.json` has 0 `unresolved` and 0
+`pending-rerun` clusters; every one of the 1,073 clusters that was `pending-rerun` on
+#67 now carries an owner and a filed issue (#217, #218 or #219).
+
+**The issue's own exit condition — 1,000,000 cases with no unresolved divergence — is
+still not met.** Neither P4-08 nor P2-11b changed the T2 divergence rate, so 38,617
+cases across 1,086 clusters still diverge; they are now tracked (not deferred), not
+resolved. Per the coordinator's stage-2 rule, the report merges and the issue goes back
+to `mig:blocked`, this time waiting on #217/#218/#219 rather than on #67/#190. There is
+nothing further this task can shard or re-run: three fresh, unowned bugs is the actual
+finding, not an artefact of the harness or the corpus.
+
+# Stage 2, first run (superseded by the re-run above)
 
 ## Run
 
