@@ -1,55 +1,185 @@
 {
- "generated_at": "2026-09-24T18:31:02.846Z",
+ "generated_at": "2026-09-26T09:14:36.602Z",
  "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
  "corpus": {
   "statements": {
-   "pct": 95.36,
-   "covered": 3268,
+   "pct": 99.21,
+   "covered": 3400,
    "total": 3427
   },
   "branches": {
-   "pct": 95.85,
-   "covered": 1759,
+   "pct": 96.34,
+   "covered": 1768,
    "total": 1835
   },
   "functions": {
-   "pct": 94.09,
-   "covered": 574,
+   "pct": 99.01,
+   "covered": 604,
    "total": 610
   },
   "lines": {
-   "pct": 95.31,
-   "covered": 3214,
+   "pct": 99.19,
+   "covered": 3345,
    "total": 3372
   }
  },
  "corpus_src_driver": "the same corpus, bin/replay.js --engine src under nyc (workspace src/ through ts-node)",
  "corpus_src": {
   "statements": {
-   "pct": 97.88,
-   "covered": 3292,
-   "total": 3363
+   "pct": 99.23,
+   "covered": 3495,
+   "total": 3522
   },
   "branches": {
-   "pct": 95.86,
-   "covered": 1783,
-   "total": 1860
+   "pct": 96.22,
+   "covered": 1861,
+   "total": 1934
   },
   "functions": {
-   "pct": 94.09,
-   "covered": 574,
-   "total": 610
+   "pct": 99.01,
+   "covered": 605,
+   "total": 611
   },
   "lines": {
-   "pct": 97.88,
-   "covered": 3238,
-   "total": 3308
+   "pct": 99.22,
+   "covered": 3440,
+   "total": 3467
   }
  },
  "corpus_reference_vs_src": {
-  "branch_layout_mismatches": 58,
-  "branch_hit_disagreements": 18,
+  "branch_layout_mismatches": 541,
+  "branch_hit_disagreements": 155,
   "disagreements": [
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "2[1]",
+    "reference": 744
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "3[1]",
+    "reference": 222,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "8[2]",
+    "reference": 423
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "8[3]",
+    "reference": 701
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "8[4]",
+    "reference": 746
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "8[5]",
+    "reference": 310
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "9[1]",
+    "reference": 0,
+    "src": 3221
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "11[1]",
+    "reference": 351,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "21[0]",
+    "reference": 0,
+    "src": 3
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "24[0]",
+    "reference": 3,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "25[1]",
+    "reference": 0,
+    "src": 947
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "26[1]",
+    "reference": 7523,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "28[1]",
+    "reference": 845,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "31[1]",
+    "reference": 95
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "32[1]",
+    "reference": 1410
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "33[1]",
+    "reference": 1147
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "39[2]",
+    "reference": 767
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "42[2]",
+    "reference": 736
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "53[1]",
+    "reference": 1344
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "59[1]",
+    "reference": 0,
+    "src": 1760
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "64[2]",
+    "reference": 449
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "66[1]",
+    "reference": 217,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "69[2]",
+    "reference": 3872
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "72[2]",
+    "reference": 2479
+   },
    {
     "file": "src/modelutil.ts",
     "branch": "0[1]",
@@ -96,74 +226,116 @@
     "reference": 130
    },
    {
-    "file": "src/introspect/numbervalidator.ts",
-    "branch": "0[1]",
-    "reference": 347
+    "file": "src/serializer.ts",
+    "branch": "4[1]",
+    "reference": 848
    },
    {
-    "file": "src/introspect/numbervalidator.ts",
-    "branch": "13[1]",
-    "reference": 78
+    "file": "src/serializer.ts",
+    "branch": "8[1]",
+    "reference": 4381
    },
    {
-    "file": "src/introspect/numbervalidator.ts",
-    "branch": "19[0]",
-    "reference": 7,
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "1[1]",
+    "reference": 685266
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "11[2]",
+    "reference": 1485809
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "11[3]",
+    "reference": 1249475
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "11[4]",
+    "reference": 1145408
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "11[5]",
+    "reference": 1013518
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "11[6]",
+    "reference": 998718
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "14[0]",
+    "reference": 0,
+    "src": 2747288
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "16[1]",
+    "reference": 535139
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "17[0]",
+    "reference": 5,
     "src": 0
    },
    {
-    "file": "src/introspect/numbervalidator.ts",
-    "branch": "19[1]",
-    "reference": 1
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "24[2]",
+    "reference": 117
    },
    {
-    "file": "src/introspect/numbervalidator.ts",
-    "branch": "20[1]",
-    "reference": 1
-   },
-   {
-    "file": "src/introspect/scalardeclaration.ts",
-    "branch": "0[1]",
-    "reference": 5038
-   },
-   {
-    "file": "src/introspect/scalardeclaration.ts",
-    "branch": "7[2]",
-    "reference": 703
-   },
-   {
-    "file": "src/introspect/scalardeclaration.ts",
-    "branch": "7[3]",
-    "reference": 3819
-   },
-   {
-    "file": "src/introspect/scalardeclaration.ts",
-    "branch": "12[0]",
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "28[1]",
     "reference": 0,
-    "src": 2664
+    "src": 109788
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "31[1]",
+    "reference": 75630,
+    "src": 0
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "34[1]",
+    "reference": 20
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "36[2]",
+    "reference": 548790
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "42[1]",
+    "reference": 1951315
    }
   ]
  },
  "unit_suite": {
   "statements": {
-   "pct": 99.01,
-   "covered": 3308,
-   "total": 3341
+   "pct": 10.27,
+   "covered": 341,
+   "total": 3320
   },
   "branches": {
-   "pct": 95.8,
-   "covered": 1758,
+   "pct": 0.21,
+   "covered": 4,
    "total": 1835
   },
   "functions": {
-   "pct": 99.34,
-   "covered": 606,
+   "pct": 0.16,
+   "covered": 1,
    "total": 610
   },
   "lines": {
-   "pct": 99.02,
-   "covered": 3254,
-   "total": 3286
+   "pct": 10.34,
+   "covered": 338,
+   "total": 3267
   }
  },
  "unit_suite_source": "nyc run of the unit suite over the workspace src/ (same command as baseline.json)",
@@ -183,15 +355,10 @@
   "functions": 99,
   "lines": 99
  },
- "uncovered_branches": 76,
- "uncovered_branches_covered_by_suite": 12,
- "covered_by_suite_by_category": {
-  "stub-only": 4,
-  "internal-only": 8
- },
- "covered_by_suite_by_destination": {
-  "P2-10 (accordproject/concerto-rust#54)": 12
- },
+ "uncovered_branches": 67,
+ "uncovered_branches_covered_by_suite": 0,
+ "covered_by_suite_by_category": {},
+ "covered_by_suite_by_destination": {},
  "unexplained_covered_by_suite": [],
  "stale_reasons": []
 }

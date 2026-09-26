@@ -347,7 +347,7 @@ async function main() {
             `- Recorded from accordproject/concerto${opts.base ? '@' + opts.base : ''} by \`migration/oracle/drivers/supplement.spec.js\` under \`lib/recorder.js\` (frozen clock, seeded random and uuid), against the frozen reference's own source (concerto-core v5.0.0 \`src/\`).`,
             `- Built by \`migration/oracle/bin/build-supplement.js\`: ${keep.length} fixtures under \`${oracleRel}/fixtures/supplement/\`, blobs inlined, ${duplicates.length} exact duplicate(s) of pinned fixtures dropped, no id collision.`,
             `- Files: ${fixtureFiles.length} fixture files plus \`fixtures/supplement/manifest.json\`.`,
-            `- Content hash (sha256 of the sorted per-file sha256 list, as CORPUS.md): ${supplementHash}`,
+            `- Content hash: ${supplementHash} -- sha256 of the sorted "<sha256>  <path>" lines of every fixture file under \`fixtures/supplement/\` (not \`manifest.json\`), paths relative to the concerto checkout root: the same method as CORPUS.md's pin hash, but over only the supplement's own fixture files, not the whole corpus and not \`cto-cache/\` (CORPUS.md's pin hash spans both \`fixtures/\` and \`cto-cache/\`).`,
             '',
         ].join('\n');
         fs.writeFileSync(opts.summary, md);
