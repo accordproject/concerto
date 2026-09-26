@@ -1,0 +1,153 @@
+{
+  "harness": "run-ts.mjs",
+  "recorded_at": "2026-09-26T18:47:58.240Z",
+  "machine": {
+    "platform": "linux",
+    "arch": "x64",
+    "cpus": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "cpu_count": 4,
+    "total_mem_gb": 17,
+    "node": "v22.22.2"
+  },
+  "concerto_commit": "30dd6484219d2d479d5d60e00712f8ecfa01e86e",
+  "concerto_engine": "rust",
+  "sample_opts": {
+    "warmup": 5,
+    "samples": 30
+  },
+  "workloads": {
+    "load_validate": {
+      "concerto-core-test-data": {
+        "load": {
+          "samples": 30,
+          "n": 35,
+          "median_ms": 0.5296617571428572,
+          "mean_ms": 0.5342749333333333,
+          "stddev_ms": 0.08338619051632803,
+          "min_ms": 0.4160391428571429,
+          "max_ms": 0.8348785428571429,
+          "cv": 0.15607355934908426
+        },
+        "validate": {
+          "samples": 30,
+          "n": 35,
+          "median_ms": 1.1167245000000001,
+          "mean_ms": 1.0198690352380952,
+          "stddev_ms": 0.23875032128739437,
+          "min_ms": 0.5809852000000001,
+          "max_ms": 1.3674299142857143,
+          "cv": 0.23409900000705142
+        },
+        "validateError": null,
+        "n": 35
+      },
+      "conformance": {
+        "load": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.3845317804878049,
+          "mean_ms": 0.3936093756097561,
+          "stddev_ms": 0.08730176424146459,
+          "min_ms": 0.2961098780487805,
+          "max_ms": 0.7460040243902439,
+          "cv": 0.22179797954818
+        },
+        "validate": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.4906385731707317,
+          "mean_ms": 0.5193523365853657,
+          "stddev_ms": 0.10085093470743871,
+          "min_ms": 0.3954564146341463,
+          "max_ms": 0.811715731707317,
+          "cv": 0.19418596510128897
+        },
+        "validateError": null,
+        "n": 41
+      },
+      "synthetic-large": {
+        "load": {
+          "samples": 30,
+          "n": 1,
+          "median_ms": 29.158413,
+          "mean_ms": 29.429446300000002,
+          "stddev_ms": 1.961203012898516,
+          "min_ms": 26.092444,
+          "max_ms": 33.699329,
+          "cv": 0.06664083968506454
+        },
+        "validate": {
+          "samples": 30,
+          "n": 1,
+          "median_ms": 37.8821175,
+          "mean_ms": 38.658208566666666,
+          "stddev_ms": 2.859902869215422,
+          "min_ms": 35.768032,
+          "max_ms": 47.534742,
+          "cv": 0.0739791877392217
+        },
+        "validateError": null,
+        "n": 1
+      }
+    },
+    "validate_ast": {
+      "concerto-core-test-data": {
+        "validateAst": {
+          "samples": 30,
+          "n": 34,
+          "median_ms": 0.39367876470588237,
+          "mean_ms": 0.40825937156862746,
+          "stddev_ms": 0.04292360087300312,
+          "min_ms": 0.3779335,
+          "max_ms": 0.5880119117647059,
+          "cv": 0.10513806629369134
+        },
+        "n": 34,
+        "totalInSet": 35
+      },
+      "conformance": {
+        "validateAst": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.38658903658536586,
+          "mean_ms": 0.387255256910569,
+          "stddev_ms": 0.014042494945795157,
+          "min_ms": 0.3610058536585366,
+          "max_ms": 0.42262853658536587,
+          "cv": 0.03626159928162852
+        },
+        "n": 41,
+        "totalInSet": 41
+      },
+      "synthetic-large": {
+        "validateAst": null,
+        "n": 1,
+        "error": "validateAst rejects every model in this set"
+      }
+    },
+    "instance_validate": {
+      "populate_and_validate": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.01900456,
+        "mean_ms": 0.0198481268,
+        "stddev_ms": 0.0021721043795211096,
+        "min_ms": 0.017327932,
+        "max_ms": 0.026494172,
+        "cv": 0.10943624057868824
+      },
+      "validate_only": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.007780525,
+        "mean_ms": 0.008216404866666669,
+        "stddev_ms": 0.0011853688348835952,
+        "min_ms": 0.0073364979999999995,
+        "max_ms": 0.012971387999999999,
+        "cv": 0.14426855225848798
+      },
+      "n": 500
+    }
+  },
+  "note": "P5-06b after-review run: concerto 30dd64842 plus the uncommitted review fix (validate() fast path taken only for a resource graph of enumerable own data properties, no Proxy); rust engine built from concerto-rust bd5d9fc (unchanged)."
+}

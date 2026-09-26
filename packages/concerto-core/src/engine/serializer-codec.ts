@@ -412,6 +412,95 @@ function encodeValidatorText(resource): string | null {
     }
 }
 
+// ---------------------------------------------------------------------------
+// P5-06b review: what `validate()`'s fast path may read.
+// ---------------------------------------------------------------------------
+//
+// The encoders above list an object's properties with `Object.keys` and read
+// each one. The TS visitor (serializer/resourcevalidator.ts
+// `visitClassDeclaration`) lists them with `Object.getOwnPropertyNames`,
+// which also sees a non-enumerable one, and reads each declared field once.
+// `validate()` falls back to that visitor whenever the engine says
+// "invalid", so the fast path may only run where reading first is
+// unobservable and `Object.keys` sees what the visitor sees: every object
+// it would reach is a non-Proxy whose own string-keyed properties are all
+// enumerable data properties (an array's own `length` aside). This check
+// reads property descriptors only, so no getter or Proxy trap runs.
+
+let isProxyFn: ((v: unknown) => boolean) | null | undefined;
+
+/**
+ * @param {object} v an object
+ * @return {boolean} whether `v` is a Proxy; `true` when that cannot be told
+ */
+function mayBeProxy(v: object): boolean {
+    if (isProxyFn === undefined) {
+        try {
+            // eslint-disable-next-line global-require
+            const types = require('util').types;
+            isProxyFn = types && typeof types.isProxy === 'function' ? types.isProxy : null;
+        } catch (err) {
+            isProxyFn = null;
+        }
+    }
+    return isProxyFn ? isProxyFn(v) : true;
+}
+
+/**
+ * Whether every object reachable from `root` through own properties (and a
+ * `Map`'s entries) holds only enumerable own data properties and is not a
+ * Proxy (see above), so that the `validate()` fast path's reads have no side
+ * effects and see every property the visitor would. The handles
+ * `TYPED_SKIP` names are checked but not walked into.
+ * @param {object} root the resource
+ * @return {boolean} whether the fast path may read it
+ */
+function isPlainDataGraph(root: object): boolean {
+    const seen = new Set<object>();
+    const pending: object[] = [root];
+    while (pending.length > 0) {
+        const obj = pending.pop() as object;
+        if (seen.has(obj)) {
+            continue;
+        }
+        seen.add(obj);
+        if (mayBeProxy(obj)) {
+            return false;
+        }
+        const typed = isTypedLike(obj);
+        const isArray = Array.isArray(obj);
+        // One descriptor at a time: `Object.getOwnPropertyDescriptors`
+        // (every one at once) is several times slower here.
+        for (const key of Object.getOwnPropertyNames(obj)) {
+            const d = Object.getOwnPropertyDescriptor(obj, key) as PropertyDescriptor;
+            if (!('value' in d)) {
+                return false;
+            }
+            if (!d.enumerable && !(isArray && key === 'length')) {
+                return false;
+            }
+            if (typed && TYPED_SKIP.has(key)) {
+                continue;
+            }
+            const value = d.value;
+            if (value !== null && (typeof value === 'object' || typeof value === 'function')) {
+                pending.push(value);
+            }
+        }
+        if (obj instanceof Map) {
+            for (const [k, x] of obj) {
+                if (k !== null && (typeof k === 'object' || typeof k === 'function')) {
+                    pending.push(k);
+                }
+                if (x !== null && (typeof x === 'object' || typeof x === 'function')) {
+                    pending.push(x);
+                }
+            }
+        }
+    }
+    return true;
+}
+
 let modelClassesCache: any;
 
 /**
@@ -585,4 +674,5 @@ function decodeValue(v, modelManager: BaseModelManager) {
 export {
     EngineFastPathUnsupported, encodeValue, decodeValue, checkString, checkJsonText,
     encodePlainObjectText, encodeTypedText, encodeValidatorText, materializeLean, modelClasses,
+    isPlainDataGraph,
 };

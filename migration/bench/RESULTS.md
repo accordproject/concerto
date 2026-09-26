@@ -26,8 +26,27 @@ runs, each against the TS runs made next to it.
 | fromJSON | 7.9 / 8.0 | 45.2 / 44.3 | 8.5 / 7.8 | 19.5 / 19.2 | 5.6× | **2.4×** | 2.3× |
 | resource.validate() | 1.9 / 2.0 | 17.5 / 17.8 | 2.3 / 2.1 | 6.5 / 6.4 | 9.1× | **2.9×** | 2.7× |
 
-**The exit condition (≤ 1.0× the TS reference) is not met.** The best
-ratios reached are 2.4× for fromJSON and 2.9× for resource.validate(). (P5-06
+### After the review fix
+
+The review found that validate()'s fast path behaved differently from the
+visitor in two cases: it listed fields with `Object.keys`, so it missed an
+undeclared non-enumerable own property that the visitor reports, and it
+read every field before a fallback, so a getter ran twice and an error
+could quote a different value. The fast path now runs only when every
+object it would reach holds enumerable own data properties and is not a
+Proxy (serializer-codec.ts `isPlainDataGraph`, which reads descriptors
+only). Any other resource goes through the visitor, as before P5-06b.
+That check costs about 0.9 µs per instance. Runs
+`results/*-P5-06b-after-review-{ts,rust-engine}.json`, back to back:
+
+| Metric | TS, run 1 / 2 | Rust engine, run 1 / 2 | **after review / TS** | speed-up over before |
+|---|---|---|---|---|
+| fromJSON | 8.0 / 7.7 | 20.1 / 19.0 | **2.5×** | 2.3× |
+| resource.validate() | 2.0 / 2.0 | 8.8 / 7.8 | **4.2×** | 2.1× |
+
+**The exit condition (≤ 1.0× the TS reference) is not met.** With the
+review fix the ratios are 2.5× for fromJSON and 4.2× for
+resource.validate() (2.4× and 2.9× before the fix). (P5-06
 reported 5.7× and 6.8× against a TS validate() median of 2.75 µs; on this
 run's TS medians, the same P5-06 code is 5.6× and 9.1×.)
 
@@ -60,7 +79,11 @@ All performance-only. Results and errors are unchanged:
   covers fromJSON, with and without validation, over 36 documents, and
   validate() over 30 resources: valid and invalid ones, a stale
   `$identifier`, non-finite numbers, nested resources, relationship
-  options, `__proto__` keys and lone surrogates.
+  options, `__proto__` keys and lone surrogates. After the review fix, a
+  second scratch script checks validate() in both modes on an undeclared
+  non-enumerable property (on the resource and on a nested concept), an
+  enumerable getter (invalid and valid, counting its calls) and a Proxy
+  (counting its `get` traps): the errors and the counts now match ts mode.
 
 The changes, by where the time was going:
 - **The crate's instance paths** (`concerto-core`).
@@ -98,13 +121,15 @@ The changes, by where the time was going:
     and its model manager resolves its type to the declaration it holds.
     It answers a boolean: an invalid resource, or one where the walk's
     `$identifier` write would change anything, goes through the visitor
-    path, which raises and writes exactly as before.
+    path, which raises and writes exactly as before. So does any resource
+    that reaches an accessor, a non-enumerable own property or a Proxy
+    (review fix, above), and nothing of it is read before that check.
 
 ## Why parity is out of reach here
 
 The profile after this change (rust mode, per instance):
-- **resource.validate(), 6.5 µs** against 2.1 µs for the whole TS
-  validate(). Encoding the resource in JS (0.9 µs), copying the UTF-8 text
+- **resource.validate(), 6.5 µs** (about 7.4 µs with the review fix's
+  check) against 2.1 µs for the whole TS validate(). Encoding the resource in JS (0.9 µs), copying the UTF-8 text
   into WASM (0.65 µs) and parsing it into a `serde_json::Value` (1.2 µs)
   already cost more than the TS reference before any validation runs; the
   validation itself is 1.35 µs in WASM (0.68 µs natively). D7 keeps

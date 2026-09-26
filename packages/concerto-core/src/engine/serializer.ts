@@ -38,6 +38,7 @@ import { rust } from './index';
 import {
     EngineFastPathUnsupported, encodeValue, decodeValue, checkString, checkJsonText,
     encodePlainObjectText, encodeTypedText, encodeValidatorText, materializeLean, modelClasses,
+    isPlainDataGraph,
 } from './serializer-codec';
 import Factory from '../factory';
 
@@ -197,10 +198,20 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
  * the resource's own `$validator` is a plain `ResourceValidator` (whose two
  * relationship options cross with the call), and its model manager still
  * resolves its type to the very declaration it holds.
+ *
+ * Nor is it taken, before anything of the resource is read, unless every
+ * object the walk would reach holds only enumerable own data properties and
+ * is not a Proxy (serializer-codec.ts `isPlainDataGraph`): the encoders list
+ * fields with `Object.keys`, where the visitor uses
+ * `Object.getOwnPropertyNames`, and reading a getter or a Proxy trap before
+ * a fallback would run it again in the visitor.
  * @param {object} resource the ValidatedResource
  * @return {boolean} whether the resource is valid and nothing is left to do
  */
 function fastValidate(resource): boolean {
+    if (!isPlainDataGraph(resource)) {
+        return false;
+    }
     const { ResourceValidator } = modelClasses();
     const validator = resource.$validator;
     if (!validator || Object.getPrototypeOf(validator) !== ResourceValidator.prototype) {
