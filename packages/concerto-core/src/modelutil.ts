@@ -65,6 +65,41 @@ const loadEngine = (specifier: string) =>
 const rust: { [binding: string]: (...args: any[]) => never } | null =
     typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
 
+// P5-06: the pure string-to-value members below cross into the engine once
+// per distinct argument rather than once per call (a model load calls
+// isSystemProperty/isValidIdentifier/getFullyQualifiedName for every
+// property of every declaration). Only string arguments are memoised, and
+// only a result the engine returned (a throw is never cached), so every
+// other call, and every error, goes to the engine exactly as before. Each
+// member's memo is cleared once it reaches ENGINE_MEMO_LIMIT entries.
+/* istanbul ignore next */
+const engineMemo: { [binding: string]: Map<string, unknown> } = {};
+const ENGINE_MEMO_LIMIT = 4096;
+
+/**
+ * `rust[binding](...args)`, memoised under `key` (see engineMemo).
+ * @param {string} binding - the engine binding to call
+ * @param {string} key - the memo key: the call's string arguments, unambiguously joined
+ * @param {...string} args - the arguments
+ * @return {*} the binding's result
+ * @private
+ */
+/* istanbul ignore next */
+function memoisedEngineCall(binding: string, key: string, ...args: string[]): unknown {
+    let memo = engineMemo[binding];
+    if (!memo) {
+        memo = engineMemo[binding] = new Map();
+    } else if (memo.has(key)) {
+        return memo.get(key);
+    }
+    const result = rust![binding](...args);
+    if (memo.size >= ENGINE_MEMO_LIMIT) {
+        memo.clear();
+    }
+    memo.set(key, result);
+    return result;
+}
+
 const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
 
 const privateReservedProperties = [
@@ -113,7 +148,7 @@ class ModelUtil {
     static getShortName(fqn) {
         /* istanbul ignore if */
         if (rust) {
-            return rust.modelUtilGetShortName(fqn);
+            return (typeof fqn === 'string' ? memoisedEngineCall('modelUtilGetShortName', fqn, fqn) : rust.modelUtilGetShortName(fqn)) as never;
         }
         let result = fqn;
         let dotIndex = fqn.lastIndexOf('.');
@@ -133,7 +168,7 @@ class ModelUtil {
     static getNamespace(fqn) {
         /* istanbul ignore if */
         if (rust) {
-            return rust.modelUtilGetNamespace(fqn);
+            return (typeof fqn === 'string' ? memoisedEngineCall('modelUtilGetNamespace', fqn, fqn) : rust.modelUtilGetNamespace(fqn)) as never;
         }
         if (!fqn) {
             throw new Error(Globalize.formatMessage('modelutil-getnamespace-nofnq'));
@@ -225,7 +260,7 @@ class ModelUtil {
     static isPrimitiveType(typeName) {
         /* istanbul ignore if */
         if (rust) {
-            return rust.modelUtilIsPrimitiveType(typeName);
+            return (typeof typeName === 'string' ? memoisedEngineCall('modelUtilIsPrimitiveType', typeName, typeName) : rust.modelUtilIsPrimitiveType(typeName)) as never;
         }
         const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
         return (primitiveTypes.indexOf(typeName) >= 0);
@@ -271,7 +306,7 @@ class ModelUtil {
     static capitalizeFirstLetter(string) {
         /* istanbul ignore if */
         if (rust) {
-            return rust.modelUtilCapitalizeFirstLetter(string);
+            return (typeof string === 'string' ? memoisedEngineCall('modelUtilCapitalizeFirstLetter', string, string) : rust.modelUtilCapitalizeFirstLetter(string)) as never;
         }
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
@@ -332,7 +367,7 @@ class ModelUtil {
     static isValidIdentifier(name: string | undefined): name is string {
         /* istanbul ignore if */
         if (rust) {
-            return rust.modelUtilIsValidIdentifier(name);
+            return (typeof name === 'string' ? memoisedEngineCall('modelUtilIsValidIdentifier', name, name) : rust.modelUtilIsValidIdentifier(name)) as never;
         }
         return ID_REGEX.test(name as string);
     }
@@ -346,7 +381,9 @@ class ModelUtil {
     static getFullyQualifiedName(namespace, type) {
         /* istanbul ignore if */
         if (rust) {
-            return rust.modelUtilGetFullyQualifiedName(namespace, type);
+            return (typeof namespace === 'string' && typeof type === 'string'
+                ? memoisedEngineCall('modelUtilGetFullyQualifiedName', `${namespace.length}:${namespace}${type}`, namespace, type)
+                : rust.modelUtilGetFullyQualifiedName(namespace, type)) as never;
         }
         if (namespace) {
             return `${namespace}.${type}`;
@@ -364,7 +401,7 @@ class ModelUtil {
     static removeNamespaceVersionFromFullyQualifiedName(fqn) {
         /* istanbul ignore if */
         if (rust) {
-            return rust.modelUtilRemoveNamespaceVersionFromFullyQualifiedName(fqn);
+            return (typeof fqn === 'string' ? memoisedEngineCall('modelUtilRemoveNamespaceVersionFromFullyQualifiedName', fqn, fqn) : rust.modelUtilRemoveNamespaceVersionFromFullyQualifiedName(fqn)) as never;
         }
         if(ModelUtil.isPrimitiveType(fqn)) {
             return fqn;
@@ -385,7 +422,7 @@ class ModelUtil {
     static isSystemProperty(propertyName) {
         /* istanbul ignore if */
         if (rust) {
-            return rust.modelUtilIsSystemProperty(propertyName);
+            return (typeof propertyName === 'string' ? memoisedEngineCall('modelUtilIsSystemProperty', propertyName, propertyName) : rust.modelUtilIsSystemProperty(propertyName)) as never;
         }
         return reservedProperties.includes(propertyName);
     }
@@ -400,7 +437,7 @@ class ModelUtil {
     static isPrivateSystemProperty(propertyName) {
         /* istanbul ignore if */
         if (rust) {
-            return rust.modelUtilIsPrivateSystemProperty(propertyName);
+            return (typeof propertyName === 'string' ? memoisedEngineCall('modelUtilIsPrivateSystemProperty', propertyName, propertyName) : rust.modelUtilIsPrivateSystemProperty(propertyName)) as never;
         }
         return privateReservedProperties.includes(propertyName);
     }
