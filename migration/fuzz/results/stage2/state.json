@@ -1,0 +1,189 @@
+{
+  "_about": "P5-05 stage 2 (accordproject/concerto-rust#76): resumable shard state, written by bin/run-shards.js",
+  "fixturesDir": "/home/user/concerto/migration/oracle/fixtures",
+  "engineModule": "/home/user/wt/P5-05s2/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+  "batchSize": 1000,
+  "seedsPerOp": 25,
+  "shards": [
+    {
+      "shard": 1,
+      "runSeed": 1001,
+      "count": 100000,
+      "status": "done",
+      "started": "2026-09-26T06:55:20.435Z",
+      "exitCode": 0,
+      "finished": "2026-09-26T07:22:28.638Z",
+      "counts": {
+        "ran": 100000,
+        "agree": 91592,
+        "divergences": 3803,
+        "expectedDivergences": 4605,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    },
+    {
+      "shard": 2,
+      "runSeed": 1002,
+      "count": 100000,
+      "status": "done",
+      "started": "2026-09-26T06:55:20.438Z",
+      "exitCode": 0,
+      "finished": "2026-09-26T07:22:28.976Z",
+      "counts": {
+        "ran": 100000,
+        "agree": 91286,
+        "divergences": 3945,
+        "expectedDivergences": 4769,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    },
+    {
+      "shard": 3,
+      "runSeed": 1003,
+      "count": 100000,
+      "status": "done",
+      "started": "2026-09-26T07:22:28.639Z",
+      "exitCode": 0,
+      "finished": "2026-09-26T07:49:31.478Z",
+      "counts": {
+        "ran": 100000,
+        "agree": 91500,
+        "divergences": 3812,
+        "expectedDivergences": 4688,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    },
+    {
+      "shard": 4,
+      "runSeed": 1004,
+      "count": 100000,
+      "status": "done",
+      "started": "2026-09-26T07:22:28.977Z",
+      "exitCode": 0,
+      "finished": "2026-09-26T07:49:31.471Z",
+      "counts": {
+        "ran": 100000,
+        "agree": 91440,
+        "divergences": 3886,
+        "expectedDivergences": 4674,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    },
+    {
+      "shard": 5,
+      "runSeed": 1005,
+      "count": 100000,
+      "status": "done",
+      "started": "2026-09-26T07:49:31.472Z",
+      "exitCode": 0,
+      "finished": "2026-09-26T08:16:27.866Z",
+      "counts": {
+        "ran": 100000,
+        "agree": 91531,
+        "divergences": 3865,
+        "expectedDivergences": 4604,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    },
+    {
+      "shard": 6,
+      "runSeed": 1006,
+      "count": 100000,
+      "status": "done",
+      "started": "2026-09-26T07:49:31.479Z",
+      "exitCode": 0,
+      "finished": "2026-09-26T08:16:27.838Z",
+      "counts": {
+        "ran": 100000,
+        "agree": 91439,
+        "divergences": 3858,
+        "expectedDivergences": 4703,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    },
+    {
+      "shard": 7,
+      "runSeed": 1007,
+      "count": 100000,
+      "status": "done",
+      "started": "2026-09-26T08:16:27.839Z",
+      "exitCode": 0,
+      "finished": "2026-09-26T08:43:25.380Z",
+      "counts": {
+        "ran": 100000,
+        "agree": 91492,
+        "divergences": 3854,
+        "expectedDivergences": 4654,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    },
+    {
+      "shard": 8,
+      "runSeed": 1008,
+      "count": 100000,
+      "status": "done",
+      "started": "2026-09-26T08:16:27.866Z",
+      "exitCode": 0,
+      "finished": "2026-09-26T08:43:25.583Z",
+      "counts": {
+        "ran": 100000,
+        "agree": 91370,
+        "divergences": 3881,
+        "expectedDivergences": 4749,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    },
+    {
+      "shard": 9,
+      "runSeed": 1009,
+      "count": 100000,
+      "status": "done",
+      "started": "2026-09-26T08:43:25.381Z",
+      "exitCode": 0,
+      "finished": "2026-09-26T09:10:26.384Z",
+      "counts": {
+        "ran": 100000,
+        "agree": 91404,
+        "divergences": 3792,
+        "expectedDivergences": 4804,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    },
+    {
+      "shard": 10,
+      "runSeed": 1010,
+      "count": 100000,
+      "status": "done",
+      "started": "2026-09-26T08:43:25.584Z",
+      "exitCode": 0,
+      "finished": "2026-09-26T09:10:26.954Z",
+      "counts": {
+        "ran": 100000,
+        "agree": 91485,
+        "divergences": 3921,
+        "expectedDivergences": 4594,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    }
+  ]
+}

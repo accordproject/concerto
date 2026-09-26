@@ -1,0 +1,15 @@
+{
+  "_about": "P5-05 stage 2 (accordproject/concerto-rust#76): the exact commits the 1,000,000-case run used",
+  "concerto": {
+    "branch": "claude/tender-pascal-ocwf9q",
+    "commit": "2b1e969654951040f6c52412baf18f9f751d9386",
+    "note": "TS side: packages/concerto-core/src via ts-node; harness: migration/fuzz at this commit plus this PR's bin/run-shards.js and bin/aggregate-shards.js (driver/aggregation only, no change to case generation or classification)"
+  },
+  "concerto-rust": {
+    "branch": "claude/tender-pascal-ocwf9q",
+    "commit": "418c72d7669c5ec23f59fe8649da10b22cbcdb66",
+    "note": "Rust side: concerto-wasm/pkg/concerto-engine.cjs built fresh from this commit with `sh concerto-wasm/build.sh` (fresh target dir, wasm-bindgen 0.2.128; wasm-opt not on PATH, so the module is unoptimised: 1,553,810 bytes, same code)"
+  },
+  "corpus": "oracle-corpus-p107-06aa375 (canonical copy, 16,704 files: 16,085 fixtures + 618 blobs + manifest.json), with migration/ledger/ at the concerto commit above; CTO cache rebuilt with migration/oracle/bin/build-cto-cache.js (705 CTO texts, --check OK; manifest not committed)",
+  "fastCheck": "4.10.2"
+}

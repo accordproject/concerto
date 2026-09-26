@@ -1,9 +1,182 @@
-# P5-05 stage 1: divergence triage
+# P5-05: divergence triage
 
 Plan: accordproject/concerto-rust#29 §2.5, §4 (Phase 5). Issue:
 accordproject/concerto-rust#76. Coordinator decision (#76 comment 5835650999): land
-P5-05 in two stages. This is stage 1's report: the harness plus this triage. No
-product code is changed here.
+P5-05 in two stages. **Stage 2** (the 1,000,000-case run, released early by the
+coordinator in #76 comment 5843986603) is reported first, below; **stage 1**'s
+report (the harness and the 60,000-case triage) follows it unchanged. No product code
+is changed by either.
+
+# Stage 2: the 1,000,000-case run
+
+## Run
+
+Ten shards of 100,000 cases, run-seeds **1001-1010**, batch size 1000, 25 seeds per
+op, driven by `bin/run-shards.js` (at most 2 shards at a time, resumable from
+`results/stage2/state.json`). Each shard is exactly
+`node bin/fuzz.js --count 100000 --batch-size 1000 --seeds-per-op 25 --run-seed <seed>`,
+so any shard can be re-run on its own and reproduces its counts.
+
+- **concerto:** `claude/tender-pascal-ocwf9q` at `2b1e969654951040f6c52412baf18f9f751d9386`
+  (TS side from `packages/concerto-core/src`; harness from `migration/fuzz/` at that
+  commit, plus this change's driver and aggregation scripts, which don't touch case
+  generation or classification).
+- **concerto-rust:** `claude/tender-pascal-ocwf9q` at
+  `418c72d7669c5ec23f59fe8649da10b22cbcdb66`, with `concerto-wasm` built fresh from it
+  (`sh concerto-wasm/build.sh`, its own target dir).
+- **Corpus:** the canonical `oracle-corpus-p107-06aa375` (16,704 files), with
+  `migration/ledger/` alongside and the CTO cache rebuilt (`build-cto-cache.js`, 705
+  texts, `--check` OK).
+
+`results/stage2/commits.json` records the same details. Wall time was 2 h 15 min
+(06:55-09:10 UTC on 2026-09-26): 27 minutes per shard, two at a time on 4 cores,
+about 62 cases/s per shard.
+
+| shard | run-seed | ran | agree | divergences | expected (DV-015) | harness errors (ts / rust) |
+|---|---|---|---|---|---|---|
+| 1 | 1001 | 100,000 | 91,592 | 3,803 | 4,605 | 0 / 0 |
+| 2 | 1002 | 100,000 | 91,286 | 3,945 | 4,769 | 0 / 0 |
+| 3 | 1003 | 100,000 | 91,500 | 3,812 | 4,688 | 0 / 0 |
+| 4 | 1004 | 100,000 | 91,440 | 3,886 | 4,674 | 0 / 0 |
+| 5 | 1005 | 100,000 | 91,531 | 3,865 | 4,604 | 0 / 0 |
+| 6 | 1006 | 100,000 | 91,439 | 3,858 | 4,703 | 0 / 0 |
+| 7 | 1007 | 100,000 | 91,492 | 3,854 | 4,654 | 0 / 0 |
+| 8 | 1008 | 100,000 | 91,370 | 3,881 | 4,749 | 0 / 0 |
+| 9 | 1009 | 100,000 | 91,404 | 3,792 | 4,804 | 0 / 0 |
+| 10 | 1010 | 100,000 | 91,485 | 3,921 | 4,594 | 0 / 0 |
+| **total** | | **1,000,000** | **914,539** | **38,617** | **46,844** | **0 / 0** |
+
+| op | ran | agree | divergences | expected | harness errors (ts / rust) |
+|---|---|---|---|---|---|
+| ModelManager.fromAst | 321,562 | 297,434 | 24,128 | 0 | 0 / 0 |
+| ModelManager.addModelFile | 206,674 | 192,193 | 14,481 | 0 | 0 / 0 |
+| Serializer.fromJSON | 207,957 | 161,105 | 8 | 46,844 | 0 / 0 |
+| Resource.validate | 263,807 | 263,807 | 0 | 0 | 0 / 0 |
+
+In every row, `ran = agree + divergences + expected + harness-error cases`. There were
+0 harness errors on either side.
+
+**What is committed:** `results/stage2/`, which holds `state.json` (the shard plan and
+per-shard status and counts), `commits.json`, `run-summary.json`,
+`divergence-summary.json` and `triage-clusters.json`. The raw per-case files (the
+divergences, expected divergences and harness errors of each shard, about 53 MB) are
+not committed. Every case is reproducible from its shard's run-seed, or from
+`{seedFile, mutationSeed}`, and each cluster carries its first sample (with shard and
+run-seed) and a minimised, seed-free edit list. `node bin/finalize-stage2.js --raw-dir
+<dir>` regenerates the committed JSON from the raw shard outputs, and a second run
+reproduces it byte for byte.
+
+## Clusters
+
+The 38,617 unresolved divergences form **1,075 signature clusters**. All 1,075 were
+minimised: 0 stale, 1 edit (279), 2 edits (612), 3 edits (176) or 4 edits (8).
+Owners come from `bin/attribute-owners.js --stage2`, through the ledger:
+
+| status | clusters | cases | owner |
+|---|---|---|---|
+| `pending-rerun` | 1,073 | 38,609 | **P4-08, accordproject/concerto-rust#67** (open, in flight) |
+| `documented` | 2 | 8 | DIVERGENCES.md **DV-009** (`engine`) |
+| `unresolved` | **0** | **0** | none, so no new issue was filed |
+
+### T2: `ModelManager.fromAst`/`addModelFile`, 1,073 clusters, 38,609 cases, `pending-rerun` (#67)
+
+This is the same theme as stage 1's T2, at the same rate: 7.5% of `fromAst` cases
+(stage 1: 7.8%) and 7.0% of `addModelFile` cases (stage 1: 7.0%). The ledger rows
+(`BaseModelManager.fromAst`/`addModelFile` and `ModelFile.fromAst`, planned_task
+`P2-08+P4-08`) resolve to P4-08 (#67). P4-08 is still open and is converting exactly
+these paths (`ModelFile` and `BaseModelManager`) to views over the Rust engine: see
+#67 comment 5843956468, which covers the rest of the `ModelFile` view including
+`fromAst`/`validate`, plus delegating `addModel`/`addModelFiles`/`validate`. So per the
+coordinator's rule, every T2 cluster is **`pending-rerun` with owner #67**, not final.
+By outcome pair:
+- `ts=ok` with Rust rejecting: 71 clusters, 17,237 cases. Examples are serde
+  strictness (`invalid type: …, expected f64/a string`), `Invalid property name`, and
+  unguarded `this.name.toString`/`Cannot read properties of undefined` in the view
+  glue.
+- Both reject, with a different class or message: 999 clusters, 21,187 cases.
+- `ts=TypeError` or `IllegalModelException` with Rust accepting: 5 clusters, 193
+  cases. TS crashes on a property whose `type` is deleted or `null`
+  (`conformance/ModelManager.addModelFile/1fdeeb379822d62d5821fe34.json`, delete
+  `declarations[0].properties[1].type`), or on an empty `superType.name`
+  (`data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json`). Rust accepts both.
+
+Cross-check with stage 1: 282 of stage 1's 309 signatures recur. The other 27 (29
+stage-1 cases) are long-tail message variants that these run-seeds didn't draw.
+Replaying their stage-1 samples on the current engines, all 27 still reproduce, so
+none of them is fixed. 793 signatures are new in stage 2. They are the same T2 theme,
+with the larger run reaching more message and path variants.
+
+### T1: `Serializer.fromJSON`
+
+- **T1a/T1b (DV-015, #156): 46,844 cases, expected, not clustered.** 28,683 are the
+  `TypeError` shape and 18,161 the array `TypeNotFoundException` shape. That is 22.5%
+  of `fromJSON` cases, against 22.1% in stage 1.
+- **T1c (embedded-NUL `DateTime`, #169): fixed.** 0 cases in stage 2. Stage 1's
+  sample (`data/Serializer.fromJSON/024a285d00093fff73ca0e8d.json`, mutationSeed
+  3124886527) no longer reproduces on these engines. The Rust side now truncates at
+  an embedded NUL like V8 (concerto-rust 531fdc5, #176).
+- **T1d: a lone-number `DateTime` string, 2 clusters, 8 cases, `documented` (DV-009).**
+  Signatures: `Serializer.fromJSON | ts=ok | rust=error(ValidationException) |
+  rust:"Expected value at path `$.t` to be of type `DateTime`"` (6 cases, shards 8-10)
+  and the same with `$.dateTimeValue` (2 cases, shards 5-6). All 8 cases, checked
+  individually, set the field to the string `"-0"`, one of `lib/mutate.js`'s junk
+  strings. Minimised to one edit, for example `t = "-0"` on
+  `data/Serializer.fromJSON/024a285d00093fff73ca0e8d.json` (sample: shard 8, run-seed
+  1008, mutationSeed 927039764):
+  - TS accepts it as `2000-01-01T00:00:00.000Z`: `new Date("-0")` goes to V8's legacy
+    parser, which reads a lone number as a year.
+  - Rust's `date_parse`/`legacy_numeric_date` (`concerto-core/src/instance/dayjs.rs`)
+    only covers two or three numbers, so it rejects it.
+
+  This is the case DV-009's row names word for word: "a non-strict `DateTime` string
+  in an uncovered legacy form (for example `"1"`, which V8 reads as 2001-01-01) is a
+  `ValidationException` (`Expected value at path … to be of type DateTime`) in rust
+  mode where ts mode accepts it". So it is documented, not new, and no issue is filed.
+  `bin/attribute-owners.js --stage2` gives it to DV-009 only when the cluster's
+  minimised reproducer sets a lone number. Any other `DateTime` shape stays
+  `unresolved`. `lib/expected-divergences.js` is unchanged, because an outcome-only
+  matcher for this pair could also hide a real Rust `DateTime` bug. Whether to add an
+  input-aware DV-009 entry there is left to the reviewer.
+
+### T3: `Resource.validate`, no divergences
+
+`Resource.validate` had 0 divergences in 263,807 cases.
+
+## Cross-check against DIVERGENCES.md
+
+Every stage-2 signature was checked against rows DV-001 to DV-016 (concerto-rust at
+`418c72d`):
+- No cluster matches the subject of DV-002, DV-004, DV-010, DV-012, DV-013, DV-014 or
+  DV-016. That rules out `isValidIdentifier`, lone surrogates, circular JSON,
+  `Infinity`, `RangeError`/call-stack cycles, `isMapDeclaration` and a doubled
+  `IllegalModelException` prefix.
+- DV-015 is excluded before clustering.
+- DV-009 covers T1d, as described above.
+- 196 T2 clusters (5,645 cases) are serde deserialisation errors (`invalid type`,
+  `missing field`, `invalid length`). DV-001 covers only *which* field such an error
+  names when several are malformed, not whether TS accepts the input at all, so these
+  stay with #67.
+
+## Stage-2 status against the exit condition
+
+The issue's exit condition is **1,000,000 cases with no unresolved divergence**. This
+run has **0 `unresolved` clusters**, but 1,073 are `pending-rerun` on P4-08 (#67).
+Under the coordinator's rule, the report merges, and the issue waits (`mig:blocked`)
+for the re-run.
+
+- **Re-run once P4-08 (#67) and P2-11b (#190) have landed:** all 10 shards, run-seeds
+  1001-1010, with the same command and a fresh `concerto-wasm` build.
+- **Why P2-11b too:** the coordinator named it. P2-11b adds `fixtures/supplement/`
+  and gives owners to the new Rust failures it finds, which can change engine
+  behaviour. No cluster in this run is attributed to it. `lib/seeds.js` draws seeds
+  only from `data/`, `conformance/`, `unit/`, `gaps/` and `lifted/`, so the supplement
+  won't change the seed set unless `supplement` is added there.
+
+Every shard is a T2 re-run candidate, because T2 appears in every shard (3,792 to
+3,945 cases each). The re-run will need a new `state.json`, or a new `--state` path,
+and the new commits recorded.
+
+# Stage 1: the 60,000-case run and harness
 
 ## Run
 
