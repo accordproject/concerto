@@ -259,6 +259,16 @@ class ModelFile extends Decorated {
      * @private
      */
     getExternalImports(): Record<string, string> {
+        const id = this._rustHandleId();
+        /* istanbul ignore if */
+        if (id !== undefined) {
+            try {
+                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+                return manager.rustHandle.modelFileGetExternalImports(id);
+            } catch (e) {
+                debug('getExternalImports', 'rustHandle.modelFileGetExternalImports failed, falling back to the TS field', e);
+            }
+        }
         return this.importUriMap;
     }
 
