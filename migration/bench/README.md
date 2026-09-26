@@ -1,9 +1,13 @@
 # migration/bench/
 
-The benchmark harness for task **P5-04a** (issue accordproject/concerto-rust#92,
-under the migration plan accordproject/concerto-rust#29): a criterion
-benchmark against the TypeScript runtime on the same models, so every later
-phase of the migration can show its speed-up against a committed baseline.
+The benchmark harness against the TypeScript runtime on the same models,
+so every later phase of the migration can show its speed-up against a
+committed baseline. Started under task **P5-04a** (issue
+accordproject/concerto-rust#92); extended under task **P5-04** (issue
+accordproject/concerto-rust#75) with `CONCERTO_ENGINE=rust` support (the
+finished Rust-backed concerto-core, via WASM, through this same script)
+and a Rust-side instance-validation workload - both under the migration
+plan accordproject/concerto-rust#29.
 
 This is the TS half. The Rust half lives in `accordproject/concerto-rust`'s
 `benches/` crate, and reads its inputs from the fixtures generated here (see
@@ -97,7 +101,31 @@ FILE` (default: a timestamped file under `results/`).
 
 The script prints a markdown table to stdout and writes full results
 (medians, means, standard deviation, coefficient of variation, machine and
-toolchain info, the `concerto` commit) as JSON to `--out`.
+toolchain info, the `concerto` commit, and which engine served the run) as
+JSON to `--out`.
+
+### Running against the Rust engine (task P5-04)
+
+Set `CONCERTO_ENGINE=rust` before the same command to run every workload
+through the finished Rust-backed concerto-core instead of the TS
+reference, via `@accordproject/concerto-engine` (the WASM build of
+`concerto-rust`'s `concerto-wasm` crate) - see
+`packages/concerto-engine/README.md`. Build that package first, in a
+`concerto-rust` checkout next to this one:
+
+```sh
+cd ../concerto-rust/concerto-wasm
+npm install   # binaryen (wasm-opt) and Playwright, for the smokes
+sh build.sh   # needs the wasm32-unknown-unknown target and wasm-bindgen-cli 0.2.128
+
+cd ../../concerto
+CONCERTO_ENGINE=rust node migration/bench/run-ts.mjs
+```
+
+This is a different comparison from `concerto-rust`'s own `cargo bench`
+(which calls the Rust crate directly, no TS or WASM boundary) - see
+`RESULTS.md`'s "Two different Rust numbers" for what each one measures
+and why they currently disagree by orders of magnitude.
 
 ### Workloads
 
@@ -118,11 +146,15 @@ toolchain info, the `concerto` commit) as JSON to `--out`.
    model once outside the timed section and benchmarks only the subset
    that passes, printing how many that is when it is not all of them,
    rather than let one edge case sink the whole set's timing.
-3. **`instance_validate`** (**TS only**, per the issue - the Rust side is
-   filled in once instance validation lands, after P3-01) - generates 500
-   instances of a small synthetic concept and times
-   `Serializer#fromJSON` (populate + validate together) and
-   `Resource#validate()` on its own.
+3. **`instance_validate`** - generates 500 instances of a small synthetic
+   concept and times `Serializer#fromJSON` (populate + validate together)
+   and `Resource#validate()` on its own. Under `CONCERTO_ENGINE=rust` this
+   exercises `concerto-core`'s instance validator (task P3-01) through the
+   same TS entry points. The matching Rust-crate-direct benchmark
+   (`concerto-rust`'s `benches/instance_validate.rs`, task P5-04) only
+   covers the `Resource#validate()` half - there is still no Rust
+   `JSONPopulator`, so `fromJSON`'s populate step has no Rust-crate
+   counterpart to compare against yet.
 
 ### Variance
 
