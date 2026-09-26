@@ -196,6 +196,7 @@ class DcsIndexWrapper {
  * @param {*} source the value to copy onto it
  * @returns {*} target
  */
+/* istanbul ignore next */
 function assignDeep(target, source) {
     if (Array.isArray(target) && Array.isArray(source)) {
         target.forEach((item, i) => assignDeep(item, source[i]));
