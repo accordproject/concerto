@@ -109,19 +109,25 @@ class BaseModelManager {
      options: ModelManagerOptions | undefined;
      decoratorValidation: NonNullable<ModelManagerOptions['decoratorValidation']>;
      metamodelModelFile: ModelFileInstance;
-     // rust mode only (P4-08): a live concerto-wasm ModelManagerHandle,
-     // mirroring every addModelFile/updateModelFile/deleteModelFile call
-     // this manager makes for a namespace `_rustMirrorEligible` allows (the
-     // decorator/root system models and the transient metamodel validation
-     // file are excluded, since rustHandle's own constructor already loads
-     // the first two, and the third is never meant to be permanent). Null
-     // in ts mode, and null here in rust mode until the constructor creates
-     // it.
+    /**
+     * rust mode only (P4-08): a live concerto-wasm ModelManagerHandle,
+     * mirroring every addModelFile/updateModelFile/deleteModelFile call
+     * this manager makes for a namespace `_rustMirrorEligible` allows (the
+     * decorator/root system models and the transient metamodel validation
+     * file are excluded, since rustHandle's own constructor already loads
+     * the first two, and the third is never meant to be permanent). Null
+     * in ts mode, and null here in rust mode until the constructor creates
+     * it.
+     * @internal
+     */
      rustHandle: { [binding: string]: (...args: any[]) => any } | null;
-     // rust mode only (P4-08): set once a `_mirrorToRust` write has failed
-     // (see `_mirrorToRust`/`_rustMirrorTrustworthy`), so a stale mirror
-     // read never answers from `rustHandle` again until `clearModelFiles`
-     // starts it over.
+    /**
+     * rust mode only (P4-08): set once a `_mirrorToRust` write has failed
+     * (see `_mirrorToRust`/`_rustMirrorTrustworthy`), so a stale mirror
+     * read never answers from `rustHandle` again until `clearModelFiles`
+     * starts it over.
+     * @internal
+     */
      _rustMirrorStale: boolean;
     /**
      * Create the ModelManager.
@@ -292,6 +298,7 @@ class BaseModelManager {
      * @param {string} namespace - the namespace being added, updated or removed
      * @return {boolean} true if `namespace` should be mirrored
      * @private
+     * @internal
      */
     /* istanbul ignore next */
     _rustMirrorEligible(namespace) {
@@ -320,6 +327,7 @@ class BaseModelManager {
      * `rustHandle`) clears the flag.
      * @param {Function} fn - the mirror write to run
      * @private
+     * @internal
      */
     /* istanbul ignore next */
     _mirrorToRust(fn) {
@@ -353,6 +361,7 @@ class BaseModelManager {
      * call that trustworthy.
      * @return {boolean} true if rustHandle mirrors exactly the namespaces TS has
      * @private
+     * @internal
      */
     /* istanbul ignore next */
     _rustMirrorTrustworthy() {

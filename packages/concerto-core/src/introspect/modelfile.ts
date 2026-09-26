@@ -168,6 +168,7 @@ class ModelFile extends Decorated {
      * `_rustMirrorTrustworthy` is itself undefined and so falsy here.
      * @return {number | undefined} the handle, or undefined to fall back to TS
      * @private
+     * @internal
      */
     _rustHandleId(): number | undefined {
         const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorTrustworthy?: () => boolean; modelFiles?: Record<string, unknown> };
