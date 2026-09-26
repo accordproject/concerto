@@ -1,6 +1,6 @@
 {
  "summary": {
-  "generated_at": "2026-09-26T09:34:20.095Z",
+  "generated_at": "2026-09-26T15:31:04.243Z",
   "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
   "corpus": {
    "statements": {
@@ -28,29 +28,145 @@
   "corpus_src": {
    "statements": {
     "pct": 99.23,
-    "covered": 3495,
-    "total": 3522
+    "covered": 3518,
+    "total": 3545
    },
    "branches": {
-    "pct": 96.22,
-    "covered": 1861,
-    "total": 1934
+    "pct": 96.23,
+    "covered": 1868,
+    "total": 1941
    },
    "functions": {
     "pct": 99.01,
-    "covered": 605,
-    "total": 611
+    "covered": 606,
+    "total": 612
    },
    "lines": {
     "pct": 99.22,
-    "covered": 3440,
-    "total": 3467
+    "covered": 3463,
+    "total": 3490
    }
   },
   "corpus_reference_vs_src": {
-   "branch_layout_mismatches": 541,
-   "branch_hit_disagreements": 155,
+   "branch_layout_mismatches": 669,
+   "branch_hit_disagreements": 198,
    "disagreements": [
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "4[1]",
+     "reference": 16915
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "5[1]",
+     "reference": 0,
+     "src": 16915
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "6[0]",
+     "reference": 0,
+     "src": 33131
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "6[1]",
+     "reference": 33131,
+     "src": 0
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "7[0]",
+     "reference": 4,
+     "src": 0
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "8[1]",
+     "reference": 0,
+     "src": 1
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "9[0]",
+     "reference": 0,
+     "src": 33131
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "9[1]",
+     "reference": 33131,
+     "src": 0
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "10[0]",
+     "reference": 15,
+     "src": 0
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "12[0]",
+     "reference": 0,
+     "src": 15
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "13[0]",
+     "reference": 155080,
+     "src": 0
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "22[0]",
+     "reference": 0,
+     "src": 2
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "23[0]",
+     "reference": 4,
+     "src": 0
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "27[0]",
+     "reference": 0,
+     "src": 4060
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "28[0]",
+     "reference": 5079,
+     "src": 0
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "33[1]",
+     "reference": 2
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "34[2]",
+     "reference": 2
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "35[1]",
+     "reference": 0,
+     "src": 2
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "36[1]",
+     "reference": 3214,
+     "src": 0
+    },
+    {
+     "file": "src/basemodelmanager.ts",
+     "branch": "41[2]",
+     "reference": 116
+    },
     {
      "file": "src/decoratormanager.ts",
      "branch": "2[1]",
@@ -210,110 +326,6 @@
      "file": "src/modelutil.ts",
      "branch": "15[1]",
      "reference": 1
-    },
-    {
-     "file": "src/modelutil.ts",
-     "branch": "16[1]",
-     "reference": 351
-    },
-    {
-     "file": "src/modelutil.ts",
-     "branch": "16[2]",
-     "reference": 157
-    },
-    {
-     "file": "src/modelutil.ts",
-     "branch": "16[3]",
-     "reference": 130
-    },
-    {
-     "file": "src/serializer.ts",
-     "branch": "4[1]",
-     "reference": 848
-    },
-    {
-     "file": "src/serializer.ts",
-     "branch": "8[1]",
-     "reference": 4381
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "1[1]",
-     "reference": 685266
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "11[2]",
-     "reference": 1485809
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "11[3]",
-     "reference": 1249475
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "11[4]",
-     "reference": 1145408
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "11[5]",
-     "reference": 1013518
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "11[6]",
-     "reference": 998718
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "14[0]",
-     "reference": 0,
-     "src": 2747288
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "16[1]",
-     "reference": 535139
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "17[0]",
-     "reference": 5,
-     "src": 0
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "24[2]",
-     "reference": 117
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "28[1]",
-     "reference": 0,
-     "src": 109788
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "31[1]",
-     "reference": 75630,
-     "src": 0
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "34[1]",
-     "reference": 20
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "36[2]",
-     "reference": 548790
-    },
-    {
-     "file": "src/introspect/classdeclaration.ts",
-     "branch": "42[1]",
-     "reference": 1951315
     }
    ]
   },
