@@ -196,6 +196,7 @@ class DcsIndexWrapper {
  * @param {*} source the value to copy onto it
  * @returns {*} target
  */
+// Rust-mode only, so excluded from ts-mode coverage (PORTING.md 1.5; P4-09a).
 /* istanbul ignore next */
 function assignDeep(target, source) {
     if (Array.isArray(target) && Array.isArray(source)) {
