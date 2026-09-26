@@ -99,6 +99,26 @@ bin/
                 minimize-clusters.js (only if FIXTURES_DIR/CONCERTO_ENGINE_MODULE
                 are set) and attribute-owners.js. Re-running it over the committed
                 run outputs reproduces the committed JSON exactly.
+  run-shards.js stage 2's shard supervisor: runs fixed, recorded shards of
+                fuzz.js (default run-seeds 1001-1010 x 100,000 cases), at most
+                --parallel at a time, keeping per-shard raw outputs in --raw-dir
+                (outside the repo) and a resumable results/stage2/state.json.
+                Re-running it skips `done` shards and restarts any other one
+                from scratch.
+  aggregate-shards.js
+                sums the shards' run.json counts (results/stage2/run-summary.json),
+                runs summarize.js over all shards (divergence-summary.json) and
+                clusters every shard's divergences (triage-clusters.json, with
+                per-shard counts and a sample carrying its shard/run-seed).
+  finalize-stage2.js
+                regenerates every committed results/stage2/ file from the raw
+                shard outputs: aggregate-shards.js, minimize-clusters.js,
+                attribute-owners.js --stage2 (each cluster's `status`:
+                `pending-rerun` when its owner is in-flight work the
+                coordinator named, `documented` when a DIVERGENCES.md row covers
+                it, else `unresolved`), then compaction (owner details once at
+                the top level; `minimized.doc` and a sample's `ok` payload
+                dropped). Deterministic: a re-run reproduces the files exactly.
 test/
   classify.test.js  node --test migration/fuzz/test/*.test.js — outcome
                 classification (ts-ok/rust-throw, ts-throw/rust-ok, both throw
@@ -129,6 +149,23 @@ results/
                       bin/attribute-owners.js's ledger-derived task/issue (or
                       DIVERGENCES.md row) attribution; the script exits non-zero if
                       any cluster has neither an owner nor an issue.
+  stage2/             stage 2 (the 1,000,000-case run): state.json, commits.json
+                      (the exact concerto/concerto-rust commits used),
+                      run-summary.json, divergence-summary.json and
+                      triage-clusters.json. The raw per-case jsonl files are not
+                      committed (about 53 MB); see TRIAGE.md.
+```
+
+## Running stage 2 (sharded)
+
+```sh
+FIXTURES_DIR=<concerto checkout>/migration/oracle/fixtures \
+CONCERTO_ENGINE_MODULE=<concerto-rust checkout>/concerto-wasm/pkg/concerto-engine.cjs \
+  nohup node migration/fuzz/bin/run-shards.js --state migration/fuzz/results/stage2/state.json \
+    --raw-dir <dir outside the repo> --parallel 2 &
+# when every shard is done:
+FIXTURES_DIR=... CONCERTO_ENGINE_MODULE=... \
+  node migration/fuzz/bin/finalize-stage2.js --raw-dir <same dir>
 ```
 
 ## Targeted ops

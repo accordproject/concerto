@@ -174,18 +174,75 @@ function hasOwnerOrIssue(owner) {
     return typeof owner.status === 'string' && owner.status.startsWith('owned:');
 }
 
+// Stage 2 (accordproject/concerto-rust#76 comment 5843986603): clusters in
+// areas that in-flight work will change are not final — they are marked
+// `pending-rerun` with that owner, and the shards are re-run once it lands.
+// Keyed by owner.issue. P4-08 (#67) converts ModelFile and BaseModelManager
+// (fromAst/addModelFile/addModel(s)/validate) to views over the Rust engine,
+// which is exactly where every T2 cluster's TS-vs-Rust difference lives.
+// P2-11b (#190) is the other in-flight item the coordinator named: it adds
+// an oracle-corpus supplement, which changes the corpus this harness draws
+// seeds from; a cluster is attributed to it only by an explicit
+// new owner entry (none so far — see TRIAGE.md).
+const PENDING_RERUN = {
+    'accordproject/concerto-rust#67': { task: 'P4-08', issue: 'accordproject/concerto-rust#67', reason: 'P4-08 (open, in flight) converts ModelFile and BaseModelManager to Rust-backed views; these clusters are in fromAst/addModelFile, which it changes. Re-run the stage-2 shards after it merges.' },
+};
+
+// Stage 2: a Serializer.fromJSON ts=ok / rust=ValidationException DateTime
+// cluster whose minimised reproducer sets the DateTime field to a lone
+// number (for example "-0": V8's legacy date parser reads a lone number as a
+// year, so TS gets 2000-01-01; Rust's date_parse does not cover that form)
+// is the case DIVERGENCES.md DV-009 (category `engine`) names explicitly —
+// "a non-strict DateTime string in an uncovered legacy form (for example
+// "1", which V8 reads as 2001-01-01) is a ValidationException (Expected value
+// at path … to be of type DateTime) in rust mode where ts mode accepts it".
+// It is documented, not unresolved, and needs no new issue. The check is on
+// the actual reproducer, not the outcome alone, so any other DateTime shape
+// still falls through to "unresolved".
+const OWNER_DV009_LONE_NUMBER = {
+    theme: 'T1d (Serializer.fromJSON, ts=ok / rust=ValidationException DateTime: a lone-number legacy date string, DIVERGENCES.md DV-009)',
+    ledger: OWNER_DATETIME_DV009.ledger,
+    tasks: OWNER_DATETIME_DV009.tasks,
+    dv: 'DV-009',
+    status: 'owned: documented divergence DIVERGENCES.md DV-009 (engine): V8\'s legacy parser reads a lone number as a year ("-0" -> 2000-01-01, the row\'s own example "1" -> 2001-01-01); the Rust port rejects any legacy form it does not cover. No new issue.',
+    issue: null,
+};
+
+function isLoneNumberDateTime(cluster) {
+    const m = cluster.minimized;
+    if (!m || !Array.isArray(m.edits) || m.edits.length === 0) { return false; }
+    return m.edits.every((e) => e.kind === 'set' && typeof e.value === 'string' && /^\s*[+-]?\d+\s*$/.test(e.value));
+}
+
 function main() {
-    const data = JSON.parse(fs.readFileSync(CLUSTERS_FILE, 'utf8'));
+    const argv = process.argv.slice(2);
+    const stage2 = argv.includes('--stage2');
+    const file = argv.filter((a) => a !== '--stage2')[0];
+    const clustersFile = file ? path.resolve(file) : CLUSTERS_FILE;
+    const data = JSON.parse(fs.readFileSync(clustersFile, 'utf8'));
     let failing = 0;
+    let pending = 0;
     for (const c of data.clusters) {
-        c.owner = clusterOverride(c) || OWNERS[c.op] || null;
+        // In stage 2, #169's DateTime-with-NUL case is fixed on the Rust side
+        // (concerto-rust 531fdc5), so a recurrence is a new finding, not
+        // #169's: don't attribute it there.
+        let override = stage2 && c.op === 'Serializer.fromJSON' ? null : clusterOverride(c);
+        if (stage2 && c.op === 'Serializer.fromJSON' && isDateTimeOutlier(c.sample) && isLoneNumberDateTime(c)) {
+            override = OWNER_DV009_LONE_NUMBER;
+        }
+        c.owner = override || OWNERS[c.op] || null;
+        if (stage2) {
+            const p = c.owner && PENDING_RERUN[c.owner.issue];
+            c.status = p ? 'pending-rerun' : (c.owner && c.owner.dv && !c.owner.issue ? 'documented' : 'unresolved');
+            if (p) { c.pendingRerun = p; pending++; } else { delete c.pendingRerun; }
+        }
         if (!hasOwnerOrIssue(c.owner)) {
             failing++;
             console.error(`attribute-owners: no owner or issue for cluster ${c.sig}`);
         }
     }
-    fs.writeFileSync(CLUSTERS_FILE, JSON.stringify(data, null, 2));
-    console.log(`attribute-owners: ${data.clusters.length} clusters, ${failing} without an owner or a new issue`);
+    fs.writeFileSync(clustersFile, JSON.stringify(data, null, 2));
+    console.log(`attribute-owners: ${data.clusters.length} clusters, ${failing} without an owner or a new issue${stage2 ? `, ${pending} pending-rerun, ${data.clusters.filter((c) => c.status === 'documented').length} documented, ${data.clusters.filter((c) => c.status === 'unresolved').length} unresolved` : ''}`);
     if (failing) { process.exitCode = 1; }
 }
 

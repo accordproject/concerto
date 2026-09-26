@@ -1,0 +1,581 @@
+{
+  "_generatedBy": "migration/fuzz/bin/aggregate-shards.js from results/stage2/state.json and each shard's run.json; do not edit by hand",
+  "fixturesDir": "/home/user/concerto/migration/oracle/fixtures",
+  "engineModule": "/home/user/wt/P5-05s2/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+  "batchSize": 1000,
+  "seedsPerOp": 25,
+  "commits": {
+    "_about": "P5-05 stage 2 (accordproject/concerto-rust#76): the exact commits the 1,000,000-case run used",
+    "concerto": {
+      "branch": "claude/tender-pascal-ocwf9q",
+      "commit": "2b1e969654951040f6c52412baf18f9f751d9386",
+      "note": "TS side: packages/concerto-core/src via ts-node; harness: migration/fuzz at this commit plus this PR's bin/run-shards.js and bin/aggregate-shards.js (driver/aggregation only, no change to case generation or classification)"
+    },
+    "concerto-rust": {
+      "branch": "claude/tender-pascal-ocwf9q",
+      "commit": "418c72d7669c5ec23f59fe8649da10b22cbcdb66",
+      "note": "Rust side: concerto-wasm/pkg/concerto-engine.cjs built fresh from this commit with `sh concerto-wasm/build.sh` (fresh target dir, wasm-bindgen 0.2.128; wasm-opt not on PATH, so the module is unoptimised: 1,553,810 bytes, same code)"
+    },
+    "corpus": "oracle-corpus-p107-06aa375 (canonical copy, 16,704 files: 16,085 fixtures + 618 blobs + manifest.json), with migration/ledger/ at the concerto commit above; CTO cache rebuilt with migration/oracle/bin/build-cto-cache.js (705 CTO texts, --check OK; manifest not committed)",
+    "fastCheck": "4.10.2"
+  },
+  "total": {
+    "byOp": {
+      "ModelManager.fromAst": {
+        "ran": 321562,
+        "agree": 297434,
+        "divergences": 24128,
+        "expectedDivergences": 0,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      },
+      "Resource.validate": {
+        "ran": 263807,
+        "agree": 263807,
+        "divergences": 0,
+        "expectedDivergences": 0,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      },
+      "Serializer.fromJSON": {
+        "ran": 207957,
+        "agree": 161105,
+        "divergences": 8,
+        "expectedDivergences": 46844,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      },
+      "ModelManager.addModelFile": {
+        "ran": 206674,
+        "agree": 192193,
+        "divergences": 14481,
+        "expectedDivergences": 0,
+        "harnessErrorCases": 0,
+        "harnessErrorsTs": 0,
+        "harnessErrorsRust": 0
+      }
+    },
+    "ran": 1000000,
+    "agree": 914539,
+    "divergences": 38617,
+    "expectedDivergences": 46844,
+    "harnessErrorCases": 0,
+    "harnessErrorsTs": 0,
+    "harnessErrorsRust": 0
+  },
+  "shards": [
+    {
+      "shard": 1,
+      "runSeed": 1001,
+      "started": "2026-09-26T06:55:20.675Z",
+      "finished": "2026-09-26T07:22:28.625Z",
+      "byOp": {
+        "ModelManager.fromAst": {
+          "ran": 32083,
+          "agree": 29660,
+          "divergences": 2423,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Resource.validate": {
+          "ran": 26391,
+          "agree": 26391,
+          "divergences": 0,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Serializer.fromJSON": {
+          "ran": 20626,
+          "agree": 16021,
+          "divergences": 0,
+          "expectedDivergences": 4605,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.addModelFile": {
+          "ran": 20900,
+          "agree": 19520,
+          "divergences": 1380,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        }
+      },
+      "ran": 100000,
+      "agree": 91592,
+      "divergences": 3803,
+      "expectedDivergences": 4605,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    {
+      "shard": 2,
+      "runSeed": 1002,
+      "started": "2026-09-26T06:55:20.676Z",
+      "finished": "2026-09-26T07:22:28.965Z",
+      "byOp": {
+        "ModelManager.fromAst": {
+          "ran": 32069,
+          "agree": 29608,
+          "divergences": 2461,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.addModelFile": {
+          "ran": 20668,
+          "agree": 19184,
+          "divergences": 1484,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Resource.validate": {
+          "ran": 26320,
+          "agree": 26320,
+          "divergences": 0,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Serializer.fromJSON": {
+          "ran": 20943,
+          "agree": 16174,
+          "divergences": 0,
+          "expectedDivergences": 4769,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        }
+      },
+      "ran": 100000,
+      "agree": 91286,
+      "divergences": 3945,
+      "expectedDivergences": 4769,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    {
+      "shard": 3,
+      "runSeed": 1003,
+      "started": "2026-09-26T07:22:28.875Z",
+      "finished": "2026-09-26T07:49:31.465Z",
+      "byOp": {
+        "Resource.validate": {
+          "ran": 26532,
+          "agree": 26532,
+          "divergences": 0,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Serializer.fromJSON": {
+          "ran": 20711,
+          "agree": 16023,
+          "divergences": 0,
+          "expectedDivergences": 4688,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.fromAst": {
+          "ran": 32030,
+          "agree": 29657,
+          "divergences": 2373,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.addModelFile": {
+          "ran": 20727,
+          "agree": 19288,
+          "divergences": 1439,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        }
+      },
+      "ran": 100000,
+      "agree": 91500,
+      "divergences": 3812,
+      "expectedDivergences": 4688,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    {
+      "shard": 4,
+      "runSeed": 1004,
+      "started": "2026-09-26T07:22:29.253Z",
+      "finished": "2026-09-26T07:49:31.456Z",
+      "byOp": {
+        "ModelManager.fromAst": {
+          "ran": 32374,
+          "agree": 29919,
+          "divergences": 2455,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Serializer.fromJSON": {
+          "ran": 20771,
+          "agree": 16097,
+          "divergences": 0,
+          "expectedDivergences": 4674,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.addModelFile": {
+          "ran": 20609,
+          "agree": 19178,
+          "divergences": 1431,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Resource.validate": {
+          "ran": 26246,
+          "agree": 26246,
+          "divergences": 0,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        }
+      },
+      "ran": 100000,
+      "agree": 91440,
+      "divergences": 3886,
+      "expectedDivergences": 4674,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    {
+      "shard": 5,
+      "runSeed": 1005,
+      "started": "2026-09-26T07:49:31.712Z",
+      "finished": "2026-09-26T08:16:27.853Z",
+      "byOp": {
+        "ModelManager.fromAst": {
+          "ran": 32245,
+          "agree": 29848,
+          "divergences": 2397,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Serializer.fromJSON": {
+          "ran": 20767,
+          "agree": 16162,
+          "divergences": 1,
+          "expectedDivergences": 4604,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.addModelFile": {
+          "ran": 20838,
+          "agree": 19371,
+          "divergences": 1467,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Resource.validate": {
+          "ran": 26150,
+          "agree": 26150,
+          "divergences": 0,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        }
+      },
+      "ran": 100000,
+      "agree": 91531,
+      "divergences": 3865,
+      "expectedDivergences": 4604,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    {
+      "shard": 6,
+      "runSeed": 1006,
+      "started": "2026-09-26T07:49:31.729Z",
+      "finished": "2026-09-26T08:16:27.825Z",
+      "byOp": {
+        "Serializer.fromJSON": {
+          "ran": 20816,
+          "agree": 16112,
+          "divergences": 1,
+          "expectedDivergences": 4703,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.fromAst": {
+          "ran": 32230,
+          "agree": 29825,
+          "divergences": 2405,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Resource.validate": {
+          "ran": 26360,
+          "agree": 26360,
+          "divergences": 0,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.addModelFile": {
+          "ran": 20594,
+          "agree": 19142,
+          "divergences": 1452,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        }
+      },
+      "ran": 100000,
+      "agree": 91439,
+      "divergences": 3858,
+      "expectedDivergences": 4703,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    {
+      "shard": 7,
+      "runSeed": 1007,
+      "started": "2026-09-26T08:16:28.076Z",
+      "finished": "2026-09-26T08:43:25.367Z",
+      "byOp": {
+        "Serializer.fromJSON": {
+          "ran": 20909,
+          "agree": 16255,
+          "divergences": 0,
+          "expectedDivergences": 4654,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Resource.validate": {
+          "ran": 26483,
+          "agree": 26483,
+          "divergences": 0,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.addModelFile": {
+          "ran": 20554,
+          "agree": 19100,
+          "divergences": 1454,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.fromAst": {
+          "ran": 32054,
+          "agree": 29654,
+          "divergences": 2400,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        }
+      },
+      "ran": 100000,
+      "agree": 91492,
+      "divergences": 3854,
+      "expectedDivergences": 4654,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    {
+      "shard": 8,
+      "runSeed": 1008,
+      "started": "2026-09-26T08:16:28.102Z",
+      "finished": "2026-09-26T08:43:25.569Z",
+      "byOp": {
+        "ModelManager.fromAst": {
+          "ran": 32242,
+          "agree": 29825,
+          "divergences": 2417,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Resource.validate": {
+          "ran": 26244,
+          "agree": 26244,
+          "divergences": 0,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.addModelFile": {
+          "ran": 20652,
+          "agree": 19189,
+          "divergences": 1463,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Serializer.fromJSON": {
+          "ran": 20862,
+          "agree": 16112,
+          "divergences": 1,
+          "expectedDivergences": 4749,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        }
+      },
+      "ran": 100000,
+      "agree": 91370,
+      "divergences": 3881,
+      "expectedDivergences": 4749,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    {
+      "shard": 9,
+      "runSeed": 1009,
+      "started": "2026-09-26T08:43:25.668Z",
+      "finished": "2026-09-26T09:10:26.371Z",
+      "byOp": {
+        "ModelManager.fromAst": {
+          "ran": 32120,
+          "agree": 29720,
+          "divergences": 2400,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Serializer.fromJSON": {
+          "ran": 20942,
+          "agree": 16135,
+          "divergences": 3,
+          "expectedDivergences": 4804,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Resource.validate": {
+          "ran": 26641,
+          "agree": 26641,
+          "divergences": 0,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.addModelFile": {
+          "ran": 20297,
+          "agree": 18908,
+          "divergences": 1389,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        }
+      },
+      "ran": 100000,
+      "agree": 91404,
+      "divergences": 3792,
+      "expectedDivergences": 4804,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    {
+      "shard": 10,
+      "runSeed": 1010,
+      "started": "2026-09-26T08:43:25.843Z",
+      "finished": "2026-09-26T09:10:26.943Z",
+      "byOp": {
+        "ModelManager.fromAst": {
+          "ran": 32115,
+          "agree": 29718,
+          "divergences": 2397,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "ModelManager.addModelFile": {
+          "ran": 20835,
+          "agree": 19313,
+          "divergences": 1522,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Serializer.fromJSON": {
+          "ran": 20610,
+          "agree": 16014,
+          "divergences": 2,
+          "expectedDivergences": 4594,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        },
+        "Resource.validate": {
+          "ran": 26440,
+          "agree": 26440,
+          "divergences": 0,
+          "expectedDivergences": 0,
+          "harnessErrorCases": 0,
+          "harnessErrorsTs": 0,
+          "harnessErrorsRust": 0
+        }
+      },
+      "ran": 100000,
+      "agree": 91485,
+      "divergences": 3921,
+      "expectedDivergences": 4594,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    }
+  ]
+}
