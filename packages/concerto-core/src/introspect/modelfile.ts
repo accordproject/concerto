@@ -214,7 +214,7 @@ class ModelFile extends Decorated {
      * Returns true if the ModelFile is a system namespace
      * @returns {Boolean} true if this is a system model file
      */
-    isSystemModelFile() {
+    isSystemModelFile(): boolean {
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {

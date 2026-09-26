@@ -991,7 +991,7 @@ class BaseModelManager {
      * Get the namespaces registered with the ModelManager.
      * @return {string[]} namespaces - the namespaces that have been registered.
      */
-    getNamespaces() {
+    getNamespaces(): string[] {
         const namespaces = Object.keys(this.modelFiles);
         /* istanbul ignore next */
         if (rust && this._rustMirrorTrustworthy()) {
@@ -1144,7 +1144,7 @@ class BaseModelManager {
      * @returns {boolean} True if this instance is an instance of the specified fully
      * qualified type name, false otherwise.
      */
-    derivesFrom(fqt1, fqt2) {
+    derivesFrom(fqt1, fqt2): boolean {
         /* istanbul ignore next */
         if (rust && this._rustMirrorTrustworthy()) {
             try {

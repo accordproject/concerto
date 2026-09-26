@@ -65,6 +65,10 @@ declare class BaseModelManager {
     options: ModelManagerOptions | undefined;
     decoratorValidation: NonNullable<ModelManagerOptions['decoratorValidation']>;
     metamodelModelFile: ModelFileInstance;
+    rustHandle: {
+        [binding: string]: (...args: any[]) => any;
+    } | null;
+    _rustMirrorStale: boolean;
     /**
      * Create the ModelManager.
      * @constructor
@@ -122,6 +126,65 @@ declare class BaseModelManager {
      * @private
      */
     addDecoratorModel(): void;
+    /**
+     * Whether a namespace should be mirrored into `rustHandle` (P4-08):
+     * every namespace but the decorator/root system models -- already
+     * mirrored by `rustHandle`'s own constructor -- and the transient
+     * metamodel file `validateAst` registers and removes around its own
+     * deserialisation check.
+     * @param {string} namespace - the namespace being added, updated or removed
+     * @return {boolean} true if `namespace` should be mirrored
+     * @private
+     */
+    _rustMirrorEligible(namespace: any): boolean;
+    /**
+     * Runs a rustHandle mirror write, swallowing any error it throws
+     * (P4-08; PORTING.md's context-trait fallback for the W tests this
+     * group's ledger names): a stub `ModelFile` a white-box test builds
+     * with `sinon.createStubInstance` answers `getAst()`/`getDefinitions()`
+     * with whatever that test configured, often not a real AST, so mirroring
+     * it can fail even though the TS-side write above already succeeded and
+     * must not be undone by this best-effort cache sync. `resolveType`,
+     * `derivesFrom`, `isAssignableTo` and `getNamespaces` fall back to their
+     * TS body themselves when a stale or partial mirror makes rustHandle
+     * unusable for a given call.
+     *
+     * A swallowed failure permanently marks `_rustMirrorStale` (review on
+     * P4-08, accordproject/concerto-rust#67): the write that failed may have
+     * been an *update* to a namespace rustHandle already had, so the
+     * `getNamespaces().length` parity check in `_rustMirrorTrustworthy`
+     * alone cannot see it -- that check's count would still match, and
+     * every later read would then silently answer from that namespace's old
+     * content instead of falling back to TS. Only `clearModelFiles` (a fresh
+     * `rustHandle`) clears the flag.
+     * @param {Function} fn - the mirror write to run
+     * @private
+     */
+    _mirrorToRust(fn: any): void;
+    /**
+     * Whether `rustHandle`'s mirror is complete enough to answer a read
+     * (P4-08): `_rustMirrorStale` catches a swallowed write failure of any
+     * kind (add, update or delete -- see `_mirrorToRust`), and a
+     * content-based parity check against `this.modelFiles`, the source of
+     * truth `_mirrorToRust` can never make stale, is kept as a
+     * belt-and-braces check for any divergence that reaches rustHandle by a
+     * path other than `_mirrorToRust` (none exists today, but a read that
+     * trusts rustHandle without it could silently answer from an incomplete
+     * or differently-shaped model -- wrong, not merely absent, for
+     * `isAssignableTo`/`derivesFrom`'s boolean results in particular, which
+     * do not otherwise surface a mismatch as a thrown error the caller
+     * would catch and fall back from). Comparing the namespace *sets*,
+     * not just their sizes, matters for exactly the case a white-box test
+     * creates by assigning `this.modelFiles` directly (bypassing
+     * `addModelFile`/`_mirrorToRust` entirely): a `rustHandle` that mirrors
+     * only the two system models could otherwise coincidentally match the
+     * count of a manager whose `modelFiles` was hand-populated with two
+     * unrelated stub namespaces, and a length-only check would wrongly
+     * call that trustworthy.
+     * @return {boolean} true if rustHandle mirrors exactly the namespaces TS has
+     * @private
+     */
+    _rustMirrorTrustworthy(): boolean;
     /**
      * Throws an error with details about the existing namespace.
      * @param {ModelFile} modelFile The model file that is trying to declare an existing namespace
@@ -2411,6 +2474,17 @@ declare class ModelFile extends Decorated {
      * @returns {boolean} true
      */
     isModelFile(): boolean;
+    /**
+     * The handle of this ModelFile's own namespace in `this.modelManager`'s
+     * `rustHandle` (P4-08), when that mirror is trustworthy
+     * (`BaseModelManager#_rustMirrorTrustworthy`) and already holds this
+     * namespace. `undefined` otherwise -- including for a `ModelFile` built
+     * by a white-box test on a stubbed `modelManager`, whose
+     * `_rustMirrorTrustworthy` is itself undefined and so falsy here.
+     * @return {number | undefined} the handle, or undefined to fall back to TS
+     * @private
+     */
+    _rustHandleId(): number | undefined;
     /**
      * Returns the semantic version
      * @returns {string} the semantic version or null if the namespace for the model file is
