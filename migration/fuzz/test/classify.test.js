@@ -105,6 +105,52 @@ test('DV-017 needs both sides: a TS crash paired with Rust ok, another crash or 
     }
 });
 
+test('a maintainer-accepted signature (DV-018) is expected, not unresolved', () => {
+    for (const [op, rustMessage] of [
+        ['ModelManager.addModelFile', "Invalid decorator. Expected object. Found null File 'x.cto': "],
+        ['ModelManager.fromAst', 'Invalid decorator. Expected object. Found null '],
+        ['ModelFile.validate', 'Invalid decorator. Expected object. Found undefined'],
+    ]) {
+        const cls = classifyCase({ ...CASE, op },
+            verdict(err('TypeError', "Cannot read properties of null (reading 'name')")),
+            verdict(err('IllegalModelException', rustMessage)),
+            expectedDivergence);
+        assert.equal(cls.kind, 'expected', op);
+        assert.equal(cls.expected.dv, 'DV-018');
+    }
+});
+
+test('DV-018 needs both sides: the decorator message with another TS outcome, or the TS crash with another Rust outcome, is unresolved', () => {
+    const crash = err('TypeError', "Cannot read properties of null (reading 'name')");
+    const rejected = err('IllegalModelException', "Invalid decorator. Expected object. Found null File 'x.cto': ");
+    const cases = [
+        // the crash, but Rust accepted (the pre-fix shape)
+        ['ModelManager.addModelFile', crash, OK],
+        // another property read
+        ['ModelManager.addModelFile', err('TypeError', "Cannot read properties of null (reading 'arguments')"), rejected],
+        // TS rejected cleanly rather than crashing
+        ['ModelManager.addModelFile', err('IllegalModelException', 'Duplicate decorator undefined '), rejected],
+        // the crash paired with some other Rust rejection
+        ['ModelManager.addModelFile', crash, err('IllegalModelException', "Decorator Foo has invalid decorator argument. Expected object. Found string, with value \"x\"")],
+        // a different "Found" value, or the right text under another class
+        ['ModelManager.addModelFile', crash, err('IllegalModelException', 'Invalid decorator. Expected object. Found 5 ')],
+        ['ModelManager.addModelFile', crash, err('Error', 'Invalid decorator. Expected object. Found null ')],
+        // not a model-loading op
+        ['Serializer.fromJSON', crash, rejected],
+    ];
+    for (const [op, ts, rust] of cases) {
+        assert.equal(classifyCase({ ...CASE, op }, verdict(ts), verdict(rust), expectedDivergence).kind, 'divergence', `${op} ${JSON.stringify(ts)} ${JSON.stringify(rust)}`);
+    }
+});
+
+test('DV-017 and DV-018 do not claim each other\'s Rust message', () => {
+    const crash = err('TypeError', "Cannot read properties of null (reading 'name')");
+    assert.equal(expectedDivergence({ op: 'ModelManager.fromAst', ts: crash,
+        rust: err('IllegalModelException', 'Invalid decorator. Expected object. Found null ') }).dv, 'DV-018');
+    assert.equal(expectedDivergence({ op: 'ModelManager.fromAst', ts: crash,
+        rust: err('IllegalModelException', 'Relationship home must have a type ') }).dv, 'DV-017');
+});
+
 test('a genuine harness error on the TS side is not skipped past the Rust side', () => {
     const rust = err('IllegalModelException', 'bad');
     const cls = classifyCase(CASE, harness('harness: unresolved blob'), verdict(rust), expectedDivergence);

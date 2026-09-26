@@ -65,7 +65,11 @@ lib/
                 RelationshipProperty with a missing or null `type` on a model-loading
                 op: TS's TypeError "Cannot read properties of undefined|null (reading
                 'name')" paired with Rust's "Relationship <name> must have a type"
-                IllegalModelException. bin/fuzz.js
+                IllegalModelException. The third (DV-018, the same issue and
+                decision) covers a null element in a `decorators` array: the same
+                TS crash, from decorator.ts:139, paired with Rust's "Invalid
+                decorator. Expected object. Found null" IllegalModelException.
+                bin/fuzz.js
                 and bin/triage.js both use it to exclude a matching case *before* it
                 is ever counted as an unresolved divergence.
 bin/
