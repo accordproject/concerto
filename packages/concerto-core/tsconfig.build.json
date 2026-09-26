@@ -1,13 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    // P4-08 (accordproject/concerto-rust#67, coordinator scope on #67: the
-    // public .d.ts surface must stay byte-identical): the rustHandle
-    // mirroring internals (BaseModelManager#rustHandle,
-    // #_rustMirrorStale/_rustMirrorEligible/_mirrorToRust/
-    // _rustMirrorTrustworthy, ModelFile#_rustHandleId) are tagged
-    // `@internal` so they stay out of the emitted (and published) .d.ts
-    // entirely, matching the committed migration/api-snapshot.
     "stripInternal": true
   },
   "exclude": ["node_modules", "features", "dist", "**/*spec.ts", "test", "scripts", "out", "coverage", "webpack.config.js", "src/engine"]
