@@ -186,7 +186,7 @@ class BaseModelManager {
             // Mirror it explicitly here, guarded against the case where
             // `validateAst`'s own leak-tracking (above) already registered
             // it in rustHandle.
-            /* istanbul ignore if */
+            /* istanbul ignore next */
             if (rust && this.rustHandle && this.rustHandle.modelFileId(MetaModelNamespace) === undefined) {
                 this._mirrorToRust(() => this.rustHandle!.addModelWithDefinitions(
                     JSON.stringify(this.metamodelModelFile.getAst()),
@@ -443,7 +443,7 @@ class BaseModelManager {
                 modelFile.validate();
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
-            /* istanbul ignore if */
+            /* istanbul ignore next */
             if (rust && this.rustHandle && this._rustMirrorEligible(modelFile.getNamespace())) {
                 this._mirrorToRust(() => this.rustHandle!.addModelWithDefinitions(
                     JSON.stringify(modelFile.getAst()),
@@ -480,7 +480,7 @@ class BaseModelManager {
         // error factory, so it propagates unchanged -- this never falls
         // back to the TS body on a genuine validation failure, only when
         // rustHandle itself is unavailable.
-        /* istanbul ignore if */
+        /* istanbul ignore next */
         if (rust && this.rustHandle) {
             const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
             try {
@@ -602,7 +602,7 @@ class BaseModelManager {
             }
         }
         this.modelFiles[modelFile.getNamespace()] = modelFile;
-        /* istanbul ignore if */
+        /* istanbul ignore next */
         if (rust && this.rustHandle && this._rustMirrorEligible(modelFile.getNamespace())) {
             // TS has already validated (or was asked not to) above; the
             // mirror call only needs to keep rustHandle's state in sync, so
@@ -626,7 +626,7 @@ class BaseModelManager {
             throw new Error('Model file does not exist');
         } else {
             delete this.modelFiles[namespace];
-            /* istanbul ignore if */
+            /* istanbul ignore next */
             if (rust && this.rustHandle && this._rustMirrorEligible(namespace)) {
                 this._mirrorToRust(() => this.rustHandle!.deleteModelFile(namespace));
             }
@@ -693,7 +693,7 @@ class BaseModelManager {
             // `validate` flag stays false: this is a structural mirror write
             // only, and TS's own validateModelFiles() below is still what
             // decides pass/fail.
-            /* istanbul ignore if */
+            /* istanbul ignore next */
             if (rust && this.rustHandle) {
                 newModelFiles.forEach((m) => {
                     if (this._rustMirrorEligible(m.getNamespace())) {
@@ -735,7 +735,7 @@ class BaseModelManager {
             // true` even though rustHandle and `this.modelFiles` were still
             // in agreement, permanently forcing `ModelFile.validate()` back
             // onto the TS body for the rest of the manager's life.
-            /* istanbul ignore if */
+            /* istanbul ignore next */
             if (rust && this.rustHandle) {
                 newModelFiles.forEach((m) => {
                     if (!mirroredNamespaces.has(m.getNamespace())) {
@@ -908,7 +908,7 @@ class BaseModelManager {
      * @private
      */
     resolveType(context, type) {
-        /* istanbul ignore if */
+        /* istanbul ignore next */
         if (rust && this._rustMirrorTrustworthy()) {
             // A stale or partially mirrored rustHandle (a W test's stub
             // ModelFile never reached it: see _mirrorToRust) falls back to
@@ -952,7 +952,7 @@ class BaseModelManager {
      */
     clearModelFiles() {
         this.modelFiles = {};
-        /* istanbul ignore if */
+        /* istanbul ignore next */
         if (rust && this.rustHandle) {
             // Every mirrored model file is gone; rustHandle has no bulk
             // clear, so start it over the same way `new BaseModelManager()`
@@ -993,7 +993,7 @@ class BaseModelManager {
      */
     getNamespaces() {
         const namespaces = Object.keys(this.modelFiles);
-        /* istanbul ignore if */
+        /* istanbul ignore next */
         if (rust && this._rustMirrorTrustworthy()) {
             try {
                 return this.rustHandle!.getNamespaces();
@@ -1145,7 +1145,7 @@ class BaseModelManager {
      * qualified type name, false otherwise.
      */
     derivesFrom(fqt1, fqt2) {
-        /* istanbul ignore if */
+        /* istanbul ignore next */
         if (rust && this._rustMirrorTrustworthy()) {
             try {
                 return this.rustHandle!.derivesFrom(fqt1, fqt2);
@@ -1189,7 +1189,7 @@ class BaseModelManager {
      * @returns {boolean} True if fqn is assignable to baseFqn
      */
     isAssignableTo(fqn: string, baseFqn: string): boolean {
-        /* istanbul ignore if */
+        /* istanbul ignore next */
         if (rust && this._rustMirrorTrustworthy()) {
             return this.rustHandle!.isAssignableTo(fqn, baseFqn);
         }

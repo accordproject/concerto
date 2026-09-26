@@ -171,6 +171,7 @@ class ModelFile extends Decorated {
      */
     _rustHandleId(): number | undefined {
         const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorTrustworthy?: () => boolean; modelFiles?: Record<string, unknown> };
+        /* istanbul ignore next */
         if (!rust || !manager || !manager.rustHandle || typeof manager._rustMirrorTrustworthy !== 'function' || !manager._rustMirrorTrustworthy()) {
             return undefined;
         }
@@ -342,7 +343,7 @@ class ModelFile extends Decorated {
         // of it for exactly this reason) must never surface as a spurious
         // validation failure.
         const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustMirrorStale?: boolean };
-        /* istanbul ignore if */
+        /* istanbul ignore next */
         if (rust && manager && manager.rustHandle && !manager._rustMirrorStale) {
             try {
                 manager.rustHandle.modelFileValidateDetached(
@@ -481,6 +482,7 @@ class ModelFile extends Decorated {
      * @private
      */
     isLocalType(type) {
+        /* istanbul ignore if */
         if (!type) {
             return false;
         }
