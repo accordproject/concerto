@@ -64,6 +64,17 @@
  * crash *and* Rust's distinctive message, on a model-loading op. A TS
  * `TypeError` paired with any other Rust outcome (including `ok`) stays an
  * unresolved divergence.
+ *
+ * DV-018 (accordproject/concerto-rust#218, the same plan-owner decision) is
+ * the other `(reading 'name')` crash hidden in the stage-2 cluster #3/#5
+ * signature: a `null` element in a `decorators` array, whose
+ * `Decorator.process` reads `this.ast.name` unguarded (decorator.ts:139).
+ * Rust rejects it with `IllegalModelException: Invalid decorator. Expected
+ * object. Found null` in native Rust and, through the `decoratorProcess`
+ * binding, in rust mode (which before the fix accepted the model). The TS
+ * record carries no stack, so the decorator site is identified by Rust's
+ * message, which only that check raises; the pair is required together, as
+ * for DV-017, and any other Rust outcome stays unresolved.
  */
 const EXPECTED = [
     {
@@ -94,6 +105,20 @@ const EXPECTED = [
             if (t.class !== 'TypeError' || !/^Cannot read properties of (undefined|null) \(reading 'name'\)$/.test(t.message)) { return false; }
             return r.class === 'IllegalModelException' && typeof r.message === 'string' &&
                 /^Relationship \S+ must have a type( |$)/.test(r.message);
+        },
+    },
+    {
+        dv: 'DV-018',
+        issue: 'accordproject/concerto-rust#218',
+        description: 'Model loading: a null element in a `decorators` array — TS\'s Decorator.process reads `this.ast.name` unguarded (decorator.ts:139) and throws an uncaught TypeError (Cannot read properties of null (reading \'name\')); Rust\'s IllegalModelException "Invalid decorator. Expected object. Found null" is maintainer-accepted, and not ported.',
+        match(d) {
+            if (typeof d.op !== 'string' || !/^(ModelManager|ModelFile)\./.test(d.op)) { return false; }
+            const t = d.ts && d.ts.error;
+            const r = d.rust && d.rust.error;
+            if (!t || !r) { return false; }
+            if (t.class !== 'TypeError' || !/^Cannot read properties of (undefined|null) \(reading 'name'\)$/.test(t.message)) { return false; }
+            return r.class === 'IllegalModelException' && typeof r.message === 'string' &&
+                /^Invalid decorator\. Expected object\. Found (null|undefined)( |$)/.test(r.message);
         },
     },
 ];

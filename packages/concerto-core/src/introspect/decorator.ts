@@ -130,7 +130,10 @@ class Decorator {
     process() {
         /* istanbul ignore if */
         if (rust) {
-            Object.assign(this, rust.decoratorProcess(this.ast));
+            // `this` lets the binding name `this.getParent().getModelFile()`
+            // in the IllegalModelException it throws for a null node, where
+            // the TS body below crashes (concerto-rust DIVERGENCES.md DV-018).
+            Object.assign(this, rust.decoratorProcess(this.ast, this));
             return;
         }
 
