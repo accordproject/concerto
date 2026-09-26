@@ -1,0 +1,49 @@
+{
+  "_generatedBy": "migration/fuzz/bin/summarize.js over all stage-2 shards' raw divergences.jsonl and expected-divergences.jsonl (via bin/aggregate-shards.js); do not edit by hand",
+  "total_divergences": 38617,
+  "expected_divergences": 46844,
+  "by_op": {
+    "ModelManager.fromAst": 24128,
+    "ModelManager.addModelFile": 14481,
+    "Serializer.fromJSON": 8
+  },
+  "by_class_pair": {
+    "ModelManager.addModelFile | ts=ok rust=TypeError": 7428,
+    "ModelManager.fromAst | ts=IllegalModelException rust=TypeError": 7036,
+    "ModelManager.fromAst | ts=IllegalModelException rust=IllegalModelException": 4571,
+    "ModelManager.fromAst | ts=ok rust=Error": 3010,
+    "ModelManager.addModelFile | ts=ok rust=IllegalModelException": 2637,
+    "ModelManager.addModelFile | ts=IllegalModelException rust=IllegalModelException": 1906,
+    "ModelManager.fromAst | ts=ok rust=TypeError": 1782,
+    "ModelManager.fromAst | ts=BaseException rust=Error": 1595,
+    "ModelManager.fromAst | ts=ok rust=IllegalModelException": 1433,
+    "ModelManager.fromAst | ts=BaseException rust=TypeError": 1337,
+    "ModelManager.fromAst | ts=TypeError rust=TypeError": 1205,
+    "ModelManager.addModelFile | ts=IllegalModelException rust=TypeError": 987,
+    "ModelManager.fromAst | ts=Error rust=TypeError": 847,
+    "ModelManager.addModelFile | ts=ok rust=Error": 808,
+    "ModelManager.fromAst | ts=BaseException rust=IllegalModelException": 506,
+    "ModelManager.fromAst | ts=TypeError rust=IllegalModelException": 346,
+    "ModelManager.fromAst | ts=Error rust=IllegalModelException": 251,
+    "ModelManager.addModelFile | ts=BaseException rust=Error": 191,
+    "ModelManager.addModelFile | ts=TypeError rust=ok": 155,
+    "ModelManager.addModelFile | ts=Error rust=IllegalModelException": 137,
+    "ModelManager.fromAst | ts=ok rust=BaseException": 125,
+    "ModelManager.addModelFile | ts=Error rust=TypeError": 79,
+    "ModelManager.addModelFile | ts=TypeError rust=IllegalModelException": 66,
+    "ModelManager.addModelFile | ts=TypeError rust=TypeError": 53,
+    "ModelManager.fromAst | ts=Error rust=Error": 32,
+    "ModelManager.fromAst | ts=TypeError rust=ok": 32,
+    "ModelManager.addModelFile | ts=BaseException rust=IllegalModelException": 16,
+    "ModelManager.addModelFile | ts=BaseException rust=TypeError": 12,
+    "ModelManager.fromAst | ts=IllegalModelException rust=Error": 9,
+    "Serializer.fromJSON | ts=ok rust=ValidationException": 8,
+    "ModelManager.addModelFile | ts=ok rust=BaseException": 6,
+    "ModelManager.fromAst | ts=IllegalModelException rust=ok": 6,
+    "ModelManager.fromAst | ts=TypeError rust=Error": 5
+  },
+  "expected_by_dv": {
+    "DV-015 (accordproject/concerto-rust#156) | Serializer.fromJSON | ts=TypeError rust=Error": 28683,
+    "DV-015 (accordproject/concerto-rust#156) | Serializer.fromJSON | ts=TypeNotFoundException rust=Error": 18161
+  }
+}

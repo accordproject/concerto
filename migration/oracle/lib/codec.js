@@ -24,7 +24,7 @@
  *   inputs  (decodable):  undefined, number, bigint, date, regexp, map, set,
  *                         dayjs, mm, mmref, self, mfref, mfnew, declref,
  *                         declnew, propref, factory, serializer, typed, blob,
- *                         predicate, decoratorfactory
+ *                         predicate, decoratorfactory, visitor, errnew
  *   outputs (summaries):  the same scalar kinds plus ModelManager, ModelFile,
  *                         Declaration, Property, typed (without handles),
  *                         object, function
@@ -225,6 +225,8 @@ function encodePlain(v, stack = new Set()) {
  *   tracker.mfRecipe(mf)  -> {mm, ast, definitions, fileName} | null
  *   tracker.declRecipe(d) -> {cls, mf, ast} | null   (optional; declarations
  *                            built by a recorded constructor op)
+ *   tracker.errRecipe(e)  -> {cls, args} | null      (optional, task P2-11b;
+ *                            an exception built from plain arguments)
  *
  * @param {object} core module set (lib/core.js)
  * @param {object} tracker recorder tracker
@@ -421,6 +423,12 @@ function makeInputEncoder(core, tracker) {
                 }
                 return out;
             }
+            // A visitor built by lib/encodable.js (task P2-11b); any other
+            // visitor is code, and fails below as a function or instance.
+            const encV = encodable.encodingOf(v);
+            if (encV && encV[M] === 'visitor') {
+                return encV;
+            }
             if (isPlainObject(v)) {
                 if (Object.prototype.hasOwnProperty.call(v, M)) {
                     throw new NonPlain('marker-collision');
@@ -439,6 +447,16 @@ function makeInputEncoder(core, tracker) {
             }
             if (v instanceof core.Typed) {
                 return encTyped(v, ctx, enc);
+            }
+            if (v instanceof Error) {
+                // An exception as an input (task P2-11b: the receiver of
+                // TypeNotFoundException.getTypeName) is rebuilt by its
+                // constructor from the plain arguments it was built with.
+                const r = typeof tracker.errRecipe === 'function' ? tracker.errRecipe(v) : null;
+                if (!r || ownStub(v)) {
+                    throw new NonPlain('error:' + ((v.constructor && v.constructor.name) || 'Error'));
+                }
+                return { [M]: 'errnew', cls: r.cls, args: r.args };
             }
             if (v instanceof core.BaseModelManager) {
                 return encMM(v, ctx);
@@ -890,6 +908,15 @@ function makeDecoder(core, runDerived) {
             return decodeDecl(v, dctx);
         case 'predicate': return encodable.buildPredicate(v);
         case 'decoratorfactory': return encodable.buildDecoratorFactory(core, v);
+        case 'visitor': return encodable.buildVisitor(v);
+        case 'errnew': {
+            const Cls = { TypeNotFoundException: core.TypeNotFoundException, SecurityException: core.SecurityException }[v.cls];
+            if (!Cls || !Array.isArray(v.args)) {
+                throw new HarnessError('malformed errnew node');
+            }
+            const args = v.args.map((a) => decode(a, dctx));
+            return engineCall(() => new Cls(...args));
+        }
         case 'propref': {
             const decl = decodeDecl(v.decl, dctx);
             if (v.part === 'key') {

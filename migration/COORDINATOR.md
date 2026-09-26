@@ -78,3 +78,5 @@ Or run it by hand when convenient.
 - **Upstream, already merged:** concerto-conformance #37 and #38 (the Rust harness).
 
 **Oracle CTO cache (2026-09-25):** the CTO cache is derived from the pinned corpus by `migration/oracle/bin/build-cto-cache.js`, which P2-09b (accordproject/concerto-rust#153) changed. After extracting `oracle-corpus-p107-06aa375`, or whenever that script changes, run `npm ci` in `migration/oracle/reference`, then `node migration/oracle/bin/build-cto-cache.js`. A stale cache shows about 89 false `addModel`/`updateExternalModels` regressions. The fixtures themselves never change.
+
+**Oracle corpus supplement (2026-09-26):** the pin `oracle-corpus-p107-06aa375` is joined by the additive supplement `oracle-corpus-supplement-d842c0ab7` (draft release, maintainer-approved on accordproject/concerto-rust#188, recorded by P2-11b #190). Extract both, supplement second, then rebuild the CTO cache. That gives 16,242 fixtures, with §0.3 coverage at 99.21 / 96.34 / 99.01 / 99.19. The baseline has 66 supplement rows, so a full oracle run needs the supplement.
