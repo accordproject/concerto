@@ -49,6 +49,21 @@
  * DV-009's, not DV-015's — see bin/attribute-owners.js) — that Rust error class/message
  * prefix is the narrow, reliable discriminator for "this is the $class type
  * check", regardless of which TS-side shape it paired with.
+ *
+ * DV-017 (accordproject/concerto-rust#218, plan-owner decision comment
+ * 5847576809) is the model-loading counterpart: a `RelationshipProperty`
+ * with a missing or `null` `type` crashes TS's `Property.process`
+ * (`this.ast.type.name`, property.ts:165) with an uncaught `TypeError`
+ * from the `ModelFile` constructor, and Rust instead rejects it with
+ * `IllegalModelException: Relationship <name> must have a type` — in
+ * native Rust and, through the `propertyProcess` binding, in rust mode
+ * (which before the fix accepted the model via the stale-mirror fallback:
+ * P5-05 stage-2 clusters #2-#5, 187 cases across
+ * `ModelManager.addModelFile` and `ModelManager.fromAst`). As with DV-015,
+ * the discriminator is both sides together: TS's exact `(reading 'name')`
+ * crash *and* Rust's distinctive message, on a model-loading op. A TS
+ * `TypeError` paired with any other Rust outcome (including `ok`) stays an
+ * unresolved divergence.
  */
 const EXPECTED = [
     {
@@ -65,6 +80,20 @@ const EXPECTED = [
             const crash = t.class === 'TypeError' && t.message === 'fqn.lastIndexOf is not a function';
             const arrayResolved = t.class === 'TypeNotFoundException' && typeof t.message === 'string' && t.message.startsWith('Namespace is not defined for type');
             return crash || arrayResolved;
+        },
+    },
+    {
+        dv: 'DV-017',
+        issue: 'accordproject/concerto-rust#218',
+        description: 'Model loading: a RelationshipProperty whose `type` is missing or null — TS\'s Property.process reads `this.ast.type.name` unguarded (property.ts:165) and throws an uncaught TypeError (Cannot read properties of undefined|null (reading \'name\')); Rust\'s IllegalModelException "Relationship <name> must have a type" is maintainer-accepted, and not ported.',
+        match(d) {
+            if (typeof d.op !== 'string' || !/^(ModelManager|ModelFile)\./.test(d.op)) { return false; }
+            const t = d.ts && d.ts.error;
+            const r = d.rust && d.rust.error;
+            if (!t || !r) { return false; }
+            if (t.class !== 'TypeError' || !/^Cannot read properties of (undefined|null) \(reading 'name'\)$/.test(t.message)) { return false; }
+            return r.class === 'IllegalModelException' && typeof r.message === 'string' &&
+                /^Relationship \S+ must have a type( |$)/.test(r.message);
         },
     },
 ];
