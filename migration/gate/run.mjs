@@ -530,7 +530,12 @@ const EXPECTED_PIN_FILE_COUNT = 16704;
 const EXPECTED_SUPPLEMENT_FILE_COUNT = 158;
 function countFiles(dir) {
   try {
-    return Number(execFileSync('sh', ['-c', `find "${dir}" -type f | wc -l`], { encoding: 'utf8' }).trim());
+    // -L: opts.oracleFixtures is a symlink into the shared corpus checkout
+    // (worktrees don't duplicate the 16k-file corpus); without -L, BSD find
+    // (macOS) refuses to descend through a symlinked top-level argument and
+    // silently reports 0 files, which previously misread a fully-populated,
+    // canonical corpus as missing.
+    return Number(execFileSync('sh', ['-c', `find -L "${dir}" -type f | wc -l`], { encoding: 'utf8' }).trim());
   } catch {
     return null;
   }
