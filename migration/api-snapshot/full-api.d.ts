@@ -273,7 +273,7 @@ declare class BaseModelManager {
      * @return {ModelFile} registered ModelFile for the namespace or null
      * @private
      */
-    getModelFileByFileName(fileName: any): ModelFile;
+    getModelFileByFileName(fileName: any): ModelFile | undefined;
     /**
      * Get the namespaces registered with the ModelManager.
      * @return {string[]} namespaces - the namespaces that have been registered.
