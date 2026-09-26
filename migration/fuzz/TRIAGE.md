@@ -58,8 +58,15 @@ under `rerunOf` for cross-reference.
 
 These per-shard and per-op totals are, case for case, almost identical to the first
 stage-2 run's (38,617 vs 38,617 divergences; 46,844 vs 46,844 expected — see the
-totals table in the superseded section below). Neither P4-08 nor P2-11b measurably
-changed the TS/Rust divergence rate on this seed set.
+totals table in the superseded section below). **The aggregate total masks a
+regression, not seed noise: see T2b below.** Both stage-2 runs used the same
+deterministic run-seeds (1001-1010), so a cluster present only in the re-run was
+caused by an engine change between `418c72d` and `80581e8`, not by drawing different
+seeds. `results/stage2/divergence-summary.json`'s `by_class_pair` shows
+`ModelManager.fromAst | ts=IllegalModelException rust=IllegalModelException` dropping
+by 97 (4,571 to 4,474) and `ModelManager.fromAst | ts=IllegalModelException rust=ok`
+rising from 6 to 100 — the same 97 cases moved from "both reject" to "Rust now
+accepts", which is what conserves the aggregate total.
 
 `results/stage2/{state.json,commits.json,run-summary.json,divergence-summary.json,
 triage-clusters.json}` are all overwritten in place with this run's output (the
@@ -100,10 +107,29 @@ clusters and minimised reproducers.
 ### T2b: Rust accepts a mutated AST TS rejects — accordproject/concerto-rust#218, 6 clusters, 287 cases
 
 `ts=reject`, `rust=ok`. The more concerning direction: Rust silently accepts a model
-TS's validation refuses (`Duplicate decorator`), plus a few where TS itself crashes on
-an unguarded field (arguably a TS bug, not a Rust permissiveness bug — #218's body
-flags this for the plan owner's judgement). Nearly identical to the first run's bucket
-(5 clusters, 193 cases).
+TS's validation refuses, plus a few where TS itself crashes on an unguarded field
+(arguably a TS bug, not a Rust permissiveness bug — #218's body flags this for the
+plan owner's judgement).
+
+**Five of the six clusters (190 cases) recur unchanged from the first run's bucket (5
+clusters, 193 cases).** The sixth is new, and it is a regression, not the same theme
+reached by different run seeds: `ModelManager.fromAst | ts=error(IllegalModelException)
+"Duplicate decorator undefined " | rust=ok`, 97 cases, minimised to
+`models[1].decorators = "💥emoji"` on
+`data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json`. This exact signature does
+not appear anywhere among the first run's 5 `ts=reject/rust=ok` clusters (193 cases
+total) — compare `results/stage2/triage-clusters.json` at `80581e8` against the same
+file at `HEAD~1` (concerto-rust `418c72d`). `results/stage2/divergence-summary.json`
+corroborates it independently: `ModelManager.fromAst |
+ts=IllegalModelException rust=IllegalModelException` drops by 97 (4,571 to 4,474)
+while `ModelManager.fromAst | ts=IllegalModelException rust=ok` rises from 6 to 100.
+So between concerto-rust `418c72d` and `80581e8`, Rust started silently accepting a
+model with a malformed `decorators` field that it used to reject with a matching
+`IllegalModelException` — the dangerous direction for a faithful port. The only engine
+change in that range is P4-08 (#164, converting `ModelFile`/`BaseModelManager` to
+views), so this cluster is most likely a P4-08 regression, not backlog; #218 should be
+read with that correction (a comment has been added there), and the coordinator should
+route it as a regression rather than as ordinary T2b backlog.
 
 ### T2c: both reject, class or message differs — accordproject/concerto-rust#219, 1,009 clusters, 21,093 cases
 
@@ -132,11 +158,16 @@ Both halves hold: `results/stage2/triage-clusters.json` has 0 `unresolved` and 0
 #67 now carries an owner and a filed issue (#217, #218 or #219).
 
 **The issue's own exit condition — 1,000,000 cases with no unresolved divergence — is
-still not met.** Neither P4-08 nor P2-11b changed the T2 divergence rate, so 38,617
-cases across 1,086 clusters still diverge; they are now tracked (not deferred), not
-resolved. Per the coordinator's stage-2 rule, the report merges and the issue goes back
-to `mig:blocked`, this time waiting on #217/#218/#219 rather than on #67/#190. There is
-nothing further this task can shard or re-run: three fresh, unowned bugs is the actual
+still not met.** The aggregate T2 divergence rate is essentially unchanged (38,617
+cases across 1,086 clusters), but that total is not evidence P4-08/P2-11b made no
+difference: it hides a genuine regression in T2b (above), where a 97-case cluster
+moved from "Rust correctly rejects" to "Rust silently accepts" between `418c72d` and
+`80581e8`, most likely introduced by P4-08. The cases are now tracked (not deferred),
+not resolved. Per the coordinator's stage-2 rule, the report merges and the issue goes
+back to `mig:blocked`, this time waiting on #217/#218/#219 rather than on #67/#190,
+with #218 flagged for the coordinator to route the regressed cluster ahead of ordinary
+backlog. There is nothing further this task can shard or re-run: three fresh, unowned
+bugs — one of them a regression — is the actual
 finding, not an artefact of the harness or the corpus.
 
 # Stage 2, first run (superseded by the re-run above)
