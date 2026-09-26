@@ -76,6 +76,35 @@ test('a maintainer-accepted signature (DV-015) is expected, not unresolved', () 
     assert.equal(cls.expected.dv, 'DV-015');
 });
 
+test('a maintainer-accepted signature (DV-017) is expected, not unresolved', () => {
+    for (const [op, value] of [['ModelManager.addModelFile', 'undefined'], ['ModelManager.fromAst', 'null']]) {
+        const cls = classifyCase({ ...CASE, op },
+            verdict(err('TypeError', `Cannot read properties of ${value} (reading 'name')`)),
+            verdict(err('IllegalModelException', "Relationship dept must have a type File 'x.cto': line 5 column 3, to line 6 column 1. ")),
+            expectedDivergence);
+        assert.equal(cls.kind, 'expected', op);
+        assert.equal(cls.expected.dv, 'DV-017');
+    }
+    // No file name: the IllegalModelException constructor still appends ' '.
+    assert.equal(expectedDivergence({ op: 'ModelManager.fromAst',
+        ts: err('TypeError', "Cannot read properties of undefined (reading 'name')"),
+        rust: err('IllegalModelException', 'Relationship home must have a type ') }).dv, 'DV-017');
+});
+
+test('DV-017 needs both sides: a TS crash paired with Rust ok, another crash or another op is unresolved', () => {
+    const crash = err('TypeError', "Cannot read properties of undefined (reading 'name')");
+    const rejected = err('IllegalModelException', 'Relationship home must have a type ');
+    const cases = [
+        ['ModelManager.fromAst', crash, OK],
+        ['ModelManager.fromAst', err('TypeError', "Cannot read properties of undefined (reading 'type')"), rejected],
+        ['ModelManager.fromAst', crash, err('IllegalModelException', 'Relationship must have a type ')],
+        ['Serializer.fromJSON', crash, rejected],
+    ];
+    for (const [op, ts, rust] of cases) {
+        assert.equal(classifyCase({ ...CASE, op }, verdict(ts), verdict(rust), expectedDivergence).kind, 'divergence', `${op} ${JSON.stringify(rust)}`);
+    }
+});
+
 test('a genuine harness error on the TS side is not skipped past the Rust side', () => {
     const rust = err('IllegalModelException', 'bad');
     const cls = classifyCase(CASE, harness('harness: unresolved blob'), verdict(rust), expectedDivergence);
