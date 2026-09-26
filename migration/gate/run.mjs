@@ -408,7 +408,14 @@ function stepOracleWasm(opts, reportDir) {
   const res = run(
     'node',
     [path.join(MIGRATION_ROOT, 'oracle', 'bin', 'replay.js'), '--engine', adapterPath, '--report', reportPath],
-    { cwd: CONCERTO_ROOT, env: { CONCERTO_ENGINE_MODULE: engineCjs }, timeoutMs: 20 * 60 * 1000, logFile }
+    // 20 minutes was measured against a smaller pre-supplement corpus and is
+    // no longer enough for the full pin+supplement corpus (16,862 fixtures
+    // replayed one at a time through the JS/WASM binding, each paying the
+    // WASM call-boundary cost): a P5-01 full-gate run hit this timeout
+    // (SIGTERM, no report written) even though the leg itself was still
+    // making progress. Widened so a real hang still gets caught well short
+    // of an agent turn's own limits.
+    { cwd: CONCERTO_ROOT, env: { CONCERTO_ENGINE_MODULE: engineCjs }, timeoutMs: 90 * 60 * 1000, logFile }
   );
   let replay = null;
   if (fs.existsSync(reportPath)) replay = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
@@ -510,29 +517,54 @@ function stepOracleReferenceInstall(reportDir) {
 // Corpus provenance check (never trust a corpus that isn't the canonical one)
 // ---------------------------------------------------------------------------
 const CANONICAL_CORPUS_SHA256 = 'e8a2bf72c7775a2d45123dea7b6ff897823c74a108603f5412251ced2619fce1';
+// Pin (oracle-corpus-p107-06aa375): the tarball extracted at the corpus root.
+const EXPECTED_PIN_FILE_COUNT = 16704;
+// Maintainer-approved additive supplement (issue 188, recorded by task
+// P2-11b): oracle-corpus-supplement-d842c0ab7 adds fixtures/supplement/ —
+// 157 new gap-driver fixtures plus its own manifest.json (158 files) — on
+// top of the pin, without changing any pinned file. A full §0 gate needs
+// the supplement present (baseline.tsv has 66 supplement rows and fails
+// "baselined fixtures missing" without it), so this check requires both
+// parts, counted separately so a corrupt pin can't hide behind a present
+// supplement or vice versa.
+const EXPECTED_SUPPLEMENT_FILE_COUNT = 158;
+function countFiles(dir) {
+  try {
+    return Number(execFileSync('sh', ['-c', `find "${dir}" -type f | wc -l`], { encoding: 'utf8' }).trim());
+  } catch {
+    return null;
+  }
+}
 function stepCorpusProvenance(opts) {
   const manifestPath = path.join(opts.oracleFixtures, 'manifest.json');
+  const supplementDir = path.join(opts.oracleFixtures, 'supplement');
   const exists = fs.existsSync(opts.oracleFixtures);
-  let fileCount = null;
-  if (exists) {
-    try {
-      fileCount = Number(execFileSync('sh', ['-c', `find "${opts.oracleFixtures}" -type f | wc -l`], { encoding: 'utf8' }).trim());
-    } catch { /* leave null */ }
-  }
-  const expectedFileCount = 16704;
+  const supplementPresent = fs.existsSync(supplementDir);
+  const fileCount = exists ? countFiles(opts.oracleFixtures) : null;
+  const supplementFileCount = supplementPresent ? countFiles(supplementDir) : 0;
+  const pinFileCount = fileCount != null && supplementFileCount != null ? fileCount - supplementFileCount : null;
+  const expectedFileCount = EXPECTED_PIN_FILE_COUNT + EXPECTED_SUPPLEMENT_FILE_COUNT;
   return {
     name: 'oracle corpus provenance (must be the canonical corpus, never self-recorded)',
-    // A pass needs the fixtures directory to exist AND have exactly the
-    // canonical file count — this never re-hashes the corpus (that was
-    // verified once at extraction time, see CANONICAL_CORPUS_SHA256 below),
-    // but a wrong or missing/partial corpus must not read as a pass.
-    ok: exists && fileCount === expectedFileCount,
+    // A pass needs the fixtures directory to exist, its non-supplement file
+    // count to match the canonical pin exactly, AND (required for a full
+    // gate) the maintainer-approved supplement to be present with exactly
+    // its own recorded file count — this never re-hashes the corpus (that
+    // was verified once at extraction time, see CANONICAL_CORPUS_SHA256
+    // below), but a wrong, missing, partial or supplement-less corpus must
+    // not read as a pass.
+    ok: exists && pinFileCount === EXPECTED_PIN_FILE_COUNT && supplementPresent && supplementFileCount === EXPECTED_SUPPLEMENT_FILE_COUNT,
     fixtures_dir: opts.oracleFixtures,
     exists,
     file_count: fileCount,
     expected_file_count: expectedFileCount,
+    pin_file_count: pinFileCount,
+    expected_pin_file_count: EXPECTED_PIN_FILE_COUNT,
+    supplement_present: supplementPresent,
+    supplement_file_count: supplementFileCount,
+    expected_supplement_file_count: EXPECTED_SUPPLEMENT_FILE_COUNT,
     manifest_present: fs.existsSync(manifestPath),
-    note: 'This checks the fixtures directory is populated as expected; it does not re-hash the corpus (that was verified once at extraction time against ' + CANONICAL_CORPUS_SHA256 + ').',
+    note: 'This checks the fixtures directory is populated as expected; it does not re-hash the corpus (that was verified once at extraction time against ' + CANONICAL_CORPUS_SHA256 + ', plus the supplement\'s own pinned content hash 7b9be1de66690be63e689b3bf0feb4583ed6cd9597099fdec1acb32f87736e71).',
   };
 }
 
