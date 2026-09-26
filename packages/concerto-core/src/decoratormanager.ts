@@ -180,6 +180,42 @@ class DcsIndexWrapper {
 }
 
 /**
+ * Copies every own field of `source` onto `target`, recursing into matching
+ * nested objects and arrays so nested references already held by a caller
+ * (for example a DecoratorCommandSet an outer scope kept a reference to) end
+ * up mutated in place rather than replaced. Not a DecoratorManager member on
+ * purpose: it is an engine-shim implementation detail (used only in rust
+ * mode, by `DecoratorManager.migrateTo` below) and must not appear in
+ * DecoratorManager's public API (`migration/api-snapshot`) the way a
+ * `static` method -- even one tagged `@private` in its jsdoc -- would. Used
+ * because the WASM binding computes the migrated value but, unlike the
+ * ts-mode body, does not mutate the JS object it was given: this reproduces
+ * that in-place mutation so rust mode has the same observable effect on its
+ * argument as ts mode.
+ * @param {*} target the object (or array) to mutate in place
+ * @param {*} source the value to copy onto it
+ * @returns {*} target
+ */
+// Rust-mode only, so excluded from ts-mode coverage (PORTING.md 1.5; P4-09a).
+/* istanbul ignore next */
+function assignDeep(target, source) {
+    if (Array.isArray(target) && Array.isArray(source)) {
+        target.forEach((item, i) => assignDeep(item, source[i]));
+        return target;
+    }
+    if (target instanceof Object && source instanceof Object) {
+        for (const key of Object.keys(source)) {
+            if (target[key] instanceof Object && source[key] instanceof Object) {
+                assignDeep(target[key], source[key]);
+            } else {
+                target[key] = source[key];
+            }
+        }
+    }
+    return target;
+}
+
+/**
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
  * @memberof module:concerto-core
@@ -234,7 +270,11 @@ class DecoratorManager {
     static migrateTo(decoratorCommandSet, version) {
         /* istanbul ignore if */
         if (rust) {
-            return rust.decoratorManagerMigrateTo(decoratorCommandSet);
+            // decoratormanager.ts's own ts-mode body below (and callers,
+            // e.g. decorateModels's migrate step) rely on decoratorCommandSet
+            // being mutated in place, not just on the return value.
+            assignDeep(decoratorCommandSet, rust.decoratorManagerMigrateTo(decoratorCommandSet));
+            return decoratorCommandSet;
         }
         if (decoratorCommandSet instanceof Object) {
             for (let key in decoratorCommandSet) {
@@ -423,6 +463,18 @@ class DecoratorManager {
 
         /* istanbul ignore if */
         if (rust) {
+            // Only the migrate step of migrateAndValidate mutates its
+            // decoratorCommandSets argument (validate only throws); run it
+            // here so decoratorCommandSet (this method's own argument, still
+            // referenced by the caller) ends up migrated in place exactly as
+            // the ts-mode body's migrateAndValidate call below leaves it.
+            if (options?.migrate) {
+                decoratorCommandSets.forEach((commandSet, index) => {
+                    if (this.canMigrate(commandSet, DCS_VERSION)) {
+                        decoratorCommandSets[index] = this.migrateTo(commandSet, DCS_VERSION);
+                    }
+                });
+            }
             return (loadEngine('./engine/views') as EngineViews).decoratorManagerDecorateModels(modelManager, decoratorCommandSets, options);
         }
 
