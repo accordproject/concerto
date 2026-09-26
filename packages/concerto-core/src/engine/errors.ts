@@ -39,10 +39,27 @@ interface ErrorPayload {
     location?: unknown;
     errorType?: string;
     modelFile?: unknown;
+    // Whether the engine's own contract (concerto-wasm `throw`, mirroring
+    // concerto-core's `attach_model_file`) considers this `IllegalModel`
+    // error one that TS attaches a model file to at all. False for the
+    // handful of checks TS never attaches a file to (e.g.
+    // `ModelFile.validate`'s duplicate-class-name scan) even though a caller
+    // that owns a `ModelFile` (`this`) is available to attach — see
+    // `ModelFile.validate()` (modelfile.ts), the only caller that consults
+    // this, since `p.modelFile` above is never populated for that binding.
+    needsModelFile?: boolean;
 }
 
 const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
-    IllegalModel: (p) => new IllegalModelException(p.message, p.modelFile, p.location),
+    IllegalModel: (p) => {
+        const err = new IllegalModelException(p.message, p.modelFile, p.location);
+        // Carried through as a plain property (not a constructor argument):
+        // `IllegalModelException`'s constructor is public API TS callers
+        // construct directly too, and does not itself need this internal
+        // engine-to-caller signal.
+        (err as unknown as { needsModelFile?: boolean }).needsModelFile = p.needsModelFile;
+        return err;
+    },
     // `TypeNotFoundException(typeName, message)`: `typeName` travels in
     // `params.typeName` (concerto-rust error/mod.rs `ContractError::type_not_found`),
     // separately from the rendered `message` the constructor would otherwise

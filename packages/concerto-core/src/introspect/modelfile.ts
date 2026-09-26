@@ -364,7 +364,23 @@ class ModelFile extends Decorated {
                     // validate() body (below) produces for the identical
                     // failure -- delegating to Rust must not change the
                     // shape of the exception callers see.
-                    if (e.getFileName() !== this.getName()) {
+                    //
+                    // But that is only true for most of the checks Rust runs
+                    // here -- TS itself never attaches a file to the one
+                    // check just below, the duplicate-class-name scan
+                    // (`Duplicate class name ${fqn}`, thrown with no second
+                    // argument at all). `needsModelFile` (errors.ts's
+                    // ErrorPayload, set from the engine's own
+                    // `err.model_file.is_some()`) is the contract's own
+                    // record of which case this is: true for the general
+                    // case above (imports, per-declaration validation, ...),
+                    // false for that one check. A filename mismatch alone
+                    // cannot tell the two apart, since Rust never has a JS
+                    // `ModelFile` to attach either way (`e.getFileName()` is
+                    // always unset here) -- so `needsModelFile === false`
+                    // is re-thrown as-is, and only the general case re-wraps.
+                    const needsModelFile = (e as unknown as { needsModelFile?: boolean }).needsModelFile;
+                    if (needsModelFile !== false && e.getFileName() !== this.getName()) {
                         throw new IllegalModelException(e.getShortMessage(), this, e.getFileLocation());
                     }
                     throw e;
