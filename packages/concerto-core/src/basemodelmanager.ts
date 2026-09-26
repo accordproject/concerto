@@ -992,7 +992,16 @@ class BaseModelManager {
      * @return {ModelFile} registered ModelFile for the namespace or null
      * @private
      */
-    getModelFileByFileName(fileName) {
+    getModelFileByFileName(fileName): ModelFile {
+        /* istanbul ignore next */
+        if (rust && this._rustMirrorTrustworthy()) {
+            try {
+                const namespace = this.rustHandle!.modelManagerGetModelFileByFileName(fileName);
+                return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
+            } catch (e) {
+                debug('getModelFileByFileName', 'rustHandle.modelManagerGetModelFileByFileName failed, falling back to the TS body', e);
+            }
+        }
         return this.getModelFiles().filter(mf => mf.getName() === fileName)[0];
     }
 

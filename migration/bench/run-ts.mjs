@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-// The one documented TS benchmark command for task P5-04a.
+// The one documented TS benchmark command, originally for task P5-04a and
+// extended by task P5-04 (accordproject/concerto-rust#75) to also drive the
+// Rust-backed concerto-core through the same public API.
 //
 //   node migration/bench/run-ts.mjs [--samples N] [--warmup N] [--out FILE]
 //
@@ -9,11 +11,31 @@
 // lib/timeit.mjs; no new dependency is added, since this task's owned path
 // is `migration/bench/` only).
 //
-// Workloads (see the plan, task P5-04a):
+// CONCERTO_ENGINE=rust (task P5-04): runs the exact same workloads through
+// the WASM-backed Rust engine instead of the TS reference implementation -
+// concerto-core's own engine shim (packages/concerto-core/src/engine/)
+// reads this variable, so no code here changes; only the built dist/
+// behaves differently. This is the "views" path (through concerto-core's
+// public API, with the usual TS<->WASM boundary crossings per call), which
+// is a different, and currently much less favourable, comparison than the
+// Rust crate's own criterion benches (concerto-rust's benches/, which call
+// concerto-core directly, no TS or WASM involved) - see this directory's
+// README and RESULTS.md for both numbers and what each one means. Needs
+// `@accordproject/concerto-engine` built and linked first -
+// packages/concerto-engine/README.md.
+//
+// Workloads (see the plan, tasks P5-04a and P5-04):
 //   1. load_validate  - load, then validate, each of three model sets.
 //   2. validate_ast   - ModelManager#validateAst over the same model sets.
-//   3. instance_validate - TS only for now (the Rust side follows P3-01):
-//      Serializer#fromJSON + Resource#validate over generated instances.
+//   3. instance_validate - generates 500 instances of a small synthetic
+//      concept and times Serializer#fromJSON (populate+validate) and
+//      Resource#validate() on its own. Under CONCERTO_ENGINE=rust this
+//      exercises concerto-core's instance validator (task P3-01) through
+//      the same TS entry points; there is still no Rust JSONPopulator (see
+//      concerto-rust's instance_validate.rs bench docs), so fromJSON's
+//      populate step is TS-only work even in rust mode - only the combined
+//      fromJSON number and validate_only are comparable to the ts-mode run
+//      of this same script, not to the Rust crate's own criterion number.
 //
 // Prints a markdown table to stdout and writes the full JSON results to
 // `--out` (default: migration/bench/results/<timestamp>-ts.json).
@@ -128,9 +150,15 @@ function benchValidateAst(ModelManager, set, sampleOpts) {
     // the subset that currently passes, same as the Rust harness does for
     // concerto-validate-rs, rather than let one file's edge case sink the
     // whole model set's timing.
-    const supported = set.filter(({ ast }) => {
+    //
+    // CONCERTO_ENGINE=rust (task P5-04, accordproject/concerto-rust#75):
+    // `BaseModelManager#validateAst`'s rust-delegating branch also calls
+    // `modelFile.getName()` (see basemodelmanager.ts), which the TS branch
+    // this fake stood in for never needed - the stub gets a `getName` too,
+    // so the same call works under either engine.
+    const supported = set.filter(({ name, ast }) => {
         try {
-            mm.validateAst({ getAst: () => ast });
+            mm.validateAst({ getAst: () => ast, getName: () => name });
             return true;
         } catch {
             return false;
@@ -149,8 +177,8 @@ function benchValidateAst(ModelManager, set, sampleOpts) {
 
     const result = timeit(
         () => {
-            for (const { ast } of supported) {
-                mm.validateAst({ getAst: () => ast });
+            for (const { name, ast } of supported) {
+                mm.validateAst({ getAst: () => ast, getName: () => name });
             }
         },
         { ...sampleOpts, n: supported.length },
@@ -248,6 +276,12 @@ function main() {
             node: process.version,
         },
         concerto_commit: gitCommit(REPO_ROOT),
+        // task P5-04 (accordproject/concerto-rust#75): which engine served
+        // concerto-core's public API for this run - 'ts' (the default) or
+        // 'rust' (CONCERTO_ENGINE=rust, the WASM-backed engine, see
+        // packages/concerto-core/src/engine/). Recorded so a results file
+        // is self-describing without cross-checking how it was invoked.
+        concerto_engine: process.env.CONCERTO_ENGINE === 'rust' ? 'rust' : 'ts',
         sample_opts: sampleOpts,
         workloads: {},
     };
@@ -294,7 +328,7 @@ function main() {
     lines.push(`| instance_validate | (synthetic) | ${iv.n} | fromJSON (populate+validate) | ${(iv.populate_and_validate.median_ms * 1000).toFixed(1)} µs | ${(iv.populate_and_validate.cv * 100).toFixed(1)}% |`);
     lines.push(`| instance_validate | (synthetic) | ${iv.n} | resource.validate() | ${(iv.validate_only.median_ms * 1000).toFixed(1)} µs | ${(iv.validate_only.cv * 100).toFixed(1)}% |`);
 
-    console.log(`# TS benchmark results (${results.recorded_at})\n`);
+    console.log(`# TS benchmark results (${results.recorded_at}), engine=${results.concerto_engine}\n`);
     console.log(`Node ${results.machine.node} on ${results.machine.cpus} (${results.machine.cpu_count} cpus), concerto@${results.concerto_commit?.slice(0, 12)}\n`);
     console.log(lines.join('\n'));
 
