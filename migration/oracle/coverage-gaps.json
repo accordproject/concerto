@@ -1,6 +1,6 @@
 {
  "summary": {
-  "generated_at": "2026-09-26T15:31:04.243Z",
+  "generated_at": "2026-09-26T22:33:49.359Z",
   "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
   "corpus": {
    "statements": {
@@ -28,13 +28,13 @@
   "corpus_src": {
    "statements": {
     "pct": 99.23,
-    "covered": 3518,
-    "total": 3545
+    "covered": 3520,
+    "total": 3547
    },
    "branches": {
-    "pct": 96.23,
-    "covered": 1868,
-    "total": 1941
+    "pct": 96.24,
+    "covered": 1869,
+    "total": 1942
    },
    "functions": {
     "pct": 99.01,
@@ -43,13 +43,13 @@
    },
    "lines": {
     "pct": 99.22,
-    "covered": 3463,
-    "total": 3490
+    "covered": 3465,
+    "total": 3492
    }
   },
   "corpus_reference_vs_src": {
    "branch_layout_mismatches": 669,
-   "branch_hit_disagreements": 198,
+   "branch_hit_disagreements": 201,
    "disagreements": [
     {
      "file": "src/basemodelmanager.ts",

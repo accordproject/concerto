@@ -290,6 +290,45 @@ function stepCoreSuiteRust(opts, reportDir) {
 }
 
 // ---------------------------------------------------------------------------
+// Step: §0.6 cargo-mutants catch rate on the validation modules. The sweep
+// itself is task P5-06's own long-running job (cargo-mutants over 420
+// mutants takes well over the 10-minute budget for this script), not
+// something this gate re-runs; P5-06 (accordproject/concerto-rust#183) has
+// since landed, so this reads its recorded result from
+// concerto-core/MUTANTS.md's summary table rather than reporting it as not
+// run.
+// ---------------------------------------------------------------------------
+function stepCargoMutants(opts) {
+  const name = 'cargo-mutants on validation modules (§0.6 catch rate)';
+  const mutantsFile = path.join(opts.rustRoot, 'concerto-core', 'MUTANTS.md');
+  if (!fs.existsSync(mutantsFile)) {
+    return { name, na: `${mutantsFile} does not exist — cargo-mutants (P5-06) has not landed` };
+  }
+  const text = fs.readFileSync(mutantsFile, 'utf8');
+  const m = text.match(
+    /\|\s*\*\*Total\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*([\d.]+)%\*\*\s*\|/
+  );
+  if (!m) {
+    return { name, na: `could not parse the summary table in ${mutantsFile}` };
+  }
+  const [, total, caught, missed, unviable, catchRatePct] = m;
+  const floorPct = 85;
+  const meetsFloor = Number(catchRatePct) >= floorPct;
+  return {
+    name,
+    ok: meetsFloor,
+    source: 'concerto-core/MUTANTS.md (accordproject/concerto-rust#183, P5-06)',
+    total: Number(total),
+    caught: Number(caught),
+    missed: Number(missed),
+    unviable: Number(unviable),
+    catch_rate_pct: Number(catchRatePct),
+    floor_pct: floorPct,
+    meets_floor: Number(catchRatePct) >= floorPct,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Step: native oracle harness explicitly, for a clean pass/fail independent
 // of status.mjs's own cargo test --workspace (§0.3 native leg)
 // ---------------------------------------------------------------------------
@@ -599,12 +638,11 @@ async function main() {
   }
   if (!opts.skipWasm) steps.oracle_wasm = stepOracleWasm(opts, reportDir);
 
-  // §0.6 cargo-mutants (validation modules) is not run by this script: it is
-  // task P5-06's own long-running job, not part of the mechanical dry run.
-  steps.cargo_mutants = {
-    name: 'cargo-mutants on validation modules (§0.6 catch rate)',
-    na: 'not run by this dry run — long-running, owned by task P5-06; cargo-mutants is installed in this environment for that task to use',
-  };
+  // §0.6 cargo-mutants (validation modules) sweep itself is not re-run by
+  // this script (it is task P5-06's own long-running job), but P5-06
+  // (accordproject/concerto-rust#183) has landed, so read its recorded
+  // result instead of reporting it as not run.
+  steps.cargo_mutants = stepCargoMutants(opts);
 
   // Failure-driven classification (see classify.mjs): every failing step
   // is broken into failing items, each matched against a small, explicit
@@ -626,9 +664,9 @@ async function main() {
   fs.writeFileSync(path.join(reportDir, 'report.json'), JSON.stringify(report, null, 2) + '\n');
 
   const lines = [];
-  lines.push(`# Gate dry run — ${report.generated_at}`);
+  lines.push(`# Gate report — ${report.generated_at}`);
   lines.push('');
-  lines.push('Dry run of migration/gate/run.mjs (task P5-01a). Not the final gate (P5-01). Each failing step is broken into failing items; an item is expected-pending only if it is in a known, owned set (migration/gate/classify.mjs), otherwise unexpected.');
+  lines.push('Output of migration/gate/run.mjs (built for task P5-01a; also used, unchanged, as the P5-01 final-gate runner). Each failing step is broken into failing items; an item is expected-pending only if it is in a known, owned set (migration/gate/classify.mjs), otherwise unexpected.');
   lines.push('');
   lines.push(`- skip flags used: ${skipped.length ? skipped.join(', ') : 'none (every step enabled)'}`);
   lines.push('');

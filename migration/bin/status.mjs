@@ -762,6 +762,38 @@ function collectConformance(repoPath, logDir, fast) {
 }
 
 // ---------------------------------------------------------------------------
+// §0.6 cargo-mutants catch rate on the validation modules. The 420-mutant
+// sweep itself is task P5-06's own long-running job, not something this
+// script runs; P5-06 (accordproject/concerto-rust#183) has landed, so this
+// reads its recorded result from concerto-core/MUTANTS.md's summary table.
+// ---------------------------------------------------------------------------
+
+function collectMutants(rustRoot) {
+  const mutantsFile = path.join(rustRoot, 'concerto-core', 'MUTANTS.md');
+  if (!fs.existsSync(mutantsFile)) {
+    return na(`${mutantsFile} does not exist — cargo-mutants (P5-06) has not landed`);
+  }
+  const text = fs.readFileSync(mutantsFile, 'utf8');
+  const m = text.match(
+    /\|\s*\*\*Total\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*([\d.]+)%\*\*\s*\|/
+  );
+  if (!m) return na(`could not parse the summary table in ${mutantsFile}`);
+  const [, total, caught, missed, unviable, catchRatePct] = m;
+  const floorPct = 85;
+  return {
+    available: true,
+    source: 'concerto-core/MUTANTS.md (accordproject/concerto-rust#183, P5-06)',
+    total: Number(total),
+    caught: Number(caught),
+    missed: Number(missed),
+    unviable: Number(unviable),
+    catch_rate_pct: Number(catchRatePct),
+    floor_pct: floorPct,
+    meets_floor: Number(catchRatePct) >= floorPct,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Worktree management for --at <sha>
 // ---------------------------------------------------------------------------
 
@@ -848,10 +880,7 @@ async function main() {
     const conformanceLogDir = path.join(RUN_LOG_DIR, 'concerto-conformance');
     const conformance = collectConformance(CONFORMANCE_ROOT, conformanceLogDir, opts.fast);
 
-    const mutants = na(
-      'cargo-mutants has not been run in this environment; the ledger/judge self-check is task P0-05, ' +
-        'and the ≥85% catch-rate gate is task P5-06'
-    );
+    const mutants = collectMutants(RUST_ROOT);
 
     const repos = {
       concerto: { path: CONCERTO_ROOT, commit: tryGitSha(CONCERTO_ROOT), commit_used: concertoShaUsed },
