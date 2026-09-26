@@ -1,3 +1,129 @@
+# P5-06b: instance fromJSON and validate() (2026-09-26)
+
+Task P5-06b (accordproject/concerto-rust#227, under the migration plan
+accordproject/concerto-rust#29) worked on the two instance operations only:
+`Serializer.fromJSON` and `Resource.validate()` through the TS public API
+in rust mode, and the crate's instance paths behind them (the populator,
+the factory, `validate_instance`). It builds on P5-06 (the section below).
+Its profile breakdown is on the issue.
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 cores, 15 GiB, Linux (same kind as P5-06) |
+| Toolchain | Node v22.22.2, rustc 1.94.1, wasm-bindgen 0.2.128, binaryen 132 |
+| Before | `concerto` `38c5926dc`, `concerto-rust` `c9ea114`: the integration heads with P5-06 (concerto#1371, concerto-rust#225) merged in, built as-is |
+| After | the P5-06b commits on top (`concerto` `3a4b0d892`, `concerto-rust` `009c298`) |
+| TS-API runs | `results/*-P5-06b-{before,after}-{ts,rust-engine}.json`: two runs of each, `run-ts.mjs` defaults (5 warm-up + 30 samples), before and after back to back |
+| Crate runs | `concerto-rust`'s `benches/results/*-rust-P5-06b-{before,after}.json` (criterion defaults) |
+
+## Through the TS public API (the exit condition's comparison)
+
+Medians, µs per instance (500 instances). Ratios use the mean of the two
+runs, each against the TS runs made next to it.
+
+| Metric | TS before, run 1 / 2 | Rust engine before, run 1 / 2 | TS after, run 1 / 2 | Rust engine after, run 1 / 2 | before / TS | **after / TS** | speed-up |
+|---|---|---|---|---|---|---|---|
+| fromJSON | 7.9 / 8.0 | 45.2 / 44.3 | 8.5 / 7.8 | 19.5 / 19.2 | 5.6× | **2.4×** | 2.3× |
+| resource.validate() | 1.9 / 2.0 | 17.5 / 17.8 | 2.3 / 2.1 | 6.5 / 6.4 | 9.1× | **2.9×** | 2.7× |
+
+**The exit condition (≤ 1.0× the TS reference) is not met.** The best
+ratios reached are 2.4× for fromJSON and 2.9× for resource.validate(). (P5-06
+reported 5.7× and 6.8× against a TS validate() median of 2.75 µs; on this
+run's TS medians, the same P5-06 code is 5.6× and 9.1×.)
+
+## The Rust crate directly
+
+Criterion (`cargo bench`), µs per instance or per model:
+
+| Benchmark | Before | After | Speed-up |
+|---|---|---|---|
+| `validate_instance` (500) | 2.43 | 0.68 | 3.6× |
+| load / validate / `ModelFile::from_json`, every model set | - | - | 0.97× to 1.03× (unchanged, noise) |
+
+`Serializer::from_json` has no criterion bench; the profiling harness
+(the same 500 instances, parsed from JSON text as the binding does, then
+`Serializer::from_json` with `validate: true`, native, release build) gives
+22.2 µs and 332 allocations per instance before, 8.4 µs and 105 after.
+`validate_instance` with its JSON parse drops from 57 allocations to 19.
+
+## What changed
+
+All performance-only. Results and errors are unchanged:
+- The oracle replays 16,242 fixtures (the canonical corpus plus the
+  supplement, CTO cache checked) with 0 regressions, and `baseline.tsv` is
+  unchanged after `ORACLE_UPDATE_BASELINE=1`.
+- The concerto-core suite passes 1,299 of 1,300 in both modes; the one
+  failure is `ModelLoader #loadModelFromUrl` (HTTP 403 in this sandbox), as
+  on the base.
+- A differential run (a scratch script, not committed) gives the same
+  results, errors and resulting own properties in ts and rust mode. It
+  covers fromJSON, with and without validation, over 36 documents, and
+  validate() over 30 resources: valid and invalid ones, a stale
+  `$identifier`, non-finite numbers, nested resources, relationship
+  options, `__proto__` keys and lone surrogates.
+
+The changes, by where the time was going:
+- **The crate's instance paths** (`concerto-core`).
+  - A per-class table (`ClassInfo`: the inherited identifying field, every
+    property with its declaring type, each property's resolved type,
+    `assignFieldDefaults`' values and the identifier's regex validator),
+    cached in the `ModelManager` by declaration handle and dropped with the
+    super-chain cache on every change to the registered files. Only
+    successful answers are kept; anything else takes the uncached path,
+    which raises the same errors as before. The validator, the populator,
+    the factory and `resource::validate` read it, instead of cloning every
+    inherited property and walking the super chain again per instance.
+  - Fewer allocations: property values read in place, the populator's
+    `parameters.path` kept unformatted until a message needs it, the
+    serializer options read in place, `Instance::set` without a new key
+    string for a key it already has, pre-sized maps.
+- **The boundary** (`concerto-wasm`, additive bindings, and the engine
+  shim).
+  - `serializerFromJsonLean`: fromJSON's one call now answers with a lean
+    recipe: the resource's own properties in order, each either an index
+    into the input object's values (when the populated value is exactly
+    that input value) or its wire encoding. `materializeLean` builds the
+    same `Resource`/`ValidatedResource` as `materializeTyped` from it.
+  - A plain input object crosses as its own `JSON.stringify` text: the
+    encoder keeps plain JSON as it is and checks for lone surrogates once,
+    on the text.
+  - The wire text is read straight into the instance values
+    (`parse_wire`), and the serializer options are decoded once per
+    distinct text.
+  - `ValidatedResource.validate()` makes one engine call instead of a TS
+    visitor walk with one call per class lookup and per field:
+    `resourceValidateSimple` for a resource of plain fields (sent already
+    in the validator's shape), `resourceValidateFast` otherwise. It is only
+    taken when the resource's `$validator` is a plain `ResourceValidator`
+    and its model manager resolves its type to the declaration it holds.
+    It answers a boolean: an invalid resource, or one where the walk's
+    `$identifier` write would change anything, goes through the visitor
+    path, which raises and writes exactly as before.
+
+## Why parity is out of reach here
+
+The profile after this change (rust mode, per instance):
+- **resource.validate(), 6.5 µs** against 2.1 µs for the whole TS
+  validate(). Encoding the resource in JS (0.9 µs), copying the UTF-8 text
+  into WASM (0.65 µs) and parsing it into a `serde_json::Value` (1.2 µs)
+  already cost more than the TS reference before any validation runs; the
+  validation itself is 1.35 µs in WASM (0.68 µs natively). D7 keeps
+  instances in TS, so every validate() has to send the instance across.
+- **fromJSON, 19.4 µs** against 8.1 µs. The part that stays in TS whatever
+  the engine does (the `ValidatedResource` constructor, 1.5 µs, of which
+  0.5 µs is its `getIdentifierFieldName()` view crossing, and `getType`,
+  0.65 µs) and the marshalling (about 3 µs) come to about 5 µs; the crate's
+  populate and validate are about 7 µs in WASM, still allocation-bound
+  (105 allocations per instance natively, dlmalloc and SipHash-keyed maps
+  in WASM).
+
+Levers not taken: validating the populated instance without first copying
+it into the validator's `serde_json::Value` shape (a rewrite of the
+validator's 3,900 lines); a different allocator or hasher in the WASM
+build; keeping instances resident in WASM (against D7); and memoising
+validate() results for resources that did not change, which would only pay
+off when a benchmark validates the same resources again and again.
+
 # P5-06: after the performance pass (2026-09-26)
 
 Task P5-06 (accordproject/concerto-rust#220, under the migration plan
