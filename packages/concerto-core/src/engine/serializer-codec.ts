@@ -446,12 +446,33 @@ function mayBeProxy(v: object): boolean {
     return isProxyFn ? isProxyFn(v) : true;
 }
 
+const declaredNamesCache = new WeakMap<object, string[]>();
+
+/**
+ * The names of every property a class declaration declares, its super
+ * types' included, read once per declaration.
+ * @param {object} declaration the class declaration
+ * @return {string[]} the property names
+ */
+function declaredNames(declaration: any): string[] {
+    let names = declaredNamesCache.get(declaration);
+    if (!names) {
+        names = declaration.getProperties().map((p) => p.getName());
+        declaredNamesCache.set(declaration, names as string[]);
+    }
+    return names as string[];
+}
+
 /**
  * Whether every object reachable from `root` through own properties (and a
- * `Map`'s entries) holds only enumerable own data properties and is not a
- * Proxy (see above), so that the `validate()` fast path's reads have no side
- * effects and see every property the visitor would. The handles
- * `TYPED_SKIP` names are checked but not walked into.
+ * `Map`'s entries) holds only enumerable, writable own data properties, is
+ * extensible and is not a Proxy (see above), so that the `validate()` fast
+ * path's reads have no side effects and see every property the visitor
+ * would, and the visitor's one write (`obj.$identifier = ...`) cannot throw.
+ * A typed object is also refused when one of its declared fields is not an
+ * own property but is found on its prototype chain: the visitor reads
+ * `obj[name]`, which sees it, where the encoders list own keys only. The
+ * handles `TYPED_SKIP` names are checked but not walked into.
  * @param {object} root the resource
  * @return {boolean} whether the fast path may read it
  */
@@ -464,27 +485,41 @@ function isPlainDataGraph(root: object): boolean {
             continue;
         }
         seen.add(obj);
-        if (mayBeProxy(obj)) {
+        if (mayBeProxy(obj) || !Object.isExtensible(obj)) {
             return false;
         }
-        const typed = isTypedLike(obj);
         const isArray = Array.isArray(obj);
-        // One descriptor at a time: `Object.getOwnPropertyDescriptors`
-        // (every one at once) is several times slower here.
-        for (const key of Object.getOwnPropertyNames(obj)) {
+        const keys = Object.getOwnPropertyNames(obj);
+        const values: unknown[] = [];
+        // Every descriptor is checked before anything is read through the
+        // object (`isTypedLike` below), so no getter runs. One descriptor at
+        // a time: `Object.getOwnPropertyDescriptors` (every one at once) is
+        // several times slower here.
+        for (const key of keys) {
             const d = Object.getOwnPropertyDescriptor(obj, key) as PropertyDescriptor;
-            if (!('value' in d)) {
+            if (!('value' in d) || !d.writable) {
                 return false;
             }
             if (!d.enumerable && !(isArray && key === 'length')) {
                 return false;
             }
-            if (typed && TYPED_SKIP.has(key)) {
+            values.push(d.value);
+        }
+        const typed = isTypedLike(obj);
+        if (typed) {
+            for (const name of declaredNames((obj as any).getClassDeclaration())) {
+                if (!Object.prototype.hasOwnProperty.call(obj, name) && name in obj) {
+                    return false;
+                }
+            }
+        }
+        for (let i = 0; i < keys.length; i++) {
+            if (typed && TYPED_SKIP.has(keys[i])) {
                 continue;
             }
-            const value = d.value;
+            const value = values[i];
             if (value !== null && (typeof value === 'object' || typeof value === 'function')) {
-                pending.push(value);
+                pending.push(value as object);
             }
         }
         if (obj instanceof Map) {
