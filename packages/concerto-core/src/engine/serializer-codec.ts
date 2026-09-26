@@ -247,6 +247,32 @@ function encodeValue(v, seen: Set<object> = new Set()) {
     throw new EngineFastPathUnsupported(`unsupported-value:${typeof v}`);
 }
 
+let modelClassesCache: any;
+
+/**
+ * The public model classes `materializeTyped` constructs, required once on
+ * first use and cached (P5-06: it runs once per decoded instance).
+ * Required late, not at module load: this file loads in ts mode too
+ * (transitively, were it ever imported there), and these are the public
+ * model classes, not engine-only code.
+ * @return {object} `{Resource, ValidatedResource, Relationship, ResourceValidator}`
+ */
+function modelClasses(): any {
+    if (!modelClassesCache) {
+        modelClassesCache = {
+            // eslint-disable-next-line global-require
+            Resource: require('../model/resource').default,
+            // eslint-disable-next-line global-require
+            ValidatedResource: require('../model/validatedresource').default,
+            // eslint-disable-next-line global-require
+            Relationship: require('../model/relationship').default,
+            // eslint-disable-next-line global-require
+            ResourceValidator: require('../serializer/resourcevalidator').default,
+        };
+    }
+    return modelClassesCache;
+}
+
 /**
  * A `"typed"` wire node (module doc) materialised into a real
  * Resource/ValidatedResource/Relationship, using the real TS classes so
@@ -257,17 +283,7 @@ function encodeValue(v, seen: Set<object> = new Set()) {
  * @return {object} the materialised instance
  */
 function materializeTyped(node, modelManager: BaseModelManager) {
-    // Required late, not at module load: this file loads in ts mode too
-    // (transitively, were it ever imported there), and these are the
-    // public model classes, not engine-only code.
-    // eslint-disable-next-line global-require
-    const Resource = require('../model/resource').default;
-    // eslint-disable-next-line global-require
-    const ValidatedResource = require('../model/validatedresource').default;
-    // eslint-disable-next-line global-require
-    const Relationship = require('../model/relationship').default;
-    // eslint-disable-next-line global-require
-    const ResourceValidator = require('../serializer/resourcevalidator').default;
+    const { Resource, ValidatedResource, Relationship, ResourceValidator } = modelClasses();
 
     const classDeclaration = modelManager.getType(node.fqn);
     const fields = node.fields || {};

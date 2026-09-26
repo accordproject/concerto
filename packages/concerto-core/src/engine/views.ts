@@ -23,6 +23,47 @@
 
 import { rust } from './index';
 
+// P5-06: the introspect modules the per-element views below construct
+// objects from, required once on first use (they cannot be imported at
+// module load: they import this module's callers) and cached, so a view run
+// once per property does not pay a module resolution on every call.
+let numberValidatorCache: any;
+let stringValidatorCache: any;
+let collectionSizeValidatorCache: any;
+let fieldCache: any;
+
+/**
+ * The introspect/numbervalidator module, required once.
+ * @return {object} the module
+ */
+function numberValidatorModule(): any {
+    return numberValidatorCache ?? (numberValidatorCache = require('../introspect/numbervalidator'));
+}
+
+/**
+ * The introspect/stringvalidator module, required once.
+ * @return {object} the module
+ */
+function stringValidatorModule(): any {
+    return stringValidatorCache ?? (stringValidatorCache = require('../introspect/stringvalidator'));
+}
+
+/**
+ * The introspect/collectionsizevalidator module, required once.
+ * @return {object} the module
+ */
+function collectionSizeValidatorModule(): any {
+    return collectionSizeValidatorCache ?? (collectionSizeValidatorCache = require('../introspect/collectionsizevalidator'));
+}
+
+/**
+ * The introspect/field module, required once.
+ * @return {object} the module
+ */
+function fieldModule(): any {
+    return fieldCache ?? (fieldCache = require('../introspect/field'));
+}
+
 /**
  * ScalarDeclaration.process in rust mode, after super.process(): Rust
  * computes the type, the validator and the default value; this sets the same
@@ -41,7 +82,7 @@ function scalarDeclarationProcess(declaration: any): void {
     declaration.validator = null;
     declaration.type = snapshot.type;
     if (snapshot.validator?.kind === 'NumberValidator') {
-        const { NumberValidator } = require('../introspect/numbervalidator');
+        const { NumberValidator } = numberValidatorModule();
         const validator = Object.create(NumberValidator.prototype);
         // The fields the Validator and NumberValidator constructors set.
         validator.validator = declaration.ast.validator;
@@ -50,10 +91,93 @@ function scalarDeclarationProcess(declaration: any): void {
         validator.upperBound = snapshot.validator.upperBound;
         declaration.validator = validator;
     } else if (snapshot.validator?.kind === 'StringValidator') {
-        const { StringValidator } = require('../introspect/stringvalidator');
+        const { StringValidator } = stringValidatorModule();
         declaration.validator = new StringValidator(declaration, declaration.ast.validator, declaration.ast.lengthValidator);
     }
     declaration.defaultValue = snapshot.defaultValue;
+}
+
+/**
+ * One property's precomputed snapshots (P5-06): `p` is its `propertyProcess`
+ * snapshot and `f` its `fieldProcess` one, from `modelFilePropertySnapshots`;
+ * `owner` is the view that took `p`, the only one `f` may then go to.
+ */
+interface PrecomputedProperty {
+    p: any;
+    f: any;
+    owner?: object;
+}
+
+/**
+ * The precomputed snapshots of the `ModelFile` being constructed, by
+ * property AST node, or null outside `beginModelFile`/`endModelFile`.
+ */
+let precomputed: Map<object, PrecomputedProperty> | null = null;
+
+/**
+ * Called by the ModelFile constructor in rust mode just before `fromAst`
+ * (P5-06): computes the `propertyProcess`/`fieldProcess` snapshots of every
+ * property of `ast` in one engine call, so that `propertyProcess` and
+ * `fieldProcess` below, run for each property view `fromAst` builds, read
+ * them instead of each crossing the boundary. A snapshot is only ever used
+ * by the view built from that very AST node, once, during this one
+ * construction (see `endModelFile`); a property the engine could not
+ * precompute (it would throw, or the AST cannot cross) has none, and its
+ * view calls the per-property binding exactly as before, so every error is
+ * raised by the same call as without the batch. Never throws.
+ * @param {object} ast the model file's AST
+ * @return {object} the state to hand back to `endModelFile`
+ */
+function beginModelFile(ast: any): Map<object, PrecomputedProperty> | null {
+    const saved = precomputed;
+    precomputed = null;
+    try {
+        if (ast && Array.isArray(ast.declarations)) {
+            const text = rust!.modelFilePropertySnapshots(JSON.stringify(ast));
+            if (typeof text === 'string') {
+                const snapshots = JSON.parse(text);
+                const map = new Map<object, PrecomputedProperty>();
+                ast.declarations.forEach((declaration: any, i: number) => {
+                    const entries = Array.isArray(snapshots) ? snapshots[i] : null;
+                    const properties = declaration && typeof declaration === 'object' ? declaration.properties : null;
+                    if (!Array.isArray(entries) || !Array.isArray(properties) || entries.length !== properties.length) {
+                        return;
+                    }
+                    properties.forEach((node: any, j: number) => {
+                        const entry = entries[j];
+                        if (entry && node && typeof node === 'object' && !map.has(node)) {
+                            map.set(node, entry);
+                        }
+                    });
+                });
+                precomputed = map;
+            }
+        }
+    } catch (e) {
+        precomputed = null;
+    }
+    return saved;
+}
+
+/**
+ * Ends the construction `beginModelFile` started: drops every snapshot not
+ * taken, so none can outlive it.
+ * @param {object} saved what `beginModelFile` returned
+ */
+function endModelFile(saved: Map<object, PrecomputedProperty> | null): void {
+    precomputed = saved;
+}
+
+/**
+ * Whether a view's `type` is the one a precomputed `fieldProcess` snapshot
+ * assumed (the `type` its `propertyProcess` snapshot set, or none).
+ * @param {*} actual the view's `type`
+ * @param {*} expected the type the snapshot was computed with
+ * @return {boolean} true if the snapshot applies
+ */
+function sameType(actual: any, expected: any): boolean {
+    const nullish = (v: any) => v === null || v === undefined;
+    return actual === expected || (nullish(actual) && nullish(expected));
 }
 
 /**
@@ -68,14 +192,21 @@ function scalarDeclarationProcess(declaration: any): void {
  * RelationshipDeclaration) being processed
  */
 function propertyProcess(property: any): void {
-    const snapshot = rust!.propertyProcess(property);
+    const entry = precomputed?.get(property.ast);
+    let snapshot;
+    if (entry && entry.p && entry.owner === undefined) {
+        entry.owner = property;
+        snapshot = entry.p;
+    } else {
+        snapshot = rust!.propertyProcess(property);
+    }
     property.name = snapshot.name;
     if ('type' in snapshot) {
         property.type = snapshot.type;
     }
     property.array = snapshot.array;
     property.optional = snapshot.optional;
-    const { default: CollectionSizeValidator } = require('../introspect/collectionsizevalidator');
+    const { default: CollectionSizeValidator } = collectionSizeValidatorModule();
     property.sizeValidator = property.ast.sizeValidator
         ? new CollectionSizeValidator(property, property.ast.sizeValidator)
         : null;
@@ -90,10 +221,17 @@ function propertyProcess(property: any): void {
  * @param {object} field the Field being processed
  */
 function fieldProcess(field: any): void {
-    const snapshot = rust!.fieldProcess(field);
+    const entry = precomputed?.get(field.ast);
+    let snapshot;
+    if (entry && entry.owner === field && entry.f && sameType(field.type, 'type' in entry.p ? entry.p.type : undefined)) {
+        precomputed!.delete(field.ast);
+        snapshot = entry.f;
+    } else {
+        snapshot = rust!.fieldProcess(field);
+    }
     field.validator = null;
     if (snapshot.validator?.kind === 'NumberValidator') {
-        const { NumberValidator } = require('../introspect/numbervalidator');
+        const { NumberValidator } = numberValidatorModule();
         const validator = Object.create(NumberValidator.prototype);
         // The fields the Validator and NumberValidator constructors set.
         validator.validator = field.ast.validator;
@@ -102,7 +240,7 @@ function fieldProcess(field: any): void {
         validator.upperBound = snapshot.validator.upperBound;
         field.validator = validator;
     } else if (snapshot.validator?.kind === 'StringValidator') {
-        const { StringValidator } = require('../introspect/stringvalidator');
+        const { StringValidator } = stringValidatorModule();
         field.validator = new StringValidator(field, field.ast.validator, field.ast.lengthValidator);
     }
     field.defaultValue = snapshot.defaultValue;
@@ -124,7 +262,7 @@ function fieldProcess(field: any): void {
  * @return {object} the synthetic Field instance
  */
 function fieldGetScalarField(field: any): any {
-    const { Field } = require('../introspect/field');
+    const { Field } = fieldModule();
     const fieldAst = rust!.fieldGetScalarField(field);
     const scalarField = new Field(field.getParent(), fieldAst);
     scalarField.array = field.isArray();
@@ -282,6 +420,8 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
 }
 
 export {
+    beginModelFile,
+    endModelFile,
     scalarDeclarationProcess,
     propertyProcess,
     fieldProcess,
