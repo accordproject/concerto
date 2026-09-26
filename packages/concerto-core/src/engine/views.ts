@@ -419,7 +419,283 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
     };
 }
 
+// ---------------------------------------------------------------------------
+// P5-06a lazy-views spike (accordproject/concerto-rust#226)
+//
+// In rust mode a ModelFile's AST crosses into Rust once, when the ModelFile
+// is constructed (`stageModelFile`): Rust loads it and keeps the result in
+// its manager handle's staging slot. When that load succeeds, the ModelFile
+// populates only its namespace, version and imports, and its `declarations`
+// and `localTypes` become accessors that build the declaration views on
+// first use (`deferDeclarations`). Registering the file in the manager's
+// `rustHandle` mirror (`commitStaged`) and validating it (`validateLoaded`)
+// then reuse the loaded file instead of sending the AST again.
+//
+// When Rust's load fails, the ModelFile is built eagerly exactly as before,
+// so the TS error is thrown by the TS code, at the same point.
+//
+// CONCERTO_LAZY_VIEWS=0 turns the lazy path off (every ModelFile is built
+// eagerly, as before). CONCERTO_LAZY_VIEWS_CHECK=1 keeps the stage but
+// builds the declaration views at construction, and reports on stderr any
+// model Rust accepted but whose TS construction throws or mutates the AST.
+// ---------------------------------------------------------------------------
+
+const lazyEnv = typeof process === 'undefined' ? undefined : process.env;
+const lazyViewsEnabled = lazyEnv?.CONCERTO_LAZY_VIEWS !== '0';
+const lazyViewsCheck = lazyEnv?.CONCERTO_LAZY_VIEWS_CHECK === '1';
+
+/**
+ * A ModelFile's staged load: the rustHandle it was staged in and its stage id.
+ */
+interface Stage {
+    handle: any;
+    id: number;
+}
+
+/**
+ * The staged load of each lazily built ModelFile, until it is committed.
+ */
+const stages = new WeakMap<object, Stage>();
+
+/**
+ * The rustHandle each ModelFile was registered in from its stage.
+ */
+const committed = new WeakMap<object, any>();
+
+/**
+ * For ASTs of namespaces the manager never mirrors into rustHandle (the
+ * system models, the metamodel), the JSON text (with the definitions and
+ * file name) Rust last loaded without error, by AST object. Such a file is
+ * never committed from its stage, so a repeat of the same text needs only
+ * the verdict, not another load: `new ModelManager()` builds the metamodel's
+ * ModelFile from the same constant AST every time.
+ */
+const acceptedUnmirrored = new WeakMap<object, string>();
+
+/**
+ * Called by the ModelFile constructor in rust mode, after `process()`:
+ * loads the AST in the manager's rustHandle staging slot, once. Returns true
+ * when the ModelFile may be built lazily: the manager is a real
+ * BaseModelManager with a rustHandle and no decorator factories (a factory
+ * is user code that must run during construction), and Rust loaded the AST
+ * without error. Never throws: on any failure the caller builds the
+ * ModelFile eagerly, which throws the TS error itself.
+ * @param {object} modelFile the ModelFile being constructed
+ * @return {boolean} true if the declarations may be built lazily
+ */
+function stageModelFile(modelFile: any): boolean {
+    if (!lazyViewsEnabled) {
+        return false;
+    }
+    const manager = modelFile.modelManager;
+    const handle = manager?.rustHandle;
+    if (!handle || typeof handle.stageModelFile !== 'function' || typeof manager._rustMirrorTrustworthy !== 'function') {
+        return false;
+    }
+    try {
+        const factories = manager.getDecoratorFactories?.();
+        if (factories && factories.length > 0) {
+            return false;
+        }
+        const text = JSON.stringify(modelFile.ast);
+        const definitions = modelFile.definitions ?? undefined;
+        const fileName = modelFile.fileName ?? undefined;
+        const unmirrored = typeof manager._rustMirrorEligible === 'function' &&
+            !manager._rustMirrorEligible(modelFile.ast.namespace);
+        const key = unmirrored ? JSON.stringify([text, definitions ?? null, fileName ?? null]) : null;
+        if (key !== null && acceptedUnmirrored.get(modelFile.ast) === key) {
+            return true;
+        }
+        const id = handle.stageModelFile(text, definitions, fileName);
+        if (key !== null) {
+            // Never committed: keep the verdict, not the loaded file.
+            handle.dropStagedModelFile(id);
+            acceptedUnmirrored.set(modelFile.ast, key);
+        } else {
+            stages.set(modelFile, { handle, id });
+        }
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Builds a lazily built ModelFile's declaration views, the way its
+ * constructor would have: `fromAst`'s declarations part (with the P5-06
+ * batch snapshots), then `localTypes`. Replaces the accessors with plain
+ * fields first; if TS construction throws, the accessors are put back, so
+ * every later access throws again.
+ * @param {object} modelFile the ModelFile
+ */
+function materialise(modelFile: any): void {
+    const field = (key: string, value: any) => Object.defineProperty(modelFile, key, {
+        value, writable: true, enumerable: true, configurable: true
+    });
+    field('declarations', []);
+    field('localTypes', null);
+    // The file was deferred only because its manager had no decorator
+    // factories then; one added since must not apply to it, just as it
+    // would not have applied to the views its constructor built.
+    const manager = modelFile.modelManager;
+    const factories = manager?.getDecoratorFactories?.();
+    const hideFactories = factories && factories.length > 0;
+    const ownDescriptor = hideFactories ? Object.getOwnPropertyDescriptor(manager, 'getDecoratorFactories') : undefined;
+    try {
+        if (hideFactories) {
+            Object.defineProperty(manager, 'getDecoratorFactories', { value: () => [], configurable: true, writable: true });
+        }
+        if (modelFile.ast.declarations) {
+            const saved = beginModelFile(modelFile.ast);
+            try {
+                modelFile._fromAstDeclarations(modelFile.ast);
+            } finally {
+                endModelFile(saved);
+            }
+        }
+    } catch (e) {
+        restoreFactories(manager, hideFactories, ownDescriptor);
+        defineLazyFields(modelFile);
+        throw e;
+    }
+    restoreFactories(manager, hideFactories, ownDescriptor);
+    const localTypes = new Map();
+    const namespace = modelFile.getNamespace();
+    for (const declaration of modelFile.declarations) {
+        localTypes.set(namespace + '.' + declaration.getName(), declaration);
+    }
+    modelFile.localTypes = localTypes;
+}
+
+/**
+ * Undoes `materialise`'s hiding of the manager's decorator factories.
+ * @param {object} manager the ModelManager
+ * @param {boolean} hidden whether they were hidden
+ * @param {object} [ownDescriptor] the manager's own `getDecoratorFactories`
+ * property before, if it had one
+ */
+function restoreFactories(manager: any, hidden: boolean, ownDescriptor?: PropertyDescriptor): void {
+    if (!hidden) {
+        return;
+    }
+    if (ownDescriptor) {
+        Object.defineProperty(manager, 'getDecoratorFactories', ownDescriptor);
+    } else {
+        delete manager.getDecoratorFactories;
+    }
+}
+
+/**
+ * Installs the `declarations` and `localTypes` accessors that build the
+ * declaration views on first use (read or write).
+ * @param {object} modelFile the ModelFile
+ */
+function defineLazyFields(modelFile: any): void {
+    for (const key of ['declarations', 'localTypes']) {
+        Object.defineProperty(modelFile, key, {
+            configurable: true,
+            enumerable: true,
+            get() {
+                materialise(modelFile);
+                return modelFile[key];
+            },
+            set(value) {
+                materialise(modelFile);
+                modelFile[key] = value;
+            },
+        });
+    }
+}
+
+/**
+ * Called at the end of the ModelFile constructor when `stageModelFile`
+ * returned true: defers the declaration views (or, with
+ * CONCERTO_LAZY_VIEWS_CHECK=1, builds them now and reports any divergence).
+ * @param {object} modelFile the ModelFile
+ */
+function deferDeclarations(modelFile: any): void {
+    defineLazyFields(modelFile);
+    if (lazyViewsCheck) {
+        const before = JSON.stringify(modelFile.ast);
+        try {
+            materialise(modelFile);
+        } catch (e: any) {
+            process.stderr.write(`P5-06a LAZY-CHECK under-rejection: ${modelFile.namespace} ${e?.name}: ${e?.message}\n`);
+            throw e;
+        }
+        if (JSON.stringify(modelFile.ast) !== before) {
+            process.stderr.write(`P5-06a LAZY-CHECK ast-mutated: ${modelFile.namespace}\n`);
+        }
+    }
+}
+
+/**
+ * The rustHandle mirror write for `modelFile` from its stage (P5-06a):
+ * registers the file Rust loaded at construction. Returns false when there
+ * is no usable stage (not staged, staged in another handle, or evicted);
+ * the caller then sends the AST as before. A registration error propagates,
+ * as `addModelWithDefinitions`'s would.
+ * @param {object} modelFile the ModelFile being added
+ * @param {object} handle the manager's rustHandle
+ * @return {boolean} true if the file was registered from its stage
+ */
+function commitStaged(modelFile: any, handle: any): boolean {
+    const stage = stages.get(modelFile);
+    if (!stage || stage.handle !== handle) {
+        return false;
+    }
+    stages.delete(modelFile);
+    const id = handle.commitStagedModelFile(stage.id);
+    if (id === undefined) {
+        return false;
+    }
+    committed.set(modelFile, handle);
+    return true;
+}
+
+/**
+ * Drops `modelFile`'s stage when it will not be registered in `handle`.
+ * @param {object} modelFile the ModelFile
+ * @param {object} handle the manager's rustHandle
+ */
+function dropStaged(modelFile: any, handle: any): void {
+    const stage = stages.get(modelFile);
+    if (stage && stage.handle === handle) {
+        stages.delete(modelFile);
+        handle.dropStagedModelFile(stage.id);
+    }
+}
+
+/**
+ * `ModelFile.validate()`'s Rust call without sending the AST again
+ * (P5-06a): validates the staged file, or the file registered from it.
+ * Returns false when neither applies; the caller then calls
+ * `modelFileValidateDetached` as before. Throws what that binding throws.
+ * @param {object} modelFile the ModelFile
+ * @param {object} handle the manager's rustHandle
+ * @return {boolean} true if validated
+ */
+function validateLoaded(modelFile: any, handle: any): boolean {
+    const stage = stages.get(modelFile);
+    if (stage && stage.handle === handle) {
+        return handle.modelFileValidateStaged(stage.id);
+    }
+    if (committed.get(modelFile) === handle) {
+        const id = modelFile._rustHandleId();
+        if (id !== undefined) {
+            handle.modelFileValidate(id);
+            return true;
+        }
+    }
+    return false;
+}
+
 export {
+    stageModelFile,
+    deferDeclarations,
+    commitStaged,
+    dropStaged,
+    validateLoaded,
     beginModelFile,
     endModelFile,
     scalarDeclarationProcess,

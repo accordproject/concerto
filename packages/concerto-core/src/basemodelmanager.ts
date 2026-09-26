@@ -65,6 +65,10 @@ const loadEngine = (specifier: string) =>
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } | null =
     typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
+// P5-06a: engine/views, required once on first use in rust mode.
+let engineViewsModule: any;
+/* istanbul ignore next */
+const engineViews = () => engineViewsModule ?? (engineViewsModule = loadEngine('./engine/views'));
 
 /**
  * What has been read from one rustHandle (P5-06), valid while its `epoch()`
@@ -374,6 +378,29 @@ class BaseModelManager {
     }
 
     /**
+     * The `rustHandle` mirror write for a model file being added (P4-08):
+     * registers the file Rust already loaded when the `ModelFile` was
+     * constructed (P5-06a, engine/views.ts `commitStaged`), or else sends
+     * its AST, as before.
+     * @param {ModelFile} modelFile - the model file being added
+     * @private
+     * @internal
+     */
+    /* istanbul ignore next */
+    _mirrorModelFileToRust(modelFile) {
+        this._mirrorToRust(() => {
+            if (!engineViews().commitStaged(modelFile, this.rustHandle)) {
+                this.rustHandle!.addModelWithDefinitions(
+                    JSON.stringify(modelFile.getAst()),
+                    modelFile.getDefinitions() ?? undefined,
+                    modelFile.getName() ?? undefined,
+                    false,
+                );
+            }
+        });
+    }
+
+    /**
      * Whether `rustHandle`'s mirror is complete enough to answer a read
      * (P4-08): `_rustMirrorStale` catches a swallowed write failure of any
      * kind (add, update or delete -- see `_mirrorToRust`), and a
@@ -511,12 +538,9 @@ class BaseModelManager {
             this.modelFiles[modelFile.getNamespace()] = modelFile;
             /* istanbul ignore next */
             if (rust && this.rustHandle && this._rustMirrorEligible(modelFile.getNamespace())) {
-                this._mirrorToRust(() => this.rustHandle!.addModelWithDefinitions(
-                    JSON.stringify(modelFile.getAst()),
-                    modelFile.getDefinitions() ?? undefined,
-                    modelFile.getName() ?? undefined,
-                    false,
-                ));
+                this._mirrorModelFileToRust(modelFile);
+            } else if (rust && this.rustHandle) {
+                engineViews().dropStaged(modelFile, this.rustHandle);
             }
         } else {
             this._throwAlreadyExists(modelFile);
@@ -764,12 +788,7 @@ class BaseModelManager {
                 newModelFiles.forEach((m) => {
                     if (this._rustMirrorEligible(m.getNamespace())) {
                         mirroredNamespaces.add(m.getNamespace());
-                        this._mirrorToRust(() => this.rustHandle!.addModelWithDefinitions(
-                            JSON.stringify(m.getAst()),
-                            m.getDefinitions() ?? undefined,
-                            m.getName() ?? undefined,
-                            false,
-                        ));
+                        this._mirrorModelFileToRust(m);
                     }
                 });
             }

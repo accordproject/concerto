@@ -1,3 +1,89 @@
+# P5-06a: lazy-views spike (2026-09-26)
+
+Task P5-06a (accordproject/concerto-rust#226, under the migration plan
+accordproject/concerto-rust#29). It tests whether rust mode reaches
+parity with the TS reference on **load** when it stops building the eager
+TS view graph. The design note is on the issue.
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 cores, 15 GiB, Linux |
+| Toolchain | Node v22.22.2, rustc 1.94.1, wasm-bindgen 0.2.128, binaryen 132 |
+| Before | `concerto` `9bd0db715`, `concerto-rust` `f324f76`: the integration heads with P5-06 merged in (concerto#1371, concerto-rust#225), built as-is in a separate worktree |
+| After | the P5-06a commits on top of those heads. The "after" runs were made on the working tree before the commit, so their JSON records `9bd0db715` as `concerto_commit` |
+| Runs | `results/P5-06a-*.json`. Three rounds, each running TS, then Rust before, then Rust after with lazy views off (`CONCERTO_LAZY_VIEWS=0`, same build), then Rust after, back to back. Every run uses the `run-ts.mjs` defaults (5 warm-up, 30 samples). |
+
+## What the prototype does (rust mode only)
+
+- **One crossing.** `new ModelFile(...)` sends the AST into Rust once
+  (`ModelManagerHandle.stageModelFile`). Rust loads it there and keeps the
+  result in a bounded staging slot.
+- **If Rust's load fails**, the ModelFile is built eagerly, exactly as
+  before. The TS code then throws the TS error at the same point.
+- **If Rust's load succeeds**, only the namespace, imports and model-level
+  decorators are set. The `declarations` and `localTypes` fields become
+  accessors that build the ClassDeclaration and Property views on first
+  use and cache them.
+- **No re-sends.** The `rustHandle` mirror registers the staged file
+  (`commitStagedModelFile`). `ModelFile.validate()` validates the staged
+  or registered file (`modelFileValidateStaged` / `modelFileValidate`)
+  instead of sending the AST again.
+- **Stays eager:** a manager with decorator factories, a manager with no
+  `rustHandle`, and everything when `CONCERTO_LAZY_VIEWS=0`.
+- **Guard:** `CONCERTO_LAZY_VIEWS_CHECK=1` builds the views at
+  construction anyway, and reports any model Rust accepted but TS
+  construction rejects or mutates.
+
+## Through the TS public API
+
+Medians in µs per model or per instance. Ratios use the mean of the three
+runs. `load+validate` is `run-ts.mjs`'s `validate` metric: a fresh load
+plus `validateModelFiles()`. The speed-up column is Rust before / Rust
+after.
+
+|---|---|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | load | 42.0 / 37.3 / 33.4 | 503.3 / 536.3 / 582.9 | 502.1 / 584.2 / 479.8 | 193.6 / 161.8 / 168.7 | 14.4× | 13.9× | **4.7×** | 3.1× |
+| concerto-core-test-data | load+validate | 69.9 / 72.1 / 73.4 | 1073.4 / 1106.7 / 1071.8 | 1011.1 / 1022.3 / 1077.1 | 452.4 / 457.9 / 432.5 | 15.1× | 14.4× | **6.2×** | 2.4× |
+| concerto-core-test-data | validateAst | 662.9 / 656.1 / 623.1 | 1086.0 / 1125.4 / 1224.1 | 1110.2 / 1080.2 / 1153.4 | 1113.0 / 1065.7 / 1140.1 | 1.8× | 1.7× | **1.7×** | 1.0× |
+| conformance | load | 18.3 / 18.8 / 28.5 | 338.3 / 399.2 / 376.6 | 324.1 / 317.9 / 374.8 | 194.9 / 161.9 / 182.5 | 17.0× | 15.5× | **8.2×** | 2.1× |
+| conformance | load+validate | 23.3 / 24.8 / 24.5 | 518.9 / 512.2 / 475.1 | 636.2 / 463.1 / 482.5 | 265.5 / 242.2 / 236.4 | 20.8× | 21.8× | **10.3×** | 2.0× |
+| conformance | validateAst | 245.1 / 257.8 / 249.5 | 605.9 / 587.5 / 645.8 | 615.4 / 594.5 / 631.3 | 619.0 / 612.9 / 659.1 | 2.4× | 2.4× | **2.5×** | 1.0× |
+| synthetic-large | load | 698.0 / 676.0 / 720.2 | 28519.4 / 26763.7 / 43232.6 | 28878.3 / 36453.8 / 27995.4 | 14789.4 / 15015.9 / 14758.6 | 47.0× | 44.6× | **21.3×** | 2.2× |
+| synthetic-large | load+validate | 2247.4 / 2224.2 / 2702.0 | 37689.4 / 49576.8 / 36357.3 | 35841.4 / 37175.1 / 35688.4 | 18368.1 / 19220.3 / 24726.8 | 17.2× | 15.2× | **8.7×** | 2.0× |
+| synthetic-large | validateAst | SKIPPED | SKIPPED | SKIPPED | SKIPPED | - | - | - | - |
+| (synthetic, 500) | fromJSON | 8.9 / 7.9 / 13.6 | 44.0 / 43.5 / 46.9 | 45.7 / 44.5 / 46.6 | 44.5 / 46.9 / 45.7 | 4.4× | 4.5× | **4.5×** | 1.0× |
+| (synthetic, 500) | resource.validate() | 2.1 / 2.1 / 2.1 | 17.8 / 17.7 / 19.1 | 18.0 / 17.8 / 18.3 | 18.2 / 17.8 / 19.2 | 8.7× | 8.6× | **8.8×** | 1.0× |
+
+Lazy views make rust-mode load 2.1× to 3.1× faster and load+validate
+2.0× to 2.4× faster. validateAst and the instance operations are
+unchanged, as expected: the spike does not touch them. **Load is still
+4.7× to 21× the TS reference, and load+validate 6.2× to 10×.** Parity
+(≤ 1.0×) is not reached.
+
+## Why the rest is out of reach: the crate itself
+
+With lazy views, a rust-mode load is roughly Rust's own load of the AST,
+plus the JS->WASM text crossing, plus the TS header. The crate alone,
+measured natively (release build, same fixtures, no WASM), is already
+slower than the whole TS reference:
+
+| Model set | TS load (µs/model) | Rust native `from_json` (µs/model) | Rust through WASM `stageModelFile` (µs/model) | TS validate part (µs/model) | Rust native `validate_models` (µs/model) |
+|---|---|---|---|---|---|
+| concerto-core-test-data | ~38 | 60 | 93 | ~34 | 41 |
+| conformance | ~22 | 23 | 43 | ~2 | 18 |
+| synthetic-large | ~700 | 3,376 | ~5,100 | ~1,700 | 2,121 |
+
+- **Native `from_json`:** about 50% is `serde_json` parsing the text into
+  a `Value` (with `IndexMap` insertion for key order), and most of the
+  rest is allocation (callgrind).
+- **Through WASM:** `dlmalloc` malloc and free are the largest single cost
+  in the rust-mode profile (about 20%).
+- **Outside the spike's scope, still on the load path:**
+  `ModelUtil.parseNamespace` costs about 11 µs per call in rust mode,
+  against 1.8 µs in TS, because it calls back into JS for `semver.parse`.
+
+---
+
 # P5-06: after the performance pass (2026-09-26)
 
 Task P5-06 (accordproject/concerto-rust#220, under the migration plan
