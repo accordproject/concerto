@@ -295,16 +295,24 @@ class BaseModelManager {
     /**
      * Whether `rustHandle`'s mirror is complete enough to answer a read
      * (P4-08): `_rustMirrorStale` catches a swallowed write failure of any
-     * kind (add, update or delete -- see `_mirrorToRust`), and the
-     * `getNamespaces().length` parity check against `this.modelFiles`, the
-     * source of truth `_mirrorToRust` can never make stale, is kept as a
+     * kind (add, update or delete -- see `_mirrorToRust`), and a
+     * content-based parity check against `this.modelFiles`, the source of
+     * truth `_mirrorToRust` can never make stale, is kept as a
      * belt-and-braces check for any divergence that reaches rustHandle by a
      * path other than `_mirrorToRust` (none exists today, but a read that
      * trusts rustHandle without it could silently answer from an incomplete
-     * model -- wrong, not merely absent, for `isAssignableTo`/`derivesFrom`'s
-     * boolean results in particular, which do not otherwise surface a
-     * mismatch as a thrown error the caller would catch and fall back from).
-     * @return {boolean} true if rustHandle mirrors every namespace TS has
+     * or differently-shaped model -- wrong, not merely absent, for
+     * `isAssignableTo`/`derivesFrom`'s boolean results in particular, which
+     * do not otherwise surface a mismatch as a thrown error the caller
+     * would catch and fall back from). Comparing the namespace *sets*,
+     * not just their sizes, matters for exactly the case a white-box test
+     * creates by assigning `this.modelFiles` directly (bypassing
+     * `addModelFile`/`_mirrorToRust` entirely): a `rustHandle` that mirrors
+     * only the two system models could otherwise coincidentally match the
+     * count of a manager whose `modelFiles` was hand-populated with two
+     * unrelated stub namespaces, and a length-only check would wrongly
+     * call that trustworthy.
+     * @return {boolean} true if rustHandle mirrors exactly the namespaces TS has
      * @private
      */
     _rustMirrorTrustworthy() {
@@ -312,7 +320,13 @@ class BaseModelManager {
             return false;
         }
         try {
-            return this.rustHandle.getNamespaces().length === Object.keys(this.modelFiles).length;
+            const rustNamespaces: string[] = this.rustHandle.getNamespaces();
+            const tsNamespaces = Object.keys(this.modelFiles);
+            if (rustNamespaces.length !== tsNamespaces.length) {
+                return false;
+            }
+            const rustNamespaceSet = new Set(rustNamespaces);
+            return tsNamespaces.every((ns) => rustNamespaceSet.has(ns));
         } catch (e) {
             return false;
         }
