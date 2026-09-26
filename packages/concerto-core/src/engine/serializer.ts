@@ -35,7 +35,10 @@
 // of its own.
 
 import { rust } from './index';
-import { EngineFastPathUnsupported, encodeValue, decodeValue, checkString, checkJsonText } from './serializer-codec';
+import {
+    EngineFastPathUnsupported, encodeValue, decodeValue, checkString, checkJsonText,
+    encodePlainObjectText, encodeTypedText, encodeValidatorText, materializeLean, modelClasses,
+} from './serializer-codec';
 import Factory from '../factory';
 
 // Types needed for TypeScript generation.
@@ -116,6 +119,13 @@ function asUnsupported(err) {
     return err;
 }
 
+// D7: the identifier and the clock stay with the caller
+// (`Factory.newResource`'s own `uuid.v4()`/`dayjs.utc()`).
+const ENV = {
+    newId: () => Factory.newId(),
+    nowMs: () => Date.now(),
+};
+
 /**
  * `Serializer.fromJSON`'s fast path.
  * @param {BaseModelManager} modelManager the model manager
@@ -125,18 +135,26 @@ function asUnsupported(err) {
  */
 function fastFromJson(modelManager: BaseModelManager, jsonObject: unknown, options: SerializerOptions) {
     const handle = handleFor(modelManager);
-    const env = {
-        // D7: the identifier and the clock stay with the caller
-        // (`Factory.newResource`'s own `uuid.v4()`/`dayjs.utc()`).
-        newId: () => Factory.newId(),
-        nowMs: () => Date.now(),
-    };
+    // P5-06b: a plain object (what `JSON.parse` gives) crosses as its own
+    // `JSON.stringify` text where it can, and the resource comes back as
+    // the lean recipe `materializeLean` reads (concerto-wasm
+    // `serializerFromJsonLean`: the same call, the same errors).
+    const plain = encodePlainObjectText(jsonObject);
+    if (plain) {
+        let reply;
+        try {
+            reply = handle.serializerFromJsonLean(plain.text, JSON.stringify(encodeValue(options)), ENV);
+        } catch (err) {
+            throw asUnsupported(err);
+        }
+        return materializeLean(JSON.parse(reply), plain.values, modelManager);
+    }
     let text;
     try {
         text = handle.serializerFromJson(
             JSON.stringify(encodeValue(jsonObject)),
             JSON.stringify(encodeValue(options)),
-            env,
+            ENV,
         );
     } catch (err) {
         throw asUnsupported(err);
@@ -167,4 +185,61 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
     return decodeValue(node, modelManager);
 }
 
-export { fastFromJson, fastToJson };
+/**
+ * `ValidatedResource.validate()`'s fast path (P5-06b): one engine call
+ * (concerto-wasm `resourceValidateFast`) that answers whether the resource
+ * is valid with nothing for the visitor to write. `true` means
+ * `validate()` is done; `false` means the caller runs its own visitor path,
+ * which then raises any error and makes any write exactly as it always has.
+ * Throws `EngineFastPathUnsupported` for a resource the engine cannot take.
+ *
+ * It is only taken when the engine would validate what the visitor would:
+ * the resource's own `$validator` is a plain `ResourceValidator` (whose two
+ * relationship options cross with the call), and its model manager still
+ * resolves its type to the very declaration it holds.
+ * @param {object} resource the ValidatedResource
+ * @return {boolean} whether the resource is valid and nothing is left to do
+ */
+function fastValidate(resource): boolean {
+    const { ResourceValidator } = modelClasses();
+    const validator = resource.$validator;
+    if (!validator || Object.getPrototypeOf(validator) !== ResourceValidator.prototype) {
+        return false;
+    }
+    const modelManager = resource.getModelManager();
+    let declaration;
+    try {
+        declaration = modelManager.getType(resource.getFullyQualifiedType());
+    } catch (err) {
+        return false;
+    }
+    if (declaration !== resource.getClassDeclaration()) {
+        return false;
+    }
+    const options = validator.options;
+    if (!options || typeof options !== 'object') {
+        return false;
+    }
+    const handle = handleFor(modelManager);
+    const convert = !!options.convertResourcesToRelationships;
+    const permit = !!options.permitResourcesForRelationships;
+    // A resource of plain fields crosses already in the validator's shape;
+    // the one write the walk makes (`obj.$identifier = obj.getIdentifier()`)
+    // is checked here to be a no-op.
+    const idField = resource.$identifierFieldName;
+    if (typeof idField === 'string' &&
+        Object.prototype.hasOwnProperty.call(resource, '$identifier') &&
+        Object.is(resource.$identifier, resource[idField])) {
+        const text = encodeValidatorText(resource);
+        if (text !== null) {
+            return handle.resourceValidateSimple(text, resource.getFullyQualifiedIdentifier(), convert, permit);
+        }
+    }
+    return handle.resourceValidateFast(
+        encodeTypedText(resource),
+        convert,
+        permit,
+    );
+}
+
+export { fastFromJson, fastToJson, fastValidate };

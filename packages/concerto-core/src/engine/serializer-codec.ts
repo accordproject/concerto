@@ -247,6 +247,171 @@ function encodeValue(v, seen: Set<object> = new Set()) {
     throw new EngineFastPathUnsupported(`unsupported-value:${typeof v}`);
 }
 
+// ---------------------------------------------------------------------------
+// P5-06b: the same wire text, built with fewer copies.
+// ---------------------------------------------------------------------------
+//
+// `encodeValue` copies every value it walks. Most of a document is already
+// plain JSON, which `JSON.stringify` writes as `encodeValue`'s copy would be
+// written, so `encodeMember` keeps a string, a boolean, `null`, a finite
+// number other than `-0`, and an array of only those, as they are, and hands
+// anything else to `encodeValue`. The lone-surrogate check that
+// `encodeValue` makes per string (`checkString`) is made once on the whole
+// text instead (`checkJsonText`), which finds the same strings.
+
+/**
+ * @param {*} v value
+ * @returns {boolean} whether `JSON.stringify` writes `v` as `encodeValue(v)` would be written
+ */
+function isSimple(v): boolean {
+    const t = typeof v;
+    return t === 'string' || t === 'boolean' || v === null ||
+        (t === 'number' && Number.isFinite(v) && !Object.is(v, -0));
+}
+
+/**
+ * `encodeValue(v, seen)`, returning `v` itself when it is plain JSON of the
+ * simple kinds above (an array of them is marked visited, as `encodeValue`
+ * would mark it). The lone-surrogate check is left to the caller.
+ * @param {*} v the value
+ * @param {Set<object>} seen the objects already visited on this encode
+ * @return {*} its wire encoding
+ */
+function encodeMember(v, seen: Set<object>) {
+    if (isSimple(v)) {
+        return v;
+    }
+    if (Array.isArray(v) && Object.getPrototypeOf(v) === Array.prototype) {
+        let simple = true;
+        for (let i = 0; i < v.length; i++) {
+            if (!isSimple(v[i])) {
+                simple = false;
+                break;
+            }
+        }
+        if (simple) {
+            visit(v, seen);
+            return v;
+        }
+    }
+    return encodeValue(v, seen);
+}
+
+/**
+ * `JSON.stringify(encodeValue(obj))` for a plain object, also returning the
+ * value of each of its own properties, in `Object.keys` order (the lean
+ * `serializerFromJsonLean` reply names them by index). `null` when `obj` is
+ * not a plain object, for the caller to use `encodeValue` instead. Throws
+ * `EngineFastPathUnsupported` where `encodeValue` would.
+ * @param {*} obj the object
+ * @return {object|null} `{ text, values }`, or `null`
+ */
+function encodePlainObjectText(obj): { text: string, values: unknown[] } | null {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj) || isDayjsLike(obj) || isTypedLike(obj) || obj instanceof Map) {
+        return null;
+    }
+    const proto = Object.getPrototypeOf(obj);
+    if (proto !== Object.prototype && proto !== null) {
+        return null;
+    }
+    const seen = new Set<object>();
+    visit(obj, seen);
+    const keys = Object.keys(obj);
+    const values = new Array(keys.length);
+    let out: any = obj;
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (key === '__proto__') {
+            throw new EngineFastPathUnsupported('proto-key');
+        }
+        const value = obj[key];
+        values[i] = value;
+        const encoded = encodeMember(value, seen);
+        if (out === obj && encoded !== value) {
+            out = {};
+            for (let j = 0; j < i; j++) {
+                out[keys[j]] = values[j];
+            }
+        }
+        if (out !== obj) {
+            out[key] = encoded;
+        }
+    }
+    return { text: checkJsonText(JSON.stringify(out)), values };
+}
+
+/**
+ * `JSON.stringify(encodeValue(resource))` for a Resource/ValidatedResource/
+ * Relationship (`encodeTyped`), with its fields encoded by `encodeMember`.
+ * @param {object} resource the instance
+ * @return {string} the wire text
+ */
+function encodeTypedText(resource): string {
+    const seen = new Set<object>();
+    visit(resource, seen);
+    const ctorName = resource.constructor && resource.constructor.name;
+    if (ctorName !== 'Resource' && ctorName !== 'ValidatedResource' && ctorName !== 'Relationship') {
+        throw new EngineFastPathUnsupported(`typed-class:${ctorName}`);
+    }
+    const fields = {};
+    for (const key of Object.keys(resource)) {
+        if (TYPED_SKIP.has(key)) {
+            continue;
+        }
+        if (key === '__proto__') {
+            throw new EngineFastPathUnsupported('proto-key');
+        }
+        fields[key] = encodeMember(resource[key], seen);
+    }
+    return checkJsonText(JSON.stringify({ [TAG]: 'typed', ctor: ctorName, fqn: resource.getFullyQualifiedType(), fields }));
+}
+
+// The own properties `Instance::to_validator_value` (concerto-core) leaves
+// out of the validator's shape: the three handles and the private ones.
+const VALIDATOR_SKIP = new Set([
+    '$modelManager', '$classDeclaration', '$validator',
+    '$namespace', '$type', '$identifierFieldName', '$imports', '$superTypes', '$id',
+]);
+
+/**
+ * A resource whose own properties are all plain JSON of the simple kinds
+ * above, as the JSON text of the shape the engine's validator reads
+ * (`Instance::to_validator_value`: `$class` first, then each own property
+ * but `VALIDATOR_SKIP`), for concerto-wasm `resourceValidateSimple`. `null`
+ * for any other resource.
+ * @param {object} resource the Resource/ValidatedResource
+ * @return {string|null} the text, or `null`
+ */
+function encodeValidatorText(resource): string | null {
+    const out: any = { $class: resource.getFullyQualifiedType() };
+    for (const key of Object.keys(resource)) {
+        if (VALIDATOR_SKIP.has(key)) {
+            continue;
+        }
+        if (key === '__proto__') {
+            return null;
+        }
+        const value = resource[key];
+        if (!isSimple(value)) {
+            if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype) {
+                return null;
+            }
+            for (let i = 0; i < value.length; i++) {
+                if (!isSimple(value[i])) {
+                    return null;
+                }
+            }
+        }
+        out[key] = value;
+    }
+    const text = JSON.stringify(out);
+    try {
+        return checkJsonText(text);
+    } catch (err) {
+        return null;
+    }
+}
+
 let modelClassesCache: any;
 
 /**
@@ -314,6 +479,60 @@ function materializeTyped(node, modelManager: BaseModelManager) {
 }
 
 /**
+ * A resource built from `serializerFromJsonLean`'s reply (concerto-wasm):
+ * what `materializeTyped` builds from the same resource's `"typed"` wire
+ * value, in the same steps and the same order, but with each field that the
+ * reply names by index taken from `values` (an array is copied, as the
+ * populator builds a new one) rather than decoded.
+ * @param {Array} reply the parsed reply
+ * @param {Array} values the input object's own property values, in `Object.keys` order
+ * @param {BaseModelManager} modelManager the model manager to resolve its class in
+ * @return {object} the materialised instance
+ */
+function materializeLean(reply, values: unknown[], modelManager: BaseModelManager) {
+    const { Resource, ValidatedResource, Relationship, ResourceValidator } = modelClasses();
+
+    const classDeclaration = modelManager.getType(reply[1]);
+    const ns = decodeValue(reply[2], modelManager);
+    const type = decodeValue(reply[3], modelManager);
+    const id = decodeValue(reply[4], modelManager);
+    const timestamp = decodeValue(reply[5], modelManager);
+
+    let resource;
+    if (reply[0] === 'ValidatedResource') {
+        const validator = new ResourceValidator({});
+        resource = new ValidatedResource(modelManager, classDeclaration, ns, type, id, timestamp, validator);
+    } else if (reply[0] === 'Relationship') {
+        resource = new Relationship(modelManager, classDeclaration, ns, type, id, timestamp);
+    } else {
+        resource = new Resource(modelManager, classDeclaration, ns, type, id, timestamp);
+    }
+
+    for (let i = 6; i < reply.length; i += 2) {
+        const key = reply[i];
+        const item = reply[i + 1];
+        let value;
+        if (typeof item === 'number') {
+            value = values[item];
+            if (Array.isArray(value)) {
+                value = value.slice();
+            }
+        } else {
+            value = decodeValue(item[0], modelManager);
+        }
+        // A plain assignment is `setOwn` here (the constructors leave only
+        // writable data properties, and no class in the chain has an
+        // accessor), except for `__proto__`.
+        if (key === '__proto__') {
+            setOwn(resource, key, value);
+        } else {
+            resource[key] = value;
+        }
+    }
+    return resource;
+}
+
+/**
  * A wire value (module doc) as the JS runtime value it decodes to.
  * @param {*} v the wire value
  * @param {BaseModelManager} modelManager the model manager, for a `"typed"` value
@@ -363,4 +582,7 @@ function decodeValue(v, modelManager: BaseModelManager) {
     }
 }
 
-export { EngineFastPathUnsupported, encodeValue, decodeValue, checkString, checkJsonText };
+export {
+    EngineFastPathUnsupported, encodeValue, decodeValue, checkString, checkJsonText,
+    encodePlainObjectText, encodeTypedText, encodeValidatorText, materializeLean, modelClasses,
+};
