@@ -133,6 +133,10 @@ class Field extends Property {
      * @return {String} the string version of the property.
      */
     toString(): string {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.fieldToString(this);
+        }
         return (
             'Field {name=' +
             this.name +
