@@ -293,7 +293,96 @@ function ensureCoreBuilt(concertoRoot, logDir) {
   return { ok: true, built };
 }
 
-function collectCoreTests(concertoRoot, migrationDir, logDir, tagInfo) {
+// The CONCERTO_ENGINE=rust suite (§0.1/§0.2, real run). This mirrors
+// migration/gate/run.mjs's stepCoreSuiteRust, which had to work around the
+// hardcoded na() stub below by re-running the suite itself and noting in
+// its report that status.mjs's own engine_modes.rust was stale. P4-02 (the
+// engine shim/WASM binding) has since landed, so this collects the real
+// thing instead of leaving that stub in place for every caller that isn't
+// the gate runner (e.g. --at, the hourly report).
+function collectCoreTestsRustMode(concertoRoot, rustRoot, logDir, tagInfo) {
+  const coreDir = path.join(concertoRoot, 'packages', 'concerto-core');
+  const engineCjs = path.join(rustRoot, 'concerto-wasm', 'pkg', 'concerto-engine.cjs');
+  if (!fs.existsSync(engineCjs)) {
+    return na(`${engineCjs} does not exist (run concerto-wasm/build.sh first)`);
+  }
+  const rawOutputPath = path.join(logDir, 'core-suite-rust-raw-stdout.log');
+  const res = run(
+    'npx',
+    ['mocha', '-r', 'ts-node/register', '--recursive', '-t', '10000', '--reporter', 'json', 'test/'],
+    {
+      cwd: coreDir,
+      env: { TS_NODE_PROJECT: 'tsconfig.build.json', TZ: 'UTC', CONCERTO_ENGINE: 'rust' },
+      timeoutMs: 8 * 60 * 1000,
+      logFile: path.join(logDir, 'core-suite-rust-stderr.log'),
+    }
+  );
+  fs.writeFileSync(rawOutputPath, res.stdout);
+
+  let mocha;
+  try {
+    const jsonStart = res.stdout.search(/\{\s*\n\s*"stats"/);
+    if (jsonStart === -1) throw new Error('no JSON object found in stdout');
+    let depth = 0;
+    let jsonEnd = -1;
+    let inString = false;
+    let escaped = false;
+    for (let i = jsonStart; i < res.stdout.length; i++) {
+      const ch = res.stdout[i];
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (ch === '\\') escaped = true;
+        else if (ch === '"') inString = false;
+        continue;
+      }
+      if (ch === '"') { inString = true; continue; }
+      if (ch === '{') depth++;
+      else if (ch === '}') {
+        depth--;
+        if (depth === 0) { jsonEnd = i + 1; break; }
+      }
+    }
+    if (jsonEnd === -1) throw new Error('unbalanced JSON object in stdout');
+    mocha = JSON.parse(res.stdout.slice(jsonStart, jsonEnd));
+    fs.writeFileSync(path.join(logDir, 'mocha-results-rust.json'), JSON.stringify(mocha, null, 2));
+  } catch (e) {
+    return na(
+      `could not parse mocha JSON reporter output for CONCERTO_ENGINE=rust (exit ${res.status}, timedOut=${res.timedOut}): ${e.message}; see core-suite-rust-raw-stdout.log`
+    );
+  }
+
+  const overall = {
+    available: true,
+    engine: 'rust',
+    suites: mocha.stats.suites,
+    tests: mocha.stats.tests,
+    passing: mocha.stats.passes,
+    failing: mocha.stats.failures,
+    pending: mocha.stats.pending,
+    duration_ms: mocha.stats.duration,
+  };
+
+  if (tagInfo.available) {
+    const failedTitles = new Set((mocha.failures || []).map((t) => t.fullTitle));
+    const pendingTitles = new Set((mocha.pending || []).map((t) => t.fullTitle));
+    const tally = {};
+    for (const t of mocha.tests || []) {
+      const relFile = t.file ? path.relative(path.join(coreDir, 'test'), t.file) : null;
+      const tag =
+        (relFile && tagInfo.map.get(`${relFile}::${t.fullTitle}`)) ||
+        tagInfo.map.get(t.fullTitle) ||
+        'untagged';
+      tally[tag] = tally[tag] || { tests: 0, passing: 0, failing: 0, pending: 0 };
+      tally[tag].tests++;
+      tally[tag][failedTitles.has(t.fullTitle) ? 'failing' : pendingTitles.has(t.fullTitle) ? 'pending' : 'passing']++;
+    }
+    overall.by_tag = { available: true, tally };
+  }
+
+  return overall;
+}
+
+function collectCoreTests(concertoRoot, migrationDir, logDir, tagInfo, rustRoot) {
   const coreDir = path.join(concertoRoot, 'packages', 'concerto-core');
   if (!fs.existsSync(coreDir)) {
     return { overall: na('packages/concerto-core does not exist at this revision') };
@@ -434,7 +523,7 @@ function collectCoreTests(concertoRoot, migrationDir, logDir, tagInfo) {
 
   const engine_modes = {
     ts: overall,
-    rust: na('CONCERTO_ENGINE=rust is not implemented yet (P4-02, engine shim, has not landed)'),
+    rust: collectCoreTestsRustMode(concertoRoot, rustRoot, logDir, tagInfo),
   };
 
   return { overall, by_tag, engine_modes, nycReportDir };
@@ -864,7 +953,7 @@ async function main() {
     const ledger = collectLedger(migrationDir);
 
     const coreLogDir = path.join(RUN_LOG_DIR, 'concerto-core');
-    const coreTests = collectCoreTests(dataRoot, migrationDir, coreLogDir, tagInfo);
+    const coreTests = collectCoreTests(dataRoot, migrationDir, coreLogDir, tagInfo, RUST_ROOT);
     const nycCoverage = collectNycCoverage(coreDir, coreTests.nycReportDir);
 
     const oracle = collectOracle(migrationDir, RUST_ROOT);

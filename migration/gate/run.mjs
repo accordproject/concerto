@@ -343,11 +343,41 @@ function stepOracleNative(opts, reportDir) {
     { cwd: opts.rustRoot, env: { CONCERTO_ORACLE_FIXTURES: opts.oracleFixtures }, timeoutMs: 15 * 60 * 1000, logFile }
   );
   const m = res.stdout.match(/test result: (\w+)\. (\d+) passed; (\d+) failed;/);
+
+  // `passed`/`failed` above are #[test] function counts (currently 32: one
+  // harness self-test suite), not the fixture-level tally the oracle
+  // replays internally in `replays_the_oracle_corpus`. The harness writes
+  // that as its own JSON report to <rustRoot>/target/oracle-report.json
+  // (concerto-core/tests/oracle/main.rs, report.rs) — read it so the gate
+  // report carries the real fixture split (total/pass/fail/unsupported/
+  // harness_error, plus unowned and per-owner counts), not just "32/32".
+  const fixtureReportPath = path.join(opts.rustRoot, 'target', 'oracle-report.json');
+  let fixtures = null;
+  if (fs.existsSync(fixtureReportPath)) {
+    try {
+      const r = JSON.parse(fs.readFileSync(fixtureReportPath, 'utf8'));
+      fixtures = {
+        total_fixtures: r.total_fixtures,
+        load_errors: r.load_errors,
+        pass: r.pass,
+        fail: r.fail,
+        unsupported: r.unsupported,
+        harness_error: r.harness_error,
+        unowned: r.unowned,
+        owners: r.owners,
+        regressions: r.regressions,
+      };
+    } catch (e) {
+      fixtures = { error: `could not parse ${fixtureReportPath}: ${e.message}` };
+    }
+  }
+
   return {
     name: 'oracle native (cargo test --test oracle, §0.3 native leg)',
     ok: res.ok,
     passed: m ? Number(m[2]) : null,
     failed: m ? Number(m[3]) : null,
+    fixtures,
     log: path.relative(reportDir, logFile),
   };
 }
@@ -613,6 +643,126 @@ function stepCorpusProvenance(opts) {
 }
 
 // ---------------------------------------------------------------------------
+// §0 criteria summary (task P5-01, accordproject/concerto-rust#72): one
+// explicit verdict line per numbered done criterion, read back out of the
+// steps above rather than re-judged here, so this can never disagree with
+// the step that actually ran the check. Also carries the P5-04 benchmark
+// finding (concerto#1368: the Rust engine measured 6x-100x slower than TS
+// through the public API) and the maintainer's decision to accept current
+// performance (P5-06a/b closed) — it is not one of the seven §0 criteria,
+// so it never affects `ok`, but the report would be misleading without it.
+// ---------------------------------------------------------------------------
+function fmtPct(v) {
+  return typeof v === 'number' && Number.isFinite(v) ? `${v}%` : 'n/a';
+}
+
+function buildCriteriaSummary(steps) {
+  const status = steps.status && steps.status.status;
+  const m = status && status.metrics;
+  const items = [];
+
+  // §0.1 / §0.2: behavioural (B) and white-box (W) tests unchanged, rust-backed.
+  const rustSuite = steps.core_suite_rust;
+  const byTag = rustSuite && rustSuite.by_tag;
+  const tagLine = (tag) => {
+    const t = byTag && byTag[tag];
+    return t ? `${t.passing}/${t.tests} passing, ${t.failing} failing, ${t.pending} pending` : 'not available';
+  };
+  items.push({
+    id: '§0.1',
+    label: 'Behavioural (B) unit tests pass unchanged, CONCERTO_ENGINE=rust',
+    ok: rustSuite ? rustSuite.ok && (!byTag || (byTag.B && byTag.B.failing === 0)) : null,
+    detail: `tag B: ${tagLine('B')}` + (rustSuite && rustSuite.exit != null ? `; suite exit ${rustSuite.exit}` : ''),
+  });
+  items.push({
+    id: '§0.2',
+    label: 'White-box (W) tests pass unchanged (or lifted + signed off)',
+    ok: rustSuite && byTag ? byTag.W && byTag.W.failing === 0 : null,
+    detail: `tag W: ${tagLine('W')}`,
+  });
+
+  // §0.3: oracle corpus coverage of the reference, 100% native + WASM.
+  const cov = steps.oracle_coverage;
+  const covCorpus = cov && cov.coverage && cov.coverage.corpus;
+  const nativeFx = steps.oracle_native && steps.oracle_native.fixtures;
+  const wasmReplay = steps.oracle_wasm && steps.oracle_wasm.replay;
+  items.push({
+    id: '§0.3a',
+    label: "Oracle corpus coverage of the reference (floor: stmt/fn/line >= 99%, branch >= 94.8%)",
+    ok: cov ? cov.ok : null,
+    detail: covCorpus
+      ? `stmt ${fmtPct(covCorpus.statements && covCorpus.statements.pct)}, branch ${fmtPct(covCorpus.branches && covCorpus.branches.pct)}, fn ${fmtPct(covCorpus.functions && covCorpus.functions.pct)}, line ${fmtPct(covCorpus.lines && covCorpus.lines.pct)}`
+      : 'not available',
+  });
+  items.push({
+    id: '§0.3b',
+    label: 'Oracle corpus 100% pass, native (cargo test --test oracle)',
+    ok: nativeFx ? nativeFx.fail === 0 && nativeFx.harness_error === 0 && nativeFx.regressions === 0 : (steps.oracle_native ? steps.oracle_native.ok : null),
+    detail: nativeFx
+      ? `${nativeFx.pass}/${nativeFx.total_fixtures} pass, ${nativeFx.fail} fail, ${nativeFx.unsupported} unsupported, ${nativeFx.harness_error} harness error, ${nativeFx.unowned} unowned, ${nativeFx.regressions} regressions vs baseline.tsv`
+      : (steps.oracle_native ? `harness self-test: ${steps.oracle_native.passed}/${(steps.oracle_native.passed ?? 0) + (steps.oracle_native.failed ?? 0)} (no fixture-level oracle-report.json found)` : 'not available'),
+  });
+  items.push({
+    id: '§0.3c',
+    label: 'Oracle corpus 100% pass, WASM/JS binding (replay.js)',
+    ok: wasmReplay ? wasmReplay.pass === wasmReplay.total && wasmReplay.fail === 0 && wasmReplay.harness_error === 0 : (steps.oracle_wasm ? steps.oracle_wasm.ok : null),
+    detail: wasmReplay ? `${wasmReplay.pass}/${wasmReplay.total} pass (${fmtPct(wasmReplay.agreement_pct)} agreement)` : 'not available',
+  });
+
+  // §0.4: >=70% of concerto-core logic, by weight, runs in Rust.
+  const ledgerPct = m && m.ledger && m.ledger.weighted_pct_rust_plus_hybrid;
+  items.push({
+    id: '§0.4',
+    label: '>=70% of concerto-core logic, by weight, runs in Rust (ledger)',
+    ok: typeof ledgerPct === 'number' ? ledgerPct >= 70 : null,
+    detail: typeof ledgerPct === 'number' ? `ledger-weighted Rust+hybrid share: ${ledgerPct}%` : 'not available',
+  });
+
+  // §0.5: public TS API unchanged.
+  items.push({
+    id: '§0.5',
+    label: 'Public TS API unchanged (exports, deep paths, .d.ts snapshot)',
+    ok: steps.guardrails ? steps.guardrails.ok : null,
+    detail: steps.guardrails ? `check-guardrails.mjs exit ${steps.guardrails.exit}` : 'not available',
+  });
+
+  // §0.6: Rust test strength — llvm-cov >=90% lines, cargo-mutants >=85% catch rate.
+  const llvmCov = m && m.rust && m.rust['concerto-rust'] && m.rust['concerto-rust'].llvm_cov;
+  const llvmCovPct = llvmCov && llvmCov.available && llvmCov.per_crate_lines_pct ? llvmCov.per_crate_lines_pct['concerto-core'] : null;
+  items.push({
+    id: '§0.6a',
+    label: 'concerto-core llvm-cov >= 90% lines',
+    ok: typeof llvmCovPct === 'number' ? llvmCovPct >= 90 : null,
+    detail: typeof llvmCovPct === 'number' ? `${llvmCovPct}% lines` : 'not available (llvm-cov tool missing or not judged)',
+  });
+  const mutants = steps.cargo_mutants;
+  items.push({
+    id: '§0.6b',
+    label: 'cargo-mutants catch rate on validation modules >= 85%',
+    ok: mutants && mutants.available !== false ? mutants.ok : null,
+    detail: mutants && mutants.catch_rate_pct != null ? `${mutants.caught}/${mutants.total} caught (${mutants.catch_rate_pct}%), source: ${mutants.source}` : (mutants && mutants.na) || 'not available',
+  });
+
+  // §0.7: upstream conformance — harness current, CI green.
+  const conf = m && m.conformance;
+  items.push({
+    id: '§0.7',
+    label: 'concerto-conformance Rust harness current, local run green',
+    ok: conf && conf.available ? conf.failed === 0 : null,
+    detail: conf && conf.available ? `${conf.passed}/${conf.total} scenarios passing locally; CI status must be read separately (this runner cannot see GitHub Actions)` : 'not available',
+  });
+
+  const p5_04 = {
+    label: 'P5-04 benchmark finding (not a §0 criterion; report only)',
+    detail:
+      'concerto#1368 measured the Rust engine at 6x-100x slower than TS through the public API. ' +
+      'The maintainer decided to accept current performance (P5-06a/b closed) rather than block the gate on it.',
+  };
+
+  return { items, p5_04 };
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
@@ -651,13 +801,16 @@ async function main() {
   for (const [key, st] of Object.entries(steps)) classification[key] = classifyStep(key, st);
   const skipped = Object.entries(opts).filter(([k, v]) => k.startsWith('skip') && v === true).map(([k]) => k);
 
+  const criteriaSummary = buildCriteriaSummary(steps);
+
   const report = {
     generated_at: new Date().toISOString(),
-    task: 'P5-01a',
+    task: 'P5-01',
     plan_issue: 'accordproject/concerto-rust#29',
-    task_issue: 'accordproject/concerto-rust#145',
+    task_issue: 'accordproject/concerto-rust#72',
     options: opts,
     skipped_steps: skipped,
+    criteria_summary: criteriaSummary,
     steps,
     classification,
   };
@@ -666,7 +819,17 @@ async function main() {
   const lines = [];
   lines.push(`# Gate report — ${report.generated_at}`);
   lines.push('');
-  lines.push('Output of migration/gate/run.mjs (built for task P5-01a; also used, unchanged, as the P5-01 final-gate runner). Each failing step is broken into failing items; an item is expected-pending only if it is in a known, owned set (migration/gate/classify.mjs), otherwise unexpected.');
+  lines.push('Output of migration/gate/run.mjs (built for task P5-01a; used, unchanged apart from additive fixture-level oracle reporting and this §0 summary, as the P5-01 final-gate runner). Each failing step is broken into failing items; an item is expected-pending only if it is in a known, owned set (migration/gate/classify.mjs), otherwise unexpected.');
+  lines.push('');
+  lines.push('## §0 criteria summary');
+  lines.push('');
+  for (const it of criteriaSummary.items) {
+    const verdict = it.ok === true ? 'PASS' : it.ok === false ? 'FAIL' : 'NOT JUDGED';
+    lines.push(`- **${it.id} ${it.label}: ${verdict}** — ${it.detail}`);
+  }
+  lines.push('');
+  lines.push(`- *${criteriaSummary.p5_04.label}*: ${criteriaSummary.p5_04.detail}`);
+  lines.push('');
   lines.push('');
   lines.push(`- skip flags used: ${skipped.length ? skipped.join(', ') : 'none (every step enabled)'}`);
   lines.push('');
