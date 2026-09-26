@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-26T09:14:36.602Z",
+ "generated_at": "2026-09-26T09:34:20.095Z",
  "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
  "corpus": {
   "statements": {
@@ -318,24 +318,24 @@
  },
  "unit_suite": {
   "statements": {
-   "pct": 10.27,
-   "covered": 341,
-   "total": 3320
+   "pct": 99.01,
+   "covered": 3308,
+   "total": 3341
   },
   "branches": {
-   "pct": 0.21,
-   "covered": 4,
+   "pct": 95.8,
+   "covered": 1758,
    "total": 1835
   },
   "functions": {
-   "pct": 0.16,
-   "covered": 1,
+   "pct": 99.34,
+   "covered": 606,
    "total": 610
   },
   "lines": {
-   "pct": 10.34,
-   "covered": 338,
-   "total": 3267
+   "pct": 99.02,
+   "covered": 3254,
+   "total": 3286
   }
  },
  "unit_suite_source": "nyc run of the unit suite over the workspace src/ (same command as baseline.json)",
@@ -356,9 +356,14 @@
   "lines": 99
  },
  "uncovered_branches": 67,
- "uncovered_branches_covered_by_suite": 0,
- "covered_by_suite_by_category": {},
- "covered_by_suite_by_destination": {},
+ "uncovered_branches_covered_by_suite": 12,
+ "covered_by_suite_by_category": {
+  "stub-only": 4,
+  "internal-only": 8
+ },
+ "covered_by_suite_by_destination": {
+  "P2-10 (accordproject/concerto-rust#54)": 12
+ },
  "unexplained_covered_by_suite": [],
  "stale_reasons": []
 }

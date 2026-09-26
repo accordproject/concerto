@@ -46,7 +46,13 @@ export TZ=UTC
 # whole leg silently reports 0% coverage. The suite leg (below) also
 # requires concerto-core's own dist/index.js (its package.json "main"),
 # since the unit tests load the package through its entry point, not via
-# ts-node. Building here, once, up front covers both.
+# ts-node. The suite leg's test/decoratormanager.js additionally requires
+# @accordproject/concerto-vocabulary through node_modules (it is not a
+# concerto-core package.json dependency, only a workspace sibling resolved
+# via the root node_modules symlink), and mocha loads test files with plain
+# `require`, not ts-node, so an unbuilt dist/ there is a hard
+# MODULE_NOT_FOUND at load time, before any test runs -- not a coverage gap.
+# Building here, once, up front covers all three legs.
 #
 # -w is given the package NAME (not the "packages/<dir>" path) because npm
 # resolves a path given to -w relative to the process's cwd, not to
@@ -56,6 +62,7 @@ export TZ=UTC
 # package name matches regardless of cwd.
 npm run build -w @accordproject/concerto-util --prefix "$REPO_DIR" >/dev/null
 npm run build -w @accordproject/concerto-cto --prefix "$REPO_DIR" >/dev/null
+npm run build -w @accordproject/concerto-vocabulary --prefix "$REPO_DIR" >/dev/null
 npm run build -w @accordproject/concerto-core --prefix "$REPO_DIR" >/dev/null
 
 # 1. corpus -> frozen reference. --cwd is the reference package so that its
@@ -112,10 +119,35 @@ if [[ "${2:-}" == "--with-suite" ]]; then
   # whatever dist/ happened to be built from before this leg (the workspace's
   # diverged src/), defeating the whole point of the swap.
   npm run build -w @accordproject/concerto-core --prefix "$REPO_DIR" >/dev/null
+  set +e
   npx nyc --temp-dir "$WORK/suite-nyc-tmp" --report-dir "$WORK/suite-nyc-report" \
     --reporter json --reporter json-summary --reporter text-summary --check-coverage=false \
-    mocha -r ts-node/register --recursive -t 10000 --reporter dot test/ > "$WORK/suite-coverage.log" 2>&1 || true
-  grep -E 'passing|failing|Statements|Branches|Functions|Lines' "$WORK/suite-coverage.log"
+    mocha -r ts-node/register --recursive -t 10000 --reporter dot test/ > "$WORK/suite-coverage.log" 2>&1
+  suite_status=$?
+  set -e
+  grep -E 'passing|failing|Statements|Branches|Functions|Lines' "$WORK/suite-coverage.log" || true
+
+  # A crashed or empty suite (e.g. a MODULE_NOT_FOUND at load time, before
+  # mocha reports anything) must fail the script loudly instead of quietly
+  # producing near-zero coverage that coverage-gaps.js then reads as a
+  # "clean" suite leg with no unexplained branches. Check the exit status,
+  # that at least one test passed, that none failed, and that the reported
+  # coverage is non-trivial -- any one of these being off means the suite
+  # didn't actually run over the swapped-in v5.0.0 src/test.
+  passing_count="$(grep -oE '[0-9]+ passing' "$WORK/suite-coverage.log" | grep -oE '^[0-9]+' | tail -1 || true)"
+  failing_count="$(grep -oE '[0-9]+ failing' "$WORK/suite-coverage.log" | grep -oE '^[0-9]+' | tail -1 || true)"
+  statements_pct="$(grep -m1 'Statements' "$WORK/suite-coverage.log" | grep -oE '[0-9]+(\.[0-9]+)?' | head -1 || true)"
+  suite_ok=1
+  if [[ "$suite_status" -ne 0 ]]; then suite_ok=0; fi
+  if [[ -z "${passing_count:-}" || "${passing_count:-0}" -eq 0 ]]; then suite_ok=0; fi
+  if [[ -n "${failing_count:-}" && "${failing_count:-0}" -ne 0 ]]; then suite_ok=0; fi
+  if [[ -z "${statements_pct:-}" ]] || ! awk -v p="${statements_pct:-0}" 'BEGIN{exit !(p>50)}'; then suite_ok=0; fi
+  if [[ "$suite_ok" -ne 1 ]]; then
+    echo "coverage.sh: unit suite leg failed to produce a real run" \
+      "(exit=$suite_status passing=${passing_count:-0} failing=${failing_count:-0} statements=${statements_pct:-0}%)," \
+      "see $WORK/suite-coverage.log" >&2
+    exit 1
+  fi
   restore_workspace_src
   trap - EXIT
   SUITE_ARGS=(--suite "$WORK/suite-nyc-report/coverage-final.json" --suite-summary "$WORK/suite-nyc-report/coverage-summary.json")
