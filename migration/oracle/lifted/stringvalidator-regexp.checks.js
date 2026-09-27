@@ -187,6 +187,48 @@ module.exports = [
         run: (core) => validatorOf(build(core, 'c8', 'concept Box { o String s default="aa" regex=/^a+$/ length=[1,3] }'), 'c8', 's').getMaxLength(),
         expect: { ok: 3 },
     },
+    {
+        id: 'SVR-CTOR-009',
+        covers: 'constructor: two managers with different engines load one shared AST object; each Field gets a validator its own engine built, at load',
+        run: (core) => {
+            const ns = `${NS}.c9@1.0.0`;
+            const source = new core.ModelManager();
+            source.addCTOModel(`namespace ${ns}\nconcept Box { o String s regex=/^a+$/ optional o String t regex=/^b+$/i length=[1,3] optional }`, 'c9.cto');
+            const ast = source.getModelFile(ns).getAst();
+            const calls = [];
+            const engine = (tag) => class extends RegExp {
+                /**
+                 * Records the call, then builds a tagged RegExp.
+                 * @param {string} pattern the pattern
+                 * @param {string} flags the flags
+                 */
+                constructor(pattern, flags) {
+                    calls.push(tag);
+                    super(pattern, flags);
+                    this.tag = tag;
+                }
+            };
+            const managers = { A: new core.ModelManager({ regExp: engine('A') }), B: new core.ModelManager({ regExp: engine('B') }) };
+            for (const mm of Object.values(managers)) {
+                mm.addModelFile(new core.ModelFile(mm, ast, undefined, 'c9.cto'), undefined, 'c9.cto');
+            }
+            const atLoad = calls.slice();
+            // Read B first, so a validator shared through the AST node would show on A.
+            const read = {};
+            for (const tag of ['B', 'A']) {
+                const box = managers[tag].getType(`${ns}.Box`);
+                read[tag] = ['s', 't'].map((p) => box.getProperty(p).getValidator().getRegex().tag);
+            }
+            // How often each engine runs is not part of the contract; that
+            // each ran at load, for both fields, and not again on read, is.
+            return {
+                ranAtLoad: { A: atLoad.filter((t) => t === 'A').length >= 2, B: atLoad.filter((t) => t === 'B').length >= 2 },
+                read,
+                ranOnRead: calls.length > atLoad.length,
+            };
+        },
+        expect: { ok: { ranAtLoad: { A: true, B: true }, read: { B: ['B', 'B'], A: ['A', 'A'] }, ranOnRead: false } },
+    },
     // ---- validate -----------------------------------------------------
     {
         id: 'SVR-VAL-001',
