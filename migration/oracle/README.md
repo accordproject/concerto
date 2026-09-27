@@ -226,9 +226,18 @@ Rules:
 `lib/adapter.js` `coreAdapter(core)` is the adapter for any JS build of concerto-core; `referenceAdapter()`
 uses `reference/node_modules/@accordproject/concerto-core` and `srcAdapter()` the workspace `src/`.
 
-Verdicts: `pass` (canonical outcomes identical), `fail` (different outcome, state divergence, input
-construction failed, unsupported op), `harness-error` (fixture or blob missing, unreadable or malformed).
-A harness error is never a pass.
+Verdicts: `pass` (canonical outcomes identical apart from exception message text), `fail` (different
+outcome, state divergence, input construction failed, unsupported op), `harness-error` (fixture or blob
+missing, unreadable or malformed). A harness error is never a pass.
+
+**Error parity is class, not message** (maintainer decision 2026-09-27, task P5-09,
+accordproject/concerto-rust#253). The judge compares throw/no-throw, exception class, component,
+location, values and effects exactly, but ignores `error.message` (and the `message` of any
+`{"@@oracle":"throws"}` marker inside a value). A fixture that differs only in message text passes; the
+replay summary counts it as `message_only` and lists its first message difference under `message_diffs`,
+for information. The native Rust harness (`concerto-core/tests/oracle`) applies the same rule. In
+`bin/self-check.js`, the `error-message-changed` mutant is therefore *tolerated*: it holds when no
+fixture fails and at least one pass reports the message difference.
 
 ## CTO -> AST cache for the native harness
 
