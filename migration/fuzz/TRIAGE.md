@@ -10,6 +10,72 @@ stage-2 re-run is reported first, below**, then the superseded first stage-2 run
 then **stage 1**'s report (the harness and the 60,000-case triage) unchanged. No
 product code is changed by any of the three.
 
+# P5-10c: lazy views against the pre-lazy engine
+
+Issue: accordproject/concerto-rust#271 (lazy views part 3, verification). Outputs:
+`results/p5-10c/` (lazy run), `results/p5-10c/prelazy/` (pre-lazy run),
+`results/p5-10c/check/` (check-mode shard), `results/p5-10c/lazy-only-clusters.json`
+(the difference, minimised) and `results/p5-10c/commits.json`.
+
+**Run.** The stage-2 plan: ten shards of 100,000 cases, run-seeds 1001-1010, batch 1000,
+25 seeds per op, `bin/run-shards.js`. It ran twice on the same cases: once on the lazy
+integration heads (concerto `d2be3f7be`, concerto-rust `e7c0163`) and once on the
+pre-lazy heads (concerto `796669d5c`, concerto-rust `5498f61`). A third, single shard
+(run-seed 1001) ran the lazy engine with `CONCERTO_LAZY_VIEWS_CHECK=1`, keeping worker
+stderr with the new opt-in `FUZZ_STDERR_LOG` (`lib/run-batch.js`).
+
+**Harness fix.** After P5-02, `lib/worker.js`'s TS side (`srcAdapter`, the workspace
+`src/`) runs the Rust engine, so both sides of the fuzzer were Rust. The TS side is now
+the frozen reference `@accordproject/concerto-core` 5.0.0 (`referenceAdapter`, the
+oracle's recording reference). Because the TS side changed, these counts are **not
+comparable with the stage-2 sections below**; the pre-lazy run is the control.
+
+| run | ran | agree | message-only agree | divergences (clusters) | expected | harness errors |
+|---|---|---|---|---|---|---|
+| lazy | 1,000,000 | 947,007 | 2,480 | 5,921 (100) | 47,072 | 0 |
+| pre-lazy | 1,000,000 | 947,243 | 2,453 | 5,685 (88) | 47,072 | 0 |
+| lazy, check mode (seed 1001) | 100,000 | 94,799 | 243 | 578 (60) | 4,623 | 0 |
+
+| kind | lazy: cases (clusters) | pre-lazy |
+|---|---|---|
+| TS accepts, Rust rejects | 4,879 (50) | 4,879 (50) |
+| both reject, class differs | 815 (44) | 805 (37) |
+| TS rejects, Rust accepts | 227 (6) | 1 (1) |
+
+**Result: lazy views add one new cluster family and remove none.** Compared case by case
+(`{op, seedFile, mutationSeed}`), 236 divergences occur only on the lazy engine
+(`ModelManager.addModelFile` 126, `ModelManager.fromAst` 110), 0 occur only on the
+pre-lazy engine, and no shared case changed its signature. All 236 fall in 12 clusters, and
+every cluster minimises (`bin/minimize-clusters.js`) to a property whose `$class` is not a
+metamodel class but ends in a property short name, for example
+`concerto.metamodel@1.0.0.StringPropertyconcerto.metamodel@1.0.0.StringProperty`:
+
+- 222 cases: TS throws `IllegalModelException: Unrecognised model element`, Rust accepts
+  (`ts=error`, `rust=ok`). Rust's check accepts the malformed `$class`. Before lazy views
+  the TS view constructor, which the hybrid engine still ran at construction, threw the same
+  error; now the file is staged lazily and the error is thrown only when its declarations
+  are first read, or never.
+- 14 cases: both throw, but a later error (`Namespace is null or undefined`, `Unrecognized
+  imports`, `Namespace … is already declared`, `ast not specified`, a `TypeError`) now
+  surfaces first, with a different class.
+- Message-only agreements rose by 27 (2,480 against 2,453). The fuzzer does not record
+  those cases individually, so they are not attributed here; they are agreements under the
+  class-not-message rule.
+
+This breaks BC-25 (errors stay eager; `migration/BREAKING-CHANGES-PLAN.md`). The check-mode
+shard confirms it: 21 `LAZY-CHECK under-rejection` lines (`check/lazy-check-stderr.log`),
+every one `Unrecognised model element`, and with the check on, the shard's 578 divergences
+are identical case for case to the pre-lazy shard 1001 (the check builds the TS views at
+construction, restoring eager errors). The fix is a Rust under-rejection fix (the #218
+direction: validate the property `$class` exactly), not a lazy-views change. It is reported on
+#271 and not fixed here.
+
+**Pre-existing, unchanged by lazy views:** the 50 TS-accepts/Rust-rejects clusters (4,879
+cases, serde and AST-glue strictness, the #217 theme), 37 class-differs clusters (805 cases,
+the #219 theme) and one TS-rejects/Rust-accepts case (`Could not find super type undefined`,
+`ModelManager.fromAst`) occur identically in both runs. `Resource.validate` has no
+divergences and `Serializer.fromJSON` has the same 8 (DV-009) in both.
+
 # P5-09: stage-2 residuals under the class-not-message rule
 
 Maintainer decision 2026-09-27 (accordproject/concerto-rust#253): Rust and TS must throw in the

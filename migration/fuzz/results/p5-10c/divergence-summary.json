@@ -1,0 +1,28 @@
+{
+  "_generatedBy": "migration/fuzz/bin/summarize.js over all stage-2 shards' raw divergences.jsonl and expected-divergences.jsonl (via bin/aggregate-shards.js); do not edit by hand",
+  "total_divergences": 5921,
+  "expected_divergences": 47072,
+  "by_op": {
+    "ModelManager.fromAst": 5787,
+    "ModelManager.addModelFile": 126,
+    "Serializer.fromJSON": 8
+  },
+  "by_class_pair": {
+    "ModelManager.fromAst | ts=ok rust=IllegalModelException": 4871,
+    "ModelManager.fromAst | ts=TypeError rust=IllegalModelException": 786,
+    "ModelManager.addModelFile | ts=IllegalModelException rust=ok": 126,
+    "ModelManager.fromAst | ts=IllegalModelException rust=ok": 101,
+    "ModelManager.fromAst | ts=Error rust=IllegalModelException": 19,
+    "ModelManager.fromAst | ts=IllegalModelException rust=Error": 9,
+    "Serializer.fromJSON | ts=ok rust=ValidationException": 8,
+    "ModelManager.fromAst | ts=IllegalModelException rust=TypeError": 1
+  },
+  "expected_by_dv": {
+    "DV-015 (accordproject/concerto-rust#156) | Serializer.fromJSON | ts=TypeError rust=Error": 28683,
+    "DV-015 (accordproject/concerto-rust#156) | Serializer.fromJSON | ts=TypeNotFoundException rust=Error": 18161,
+    "DV-017 (accordproject/concerto-rust#218) | ModelManager.addModelFile | ts=TypeError rust=IllegalModelException": 143,
+    "DV-018 (accordproject/concerto-rust#218) | ModelManager.addModelFile | ts=TypeError rust=IllegalModelException": 33,
+    "DV-017 (accordproject/concerto-rust#218) | ModelManager.fromAst | ts=TypeError rust=IllegalModelException": 31,
+    "DV-018 (accordproject/concerto-rust#218) | ModelManager.fromAst | ts=TypeError rust=IllegalModelException": 21
+  }
+}
