@@ -789,11 +789,17 @@ function buildCriteriaSummary(steps) {
 
   // §0.7: upstream conformance — harness current, CI green.
   const conf = m && m.conformance;
+  const confCommit = status && status.repos && status.repos['concerto-conformance'] && status.repos['concerto-conformance'].commit;
+  const confCommitShort = confCommit ? confCommit.slice(0, 7) : null;
   items.push({
     id: '§0.7',
     label: 'concerto-conformance Rust harness current, local run green',
     ok: conf && conf.available ? conf.failed === 0 : null,
-    detail: conf && conf.available ? `${conf.passed}/${conf.total} scenarios passing locally; CI status must be read separately (this runner cannot see GitHub Actions)` : 'not available',
+    detail: conf && conf.available
+      ? `${conf.passed}/${conf.total_scenarios} scenarios passing locally` +
+        (confCommitShort ? ` (concerto-conformance ${confCommitShort})` : '') +
+        '; CI status must be read separately (this runner cannot see GitHub Actions)'
+      : 'not available',
   });
 
   const p5_04 = {
