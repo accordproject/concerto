@@ -36,6 +36,11 @@ jobs:
         with:
           node-version: 20
 
+      # concerto-core loads the Rust engine when it is imported, so the build
+      # needs it (accordproject/concerto-rust#259).
+      - name: Build the Rust engine (concerto-wasm)
+        uses: ./.github/actions/concerto-engine
+
       - name: Install workspace dependencies
         run: npm ci
 

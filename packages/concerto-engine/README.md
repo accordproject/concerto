@@ -31,5 +31,9 @@ they are loaded. To use a build somewhere else, set `CONCERTO_ENGINE_MODULE`
 to its `concerto-engine.cjs`; the shim then loads that path instead of this
 package.
 
-Nothing in the default (`CONCERTO_ENGINE=ts`) mode loads this package, so a
-checkout without concerto-rust builds and tests as before.
+concerto-core loads the engine when it is imported and declares this package
+as a dependency, so concerto does not build or test without it. CI provides
+it the same way: `.github/actions/concerto-engine` builds concerto-wasm from a
+pinned concerto-rust commit into a sibling checkout
+(accordproject/concerto-rust#259). How the engine is published for a release
+is still open (D9, accordproject/concerto-rust#28).
