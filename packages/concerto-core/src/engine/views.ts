@@ -99,62 +99,132 @@ function scalarDeclarationProcess(declaration: any): void {
 
 /**
  * One property's precomputed snapshots (P5-06): `p` is its `propertyProcess`
- * snapshot and `f` its `fieldProcess` one, from `modelFilePropertySnapshots`;
- * `owner` is the view that took `p`, the only one `f` may then go to.
+ * snapshot and `f` its `fieldProcess` one, from the file's view snapshot;
+ * `owner` is the view that took `p` last, the only one `f` may then go to,
+ * and `parent` its declaration view. A declaration that runs `process()`
+ * again (IdentifiedDeclaration's constructor does) rebuilds its property
+ * views from the same AST nodes: a view with the same parent may take the
+ * entry again (P5-10a).
  */
 interface PrecomputedProperty {
     p: any;
     f: any;
     owner?: object;
+    parent?: object;
 }
 
 /**
- * The precomputed snapshots of the `ModelFile` being constructed, by
- * property AST node, or null outside `beginModelFile`/`endModelFile`.
+ * One declaration's precomputed construction decisions (P5-10a), from the
+ * `d` entry of `modelFileViewSnapshot`: its (valid) `name`, the `fqn`
+ * `Declaration.process` computes, and `cd`, the `classDeclarationProcess`
+ * snapshot (or null). `defaulted` marks an entry computed with the default
+ * super type `ModelFile.fromAst` gives an asset, participant, transaction or
+ * event declaration that names none. `owner` is the view that took it, the
+ * only one it may then go to, as often as that view runs `process()`
+ * (IdentifiedDeclaration's constructor runs it twice).
  */
-let precomputed: Map<object, PrecomputedProperty> | null = null;
+interface PrecomputedDeclaration {
+    name: string;
+    fqn: string;
+    cd: any;
+    defaulted: boolean;
+    owner?: object;
+}
 
 /**
- * Called by the ModelFile constructor in rust mode just before `fromAst`
- * (P5-06): computes the `propertyProcess`/`fieldProcess` snapshots of every
- * property of `ast` in one engine call, so that `propertyProcess` and
- * `fieldProcess` below, run for each property view `fromAst` builds, read
- * them instead of each crossing the boundary. A snapshot is only ever used
- * by the view built from that very AST node, once, during this one
- * construction (see `endModelFile`); a property the engine could not
- * precompute (it would throw, or the AST cannot cross) has none, and its
- * view calls the per-property binding exactly as before, so every error is
- * raised by the same call as without the batch. Never throws.
- * @param {object} ast the model file's AST
+ * The precomputed snapshots of the `ModelFile` whose declarations are being
+ * built, or null outside `beginModelFile`/`endModelFile`.
+ */
+interface Batch {
+    /** The ModelFile the snapshots were computed for. */
+    modelFile: any;
+    /** Its namespace, as the snapshot's `fqn`s assumed it. */
+    namespace: string;
+    /** The property snapshots, by property AST node. */
+    properties: Map<object, PrecomputedProperty>;
+    /** The declaration entries, by declaration AST node. */
+    declarations: Map<object, PrecomputedDeclaration>;
+    /**
+     * The declaration entries `ModelFile.fromAst` builds from a copy of the
+     * AST node (the default super type), by that node's `properties` array,
+     * which the copy shares.
+     */
+    defaulted: Map<object, PrecomputedDeclaration>;
+}
+
+let batch: Batch | null = null;
+
+/**
+ * Called just before a ModelFile's declarations are built (P5-06, extended
+ * by P5-10a to one crossing per file): computes, in one engine call, the
+ * construction-time snapshots of every declaration and property of the
+ * file (`modelFileViewSnapshot`), so that the declaration and property views
+ * `fromAst` builds read them (`declarationIsValidIdentifier`,
+ * `declarationFullyQualifiedName`, `classDeclarationProcess`,
+ * `propertyProcess`, `fieldProcess` below) instead of each crossing the
+ * boundary. A snapshot is only ever used by the view built from that very
+ * AST node (and by its rebuild when its declaration runs `process()`
+ * again), during this one construction (see `endModelFile`); an
+ * element the engine could not precompute (it would throw, or the AST cannot
+ * cross) has none, and its view calls the per-element binding exactly as
+ * before, so every error is raised by the same call as without the batch.
+ * Called after `fromAst`'s header part, so the namespace is known. Never
+ * throws.
+ * @param {object} modelFile the ModelFile whose declarations are being built
+ * @param {object} ast the AST they are built from
  * @return {object} the state to hand back to `endModelFile`
  */
-function beginModelFile(ast: any): Map<object, PrecomputedProperty> | null {
-    const saved = precomputed;
-    precomputed = null;
+function beginModelFile(modelFile: any, ast: any): Batch | null {
+    const saved = batch;
+    batch = null;
     try {
+        const namespace = modelFile.namespace;
         if (ast && Array.isArray(ast.declarations)) {
-            const text = rust!.modelFilePropertySnapshots(JSON.stringify(ast));
+            const text = rust!.modelFileViewSnapshot(
+                JSON.stringify(ast),
+                typeof namespace === 'string' ? namespace : undefined,
+            );
             if (typeof text === 'string') {
                 const snapshots = JSON.parse(text);
-                const map = new Map<object, PrecomputedProperty>();
+                const next: Batch = {
+                    modelFile,
+                    namespace,
+                    properties: new Map(),
+                    declarations: new Map(),
+                    defaulted: new Map(),
+                };
                 ast.declarations.forEach((declaration: any, i: number) => {
-                    const entries = Array.isArray(snapshots) ? snapshots[i] : null;
-                    const properties = declaration && typeof declaration === 'object' ? declaration.properties : null;
+                    const snapshot = Array.isArray(snapshots) ? snapshots[i] : null;
+                    if (!snapshot || !declaration || typeof declaration !== 'object') {
+                        return;
+                    }
+                    const properties = declaration.properties;
+                    const d = snapshot.d;
+                    if (d && typeof d.name === 'string' && d.name === declaration.name) {
+                        if (!d.defaulted) {
+                            if (!next.declarations.has(declaration)) {
+                                next.declarations.set(declaration, d);
+                            }
+                        } else if (Array.isArray(properties) && !next.defaulted.has(properties)) {
+                            next.defaulted.set(properties, d);
+                        }
+                    }
+                    const entries = snapshot.p;
                     if (!Array.isArray(entries) || !Array.isArray(properties) || entries.length !== properties.length) {
                         return;
                     }
                     properties.forEach((node: any, j: number) => {
                         const entry = entries[j];
-                        if (entry && node && typeof node === 'object' && !map.has(node)) {
-                            map.set(node, entry);
+                        if (entry && node && typeof node === 'object' && !next.properties.has(node)) {
+                            next.properties.set(node, entry);
                         }
                     });
                 });
-                precomputed = map;
+                batch = next;
             }
         }
     } catch (e) {
-        precomputed = null;
+        batch = null;
     }
     return saved;
 }
@@ -164,8 +234,88 @@ function beginModelFile(ast: any): Map<object, PrecomputedProperty> | null {
  * taken, so none can outlive it.
  * @param {object} saved what `beginModelFile` returned
  */
-function endModelFile(saved: Map<object, PrecomputedProperty> | null): void {
-    precomputed = saved;
+function endModelFile(saved: Batch | null): void {
+    batch = saved;
+}
+
+/**
+ * The precomputed entry for a declaration view being constructed, or
+ * undefined. `ModelFile.fromAst` hands an asset, participant, transaction or
+ * event declaration that names no super type a shallow copy of its AST node
+ * with the default one added; that copy is found by the `properties` array
+ * it shares with the original, and only when it carries exactly the default
+ * super type the entry was computed with.
+ * @param {object} view the Declaration view
+ * @return {object|undefined} the entry
+ */
+function declarationEntry(view: any): PrecomputedDeclaration | undefined {
+    if (!batch || view.modelFile !== batch.modelFile) {
+        return undefined;
+    }
+    const ast = view.ast;
+    if (!ast || typeof ast !== 'object') {
+        return undefined;
+    }
+    const direct = batch.declarations.get(ast);
+    if (direct) {
+        return direct;
+    }
+    const properties = ast.properties;
+    const copy = Array.isArray(properties) ? batch.defaulted.get(properties) : undefined;
+    if (copy && copy.name === ast.name && ast.superType && typeof ast.superType === 'object' &&
+        copy.cd && ast.superType.name === copy.cd.superType) {
+        return copy;
+    }
+    return undefined;
+}
+
+/**
+ * `Declaration.process`'s `ModelUtil.isValidIdentifier(this.ast.name)`
+ * (P5-10a): true from the file's view snapshot when it has an entry for this
+ * view's AST node (the entry exists only for a valid name, and the view then
+ * owns it), else the `modelUtilIsValidIdentifier` binding, as before.
+ * @param {object} view the Declaration view being processed
+ * @return {boolean} whether the name is a valid identifier
+ */
+function declarationIsValidIdentifier(view: any): boolean {
+    const entry = declarationEntry(view);
+    if (entry && (entry.owner === undefined || entry.owner === view) && view.ast.name === entry.name) {
+        entry.owner = view;
+        return true;
+    }
+    return rust!.modelUtilIsValidIdentifier(view.ast.name);
+}
+
+/**
+ * `Declaration.process`'s `ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name)`
+ * (P5-10a): from the view snapshot for the view that owns the entry, while
+ * the namespace is still the one the snapshot assumed, else the binding.
+ * @param {object} view the Declaration view being processed
+ * @return {string} the fully qualified name
+ */
+function declarationFullyQualifiedName(view: any): string {
+    const namespace = view.modelFile.getNamespace();
+    const entry = declarationEntry(view);
+    if (entry && entry.owner === view && view.name === entry.name && namespace === batch!.namespace) {
+        return entry.fqn;
+    }
+    return rust!.modelUtilGetFullyQualifiedName(namespace, view.name);
+}
+
+/**
+ * `ClassDeclaration.process`'s superType/idField decision (P5-10a): the
+ * view snapshot's `cd` for the view that owns the entry, when its name and
+ * fully qualified name are still the ones the snapshot assumed, else the
+ * `classDeclarationProcess` binding, as before.
+ * @param {object} view the ClassDeclaration view being processed
+ * @return {object} `{superType, idField, addIdentifierField, addTimestampField}`
+ */
+function classDeclarationProcess(view: any): any {
+    const entry = declarationEntry(view);
+    if (entry && entry.owner === view && entry.cd && view.name === entry.name && view.fqn === entry.fqn) {
+        return { ...entry.cd };
+    }
+    return rust!.classDeclarationProcess(view);
 }
 
 /**
@@ -192,10 +342,12 @@ function sameType(actual: any, expected: any): boolean {
  * RelationshipDeclaration) being processed
  */
 function propertyProcess(property: any): void {
-    const entry = precomputed?.get(property.ast);
+    const entry = batch?.properties.get(property.ast);
     let snapshot;
-    if (entry && entry.p && entry.owner === undefined) {
+    if (entry && entry.p && (entry.owner === undefined ||
+        (property.parent !== undefined && entry.parent === property.parent))) {
         entry.owner = property;
+        entry.parent = property.parent;
         snapshot = entry.p;
     } else {
         snapshot = rust!.propertyProcess(property);
@@ -221,10 +373,9 @@ function propertyProcess(property: any): void {
  * @param {object} field the Field being processed
  */
 function fieldProcess(field: any): void {
-    const entry = precomputed?.get(field.ast);
+    const entry = batch?.properties.get(field.ast);
     let snapshot;
     if (entry && entry.owner === field && entry.f && sameType(field.type, 'type' in entry.p ? entry.p.type : undefined)) {
-        precomputed!.delete(field.ast);
         snapshot = entry.f;
     } else {
         snapshot = rust!.fieldProcess(field);
@@ -419,9 +570,329 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
     };
 }
 
+// ---------------------------------------------------------------------------
+// Lazy views (P5-10a, accordproject/concerto-rust#269; from the P5-06a spike,
+// #226). The design note is on #269.
+//
+// A ModelFile's AST crosses into Rust once, when the ModelFile is
+// constructed (`stageModelFile`): Rust loads it, with every construction-time
+// check the Rust port makes, and keeps the loaded file in its manager
+// handle's staging slot. When that load succeeds, the ModelFile populates
+// its namespace, version, imports and model decorators as before, and its
+// `declarations` and `localTypes` become accessors that build the
+// declaration and property views on first use (`deferDeclarations`,
+// `materialise`), from one batch snapshot per file (`beginModelFile`).
+// Registering the file in the manager's `rustHandle` (`commitStaged`) and
+// validating it (`validateLoaded`) then reuse the loaded file instead of
+// sending the AST again.
+//
+// When Rust's load fails, or the manager is not a real BaseModelManager, or
+// it has decorator factories or a custom `options.regExp` engine (user code
+// that runs during construction: P5-10b moves them), the ModelFile is built
+// eagerly exactly as before, so a TS error is thrown by the TS code, at the
+// same point.
+//
+// CONCERTO_LAZY_VIEWS_CHECK=1 is a migration diagnostic, not an option: it
+// keeps the lazy path but builds the declaration views at construction too,
+// and reports on stderr any model Rust accepted whose TS construction throws
+// (an under-rejection, which would move an error from construction to the
+// first read) or mutates the AST.
+// ---------------------------------------------------------------------------
+
+const lazyEnv = typeof process === 'undefined' ? undefined : process.env;
+const lazyViewsCheck = lazyEnv?.CONCERTO_LAZY_VIEWS_CHECK === '1';
+
+/**
+ * A ModelFile's staged load: the rustHandle it was staged in and its stage id.
+ */
+interface Stage {
+    handle: any;
+    id: number;
+}
+
+/**
+ * The staged load of each lazily built ModelFile, until it is committed or
+ * dropped.
+ */
+const stages = new WeakMap<object, Stage>();
+
+/**
+ * The rustHandle each ModelFile was registered in from its stage.
+ */
+const committed = new WeakMap<object, any>();
+
+/**
+ * Drops the stage of a ModelFile that is garbage-collected before it is
+ * committed or dropped (constructed but never added: `filter`, a manager's
+ * `validateModelFile`, user code), so its loaded file does not wait for the
+ * staging slot's own eviction. Best effort: the handle may be gone too.
+ */
+const FinalizationRegistryCtor = (globalThis as any).FinalizationRegistry;
+const stageFinalizer: { register(target: object, held: Stage, token: object): void; unregister(token: object): void } | null =
+    typeof FinalizationRegistryCtor === 'function'
+        ? new FinalizationRegistryCtor((stage: Stage) => {
+            try {
+                stage.handle.dropStagedModelFile(stage.id);
+            } catch (e) {
+                // the handle was freed or replaced: nothing to drop
+            }
+        })
+        : null;
+
+/**
+ * For ASTs of namespaces the manager never writes into rustHandle (the
+ * system models, the metamodel), the JSON text (with the definitions and
+ * file name) Rust last loaded without error, by AST object. Such a file is
+ * never committed from its stage, so a repeat of the same text needs only
+ * the verdict, not another load: `new ModelManager()` builds the metamodel's
+ * ModelFile from the same constant AST every time.
+ */
+const acceptedUnmirrored = new WeakMap<object, string>();
+
+/**
+ * The ModelFiles whose declaration views `materialise` is building: their
+ * manager's decorator factories are hidden from them (`decoratorFactories`).
+ */
+const materialising = new Set<object>();
+
+/**
+ * Called by the ModelFile constructor, after `process()` and before the
+ * header part of `fromAst`: loads the AST in the manager's rustHandle
+ * staging slot, once. Returns true when the ModelFile may be built lazily:
+ * the manager is a real BaseModelManager with a rustHandle, no decorator
+ * factories and no custom `options.regExp`, and Rust loaded the AST without
+ * error. Never throws: on any
+ * failure the caller builds the ModelFile eagerly, which throws the TS error
+ * itself.
+ * @param {object} modelFile the ModelFile being constructed
+ * @return {boolean} true if the declarations may be built lazily
+ */
+function stageModelFile(modelFile: any): boolean {
+    const manager = modelFile.modelManager;
+    const handle = manager?.rustHandle;
+    if (!handle || typeof handle.stageModelFile !== 'function' ||
+        typeof manager._rustHandleMatchesModelFiles !== 'function' ||
+        typeof manager._needsRustWrite !== 'function') {
+        return false;
+    }
+    try {
+        const factories = manager.getDecoratorFactories();
+        if (factories && factories.length > 0) {
+            return false;
+        }
+        // A custom `options.regExp` engine is user code the StringValidator
+        // constructor runs (and may throw from) during construction too.
+        if (manager.options?.regExp) {
+            return false;
+        }
+        const ast = modelFile.ast;
+        const text = JSON.stringify(ast);
+        const definitions = modelFile.definitions ?? undefined;
+        const fileName = modelFile.fileName ?? undefined;
+        const unmirrored = !manager._needsRustWrite(ast.namespace);
+        const key = unmirrored ? JSON.stringify([text, definitions ?? null, fileName ?? null]) : null;
+        if (key !== null && acceptedUnmirrored.get(ast) === key) {
+            return true;
+        }
+        const id = handle.stageModelFile(text, definitions, fileName);
+        if (key !== null) {
+            // Never committed: keep the verdict, not the loaded file.
+            handle.dropStagedModelFile(id);
+            acceptedUnmirrored.set(ast, key);
+        } else {
+            const stage = { handle, id };
+            stages.set(modelFile, stage);
+            stageFinalizer?.register(modelFile, stage, stage);
+        }
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+
+/**
+ * `Decorated.process`'s `modelFile.getModelManager()?.getDecoratorFactories()`:
+ * none while `materialise` builds that file's views. A lazily built file was
+ * deferred only because its manager had no decorator factories at
+ * construction; one added since must not apply to it, just as it would not
+ * have applied to the views its constructor built.
+ * @param {object} modelFile the ModelFile of the element being processed
+ * @return {object[]|undefined} the decorator factories that apply
+ */
+function decoratorFactories(modelFile: any): any[] | undefined {
+    if (materialising.has(modelFile)) {
+        return [];
+    }
+    return modelFile.getModelManager()?.getDecoratorFactories();
+}
+
+/**
+ * Builds a lazily built ModelFile's declaration views, the way its
+ * constructor would have: `fromAst`'s declarations part, then
+ * `localTypes`. Replaces the accessors with plain fields first; if TS
+ * construction throws, the accessors are put back, so every later access
+ * throws again.
+ * @param {object} modelFile the ModelFile
+ */
+function materialise(modelFile: any): void {
+    const field = (key: string, value: any) => Object.defineProperty(modelFile, key, {
+        value, writable: true, enumerable: true, configurable: true
+    });
+    field('declarations', []);
+    field('localTypes', null);
+    materialising.add(modelFile);
+    try {
+        // `fromAst`'s declarations part (declarations is an optional field).
+        if (modelFile.ast.declarations) {
+            modelFile._fromAstDeclarations(modelFile.ast);
+        }
+    } catch (e) {
+        defineLazyFields(modelFile);
+        throw e;
+    } finally {
+        materialising.delete(modelFile);
+    }
+    const localTypes = new Map();
+    const namespace = modelFile.getNamespace();
+    for (const declaration of modelFile.declarations) {
+        localTypes.set(namespace + '.' + declaration.getName(), declaration);
+    }
+    modelFile.localTypes = localTypes;
+}
+
+/**
+ * Installs the `declarations` and `localTypes` accessors that build the
+ * declaration views on first use (read or write).
+ * @param {object} modelFile the ModelFile
+ */
+function defineLazyFields(modelFile: any): void {
+    for (const key of ['declarations', 'localTypes']) {
+        Object.defineProperty(modelFile, key, {
+            configurable: true,
+            enumerable: true,
+            get() {
+                materialise(modelFile);
+                return modelFile[key];
+            },
+            set(value) {
+                materialise(modelFile);
+                modelFile[key] = value;
+            },
+        });
+    }
+}
+
+/**
+ * Called at the end of the ModelFile constructor when `stageModelFile`
+ * returned true: defers the declaration views (or, with
+ * CONCERTO_LAZY_VIEWS_CHECK=1, builds them now and reports any divergence).
+ * @param {object} modelFile the ModelFile
+ */
+function deferDeclarations(modelFile: any): void {
+    defineLazyFields(modelFile);
+    if (lazyViewsCheck) {
+        const before = JSON.stringify(modelFile.ast);
+        try {
+            materialise(modelFile);
+        } catch (e: any) {
+            process.stderr.write(`LAZY-CHECK under-rejection: ${modelFile.namespace} ${e?.name}: ${e?.message}\n`);
+            throw e;
+        }
+        if (JSON.stringify(modelFile.ast) !== before) {
+            process.stderr.write(`LAZY-CHECK ast-mutated: ${modelFile.namespace}\n`);
+        }
+    }
+}
+
+/**
+ * Forgets `modelFile`'s stage, returning it if it was staged in `handle`.
+ * @param {object} modelFile the ModelFile
+ * @param {object} handle the manager's rustHandle
+ * @return {object|undefined} the stage
+ */
+function takeStage(modelFile: any, handle: any): Stage | undefined {
+    const stage = stages.get(modelFile);
+    if (!stage || stage.handle !== handle) {
+        return undefined;
+    }
+    stages.delete(modelFile);
+    stageFinalizer?.unregister(stage);
+    return stage;
+}
+
+/**
+ * The rustHandle write for `modelFile` from its stage: registers the file
+ * Rust loaded at construction. Returns false when there is no usable stage
+ * (not staged, staged in another handle, or evicted); the caller then sends
+ * the AST as before. A registration error propagates, as
+ * `addModelWithDefinitions`'s would.
+ * @param {object} modelFile the ModelFile being added
+ * @param {object} handle the manager's rustHandle
+ * @return {boolean} true if the file was registered from its stage
+ */
+function commitStaged(modelFile: any, handle: any): boolean {
+    const stage = takeStage(modelFile, handle);
+    if (!stage) {
+        return false;
+    }
+    const id = handle.commitStagedModelFile(stage.id);
+    if (id === undefined) {
+        return false;
+    }
+    committed.set(modelFile, handle);
+    return true;
+}
+
+/**
+ * Drops `modelFile`'s stage when it will not be registered from it in
+ * `handle`.
+ * @param {object} modelFile the ModelFile
+ * @param {object} handle the manager's rustHandle
+ */
+function dropStaged(modelFile: any, handle: any): void {
+    const stage = takeStage(modelFile, handle);
+    if (stage) {
+        handle.dropStagedModelFile(stage.id);
+    }
+}
+
+/**
+ * `ModelFile.validate()`'s Rust call without sending the AST again:
+ * validates the staged file, or the file registered from it. Returns false
+ * when neither applies; the caller then calls `modelFileValidateDetached`
+ * as before. Throws what that binding throws.
+ * @param {object} modelFile the ModelFile
+ * @param {object} handle the manager's rustHandle
+ * @return {boolean} true if validated
+ */
+function validateLoaded(modelFile: any, handle: any): boolean {
+    const stage = stages.get(modelFile);
+    if (stage && stage.handle === handle) {
+        return handle.modelFileValidateStaged(stage.id);
+    }
+    if (committed.get(modelFile) === handle) {
+        const id = modelFile._rustHandleId();
+        if (id !== undefined) {
+            handle.modelFileValidate(id);
+            return true;
+        }
+    }
+    return false;
+}
+
 export {
+    stageModelFile,
+    deferDeclarations,
+    decoratorFactories,
+    commitStaged,
+    dropStaged,
+    validateLoaded,
     beginModelFile,
     endModelFile,
+    declarationIsValidIdentifier,
+    declarationFullyQualifiedName,
+    classDeclarationProcess,
     scalarDeclarationProcess,
     propertyProcess,
     fieldProcess,

@@ -97,6 +97,9 @@ module.exports = {
             'rustHandleReads': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (caches a rustHandle\'s epoch/namespaces reads)' },
             'BaseModelManager._needsRustWrite': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (decides which namespaces are mirrored to rustHandle)' },
             'BaseModelManager._mirrorWrite': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (runs a rustHandle mirror write, swallowing its error)' },
+            // P5-10a lazy views (accordproject/concerto-rust#269).
+            'engineViews': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (requires engine/views once, on first use)' },
+            'BaseModelManager._rustMirrorAdd': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (the rustHandle write for an added model file: registers the file Rust loaded at construction, or sends the AST)' },
         },
     },
     'src/datetimeutil.ts': { c: 'TS', t: NONE, p: NONE, r: R.dayjs },
@@ -130,7 +133,24 @@ module.exports = {
     'src/engine/serializer.ts': {
         c: 'HYBRID', t: NONE, p: 'P4-10', r: 'JSON envelope building, the ModelManagerHandle cache and the options.regExp fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path)',
     },
-    'src/engine/views.ts': { c: 'HYBRID', t: NONE, p: 'P4-06+P4-07', r: 'per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration\'s type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust' },
+    'src/engine/views.ts': {
+        c: 'HYBRID', t: NONE, p: 'P4-06+P4-07', r: 'per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration\'s type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust',
+        // P5-10a lazy views (accordproject/concerto-rust#269): the staging,
+        // deferral and identity plumbing around the Rust load; the load and
+        // every check it makes run in Rust (stageModelFile), and the views
+        // are built by the ledgered view constructors.
+        m: {
+            'stageModelFile': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: sends a ModelFile\'s AST to Rust once and keeps the loaded file staged; decides lazy vs eager)' },
+            'decoratorFactories': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: hides decorator factories while a lazily built file\'s views are built)' },
+            'materialise': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: builds a file\'s declaration views on first read through the ledgered view constructors, and caches them)' },
+            'defineLazyFields': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: installs the declarations/localTypes accessors)' },
+            'deferDeclarations': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: defers a file\'s declaration views; the migration check mode builds them at once)' },
+            'takeStage': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: stage bookkeeping)' },
+            'commitStaged': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: registers the staged file in rustHandle)' },
+            'dropStaged': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: drops a stage that will not be registered)' },
+            'validateLoaded': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: validates the staged or registered file without sending the AST again)' },
+        },
+    },
     'src/factory.ts': { c: 'TS', t: NONE, p: NONE, r: R.d7Factory },
     'src/globalize.ts': { c: 'TS', t: NONE, p: NONE, r: R.globalize },
     'src/introspect/assetdeclaration.ts': { c: 'RUST', t: DECL, p: 'P2-03+P4-06' },
@@ -200,6 +220,10 @@ module.exports = {
             'ModelFile.filter': { c: 'HYBRID', r: R.predicate },
             'ModelFile.getDeclarations': { c: 'HYBRID', r: 'takes a JS class constructor and filters with instanceof; TS maps the constructor to a Rust declaration kind, Rust does the filtering' },
             'ModelFile.fromAst': { cat: 'validation' },
+            // P5-10a: fromAst split into its header and declarations parts.
+            'ModelFile._fromAstHeader': { cat: 'validation' },
+            'ModelFile._fromAstDeclarations': { c: 'HYBRID', r: 'reads the file\'s one-call Rust view snapshot (modelFileViewSnapshot) around the declaration views it builds', cat: 'validation' },
+            'ModelFile._fromAstDeclarationViews': { cat: 'validation' },
             'ModelFile.isCompatibleVersion': { cat: 'validation' },
             'ModelFile.enforceImportVersioning': { cat: 'validation' },
         },

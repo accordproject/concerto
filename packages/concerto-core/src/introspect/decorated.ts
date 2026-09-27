@@ -44,9 +44,13 @@ import type ModelFile from './modelfile';
 // chunks' location.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
+// P5-10a: memoised per specifier (see introspect/property.ts).
+const engineModules: { [specifier: string]: any } = {};
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
@@ -124,7 +128,10 @@ class Decorated {
 
         if(this.ast.decorators) {
             const modelFile = this.getModelFile();
-            const factories = modelFile.getModelManager()?.getDecoratorFactories();
+            // `modelFile.getModelManager()?.getDecoratorFactories()`, except
+            // while a lazily built file's views are built (P5-10a,
+            // engine/views.ts `decoratorFactories`).
+            const factories = loadEngine('../engine/views').decoratorFactories(modelFile);
             const hasFactories = factories && factories.length > 0;
             for(let n=0; n < this.ast.decorators.length; n++ ) {
                 let thing = this.ast.decorators[n];

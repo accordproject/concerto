@@ -43,11 +43,13 @@ import type ModelFile from './modelfile';
 // chunks' location.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
+// P5-10a: memoised per specifier (see introspect/property.ts).
+const engineModules: { [specifier: string]: any } = {};
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
-/* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
 
 /**
  * Declaration defines the structure (model/schema) of composite data.
@@ -87,14 +89,18 @@ class Declaration extends Decorated {
     process() {
         super.process();
 
-        if (!rust.modelUtilIsValidIdentifier(this.ast.name)) {
+        // P5-10a: `modelUtilIsValidIdentifier` and
+        // `modelUtilGetFullyQualifiedName`, read from the file's view
+        // snapshot while its declarations are built (engine/views.ts).
+        const views = loadEngine('../engine/views');
+        if (!views.declarationIsValidIdentifier(this)) {
             throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
         }
-        // `rust.modelUtilIsValidIdentifier` is a plain boolean binding, not a
+        // `declarationIsValidIdentifier` is a plain boolean function, not a
         // type predicate, so `this.ast.name` is not narrowed from
         // `string | undefined` by the check above.
         this.name = this.ast.name as string;
-        this.fqn = rust.modelUtilGetFullyQualifiedName(this.modelFile.getNamespace(), this.name);
+        this.fqn = views.declarationFullyQualifiedName(this);
     }
 
     /**
