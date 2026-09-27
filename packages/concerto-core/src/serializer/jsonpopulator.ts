@@ -46,7 +46,7 @@ const engineModules: { [specifier: string]: any } = {};
 const loadEngine = (specifier: string) =>
     engineModules[specifier] ??
     (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : createRequire(__filename)(specifier));
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engine').rust;
 
