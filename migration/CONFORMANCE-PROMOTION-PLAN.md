@@ -177,7 +177,7 @@ These scenarios load **JSON ASTs only**, since the shapes cannot be written in C
 | INS-02 | F:unit/Serializer.fromJSON/7eef0467c9736d911a423e4a, da7770373053efbcd3651cab, 853af8b9ef7b95224e8881ce; F:data/Serializer.fromJSON/05598770d4c6f12c4d5dcf8e (81 with this template) | A property the type does not declare is rejected. | `reject(ValidationException) @rule:INSTANCE_002 mentions(<property>)` | promote |
 | INS-03 | F:unit/Serializer.fromJSON/4265ea5776f0744ece6cfaf3 (`$timestamp`), 4f5727758ee6ebaeb5aba2dc (reserved `$…`) | A reserved system property that the type does not allow is rejected. | `reject(ValidationException) @rule:INSTANCE_002` | promote |
 | INS-04 | F:unit/Serializer.fromJSON/733af204effc067b07a2835b (11); F:supplement/Serializer.toJSON/eac548ead8fcba3e69860691 | A missing required field is rejected. | `reject(ValidationException) @rule:INSTANCE_003` | **strengthen** `CS:validate:Missing required field should fail` (add class). |
-| INS-05 | F:gaps/Resource.validate/d2358f8a29e58042f7c2de82 (2) | An instance whose `$class` is abstract is rejected. | `reject(ValidationException) @rule:INSTANCE_004` (new) | promote (re-expressed, see 4.1). |
+| INS-05 | F:gaps/Resource.validate/d2358f8a29e58042f7c2de82 (2) | An instance whose `$class` is abstract is rejected. | `reject(any) @rule:INSTANCE_004` (new) | **promote (pending Q-13)**, re-expressed (see 4.1). P5-08b: the instance-JSON form raises a plain `Error` ("Cannot instantiate the abstract type") in TS 5.0.0 and in rust mode, not the recorded `ValidationException`, so it moved from B2 to B3. |
 | INS-06 | F:lifted/Serializer.fromJSON/6166a93ac060da7b83c35154 (JP-IT-001); F:data/Serializer.fromJSON (TypeNotFound family) | `$class` naming an undeclared type. | `reject(TypeNotFoundException) @rule:INSTANCE_005` | **strengthen** `CS:validate:Non-existent $class type should fail`. |
 | INS-07 | F:unit/Serializer.fromJSON/c373d8970e5aa90866d4d02b, d0036c7cb4de10575d1d53d3 | An instance whose `$class` is an enum or a map declaration cannot be created. | `reject(any) @rule:INSTANCE_006` (new) | **promote (pending Q-13)**. |
 | INS-08 | F:gaps/Factory.newConcept/1b570a045e1f39095db3bddd (4, "Model is recursive") | A recursive model for instance generation. | – | **exclude**: `Factory`/instance generation is stays-ts (X-03). |
@@ -203,7 +203,7 @@ These scenarios load **JSON ASTs only**, since the shapes cannot be written in C
 
 | ID | Source | Behaviour | Assertion | Disposition |
 |---|---|---|---|---|
-| REL-01 | F:gaps/Resource.validate/3b739c27995988ea846df853 | An identified instance with an empty identifier is rejected. | `reject(ValidationException) @rule:INSTANCE_020` (new) | promote (re-expressed, see 4.1). |
+| REL-01 | F:gaps/Resource.validate/3b739c27995988ea846df853 | An identified instance with an empty identifier is rejected. | `reject(any) @rule:INSTANCE_020` (new) | **promote (pending Q-13)**, re-expressed (see 4.1). P5-08b: the instance-JSON form raises a plain `Error` ("Missing identifier", REL-02's rule) in TS 5.0.0 and in rust mode, not the recorded `ValidationException`, so it moved from B2 to B3. |
 | REL-02 | F:data/Serializer.fromJSON/4d720dde48ec1737aba3f2e5 (identifier1err) | An identified instance missing its identifier field is rejected. | `reject(any) @rule:INSTANCE_020` | **promote (pending Q-13)** (plain `Error`). |
 | REL-03 | F:lifted/Serializer.fromJSON/dfd52817045927bf4086d2d3 (JP-RL-001), b2489235f4c5aa758d45b03d (JP-RL-007) | A relationship (single or array) given as an identifier string is accepted. | `accept`, with `validate: false` as recorded | **promote (pending Q-11)**: the recorded `validate: false` is a serializer option. Moved from B2 to B3 in P5-08b. |
 | REL-04 | F:lifted/Serializer.fromJSON/9aed8b4bc4384bb4edb1342d (JP-RL-002), aa9ca2f4089cc755335b32a2 (JP-RL-004), bc0c01bd5483c1dbfde4008f (JP-RL-010); F:gaps/Serializer.fromJSON/2e9169b9f0f4dd24e1796dfd | With default options, a relationship field holding an object or a number is rejected. | `reject(any) @rule:INSTANCE_021` (new) | **promote (pending Q-13)** (plain `Error`). |
@@ -312,7 +312,7 @@ decision the records do not settle. They cross-reference DIVERGENCES.md and P5-0
 | Q-10 | **Strict AST.** Should the spec require structurally invalid JSON ASTs (wrong field types, non-string names, non-object validators) to be rejected with `MetamodelException`, as BC-19's `strictAst` proposes? If yes, AST-05, IDN-03, SCV-07 and DEC-06 become one metamodel batch. | BC-18, BC-19, BC-20, Q-P7-10; #217/#219 | AST-05, IDN-03, SCV-03 (shape part), SCV-07, CON-12 variants |
 | Q-11 | **Serializer options in the spec.** Are `validate: false` and `acceptResourcesForRelationships` (both recorded in the lifted JP-RL fixtures) part of the language-neutral contract, or JS serializer options? If not, REL-03 and REL-08 are re-authored with validation on and default options. | F:lifted/Serializer.fromJSON JP-RL-001 to 012 | REL-03, REL-04, REL-08 |
 | Q-12 | **Import error precedence.** For an import that is both unregistered and malformed, TS reports the malformed namespace because of call order. Spec: any rejection, or the "unregistered" rule first? | DV-019, #241, #242 | NSI-08 |
-| Q-13 | **Error class for rules TS raises as plain `Error`.** Unversioned import, duplicate namespace, missing `$class`, missing identifier, relationship value shape, alias to a primitive, invalid namespace version. Should the spec name a class (`IllegalModelException` for model rules, `ValidationException` for instance rules), or stay at `reject(any)`? | Records throughout sections 1.B to 1.M; Q-P7-1 (is a class change minor?) | IDN-05, NSI-01 to 04, NSI-08, INS-01, INS-07, REL-02, REL-04, REL-06, REL-08, IMP-03 |
+| Q-13 | **Error class for rules TS raises as plain `Error`.** Unversioned import, duplicate namespace, missing `$class`, abstract `$class`, missing or empty identifier, relationship value shape, alias to a primitive, invalid namespace version. Should the spec name a class (`IllegalModelException` for model rules, `ValidationException` for instance rules), or stay at `reject(any)`? | Records throughout sections 1.B to 1.M; Q-P7-1 (is a class change minor?) | IDN-05, NSI-01 to 04, NSI-08, INS-01, INS-05, INS-07, REL-01, REL-02, REL-04, REL-06, REL-08, IMP-03 |
 | Q-14 | **Rule IDs.** Confirm the proposed new IDs (CLASS_DECLARATION_011 to 013, MODEL_ELEMENT_003, SCALAR_DECLARATION_001, MODEL_FILE_005 to 008, NUMBER_VALIDATOR_004/005, STRING_VALIDATOR_005/006, COLLECTION_SIZE_007/008, MAP_VALUE_TYPE_002, MAP_DECLARATION_002, DECORATOR_001 to 003, RELATIONSHIP_004, METAMODEL_001/002, INSTANCE_001 to 040), or supply the canonical rule list if one exists outside the folder names. | concerto-conformance folder names | all new scenarios |
 | Q-15 | **Validator errors are `BaseException` in TS**, both at model load (bad bounds, default out of range) and at instance validation (regex, length, range, size). Should the spec say `IllegalModelException` for model-load validator errors and `ValidationException` for instance violations? | F:conformance/ModelFile.new/* validator negatives; F:conformance/Serializer.fromJSON/3fd7878b64ffd91a8fdaafd8; #219 BaseException/Error clusters | SCV-01 to 03, SCV-05/06, IVL-01 to 05 |
 | Q-16 | **Regex dialect and string length.** Concerto `regex=` patterns are evaluated as ECMAScript regular expressions in TS (and emulated in Rust). What dialect does the spec require (ECMAScript, or a portable subset such as I-Regexp, RFC 9485)? Is `length` counted in UTF-16 code units (JS) or code points? | SCV-05; TRIAGE stage 1 (`/(/` wording fixed); BC-28; DV-004 | SCV-05, IVL-01, IVL-02 |
@@ -381,18 +381,18 @@ A Scenario Outline counts once per example row. A positive/negative pair counts 
 | Maps | 4 | 1 | 2 |
 | Decorators | 5 | 1 | 0 (DEC-04 is counted under CON-11) |
 | Metamodel | 4 | 2 | 0 |
-| Instance: structure | 9 | 4 | 2 |
+| Instance: structure | 9 | 5 | 2 |
 | Instance: primitives and dates | 17 | 2 | 2 |
-| Instance: relationships | 11 | 9 | 0 |
+| Instance: relationships | 11 | 10 | 0 |
 | Instance: inheritance | 4 | 0 | 0 |
 | Instance: validators | 8 | 8 | 3 |
 | Instance: maps | 3 | 1 | 0 |
 | Serialisation (optional) | 6 | 6 | 0 |
-| **Total** | **107** (101 without serialisation) | **48** | **30** |
+| **Total** | **107** (101 without serialisation) | **50** | **30** |
 
-59 new scenarios need no maintainer decision (62 before P5-08b moved REL-03 and
-REL-08 to B3). The suite would grow from 96 to about 203 scenarios, 155 of them
-runnable before any question is answered. If
+57 new scenarios need no maintainer decision (62 before P5-08b moved REL-03 and
+REL-08 to B3 for Q-11, and INS-05 and REL-01 to B3 for Q-13). The suite would grow
+from 96 to about 203 scenarios, 153 of them runnable before any question is answered. If
 Q-07/Q-08 promote REL-09 and IMP-04 to 06, add about 5.
 
 ### 4.3 Batches
@@ -401,8 +401,8 @@ Q-07/Q-08 promote REL-09 and IMP-04 to 06, add about 5.
 |---|---|---|---|
 | **B0: hygiene** | FIX-01 to FIX-05: missing-fixture harness error, class step, `@rule` tags, convert the existing negatives, un-skip where the recorded class is known | class step in all three runners | 30 changed, 0 new |
 | **B1: model semantics, no questions** | CON-01 to 09, CON-12, IDN-01/02/04, NSI-05, MAP-01 to 03, DEC-01 to 03, AST-01/02 | options step (decorator and metamodel validation) | 31 new |
-| **B2: instance validation, no questions** | INS-02/03/05, PRM-01 to 06, PRM-08, REL-01/05, INH-01 to 04, IMP-01/02 | Rust and C# instance steps; JSON AST siblings for `validate/models` | 28 new |
-| **B3: after Q-11/Q-13/Q-15/Q-16/Q-17** | IDN-05, NSI-01 to 04, SCV-01 to 03/05, INS-01/07, PRM-07, REL-02/03/04/06, REL-08 (both), IVL-01 to 04, IMP-03 | answers | 35 new |
+| **B2: instance validation, no questions** | INS-02/03, PRM-01 to 06, PRM-08, REL-05, INH-01 to 04, IMP-01/02 | Rust and C# instance steps; JSON AST siblings for `validate/models` | 26 new |
+| **B3: after Q-11/Q-13/Q-15/Q-16/Q-17** | IDN-05, NSI-01 to 04, SCV-01 to 03/05, INS-01/05/07, PRM-07, REL-01/02/03/04/06, REL-08 (both), IVL-01 to 04, IMP-03 | answers | 37 new |
 | **B4: after Q-01 to Q-08, Q-10, Q-12** | CON-10, MAP-04, AST-03, DEC-05, INS-09, NSI-08 (plus REL-09, IMP-04 to 06 and the strict-AST group if promoted) | answers; `@since-R1` tag handling | 7 new (+5 or more) |
 | **B5 (optional)** | SER-01 to 03; later the DCS area | round-trip step; DCS steps | 6 new + DCS |
 
