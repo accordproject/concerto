@@ -124,6 +124,8 @@ async function main() {
         // side separately (lib/classify.js). expectedDivergences are cases
         // that differ but match a maintainer-accepted, documented divergence
         // (lib/expected-divergences.js) and are not counted in divergences.
+        // messageOnlyAgree (P5-09) counts the agreements whose exception
+        // message alone differs; they are included in agree.
         ...emptyCounts(),
         byOp: {},
     };

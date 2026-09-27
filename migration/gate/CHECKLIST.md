@@ -134,6 +134,19 @@ This file only *checks*. It never fixes product code, never touches
 
 ### 3. Oracle corpus: coverage of the reference; 0 fail / 0 regressions / 0 harness errors on Rust native + WASM
 
+**Error parity is class, not message** (maintainer decision 2026-09-27, task
+P5-09, accordproject/concerto-rust#253). Rust must throw in the same scenarios
+as TS with the same exception class; the exception message text may differ.
+Both oracle legs below judge on that rule: a fixture whose outcome differs
+only in `error.message` passes (the native report and `replay.js` count it as
+`message_only` and list it under `message_diffs`, for information), while a
+throw/no-throw, class, component, location, value or effects difference is
+still a failure. A message-only difference is never a gate failure and never
+needs a `DIVERGENCES.md` row. The same rule lets a `packages/concerto-core/test/**`
+assertion on exact message text be relaxed to a class check, but only when it
+is listed in `migration/guardrails/test-message-relaxations.tsv` and signed off
+in review (`check-guardrails.mjs` rule 1, §5).
+
 **Corpus currency caveat, found by this task's dry run (2026-09-25).** P2-10
 (#54) and P2-11 (#55) both closed `mig:done`, each reporting corpus-only
 coverage of the reference at or above the unit suite's own figures. Running

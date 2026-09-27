@@ -2,7 +2,9 @@ name: migration-guardrails
 
 # P0-02(B): guards the Rust migration's invariants on every PR — see
 # RUST_MIGRATION_PLAN.md §2.1 and §4 (task P0-02). Fails the build if a PR:
-#   - touches packages/concerto-core/test/**
+#   - touches packages/concerto-core/test/**, except allow-listed hunks
+#     that relax an exact-message assertion to a class check (P5-09; see
+#     migration/guardrails/test-message-relaxations.tsv)
 #   - changes the `nyc` coverage-threshold block in
 #     packages/concerto-core/package.json
 #   - changes the exported symbol list of packages/concerto-core/src/index.ts
@@ -41,6 +43,9 @@ jobs:
       # workspace packages, so they must be built first, as build.yml does.
       - name: Build workspace packages
         run: npm run build
+
+      - name: Self-test the test-edit relaxation guard
+        run: node --test migration/guardrails/relaxations.test.mjs
 
       - name: Run migration guardrails
         run: |
