@@ -151,6 +151,7 @@ after P5-06: load 13–40×, load+validate 17–21×, validateAst 1.7–2.5×,
 | **BC-34** | plan §3 ("visitor shells … because tests spy on `visitX`"); lifted MAP.tsv (4 `jsonpopulator` not-liftable rows: `parameters.path` injection, `visit` fallthrough); `migration/api-snapshot` `deepPaths`; §0.5 | `JSONPopulator`, `JSONGenerator` and `ResourceValidator` keep TS visitor shells, and their internals (`parameters.path`, `visitX`) are reachable through deep `src/...` paths that §0.5 kept stable. | Stop supporting deep imports of visitor internals and internal visitor parameters. Only the root exports stay public. | removal | JS | 4 not-liftable W tests; `deepPaths` in the snapshot | medium: unknown deep-import users | lets P5-02-style deletion continue inside the visitors | major | M |
 | **BC-35** | ledger (stays-ts): `globalize.ts` `messageFormatter`; P1-05 (Rust owns the templates) | `Globalize` stays public over `messages/en.json`, while Rust owns the same templates. | Deprecate `Globalize`, or generate `en.json` from the Rust catalogue so the two cannot drift. | removal | JS | ledger row | low | one message source | major (removal) / patch (generation) | S |
 | **BC-36** | D7; ledger (stays-ts) for `Factory`, `Resource`, `Typed`, `Identifiable`, `Relationship`, `ValidatedResource`, `InstanceGenerator`, `valuegenerator`, `DateTimeUtil` | Instances are dynamic TS objects with dayjs date values. Sample generation uses `Math.random`, randexp and dayjs. | **No change proposed.** Replacing dayjs, or making instances Rust-owned, is a public API redesign. List it as a long-horizon option only (BC-26 covers the performance side). | – | – | ledger rows (177 `TS`/`-` rows; 84 of them are in these D7 files) | – | – | – | – |
+| **BC-37** | P5-02 (#73), concerto 70bdeb49e; maintainer decision 2026-09-27 (option 1: accept) | P5-02 deleted the superseded TS decorator-command implementation and regenerated `migration/api-snapshot` (−352/+35 lines). Removed from the published `.d.ts`: the whole `DecoratorExtractor` module and class (never exported from the package root; reachable only by deep import), 11 `DecoratorManager` static helpers (`validateCommand`, `executeCommand`, `applyDecorator`, `applyDecoratorForMapElement`, `migrateAndValidate`, `getDecoratorMaps`, `addDcsWithIndexToMap`, `pushMapValues`, `checkForDuplicateDecorators`, `checkForNamespaceTargetAndApplyDecorator`, `executeNamespaceCommand`), and `processType` on `MapKeyType`/`MapValueType`. The public entry points (`DecoratorManager.decorateModels`, `validate`, `migrateTo`, `extractDecorators`, `extractVocabularies`, `extractNonVocabDecorators`) are unchanged. | **Accepted as shipped (maintainer decision).** The regenerated snapshot is the new baseline. List the removals in the R1 changelog. No shims. | removal | JS | api-snapshot diff 7c2cc6752..c73e6aa8c | low: internal helpers and a deep-import-only module | lets P5-02 remove the TS decorator-command engine | major (R1) | none (already done) |
 
 **The other stays-ts rows**, excluded because nothing breaks:
 - constant-return, abstract-stub and `accept` dispatch members;
@@ -186,7 +187,7 @@ and BC-34 from happening during the migration. P4-08's `stripInternal` and
 | Class | Rows |
 |---|---|
 | **Safe after the migration as minor or patch** | BC-01, BC-06, BC-08, BC-11, BC-12, BC-14 (crash to domain exception, or message text only); BC-09 (subject to Q8); BC-21 as a faithful fix (patch); BC-29 (patch, non-breaking form); BC-26 additive form, BC-30 (minor, additive); BC-35 generation form (patch); BR-02 |
-| **Needs a major release** | BC-02, BC-04 (until Q6), BC-05, BC-07 (default flip), BC-10, BC-17, BC-19 (with BC-18 and BC-20 folded in), BC-21 extending DV-018, BC-23, BC-24, BC-26 Rust-owned form, BC-27, BC-28, BC-31, BC-32, BC-33, BC-34, BC-35 removal form |
+| **Needs a major release** | BC-37 (already shipped in R1), BC-02, BC-04 (until Q6), BC-05, BC-07 (default flip), BC-10, BC-17, BC-19 (with BC-18 and BC-20 folded in), BC-21 extending DV-018, BC-23, BC-24, BC-26 Rust-owned form, BC-27, BC-28, BC-31, BC-32, BC-33, BC-34, BC-35 removal form |
 | **Changelog-only: already Rust behaviour, universal at P5-02** | BC-03 (DV-004), BC-07 part (a) (DV-009), BC-13 (DV-015), BC-15 (DV-017), BC-16 (DV-018) |
 | **Rust-crate-API-only** (feeds P6-01 #83) | BR-01 to BR-11 |
 | **No change proposed** | BR-01, BC-25 (a constraint), BC-36, BC-22 (pending #219) |
@@ -206,6 +207,7 @@ otherwise "same behaviour, new engine".
 **Contents:**
 - **Packaging:** BC-31 (the Node floor, or an ESM loader) and BC-32 (a browser init entry and bundler docs).
 - **Changelog for already-built divergences:** BC-03 (DV-004), BC-07(a) (DV-009), BC-13 (DV-015), BC-15 (DV-017) and BC-16 (DV-018).
+- **Changelog for P5-02's accepted API removals:** BC-37 (`DecoratorExtractor`, internal `DecoratorManager` statics, `MapKeyType`/`MapValueType.processType`).
 - **Optionally, the minor-class fixes, because after P5-02 they are one-place Rust changes:**
   - BC-06, BC-08, BC-11, BC-12 and BC-14: TS crash to domain exception, or message text;
   - BC-01;
@@ -299,6 +301,7 @@ RB does not affect JS users and can run in parallel with R2.
 | BC-33 | – | none | "`getModelFileByFileName` is typed `ModelFile \| undefined`." |
 | BC-34 | Deprecate deep imports in R2 (package `exports` warnings). | none | "Only the package's root exports are public. Deep `src/...` imports of the serializer visitors are removed." |
 | BC-35 | Deprecate `Globalize` in R2. | none | "`Globalize` is removed. Error messages come from the engine's catalogue." |
+| BC-37 | – (already removed in P5-02; accepted by the maintainer) | none | "`DecoratorExtractor` and the internal `DecoratorManager` helpers (`validateCommand`, `executeCommand`, `applyDecorator` and related statics) are removed; decorator command sets are applied by the Concerto engine. Use `DecoratorManager.decorateModels`, `validate`, `migrateTo` and the `extract*` methods, which are unchanged. `MapKeyType.processType` and `MapValueType.processType` are removed." |
 | BR-* | `#[deprecated]` aliases for one minor (public-api.md §7.4). | the `binding` feature | Crate CHANGELOG, from P6-03's semver check. |
 
 The minor-class rows (BC-01, BC-06, BC-08, BC-09, BC-11, BC-12, BC-14) need no
