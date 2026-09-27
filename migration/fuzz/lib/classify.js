@@ -30,10 +30,19 @@
  *   on which side(s)?
  *
  * tally() folds a classified case into a run summary, per side and per op.
+ *
+ * Error parity (maintainer decision 2026-09-27, task P5-09,
+ * accordproject/concerto-rust#253): the engines must throw in the same
+ * scenarios with the same exception class; message text may differ. So two
+ * outcomes that differ only in exception message (judge.js
+ * withoutMessages()) are an agreement, flagged `messageOnly` and counted in
+ * `messageOnlyAgree` (a subset of `agree`) for information. A throw/no-throw,
+ * class, component, location or value difference is still a divergence.
  */
 
 const path = require('path');
 const { sortedStringify } = require(path.join(__dirname, '..', '..', 'oracle', 'lib', 'canon'));
+const { withoutMessages } = require(path.join(__dirname, '..', '..', 'oracle', 'lib', 'judge'));
 
 /**
  * Is an error thrown out of `adapter.run()` an engine verdict?
@@ -61,7 +70,9 @@ function classifyThrow(e) {
  * @param {object|undefined} r Rust worker result, same shape
  * @param {function(object): (object|null)} expectedDivergence lib/expected-divergences.js's matcher
  * @returns {{kind: string, tsHarness: boolean, rustHarness: boolean, record?: object, expected?: object}}
- *   kind is one of 'agree', 'divergence', 'expected', 'harness'. For
+ *   kind is one of 'agree', 'divergence', 'expected', 'harness'. An 'agree'
+ *   that differs only in exception message has `messageOnly: true` and keeps
+ *   `record` (P5-09). For
  *   'harness', tsHarness/rustHarness say which side(s) failed and `record`
  *   keeps both sides (a side that did produce a verdict keeps it), so the
  *   case is reported, never silently dropped.
@@ -83,6 +94,9 @@ function classifyCase(c, t, r, expectedDivergence) {
     if (sortedStringify(t.canon) === sortedStringify(r.canon)) {
         return { kind: 'agree', tsHarness, rustHarness };
     }
+    if (sortedStringify(withoutMessages(t.canon)) === sortedStringify(withoutMessages(r.canon))) {
+        return { kind: 'agree', messageOnly: true, tsHarness, rustHarness, record };
+    }
     const expected = expectedDivergence ? expectedDivergence(record) : null;
     if (expected) {
         return { kind: 'expected', tsHarness, rustHarness, record, expected };
@@ -97,6 +111,8 @@ function emptyCounts() {
     return {
         ran: 0,
         agree: 0,
+        // Agreements whose exception message differs (P5-09), included in agree.
+        messageOnlyAgree: 0,
         divergences: 0,
         expectedDivergences: 0,
         // Cases with a harness error on at least one side (ran = agree +
@@ -119,7 +135,10 @@ function tally(summary, op, cls) {
     for (const s of [summary, byOp]) {
         s.ran++;
         switch (cls.kind) {
-        case 'agree': s.agree++; break;
+        case 'agree':
+            s.agree++;
+            if (cls.messageOnly) { s.messageOnlyAgree++; }
+            break;
         case 'divergence': s.divergences++; break;
         case 'expected': s.expectedDivergences++; break;
         case 'harness':

@@ -62,9 +62,29 @@ test('both throw, different class: a divergence', () => {
     assert.equal(cls.kind, 'divergence');
 });
 
-test('both throw, same class, different message: a divergence', () => {
+test('both throw, same class, different message: an agreement flagged messageOnly (P5-09)', () => {
     const cls = classifyCase(CASE, verdict(err('IllegalModelException', 'bad a')), verdict(err('IllegalModelException', 'bad b')), expectedDivergence);
-    assert.equal(cls.kind, 'divergence');
+    assert.equal(cls.kind, 'agree');
+    assert.equal(cls.messageOnly, true);
+    const summary = { ...emptyCounts(), byOp: {} };
+    tally(summary, CASE.op, cls);
+    assert.equal(summary.agree, 1);
+    assert.equal(summary.messageOnlyAgree, 1);
+    assert.equal(summary.divergences, 0);
+});
+
+test('same class and message but a different location: still a divergence (P5-09 relaxes message only)', () => {
+    const a = { error: { class: 'IllegalModelException', message: 'bad', location: { start: { line: 1 } }, component: null } };
+    const b = { error: { class: 'IllegalModelException', message: 'other', location: null, component: null } };
+    assert.equal(classifyCase(CASE, verdict(a), verdict(b), expectedDivergence).kind, 'divergence');
+});
+
+test('a message inside a throws marker in a value is ignored too (P5-09)', () => {
+    const a = { ok: { x: { '@@oracle': 'throws', class: 'TypeError', message: 'one' } } };
+    const b = { ok: { x: { '@@oracle': 'throws', class: 'TypeError', message: 'two' } } };
+    const c = { ok: { x: { '@@oracle': 'throws', class: 'Error', message: 'one' } } };
+    assert.equal(classifyCase(CASE, verdict(a), verdict(b), expectedDivergence).messageOnly, true);
+    assert.equal(classifyCase(CASE, verdict(a), verdict(c), expectedDivergence).kind, 'divergence');
 });
 
 test('a maintainer-accepted signature (DV-015) is expected, not unresolved', () => {
@@ -128,8 +148,6 @@ test('DV-018 needs both sides: the decorator message with another TS outcome, or
         ['ModelManager.addModelFile', crash, OK],
         // another property read
         ['ModelManager.addModelFile', err('TypeError', "Cannot read properties of null (reading 'arguments')"), rejected],
-        // TS rejected cleanly rather than crashing
-        ['ModelManager.addModelFile', err('IllegalModelException', 'Duplicate decorator undefined '), rejected],
         // the crash paired with some other Rust rejection
         ['ModelManager.addModelFile', crash, err('IllegalModelException', "Decorator Foo has invalid decorator argument. Expected object. Found string, with value \"x\"")],
         // a different "Found" value, or the right text under another class
@@ -141,6 +159,12 @@ test('DV-018 needs both sides: the decorator message with another TS outcome, or
     for (const [op, ts, rust] of cases) {
         assert.equal(classifyCase({ ...CASE, op }, verdict(ts), verdict(rust), expectedDivergence).kind, 'divergence', `${op} ${JSON.stringify(ts)} ${JSON.stringify(rust)}`);
     }
+    // TS rejected cleanly rather than crashing: the same class, so since
+    // P5-09 it is a message-only agreement, not DV-018 and not a divergence.
+    const clean = classifyCase({ ...CASE, op: 'ModelManager.addModelFile' },
+        verdict(err('IllegalModelException', 'Duplicate decorator undefined ')), verdict(rejected), expectedDivergence);
+    assert.equal(clean.kind, 'agree');
+    assert.equal(clean.messageOnly, true);
 });
 
 test('DV-017 and DV-018 do not claim each other\'s Rust message', () => {
@@ -180,8 +204,8 @@ test('tally counts harness errors per side and per op, and every case exactly on
     tally(summary, 'A', classifyCase(CASE, harness('x'), verdict(OK), expectedDivergence));
     tally(summary, 'B', classifyCase(CASE, verdict(OK), harness('y'), expectedDivergence));
     tally(summary, 'B', classifyCase(CASE, harness('x'), harness('y'), expectedDivergence));
-    assert.deepEqual(summary.byOp.A, { ran: 3, agree: 1, divergences: 1, expectedDivergences: 0, harnessErrorCases: 1, harnessErrorsTs: 1, harnessErrorsRust: 0 });
-    assert.deepEqual(summary.byOp.B, { ran: 2, agree: 0, divergences: 0, expectedDivergences: 0, harnessErrorCases: 2, harnessErrorsTs: 1, harnessErrorsRust: 2 });
+    assert.deepEqual(summary.byOp.A, { ran: 3, agree: 1, messageOnlyAgree: 0, divergences: 1, expectedDivergences: 0, harnessErrorCases: 1, harnessErrorsTs: 1, harnessErrorsRust: 0 });
+    assert.deepEqual(summary.byOp.B, { ran: 2, agree: 0, messageOnlyAgree: 0, divergences: 0, expectedDivergences: 0, harnessErrorCases: 2, harnessErrorsTs: 1, harnessErrorsRust: 2 });
     assert.equal(summary.ran, 5);
     assert.equal(summary.agree + summary.divergences + summary.expectedDivergences + summary.harnessErrorCases, summary.ran);
     assert.equal(summary.harnessErrorsTs, 2);
