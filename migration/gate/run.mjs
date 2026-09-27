@@ -339,7 +339,13 @@ function stepStatus(opts, reportDir) {
 // ---------------------------------------------------------------------------
 function stepCoreSuiteRust(opts, reportDir) {
   const coreDir = path.join(CONCERTO_ROOT, 'packages', 'concerto-core');
-  const name = 'concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run)';
+  // Not-built/not-runnable outcomes (na or the explicit-override error below)
+  // keep the pre-P5-01c name so gate output is otherwise unchanged when the
+  // engine isn't built; only an actual real run earns the ", real run)"
+  // suffix (restores the continuation brief's item 5, accordproject/
+  // concerto-rust#250).
+  const name = 'concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2)';
+  const realRunName = 'concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run)';
   const engine = resolveEngineModule(opts);
   if (!engine.exists) {
     if (engine.source.startsWith('env')) {
@@ -386,7 +392,7 @@ function stepCoreSuiteRust(opts, reportDir) {
   }
 
   return {
-    name,
+    name: realRunName,
     ok: res.ok,
     exit: res.status,
     engine_module: engine,
