@@ -86,11 +86,20 @@ function engineModules(): string[] {
  *     `loadEngine`, read through scripts/browser-module-shim.js);
  *   - the public modules the engine requires back (see engineRequires).
  *
- * Every specifier asked for while this function loads the registry (the
- * engine and the views' own modules) is discarded before it returns:
- * `globalThis.__concertoBundler.requested` starts empty for the public graph
- * that a test imports afterwards, so a check against it is proof of what that
- * public graph itself asked for.
+ * Every specifier asked for while this function loads the engine side of the
+ * registry (the wasm engine and its own entry modules) is discarded before
+ * the public modules the engine requires back are loaded: those public
+ * modules (see engineRequires) are the SAME instances the public graph a test
+ * imports afterwards will resolve to, so their module-level `loadEngine`
+ * calls are genuine public-graph requests, not setup noise, and happen here
+ * because ESM only evaluates a module once. Clearing after them, instead,
+ * would discard that signal permanently: a later import of the same
+ * already-cached module never re-runs its top-level code, so a request made
+ * only during this pre-load could never be observed again. What remains in
+ * `globalThis.__concertoBundler.requested` after this function returns is
+ * therefore everything the public graph asked for, whether that happened
+ * while resolving these shared modules here or later while a test imports
+ * and exercises the public entry point.
  *
  * @param {Page} page - the Playwright page
  * @param {string} baseUrl - the server's base URL
@@ -122,10 +131,14 @@ export async function installEngineBundler(page: Page, baseUrl: string): Promise
         for (const name of modules) {
             bundled.set(`engine/${name}`, await import(`${baseUrl}/concerto-core/engine/${name}.mjs`));
         }
+        // Only the engine-side setup above is noise: clear it before loading
+        // the public modules the engine requires back below, so their
+        // module-level `loadEngine` calls (the same instances the public
+        // graph reuses, e.g. modelmanager.mjs pulling in basemodelmanager,
+        // modelutil and modelfile) are recorded rather than discarded.
+        requested.clear();
         for (const specifier of requires) {
             bundled.set(specifier, await import(`${baseUrl}/concerto-core/engine/${specifier}`));
         }
-        // Only what the public graph asks for from here on counts.
-        requested.clear();
     }, { baseUrl, modules: engineModules(), requires: engineRequires() });
 }
