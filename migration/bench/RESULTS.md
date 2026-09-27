@@ -110,6 +110,8 @@ touch the typed path, and they are unchanged within noise, as expected.
   wasm32 clippy `-D warnings`, check, `build.sh`, and 80 of 80
   `smoke:node` checks.
 
+---
+
 # P5-04b: fresh benchmark after P5-02 (2026-09-27)
 
 Task P5-04b (accordproject/concerto-rust#255, under the migration plan
