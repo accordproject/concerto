@@ -54,17 +54,17 @@ import type TransactionDeclaration from './introspect/transactiondeclaration';
 import debugLib from 'debug';
 const debug = debugLib('concerto:BaseModelManager');
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// See classdeclaration.ts's own copy of this comment for the bundler/webpack
-// reasoning this loader relies on.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See classdeclaration.ts's
+// own copy of this comment for the bundler/webpack reasoning this loader
+// relies on.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('./engine').rust;
 
 /**
  * What has been read from one rustHandle (P5-06), valid while its `epoch()`
@@ -144,22 +144,21 @@ class BaseModelManager {
      decoratorValidation: NonNullable<ModelManagerOptions['decoratorValidation']>;
      metamodelModelFile: ModelFileInstance;
     /**
-     * rust mode only (P4-08): a live concerto-wasm ModelManagerHandle,
-     * mirroring every addModelFile/updateModelFile/deleteModelFile call
-     * this manager makes for a namespace `_rustMirrorEligible` allows (the
-     * decorator/root system models and the transient metamodel validation
-     * file are excluded, since rustHandle's own constructor already loads
-     * the first two, and the third is never meant to be permanent). Null
-     * in ts mode, and null here in rust mode until the constructor creates
-     * it.
+     * (P4-08): a live concerto-wasm ModelManagerHandle, mirroring every
+     * addModelFile/updateModelFile/deleteModelFile call this manager makes
+     * for a namespace `_rustMirrorEligible` allows (the decorator/root
+     * system models and the transient metamodel validation file are
+     * excluded, since rustHandle's own constructor already loads the first
+     * two, and the third is never meant to be permanent). Null here only
+     * until the constructor creates it.
      * @internal
      */
      rustHandle: { [binding: string]: (...args: any[]) => any } | null;
     /**
-     * rust mode only (P4-08): set once a `_mirrorToRust` write has failed
-     * (see `_mirrorToRust`/`_rustMirrorTrustworthy`), so a stale mirror
-     * read never answers from `rustHandle` again until `clearModelFiles`
-     * starts it over.
+     * (P4-08): set once a `_mirrorToRust` write has failed (see
+     * `_mirrorToRust`/`_rustMirrorTrustworthy`), so a stale mirror read
+     * never answers from `rustHandle` again until `clearModelFiles` starts
+     * it over.
      * @internal
      */
      _rustMirrorStale: boolean;
@@ -186,23 +185,20 @@ class BaseModelManager {
         this.rustHandle = null;
         this._rustMirrorStale = false;
         this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
-        /* istanbul ignore if */
-        if (rust) {
-            this.rustHandle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
-            // P4-08 (accordproject/concerto-rust#67, maintainer decision
-            // 2026-09-26): propagate both TS validation options rustHandle's
-            // own validation was previously blind to (P4-08e/#189 added the
-            // decorator-validation binding; the reserved-system-type-names
-            // one already existed) *before* addDecoratorModel/addRootModel
-            // below mirror anything into it, so `ModelFile.validate()`'s
-            // Rust delegation (introspect/modelfile.ts) and rustHandle's own
-            // add/validate paths see the same options TS's own validate()
-            // body reads from `this.options`/`this.decoratorValidation`.
-            this.rustHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels(
-                !!options?.dangerouslyAllowReservedSystemTypeNamesInUserModels
-            );
-            this.rustHandle.setDecoratorValidation(this.decoratorValidation);
-        }
+        this.rustHandle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
+        // P4-08 (accordproject/concerto-rust#67, maintainer decision
+        // 2026-09-26): propagate both TS validation options rustHandle's
+        // own validation was previously blind to (P4-08e/#189 added the
+        // decorator-validation binding; the reserved-system-type-names
+        // one already existed) *before* addDecoratorModel/addRootModel
+        // below mirror anything into it, so `ModelFile.validate()`'s
+        // Rust delegation (introspect/modelfile.ts) and rustHandle's own
+        // add/validate paths see the same options TS's own validate()
+        // body reads from `this.options`/`this.decoratorValidation`.
+        this.rustHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels(
+            !!options?.dangerouslyAllowReservedSystemTypeNamesInUserModels
+        );
+        this.rustHandle.setDecoratorValidation(this.decoratorValidation);
         this.addDecoratorModel();
         this.addRootModel();
 
@@ -227,7 +223,7 @@ class BaseModelManager {
             // `validateAst`'s own leak-tracking (above) already registered
             // it in rustHandle.
             /* istanbul ignore next */
-            if (rust && this.rustHandle && this.rustHandle.modelFileId(MetaModelNamespace) === undefined) {
+            if (this.rustHandle && this.rustHandle.modelFileId(MetaModelNamespace) === undefined) {
                 this._mirrorToRust(() => this.rustHandle!.addModelWithDefinitions(
                     JSON.stringify(this.metamodelModelFile.getAst()),
                     this.metamodelModelFile.getDefinitions() ?? undefined,
@@ -510,7 +506,7 @@ class BaseModelManager {
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
             /* istanbul ignore next */
-            if (rust && this.rustHandle && this._rustMirrorEligible(modelFile.getNamespace())) {
+            if (this.rustHandle && this._rustMirrorEligible(modelFile.getNamespace())) {
                 this._mirrorToRust(() => this.rustHandle!.addModelWithDefinitions(
                     JSON.stringify(modelFile.getAst()),
                     modelFile.getDefinitions() ?? undefined,
@@ -540,14 +536,15 @@ class BaseModelManager {
         // file, so a stale or partially mirrored rustHandle (a W test's
         // stub ModelFile never reached it: see _mirrorToRust) is not a
         // reason to distrust it here the way a read over `this.modelFiles`
-        // would be; only `rust` (engine mode) gates delegation. A thrown
+        // would be; only whether `rustHandle` itself exists gates
+        // delegation (a W test may stub the manager without one). A thrown
         // error already arrives as the mapped `MetamodelException` (or
         // other TS exception class, src/engine/errors.ts) via the host
         // error factory, so it propagates unchanged -- this never falls
         // back to the TS body on a genuine validation failure, only when
         // rustHandle itself is unavailable.
         /* istanbul ignore next */
-        if (rust && this.rustHandle) {
+        if (this.rustHandle) {
             const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
             try {
                 this.rustHandle.validateAst(
@@ -669,7 +666,7 @@ class BaseModelManager {
         }
         this.modelFiles[modelFile.getNamespace()] = modelFile;
         /* istanbul ignore next */
-        if (rust && this.rustHandle && this._rustMirrorEligible(modelFile.getNamespace())) {
+        if (this.rustHandle && this._rustMirrorEligible(modelFile.getNamespace())) {
             // TS has already validated (or was asked not to) above; the
             // mirror call only needs to keep rustHandle's state in sync, so
             // it never re-validates itself.
@@ -693,7 +690,7 @@ class BaseModelManager {
         } else {
             delete this.modelFiles[namespace];
             /* istanbul ignore next */
-            if (rust && this.rustHandle && this._rustMirrorEligible(namespace)) {
+            if (this.rustHandle && this._rustMirrorEligible(namespace)) {
                 this._mirrorToRust(() => this.rustHandle!.deleteModelFile(namespace));
             }
         }
@@ -760,7 +757,7 @@ class BaseModelManager {
             // only, and TS's own validateModelFiles() below is still what
             // decides pass/fail.
             /* istanbul ignore next */
-            if (rust && this.rustHandle) {
+            if (this.rustHandle) {
                 newModelFiles.forEach((m) => {
                     if (this._rustMirrorEligible(m.getNamespace())) {
                         mirroredNamespaces.add(m.getNamespace());
@@ -802,7 +799,7 @@ class BaseModelManager {
             // in agreement, permanently forcing `ModelFile.validate()` back
             // onto the TS body for the rest of the manager's life.
             /* istanbul ignore next */
-            if (rust && this.rustHandle) {
+            if (this.rustHandle) {
                 newModelFiles.forEach((m) => {
                     if (!mirroredNamespaces.has(m.getNamespace())) {
                         return;
@@ -975,7 +972,7 @@ class BaseModelManager {
      */
     resolveType(context, type) {
         /* istanbul ignore next */
-        if (rust && this._rustMirrorTrustworthy()) {
+        if (this._rustMirrorTrustworthy()) {
             // A stale or partially mirrored rustHandle (a W test's stub
             // ModelFile never reached it: see _mirrorToRust) falls back to
             // the TS body below, which reads this.modelFiles directly and
@@ -1019,7 +1016,7 @@ class BaseModelManager {
     clearModelFiles() {
         this.modelFiles = {};
         /* istanbul ignore next */
-        if (rust && this.rustHandle) {
+        if (this.rustHandle) {
             // Every mirrored model file is gone; rustHandle has no bulk
             // clear, so start it over the same way `new BaseModelManager()`
             // does. addDecoratorModel/addRootModel below re-populate TS's
@@ -1051,7 +1048,7 @@ class BaseModelManager {
      */
     getModelFileByFileName(fileName): ModelFile {
         /* istanbul ignore next */
-        if (rust && this._rustMirrorTrustworthy()) {
+        if (this._rustMirrorTrustworthy()) {
             try {
                 const namespace = this.rustHandle!.modelManagerGetModelFileByFileName(fileName);
                 return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
@@ -1069,7 +1066,7 @@ class BaseModelManager {
     getNamespaces(): string[] {
         const namespaces = Object.keys(this.modelFiles);
         /* istanbul ignore next */
-        if (rust && this._rustMirrorTrustworthy()) {
+        if (this._rustMirrorTrustworthy()) {
             try {
                 return this.rustHandle!.getNamespaces();
             } catch (e) {
@@ -1221,7 +1218,7 @@ class BaseModelManager {
      */
     derivesFrom(fqt1, fqt2): boolean {
         /* istanbul ignore next */
-        if (rust && this._rustMirrorTrustworthy()) {
+        if (this._rustMirrorTrustworthy()) {
             try {
                 return this.rustHandle!.derivesFrom(fqt1, fqt2);
             } catch (e) {
@@ -1265,7 +1262,7 @@ class BaseModelManager {
      */
     isAssignableTo(fqn: string, baseFqn: string): boolean {
         /* istanbul ignore next */
-        if (rust && this._rustMirrorTrustworthy()) {
+        if (this._rustMirrorTrustworthy()) {
             return this.rustHandle!.isAssignableTo(fqn, baseFqn);
         }
         let typeDeclaration;
