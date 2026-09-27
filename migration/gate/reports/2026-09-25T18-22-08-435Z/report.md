@@ -28,7 +28,7 @@ Dry run of migration/gate/run.mjs (task P5-01a). Not the final gate (P5-01). Eac
   - expected-pending: wasm smoke check: a new manager holds the system model (node v22.22.2 (CommonJS)) (owner: accordproject/concerto-rust#150 (open, worker:cloud-2)): stale assertion: a new manager now starts with two model files (modelFileIds 0,1), not one
   - expected-pending: wasm smoke check: property handles and snapshots (node v22.22.2 (CommonJS)) (owner: accordproject/concerto-rust#150 (open, worker:cloud-2)): stale assertion 'enum values have no PropId yet (P2-04)': P2-04 (#48) landed and enum values have PropIds
 
-## concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run — status.mjs's own engine_modes.rust is stale)
+## concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run)
 - verdict: expected-pending (owner: environment (sandboxed network egress), not a migration task)
 - exit code: 1
 - log: core-suite-rust.log

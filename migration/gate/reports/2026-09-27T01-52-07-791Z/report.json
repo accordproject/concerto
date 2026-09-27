@@ -39,7 +39,7 @@
       },
       {
         "id": "\u00a70.3b",
-        "label": "Oracle corpus 100% pass, native (cargo test --test oracle)",
+        "label": "Oracle corpus: 0 regressions vs baseline.tsv (16,242 fixtures; 2321 unsupported), native (cargo test --test oracle)",
         "ok": true,
         "detail": "13921/16242 pass, 0 fail, 2321 unsupported, 0 harness error, 0 unowned, 0 regressions vs baseline.tsv"
       },
@@ -563,7 +563,7 @@
       }
     },
     "core_suite_rust": {
-      "name": "concerto-core suite, CONCERTO_ENGINE=rust (\u00a70.1/\u00a70.2, real run \u2014 status.mjs's own engine_modes.rust is stale)",
+      "name": "concerto-core suite, CONCERTO_ENGINE=rust (\u00a70.1/\u00a70.2, real run)",
       "ok": true,
       "exit": 0,
       "stats": {

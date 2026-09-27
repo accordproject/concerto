@@ -7,7 +7,7 @@ Output of migration/gate/run.mjs (built for task P5-01a; used, unchanged apart f
 - **§0.1 Behavioural (B) unit tests pass unchanged, CONCERTO_ENGINE=rust: PASS** — tag B: 950/956 passing, 0 failing, 6 pending; suite exit 0
 - **§0.2 White-box (W) tests pass unchanged (or lifted + signed off): PASS** — tag W: 272/272 passing, 0 failing, 0 pending
 - **§0.3a Oracle corpus coverage of the reference (floor: stmt/fn/line >= 99%, branch >= 94.8%): PASS** — stmt 99.21%, branch 96.34%, fn 99.01%, line 99.19%
-- **§0.3b Oracle corpus 100% pass, native (cargo test --test oracle): PASS** — 13921/16242 pass, 0 fail, 2321 unsupported, 0 harness error, 0 unowned, 0 regressions vs baseline.tsv
+- **§0.3b Oracle corpus: 0 regressions vs baseline.tsv (16,242 fixtures; 2321 unsupported), native (cargo test --test oracle): PASS** — 13921/16242 pass, 0 fail, 2321 unsupported, 0 harness error, 0 unowned, 0 regressions vs baseline.tsv
 - **§0.3c Oracle corpus 100% pass, WASM/JS binding (replay.js): PASS** — 16242/16242 pass (100% agreement)
 - **§0.4 >=70% of concerto-core logic, by weight, runs in Rust (ledger): PASS** — ledger-weighted Rust+hybrid share: 85.3%
 - **§0.5 Public TS API unchanged (exports, deep paths, .d.ts snapshot): PASS** — check-guardrails.mjs exit 0
@@ -36,7 +36,7 @@ Output of migration/gate/run.mjs (built for task P5-01a; used, unchanged apart f
 ## WASM build (size budget) + smoke:node
 - verdict: PASS
 
-## concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run — status.mjs's own engine_modes.rust is stale)
+## concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run)
 - verdict: PASS
 - exit code: 0
 - log: core-suite-rust.log

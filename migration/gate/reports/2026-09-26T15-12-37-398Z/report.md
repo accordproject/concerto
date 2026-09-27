@@ -20,7 +20,7 @@ Dry run of migration/gate/run.mjs (task P5-01a). Not the final gate (P5-01). Eac
 ## WASM build (size budget) + smoke:node
 - verdict: PASS
 
-## concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run — status.mjs's own engine_modes.rust is stale)
+## concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run)
 - verdict: PASS
 - exit code: 0
 - log: core-suite-rust.log

@@ -315,7 +315,7 @@ function stepCoreSuiteRust(opts, reportDir) {
   }
 
   return {
-    name: 'concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run — status.mjs\'s own engine_modes.rust is stale)',
+    name: 'concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run)',
     ok: res.ok,
     exit: res.status,
     stats: mocha ? mocha.stats : null,
@@ -783,7 +783,13 @@ function buildCriteriaSummary(steps) {
   });
   items.push({
     id: '§0.3b',
-    label: 'Oracle corpus 100% pass, native (cargo test --test oracle)',
+    // Labelled by what this actually judges (round-4 review, mttrbrts on
+    // #72): 0 regressions vs baseline.tsv over the full canonical corpus,
+    // not "100% pass" -- unsupported fixtures are expected and excluded,
+    // not failures.
+    label: nativeFx
+      ? `Oracle corpus: ${nativeFx.regressions} regressions vs baseline.tsv (${nativeFx.total_fixtures.toLocaleString()} fixtures; ${nativeFx.unsupported} unsupported), native (cargo test --test oracle)`
+      : 'Oracle corpus regressions vs baseline.tsv, native (cargo test --test oracle)',
     // Read back from the step rather than re-derived here: stepOracleNative's
     // own `ok` is cargo's exit status AND a fresh, right-sized fixture
     // report (see the long comment there for why unsupported/unowned
