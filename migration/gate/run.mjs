@@ -107,6 +107,42 @@ function sha256(filePath) {
 }
 
 // ---------------------------------------------------------------------------
+// Step: build the TS workspace packages (util -> cto+core -> the rest), via
+// the repo's own canonical `npm run build` (build:ordered). Not a §0
+// criterion by itself, but a hard prerequisite for several that are: a fresh
+// checkout/worktree has no packages/*/dist (`npm ci` alone never builds
+// workspace packages -- see coverage.sh's own longer comment on this), so
+// without this step:
+//   - guardrails (§0.5) fails to even build concerto-core's .d.ts, because
+//     concerto-core's own tsc build needs concerto-util's and
+//     concerto-cto's *already-built* dist/*.d.ts (workspace deps resolved
+//     through node_modules, not source);
+//   - core_suite_rust (§0.1/§0.2) fails at mocha's very first `require`,
+//     MODULE_NOT_FOUND on concerto-core's own dist/index.js (its
+//     package.json "main" -- the suite loads the package through its entry
+//     point, not via ts-node);
+//   - oracle_coverage's leg 2 (corpus -> workspace src/ via ts-node) needs
+//     concerto-util's/concerto-cto's dist/*.d.ts for the same reason as
+//     guardrails.
+// Building here, once, up front (in the repo's own documented dependency
+// order) covers all three, so those steps' pass/fail reflects the actual
+// code, never a missing build step in a freshly (re)created worktree.
+// ---------------------------------------------------------------------------
+function stepWorkspaceBuild(reportDir) {
+  const logFile = path.join(reportDir, 'workspace-build.log');
+  // 'build:ordered', not 'build': the root package.json wires 'build' to an
+  // npm-lifecycle 'postbuild' (`npm run test:esm`), an ESM smoke suite
+  // that is not itself a §0 criterion and is TZ-sensitive (fails outside
+  // TZ=UTC on a date-round-trip check) -- exactly the kind of unrelated,
+  // environment-dependent failure this step must not introduce into a
+  // criterion it isn't responsible for. 'build:ordered' is the actual
+  // dependency-ordered compile (level0 util, level1 cto+core, level2 the
+  // rest) with no lifecycle hook of its own.
+  const res = run('npm', ['run', 'build:ordered'], { cwd: CONCERTO_ROOT, env: { TZ: 'UTC' }, timeoutMs: 15 * 60 * 1000, logFile });
+  return { name: 'TS workspace build (prerequisite for §0.1/§0.2/§0.3a/§0.5)', ok: res.ok, exit: res.status, log: path.relative(reportDir, logFile) };
+}
+
+// ---------------------------------------------------------------------------
 // Step: guardrails (§0.5)
 // ---------------------------------------------------------------------------
 function stepGuardrails(reportDir) {
@@ -846,6 +882,7 @@ async function main() {
   fs.mkdirSync(reportDir, { recursive: true });
 
   const steps = {};
+  steps.workspace_build = stepWorkspaceBuild(reportDir);
   steps.corpus_provenance = stepCorpusProvenance(opts);
   steps.guardrails = stepGuardrails(reportDir);
   if (!opts.skipConformanceInstall) steps.conformance_install = stepConformanceInstall(opts, reportDir);
