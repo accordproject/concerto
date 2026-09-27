@@ -1,3 +1,117 @@
+# P5-06d: typed AST deserialisation (2026-09-27)
+
+Task P5-06d (accordproject/concerto-rust#239) adopts the P5-06c spike's
+lever 1. When a model's JSON AST is loaded from text, it is now read
+straight into typed Rust structs, with no intermediate
+`serde_json::Value`. Any document the typed structs do not cover falls back
+to the unchanged `Value` path, which keeps error parity. This re-runs the
+P5-04 suite unchanged, after P5-02, before and after the change, on the
+same machine and interleaved round by round.
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 cores, 17 GB, Linux |
+| Toolchain | Node v22.22.2, rustc 1.94.1 |
+| Before | `concerto` `c73e6aa8c`, `concerto-rust` `a2bb5b4` (the post-P5-02 integration head), built as-is |
+| After | `concerto-rust` `6afca8a` (P5-06c spike merged onto `a2bb5b4`, then completed); `concerto` unchanged |
+| TS reference | published `@accordproject/concerto-core` 5.0.0, the oracle's reference, because P5-02 removed the in-tree TS engine |
+| TS-API runs | `results/2026-09-27-P5-06d-{before-rust-engine,after-rust-engine,ts-reference-5.0.0}-{1,2,3}.json`: three interleaved rounds, `run-ts.mjs` defaults (5 warm-up + 30 samples) |
+| Crate runs | `concerto-rust`'s `benches/results/P5-06d/2026-09-27-rust-crit-{before,after}-{1,2}.json`: two interleaved rounds, criterion defaults |
+
+## Through the TS public API
+
+Medians in µs per model or per instance, for runs 1, 2 and 3. The ratios
+use the median of the three runs. `load+validate` is `run-ts.mjs`'s
+`validate` metric, which times a fresh load and `validateModelFiles()`
+together.
+
+| Model set | Metric | TS, runs 1 / 2 / 3 | Rust before, runs 1 / 2 / 3 | Rust after, runs 1 / 2 / 3 | before / TS | **after / TS** | speed-up |
+|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | load | 37.1 / 34.9 / 27.9 | 611.7 / 498.9 / 516.5 | 465.6 / 518.7 / 522.9 | 14.8× | **14.9×** | 1.00× |
+| concerto-core-test-data | load+validate | 64.5 / 83.0 / 67.3 | 1166.2 / 991.6 / 1068.3 | 579.5 / 551.2 / 536.8 | 15.9× | **8.2×** | 1.94× |
+| concerto-core-test-data | validateAst | 646.2 / 846.4 / 560.2 | 1001.8 / 897.7 / 1012.2 | 1020.8 / 933.8 / 787.8 | 1.6× | **1.4×** | 1.07× |
+| conformance | load | 13.9 / 14.5 / 13.5 | 321.4 / 329.7 / 412.2 | 144.1 / 157.5 / 129.7 | 23.7× | **10.4×** | 2.29× |
+| conformance | load+validate | 21.5 / 24.6 / 25.0 | 473.0 / 472.7 / 481.0 | 357.0 / 296.9 / 251.6 | 19.2× | **12.1×** | 1.59× |
+| conformance | validateAst | 192.3 / 226.3 / 290.8 | 521.6 / 509.8 / 516.3 | 541.2 / 567.5 / 415.6 | 2.3× | **2.4×** | 0.95× |
+| synthetic-large | load | 865.3 / 1111.7 / 929.8 | 33500.6 / 29816.8 / 28770.4 | 20773.1 / 27547.5 / 26634.6 | 32.1× | **28.6×** | 1.12× |
+| synthetic-large | load+validate | 1908.7 / 3060.2 / 2879.7 | 42890.7 / 45380.3 / 42472.8 | 26522.5 / 25890.2 / 24629.2 | 14.9× | **9.0×** | 1.66× |
+| (synthetic, 500) | fromJSON | 6.3 / 6.4 / 5.8 | 39.0 / 42.8 / 41.6 | 44.1 / 44.0 / 38.9 | 6.6× | **7.0×** | 0.95× |
+| (synthetic, 500) | resource.validate() | 1.6 / 1.6 / 1.7 | 15.1 / 12.2 / 14.2 | 15.6 / 11.9 / 14.9 | 8.8× | **9.3×** | 0.95× |
+
+Model load and load+validate get faster by 1.1× to 2.3×. The clearest
+gains are conformance load (2.3×) and load+validate on all three sets
+(1.6× to 1.9×). synthetic-large load gains only 1.1× on the median, and
+its after runs are noisy (20.8 to 27.5 ms). concerto-core-test-data load
+does not change (see below). validateAst and instance validation do not
+take the typed path, and they are unchanged within noise (0.95× to 1.07×).
+The Rust engine through the TS API is still slower than the TS reference
+on every operation.
+
+### concerto-core-test-data `load`
+
+This row showed no gain in the spike either. Profiling the TS-API load of
+this set shows that `addModelWithDefinitions`, the call the typed path
+speeds up, is only about 119 of the roughly 567 µs per model. The rest is
+TS `ModelFile` construction and its per-node engine bindings
+(`classDeclarationProcess`, `propertyProcess`, `fieldProcess`,
+`decoratorProcess`, `modelFilePropertySnapshots`). Those take JS objects,
+not JSON text, so typed deserialisation cannot reach them. Speeding them
+up would mean changing how the view layer crosses the boundary. That is
+not a cheap fix, so this task leaves it alone.
+
+## The Rust crate directly (criterion)
+
+Medians in µs per model or per instance, for runs 1 and 2. The speed-up
+uses the mean of the two runs. `load_text_typed` is a new bench, the typed
+text-to-`ModelFile` path, and `load_text_value` is the same input through
+the `Value` path. Both are measured on the after tree.
+
+| Benchmark | Before, runs 1 / 2 | After, runs 1 / 2 | Speed-up |
+|---|---|---|---|
+| text→ModelFile, concerto-core-test-data: `Value` path → typed path | - | 62.9 / 66.6 → 43.8 / 43.7 | 1.48× |
+| text→ModelFile, conformance: `Value` path → typed path | - | 23.9 / 24.7 → 14.6 / 14.9 | 1.65× |
+| text→ModelFile, synthetic-large: `Value` path → typed path | - | 3356.7 / 3721.4 → 1770.0 / 1766.9 | 2.00× |
+| `load` (from a parsed `Value`), concerto-core-test-data | 59.3 / 55.3 | 56.2 / 58.5 | 1.00× |
+| `load` (from a parsed `Value`), conformance | 18.2 / 21.2 | 21.3 / 21.4 | 0.92× |
+| `load` (from a parsed `Value`), synthetic-large | 3495.4 / 3358.6 | 3323.9 / 3393.6 | 1.02× |
+| validate, concerto-core-test-data | 49.9 / 52.7 | 53.7 / 56.9 | 0.93× |
+| validate, conformance | 25.0 / 25.0 | 25.4 / 25.5 | 0.98× |
+| validate, synthetic-large | 3142.9 / 3009.4 | 2783.6 / 2921.2 | 1.08× |
+| `ModelFile::from_json`, concerto-core-test-data | 52.6 / 52.7 | 51.4 / 52.0 | 1.02× |
+| `ModelFile::from_json`, conformance | 18.6 / 19.0 | 18.3 / 19.1 | 1.01× |
+| `ModelFile::from_json`, synthetic-large | 3380.5 / 3074.5 | 3430.9 / 3120.7 | 0.99× |
+| `validate_instance` (500) | 1.9 / 1.9 | 1.9 / 1.9 | 1.01× |
+
+Text to `ModelFile` is 1.5× to 2.0× faster on the typed path. The
+existing benches start from an already-parsed `Value`, so they do not
+touch the typed path, and they are unchanged within noise, as expected.
+
+## Correctness and budget
+
+- **Coverage:** all 1,283 loadable models in the canonical corpus, the
+  supplement, the CTO cache and the bench sets take the typed path. None
+  falls back, and none disagrees with the `Value` path (the spike reached
+  1,282 of 1,283). A differential and drift test in `cargo test`
+  (`concerto-core/src/introspect/typed_ast.rs`) fails if the two paths
+  disagree or if a model that loads falls back. It runs in CI over the
+  in-repo coverage model `concerto-core/tests/typed_ast/`, and over the
+  whole corpus when `CONCERTO_ORACLE_FIXTURES` is set.
+- **Oracle:** 16,242 fixtures (canonical corpus plus supplement, CTO cache
+  rebuilt): 13,921 pass, 0 fail, 0 regressions. `baseline.tsv` is
+  unchanged after `ORACLE_UPDATE_BASELINE=1`. The JS replay through the
+  WASM engine agrees on 16,242 of 16,242, before and after.
+- **concerto-core suite (nyc):** the before and after engines give the same
+  result: 1,445 pass, 154 pending and 1 failure. The failure is
+  `ModelLoader #loadModelFromUrl`, which needs the network and gets HTTP 403
+  in this sandbox. Coverage is identical.
+- **Guardrails** pass, including the byte-identical API snapshot.
+- **WASM:** `concerto-engine` goes from 2,621,682 to 2,775,834 bytes
+  (+154 KB), within the 4 MiB budget. The WASM LEG checks pass: fmt,
+  wasm32 clippy `-D warnings`, check, `build.sh`, and 80 of 80
+  `smoke:node` checks.
+
+---
+
 # P5-06: after the performance pass (2026-09-26)
 
 Task P5-06 (accordproject/concerto-rust#220, under the migration plan
