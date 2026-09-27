@@ -1,18 +1,18 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-27T04:42:29.686Z",
+  "generated_at": "2026-09-26T22:26:20.067Z",
   "requested_at_sha": null,
   "fast": false,
-  "runtime_ms": 502814,
+  "runtime_ms": 591810,
   "repos": {
     "concerto": {
       "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-01/concerto",
-      "commit": "520b243139923843a3e7bd62b1501ae09aaba356",
-      "commit_used": "520b243139923843a3e7bd62b1501ae09aaba356"
+      "commit": "7c4d86f92405cb01ca44ebd605ca0e4c45c4c046",
+      "commit_used": "7c4d86f92405cb01ca44ebd605ca0e4c45c4c046"
     },
     "concerto-rust": {
       "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-01/concerto-rust",
-      "commit": "ad806ade0c79024f08057e0d7dfaa21a936b4eaf"
+      "commit": "b0c074869f4e78303aa5162296d80c988349be96"
     },
     "concerto-validate-rs": {
       "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-01/concerto-validate-rs",
@@ -60,7 +60,7 @@
         "passing": 1300,
         "failing": 0,
         "pending": 8,
-        "duration_ms": 6204
+        "duration_ms": 5780
       },
       "by_tag": {
         "available": true,
@@ -94,40 +94,11 @@
           "passing": 1300,
           "failing": 0,
           "pending": 8,
-          "duration_ms": 6204
+          "duration_ms": 5780
         },
         "rust": {
-          "available": true,
-          "engine": "rust",
-          "suites": 411,
-          "tests": 1308,
-          "passing": 1300,
-          "failing": 0,
-          "pending": 8,
-          "duration_ms": 10273,
-          "by_tag": {
-            "available": true,
-            "tally": {
-              "B": {
-                "tests": 956,
-                "passing": 950,
-                "failing": 0,
-                "pending": 6
-              },
-              "M": {
-                "tests": 80,
-                "passing": 78,
-                "failing": 0,
-                "pending": 2
-              },
-              "W": {
-                "tests": 272,
-                "passing": 272,
-                "failing": 0,
-                "pending": 0
-              }
-            }
-          }
+          "available": false,
+          "reason": "CONCERTO_ENGINE=rust is not implemented yet (P4-02, engine shim, has not landed)"
         }
       }
     },
@@ -188,23 +159,16 @@
         }
       },
       "native": {
-        "available": true,
-        "generated_at": "2026-09-27T04:02:33.952Z",
-        "total_fixtures": 16242,
-        "pass": 13921,
-        "fail": 0,
-        "unsupported": 2321,
-        "harness_error": 0,
-        "regressions": 0,
-        "pass_pct": 85.71
+        "available": false,
+        "reason": "no native oracle adapter exists yet (P1-07 has not landed)"
       },
       "wasm": {
         "available": false,
-        "reason": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-01/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs is built (P4-01/P4-02 have landed), but this collector has no stable corpus-replay report to read for it; see migration/gate/run.mjs's stepOracleWasm for a real replay"
+        "reason": "no WASM oracle adapter exists yet (P4-01/P4-02 have not landed)"
       },
       "corpus_coverage_of_reference": {
         "available": true,
-        "generated_at": "2026-09-27T04:05:59.736Z",
+        "generated_at": "2026-09-26T21:33:23.483Z",
         "corpus": {
           "statements": {
             "pct": 99.21,
@@ -271,12 +235,12 @@
           "available": true,
           "command_exit_ok": true,
           "totals": {
-            "passed": 927,
+            "passed": 910,
             "failed": 0
           },
           "per_crate": {
             "concerto_core": {
-              "passed": 862,
+              "passed": 845,
               "failed": 0
             },
             "derive": {
@@ -319,9 +283,9 @@
         },
         "llvm_cov": {
           "available": true,
-          "workspace_lines_pct": 94.41,
+          "workspace_lines_pct": 94.32,
           "per_crate_lines_pct": {
-            "concerto-core": 94.43,
+            "concerto-core": 94.33,
             "concerto-macros": 99.22,
             "concerto-metamodel": 0,
             "concerto-vocabulary": 0

@@ -293,7 +293,96 @@ function ensureCoreBuilt(concertoRoot, logDir) {
   return { ok: true, built };
 }
 
-function collectCoreTests(concertoRoot, migrationDir, logDir, tagInfo) {
+// The CONCERTO_ENGINE=rust suite (§0.1/§0.2, real run). This mirrors
+// migration/gate/run.mjs's stepCoreSuiteRust, which had to work around the
+// hardcoded na() stub below by re-running the suite itself and noting in
+// its report that status.mjs's own engine_modes.rust was stale. P4-02 (the
+// engine shim/WASM binding) has since landed, so this collects the real
+// thing instead of leaving that stub in place for every caller that isn't
+// the gate runner (e.g. --at, the hourly report).
+function collectCoreTestsRustMode(concertoRoot, rustRoot, logDir, tagInfo) {
+  const coreDir = path.join(concertoRoot, 'packages', 'concerto-core');
+  const engineCjs = path.join(rustRoot, 'concerto-wasm', 'pkg', 'concerto-engine.cjs');
+  if (!fs.existsSync(engineCjs)) {
+    return na(`${engineCjs} does not exist (run concerto-wasm/build.sh first)`);
+  }
+  const rawOutputPath = path.join(logDir, 'core-suite-rust-raw-stdout.log');
+  const res = run(
+    'npx',
+    ['mocha', '-r', 'ts-node/register', '--recursive', '-t', '10000', '--reporter', 'json', 'test/'],
+    {
+      cwd: coreDir,
+      env: { TS_NODE_PROJECT: 'tsconfig.build.json', TZ: 'UTC', CONCERTO_ENGINE: 'rust' },
+      timeoutMs: 8 * 60 * 1000,
+      logFile: path.join(logDir, 'core-suite-rust-stderr.log'),
+    }
+  );
+  fs.writeFileSync(rawOutputPath, res.stdout);
+
+  let mocha;
+  try {
+    const jsonStart = res.stdout.search(/\{\s*\n\s*"stats"/);
+    if (jsonStart === -1) throw new Error('no JSON object found in stdout');
+    let depth = 0;
+    let jsonEnd = -1;
+    let inString = false;
+    let escaped = false;
+    for (let i = jsonStart; i < res.stdout.length; i++) {
+      const ch = res.stdout[i];
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (ch === '\\') escaped = true;
+        else if (ch === '"') inString = false;
+        continue;
+      }
+      if (ch === '"') { inString = true; continue; }
+      if (ch === '{') depth++;
+      else if (ch === '}') {
+        depth--;
+        if (depth === 0) { jsonEnd = i + 1; break; }
+      }
+    }
+    if (jsonEnd === -1) throw new Error('unbalanced JSON object in stdout');
+    mocha = JSON.parse(res.stdout.slice(jsonStart, jsonEnd));
+    fs.writeFileSync(path.join(logDir, 'mocha-results-rust.json'), JSON.stringify(mocha, null, 2));
+  } catch (e) {
+    return na(
+      `could not parse mocha JSON reporter output for CONCERTO_ENGINE=rust (exit ${res.status}, timedOut=${res.timedOut}): ${e.message}; see core-suite-rust-raw-stdout.log`
+    );
+  }
+
+  const overall = {
+    available: true,
+    engine: 'rust',
+    suites: mocha.stats.suites,
+    tests: mocha.stats.tests,
+    passing: mocha.stats.passes,
+    failing: mocha.stats.failures,
+    pending: mocha.stats.pending,
+    duration_ms: mocha.stats.duration,
+  };
+
+  if (tagInfo.available) {
+    const failedTitles = new Set((mocha.failures || []).map((t) => t.fullTitle));
+    const pendingTitles = new Set((mocha.pending || []).map((t) => t.fullTitle));
+    const tally = {};
+    for (const t of mocha.tests || []) {
+      const relFile = t.file ? path.relative(path.join(coreDir, 'test'), t.file) : null;
+      const tag =
+        (relFile && tagInfo.map.get(`${relFile}::${t.fullTitle}`)) ||
+        tagInfo.map.get(t.fullTitle) ||
+        'untagged';
+      tally[tag] = tally[tag] || { tests: 0, passing: 0, failing: 0, pending: 0 };
+      tally[tag].tests++;
+      tally[tag][failedTitles.has(t.fullTitle) ? 'failing' : pendingTitles.has(t.fullTitle) ? 'pending' : 'passing']++;
+    }
+    overall.by_tag = { available: true, tally };
+  }
+
+  return overall;
+}
+
+function collectCoreTests(concertoRoot, migrationDir, logDir, tagInfo, rustRoot) {
   const coreDir = path.join(concertoRoot, 'packages', 'concerto-core');
   if (!fs.existsSync(coreDir)) {
     return { overall: na('packages/concerto-core does not exist at this revision') };
@@ -434,7 +523,7 @@ function collectCoreTests(concertoRoot, migrationDir, logDir, tagInfo) {
 
   const engine_modes = {
     ts: overall,
-    rust: na('CONCERTO_ENGINE=rust is not implemented yet (P4-02, engine shim, has not landed)'),
+    rust: collectCoreTestsRustMode(concertoRoot, rustRoot, logDir, tagInfo),
   };
 
   return { overall, by_tag, engine_modes, nycReportDir };
@@ -497,9 +586,22 @@ function collectNycCoverage(coreDir, nycReportDir) {
 //     sanity checks (`harness_checks`).
 // There is no results.json or coverage-report.json (those never existed;
 // an earlier version of this function guessed those paths and always
-// fell through to "n/a"). native/wasm per-engine pass % stay n/a until
-// the native (P1-07) and WASM (P4-01/P4-02) adapters exist to replay the
-// corpus against something other than the reference itself.
+// fell through to "n/a").
+//
+// native/wasm per-engine pass %: P1-07 (native harness) and P4-01/P4-02
+// (WASM binding) have since landed, so "no adapter exists yet" is stale
+// the same way engine_modes.rust was (see collectCoreTestsRustMode above).
+// `native` now checks for the harness (concerto-core/tests/oracle/main.rs)
+// and, when the harness has actually been run, reads the same
+// <rustRoot>/target/oracle-report.json that migration/gate/run.mjs's
+// stepOracleNative reads (not committed; produced by `cargo test -p
+// accordproject-concerto-core --test oracle`, or the gate). `wasm` checks
+// for the built binding (concerto-wasm/pkg/concerto-engine.cjs); there is
+// no equivalent stable, well-known report path for a corpus replay through
+// it (replay.js writes wherever the gate's own timestamped report dir
+// says to), so it stays "n/a" even once the binding is built, but with an
+// accurate reason instead of the pre-P4-01/P4-02 assumption that it does
+// not exist.
 // ---------------------------------------------------------------------------
 
 function collectOracle(migrationDir, rustRoot) {
@@ -507,20 +609,49 @@ function collectOracle(migrationDir, rustRoot) {
   const replayReferenceFile = path.join(oracleDir, 'results', 'replay-reference.json');
   const coverageFile = path.join(oracleDir, 'results', 'coverage.json');
   const selfCheckFile = path.join(oracleDir, 'results', 'self-check.json');
+  const nativeHarnessFile = path.join(rustRoot, 'concerto-core', 'tests', 'oracle', 'main.rs');
+  const nativeReportFile = path.join(rustRoot, 'target', 'oracle-report.json');
+  const wasmEngineCjs = path.join(rustRoot, 'concerto-wasm', 'pkg', 'concerto-engine.cjs');
 
   const notStarted = !fs.existsSync(oracleDir)
     ? 'migration/oracle/ does not exist yet (P0-05 not started)'
     : 'migration/oracle/results/ has not been produced yet (P0-05 in progress)';
 
+  const nativeHarnessExists = fs.existsSync(nativeHarnessFile);
+
   const out = {
     reference: na(notStarted),
-    native: na('no native oracle adapter exists yet (P1-07 has not landed)'),
-    wasm: na(fs.existsSync(path.join(rustRoot, 'concerto-wasm'))
-      ? 'no WASM oracle adapter exists yet (P4-01/P4-02 have not landed)'
-      : 'no WASM binding crate exists yet (P4-01 has not landed)'),
+    native: nativeHarnessExists
+      ? na(`${nativeReportFile} not found (P1-07's native oracle harness exists at ${nativeHarnessFile}; run \`cargo test -p accordproject-concerto-core --test oracle\`, or the gate, to produce a report)`)
+      : na('no native oracle adapter exists yet (P1-07 has not landed)'),
+    wasm: na(fs.existsSync(wasmEngineCjs)
+      ? `${wasmEngineCjs} is built (P4-01/P4-02 have landed), but this collector has no stable corpus-replay report to read for it; see migration/gate/run.mjs's stepOracleWasm for a real replay`
+      : fs.existsSync(path.join(rustRoot, 'concerto-wasm'))
+        ? `${wasmEngineCjs} does not exist (run concerto-wasm/build.sh first)`
+        : 'no WASM binding crate exists yet (P4-01 has not landed)'),
     corpus_coverage_of_reference: na(notStarted),
     mutants: na(notStarted),
   };
+
+  if (nativeHarnessExists && fs.existsSync(nativeReportFile)) {
+    try {
+      const r = JSON.parse(fs.readFileSync(nativeReportFile, 'utf8'));
+      const total = r.total_fixtures || 0;
+      out.native = {
+        available: true,
+        generated_at: fs.statSync(nativeReportFile).mtime.toISOString(),
+        total_fixtures: r.total_fixtures,
+        pass: r.pass,
+        fail: r.fail,
+        unsupported: r.unsupported,
+        harness_error: r.harness_error,
+        regressions: r.regressions,
+        pass_pct: total > 0 ? round2((r.pass / total) * 100) : null,
+      };
+    } catch (e) {
+      out.native = na(`failed to parse ${nativeReportFile}: ${e.message}`);
+    }
+  }
 
   if (fs.existsSync(replayReferenceFile)) {
     try {
@@ -762,6 +893,38 @@ function collectConformance(repoPath, logDir, fast) {
 }
 
 // ---------------------------------------------------------------------------
+// §0.6 cargo-mutants catch rate on the validation modules. The 420-mutant
+// sweep itself is task P5-06's own long-running job, not something this
+// script runs; P5-06 (accordproject/concerto-rust#183) has landed, so this
+// reads its recorded result from concerto-core/MUTANTS.md's summary table.
+// ---------------------------------------------------------------------------
+
+function collectMutants(rustRoot) {
+  const mutantsFile = path.join(rustRoot, 'concerto-core', 'MUTANTS.md');
+  if (!fs.existsSync(mutantsFile)) {
+    return na(`${mutantsFile} does not exist — cargo-mutants (P5-06) has not landed`);
+  }
+  const text = fs.readFileSync(mutantsFile, 'utf8');
+  const m = text.match(
+    /\|\s*\*\*Total\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*([\d.]+)%\*\*\s*\|/
+  );
+  if (!m) return na(`could not parse the summary table in ${mutantsFile}`);
+  const [, total, caught, missed, unviable, catchRatePct] = m;
+  const floorPct = 85;
+  return {
+    available: true,
+    source: 'concerto-core/MUTANTS.md (accordproject/concerto-rust#183, P5-06)',
+    total: Number(total),
+    caught: Number(caught),
+    missed: Number(missed),
+    unviable: Number(unviable),
+    catch_rate_pct: Number(catchRatePct),
+    floor_pct: floorPct,
+    meets_floor: Number(catchRatePct) >= floorPct,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Worktree management for --at <sha>
 // ---------------------------------------------------------------------------
 
@@ -832,7 +995,7 @@ async function main() {
     const ledger = collectLedger(migrationDir);
 
     const coreLogDir = path.join(RUN_LOG_DIR, 'concerto-core');
-    const coreTests = collectCoreTests(dataRoot, migrationDir, coreLogDir, tagInfo);
+    const coreTests = collectCoreTests(dataRoot, migrationDir, coreLogDir, tagInfo, RUST_ROOT);
     const nycCoverage = collectNycCoverage(coreDir, coreTests.nycReportDir);
 
     const oracle = collectOracle(migrationDir, RUST_ROOT);
@@ -848,10 +1011,7 @@ async function main() {
     const conformanceLogDir = path.join(RUN_LOG_DIR, 'concerto-conformance');
     const conformance = collectConformance(CONFORMANCE_ROOT, conformanceLogDir, opts.fast);
 
-    const mutants = na(
-      'cargo-mutants has not been run in this environment; the ledger/judge self-check is task P0-05, ' +
-        'and the ≥85% catch-rate gate is task P5-06'
-    );
+    const mutants = collectMutants(RUST_ROOT);
 
     const repos = {
       concerto: { path: CONCERTO_ROOT, commit: tryGitSha(CONCERTO_ROOT), commit_used: concertoShaUsed },

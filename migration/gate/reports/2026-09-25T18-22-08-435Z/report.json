@@ -473,7 +473,7 @@
       }
     },
     "core_suite_rust": {
-      "name": "concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run — status.mjs's own engine_modes.rust is stale)",
+      "name": "concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run)",
       "ok": false,
       "exit": 1,
       "stats": {
