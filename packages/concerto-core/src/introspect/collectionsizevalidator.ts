@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-import { NullUtil } from '@accordproject/concerto-util';
 import Validator from './validator';
 
 // Types needed for TypeScript generation.
@@ -21,24 +20,22 @@ import type { ValidatedElement } from './validator';
 import type { ICollectionSizeValidator } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
 
-const { isNull } = NullUtil;
-
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// Its bindings are typed `never` so that a view leaves the member's inferred
-// return type, and so the .d.ts, exactly as the TS body makes it.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
+// `never` so that a view leaves the member's inferred return type, and so
+// the .d.ts, exactly as the TS body used to make it.
 //
 // dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
 // with no .d.ts, since it is not public API (tsconfig.build.internal.json;
-// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
-// must never see a specifier it would resolve: `loadEngine` takes a
-// non-literal one (esbuild, rollup and browserify leave it alone) and never
-// names the bare `require` (esbuild's ESM output would add its `__require`
-// shim, which webpack reports as a critical dependency), and webpack folds
-// the `typeof __webpack_require__` test and keeps only the dead-in-Node
-// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
-// bundles exactly as before (PORTING.md 1.5).
+// OD-11). A bundler must never see a specifier it would resolve: `loadEngine`
+// takes a non-literal one (esbuild, rollup and browserify leave it alone) and
+// never names the bare `require` (esbuild's ESM output would add its
+// `__require` shim, which webpack reports as a critical dependency), and
+// webpack folds the `typeof __webpack_require__` test and keeps only the
+// dead-in-Node `__non_webpack_require__` branch, so it neither resolves nor
+// warns.
 //
-// rust mode through the public ESM entry points (P4-11a, PORTING.md 1.5):
+// Loading through the public ESM entry points (P4-11a, PORTING.md 1.5):
 // - Node ESM (dist/esm/index.mjs) works unaided. scripts/build-esm.js's Node
 //   banner sets a `globalThis.module` whose `require` resolves the engine
 //   specifiers. It does not rely on the relative specifier above matching
@@ -54,12 +51,9 @@ const { isNull } = NullUtil;
 //   host provides, and throws if there is none.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
-/* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
-/* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * A Validator to enforce that a collection (array or map) has a size within a specified range.
@@ -82,25 +76,7 @@ class CollectionSizeValidator extends Validator {
      */
     constructor(field: ValidatedElement, validator: ICollectionSizeValidator) {
         super(field, validator);
-
-        /* istanbul ignore if */
-        if (rust) {
-            Object.assign(this, rust.collectionSizeValidatorNew(this, validator));
-            return;
-        }
-
-        this.minSize = validator.minSize ?? null;
-        this.maxSize = validator.maxSize ?? null;
-
-        if (isNull(this.minSize) && isNull(this.maxSize)) {
-            this.reportError(field.getName(), 'Invalid collection size, minSize and/or maxSize must be specified.');
-        } else if ((this.minSize ?? 0) < 0 || (this.maxSize ?? 0) < 0) {
-            this.reportError(field.getName(), 'minSize and/or maxSize must be positive integers.');
-        } else if (isNull(this.minSize) || isNull(this.maxSize)) {
-            // this is fine and means that we don't need to check whether minSize > maxSize
-        } else if (this.minSize > this.maxSize) {
-            this.reportError(field.getName(), 'minSize must be less than or equal to maxSize.');
-        }
+        Object.assign(this, rust.collectionSizeValidatorNew(this, validator));
     }
 
     /**
@@ -111,17 +87,7 @@ class CollectionSizeValidator extends Validator {
      * @private
      */
     validate(identifier: string | null, value: number): void {
-        /* istanbul ignore if */
-        if (rust) {
-            rust.collectionSizeValidatorValidate(this, identifier, value);
-            return;
-        }
-        if(!isNull(this.minSize) && value < this.minSize) {
-            this.reportError(identifier, `Collection must contain at least ${this.minSize} elements.`);
-        }
-        if(!isNull(this.maxSize) && value > this.maxSize) {
-            this.reportError(identifier, `Collection must contain no more than ${this.maxSize} elements.`);
-        }
+        rust.collectionSizeValidatorValidate(this, identifier, value);
     }
 
     /**
@@ -149,35 +115,7 @@ class CollectionSizeValidator extends Validator {
      * validator, false otherwise.
      */
     compatibleWith(other: Validator | null): boolean {
-        /* istanbul ignore if */
-        if (rust) {
-            return rust.collectionSizeValidatorCompatibleWith(this, other, CollectionSizeValidator);
-        }
-        if (!(other instanceof CollectionSizeValidator)) {
-            return false;
-        }
-
-        const thisMinSize = this.getMinSize();
-        const otherMinSize = other.getMinSize();
-        if (isNull(thisMinSize) && !isNull(otherMinSize)) {
-            return false;
-        } else if (!isNull(thisMinSize) && !isNull(otherMinSize)) {
-            if (thisMinSize < otherMinSize) {
-                return false;
-            }
-        }
-
-        const thisMaxSize = this.getMaxSize();
-        const otherMaxSize = other.getMaxSize();
-        if (isNull(thisMaxSize) && !isNull(otherMaxSize)) {
-            return false;
-        } else if (!isNull(thisMaxSize) && !isNull(otherMaxSize)) {
-            if (thisMaxSize > otherMaxSize) {
-                return false;
-            }
-        }
-
-        return true;
+        return rust.collectionSizeValidatorCompatibleWith(this, other, CollectionSizeValidator);
     }
 }
 

@@ -12,11 +12,7 @@
  * limitations under the License.
  */
 
-import ModelUtil from '../modelutil';
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-
 import Decorated from './decorated';
-import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -25,17 +21,15 @@ import type MapDeclaration from './mapdeclaration';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// See property.ts's own copy of this comment for the bundler/webpack
-// reasoning this loader relies on.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See property.ts's own
+// copy of this comment for the bundler/webpack reasoning this loader relies
+// on.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
-/* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
-/* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * MapKeyType defines a Key type of an MapDeclaration.
@@ -72,14 +66,7 @@ class MapKeyType extends Decorated {
      */
     process() {
         super.process();
-
-        /* istanbul ignore if */
-        if (rust) {
-            this.type = rust.mapKeyTypeProcess(this);
-            return;
-        }
-
-        this.processType(this.ast);
+        this.type = rust.mapKeyTypeProcess(this);
     }
 
     /**
@@ -89,41 +76,7 @@ class MapKeyType extends Decorated {
      * @protected
      */
     validate() {
-        /* istanbul ignore if */
-        if (rust) {
-            rust.mapKeyTypeValidate(this);
-            return;
-        }
-
-        if (!ModelUtil.isPrimitiveType(this.type)) {
-            const decl = this.modelFile.getType(this.ast.type.name);
-            // All but StringScalar & DateTimeScalar are unsupported.
-            if  (!ModelUtil.isValidMapKeyScalar(decl)) {
-                throw new IllegalModelException(
-                    `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}, for MapDeclaration ${this.parent.name}`
-                );
-            }
-        }
-    }
-
-    /**
-     * Sets the Type name for the Map Key
-     *
-     * @param {Object} ast - The AST created by the parser
-     * @private
-     */
-    processType(ast: AstNode) {
-        switch(ast.$class) {
-        case `${MetaModelNamespace}.DateTimeMapKeyType`:
-            this.type = 'DateTime';
-            break;
-        case `${MetaModelNamespace}.StringMapKeyType`:
-            this.type = 'String';
-            break;
-        case `${MetaModelNamespace}.ObjectMapKeyType`:
-            this.type = String(this.ast.type.name);
-            break;
-        }
+        rust.mapKeyTypeValidate(this);
     }
 
     /**
