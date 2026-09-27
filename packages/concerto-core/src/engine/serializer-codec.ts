@@ -252,9 +252,11 @@ let modelClassesCache: any;
 /**
  * The public model classes `materializeTyped` constructs, required once on
  * first use and cached (P5-06: it runs once per decoded instance).
- * Required late, not at module load: this file loads in ts mode too
- * (transitively, were it ever imported there), and these are the public
- * model classes, not engine-only code.
+ * Required late, not at module load: these are the public model classes,
+ * not engine-only code, and a late require avoids a load-order cycle with
+ * them (P5-02 removed the CONCERTO_ENGINE=ts|rust flag: the whole directory
+ * is rust-mode code now, but the public model classes it requires here are
+ * not).
  * @return {object} `{Resource, ValidatedResource, Relationship, ResourceValidator}`
  */
 function modelClasses(): any {
