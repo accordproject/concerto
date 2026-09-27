@@ -63,7 +63,7 @@ metamodel class but ends in a property short name, for example
   class-not-message rule.
 
 This breaks BC-25 (errors stay eager; `migration/BREAKING-CHANGES-PLAN.md`). The check-mode
-shard confirms it: 21 `LAZY-CHECK under-rejection` lines (`check/lazy-check-stderr.log`),
+shard confirms it: 21 `LAZY-CHECK under-rejection` lines (`check/lazy-check-stderr.txt`),
 every one `Unrecognised model element`, and with the check on, the shard's 578 divergences
 are identical case for case to the pre-lazy shard 1001 (the check builds the TS views at
 construction, restoring eager errors). The fix is a Rust under-rejection fix (the #218
