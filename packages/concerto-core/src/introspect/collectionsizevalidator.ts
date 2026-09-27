@@ -49,11 +49,34 @@ import type { ICollectionSizeValidator } from '@accordproject/concerto-metamodel
 //   load dist/esm-browser/engine/*.mjs by itself. scripts/browser-module-shim.js
 //   reads `module.require` from the `globalThis.module` that the bundler or
 //   host provides, and throws if there is none.
+//
+// `module.require` is checked before `globalThis.module.require` so that
+// real Node CJS always resolves through its own require, exactly as it did
+// before this loader gained the ESM/vite-node fallbacks below. Checking
+// `globalThis.module` first would break that in the dual-package case: the
+// Node-ESM banner (scripts/build-esm.js) sets `globalThis.module` whenever
+// it finds it undefined, so a process that imports dist/esm/index.mjs and
+// later requires dist/index.js would have the CJS build's own loadEngine
+// see that global and load the ESM engine build instead of its own
+// dist/engine/index.js.
+//
+// A module context that gives every loaded file its own `module` with no
+// `.require` (Vitest's vite-node, and anything else that behaves the same
+// way) falls through this first check, so `globalThis.module.require`
+// still reaches a loader a Node-ESM banner installed, regardless of the
+// local shadow (this is a plain property read, not a bound alias of
+// `require`, so it is as invisible to webpack as `module.require` already
+// was, per the banner comment above). `createRequire(__filename)` is the
+// final fallback, for a context with neither: it resolves the same
+// relative specifier the source file itself sees, unbundled, though it
+// cannot find a directory that (like dist/esm/engine/) only has a `.mjs`
+// entry.
+import { createRequire } from 'module';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier);
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 

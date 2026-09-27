@@ -34,6 +34,7 @@ import Field from '../introspect/field';
 // delegates to the engine, one field at a time. See introspect/property.ts's
 // identical preamble for why `loadEngine` takes a non-literal specifier and
 // why rust mode only works through the CommonJS dist/ today.
+import { createRequire } from 'module';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 // P5-06: memoised per specifier, so a call site on a per-element or
@@ -45,7 +46,7 @@ const engineModules: { [specifier: string]: any } = {};
 const loadEngine = (specifier: string) =>
     engineModules[specifier] ??
     (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engine').rust;
 
