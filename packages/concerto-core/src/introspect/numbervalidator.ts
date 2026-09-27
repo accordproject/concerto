@@ -54,11 +54,25 @@ import type ScalarDeclaration from './scalardeclaration';
 //   load dist/esm-browser/engine/*.mjs by itself. scripts/browser-module-shim.js
 //   reads `module.require` from the `globalThis.module` that the bundler or
 //   host provides, and throws if there is none.
+//
+// A module context that gives every loaded file its own `module` (Vitest's
+// vite-node, and anything else that behaves the same way) shadows the
+// Node-ESM banner's `globalThis.module` with a local one that has no
+// `.require`, so `module.require` above would throw even though the banner
+// already installed a working loader. Reading `globalThis.module.require`
+// explicitly first reaches that installed loader regardless of the local
+// shadow (this is a plain property read, not a bound alias of `require`,
+// so it is as invisible to webpack as `module.require` already was, per
+// the banner comment above). `createRequire(__filename)` is the final
+// fallback, for a context with neither: it resolves the same relative
+// specifier the source file itself sees, unbundled, though it cannot find
+// a directory that (like dist/esm/engine/) only has a `.mjs` entry.
+import { createRequire } from 'module';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : createRequire(__filename)(specifier);
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 

@@ -42,6 +42,7 @@ import type ModelFile from './modelfile';
 // not supported yet and is deferred to a follow-up: there `module.require`
 // does not exist, and the relative specifier does not match the flattened
 // chunks' location.
+import { createRequire } from 'module';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 // P5-10a: memoised per specifier (see introspect/property.ts).
@@ -50,7 +51,7 @@ const engineModules: { [specifier: string]: any } = {};
 const loadEngine = (specifier: string) =>
     engineModules[specifier] ??
     (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : createRequire(__filename)(specifier));
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 

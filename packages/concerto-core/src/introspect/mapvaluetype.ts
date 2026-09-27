@@ -25,11 +25,12 @@ import type { AstNode } from './decorated';
 // CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See property.ts's own
 // copy of this comment for the bundler/webpack reasoning this loader relies
 // on.
+import { createRequire } from 'module';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : createRequire(__filename)(specifier);
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 

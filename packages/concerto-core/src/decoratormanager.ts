@@ -29,6 +29,7 @@ import type ModelFile from './introspect/modelfile';
 // the .d.ts, exactly as the TS body used to make it.
 // See src/modelutil.ts for why this is loaded this way (dist/, bundler and
 // CJS/ESM notes); the same considerations apply here unchanged.
+import { createRequire } from 'module';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 // P5-06: memoised per specifier, so a call site on a per-element or
@@ -40,7 +41,7 @@ const engineModules: { [specifier: string]: any } = {};
 const loadEngine = (specifier: string) =>
     engineModules[specifier] ??
     (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : createRequire(__filename)(specifier));
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('./engine').rust;
 // The rust-mode view functions (src/engine/views.ts), typed `never` for the
 // same reason as `rust` above (PORTING.md 1.5, "Why never"): the return types
