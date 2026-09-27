@@ -337,6 +337,17 @@ function stepOracleNative(opts, reportDir) {
   if (!fs.existsSync(opts.rustRoot)) {
     return { name: 'oracle native (cargo test --test oracle)', ok: false, na: `${opts.rustRoot} does not exist` };
   }
+
+  // The harness writes its fixture-level report to <rustRoot>/target/
+  // oracle-report.json (concerto-core/tests/oracle/main.rs, report.rs)
+  // *before* calling assert_no_regressions, so a run that crashes, times
+  // out or is corpus-skipped after that point can still leave a report on
+  // disk. Remove any report left over from an earlier invocation before
+  // running cargo, so such a run is never mistaken for a pass by picking
+  // up stale data below.
+  const fixtureReportPath = path.join(opts.rustRoot, 'target', 'oracle-report.json');
+  fs.rmSync(fixtureReportPath, { force: true });
+
   const res = run(
     'cargo',
     ['test', '--release', '-p', 'accordproject-concerto-core', '--test', 'oracle'],
@@ -346,12 +357,10 @@ function stepOracleNative(opts, reportDir) {
 
   // `passed`/`failed` above are #[test] function counts (currently 32: one
   // harness self-test suite), not the fixture-level tally the oracle
-  // replays internally in `replays_the_oracle_corpus`. The harness writes
-  // that as its own JSON report to <rustRoot>/target/oracle-report.json
-  // (concerto-core/tests/oracle/main.rs, report.rs) — read it so the gate
-  // report carries the real fixture split (total/pass/fail/unsupported/
+  // replays internally in `replays_the_oracle_corpus`. Read the report
+  // this run just (re)produced (see the rmSync above) so the gate report
+  // carries the real fixture split (total/pass/fail/unsupported/
   // harness_error, plus unowned and per-owner counts), not just "32/32".
-  const fixtureReportPath = path.join(opts.rustRoot, 'target', 'oracle-report.json');
   let fixtures = null;
   if (fs.existsSync(fixtureReportPath)) {
     try {
@@ -372,9 +381,23 @@ function stepOracleNative(opts, reportDir) {
     }
   }
 
+  // This is the one place that decides pass/fail for the native leg:
+  // buildCriteriaSummary's §0.3b reads this `ok` back rather than
+  // re-deriving it from `fixtures`, so the two can never disagree (see the
+  // §0 criteria summary comment below). "Oracle corpus 100% pass" means
+  // every fixture actually passed — fail, unsupported and harness_error
+  // must all be zero, on top of cargo's own exit status and (thanks to the
+  // rmSync above) a report this run actually produced, not a stale one.
+  // When cargo failed outright (crash/timeout) there may be no fresh
+  // report at all; that must not read as a pass either.
+  const fixturesOk = fixtures && !fixtures.error
+    ? fixtures.fail === 0 && fixtures.unsupported === 0 && fixtures.harness_error === 0 && fixtures.regressions === 0
+    : null;
+  const ok = fixturesOk === null ? res.ok : res.ok && fixturesOk;
+
   return {
     name: 'oracle native (cargo test --test oracle, §0.3 native leg)',
-    ok: res.ok,
+    ok,
     passed: m ? Number(m[2]) : null,
     failed: m ? Number(m[3]) : null,
     fixtures,
@@ -697,7 +720,12 @@ function buildCriteriaSummary(steps) {
   items.push({
     id: '§0.3b',
     label: 'Oracle corpus 100% pass, native (cargo test --test oracle)',
-    ok: nativeFx ? nativeFx.fail === 0 && nativeFx.harness_error === 0 && nativeFx.regressions === 0 : (steps.oracle_native ? steps.oracle_native.ok : null),
+    // Read back from the step rather than re-derived here (see the §0
+    // criteria summary comment above): stepOracleNative's own `ok` already
+    // accounts for the fixture-level fail/unsupported/harness_error/
+    // regressions counts *and* cargo's exit status, so this can never
+    // disagree with it.
+    ok: steps.oracle_native ? steps.oracle_native.ok : null,
     detail: nativeFx
       ? `${nativeFx.pass}/${nativeFx.total_fixtures} pass, ${nativeFx.fail} fail, ${nativeFx.unsupported} unsupported, ${nativeFx.harness_error} harness error, ${nativeFx.unowned} unowned, ${nativeFx.regressions} regressions vs baseline.tsv`
       : (steps.oracle_native ? `harness self-test: ${steps.oracle_native.passed}/${(steps.oracle_native.passed ?? 0) + (steps.oracle_native.failed ?? 0)} (no fixture-level oracle-report.json found)` : 'not available'),

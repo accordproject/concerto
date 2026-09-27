@@ -586,9 +586,22 @@ function collectNycCoverage(coreDir, nycReportDir) {
 //     sanity checks (`harness_checks`).
 // There is no results.json or coverage-report.json (those never existed;
 // an earlier version of this function guessed those paths and always
-// fell through to "n/a"). native/wasm per-engine pass % stay n/a until
-// the native (P1-07) and WASM (P4-01/P4-02) adapters exist to replay the
-// corpus against something other than the reference itself.
+// fell through to "n/a").
+//
+// native/wasm per-engine pass %: P1-07 (native harness) and P4-01/P4-02
+// (WASM binding) have since landed, so "no adapter exists yet" is stale
+// the same way engine_modes.rust was (see collectCoreTestsRustMode above).
+// `native` now checks for the harness (concerto-core/tests/oracle/main.rs)
+// and, when the harness has actually been run, reads the same
+// <rustRoot>/target/oracle-report.json that migration/gate/run.mjs's
+// stepOracleNative reads (not committed; produced by `cargo test -p
+// accordproject-concerto-core --test oracle`, or the gate). `wasm` checks
+// for the built binding (concerto-wasm/pkg/concerto-engine.cjs); there is
+// no equivalent stable, well-known report path for a corpus replay through
+// it (replay.js writes wherever the gate's own timestamped report dir
+// says to), so it stays "n/a" even once the binding is built, but with an
+// accurate reason instead of the pre-P4-01/P4-02 assumption that it does
+// not exist.
 // ---------------------------------------------------------------------------
 
 function collectOracle(migrationDir, rustRoot) {
@@ -596,20 +609,49 @@ function collectOracle(migrationDir, rustRoot) {
   const replayReferenceFile = path.join(oracleDir, 'results', 'replay-reference.json');
   const coverageFile = path.join(oracleDir, 'results', 'coverage.json');
   const selfCheckFile = path.join(oracleDir, 'results', 'self-check.json');
+  const nativeHarnessFile = path.join(rustRoot, 'concerto-core', 'tests', 'oracle', 'main.rs');
+  const nativeReportFile = path.join(rustRoot, 'target', 'oracle-report.json');
+  const wasmEngineCjs = path.join(rustRoot, 'concerto-wasm', 'pkg', 'concerto-engine.cjs');
 
   const notStarted = !fs.existsSync(oracleDir)
     ? 'migration/oracle/ does not exist yet (P0-05 not started)'
     : 'migration/oracle/results/ has not been produced yet (P0-05 in progress)';
 
+  const nativeHarnessExists = fs.existsSync(nativeHarnessFile);
+
   const out = {
     reference: na(notStarted),
-    native: na('no native oracle adapter exists yet (P1-07 has not landed)'),
-    wasm: na(fs.existsSync(path.join(rustRoot, 'concerto-wasm'))
-      ? 'no WASM oracle adapter exists yet (P4-01/P4-02 have not landed)'
-      : 'no WASM binding crate exists yet (P4-01 has not landed)'),
+    native: nativeHarnessExists
+      ? na(`${nativeReportFile} not found (P1-07's native oracle harness exists at ${nativeHarnessFile}; run \`cargo test -p accordproject-concerto-core --test oracle\`, or the gate, to produce a report)`)
+      : na('no native oracle adapter exists yet (P1-07 has not landed)'),
+    wasm: na(fs.existsSync(wasmEngineCjs)
+      ? `${wasmEngineCjs} is built (P4-01/P4-02 have landed), but this collector has no stable corpus-replay report to read for it; see migration/gate/run.mjs's stepOracleWasm for a real replay`
+      : fs.existsSync(path.join(rustRoot, 'concerto-wasm'))
+        ? `${wasmEngineCjs} does not exist (run concerto-wasm/build.sh first)`
+        : 'no WASM binding crate exists yet (P4-01 has not landed)'),
     corpus_coverage_of_reference: na(notStarted),
     mutants: na(notStarted),
   };
+
+  if (nativeHarnessExists && fs.existsSync(nativeReportFile)) {
+    try {
+      const r = JSON.parse(fs.readFileSync(nativeReportFile, 'utf8'));
+      const total = r.total_fixtures || 0;
+      out.native = {
+        available: true,
+        generated_at: fs.statSync(nativeReportFile).mtime.toISOString(),
+        total_fixtures: r.total_fixtures,
+        pass: r.pass,
+        fail: r.fail,
+        unsupported: r.unsupported,
+        harness_error: r.harness_error,
+        regressions: r.regressions,
+        pass_pct: total > 0 ? round2((r.pass / total) * 100) : null,
+      };
+    } catch (e) {
+      out.native = na(`failed to parse ${nativeReportFile}: ${e.message}`);
+    }
+  }
 
   if (fs.existsSync(replayReferenceFile)) {
     try {
