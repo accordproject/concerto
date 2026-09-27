@@ -22,7 +22,7 @@
  *
  *   node bin/build-supplement.js --raw <dir> [--raw <dir> ...] --blobs <staging blob dir>
  *       --pin <oracle-corpus-*.tgz> --pin-hash <sha256>
- *       [--fixtures <fixtures dir>] [--base <commit>] [--summary <SUPPLEMENT.md>]
+ *       [--fixtures <fixtures dir>] [--base <commit>] [--summary <migration/oracle/SUPPLEMENT.md>]
  *
  * 1. Checks the pin first: every file the pinned tarball holds under
  *    migration/oracle/fixtures and migration/oracle/cto-cache is present

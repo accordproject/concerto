@@ -13,7 +13,11 @@
 # packages/concerto-core/src is the frozen reference's own source (v5.0.0),
 # as README.md "Corpus supplement" describes.
 #
-# Raw records, staging blobs and logs stay in <work dir>.
+# Raw records, staging blobs and logs stay in <work dir>. The summary is
+# written straight to migration/oracle/SUPPLEMENT.md in the repo, next to the
+# supplement tooling it documents (not the repo root: the licence checker
+# excludes migration/ as a whole, and a bare SUPPLEMENT.md at the root has no
+# licence header, see accordproject/concerto-rust#281).
 set -euo pipefail
 
 WORK="${1:?usage: record-supplement.sh <work dir> <pin tgz> <pin hash>}"
@@ -41,4 +45,4 @@ tail -3 "$WORK/logs/supplement.log"
 
 node "$ORACLE_DIR/bin/build-supplement.js" --raw "$WORK/raw/supplement" --blobs "$WORK/blobs" \
   --pin "$PIN" --pin-hash "$PIN_HASH" --base "$(git -C "$REPO_DIR" rev-parse --short=9 HEAD)" \
-  --summary "$WORK/SUPPLEMENT.md"
+  --summary "$ORACLE_DIR/SUPPLEMENT.md"
