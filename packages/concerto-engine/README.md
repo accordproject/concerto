@@ -34,28 +34,11 @@ concerto-core loads the engine when it is imported and declares this package
 as a dependency, so concerto does not build or test without it. CI provides
 it the same way: `.github/actions/concerto-engine` builds concerto-wasm from a
 pinned concerto-rust commit into a sibling checkout
-(accordproject/concerto-rust#259).
+(accordproject/concerto-rust#259). This package itself is **not published**
+(decision D9, accordproject/concerto-rust#28/#29); the Rust build is not
+stable enough to release yet (accordproject/concerto-rust#259, #278).
 
-## Publishing
-
-This package is published with the other concerto packages, at the same
-version, and concerto-core depends on that version (`scripts/bump_version.js`
-keeps them in step). This supersedes decision D9 (not published) for the
-release (accordproject/concerto-rust#259, #28).
-
-The published package carries the built engine rather than the link. On
-`npm pack` / `npm publish`, `prepack` runs `node scripts/pack.js stage`,
-which copies the engine's runtime files into `pkg/` and points `index.js` and
-`index.mjs` at them; `postpack` restores the link and removes `pkg/`:
-
-```
-pkg/concerto-engine.cjs      `require` (index.js)
-pkg/concerto-engine.mjs      `import`  (index.mjs)
-pkg/web/concerto_wasm.js     the wasm-bindgen glue concerto-engine.mjs imports
-pkg/web/package.json
-```
-
-The engine is read from the sibling checkout above, or from
-`CONCERTO_ENGINE_PKG` when that is set; packing fails when it is not built.
-The release workflow (`.github/workflows/publish.yml`) builds it first with
-`.github/actions/concerto-engine`.
+Because concerto-core depends on this private workspace package, D9 must be
+resolved (this package published, or the dependency otherwise removed) before
+concerto-core itself can be released — a published package cannot depend on a
+private one.

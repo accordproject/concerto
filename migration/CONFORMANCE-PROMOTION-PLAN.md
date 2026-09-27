@@ -17,7 +17,7 @@ other than this file was changed. concerto-conformance is untouched.
 | Record | Where | Snapshot used |
 |---|---|---|
 | Oracle corpus | `migration/oracle/fixtures/` (pinned `oracle-corpus-p107-06aa375` plus `supplement/` from `oracle-corpus-supplement-d842c0ab7`) | 16,242 fixtures: unit 4,082, data 10,231, conformance 815, gaps 658, lifted 299, supplement 157 |
-| Corpus manifests | `fixtures/manifest.json`, `fixtures/supplement/manifest.json`, `SUPPLEMENT.md` | as extracted |
+| Corpus manifests | `fixtures/manifest.json`, `fixtures/supplement/manifest.json`, `migration/oracle/SUPPLEMENT.md` | as extracted |
 | Owner report | `migration/gate/reports/2026-09-27T04-00-19-777Z/report.md` (concerto) | 13,921 pass, 0 fail, 2,321 unsupported: stays-ts 2,121, P2-08+P4-08 172, P3-04+P4-08 17, P2-03+P4-05 11 |
 | Seam ledger | `migration/ledger/SEAM_LEDGER.tsv` | concerto `c4793e9f6` |
 | P5-05 fuzz | `migration/fuzz/TRIAGE.md`, `migration/fuzz/results/stage2/triage-clusters.json` (1,086 clusters) | concerto `c4793e9f6` |

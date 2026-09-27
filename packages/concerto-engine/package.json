@@ -1,7 +1,8 @@
 {
   "name": "@accordproject/concerto-engine",
-  "version": "5.0.0",
-  "description": "The concerto-core Rust engine, compiled to WASM by concerto-rust's concerto-wasm. In this repository it links a concerto-rust checkout next to this one; the published package carries the built engine.",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local workspace link to the concerto-core Rust engine (WASM) built in a sibling concerto-rust checkout. Not published.",
   "homepage": "https://github.com/accordproject/concerto-rust",
   "engines": {
     "node": ">=18",
@@ -11,15 +12,6 @@
   "exports": {
     "import": "./index.mjs",
     "require": "./index.js"
-  },
-  "files": [
-    "index.js",
-    "index.mjs",
-    "pkg/"
-  ],
-  "scripts": {
-    "prepack": "node scripts/pack.js stage",
-    "postpack": "node scripts/pack.js unstage"
   },
   "repository": {
     "type": "git",
