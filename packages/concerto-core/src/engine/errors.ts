@@ -15,8 +15,10 @@
 /* istanbul ignore file */
 // Maps the engine's error payload to the TS exception class (PORTING.md 2.3;
 // P4-02). Every ErrorKind concerto-rust's error/mod.rs defines has an entry
-// here, so a ported member is never left throwing the "unknown engine error
-// kind" fallback just because it is not one of the P0-04b trial units.
+// here, so no converted member (from the original P0-04b trial units of
+// ModelUtil, NumberValidator and ScalarDeclaration through to the full
+// conversion at P5-02) is ever left throwing the "unknown engine error kind"
+// fallback.
 //
 // The payload is {kind, code, params, message, location, errorType,
 // modelFile}. `message` is the raw rendered message: each TS constructor
