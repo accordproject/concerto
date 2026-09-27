@@ -96,26 +96,26 @@ ledger, checking that each TS or HYBRID row has a reason.
 
 | | members | loc | weight | share of weight |
 |---|---|---|---|---|
-| RUST | 242 | 2139 | 2303 | 38.5% |
-| HYBRID | 84 | 2065 | 2365.5 | 39.6% |
-| TS | 224 | 1558 | 1308 | 21.9% |
-| **total** | 550 | 5762 | 5976.5 | 100% |
+| RUST | 242 | 2084 | 2224 | 37.8% |
+| HYBRID | 84 | 2052 | 2353.5 | 40.0% |
+| TS | 224 | 1558 | 1308 | 22.2% |
+| **total** | 550 | 5694 | 5885.5 | 100% |
 
-* **RUST+HYBRID weighted share (new D1 denominator): 79.2%**, HYBRID at full weight
+* **RUST+HYBRID weighted share (new D1 denominator): 78.9%**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. **Met.**
   Denominator excludes constant markers and `accept()` visitor entry points
   (54 members, weight 81) as not-logic, per the maintainer's
-  decision on open question 2 below. New total weight: 5895.5 (was 5976.5).
-* **Old figure (previous denominator, all 550 members): 78.1%.**
-* RUST only (new denominator): 39.1%.
+  decision on open question 2 below. New total weight: 5804.5 (was 5885.5).
+* **Old figure (previous denominator, all 550 members): 77.8%.**
+* RUST only (new denominator): 38.3%.
 
 By weight category:
 
 | category | members | loc | weight | RUST w | HYBRID w | TS w |
 |---|---|---|---|---|---|---|
-| glue (x0.5) | 328 | 1141 | 570.5 | 249.5 | 58.5 | 262.5 |
-| logic (x1) | 166 | 3051 | 3051 | 813 | 1230 | 1008 |
-| validation (x1.5) | 56 | 1570 | 2355 | 1240.5 | 1077 | 37.5 |
+| glue (x0.5) | 328 | 1139 | 569.5 | 249.5 | 57.5 | 262.5 |
+| logic (x1) | 166 | 3033 | 3033 | 806 | 1219 | 1008 |
+| validation (x1.5) | 56 | 1522 | 2283 | 1168.5 | 1077 | 37.5 |
 
 ## 2. By planned task
 
@@ -129,16 +129,16 @@ By weight category:
 | P2-05 | 6 | 16 | 0 |
 | P2-06 | 22 | 55.5 | 1 |
 | P2-07 | 12 | 98 | 6 |
-| P2-08 | 91 | 1700.5 | 11 |
+| P2-08 | 91 | 1668 | 11 |
 | P3-01 | 37 | 1477 | 34 |
-| P3-04 | 4 | 155.5 | 0 |
+| P3-04 | 4 | 97 | 0 |
 | P4-02 | 6 | 22.5 | 0 |
 | P4-03 | 22 | 74 | 1 |
 | P4-04 | 21 | 178.5 | 4 |
 | P4-05 | 20 | 162.5 | 7 |
 | P4-06 | 60 | 537.5 | 17 |
 | P4-07 | 72 | 382.5 | 20 |
-| P4-08 | 95 | 1856 | 11 |
+| P4-08 | 95 | 1765 | 11 |
 | P4-09 | 12 | 119 | 3 |
 | P4-10 | 41 | 1552 | 38 |
 
@@ -151,7 +151,7 @@ Columns: members; count RUST / HYBRID / TS; total weight; weight RUST / HYBRID /
 | file | n | R / H / T | weight | weight R / H / T | R+H | tasks |
 |---|---|---|---|---|---|---|
 | astmodelmanager.ts | 2 | 0 / 0 / 2 | 8.5 | 0 / 0 / 8.5 | 0.0% | - |
-| basemodelmanager.ts | 52 | 35 / 7 / 10 | 841 | 552 / 255.5 / 33.5 | 96.0% | P2-08+P4-08, P3-04+P4-08 |
+| basemodelmanager.ts | 52 | 35 / 7 / 10 | 763.5 | 486.5 / 243.5 / 33.5 | 95.6% | P2-08+P4-08, P3-04+P4-08 |
 | datetimeutil.ts | 1 | 0 / 0 / 1 | 16 | 0 / 0 / 16 | 0.0% | - |
 | dcsconverter.ts | 9 | 0 / 0 / 9 | 120 | 0 / 0 / 120 | 0.0% | - |
 | decoratormanager.ts | 14 | 9 / 3 / 2 | 122.5 | 87.5 / 31.5 / 3.5 | 97.1% | P4-09 |
@@ -184,7 +184,7 @@ Columns: members; count RUST / HYBRID / TS; total weight; weight RUST / HYBRID /
 | introspect/mapkeytype.ts | 11 | 8 / 0 / 3 | 21 | 17 / 0 / 4 | 81.0% | P2-06+P4-07 |
 | introspect/mapvaluetype.ts | 11 | 8 / 0 / 3 | 21 | 17 / 0 / 4 | 81.0% | P2-06+P4-07 |
 | introspect/metamodel.ts | 3 | 3 / 0 / 0 | 40 | 40 / 0 / 0 | 100.0% | P3-04+P4-08 |
-| introspect/modelfile.ts | 47 | 40 / 3 / 4 | 963.5 | 755.5 / 201.5 / 6.5 | 99.3% | P2-08+P4-08 |
+| introspect/modelfile.ts | 47 | 40 / 3 / 4 | 950 | 742 / 201.5 / 6.5 | 99.3% | P2-08+P4-08 |
 | introspect/numbervalidator.ts | 7 | 6 / 0 / 1 | 13.5 | 12.5 / 0 / 1 | 92.6% | P2-02+P4-04 |
 | introspect/participantdeclaration.ts | 3 | 2 / 0 / 1 | 4 | 3 / 0 / 1 | 75.0% | P2-03+P4-06 |
 | introspect/property.ts | 16 | 14 / 1 / 1 | 73 | 68.5 / 2.5 / 2 | 97.3% | P2-04+P4-07 |
@@ -216,7 +216,7 @@ Columns: members; count RUST / HYBRID / TS; total weight; weight RUST / HYBRID /
 
 ## 4. TS items (stay in TypeScript) with reasons
 
-224 members, weight 1308 (21.9%).
+224 members, weight 1308 (22.2%).
 
 ### 4a. Grouped by reason
 
@@ -491,15 +491,15 @@ Columns: members; count RUST / HYBRID / TS; total weight; weight RUST / HYBRID /
 
 ## 5. HYBRID items with reasons
 
-84 members, weight 2365.5 (39.6%).
+84 members, weight 2353.5 (40.0%).
 
 | file | class | member | weight | what stays in JS |
 |---|---|---|---|---|
-| basemodelmanager.ts | BaseModelManager | constructor | 29 | creates the Rust ModelManager handle; also builds the TS Factory/Serializer, keeps the JS processFile callback and the options object (options.regExp, decoratorValidation) |
+| basemodelmanager.ts | BaseModelManager | constructor | 28 | creates the Rust ModelManager handle; also builds the TS Factory/Serializer, keeps the JS processFile callback and the options object (options.regExp, decoratorValidation) |
 | basemodelmanager.ts | BaseModelManager | validateModelFile | 13.5 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
 | basemodelmanager.ts | BaseModelManager | addModel | 12 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
 | basemodelmanager.ts | BaseModelManager | updateModelFile | 34 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
-| basemodelmanager.ts | BaseModelManager | addModelFiles | 113 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
+| basemodelmanager.ts | BaseModelManager | addModelFiles | 102 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
 | basemodelmanager.ts | BaseModelManager | updateExternalModels | 37 | async download through FileDownloader (JS I/O, stubbed by tests) stays in TS; the add/update/validate/rollback of the downloaded ASTs runs in Rust |
 | basemodelmanager.ts | BaseModelManager | filter | 17 | takes a JS predicate callback over Declaration views; Rust does the AST copy and import pruning |
 | decoratormanager.ts | DecoratorManager | validate | 27 | the DCS model is CTO text compiled by concerto-cto in JS (via addCTOModel); the command-set instance validation itself is Rust (Serializer fast path / validateCommand) |
@@ -757,8 +757,8 @@ so this holds. It is also why constructors taking a stubbed parent are HYBRID (c
 
 Kept for history; every question below has a maintainer decision now, linked from each item.
 
-1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 79.2%
-   (old figure, previous denominator: 78.1%). See section 1.
+1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 78.9%
+   (old figure, previous denominator: 77.8%). See section 1.
 2. **Constant markers and `accept()` count as TS. Settled: excluded from the D1
    denominator.** They are not "logic". 54 members, weight 81,
    removed from the denominator (section 1).
