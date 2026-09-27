@@ -61,6 +61,7 @@ const R = {
     loader: 'async file/URL loading orchestration (fs, FileLoader, concerto-cto Parser); all model work goes through the ledgered ModelManager methods it calls',
     fsWrite: 'writes files through concerto-util ModelWriter (Node fs); no model logic',
     tsLogger: 'Logger.dispatch is the JS logging sink; the error-vs-warn decision and message come from Rust',
+    engineShim: 'engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust',
 };
 
 module.exports = {
@@ -93,23 +94,36 @@ module.exports = {
     },
     'src/datetimeutil.ts': { c: 'TS', t: NONE, p: NONE, r: R.dayjs },
     'src/dcsconverter.ts': { c: 'TS', t: NONE, p: NONE, r: R.yaml },
-    'src/decoratorextractor.ts': {
-        c: 'RUST', t: DCS, p: 'P4-09',
-        m: {
-            'DecoratorExtractor.quoteStringValue': { c: 'HYBRID', r: 'quoting decision is defined by the `yaml` npm lib plain-scalar rules (yaml.stringify); Rust must port the rule and golden-test it against yaml.stringify, or call back into JS' },
-        },
-    },
+    // src/decoratorextractor.ts was deleted by the P5-02 decorator-manager
+    // chunk (2026-09-27): its only callers, DecoratorManager.extract*, now
+    // delegate straight to the Rust engine, so the TS extractor class became
+    // dead code everywhere and was removed with them. No classification rule
+    // needed: the file no longer exists.
     'src/decoratormanager.ts': {
         c: 'RUST', t: DCS, p: 'P4-09',
         m: {
             'DecoratorManager.validate': { c: 'HYBRID', r: R.dcsCto },
-            'DecoratorManager.migrateAndValidate': { c: 'HYBRID', r: R.dcsCto },
             'DecoratorManager.jsonToYaml': { c: 'HYBRID', r: 'command-set validation runs in Rust; YAML emission stays in TS (dcsconverter, `yaml` npm lib)' },
             'DecoratorManager.yamlToJson': { c: 'HYBRID', r: 'YAML parsing stays in TS (dcsconverter, `yaml` npm lib); command-set validation runs in Rust' },
-            'DecoratorManager.validateCommand': { cat: 'validation' },
         },
     },
     'src/decoratormodelhelper.ts': { c: 'RUST', t: ROOT, p: 'P2-08+P4-08' },
+    // engine/ (P4-02; P5-02 removed the CONCERTO_ENGINE flag). The whole
+    // directory is `/* istanbul ignore file */` and excluded from the
+    // declaration build (PORTING.md 1.5), so it never moves nyc or the .d.ts
+    // snapshot. These files are the shim itself -- the loader, the handle
+    // registry, the error-payload mapper and the fast-path wire codec -- not
+    // TS logic superseded by Rust, so each is classified TS with a reason
+    // naming what it does, per the maintainer's 2026-09-27 ruling on #73.
+    'src/engine/errors.ts': { c: 'TS', t: NONE, p: NONE, r: 'JS error-class mapping for engine results: builds the TS exception (IllegalModelException/TypeNotFoundException/ValidationException/MetamodelException/BaseException/Error/TypeError/RangeError) for an engine error payload {kind, code, params, message, location}; Rust decides the kind and renders the message, this only picks the constructor' },
+    'src/engine/handles.ts': { c: 'TS', t: NONE, p: NONE, r: 'handle registry bookkeeping: a per-ModelManagerHandle WeakMap from a live TS view object to its Rust arena handle (ModelFileId/DeclId/PropId); no model logic' },
+    'src/engine/index.ts': { c: 'TS', t: NONE, p: NONE, r: 'engine loader entry point: requires rust.ts and re-exports the loaded engine; no model logic' },
+    'src/engine/rust.ts': { c: 'TS', t: NONE, p: NONE, r: 'loads the @accordproject/concerto-engine WASM module and registers its host callbacks (the error factory, semver.parse); no model logic' },
+    'src/engine/serializer-codec.ts': { c: 'TS', t: NONE, p: NONE, r: 'JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own' },
+    'src/engine/serializer.ts': {
+        c: 'HYBRID', t: NONE, p: 'P4-10', r: 'JSON envelope building, the ModelManagerHandle cache and the options.regExp fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path)',
+    },
+    'src/engine/views.ts': { c: 'HYBRID', t: NONE, p: 'P4-06+P4-07', r: 'per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration\'s type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust' },
     'src/factory.ts': { c: 'TS', t: NONE, p: NONE, r: R.d7Factory },
     'src/globalize.ts': { c: 'TS', t: NONE, p: NONE, r: R.globalize },
     'src/introspect/assetdeclaration.ts': { c: 'RUST', t: DECL, p: 'P2-03+P4-06' },

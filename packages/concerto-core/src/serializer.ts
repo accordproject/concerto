@@ -35,11 +35,12 @@ import type { JsonPopulatorParameters } from './serializer/jsonpopulator';
 import type Resource from './model/resource';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// See introspect/property.ts's identical preamble for why `loadEngine` takes
-// a non-literal specifier (kept ts-mode bundles free of src/engine/, which
-// ships as JavaScript only, PORTING.md 1.5) and why rust mode only works
-// through the CommonJS dist/ today.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See introspect/property.ts's
+// identical preamble for why `loadEngine` takes a non-literal specifier (kept
+// ts-mode bundles free of src/engine/, which ships as JavaScript only,
+// PORTING.md 1.5) and why rust mode only works through the CommonJS dist/
+// today.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 // P5-06: memoised per specifier, so a call site on a per-element or
@@ -52,9 +53,6 @@ const loadEngine = (specifier: string) =>
     engineModules[specifier] ??
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
-/* istanbul ignore next */
-const rust: unknown =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
 
 /**
  * Serialize Resources instances to/from various formats for long-term storage
@@ -131,15 +129,12 @@ class Serializer {
         // manager with a custom `regExp` engine, a value the wire codec
         // cannot carry), exactly as calling the visitors directly still
         // does for callers/tests that need them.
-        /* istanbul ignore if */
-        if (rust) {
-            try {
-                const merged = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
-                return loadEngine('./engine/serializer').fastToJson(this.modelManager, resource, merged);
-            } catch (err) {
-                if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
-                    throw err;
-                }
+        try {
+            const merged = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
+            return loadEngine('./engine/serializer').fastToJson(this.modelManager, resource, merged);
+        } catch (err) {
+            if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+                throw err;
             }
         }
 
@@ -202,14 +197,11 @@ class Serializer {
         // anything the engine cannot cross (EngineFastPathUnsupported),
         // exactly as calling the visitor directly still does for
         // callers/tests that need it.
-        /* istanbul ignore if */
-        if (rust) {
-            try {
-                return loadEngine('./engine/serializer').fastFromJson(this.modelManager, jsonObject, options);
-            } catch (err) {
-                if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
-                    throw err;
-                }
+        try {
+            return loadEngine('./engine/serializer').fastFromJson(this.modelManager, jsonObject, options);
+        } catch (err) {
+            if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+                throw err;
             }
         }
 

@@ -12,34 +12,31 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-
 import ModelUtil from '../modelutil';
-import IllegalModelException from './illegalmodelexception';
 import Decorated from './decorated';
-import CollectionSizeValidator from './collectionsizevalidator';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ClassDeclaration from './classdeclaration';
 import type ModelFile from './modelfile';
 import type { AstNode } from './decorated';
+import type CollectionSizeValidator from './collectionsizevalidator';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// Its bindings are typed `never` so that a view leaves the member's inferred
-// return type, and so the .d.ts, exactly as the TS body makes it.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
+// `never` so that a view leaves the member's inferred return type, and so
+// the .d.ts, exactly as the TS body used to make it.
 //
 // dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
 // with no .d.ts, since it is not public API (tsconfig.build.internal.json;
-// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
-// must never see a specifier it would resolve: `loadEngine` takes a
-// non-literal one (esbuild, rollup and browserify leave it alone) and never
-// names the bare `require` (esbuild's ESM output would add its `__require`
-// shim, which webpack reports as a critical dependency), and webpack folds
-// the `typeof __webpack_require__` test and keeps only the dead-in-Node
-// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
-// bundles exactly as before (PORTING.md 1.5).
+// OD-11). A bundler must never see a specifier it would resolve: `loadEngine`
+// takes a non-literal one (esbuild, rollup and browserify leave it alone) and
+// never names the bare `require` (esbuild's ESM output would add its
+// `__require` shim, which webpack reports as a critical dependency), and
+// webpack folds the `typeof __webpack_require__` test and keeps only the
+// dead-in-Node `__non_webpack_require__` branch, so it neither resolves nor
+// warns.
 //
 // rust mode works through the CommonJS dist/ only. Through the public ESM and
 // browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
@@ -51,7 +48,6 @@ declare const __non_webpack_require__: NodeRequire;
 // P5-06: memoised per specifier, so a call site on a per-element or
 // per-instance path (propertyProcess, fastFromJson, ...) resolves the module
 // once rather than on every call.
-/* istanbul ignore next */
 const engineModules: { [specifier: string]: any } = {};
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
@@ -59,8 +55,7 @@ const loadEngine = (specifier: string) =>
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * Property representing an attribute of a class declaration,
@@ -117,77 +112,18 @@ class Property extends Decorated {
     process() {
         super.process();
 
-        /* istanbul ignore if */
-        if (rust) {
-            // A nullish `this.ast.name` is a TS-only quirk: `ID_REGEX.test(null)`
-            // (or `undefined`) coerces its argument to the string "null" (or
-            // "undefined"), which is itself a valid identifier, so
-            // `ModelUtil.isValidIdentifier` passes; it is the later
-            // `if(!this.name)` check, on the nullish value itself, that
-            // throws. `propertyProcess` reads `this.ast.name` as a string, so
-            // this one case is kept here rather than round-tripped through
-            // the engine.
-            if (this.ast.name === null || this.ast.name === undefined) {
-                throw new Error('No name for type ' + JSON.stringify(this.ast));
-            }
-            loadEngine('../engine/views').propertyProcess(this);
-            return;
-        }
-
-        if (!ModelUtil.isValidIdentifier(this.ast.name)){
-            throw new IllegalModelException(`Invalid property name '${this.ast.name}'`, this.getModelFile(), this.ast.location);
-        }
-
-        this.name = this.ast.name;
-
-        if(!this.name) {
+        // A nullish `this.ast.name` is a TS-only quirk: `ID_REGEX.test(null)`
+        // (or `undefined`) coerces its argument to the string "null" (or
+        // "undefined"), which is itself a valid identifier, so
+        // `ModelUtil.isValidIdentifier` passes; it is the later
+        // `if(!this.name)` check, on the nullish value itself, that
+        // throws. `propertyProcess` reads `this.ast.name` as a string, so
+        // this one case is kept here rather than round-tripped through
+        // the engine.
+        if (this.ast.name === null || this.ast.name === undefined) {
             throw new Error('No name for type ' + JSON.stringify(this.ast));
         }
-
-        switch (this.ast.$class) {
-        case `${MetaModelNamespace}.EnumProperty`:
-            break;
-        case `${MetaModelNamespace}.BooleanProperty`:
-            this.type = 'Boolean';
-            break;
-        case `${MetaModelNamespace}.DateTimeProperty`:
-            this.type = 'DateTime';
-            break;
-        case `${MetaModelNamespace}.DoubleProperty`:
-            this.type = 'Double';
-            break;
-        case `${MetaModelNamespace}.IntegerProperty`:
-            this.type = 'Integer';
-            break;
-        case `${MetaModelNamespace}.LongProperty`:
-            this.type = 'Long';
-            break;
-        case `${MetaModelNamespace}.StringProperty`:
-            this.type = 'String';
-            break;
-        case `${MetaModelNamespace}.ObjectProperty`:
-            this.type = this.ast.type ? this.ast.type.name : null;
-            break;
-        case `${MetaModelNamespace}.RelationshipProperty`:
-            this.type = this.ast.type.name;
-            break;
-        }
-        this.array = false;
-
-        if(this.ast.isArray) {
-            this.array = true;
-        }
-
-        this.sizeValidator = this.ast.sizeValidator
-            ? new CollectionSizeValidator(this, this.ast.sizeValidator)
-            : null;
-
-        if(this.ast.isOptional) {
-            this.optional = true;
-        }
-        else {
-            this.optional = false;
-        }
+        loadEngine('../engine/views').propertyProcess(this);
     }
 
     /**
@@ -199,34 +135,7 @@ class Property extends Decorated {
     validate(classDecl: ClassDeclaration) {
         super.validate();
 
-        /* istanbul ignore if */
-        if (rust) {
-            rust.propertyValidate(this, classDecl);
-            return;
-        }
-
-        if(this.type) {
-            classDecl.getModelFile().resolveType( 'property ' + this.getFullyQualifiedName(), this.type);
-        }
-
-        if(this.sizeValidator && !this.array) {
-            let isMapType = false;
-            if(this.type && !this.isPrimitive()) {
-                try {
-                    const resolvedType = classDecl.getModelFile().getType(this.type);
-                    isMapType = resolvedType.isMapDeclaration?.() === true;
-                } catch(e) {
-                    // type resolution failed — will be caught by other validation
-                }
-            }
-            if(!isMapType) {
-                throw new IllegalModelException(
-                    `size validator can only be applied to array or map properties: ${this.getFullyQualifiedName()}`,
-                    classDecl.getModelFile(),
-                    this.ast.location
-                );
-            }
-        }
+        rust.propertyValidate(this, classDecl);
     }
 
     /**

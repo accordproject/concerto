@@ -13,28 +13,20 @@
  */
 
 import ModelManager from './modelmanager';
-import Serializer from './serializer';
-import Factory from './factory';
 import ModelUtil from './modelutil';
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import semver from 'semver';
-import DecoratorExtractor from './decoratorextractor';
-import IllegalModelException from './introspect/illegalmodelexception';
-import rfdcLib from 'rfdc';
-const rfdc = rfdcLib({
-    circles: true,
-    proto: false,
-});
 
 import { jsonToYaml, yamlToJson } from './dcsconverter';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ModelFile from './introspect/modelfile';
-import type { DecoratorCommand } from './types';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
+// `never` so that a view leaves the member's inferred return type, and so
+// the .d.ts, exactly as the TS body used to make it.
 // See src/modelutil.ts for why this is loaded this way (dist/, bundler and
 // CJS/ESM notes); the same considerations apply here unchanged.
 declare const __webpack_require__: unknown;
@@ -49,9 +41,7 @@ const loadEngine = (specifier: string) =>
     engineModules[specifier] ??
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
-/* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('./engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('./engine').rust;
 // The rust-mode view functions (src/engine/views.ts), typed `never` for the
 // same reason as `rust` above (PORTING.md 1.5, "Why never"): the return types
 // the declaration build infers stay exactly those of the TS bodies.
@@ -124,69 +114,6 @@ concept DecoratorCommandSet {
 `;
 
 /**
- * Intersection of two string arrays
- * @param {string[]} a the first array
- * @param {string[]} b the second array
- * @returns {string[]} returns the intersection of a and b (i.e. an
- * array of the elements they have in common)
- */
-function intersect(a, b) {
-    const setA = new Set(a);
-    const setB = new Set(b);
-    const intersection = new Set([...setA].filter((x) => setB.has(x)));
-    return Array.from(intersection);
-}
-
-/**
- * Returns true if the unversioned namespace for a model
- * file is equal to a target
- * @param {ModelFile} modelFile the model file to test
- * @param {string} unversionedNamespace the unversioned namespace to test against
- * @returns {boolean} true is the unversioned namespace for the
- * model file equals unversionedNamespace
- */
-function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
-    const { name } = ModelUtil.parseNamespace(modelFile.getNamespace());
-    return name === unversionedNamespace;
-}
-
-/**
- * Helper class to wrap the decorator command and the index of the command
- * @private
- */
-class DcsIndexWrapper {
-    command: DecoratorCommand;
-    index: number;
-
-    /**
-     * Create the DcsIndexWrapper.
-     * @constructor
-     * @param {*} command - the decorator command
-     * @param {number} index - the index of the command
-     */
-    constructor(command: DecoratorCommand, index: number) {
-        this.command = command;
-        this.index = index;
-    }
-
-    /**
-     * Get the decorator command.
-     * @returns {*} The decorator command.
-     */
-    getCommand(): DecoratorCommand {
-        return this.command;
-    }
-
-    /**
-     * Get the index of the command.
-     * @returns {number} The index of the command.
-     */
-    getIndex(): number {
-        return this.index;
-    }
-}
-
-/**
  * Copies every own field of `source` onto `target`, recursing into matching
  * nested objects and arrays so nested references already held by a caller
  * (for example a DecoratorCommandSet an outer scope kept a reference to) end
@@ -254,17 +181,10 @@ class DecoratorManager {
             DCS_MODEL,
             'decoratorcommands@0.3.0.cto'
         );
-        /* istanbul ignore if */
-        if (rust) {
-            // The structural check only (src/dcs/mod.rs `validate`); the
-            // validationModelManager above is still built the TS way (CTO
-            // parsing is not ported) and returned unchanged.
-            rust.decoratorManagerValidate(decoratorCommandSet, modelFiles?.map((mf: ModelFile) => mf.getAst()));
-        } else {
-            const factory = new Factory(validationModelManager);
-            const serializer = new Serializer(factory, validationModelManager);
-            serializer.fromJSON(decoratorCommandSet);
-        }
+        // The structural check only (src/dcs/mod.rs `validate`); the
+        // validationModelManager above is still built the TS way (CTO
+        // parsing is not ported) and returned unchanged.
+        rust.decoratorManagerValidate(decoratorCommandSet, modelFiles?.map((mf: ModelFile) => mf.getAst()));
         return validationModelManager;
     }
 
@@ -275,27 +195,10 @@ class DecoratorManager {
      * @returns {object} the migrated DecoratorCommandSet object
      */
     static migrateTo(decoratorCommandSet, version) {
-        /* istanbul ignore if */
-        if (rust) {
-            // decoratormanager.ts's own ts-mode body below (and callers,
-            // e.g. decorateModels's migrate step) rely on decoratorCommandSet
-            // being mutated in place, not just on the return value.
-            assignDeep(decoratorCommandSet, rust.decoratorManagerMigrateTo(decoratorCommandSet));
-            return decoratorCommandSet;
-        }
-        if (decoratorCommandSet instanceof Object) {
-            for (let key in decoratorCommandSet) {
-                if (key === '$class' && decoratorCommandSet[key].includes('org.accordproject.decoratorcommands')) {
-                    const ns = ModelUtil.getNamespace(decoratorCommandSet.$class);
-                    decoratorCommandSet[key] = decoratorCommandSet[key].replace(
-                        ModelUtil.parseNamespace(ns).version,
-                        DCS_VERSION);
-                }
-                if (decoratorCommandSet[key] instanceof Object || decoratorCommandSet[key] instanceof Array) {
-                    this.migrateTo(decoratorCommandSet[key], version);
-                }
-            }
-        }
+        // decoratormanager.ts's own callers (e.g. decorateModels's migrate
+        // step) rely on decoratorCommandSet being mutated in place, not just
+        // on the return value.
+        assignDeep(decoratorCommandSet, rust.decoratorManagerMigrateTo(decoratorCommandSet));
         return decoratorCommandSet;
     }
 
@@ -309,131 +212,6 @@ class DecoratorManager {
     static canMigrate(decoratorCommandSet, DCS_VERSION) {
         const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
         return (semver.major(inputVersion!) === semver.major(DCS_VERSION) && (semver.minor(inputVersion!) < semver.minor(DCS_VERSION)));
-    }
-
-    /**
-     * Add decorator commands set with index object to the coresponding target map
-     * @param {*} targetMap the target map to add the command to
-     * @param {targetKey} targetKey the target key to add the command to
-     * @param {DcsIndexWrapper} dcsWithIndex the command to add
-     * @private
-     */
-    static addDcsWithIndexToMap(targetMap, targetKey, dcsWithIndex) {
-        const targetCommands = targetMap.get(targetKey);
-        if (targetCommands) {
-            targetCommands.push(dcsWithIndex);
-        } else {
-            targetMap.set(targetKey, [dcsWithIndex]);
-        }
-    }
-
-
-    /**
-     * Creates five different maps to index decorator command sets by target type and returns them
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
-     * @returns {Object} object with all the decorator command maps based on the target
-     * @private
-     */
-    static getDecoratorMaps(decoratorCommandSet) {
-        const namespaceCommandsMap = new Map();
-        const declarationCommandsMap = new Map();
-        const propertyCommandsMap = new Map();
-        const mapElementCommandsMap = new Map();
-        const typeCommandsMap = new Map();
-
-        decoratorCommandSet.commands.map((decoratorCommand, index) => {
-            const dcsWithIndex = new DcsIndexWrapper(decoratorCommand, index);
-            switch (true) {
-            case !!decoratorCommand?.target?.type:
-                this.addDcsWithIndexToMap(typeCommandsMap, decoratorCommand.target.type, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.property:
-                this.addDcsWithIndexToMap(propertyCommandsMap, decoratorCommand.target.property, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.properties:
-                decoratorCommand.target.properties.forEach((property) => {
-                    this.addDcsWithIndexToMap(propertyCommandsMap, property, dcsWithIndex);
-                });
-                break;
-            case !!decoratorCommand?.target?.mapElement:
-                this.addDcsWithIndexToMap(mapElementCommandsMap, decoratorCommand.target.mapElement, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.declaration:
-                this.addDcsWithIndexToMap(declarationCommandsMap, decoratorCommand.target.declaration, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.namespace:
-                this.addDcsWithIndexToMap(namespaceCommandsMap, decoratorCommand.target.namespace, dcsWithIndex);
-                break;
-            }
-        });
-
-        return {
-            namespaceCommandsMap,
-            declarationCommandsMap,
-            propertyCommandsMap,
-            mapElementCommandsMap,
-            typeCommandsMap
-        };
-    }
-
-    /**
-     * Migrate or validate the DecoratorCommandSet object if the options are set as true
-     * @param {ModelManager} modelManager the input model manager
-     * @param {*} decoratorCommandSet a DecoratorCommandSet object, or an array of DecoratorCommandSet objects
-     * @param {boolean} shouldMigrate migrate the decoratorCommandSet $class to match the dcs model version
-     * @param {boolean} shouldValidate validate that decorator command set is valid
-     * with respect to to decorator command set model
-     * @param {boolean} shouldValidateCommands validate the decorator command set targets. Note that
-     * the validate option must also be true
-     * @private
-     */
-    static migrateAndValidate(modelManager, decoratorCommandSet, shouldMigrate, shouldValidate, shouldValidateCommands) {
-        const decoratorCommandSets = Array.isArray(decoratorCommandSet) ? decoratorCommandSet : [decoratorCommandSet];
-        if (shouldMigrate) {
-            decoratorCommandSets.forEach((commandSet, index) => {
-                if (this.canMigrate(commandSet, DCS_VERSION)) {
-                    decoratorCommandSets[index] = this.migrateTo(commandSet, DCS_VERSION);
-                }
-            });
-        }
-
-        if (shouldValidate) {
-            const validationModelManager = new ModelManager({
-                metamodelValidation: true,
-                addMetamodel: true,
-            });
-            validationModelManager.addModelFiles(modelManager.getModelFiles());
-            validationModelManager.addCTOModel(
-                DCS_MODEL,
-                'decoratorcommands@0.4.0.cto'
-            );
-            const factory = new Factory(validationModelManager);
-            const serializer = new Serializer(factory, validationModelManager);
-            decoratorCommandSets.forEach((commandSet) => {
-                serializer.fromJSON(commandSet);
-                if (shouldValidateCommands) {
-                    commandSet.commands.forEach((command) => {
-                        DecoratorManager.validateCommand(
-                            validationModelManager,
-                            command
-                        );
-                    });
-                }
-            });
-        }
-    }
-
-    /**
-     * Adds decorator commands with index to the array passed
-     * @param {DcsIndexWrapper[]} array the array to add the command to
-     * @param {*} map the target map to add the command to
-     * @param {key} key the target key to add the command to
-     * @private
-     */
-    static pushMapValues(array, map, key) {
-        for (const value of map.get(key) || []) {
-            array.push(value);
-        }
     }
 
     /**
@@ -468,104 +246,19 @@ class DecoratorManager {
             options.disableMetamodelValidation = true;
         }
 
-        /* istanbul ignore if */
-        if (rust) {
-            // Only the migrate step of migrateAndValidate mutates its
-            // decoratorCommandSets argument (validate only throws); run it
-            // here so decoratorCommandSet (this method's own argument, still
-            // referenced by the caller) ends up migrated in place exactly as
-            // the ts-mode body's migrateAndValidate call below leaves it.
-            if (options?.migrate) {
-                decoratorCommandSets.forEach((commandSet, index) => {
-                    if (this.canMigrate(commandSet, DCS_VERSION)) {
-                        decoratorCommandSets[index] = this.migrateTo(commandSet, DCS_VERSION);
-                    }
-                });
-            }
-            return (loadEngine('./engine/views') as EngineViews).decoratorManagerDecorateModels(modelManager, decoratorCommandSets, options);
-        }
-
-        this.migrateAndValidate(modelManager, decoratorCommandSets, options?.migrate, options?.validate, options?.validateCommands);
-
-        // Flatten commands across all command sets so decorators can be applied in a single AST scan.
-        const combinedDecoratorCommandSet = {
-            commands: decoratorCommandSets.flatMap(commandSet => commandSet.commands)
-        };
-
-        // we create synthetic imports for all decorator declarations
-        // along with any of their type reference arguments
-        const decoratorImports = combinedDecoratorCommandSet.commands.flatMap(command => {
-            return [{
-                $class: `${MetaModelNamespace}.ImportType`,
-                name: command.decorator.name,
-                namespace: command.decorator.namespace ? command.decorator.namespace : options?.defaultNamespace
-            }].concat(command.decorator.arguments ? command.decorator.arguments?.filter(a => a.type)
-                .map(a => {
-                    return {
-                        $class: `${MetaModelNamespace}.ImportType`,
-                        name: a.type.name,
-                        namespace: a.type.namespace ? a.type.namespace : options?.defaultNamespace
-                    };
-                })
-                : []);
-        }).filter(i => i.namespace);
-        const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(combinedDecoratorCommandSet);
-        const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, true) : modelManager.getAst(true, true);
-        const decoratedAst = rfdc(ast);
-        decoratedAst.models.forEach((model) => {
-            // remove the imports for types defined in this namespace
-            const neededImports = decoratorImports.filter(i => i.namespace !== model.namespace);
-            // add the imports for decorators, in case they get added below
-            model.imports = model.imports ? model.imports.concat(neededImports) : neededImports;
-            const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
-            model.declarations.forEach((decl) => {
-                const declarationDecoratorCommandSets: DcsIndexWrapper[] = [];
-                const { name: declarationName, $class: $classForDeclaration } = decl;
-                this.pushMapValues(declarationDecoratorCommandSets, declarationCommandsMap, declarationName);
-                this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, model.namespace);
-                this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, namespaceName);
-                this.pushMapValues(declarationDecoratorCommandSets, typeCommandsMap, $classForDeclaration);
-                const sortedDeclarationDecoratorCommandSets = declarationDecoratorCommandSets.sort((declDcs1, declDcs2) => declDcs1.getIndex() - declDcs2.getIndex());
-                sortedDeclarationDecoratorCommandSets.forEach(dcsWithIndex => {
-                    this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), null, options);
-                    this.executeNamespaceCommand(model, dcsWithIndex.getCommand());
-                });
-
-                if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
-                    const mapDecoratorCommandSets: DcsIndexWrapper[] = [];
-                    this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.key.$class);
-                    this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.value.$class);
-                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'KEY');
-                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'VALUE');
-                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'KEY_VALUE');
-                    const sortedMapDecoratorCommandSets = mapDecoratorCommandSets.sort((mapDcs1, mapDcs2) => mapDcs1.getIndex() - mapDcs2.getIndex());
-                    sortedMapDecoratorCommandSets.forEach(dcsWithIndex => {
-                        this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand());
-                    });
+        // Only the migrate step of the old migrateAndValidate call mutated
+        // its decoratorCommandSets argument (validate only threw); run it
+        // here so decoratorCommandSet (this method's own argument, still
+        // referenced by the caller) ends up migrated in place exactly as
+        // before.
+        if (options?.migrate) {
+            decoratorCommandSets.forEach((commandSet, index) => {
+                if (this.canMigrate(commandSet, DCS_VERSION)) {
+                    decoratorCommandSets[index] = this.migrateTo(commandSet, DCS_VERSION);
                 }
-
-                // scalars are declarations but do not have properties
-                if (decl.properties) {
-                    decl.properties.forEach((property) => {
-                        const propertyDecoratorCommandSets: DcsIndexWrapper[] = [];
-                        const { name: propertyName, $class: $classForProperty } = property;
-                        this.pushMapValues(propertyDecoratorCommandSets, propertyCommandsMap, propertyName);
-                        this.pushMapValues(propertyDecoratorCommandSets, typeCommandsMap, $classForProperty);
-                        const sortedPropertyDecoratorCommandSets = propertyDecoratorCommandSets.sort((propertyDcs1, propertyDcs2) => propertyDcs1.getIndex() - propertyDcs2.getIndex());
-                        sortedPropertyDecoratorCommandSets.forEach(dcsWithIndex => {
-                            this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), property);
-                        });
-                    });
-                }
-
             });
-        });
-
-        const newModelManager = new ModelManager({
-            decoratorValidation: modelManager.getDecoratorValidation()
-        });
-        newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
-        return newModelManager;
+        }
+        return (loadEngine('./engine/views') as EngineViews).decoratorManagerDecorateModels(modelManager, decoratorCommandSets, options);
     }
     /**
      * @typedef ExtractDecoratorsResult
@@ -588,18 +281,7 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        /* istanbul ignore if */
-        if (rust) {
-            return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractDecorators(modelManager, options);
-        }
-        const sourceAst = modelManager.getAst(true, true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL);
-        const collectionResp = decoratorExtrator.extract();
-        return {
-            modelManager: collectionResp.updatedModelManager,
-            decoratorCommandSet: collectionResp.decoratorCommandSet,
-            vocabularies: collectionResp.vocabularies
-        };
+        return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractDecorators(modelManager, options);
     }
     /**
      * Extracts all the vocab decorator commands from all the models in modelManager
@@ -615,17 +297,7 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        /* istanbul ignore if */
-        if (rust) {
-            return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractVocabularies(modelManager, options);
-        }
-        const sourceAst = modelManager.getAst(true, true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB);
-        const collectionResp = decoratorExtrator.extract();
-        return {
-            modelManager: collectionResp.updatedModelManager,
-            vocabularies: collectionResp.vocabularies
-        };
+        return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractVocabularies(modelManager, options);
     }
     /**
      * Extracts all the non-vocab decorator commands from all the models in modelManager
@@ -641,122 +313,8 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        /* istanbul ignore if */
-        if (rust) {
-            return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractNonVocabDecorators(modelManager, options);
-        }
-        const sourceAst = modelManager.getAst(true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB);
-        const collectionResp = decoratorExtrator.extract();
-        return {
-            modelManager: collectionResp.updatedModelManager,
-            decoratorCommandSet: collectionResp.decoratorCommandSet
-        };
+        return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractNonVocabDecorators(modelManager, options);
     }
-    /**
-     * Throws an error if the decoractor command is invalid
-     * @param {ModelManager} validationModelManager the validation model manager
-     * @param {*} command the decorator command
-     */
-    static validateCommand(validationModelManager, command) {
-        if (command.target.type) {
-            validationModelManager.resolveType(
-                'DecoratorCommand.type',
-                command.target.type
-            );
-        }
-        let modelFile: ModelFile | null = null;
-        if (command.target.namespace) {
-            modelFile = validationModelManager.getModelFile(
-                command.target.namespace
-            );
-            if (!modelFile) {
-                const { name, version } = ModelUtil.parseNamespace(
-                    command.target.namespace
-                );
-                if (!version) {
-                    // does the model file exist with any version?
-                    modelFile = validationModelManager
-                        .getModelFiles()
-                        .find((m) => isUnversionedNamespaceEqual(m, name));
-                }
-            }
-        }
-        if (command.target.namespace && !modelFile) {
-            throw new Error(
-                `Decorator Command references namespace "${
-                    command.target.namespace
-                }" which does not exist: ${JSON.stringify(command, null, 2)}`
-            );
-        }
-
-        // the guard above throws unless modelFile was resolved for the namespace
-        if (command.target.namespace && command.target.declaration) {
-            validationModelManager.resolveType(
-                'DecoratorCommand.target.declaration',
-                `${modelFile!.getNamespace()}.${command.target.declaration}`
-            );
-        }
-        if (command.target.properties && command.target.property) {
-            throw new Error(
-                'Decorator Command references both property and properties. You must either reference a single property or a list of properites.'
-            );
-        }
-        if (
-            command.target.namespace &&
-            command.target.declaration &&
-            command.target.property
-        ) {
-            const decl = validationModelManager.getType(
-                `${modelFile!.getNamespace()}.${command.target.declaration}`
-            );
-            const property = decl.getProperty(command.target.property);
-            if (!property) {
-                throw new Error(
-                    `Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${command.target.property}" which does not exist.`
-                );
-            }
-        }
-        if (
-            command.target.namespace &&
-            command.target.declaration &&
-            command.target.properties
-        ) {
-            const decl = validationModelManager.getType(
-                `${modelFile!.getNamespace()}.${command.target.declaration}`
-            );
-            command.target.properties.forEach((commandProperty) => {
-                const property = decl.getProperty(commandProperty);
-                if (!property) {
-                    throw new Error(
-                        `Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${commandProperty}" which does not exist.`
-                    );
-                }
-            });
-        }
-    }
-
-
-    /**
-     * Applies a new decorator to the Map element
-     * @private
-     * @param {string} element the element to apply the decorator to
-     * @param {string} target the command target
-     * @param {*} declaration the map declaration
-     * @param {string} type the command type
-     * @param {*} newDecorator the decorator to add
-     */
-    static applyDecoratorForMapElement(element, target, declaration, type, newDecorator ) {
-        const decl = element === 'KEY' ? declaration.key : declaration.value;
-        if (target.type) {
-            if (this.falsyOrEqual(target.type, decl.$class)) {
-                this.applyDecorator(decl, type, newDecorator);
-            }
-        } else {
-            this.applyDecorator(decl, type, newDecorator);
-        }
-    }
-
     /**
      * Compares two arrays. If the first argument is falsy
      * the function returns true.
@@ -766,135 +324,7 @@ class DecoratorManager {
      * the test and values arrays is not empty (i.e. they have values in common)
      */
     static falsyOrEqual(test, values) {
-        /* istanbul ignore if */
-        if (rust) {
-            return rust.decoratorManagerFalsyOrEqual(test, values);
-        }
-        return Array.isArray(test)
-            ? intersect(test, values).length > 0
-            : test
-                ? values.includes(test)
-                : true;
-    }
-
-    /**
-     * Applies a decorator to a decorated model element.
-     * @param {*} decorated the type to apply the decorator to
-     * @param {string} type the command type
-     * @param {*} newDecorator the decorator to add
-     */
-    static applyDecorator(decorated, type, newDecorator) {
-        if (type === 'UPSERT') {
-            let updated = false;
-            if (decorated.decorators) {
-                for (let n = 0; n < decorated.decorators.length; n++) {
-                    let decorator = decorated.decorators[n];
-                    if (decorator.name === newDecorator.name) {
-                        decorated.decorators[n] = newDecorator;
-                        updated = true;
-                    }
-                }
-            }
-
-            if (!updated) {
-                decorated.decorators
-                    ? decorated.decorators.push(newDecorator)
-                    : (decorated.decorators = [newDecorator]);
-            }
-        } else if (type === 'APPEND') {
-            decorated.decorators
-                ? decorated.decorators.push(newDecorator)
-                : (decorated.decorators = [newDecorator]);
-            this.checkForDuplicateDecorators(decorated);
-        } else {
-            throw new Error(`Unknown command type ${type}`);
-        }
-    }
-
-    /**
-     * Checks for duplicate decorators added to a decorated model element.
-     * @param {*} decoratedAst ast of the property or the declaration to apply the decorator to
-     * @throws {IllegalModelException} if the decoratedAst has duplicate decorators
-     * @private
-     */
-    static checkForDuplicateDecorators(decoratedAst) {
-        const uniqueDecoratorNames = new Set();
-        decoratedAst.decorators.forEach(d => {
-            const decoratorName = d.name;
-            if(!uniqueDecoratorNames.has(decoratorName)) {
-                uniqueDecoratorNames.add(decoratorName);
-            } else {
-                throw new IllegalModelException(
-                    `Duplicate decorator ${decoratorName}`,
-                    decoratedAst.location,
-                );
-            }
-        });
-    }
-
-    /**
-     * Executes a Command against a Model Namespace, adding
-     * decorators to the Namespace.
-     * @private
-     * @param {*} model the model
-     * @param {*} command the Command object from the dcs
-     */
-    static executeNamespaceCommand(model, command) {
-        const { target, decorator, type } = command;
-        if (Object.keys(target).length === 2 && target.namespace) {
-            const { name } = ModelUtil.parseNamespace( model.namespace );
-            if(this.falsyOrEqual(target.namespace, [model.namespace, name])) {
-                this.applyDecorator(model, type, decorator);
-            }
-        }
-    }
-
-    /**
-     * Executes a Command against a Declaration, adding
-     * decorators to the Declaration, or its properties, as required.
-     * @param {string} namespace the namespace for the declaration
-     * @param {*} declaration the class declaration
-     * @param {*} command the Command object from the dcs
-     * @param {*} [property] the property of a declaration, optional, to be passed if the command is for a property
-     * @param {object} [options] - execute command options
-     */
-    static executeCommand(namespace, declaration, command, property?, options?) {
-        const { target, decorator, type } = command;
-        // the namespace version is already validated in the decorateModels method
-        const { name } = ModelUtil.parseNamespace( namespace, { disableVersionParsing: true } );
-        if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
-            this.falsyOrEqual(target.declaration, [declaration.name])) {
-
-            if (declaration.$class === `${MetaModelNamespace}.MapDeclaration`) {
-                if (target.mapElement) {
-                    switch (target.mapElement) {
-                    case 'KEY':
-                    case 'VALUE':
-                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
-                        break;
-                    case 'KEY_VALUE':
-                        this.applyDecoratorForMapElement('KEY', target, declaration, type, decorator);
-                        this.applyDecoratorForMapElement('VALUE', target, declaration, type, decorator);
-                        break;
-                    }
-                } else if (target.type) {
-                    if (this.falsyOrEqual(target.type, declaration.key.$class)) {
-                        this.applyDecorator(declaration.key, type, decorator);
-                    }
-                    if (this.falsyOrEqual(target.type, declaration.value.$class)) {
-                        this.applyDecorator(declaration.value, type, decorator);
-                    }
-                } else {
-                    this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target);
-                }
-            } else if (!(target.property || target.properties || target.type)) {
-                this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target);
-            } else {
-                if(property) {
-                    this.executePropertyCommand(property, command);
-                }
-            }
-        }
+        return rust.decoratorManagerFalsyOrEqual(test, values);
     }
 
     /**
@@ -905,41 +335,11 @@ class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property, command) {
-        /* istanbul ignore if */
-        if (rust) {
-            // Mutates a detached clone across the boundary; copy the result
-            // back onto `property` so callers that hold onto it (as every
-            // test does) see the same mutation the TS body makes in place.
-            Object.assign(property, rust.decoratorManagerExecutePropertyCommand(property, command));
-            return;
-        }
-        const { target, decorator, type } = command;
-        if(target.properties || target.property || target.type) {
-            if (
-                this.falsyOrEqual(
-                    target.property ? target.property : target.properties,
-                    [property.name]
-                ) &&
-                this.falsyOrEqual(target.type, [property.$class])
-            ) {
-                this.applyDecorator(property, type, decorator);
-            }
-        }
-    }
-
-    /**
-     * Applies the decorator on top of the namespace or else on all declarations
-     * within the namespace.
-     * @private
-     * @param {*} declaration the type to apply the decorator to
-     * @param {string} type the command type
-     * @param {*} decorator the decorator to add
-     * @param {*} target the target object for the decorator
-     */
-    static checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target) {
-        if (target.declaration) {
-            this.applyDecorator(declaration, type, decorator);
-        }
+        // Mutates a detached clone across the boundary; copy the result
+        // back onto `property` so callers that hold onto it (as every
+        // test does) see the same mutation the TS body used to make in
+        // place.
+        Object.assign(property, rust.decoratorManagerExecutePropertyCommand(property, command));
     }
 
     /**

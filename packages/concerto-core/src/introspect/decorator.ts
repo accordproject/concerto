@@ -12,32 +12,29 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import { Logger } from '@accordproject/concerto-util';
-import ModelUtil from '../modelutil';
 import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type Decorated from './decorated';
 import type { AstNode } from './decorated';
-import type { IDecorator } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// Its bindings are typed `never` so that a view leaves the member's inferred
-// return type, and so the .d.ts, exactly as the TS body makes it.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
+// `never` so that a view leaves the member's inferred return type, and so
+// the .d.ts, exactly as the TS body used to make it.
 //
 // dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
 // with no .d.ts, since it is not public API (tsconfig.build.internal.json;
-// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
-// must never see a specifier it would resolve: `loadEngine` takes a
-// non-literal one (esbuild, rollup and browserify leave it alone) and never
-// names the bare `require` (esbuild's ESM output would add its `__require`
-// shim, which webpack reports as a critical dependency), and webpack folds
-// the `typeof __webpack_require__` test and keeps only the dead-in-Node
-// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
-// bundles exactly as before (PORTING.md 1.5).
+// OD-11). A bundler must never see a specifier it would resolve: `loadEngine`
+// takes a non-literal one (esbuild, rollup and browserify leave it alone) and
+// never names the bare `require` (esbuild's ESM output would add its
+// `__require` shim, which webpack reports as a critical dependency), and
+// webpack folds the `typeof __webpack_require__` test and keeps only the
+// dead-in-Node `__non_webpack_require__` branch, so it neither resolves nor
+// warns.
 //
 // rust mode works through the CommonJS dist/ only. Through the public ESM and
 // browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
@@ -50,8 +47,7 @@ declare const __non_webpack_require__: NodeRequire;
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * A decorator argument that references a type, produced from a
@@ -92,19 +88,6 @@ class Decorator {
     }
 
     /**
-    * Handles a validation error, logging and throwing as required
-    * @param {string} level the log level
-    * @param {string | Error} err the message to log, or the error that was caught
-    * @private
-    */
-    handleError(level: string | undefined, err: string | Error): void {
-        Logger.dispatch(level as string, err);
-        if (level === 'error') {
-            throw new IllegalModelException(err, this.getParent().getModelFile(), this.ast.location);
-        }
-    }
-
-    /**
      * Visitor design pattern
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
@@ -123,41 +106,31 @@ class Decorator {
     }
 
     /**
+    * Handles a validation error, logging and throwing as required. Called
+    * back by the Rust engine's decoratorValidate binding (concerto-wasm
+    * src/lib.rs `handle_error`) for every non-fatal-or-fatal validation
+    * outcome, so this is a live collaborator, not TS-only fallback logic.
+    * @param {string} level the log level
+    * @param {string | Error} err the message to log, or the error that was caught
+    * @private
+    */
+    handleError(level: string | undefined, err: string | Error): void {
+        Logger.dispatch(level as string, err);
+        if (level === 'error') {
+            throw new IllegalModelException(err, this.getParent().getModelFile(), this.ast.location);
+        }
+    }
+
+    /**
      * Process the AST and build the model
      * @throws {IllegalModelException}
      * @private
      */
     process() {
-        /* istanbul ignore if */
-        if (rust) {
-            // `this` lets the binding name `this.getParent().getModelFile()`
-            // in the IllegalModelException it throws for a null node, where
-            // the TS body below crashes (concerto-rust DIVERGENCES.md DV-018).
-            Object.assign(this, rust.decoratorProcess(this.ast, this));
-            return;
-        }
-
-        // a Decorator is always built from a metamodel Decorator node, which
-        // always carries a name
-        this.name = (this.ast as IDecorator).name;
-        this.arguments = [];
-
-        if (this.ast.arguments) {
-            for (let n = 0; n < this.ast.arguments.length; n++) {
-                let thing = this.ast.arguments[n];
-                if (thing) {
-                    if (thing.$class === `${MetaModelNamespace}.DecoratorTypeReference`) {
-                        this.arguments.push({
-                            type: 'Identifier',
-                            name: thing.type.name,
-                            array: thing.isArray
-                        });
-                    } else {
-                        this.arguments.push(thing.value);
-                    }
-                }
-            }
-        }
+        // `this` lets the binding name `this.getParent().getModelFile()`
+        // in the IllegalModelException it throws for a null node, where
+        // the old TS body used to crash (concerto-rust DIVERGENCES.md DV-018).
+        Object.assign(this, rust.decoratorProcess(this.ast, this));
     }
 
     /**
@@ -171,88 +144,7 @@ class Decorator {
         const parent = this.getParent() as Decorated & { getFullyQualifiedName?(): string };
         const decoratedName = parent.getFullyQualifiedName?.();
 
-        /* istanbul ignore if */
-        if (rust) {
-            rust.decoratorValidate(this, mf, decoratedName);
-            return;
-        }
-
-        const mm = mf.getModelManager();
-        const validationOptions = mm.getDecoratorValidation();
-
-        if (validationOptions.missingDecorator || validationOptions.invalidDecorator) {
-            try {
-                // this throws if the type does not exist
-                mf.resolveType(decoratedName, this.getName(), this.ast.location);
-                const decoratorDecl = mf.getType(this.getName());
-                const requiredProperties = decoratorDecl.getProperties().filter(p => !p.isOptional());
-                const optionalProperties = decoratorDecl.getProperties().filter(p => p.isOptional());
-                const allProperties = [...requiredProperties, ...optionalProperties];
-                if (this.getArguments().length < requiredProperties.length) {
-                    const err = `Decorator ${this.getName()} has too few arguments. Required properties are: [${requiredProperties.map(p => p.getName()).join()}]`;
-                    this.handleError(validationOptions.invalidDecorator, err);
-                }
-                const args = this.getArguments();
-                for (let n = 0; n < args.length; n++) {
-                    const arg = args[n];
-                    if (n > allProperties.length - 1) {
-                        const err = `Decorator ${this.getName()} has too many arguments. Properties are: [${allProperties.map(p => p.getName()).join()}]`;
-                        this.handleError(validationOptions.invalidDecorator, err);
-                    }
-                    else {
-                        const property = allProperties[n];
-                        const argType = typeof arg;
-                        switch (property.getType()) {
-                        case 'Integer':
-                        case 'Double':
-                        case 'Long':
-                            if (argType !== 'number') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected number. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            break;
-                        case 'String':
-                            if (argType !== 'string') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected string. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            break;
-                        case 'Boolean':
-                            if (argType !== 'boolean') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected boolean. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            break;
-                        default: {
-                            if (typeof arg !== 'object' || arg?.type !== 'Identifier') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected object. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            // handleError above only throws when the decorator
-                            // validation option is set to 'error', so arg may still
-                            // be something other than a type reference here
-                            const typeReference = arg as DecoratorTypeReferenceArgument;
-                            const typeDecl = mf.getType(typeReference.name);
-                            if (!typeDecl) {
-                                const err = `Decorator ${this.getName()} references a type ${typeReference.name} which has not been defined/imported.`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            else {
-                                if (!ModelUtil.isAssignableTo(typeDecl.getModelFile(), typeDecl.getFullyQualifiedName(), property)) {
-                                    const err = `Decorator ${this.getName()} references a type ${typeReference.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`;
-                                    this.handleError(validationOptions.invalidDecorator, err);
-                                }
-                            }
-                            break;
-                        }
-                        }
-                    }
-                }
-            }
-            catch (err) {
-                this.handleError(validationOptions.missingDecorator, err as Error);
-            }
-        }
+        rust.decoratorValidate(this, mf, decoratedName);
     }
 
     /**

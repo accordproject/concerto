@@ -95,7 +95,6 @@
     "datetimeutil.d.ts",
     "dayjs-setup.d.ts",
     "dcsconverter.d.ts",
-    "decoratorextractor.d.ts",
     "decoratormanager.d.ts",
     "decoratormodelhelper.d.ts",
     "factory.d.ts",

@@ -13,10 +13,8 @@
  */
 
 import Declaration from './declaration';
-import IllegalModelException from './illegalmodelexception';
 import MapValueType from './mapvaluetype';
 import MapKeyType from './mapkeytype';
-import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -24,17 +22,17 @@ import type ModelFile from './modelfile';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// See property.ts's own copy of this comment for the bundler/webpack
-// reasoning this loader relies on.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See property.ts's own
+// copy of this comment for the bundler/webpack reasoning this loader relies
+// on.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * MapDeclaration defines a Map data structure, which allows storage of a collection
@@ -71,27 +69,7 @@ class MapDeclaration extends Declaration {
     process() {
         super.process();
 
-        /* istanbul ignore if */
-        if (rust) {
-            rust.mapDeclarationProcess(this);
-            this.key = new MapKeyType(this, this.ast.key);
-            this.value = new MapValueType(this, this.ast.value);
-            return;
-        }
-
-        if (!this.ast.key || !this.ast.value) {
-            throw new IllegalModelException(`MapDeclaration must contain Key & Value properties ${this.ast.name}`, this.modelFile, this.ast.location);
-        }
-
-        if (!ModelUtil.isValidMapKey(this.ast.key)) {
-            throw new IllegalModelException(`MapDeclaration must contain valid MapKeyType  ${this.ast.name}`, this.modelFile, this.ast.location);
-        }
-
-        if (!ModelUtil.isValidMapValue(this.ast.value)) {
-            throw new IllegalModelException(`MapDeclaration must contain valid MapValueType, for MapDeclaration ${this.ast.name}` , this.modelFile, this.ast.location);
-        }
-
-        // super.process() has already set name and fqn from this.ast.name
+        rust.mapDeclarationProcess(this);
         this.key = new MapKeyType(this, this.ast.key);
         this.value = new MapValueType(this, this.ast.value);
     }
