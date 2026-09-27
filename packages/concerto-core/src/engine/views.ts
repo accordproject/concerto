@@ -837,10 +837,13 @@ function stageModelFile(modelFile: any): boolean {
 
 /**
  * P5-10b: the StringValidators built by `probeCustomRegExp` when a lazily
- * built file was constructed, by the property AST node each was built
- * from, until `fieldProcess` gives each to the Field built from that node.
+ * built file was constructed, by that ModelFile and then by the property
+ * AST node each was built from, until `fieldProcess` gives each to the
+ * Field built from that node in that file. Keyed by file as well as node
+ * because two files (in one manager or two) can share AST objects, and
+ * each file's Fields must get the validators its own manager's engine built.
  */
-const probedStringValidators = new WeakMap<object, any>();
+const probedStringValidators = new WeakMap<object, WeakMap<object, any>>();
 
 /**
  * Whether a property AST node is one `Field.process` builds a
@@ -912,9 +915,11 @@ function probeCustomRegExp(modelFile: any, ast: any): boolean {
     } catch (e) {
         return false;
     }
+    const byNode = new WeakMap<object, any>();
     for (const [node, validator] of built) {
-        probedStringValidators.set(node, validator);
+        byNode.set(node, validator);
     }
+    probedStringValidators.set(modelFile, byNode);
     return true;
 }
 
@@ -926,11 +931,13 @@ function probeCustomRegExp(modelFile: any, ast: any): boolean {
  */
 function takeProbedStringValidator(field: any): any {
     const node = field.ast;
-    const validator = node && typeof node === 'object' ? probedStringValidators.get(node) : undefined;
+    const modelFile = field.parent?.modelFile;
+    const byNode = modelFile && typeof modelFile === 'object' ? probedStringValidators.get(modelFile) : undefined;
+    const validator = byNode && node && typeof node === 'object' ? byNode.get(node) : undefined;
     if (validator === undefined) {
         return undefined;
     }
-    probedStringValidators.delete(node);
+    byNode!.delete(node);
     validator.field = field;
     return validator;
 }
