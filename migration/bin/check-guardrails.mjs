@@ -4,7 +4,11 @@
  *
  * Exits non-zero (and prints why) if, relative to a given base ref
  * (default origin/main):
- *   1. any file under packages/concerto-core/test/ changed;
+ *   1. any file under packages/concerto-core/test/ changed, except for
+ *      hunks that relax an exact-message assertion to a class check and are
+ *      listed in migration/guardrails/test-message-relaxations.tsv (P5-09,
+ *      maintainer decision 2026-09-27 on accordproject/concerto-rust#253;
+ *      see migration/guardrails/relaxations.mjs for the accepted shapes);
  *   2. the `nyc` block in packages/concerto-core/package.json changed;
  *   3. the export list of packages/concerto-core/src/index.ts changed;
  *   4. the generated API snapshot (migration/api-snapshot/) differs from
@@ -27,6 +31,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { buildSnapshot } from '../api-snapshot/generate-snapshot.mjs';
+import { checkTestTree } from '../guardrails/relaxations.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATION_ROOT = path.resolve(__dirname, '..');
@@ -68,29 +73,16 @@ if (gitOrNull(['rev-parse', '--verify', BASE_REF]) === null) {
     process.exit(2);
 }
 
-// -- Rule 1: nothing under packages/concerto-core/test/ changed. -----------
-function changedFilesVsBase() {
-    const set = new Set();
-    const committed = gitOrNull(['diff', '--name-only', `${BASE_REF}...HEAD`]) || '';
-    const staged = gitOrNull(['diff', '--name-only', '--cached']) || '';
-    const unstaged = gitOrNull(['diff', '--name-only']) || '';
-    const untracked = gitOrNull(['ls-files', '--others', '--exclude-standard']) || '';
-    for (const chunk of [committed, staged, unstaged, untracked]) {
-        for (const line of chunk.split('\n')) {
-            const f = line.trim();
-            if (f) set.add(f);
-        }
-    }
-    return [...set];
-}
-
-const changed = changedFilesVsBase();
+// -- Rule 1: nothing under packages/concerto-core/test/ changed, except
+// allow-listed message-to-class assertion relaxations (P5-09). ------------
 const testPrefix = `${CORE_REL}/test/`;
-const changedTestFiles = changed.filter((f) => f.startsWith(testPrefix));
-if (changedTestFiles.length > 0) {
+const ALLOW_LIST = path.join(MIGRATION_ROOT, 'guardrails', 'test-message-relaxations.tsv');
+
+const testViolations = checkTestTree({ repoRoot: REPO_ROOT, baseRef: BASE_REF, testPrefix, allowListPath: ALLOW_LIST });
+if (testViolations.length > 0) {
     failures.push([
-        `${changedTestFiles.length} file(s) under ${testPrefix} changed relative to ${BASE_REF}:`,
-        ...changedTestFiles.map((f) => `    ${f}`),
+        `${testViolations.length} disallowed change(s) under ${testPrefix} relative to ${BASE_REF} (only allow-listed message-to-class assertion relaxations may change):`,
+        ...testViolations.map((v) => `    ${v}`),
     ].join('\n'));
 }
 

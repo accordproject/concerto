@@ -19,11 +19,22 @@
  * canonical outcomes (plan §2.5, §2.6).
  *
  * Verdicts:
- *   pass           canonical outcome identical to the recorded one
+ *   pass           canonical outcome identical to the recorded one, apart
+ *                  from exception message text (task P5-09, below)
  *   fail           outcome differs, the engine diverged while rebuilding the
  *                  inputs' state, or the engine does not support the op
  *   harness-error  the fixture or one of its inputs is missing, unreadable or
  *                  malformed; never counted as a pass
+ *
+ * Error parity (maintainer decision 2026-09-27, task P5-09,
+ * accordproject/concerto-rust#253): an engine must throw in the same
+ * scenarios with the same exception class as the reference; the message text
+ * may differ. So the verdict ignores `error.message` (and the `message` of any
+ * `{"@@oracle":"throws"}` marker inside a value). A fixture that differs only
+ * in message is a pass; the verdict carries the message difference as
+ * `message_diff`, and replayCorpus() counts and lists them (`message_only`,
+ * `message_diffs`) for information. Throw/no-throw, class, component,
+ * location, values and effects are still compared exactly.
  *
  * An adapter's run() may return a promise (async ops, task
  * accordproject/concerto-rust#94); judgeFixture() then returns a promise of
@@ -85,6 +96,34 @@ function firstDiff(a, b, p = '$') {
         return s === undefined ? 'undefined' : (s.length > 200 ? s.slice(0, 200) + '…' : s);
     };
     return `${p}: expected ${show(a)} got ${show(b)}`;
+}
+
+/**
+ * A copy of a canonical outcome with every exception message removed: the
+ * top-level `error.message`, and the `message` of each `{"@@oracle":"throws"}`
+ * marker (codec.js `safe`) anywhere in it.
+ * @param {*} v canonical outcome (or part of one)
+ * @param {boolean} [top] whether `v` is the outcome itself
+ * @returns {*} the copy
+ */
+function withoutMessages(v, top = true) {
+    if (Array.isArray(v)) {
+        return v.map((x) => withoutMessages(x, false));
+    }
+    if (!v || typeof v !== 'object') {
+        return v;
+    }
+    const out = {};
+    for (const [k, x] of Object.entries(v)) {
+        out[k] = withoutMessages(x, false);
+    }
+    if (top && out.error && typeof out.error === 'object' && !Array.isArray(out.error)) {
+        delete out.error.message;
+    }
+    if (out['@@oracle'] === 'throws') {
+        delete out.message;
+    }
+    return out;
 }
 
 /**
@@ -181,7 +220,12 @@ function verdictOf(base, res, start, end, expected, facts) {
     if (sortedStringify(actual) === sortedStringify(expectedCanon)) {
         return Object.assign(base, { status: 'pass' });
     }
-    return Object.assign(base, { status: 'fail', detail: firstDiff(expectedCanon, actual) });
+    // P5-09: message text is not part of the verdict.
+    const detail = firstDiff(withoutMessages(expectedCanon), withoutMessages(actual));
+    if (detail === null) {
+        return Object.assign(base, { status: 'pass', message_diff: firstDiff(expectedCanon, actual) });
+    }
+    return Object.assign(base, { status: 'fail', detail });
 }
 
 /**
@@ -194,7 +238,7 @@ function verdictOf(base, res, start, end, expected, facts) {
  */
 async function replayCorpus(fixturesDir, adapter, store, opts = {}) {
     const files = listFixtures(fixturesDir).filter(opts.filter || (() => true));
-    const summary = { engine: adapter.name, total: 0, pass: 0, fail: 0, harness_error: 0, by_source: {}, by_op: {}, failures: [] };
+    const summary = { engine: adapter.name, total: 0, pass: 0, fail: 0, harness_error: 0, message_only: 0, by_source: {}, by_op: {}, failures: [], message_diffs: [] };
     for (const f of files) {
         let v = judgeFile(f, adapter, store);
         if (v && typeof v.then === 'function') {
@@ -209,6 +253,11 @@ async function replayCorpus(fixturesDir, adapter, store, opts = {}) {
             bucket[k].total++;
             bucket[k][key]++;
         }
+        if (v.message_diff) {
+            // Information only (P5-09): a pass whose exception message differs.
+            summary.message_only++;
+            summary.message_diffs.push({ file: path.relative(fixturesDir, f), op: v.op, detail: v.message_diff });
+        }
         if (v.status !== 'pass') {
             summary.failures.push({ file: path.relative(fixturesDir, f), status: v.status, op: v.op, detail: v.detail });
         }
@@ -220,4 +269,4 @@ async function replayCorpus(fixturesDir, adapter, store, opts = {}) {
     return summary;
 }
 
-module.exports = { listFixtures, judgeFile, judgeFixture, replayCorpus, firstDiff };
+module.exports = { listFixtures, judgeFile, judgeFixture, replayCorpus, firstDiff, withoutMessages };

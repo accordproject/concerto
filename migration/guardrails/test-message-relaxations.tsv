@@ -1,0 +1,12 @@
+# P5-09 (accordproject/concerto-rust#253): the only edits allowed under
+# packages/concerto-core/test/** relax an exact-message assertion to a class
+# (or 'it throws') check. One row per changed assertion, tab-separated:
+#   file           repo-relative path of the test file
+#   test           title of the enclosing it('...') block
+#   old_assertion  the assertion before (whitespace is collapsed)
+#   new_assertion  the assertion after (whitespace is collapsed)
+#   reason         why the message differs (e.g. the Rust engine's wording)
+# check-guardrails.mjs rule 1 fails on any test change not listed here, any
+# added/deleted/renamed/skipped test and any change that is not an assertion.
+# Each row is also listed in its PR (file, test, old, new) for review sign-off.
+file	test	old_assertion	new_assertion	reason

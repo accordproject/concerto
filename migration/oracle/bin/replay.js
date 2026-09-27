@@ -24,6 +24,8 @@
  *
  * An adapter module exports `createAdapter()` returning {name, run(op, inputs)}.
  * Exit status: 0 only when every fixture passes (no fail, no harness error).
+ * A fixture whose exception message alone differs passes (task P5-09); it is
+ * counted as message_only and listed under message_diffs in the report.
  */
 
 process.env.TZ = 'UTC';
@@ -105,15 +107,22 @@ const filter = (f) => {
     const summary = await replayCorpus(opts.fixtures, adapter, store, { filter });
     summary.seconds = Math.round((Date.now() - t0) / 100) / 10;
     const allFailures = summary.failures;
+    const allMessageDiffs = summary.message_diffs;
     summary.failures = allFailures.slice(0, opts.maxFailures);
     summary.failures_truncated = allFailures.length > opts.maxFailures;
+    summary.message_diffs = allMessageDiffs.slice(0, opts.maxFailures);
     if (opts.report) {
         fs.mkdirSync(path.dirname(opts.report), { recursive: true });
-        fs.writeFileSync(opts.report, JSON.stringify(Object.assign({}, summary, { failures: allFailures }), null, 1) + '\n');
+        fs.writeFileSync(opts.report, JSON.stringify(Object.assign({}, summary, { failures: allFailures, message_diffs: allMessageDiffs }), null, 1) + '\n');
     }
-    out(`engine=${summary.engine} total=${summary.total} pass=${summary.pass} fail=${summary.fail} harness_error=${summary.harness_error} agreement=${summary.agreement_pct}% (${summary.seconds}s)`);
+    // message_only: passes whose exception message differs (P5-09: the
+    // verdict compares throw/no-throw and class, not message text).
+    out(`engine=${summary.engine} total=${summary.total} pass=${summary.pass} fail=${summary.fail} harness_error=${summary.harness_error} message_only=${summary.message_only} agreement=${summary.agreement_pct}% (${summary.seconds}s)`);
     for (const f of summary.failures.slice(0, 10)) {
         out(`ERROR ${f.status} ${f.op} ${f.file}: ${f.detail}`);
+    }
+    for (const f of summary.message_diffs.slice(0, 5)) {
+        out(`info message differs (pass) ${f.op} ${f.file}: ${f.detail}`);
     }
     process.exitCode = summary.pass === summary.total && summary.total > 0 ? 0 : 1;
 })().catch((e) => {
