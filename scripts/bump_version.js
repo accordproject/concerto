@@ -31,7 +31,6 @@ const workspacesPattern = 'packages/**/package.json'; // Adjust this pattern bas
 const packageNames = [
     "@accordproject/concerto-analysis",
     "@accordproject/concerto-core",
-    "@accordproject/concerto-engine",
     "@accordproject/concerto-cto",
     "@accordproject/concerto-types",
     "@accordproject/concerto-util",
