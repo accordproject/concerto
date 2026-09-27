@@ -431,6 +431,14 @@ class ResourceValidator {
                 );
                 delegated = true;
             } catch (err) {
+                /* istanbul ignore next: defensive rethrow (PORTING.md 1.5).
+                 * `EngineFastPathUnsupported` is the only outcome the wire
+                 * codec / engine call is documented to produce for a value
+                 * this method can receive; a real value or type error from
+                 * `checkString`/`resourceValidatorPrimitiveValid` would mean
+                 * the engine itself misbehaved, so this rethrows rather than
+                 * silently falling through to the TS switch below. No
+                 * public-API input has been found that reaches this arm. */
                 if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
                     throw err;
                 }
