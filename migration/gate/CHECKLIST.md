@@ -126,14 +126,18 @@ for the numbers as found.
   cargo test --release -p accordproject-concerto-core --test oracle
   ```
   (in the concerto-rust checkout, at the integration branch head).
-  **Expected:** `replays_the_oracle_corpus` passes; 100% of fixtures pass,
-  0 failures, 0 harness errors.
+  **Expected:** `replays_the_oracle_corpus` passes with 0 failures,
+  0 regressions and 0 harness errors against `baseline.tsv` on the canonical
+  corpus plus the supplement. Unsupported fixtures (stays-ts and
+  not-yet-served ops) are reported, by owner, but do not count against the
+  gate (maintainer decision, 2026-09-27, #72).
 - **WASM (JS binding):**
   ```
   CONCERTO_ORACLE_FIXTURES=<canonical fixtures> \
   node migration/oracle/bin/replay.js --engine <path to migration/oracle/lib/rust-adapter.js>
   ```
-  **Expected:** same as native — 100% pass, 0 fail, 0 harness error.
+  **Expected:** same as native: 0 failures, 0 regressions and 0 harness
+  errors; unsupported fixtures are reported but not gating.
 - **Evidence:** `migration/oracle/results/{coverage,replay-reference,replay-<engine>}.json`,
   copied into `migration/gate/reports/<run>/oracle/`.
 
