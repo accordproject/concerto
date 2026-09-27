@@ -13,16 +13,17 @@
  */
 
 /* istanbul ignore file */
-// Loads the WASM engine for CONCERTO_ENGINE=rust (P4-02; P0-04b trial
-// scaffold) and registers the host functions it calls back: the error factory
-// and semver.parse.
+// Loads the WASM engine (P4-02; P5-02 removed the CONCERTO_ENGINE=ts|rust
+// flag: the Rust engine is now the only path) and registers the host
+// functions it calls back: the error factory and semver.parse.
 
 import semver from 'semver';
 import { makeError } from './errors';
 
 /**
  * The bindings of the concerto-wasm module (concerto-rust concerto-wasm/src/lib.rs).
- * Only the three trial units are bound.
+ * Every converted member is bound; the P0-04b trial units (ModelUtil,
+ * NumberValidator, ScalarDeclaration) were only the first three.
  */
 export interface RustEngine {
     [binding: string]: (...args: any[]) => any;
