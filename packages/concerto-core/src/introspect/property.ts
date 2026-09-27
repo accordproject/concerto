@@ -49,10 +49,12 @@ declare const __non_webpack_require__: NodeRequire;
 // per-instance path (propertyProcess, fastFromJson, ...) resolves the module
 // once rather than on every call.
 const engineModules: { [specifier: string]: any } = {};
+/* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     engineModules[specifier] ??
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
+/* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**

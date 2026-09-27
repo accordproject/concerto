@@ -18,8 +18,10 @@
 // would resolve (PORTING.md 1.5).
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
