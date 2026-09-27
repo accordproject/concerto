@@ -217,6 +217,10 @@ function statusItems(step) {
 }
 
 function coreSuiteRustItems(step) {
+  // CONCERTO_ENGINE_MODULE set but missing (task P5-01c, #250): a setup
+  // mistake, never expected-pending, and never quietly folded into "no
+  // failing tests reported" below.
+  if (step.error) return [unexpected('engine module (CONCERTO_ENGINE_MODULE)', step.error)];
   const failing = step.stats ? step.stats.failures : null;
   if (!step.stats) {
     return [unexpected('core suite (CONCERTO_ENGINE=rust)', `mocha exited ${step.exit} and its JSON reporter output could not be parsed`)];
@@ -253,6 +257,9 @@ function wasmItems(step) {
 }
 
 function oracleWasmItems(step) {
+  // CONCERTO_ENGINE_MODULE set but missing (task P5-01c, #250): same as
+  // coreSuiteRustItems above.
+  if (step.error) return [unexpected('engine module (CONCERTO_ENGINE_MODULE)', step.error)];
   const r = step.replay;
   if (!r) return [unexpected('oracle WASM replay', `replay.js exited ${step.exit} without a report`)];
   const items = [];
