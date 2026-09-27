@@ -145,6 +145,22 @@ test('core_suite_rust: failure matched on title but a different file → unexpec
   assert.equal(c.verdict, 'unexpected');
 });
 
+// CONCERTO_ENGINE_MODULE set but missing (task P5-01c, accordproject/
+// concerto-rust#250): must fail loudly (unexpected), never expected-pending
+// and never mistaken for "no failing tests reported" just because there is
+// no mocha `stats` to read.
+test('core_suite_rust: CONCERTO_ENGINE_MODULE set but missing → unexpected, not a pass or na', () => {
+  const step = {
+    ok: false,
+    error: 'CONCERTO_ENGINE_MODULE=/tmp/does-not-exist.cjs is set but does not exist',
+    engine_module: { path: '/tmp/does-not-exist.cjs', source: 'env (CONCERTO_ENGINE_MODULE)', exists: false, built_at: null },
+  };
+  const c = classifyStep('core_suite_rust', step);
+  assert.equal(c.verdict, 'unexpected');
+  assert.equal(c.items.length, 1);
+  assert.match(c.items[0].reason, /does not exist/);
+});
+
 // --- wasm --------------------------------------------------------------------
 
 function wasmStep(overrides = {}) {
@@ -211,6 +227,20 @@ test('oracle_wasm: a new DecoratorManager disagreement outside the pinned 31 →
 test('oracle_wasm: truncated failure list or harness errors → unexpected', () => {
   assert.equal(classifyStep('oracle_wasm', oracleWasmStep(KNOWN.slice(0, 3), { failures_truncated: true })).verdict, 'unexpected');
   assert.equal(classifyStep('oracle_wasm', oracleWasmStep(KNOWN.slice(0, 3), { harness_error: 1 })).verdict, 'unexpected');
+});
+
+// CONCERTO_ENGINE_MODULE set but missing (task P5-01c, #250) — same
+// fail-loudly requirement as core_suite_rust above.
+test('oracle_wasm: CONCERTO_ENGINE_MODULE set but missing → unexpected, not a pass or na', () => {
+  const step = {
+    ok: false,
+    error: 'CONCERTO_ENGINE_MODULE=/tmp/does-not-exist.cjs is set but does not exist',
+    engine_module: { path: '/tmp/does-not-exist.cjs', source: 'env (CONCERTO_ENGINE_MODULE)', exists: false, built_at: null },
+  };
+  const c = classifyStep('oracle_wasm', step);
+  assert.equal(c.verdict, 'unexpected');
+  assert.equal(c.items.length, 1);
+  assert.match(c.items[0].reason, /does not exist/);
 });
 
 // --- everything else -----------------------------------------------------------
