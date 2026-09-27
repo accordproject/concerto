@@ -437,6 +437,11 @@ function collectCoreTests(concertoRoot, migrationDir, logDir, tagInfo, rustRoot)
     '--recursive',
     '-t', '10000',
     '--reporter', 'json',
+    // P5-02b (accordproject/concerto-rust#251): the lifted fallback checks
+    // count towards the nyc gate, as in concerto-core's own `test` script.
+    // They run first: a white-box test in test/serializer/jsongenerator.js
+    // leaves a sinon stub on ModelUtil.isEnum for the rest of the process.
+    path.join(concertoRoot, 'migration', 'oracle', 'lifted', 'fallbacks.spec.js'),
     'test/',
   ];
   const res = run('npx', args, {
