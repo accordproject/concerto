@@ -25,7 +25,7 @@ other than this file was changed. concerto-conformance is untouched.
 | Supplement follow-ups | concerto-rust #190, #193 to #201 (all closed) | read 2026-09-27 |
 | DIVERGENCES.md | concerto-rust `claude/tender-pascal-ocwf9q` | `114401e`, DV-001 to DV-019 |
 | P5-07 plan | concerto#1376, `migration/BREAKING-CHANGES-PLAN.md` on `claude/tender-pascal-ocwf9q-cloud-3-P5-07` | BC-01 to BC-36, BR-01 to BR-11, Q1 to Q12 |
-| concerto-conformance | `origin/main` | `9339642`: 60 semantic + 15 validate = 75 scenarios |
+| concerto-conformance | `origin/main` | `9339642`: 81 semantic + 15 validate = 96 scenarios (corrected in P5-08b; the first version said 60 + 15 = 75) |
 
 ### 0.2 Citation conventions
 
@@ -187,7 +187,7 @@ These scenarios load **JSON ASTs only**, since the shapes cannot be written in C
 
 | ID | Source | Behaviour | Assertion | Disposition |
 |---|---|---|---|---|
-| PRM-01 | F:lifted/Serializer.fromJSON/707218a446c96228c2f1dae0 (JP-CV-020), cdb265c14bad738f749b0062; F:gaps/Serializer.fromJSON/1aa31f090ed15792e0b30485 | A non-number for a `Long` field is rejected. | `reject(ValidationException) @rule:INSTANCE_010` (new) | promote |
+| PRM-01 | F:lifted/Serializer.fromJSON/707218a446c96228c2f1dae0 (JP-CV-020), cdb265c14bad738f749b0062; F:gaps/Serializer.fromJSON/1aa31f090ed15792e0b30485 | A non-number for a `Long` field is rejected. | `reject(ValidationException) @rule:INSTANCE_010` (new) | promote. Note: both lifted fixtures were recorded with `{validate: false}` (the type check is the populator's, not the validator's); the scenario uses default options, as in the gaps fixture. |
 | PRM-02 | F:lifted/Serializer.fromJSON/f06744c7e6fa3441835e266f (JP-CV-021); F:gaps/Serializer.fromJSON/dd8a2934832696c1b29dabd4 | A non-number for a `Double` field is rejected. | `reject(ValidationException) @rule:INSTANCE_010` | promote |
 | PRM-03 | F:lifted/Serializer.fromJSON/7501684a928cc82ddb480a47 (JP-CV-031); F:gaps/Serializer.fromJSON/d106c4be2398eea1c9f577f5 | A non-string for a `String` field is rejected. | `reject(ValidationException) @rule:INSTANCE_010` | promote |
 | PRM-04 | F:lifted/Serializer.fromJSON/32d50dc5c52c15ee0eb24f7e, c5b87cdb0253a6634bd0db1d, 76cb58b8715aef927fe84a59, 94cc1cb6fc3bf6f62ae38ecb, 648a492e4cef700df339b4ee, aee94f197dd35f048a664d25 (JP-CV-013/018/023/028/033/007) | An array element of the wrong primitive type is rejected (Integer, Long, Double, Boolean, String, DateTime). | `reject(ValidationException) @rule:INSTANCE_010` | promote (one Scenario Outline, 6 rows). |
@@ -205,12 +205,12 @@ These scenarios load **JSON ASTs only**, since the shapes cannot be written in C
 |---|---|---|---|---|
 | REL-01 | F:gaps/Resource.validate/3b739c27995988ea846df853 | An identified instance with an empty identifier is rejected. | `reject(ValidationException) @rule:INSTANCE_020` (new) | promote (re-expressed, see 4.1). |
 | REL-02 | F:data/Serializer.fromJSON/4d720dde48ec1737aba3f2e5 (identifier1err) | An identified instance missing its identifier field is rejected. | `reject(any) @rule:INSTANCE_020` | **promote (pending Q-13)** (plain `Error`). |
-| REL-03 | F:lifted/Serializer.fromJSON/dfd52817045927bf4086d2d3 (JP-RL-001), b2489235f4c5aa758d45b03d (JP-RL-007) | A relationship (single or array) given as an identifier string is accepted. | `accept`, with `validate: false` as recorded | promote |
+| REL-03 | F:lifted/Serializer.fromJSON/dfd52817045927bf4086d2d3 (JP-RL-001), b2489235f4c5aa758d45b03d (JP-RL-007) | A relationship (single or array) given as an identifier string is accepted. | `accept`, with `validate: false` as recorded | **promote (pending Q-11)**: the recorded `validate: false` is a serializer option. Moved from B2 to B3 in P5-08b. |
 | REL-04 | F:lifted/Serializer.fromJSON/9aed8b4bc4384bb4edb1342d (JP-RL-002), aa9ca2f4089cc755335b32a2 (JP-RL-004), bc0c01bd5483c1dbfde4008f (JP-RL-010); F:gaps/Serializer.fromJSON/2e9169b9f0f4dd24e1796dfd | With default options, a relationship field holding an object or a number is rejected. | `reject(any) @rule:INSTANCE_021` (new) | **promote (pending Q-13)** (plain `Error`). |
 | REL-05 | F:lifted/Serializer.fromJSON/777d0f1bdb8fc226c82bc415 (JP-VS-003) | A non-array for an array relationship field is rejected. | `reject(ValidationException) @rule:INSTANCE_011` | promote |
 | REL-06 | F:gaps/Serializer.fromJSON/1a57d3a92be9d0df3807cf59 (2) | A relationship to a type that is not identifiable is rejected at instance level. | `reject(any) @rule:INSTANCE_022` (new) | **promote (pending Q-13)**. |
 | REL-07 | F:gaps/Resource.validate/9b4cd4a28edb1f02bf3ac513 (7), 331fd69aebfa05c83bc17db6 (6) | A relationship field holding an in-memory `Resource` object. | – | **exclude**: recorded over hand-built JS resources (X-03). The JSON form of the same mistake is REL-04. |
-| REL-08 | F:lifted/Serializer.fromJSON/28fd1189f544a892dfebf965 (JP-RL-005), 35d815204888ac7e173b7a57 (JP-RL-012) | With `acceptResourcesForRelationships: true`, an embedded object without `$class`, or with an unknown `$class`, is rejected. | `reject(any)` / `reject(TypeNotFoundException)` | promote the second; first **pending Q-13**. |
+| REL-08 | F:lifted/Serializer.fromJSON/28fd1189f544a892dfebf965 (JP-RL-005), 35d815204888ac7e173b7a57 (JP-RL-012) | With `acceptResourcesForRelationships: true`, an embedded object without `$class`, or with an unknown `$class`, is rejected. | `reject(any)` / `reject(TypeNotFoundException)` | **promote (pending Q-11)** for both, since both need `acceptResourcesForRelationships`; the first also waits on Q-13. Moved from B2 to B3 in P5-08b. |
 | REL-09 | DV-008, BC-06; F:gaps/Resource.validate/d444ebcf0cf5a3c23e5ee6dd | A non-array value, or a `null` element, on an array relationship field. | TS: V8 `TypeError`. | **exclude until Q-07**. |
 | REL-10 | F:unit/Relationship.fromURI (6 error fixtures, e.g. 008acf088257006f30b3e8f6) | Relationship URI syntax (`resource:ns.Type#id`). | – | **exclude for now**: `Relationship.fromURI` is stays-ts (X-03). Worth a later "URI" area if P6-01 exposes it natively. |
 
@@ -218,9 +218,9 @@ These scenarios load **JSON ASTs only**, since the shapes cannot be written in C
 
 | ID | Source | Behaviour | Assertion | Disposition |
 |---|---|---|---|---|
-| INH-01 | F:gaps/Resource.validate/01286fe727ec519e670c99ad (16); F:unit/Resource.validate/7fc8e23992f6c50ed3b5fb11 | A nested value whose `$class` is not the declared type or a subtype of it is rejected. | `reject(ValidationException) @rule:INSTANCE_030` (new) | promote (re-expressed, see 4.1). |
+| INH-01 | F:gaps/Resource.validate/3363a3ddcc5914a45a7a1422 (single field), e2649af2c774da7d2f7a8484 (array field); F:unit/Resource.validate/7fc8e23992f6c50ed3b5fb11. 4 gaps fixtures record this check on a contained value (the two above plus their `Serializer.toJSON` twins 11f594369be367182917899f, 38c5bb8d166e95573bcaf670). The other 12 gaps fixtures with the same message, such as 01286fe727ec519e670c99ad (cited here before P5-08b), are the relationship-field form, not this behaviour. | A nested value whose `$class` is not the declared type or a subtype of it is rejected. | `reject(ValidationException) @rule:INSTANCE_030` (new) | promote (re-expressed, see 4.1). |
 | INH-02 | F:supplement/Serializer.fromJSON/3207b2a10e7355e10b2b2b9e, 93cc979c91cd056d2add5107 (#190 "validate a derived asset") | A subtype instance where the super type is declared is accepted, including inherited fields. | `accept` | promote |
-| INH-03 | F:supplement/Resource.validate/e455cab3b19b2f737d873688 (#190 "a field with a default value left unset") | A field with a default value may be omitted. | `accept` | promote |
+| INH-03 | F:supplement/Resource.validate/e455cab3b19b2f737d873688 (#190 "a field with a default value left unset") | A field with a default value may be omitted. | `accept` | promote (re-expressed, see 4.1). |
 | INH-04 | F:unit/Resource.validate/e112db6f710c1ba9da2175b7 (6) | A nested value with a property its type does not declare. | `reject(ValidationException) @rule:INSTANCE_002` | promote (nested form of INS-02; re-expressed, see 4.1). |
 
 ### 1.L Instance validation, validators: `validate/features/validators.feature` (+8)
@@ -362,7 +362,7 @@ suite's `org.concerto.<area>.<valid|invalid>.<rule>@1.0.0` pattern. The expected
 result is taken from the fixture's recorded `outcome` class, never its message.
 
 **Re-expressed candidates.** Rows marked "re-expressed" (INS-05, REL-01, INH-01,
-INH-04, IVL-04) were recorded by calling `Resource.validate` on resources built in
+INH-03, INH-04, IVL-04) were recorded by calling `Resource.validate` on resources built in
 memory, not from instance JSON. The batch that promotes them writes the equivalent
 instance JSON and must see the scenario pass on the JS reference in the suite's own
 CI before merging; if the JSON form gives a different class, the candidate is
@@ -383,15 +383,16 @@ A Scenario Outline counts once per example row. A positive/negative pair counts 
 | Metamodel | 4 | 2 | 0 |
 | Instance: structure | 9 | 4 | 2 |
 | Instance: primitives and dates | 17 | 2 | 2 |
-| Instance: relationships | 11 | 6 | 0 |
+| Instance: relationships | 11 | 9 | 0 |
 | Instance: inheritance | 4 | 0 | 0 |
 | Instance: validators | 8 | 8 | 3 |
 | Instance: maps | 3 | 1 | 0 |
 | Serialisation (optional) | 6 | 6 | 0 |
-| **Total** | **107** (101 without serialisation) | **45** | **30** |
+| **Total** | **107** (101 without serialisation) | **48** | **30** |
 
-62 new scenarios need no maintainer decision. The suite would grow from 75 to
-about 182 scenarios, 137 of them runnable before any question is answered. If
+59 new scenarios need no maintainer decision (62 before P5-08b moved REL-03 and
+REL-08 to B3). The suite would grow from 96 to about 203 scenarios, 155 of them
+runnable before any question is answered. If
 Q-07/Q-08 promote REL-09 and IMP-04 to 06, add about 5.
 
 ### 4.3 Batches
@@ -400,8 +401,8 @@ Q-07/Q-08 promote REL-09 and IMP-04 to 06, add about 5.
 |---|---|---|---|
 | **B0: hygiene** | FIX-01 to FIX-05: missing-fixture harness error, class step, `@rule` tags, convert the existing negatives, un-skip where the recorded class is known | class step in all three runners | 30 changed, 0 new |
 | **B1: model semantics, no questions** | CON-01 to 09, CON-12, IDN-01/02/04, NSI-05, MAP-01 to 03, DEC-01 to 03, AST-01/02 | options step (decorator and metamodel validation) | 31 new |
-| **B2: instance validation, no questions** | INS-02/03/05, PRM-01 to 06, PRM-08, REL-01/03/05, REL-08 (unknown `$class`), INH-01 to 04, IMP-01/02 | Rust and C# instance steps; JSON AST siblings for `validate/models` | 31 new |
-| **B3: after Q-11/Q-13/Q-15/Q-16/Q-17** | IDN-05, NSI-01 to 04, SCV-01 to 03/05, INS-01/07, PRM-07, REL-02/04/06, REL-08 (no `$class`), IVL-01 to 04, IMP-03 | answers | 32 new |
+| **B2: instance validation, no questions** | INS-02/03/05, PRM-01 to 06, PRM-08, REL-01/05, INH-01 to 04, IMP-01/02 | Rust and C# instance steps; JSON AST siblings for `validate/models` | 28 new |
+| **B3: after Q-11/Q-13/Q-15/Q-16/Q-17** | IDN-05, NSI-01 to 04, SCV-01 to 03/05, INS-01/07, PRM-07, REL-02/03/04/06, REL-08 (both), IVL-01 to 04, IMP-03 | answers | 35 new |
 | **B4: after Q-01 to Q-08, Q-10, Q-12** | CON-10, MAP-04, AST-03, DEC-05, INS-09, NSI-08 (plus REL-09, IMP-04 to 06 and the strict-AST group if promoted) | answers; `@since-R1` tag handling | 7 new (+5 or more) |
 | **B5 (optional)** | SER-01 to 03; later the DCS area | round-trip step; DCS steps | 6 new + DCS |
 
