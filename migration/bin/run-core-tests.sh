@@ -13,7 +13,7 @@
 #   MOCHA_JSON_OUT -> --json-out
 #
 # With no test files/globs given, the full `test/` tree is run
-# (--recursive). Pass one or more files for a fast, per-file run while
+# (--recursive), after migration/oracle/lifted/fallbacks.spec.js. Pass one or more files for a fast, per-file run while
 # iterating; do a full-suite run only when you need the whole picture.
 #
 # Exit code is mocha/nyc's exit code (non-zero on test failure or on a
@@ -54,7 +54,11 @@ fi
 mkdir -p "$NYC_TEMP_DIR" "$NYC_REPORT_DIR"
 
 if [[ ${#FILES[@]} -eq 0 ]]; then
-  FILES=("test/")
+  # The full gate run: the P5-02b lifted fallback checks count towards nyc,
+  # as in concerto-core's own `test` script. They run first, because
+  # test/serializer/jsongenerator.js leaves a sinon stub on ModelUtil.isEnum
+  # for the rest of the process.
+  FILES=("../../migration/oracle/lifted/fallbacks.spec.js" "test/")
 fi
 
 MOCHA_ARGS=(-r ts-node/register --recursive -t 10000)

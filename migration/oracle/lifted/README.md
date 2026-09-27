@@ -285,3 +285,37 @@ whole-repo coverage number, which is P2-11's job.
 None of these are marked `not-liftable` here — that determination (per the
 issue) needs the same per-test read this PR gave `stringvalidator.js`'s
 tests; it has not been redone for any other file.
+
+## P5-02b: fallback checks (`*.checks.js`, `fallbacks.spec.js`)
+
+Task P5-02b (accordproject/concerto-rust#251) adds asserting checks, not
+recorded fixtures, for the TS fallbacks that stay after P5-02 made the Rust
+engine the only path, so that concerto-core's nyc gate still covers them
+without editing `packages/concerto-core/test/**`:
+
+* `serializer-fallback.checks.js`: the serializer visitors behind
+  `EngineFastPathUnsupported` (JSONPopulator, JSONGenerator,
+  ResourceValidator, `Serializer.fromJSON`/`toJSON`);
+* `stringvalidator-regexp.checks.js`: `StringValidator` with a custom
+  `regExp` engine;
+* `collaborator.checks.js`: `ModelFile.validate()` and `ModelFile.filter()`
+  for a model file whose manager is not engine-backed, or that is detached
+  from its manager, and `BaseModelManager`'s reads (`derivesFrom`,
+  `isAssignableTo`, `getModelFileByFileName`, `resolveType`) on a manager
+  holding a hand-built model file the engine mirror did not take;
+* `public-api.checks.js`: small public members (`ModelUtil`'s engine memo,
+  `ResourceId` guards, and so on).
+
+`serializer-fallback.checks.js` also passes a boxed `utcOffset`
+(`new Number(0)`) to `fromJSON`: the codec cannot carry it, so plain, valid
+primitive values take `convertToObject`'s TS switch too.
+
+Each check is `{ id, covers, run(core), expect }`. `fallbacks.spec.js` runs
+`run` against the workspace `src/` and against the frozen v5.0.0 reference
+(`migration/oracle/reference`, skipped when not installed) and asserts both
+give `expect`, which was taken from the reference. concerto-core's `test`
+script and `migration/bin/status.mjs` run this spec before `test/` under the
+same nyc run. It must come first: `test/serializer/jsongenerator.js` leaves a
+sinon stub on `ModelUtil.isEnum` for the rest of the process. Files here are
+never named `*.scenarios.js`, so `drivers/lifted.spec.js` and the recorder
+never see them.
