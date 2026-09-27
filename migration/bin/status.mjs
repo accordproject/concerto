@@ -224,6 +224,9 @@ function collectLedger(migrationDir) {
     };
     const fullWeightRust = classRow('RUST');
     const fullWeightHybrid = classRow('HYBRID');
+    // PARTIAL (accordproject/concerto-rust#261): planned for Rust, no engine
+    // call yet; not in the D1 numerator. Absent from older SUMMARY.md files.
+    const fullWeightPartial = classRow('PARTIAL');
     const fullWeightTs = classRow('TS');
     const fullWeightTotal = classRow('total');
 
@@ -249,7 +252,7 @@ function collectLedger(migrationDir) {
       // constant markers and accept() (the "old formula"/"old figure").
       full_weight: {
         total_weight: fullWeightTotal,
-        weight_by_classification: { RUST: fullWeightRust, HYBRID: fullWeightHybrid, TS: fullWeightTs },
+        weight_by_classification: { RUST: fullWeightRust, HYBRID: fullWeightHybrid, PARTIAL: fullWeightPartial, TS: fullWeightTs },
         weighted_pct_rust_plus_hybrid: Number.parseFloat(oldPctMatch[1]),
       },
       // D1 figures: the maintainer-accepted denominator, excluding constant

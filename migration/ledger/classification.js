@@ -7,7 +7,9 @@
  * accessors). build-ledger.js joins these rules with the members extracted
  * from the TypeScript AST, so every member gets exactly one row.
  *
- *   c   classification: RUST | HYBRID | TS
+ *   c   classification: RUST | HYBRID | TS (never PARTIAL: build-ledger.js
+ *       sets PARTIAL itself when a RUST row's body makes no engine call,
+ *       engine-calls.js, accordproject/concerto-rust#261)
  *   t   target Rust module ('-' when the member stays in TS)
  *   p   planned task(s): Rust implementation task + view-conversion task
  *   r   reason (mandatory for TS and HYBRID)
@@ -90,6 +92,11 @@ module.exports = {
             'BaseModelManager.filter': { c: 'HYBRID', r: R.predicate },
             'BaseModelManager.resolveType': { cat: 'validation' },
             'BaseModelManager.getType': { cat: 'validation' },
+            // rustHandle cache plumbing (accordproject/concerto-rust#261): not
+            // ported model logic, so engine shim like src/engine/*.
+            'rustHandleReads': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (caches a rustHandle\'s epoch/namespaces reads)' },
+            'BaseModelManager._needsRustWrite': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (decides which namespaces are mirrored to rustHandle)' },
+            'BaseModelManager._mirrorWrite': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (runs a rustHandle mirror write, swallowing its error)' },
         },
     },
     'src/datetimeutil.ts': { c: 'TS', t: NONE, p: NONE, r: R.dayjs },

@@ -18,6 +18,7 @@ const path = require('path');
 const { extract, repo } = require('./extract-members.js');
 const rules = require('./classification.js');
 const { computeEvidence, fmtTestSet } = require('./test-evidence.js');
+const { scan } = require('./engine-calls.js');
 
 const pkg = path.join(repo, 'packages', 'concerto-core');
 const outDir = __dirname;
@@ -118,6 +119,11 @@ function autoCategory(row) {
     if (row.kind === 'ctor' && !/throw|reportError/.test(b)) { return 'glue'; }
     return 'logic';
 }
+// PARTIAL (accordproject/concerto-rust#261): a row the rules call RUST whose
+// own body makes no engine call (engine-calls.js). Its observable behaviour
+// is its TS body's, so it is not counted as Rust in D1.
+const PARTIAL_LOGIC_REASON = 'no engine call: the TS body (branches, loops or throw sites) still runs and decides the result and any exception; not yet converted to a delegation. Planned task kept; porting it is follow-up after P5-10 (accordproject/concerto-rust#261)';
+const PARTIAL_READ_REASON = 'no engine call: a straight-line read of view state (a snapshot field, the wrapped AST node or a child view), a fixed-data builder or a forward to other members; PORTING 1.5 snapshot design allows it on a view, but the member itself runs no Rust (accordproject/concerto-rust#261)';
 function memberKey(row) {
     return row.cls ? `${row.cls}.${row.member}` : row.member;
 }
@@ -144,6 +150,13 @@ const ledger = rows.map(row => {
         if (ov.c && ov.c !== 'TS' && t === '-') { t = fr.t; p = fr.p; }
     }
     if (c === 'RUST' && !(ov && ov.r)) { r = ''; }
+    const sc = scan(row);
+    let partialKind = '';
+    if (c === 'RUST' && !sc.engineCall) {
+        c = 'PARTIAL';
+        partialKind = sc.substantive ? 'logic' : 'read';
+        r = sc.substantive ? PARTIAL_LOGIC_REASON : PARTIAL_READ_REASON;
+    }
     if (!cat) { cat = autoCategory(row); }
     if (c === 'TS' && t !== '-') { t = '-'; }
     const cp = coupling(row);
@@ -151,6 +164,7 @@ const ledger = rows.map(row => {
         file: row.file, cls: row.cls, member: row.member, kind: row.kind, loc: row.loc,
         weight: +(row.loc * FACTOR[cat]).toFixed(1), category: cat, classification: c, reason: r,
         coupled_tests_grep: cp.text, target: t, planned: p, line: row.line, cw: cp.w, cs: cp.s, cb: cp.b,
+        partialKind, engineCall: sc.engineCall,
     };
 });
 
@@ -172,6 +186,7 @@ for (const f of Object.keys(rules)) {
     }
 }
 for (const l of ledger) {
+    if (l.classification === 'RUST' && !l.engineCall) { throw new Error('RUST row with no engine call: ' + l.file + ' ' + l.cls + '.' + l.member); }
     if (l.classification !== 'RUST' && !l.reason) { throw new Error('Missing reason: ' + l.file + ' ' + l.cls + '.' + l.member); }
     if (/\t|\n/.test(l.reason)) { throw new Error('Bad reason text: ' + l.member); }
 }
@@ -192,7 +207,7 @@ fs.writeFileSync(path.join(outDir, 'SEAM_LEDGER.tsv'), tsv);
 // ---------------------------------------------------------------- SUMMARY
 const sum = (arr, f) => +arr.reduce((a, x) => a + f(x), 0).toFixed(1);
 const pct = (a, b) => (b ? (100 * a / b).toFixed(1) : '0.0') + '%';
-const CL = ['RUST', 'HYBRID', 'TS'];
+const CL = ['RUST', 'HYBRID', 'PARTIAL', 'TS'];
 const totW = sum(ledger, l => l.weight);
 const totLoc = sum(ledger, l => l.loc);
 const by = (k) => CL.map(c => {
@@ -200,7 +215,7 @@ const by = (k) => CL.map(c => {
     return { c, n: xs.length, loc: sum(xs, l => l.loc), w: sum(xs, l => l.weight) };
 });
 const cls = by();
-const wR = cls[0].w; const wH = cls[1].w; const wT = cls[2].w;
+const wR = cls[0].w; const wH = cls[1].w; const wP = cls[2].w; const wT = cls[3].w;
 const catRows = ['glue', 'logic', 'validation'].map(cat => {
     const xs = ledger.filter(l => l.category === cat);
     return `| ${cat} (x${FACTOR[cat]}) | ${xs.length} | ${sum(xs, l => l.loc)} | ${sum(xs, l => l.weight)} | ` +
@@ -232,6 +247,12 @@ const tsGroups = [...byReason.entries()].sort((a, b) => sum(b[1], l => l.weight)
 });
 const tsFull = tsItems.map(l => `| ${l.file.replace(/^src\//, '')} | ${l.cls || '(function)'} | ${l.member} | ${l.kind} | ${l.loc} | ${l.weight} | ${l.reason} |`);
 const hyItems = ledger.filter(l => l.classification === 'HYBRID');
+const paItems = ledger.filter(l => l.classification === 'PARTIAL');
+const paLogic = paItems.filter(l => l.partialKind === 'logic');
+const paRead = paItems.filter(l => l.partialKind === 'read');
+const wPLogic = sum(paLogic, l => l.weight);
+const wPRead = sum(paRead, l => l.weight);
+const paRow = (l) => `| ${l.file.replace(/^src\//, '')} | ${l.cls || '(function)'} | ${l.member} | ${l.loc} | ${l.weight} | ${l.planned} |`;
 const hyFull = hyItems.map(l => `| ${l.file.replace(/^src\//, '')} | ${l.cls || '(function)'} | ${l.member} | ${l.weight} | ${l.reason} |`);
 const wCoupled = ledger.filter(l => l.cw > 0);
 const wCoupledRows = wCoupled.map(l => `| ${l.file.replace(/^src\//, '')} | ${l.cls ? l.cls + '.' : ''}${l.member} | ${l.classification} | ${l.coupled_tests_grep.split(' ').filter(s => s.startsWith('W:')).join('')} |`);
@@ -246,6 +267,8 @@ const d1Excluded = ledger.filter(l => l.reason === CONST_REASON || l.reason === 
 const d1ExcludedW = sum(d1Excluded, l => l.weight);
 const d1TotW = +(totW - d1ExcludedW).toFixed(1);
 const d1Pct = pct(wR + wH, d1TotW);
+const d1PctWithReads = pct(wR + wH + wPRead, d1TotW);
+const d1PctWithPartial = pct(wR + wH + wP, d1TotW);
 const oldPct = pct(wR + wH, totW);
 
 // ---------------------------------------------------------------- needs_fallback, grouped by class (drives P4 view work)
@@ -286,6 +309,8 @@ Generated by \`migration/ledger/build-ledger.js\` from the TypeScript AST of
 3. Section 8's open questions are now settled; see
    [accordproject/concerto-rust#32](https://github.com/accordproject/concerto-rust/issues/32).
 4. RUST rows need no reason. Spot-check them by file in section 3.
+5. PARTIAL rows (section 5b) are members the rules put in Rust whose own body
+   makes no engine call; their reason is set automatically.
 
 Reproduce the whole ledger, including the test-coupling columns below, with
 one command (it reads \`migration/tags/test-tags.tsv\`, so run
@@ -300,7 +325,11 @@ node migration/ledger/extract-members.js --check migration/ledger/SEAM_LEDGER.ts
 The first command writes \`SEAM_LEDGER.tsv\` and this file. The second extracts
 every constructor, method, static method, accessor and top-level function
 (including \`const f = () => ...\`) from the TS AST and diffs them against the
-ledger, checking that each TS or HYBRID row has a reason.
+ledger, checking that each non-RUST row has a reason, that every RUST row
+makes an engine call and that no PARTIAL row does (the engine-call scan in
+\`engine-calls.js\`, accordproject/concerto-rust#261). CI runs it in
+\`migration-guardrails.yml\`, so a view that gains or loses its engine call
+without a ledger rebuild fails the build.
 
 ## Method
 
@@ -322,6 +351,20 @@ ledger, checking that each TS or HYBRID row has a reason.
   * **RUST**: the logic runs in Rust. The TS member becomes a one-line delegation on the view.
   * **HYBRID**: part of the member stays in JS, and the reason says which part. The member
     still calls Rust for its model logic.
+  * **PARTIAL** (accordproject/concerto-rust#261): the rules put the member in Rust, but
+    its own body makes no engine call: no reference to the module's \`rust\` binding, a
+    \`rustHandle\`/\`_rust*\` handle or \`loadEngine(...)\` (nested closures included;
+    \`engine-calls.js\`). It is set automatically, never by hand: a RUST row that fails
+    the scan becomes PARTIAL. Two kinds, by the same scan:
+    * *logic*: the body has a branch, loop, \`throw\`, \`try\` or conditional and spans more
+      than 4 lines. The TS body still decides the result and which exception is thrown; it
+      was never converted. Porting these is follow-up work after P5-10.
+    * *read*: a straight-line body: a snapshot getter or field read, a fixed-data builder
+      or a forward to other members. PORTING 1.5's snapshot design allows these on a view,
+      but the member itself runs no Rust.
+
+    PARTIAL rows keep their planned task (so the oracle's owner attribution is unchanged)
+    and are **not** counted as Rust in D1.
   * **TS**: the member stays in TS with no Rust involvement.
 * **Automatic TS rules**, which an explicit override can reverse:
   * \`accept()\` visitor entry points;
@@ -374,16 +417,22 @@ ${cls.map(x => `| ${x.c} | ${x.n} | ${x.loc} | ${x.w} | ${pct(x.w, totW)} |`).jo
 
 * **RUST+HYBRID weighted share (new D1 denominator): ${d1Pct}**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. ${(wR + wH) / d1TotW >= 0.7 ? '**Met.**' : '**NOT met.**'}
+  PARTIAL rows (section 5b) are not in the numerator.
   Denominator excludes constant markers and \`accept()\` visitor entry points
   (${d1Excluded.length} members, weight ${d1ExcludedW}) as not-logic, per the maintainer's
   decision on open question 2 below. New total weight: ${d1TotW} (was ${totW}).
 * **Old figure (previous denominator, all ${ledger.length} members): ${oldPct}.**
 * RUST only (new denominator): ${pct(wR, d1TotW)}.
+* For comparison only, not the D1 figure: counting PARTIAL *read* rows (${paRead.length} members,
+  weight ${wPRead}) as Rust gives ${d1PctWithReads}; counting every PARTIAL row (${paItems.length} members,
+  weight ${wP}) gives ${d1PctWithPartial}. That is how the ledger counted them before
+  accordproject/concerto-rust#261 (then 78.9%, which also counted three \`rustHandle\`
+  plumbing helpers as RUST; they are now TS, engine shim).
 
 By weight category:
 
-| category | members | loc | weight | RUST w | HYBRID w | TS w |
-|---|---|---|---|---|---|---|
+| category | members | loc | weight | RUST w | HYBRID w | PARTIAL w | TS w |
+|---|---|---|---|---|---|---|---|
 ${catRows.join('\n')}
 
 ## 2. By planned task
@@ -396,9 +445,9 @@ TS members have \`planned_task = -\` and need no migration work. The exception i
 
 ## 3. By file
 
-Columns: members; count RUST / HYBRID / TS; total weight; weight RUST / HYBRID / TS; RUST+HYBRID share; tasks.
+Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST / HYBRID / PARTIAL / TS; RUST+HYBRID share; tasks.
 
-| file | n | R / H / T | weight | weight R / H / T | R+H | tasks |
+| file | n | R / H / P / T | weight | weight R / H / P / T | R+H | tasks |
 |---|---|---|---|---|---|---|
 ${fileRows.join('\n')}
 
@@ -425,6 +474,28 @@ ${hyItems.length} members, weight ${wH} (${pct(wH, totW)}).
 | file | class | member | weight | what stays in JS |
 |---|---|---|---|---|
 ${hyFull.join('\n')}
+
+## 5b. PARTIAL items (no engine call)
+
+${paItems.length} members, weight ${wP} (${pct(wP, totW)}). Set automatically by the engine-call
+scan (see Method); accordproject/concerto-rust#261.
+
+### PARTIAL *logic*: unconverted TS bodies
+
+${paLogic.length} members, weight ${wPLogic}. The TS body is still the live path, including which
+exception is thrown. Follow-up: convert each to a delegation (after P5-10).
+
+| file | class | member | loc | weight | planned task |
+|---|---|---|---|---|---|
+${paLogic.map(paRow).join('\n') || '(none)'}
+
+### PARTIAL *read*: straight-line reads and forwards
+
+${paRead.length} members, weight ${wPRead}.
+
+| file | class | member | loc | weight | planned task |
+|---|---|---|---|---|---|
+${paRead.map(paRow).join('\n') || '(none)'}
 
 ## 6. White-box coupling seen in tests
 
@@ -460,11 +531,13 @@ ${stubbedClasses.join('\n')}
 * **Serializer and visitors (P3-01, P4-10).** \`Serializer.toJSON\`/\`fromJSON\` and every \`visitX\`/\`checkX\`
   are HYBRID: the TS visitor shell stays, and each per-field check, coercion and message
   goes to Rust. \`visit()\` dispatchers and visitor constructors are TS.
-  \`getAssignableProperties\`/\`validateProperties\` are RUST.
+  \`getAssignableProperties\`/\`validateProperties\` are planned for Rust but still run
+  their TS bodies, so they are PARTIAL (section 5b).
 * **Factory, \`model/*\`, InstanceGenerator and ValueGenerator** stay TS under D7.
   \`ResourceId\` is the exception: plan P4-03 converts it, so its URI parsing is RUST
   and only its value-object constructor is HYBRID.
-  \`InstanceGenerator.findConcreteSubclass\` is a pure graph query, so it is RUST.
+  \`InstanceGenerator.findConcreteSubclass\` is a pure graph query planned for Rust; it
+  still runs its TS body, so it is PARTIAL (section 5b).
 * **DCS (D7: the ledger decides).**
   * DecoratorManager command application and DecoratorExtractor are RUST
     (\`concerto_core::dcs\`).
@@ -549,4 +622,4 @@ has no corresponding *method* row in this ledger (methods/functions only, no fie
 ${unmappedRows.join("\n") || "(none)"}
 `;
 fs.writeFileSync(path.join(outDir, 'SUMMARY.md'), md);
-console.log(`members=${ledger.length} RUST=${cls[0].n} HYBRID=${cls[1].n} TS=${cls[2].n} weight=${totW} R+H(new denom)=${d1Pct} R+H(old denom)=${oldPct} needs_fallback=${nfRows.length} unmapped_W=${unmappedRows.length}`);
+console.log(`members=${ledger.length} RUST=${cls[0].n} HYBRID=${cls[1].n} PARTIAL=${cls[2].n} (logic=${paLogic.length} w=${wPLogic}, read=${paRead.length} w=${wPRead}) TS=${cls[3].n} weight=${totW} R+H+Pread=${d1PctWithReads} R+H+P=${d1PctWithPartial} R+H(new denom)=${d1Pct} R+H(old denom)=${oldPct} needs_fallback=${nfRows.length} unmapped_W=${unmappedRows.length}`);
