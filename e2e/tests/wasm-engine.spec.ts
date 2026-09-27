@@ -101,7 +101,13 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
             // scalardeclaration.ts and others). Validating a model with a
             // scalar range goes through ModelManager, ModelFile and
             // ScalarDeclaration's '../engine/views' snapshot path, which
-            // builds its NumberValidator through the engine.
+            // builds its NumberValidator through the engine. addCTOModel's
+            // write to rustHandle also goes through BaseModelManager's own
+            // '_rustMirrorAdd' (P5-10a lazy views), which lazily requires
+            // engine/views.ts for every model file added (dropStaged /
+            // commitStaged) -- that is basemodelmanager.ts's own top-level
+            // './engine/views' (a sibling of engine/, unlike introspect/'s
+            // '../engine/views').
             const { ModelUtil, ModelManager } = await import(`${baseUrl}/concerto-core/index.mjs`);
 
             const modelManager = new ModelManager();
@@ -139,7 +145,13 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
 
         expect(pageErrors).toEqual([]);
         expect(result).toEqual({
-            viewEngineRequests: ['../engine', '../engine/views', './engine'],
+            // './engine/views' (distinct from introspect/'s '../engine/views')
+            // is basemodelmanager.ts's own lazy require of engine/views.ts,
+            // taken by every addCTOModel/addModelFile through
+            // '_rustMirrorAdd' (P5-10a lazy views: dropStaged/commitStaged).
+            // A legitimate new back-reference, not a bug: accordproject/
+            // concerto-rust#282's Browser E2E finding.
+            viewEngineRequests: ['../engine', '../engine/views', './engine', './engine/views'],
             capitalized: 'Vehicle',
             validIdentifier: true,
             invalidIdentifier: false,
