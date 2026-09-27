@@ -245,5 +245,8 @@ class Property extends Decorated {
     }
 }
 
+// P5-10b: built on first read in a lazily built file (engine/views.ts).
+loadEngine('../engine/views').installLazyField(Property.prototype, 'sizeValidator');
+
 export { Property };
 export default Property;

@@ -82,7 +82,11 @@ export interface AstNode {
  */
 class Decorated {
     ast: AstNode;
-    decorators: Decorator[] = [];
+    // P5-10b: an accessor on the prototype (installed below), so that a
+    // lazily built file's element builds its decorators on first read. A
+    // write stores a plain own field, and an element that never processed
+    // any reads an empty array, as the `= []` initialiser gave it.
+    decorators!: Decorator[];
     /**
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.
@@ -125,13 +129,17 @@ class Decorated {
      * @private
      */
     process() {
+        // P5-10b: in a lazily built file, the decorators are built on first
+        // read (engine/views.ts `deferDecorators`).
+        if (loadEngine('../engine/views').deferDecorators(this)) {
+            return;
+        }
         this.decorators = [];
 
         if(this.ast.decorators) {
             const modelFile = this.getModelFile();
             // `modelFile.getModelManager()?.getDecoratorFactories()`, except
-            // while a lazily built file's views are built (P5-10a,
-            // engine/views.ts `decoratorFactories`).
+            // for a lazily built file (engine/views.ts `decoratorFactories`).
             const factories = loadEngine('../engine/views').decoratorFactories(modelFile);
             const hasFactories = factories && factories.length > 0;
             for(let n=0; n < this.ast.decorators.length; n++ ) {
@@ -204,6 +212,8 @@ class Decorated {
         return null;
     }
 }
+
+loadEngine('../engine/views').installLazyField(Decorated.prototype, 'decorators', () => []);
 
 export { Decorated };
 export default Decorated;
