@@ -1,3 +1,135 @@
+# P5-04b: fresh benchmark after P5-02 (2026-09-27)
+
+Task P5-04b (accordproject/concerto-rust#255, under the migration plan
+accordproject/concerto-rust#29) re-runs the P5-04 suite on the integration
+heads right after P5-02 (accordproject/concerto-rust#73, "Delete
+superseded TS logic; remove engine flag") merged.
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz, 8 cores, 17 GiB, macOS (Darwin 22.6.0), worker local-matt |
+| Toolchain | Node v22.23.2, npm 10.9.8, cargo 1.98.1 (797e8a9bc 2026-08-05), rustc 1.98.1 (48a229cea 2026-09-01), wasm-bindgen 0.2.128 |
+| Quiet-check | 1-minute load 3.57 at the start of the timed section (threshold revised by the maintainer on #255 to < 4.0, no cargo/rustc/oracle/mocha/gate process at ≥ 20% CPU); the machine had been busy (load1 up to ~32) for the first ~15 minutes of quiet-polling and settled before any timed run started. Full poll log: `.longrun/p5-04b.log`. |
+| Post-P5-02 head ("after") | `concerto` `c73e6aa8c`, `concerto-rust` `a2bb5b4b2` (both `origin/claude/tender-pascal-ocwf9q`) — the heads named on #255 |
+| Pre-P5-02 head ("before") | `concerto` `f1ddaf658` (the integration head immediately before the P5-02 merge commit), same `concerto-rust` `a2bb5b4b2` — confirmed byte-identical to the pre-P5-02 concerto-rust head by an empty `git diff 62304c2..a2bb5b4b2` |
+| TS-API runs | `results/P5-04b-{before-ts,before-rust-engine,after}-run{1,2}.json`: two runs of each, `run-ts.mjs` defaults |
+| Crate runs | `concerto-rust`'s `benches/results/2026-09-27T16-29-30Z-rust.json` (criterion defaults) |
+
+**Why a separate "before" worktree.** P5-02 deleted concerto-core's
+TS-native implementation and the `CONCERTO_ENGINE=ts\|rust` flag entirely
+(`packages/concerto-core/src/engine/index.ts` now always
+`require('./rust').loadRustEngine()`). Past the merge there is no live TS
+reference in the same checkout to compare against, so `CONCERTO_ENGINE=rust`
+is now a no-op label. To get a genuine, same-machine before/after ratio
+(the method P5-06/#220 and P5-06a/#226 used), this task built a second,
+scratch worktree at the immediate pre-P5-02 integration head and ran the TS
+reference and "Rust engine through the TS API" there, back to back on this
+machine, immediately before the post-P5-02 (single, Rust-only path) run.
+The pre-P5-02 worktree is not a task branch: it is not committed or pushed.
+
+## Through the TS public API (the exit condition's comparison)
+
+Medians, µs per model or per instance. `load+validate` is `run-ts.mjs`'s
+`validate` metric (a fresh load plus `validateModelFiles()`). Ratios use
+the mean of the two runs on each side.
+
+| Model set | Metric | TS before (µs) | Rust before/TS API (µs) | **post-P5-02 (µs)** | before/TS | **post-P5-02/TS** |
+|---|---|---|---|---|---|---|
+| concerto-core-test-data | load | 37.7 | 636.6 | 636.2 | 16.9× | **16.9×** |
+| concerto-core-test-data | load+validate | 76.1 | 1424.7 | 1421.0 | 18.7× | **18.7×** |
+| concerto-core-test-data | validateAst | 785.3 | 1203.7 | 1178.3 | 1.5× | **1.5×** |
+| conformance | load | 17.6 | 508.0 | 503.9 | 28.9× | **28.6×** |
+| conformance | load+validate | 26.9 | 679.9 | 697.5 | 25.3× | **26.0×** |
+| conformance | validateAst | 303.8 | 611.1 | 644.1 | 2.0× | **2.1×** |
+| synthetic-large | load | 791.3 | 50819.4 | 51776.6 | 64.2× | **65.4×** |
+| synthetic-large | load+validate | 2407.2 | 70683.8 | 70348.2 | 29.4× | **29.2×** |
+| synthetic-large | validateAst | SKIPPED | SKIPPED | SKIPPED | - | - |
+| (synthetic, 500) | fromJSON | 9.2 | 58.4 | 57.3 | 6.4× | **6.2×** |
+| (synthetic, 500) | resource.validate() | 2.5 | 22.6 | 23.0 | 9.1× | **9.3×** |
+
+`synthetic-large` `validateAst` is still rejected by both engines, as in
+P5-04 and P5-06: its `DateTimeProperty` default value fails `validateAst`'s
+strict check.
+
+**post-P5-02 vs pre-P5-02, same machine:** every ratio above matches its
+pre-P5-02 counterpart to within run-to-run noise (≤ 2%). **This is
+expected, not a regression check failure:** P5-02's scope was deleting the
+already-dead TS-native implementation and the engine flag, not the
+double-materialisation architecture (TS view graph *and* Rust mirror) that
+was the subject of the P5-06a lazy-views spike. The exit condition (≤ 1.0×
+on all of these) is **not met**, and per the maintainer's decision on
+accordproject/concerto-rust#226 (2026-09-26, "accept the current
+performance and proceed. There is no lazy-views rollout.") it is not
+expected to be met by any change currently planned.
+
+**Comparison with P5-06 (#220) and P5-06a (#226).** Both were run on a
+different machine (Linux Xeon, 4 cores), so absolute µs are not
+comparable, but the same-machine ratios line up with the same story:
+- P5-06 (#220, after its performance pass, merged): load 13.3×–40.4×,
+  validateAst 1.7×–2.5×, instance ops 5.7×–6.8×. This run's post-P5-02
+  ratios (load 16.9×–65.4×, validateAst 1.5×–2.1×, instance ops 6.2×–9.3×)
+  are the same order of magnitude; the larger `synthetic-large` load ratio
+  here (65.4× vs 40.4×) is consistent with this machine's TS reference
+  being proportionally faster on that one large-model case, not with any
+  code change (concerto-rust is unchanged between the two "before" heads
+  compared here, and P5-02 touched no performance-relevant code path).
+- P5-06a (#226, no-go spike): lazy views reached load 4.7×–21.3× and
+  load+validate 6.2×–10.3× at best, still short of parity, and the
+  maintainer decided not to roll them out. This run's numbers (16.9×–65.4×
+  load) confirm that ceiling was never reached in the shipped tree, as
+  expected since the spike stayed an unmerged draft.
+
+## The Rust crate directly (criterion)
+
+Medians in ns/op, this machine. These are the crate's own numbers; they
+skip the TS<->WASM boundary entirely and are shown for reference only —
+compare within this run, not against P5-06's crate table (different
+machine: this Mac is consistently ~2.7×–2.9× slower per-op across every
+benchmark than the Linux Xeon box used for P5-06/P5-06a, e.g.
+`instance_validate/validate_only` 6493 ns here vs 2259 ns there for the
+same op count — a hardware difference, not a regression, since
+concerto-rust at `a2bb5b4b2` is unchanged from the pre-P5-02 head compared
+above).
+
+| Benchmark | n | median (ns/op) | CV |
+|---|---|---|---|
+| instance_validate/validate_only | 500 | 6493.5 | 7.3% |
+| load_validate_concerto-core-test-data/load | 35 | 140311.4 | 6.5% |
+| load_validate_concerto-core-test-data/validate | 35 | 158133.5 | 7.5% |
+| load_validate_conformance/load | 41 | 59983.4 | 7.0% |
+| load_validate_conformance/validate | 41 | 87353.7 | 6.6% |
+| load_validate_synthetic-large/load | 1 | 9597086.1 | 7.8% |
+| load_validate_synthetic-large/validate | 1 | 8794275.7 | 9.6% |
+| validate_metamodel_concerto-core-test-data/concerto-core_from_json | 35 | 139180.9 | 7.6% |
+| validate_metamodel_conformance/concerto-core_from_json | 41 | 56169.5 | 8.8% |
+| validate_metamodel_synthetic-large/concerto-core_from_json | 1 | 9792664.8 | 8.2% |
+
+## Notes and caveats
+
+- `wasm-opt` was not installed on this machine, so the `concerto-wasm`
+  engine module used for every TS-API run (before and after) was built
+  without the size/speed optimisation pass P5-06's build had (`build.sh:
+  wasm-opt not found; the module is not size-optimised`). This is shared
+  identically across the before and after runs in this task (one engine
+  build serves both), so it does not affect the before/after ratios above;
+  it does mean the absolute µs figures here are not directly comparable to
+  P5-06's, consistent with the cross-machine caveat already noted.
+- `benches/extract-results.sh` failed under `sh` on this machine (`line
+  47: syntax error near unexpected token '<'`): its `done < <(find ...)`
+  is a bash process-substitution construct that plain `sh` (dash on this
+  Mac) does not support. The criterion run itself completed and its raw
+  output is intact under `benches/target/criterion`; the summary file was
+  produced by re-running the same script with `bash` directly, with no
+  other changes. Worth fixing the script's shebang/invocation separately
+  — flagged, not fixed here, since this task is measurement-only.
+- This task's report generator (`gen_report.py`, local to the task
+  worktree, not committed) originally passed the wrong loop variable to
+  its `load+validate` lookup and reported it as `SKIPPED` throughout; the
+  bug was in report generation only, not in the underlying `run-ts.mjs`
+  data, and is fixed above.
+
+---
+
 # P5-06: after the performance pass (2026-09-26)
 
 Task P5-06 (accordproject/concerto-rust#220, under the migration plan
