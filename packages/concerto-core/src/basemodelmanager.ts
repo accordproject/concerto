@@ -364,7 +364,7 @@ class BaseModelManager {
      * @internal
      */
     /* istanbul ignore next */
-    _mirrorAdd(modelFile) {
+    _rustMirrorAdd(modelFile) {
         if (!this._needsRustWrite(modelFile.getNamespace())) {
             this._mirrorWrite(() => engineViews().dropStaged(modelFile, this.rustHandle));
             return false;
@@ -513,7 +513,7 @@ class BaseModelManager {
                 modelFile.validate();
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
-            this._mirrorAdd(modelFile);
+            this._rustMirrorAdd(modelFile);
         } else {
             this._throwAlreadyExists(modelFile);
         }
@@ -721,7 +721,7 @@ class BaseModelManager {
             // only, and TS's own validateModelFiles() below is still what
             // decides pass/fail.
             newModelFiles.forEach((m) => {
-                if (this._mirrorAdd(m)) {
+                if (this._rustMirrorAdd(m)) {
                     mirroredNamespaces.add(m.getNamespace());
                 }
             });
