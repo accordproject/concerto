@@ -60,10 +60,19 @@ export TZ=UTC
 # leg 2 and the suite leg), a `-w packages/concerto-core` there fails with
 # "No workspaces found" even though --prefix "$REPO_DIR" is correct. The
 # package name matches regardless of cwd.
+# Order matters: concerto-vocabulary's src imports @accordproject/concerto-core
+# (vocabulary.ts, vocabularymanager.ts) even though it is not a package.json
+# dependency (only a workspace sibling resolved via the root node_modules
+# symlink, same as the suite leg's decoratormanager.js in reverse), so it
+# must build AFTER concerto-core, not before -- matching the root's own
+# canonical build:ordered (level0 util, level1 cto+core, level2 incl.
+# vocabulary). Building vocabulary first fails with TS2307 "Cannot find
+# module '@accordproject/concerto-core'" on any worktree where concerto-core
+# has not already been built by something else first.
 npm run build -w @accordproject/concerto-util --prefix "$REPO_DIR" >/dev/null
 npm run build -w @accordproject/concerto-cto --prefix "$REPO_DIR" >/dev/null
-npm run build -w @accordproject/concerto-vocabulary --prefix "$REPO_DIR" >/dev/null
 npm run build -w @accordproject/concerto-core --prefix "$REPO_DIR" >/dev/null
+npm run build -w @accordproject/concerto-vocabulary --prefix "$REPO_DIR" >/dev/null
 
 # 1. corpus -> frozen reference. --cwd is the reference package so that its
 # dist/ is instrumented even though it lives under node_modules; src/**/*.ts
