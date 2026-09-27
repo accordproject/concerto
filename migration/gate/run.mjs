@@ -107,6 +107,53 @@ function sha256(filePath) {
 }
 
 // ---------------------------------------------------------------------------
+// Rust-mode engine module resolution (task P5-01c, accordproject/
+// concerto-rust#250). Every step that loads the WASM engine through
+// concerto-core's CONCERTO_ENGINE=rust path (src/engine/rust.ts's
+// loadRustEngine) must resolve to the SAME module this helper resolves, and
+// must set CONCERTO_ENGINE_MODULE explicitly in its child's env rather than
+// relying on it merely being inherited from this process's own env — with
+// no override, concerto-core falls back to requiring the bare package
+// `@accordproject/concerto-engine` (packages/concerto-engine/index.js),
+// whose own path is a *hardcoded* `../../../concerto-rust/concerto-wasm/pkg/
+// concerto-engine.cjs` relative to the concerto checkout it runs from. From
+// a worktree (this checkout's own parent is `wt/<task>/`, not the shared
+// clone's parent) that can silently resolve one directory too high and load
+// the SHARED clone's own (possibly stale) build instead of the checkout
+// this gate run is actually meant to measure — exactly the "stale prebuilt
+// WASM engine" failure mode #250 reports.
+//
+// Resolution order:
+//   1. CONCERTO_ENGINE_MODULE, if already set in this process's own env
+//      (the caller's explicit choice — honoured, never silently
+//      overridden). If set but the file does not exist, this is a setup
+//      mistake worth failing loudly over, not silently falling back.
+//   2. Otherwise, the module `--rust-root` (default: sibling of this
+//      checkout) resolves to build for CONCERTO_ENGINE=rust — the previous,
+//      unconditional default. If neither exists, the step is not-yet-built
+//      (`na`), same as before.
+function resolveEngineModule(opts) {
+  const defaultPath = path.join(opts.rustRoot, 'concerto-wasm', 'pkg', 'concerto-engine.cjs');
+  const envOverride = process.env.CONCERTO_ENGINE_MODULE;
+  if (envOverride) {
+    const exists = fs.existsSync(envOverride);
+    return {
+      path: envOverride,
+      source: 'env (CONCERTO_ENGINE_MODULE)',
+      exists,
+      built_at: exists ? fs.statSync(envOverride).mtime.toISOString() : null,
+    };
+  }
+  const exists = fs.existsSync(defaultPath);
+  return {
+    path: defaultPath,
+    source: '--rust-root default',
+    exists,
+    built_at: exists ? fs.statSync(defaultPath).mtime.toISOString() : null,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Step: build the TS workspace packages (util -> cto+core -> the rest), via
 // the repo's own canonical `npm run build` (build:ordered). Not a §0
 // criterion by itself, but a hard prerequisite for several that are: a fresh
@@ -240,9 +287,20 @@ function stepStatus(opts, reportDir) {
   const args = [path.join(MIGRATION_ROOT, 'bin', 'status.mjs')];
   if (opts.fast) args.push('--fast');
   const logFile = path.join(reportDir, 'status-run.log');
+  // Forward the same resolved engine module stepCoreSuiteRust/stepOracleWasm
+  // use (task P5-01c, accordproject/concerto-rust#250): status.mjs's own
+  // collectCoreTestsRustMode resolves its engine against a hardcoded
+  // sibling of the concerto checkout, with no --rust-root of its own, so
+  // without this its mocha child can silently measure a different
+  // (possibly stale) engine than the rest of this run whenever --rust-root
+  // points elsewhere. status.mjs's run() merges process.env into its
+  // children (and, since its own env override for that child does not set
+  // CONCERTO_ENGINE_MODULE itself, does not shadow this), so setting it
+  // here also reaches the mocha child collectCoreTestsRustMode spawns.
+  const engine = resolveEngineModule(opts);
   const res = run('node', args, {
     cwd: CONCERTO_ROOT,
-    env: { CONCERTO_ORACLE_FIXTURES: opts.oracleFixtures },
+    env: { CONCERTO_ORACLE_FIXTURES: opts.oracleFixtures, CONCERTO_ENGINE_MODULE: engine.path },
     timeoutMs: 30 * 60 * 1000,
     logFile,
   });
@@ -269,7 +327,7 @@ function stepStatus(opts, reportDir) {
   // ok requires: the script itself ran cleanly, status.json was produced,
   // and every §0 threshold it carries was both judged (not `na`) and met.
   const ok = res.ok && thresholds != null && Object.values(thresholds).every((t) => t.meets === true);
-  return { name: 'status.mjs (full run)', ok, exit: res.status, log: path.relative(reportDir, logFile), status, thresholds, ts_failures: tsFailures };
+  return { name: 'status.mjs (full run)', ok, exit: res.status, log: path.relative(reportDir, logFile), status, thresholds, ts_failures: tsFailures, engine_module: engine };
 }
 
 // ---------------------------------------------------------------------------
@@ -281,15 +339,34 @@ function stepStatus(opts, reportDir) {
 // ---------------------------------------------------------------------------
 function stepCoreSuiteRust(opts, reportDir) {
   const coreDir = path.join(CONCERTO_ROOT, 'packages', 'concerto-core');
-  const engineCjs = path.join(opts.rustRoot, 'concerto-wasm', 'pkg', 'concerto-engine.cjs');
-  if (!fs.existsSync(engineCjs)) {
-    return { name: 'concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2)', ok: false, na: `${engineCjs} not built yet (run concerto-wasm/build.sh first)` };
+  // Not-built/not-runnable outcomes (na or the explicit-override error below)
+  // keep the pre-P5-01c name so gate output is otherwise unchanged when the
+  // engine isn't built; only an actual real run earns the ", real run)"
+  // suffix (restores the continuation brief's item 5, accordproject/
+  // concerto-rust#250).
+  const name = 'concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2)';
+  const realRunName = 'concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run)';
+  const engine = resolveEngineModule(opts);
+  if (!engine.exists) {
+    if (engine.source.startsWith('env')) {
+      // CONCERTO_ENGINE_MODULE was set explicitly but points nowhere: fail
+      // loudly rather than silently falling back to the package default,
+      // which could paper over exactly the "wrong engine" bug this exists
+      // to catch.
+      return { name, ok: false, error: `CONCERTO_ENGINE_MODULE=${engine.path} is set but does not exist`, engine_module: engine };
+    }
+    return { name, ok: false, na: `${engine.path} not built yet (run concerto-wasm/build.sh first)`, engine_module: engine };
   }
   const logFile = path.join(reportDir, 'core-suite-rust.log');
   const res = run(
     'npx',
     ['mocha', '-r', 'ts-node/register', '--recursive', '-t', '10000', '--reporter', 'json', 'test/'],
-    { cwd: coreDir, env: { TS_NODE_PROJECT: 'tsconfig.build.json', TZ: 'UTC', CONCERTO_ENGINE: 'rust' }, timeoutMs: 8 * 60 * 1000, logFile }
+    {
+      cwd: coreDir,
+      env: { TS_NODE_PROJECT: 'tsconfig.build.json', TZ: 'UTC', CONCERTO_ENGINE: 'rust', CONCERTO_ENGINE_MODULE: engine.path },
+      timeoutMs: 8 * 60 * 1000,
+      logFile,
+    }
   );
   let mocha = null;
   try {
@@ -315,9 +392,10 @@ function stepCoreSuiteRust(opts, reportDir) {
   }
 
   return {
-    name: 'concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run)',
+    name: realRunName,
     ok: res.ok,
     exit: res.status,
+    engine_module: engine,
     stats: mocha ? mocha.stats : null,
     by_tag,
     failures: mocha ? mochaFailures(mocha, map) : null,
@@ -551,9 +629,12 @@ function stepOracleCoverage(opts, reportDir) {
 // ---------------------------------------------------------------------------
 function stepOracleWasm(opts, reportDir) {
   const name = 'oracle WASM/JS-binding leg (§0.3, replay.js --engine rust-adapter.js)';
-  const engineCjs = path.join(opts.rustRoot, 'concerto-wasm', 'pkg', 'concerto-engine.cjs');
-  if (!fs.existsSync(engineCjs)) {
-    return { name, ok: false, na: `${engineCjs} not built yet (run concerto-wasm/build.sh first)` };
+  const engine = resolveEngineModule(opts);
+  if (!engine.exists) {
+    if (engine.source.startsWith('env')) {
+      return { name, ok: false, error: `CONCERTO_ENGINE_MODULE=${engine.path} is set but does not exist`, engine_module: engine };
+    }
+    return { name, ok: false, na: `${engine.path} not built yet (run concerto-wasm/build.sh first)`, engine_module: engine };
   }
   const link = ensureFixturesSymlink(opts);
   if (!link.ok) return { name, ok: false, na: link.na };
@@ -571,7 +652,7 @@ function stepOracleWasm(opts, reportDir) {
     // (SIGTERM, no report written) even though the leg itself was still
     // making progress. Widened so a real hang still gets caught well short
     // of an agent turn's own limits.
-    { cwd: CONCERTO_ROOT, env: { CONCERTO_ENGINE_MODULE: engineCjs }, timeoutMs: 90 * 60 * 1000, logFile }
+    { cwd: CONCERTO_ROOT, env: { CONCERTO_ENGINE_MODULE: engine.path }, timeoutMs: 90 * 60 * 1000, logFile }
   );
   let replay = null;
   if (fs.existsSync(reportPath)) replay = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
@@ -579,6 +660,7 @@ function stepOracleWasm(opts, reportDir) {
     name,
     ok: res.ok && replay != null && replay.pass === replay.total && replay.total > 0 && replay.fail === 0 && replay.harness_error === 0,
     exit: res.status,
+    engine_module: engine,
     log: path.relative(reportDir, logFile),
     replay: replay
       ? { total: replay.total, pass: replay.pass, fail: replay.fail, harness_error: replay.harness_error, agreement_pct: replay.agreement_pct, failures_truncated: replay.failures_truncated }
@@ -743,6 +825,16 @@ function fmtPct(v) {
   return typeof v === 'number' && Number.isFinite(v) ? `${v}%` : 'n/a';
 }
 
+// Renders a step's resolved `engine_module` (task P5-01c, #250) so a stale
+// engine is visible right next to the numbers it produced, not just buried
+// in report.json.
+function fmtEngineModule(step) {
+  const e = step && step.engine_module;
+  if (!e) return '';
+  if (!e.exists) return ` [engine module: ${e.path} (${e.source}) — MISSING]`;
+  return ` [engine module: ${e.path} (${e.source}, built ${e.built_at})]`;
+}
+
 function buildCriteriaSummary(steps) {
   const status = steps.status && steps.status.status;
   const m = status && status.metrics;
@@ -759,13 +851,13 @@ function buildCriteriaSummary(steps) {
     id: '§0.1',
     label: 'Behavioural (B) unit tests pass unchanged, CONCERTO_ENGINE=rust',
     ok: rustSuite ? rustSuite.ok && (!byTag || (byTag.B && byTag.B.failing === 0)) : null,
-    detail: `tag B: ${tagLine('B')}` + (rustSuite && rustSuite.exit != null ? `; suite exit ${rustSuite.exit}` : ''),
+    detail: `tag B: ${tagLine('B')}` + (rustSuite && rustSuite.exit != null ? `; suite exit ${rustSuite.exit}` : '') + fmtEngineModule(rustSuite),
   });
   items.push({
     id: '§0.2',
     label: 'White-box (W) tests pass unchanged (or lifted + signed off)',
     ok: rustSuite && byTag ? byTag.W && byTag.W.failing === 0 : null,
-    detail: `tag W: ${tagLine('W')}`,
+    detail: `tag W: ${tagLine('W')}` + fmtEngineModule(rustSuite),
   });
 
   // §0.3: oracle corpus coverage of the reference, 100% native + WASM.
@@ -816,7 +908,7 @@ function buildCriteriaSummary(steps) {
     id: '§0.3c',
     label: 'Oracle corpus 100% pass, WASM/JS binding (replay.js)',
     ok: wasmReplay ? wasmReplay.pass === wasmReplay.total && wasmReplay.fail === 0 && wasmReplay.harness_error === 0 : (steps.oracle_wasm ? steps.oracle_wasm.ok : null),
-    detail: wasmReplay ? `${wasmReplay.pass}/${wasmReplay.total} pass (${fmtPct(wasmReplay.agreement_pct)} agreement)` : 'not available',
+    detail: (wasmReplay ? `${wasmReplay.pass}/${wasmReplay.total} pass (${fmtPct(wasmReplay.agreement_pct)} agreement)` : 'not available') + fmtEngineModule(steps.oracle_wasm),
   });
 
   // §0.4: >=70% of concerto-core logic, by weight, runs in Rust.
@@ -967,6 +1059,11 @@ async function main() {
     lines.push(`- verdict: ${verdictLabel(c)}`);
     if ('exit' in s) lines.push(`- exit code: ${s.exit}`);
     if ('log' in s) lines.push(`- log: ${s.log}`);
+    if (s.engine_module) {
+      const e = s.engine_module;
+      lines.push(`- engine module: ${e.path} (${e.source})${e.exists ? `, built ${e.built_at}` : ' — MISSING'}`);
+    }
+    if (s.error) lines.push(`- error: ${s.error}`);
     // Unexpected items one per line; expected items grouped by known entry
     // (full per-item lists are in report.json's `classification`).
     for (const it of c.items.filter((i) => i.verdict !== 'expected-pending')) {

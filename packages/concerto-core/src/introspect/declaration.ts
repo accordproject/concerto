@@ -14,7 +14,6 @@
 
 import Decorated from './decorated';
 import type { AstNode } from './decorated';
-import ModelUtil from '../modelutil';
 import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
@@ -22,20 +21,20 @@ import IllegalModelException from './illegalmodelexception';
 import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// Its bindings are typed `never` so that a view leaves the member's inferred
-// return type, and so the .d.ts, exactly as the TS body makes it.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
+// `never` so that a view leaves the member's inferred return type, and so
+// the .d.ts, exactly as the TS body used to make it.
 //
 // dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
 // with no .d.ts, since it is not public API (tsconfig.build.internal.json;
-// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
-// must never see a specifier it would resolve: `loadEngine` takes a
-// non-literal one (esbuild, rollup and browserify leave it alone) and never
-// names the bare `require` (esbuild's ESM output would add its `__require`
-// shim, which webpack reports as a critical dependency), and webpack folds
-// the `typeof __webpack_require__` test and keeps only the dead-in-Node
-// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
-// bundles exactly as before (PORTING.md 1.5).
+// OD-11). A bundler must never see a specifier it would resolve: `loadEngine`
+// takes a non-literal one (esbuild, rollup and browserify leave it alone) and
+// never names the bare `require` (esbuild's ESM output would add its
+// `__require` shim, which webpack reports as a critical dependency), and
+// webpack folds the `typeof __webpack_require__` test and keeps only the
+// dead-in-Node `__non_webpack_require__` branch, so it neither resolves nor
+// warns.
 //
 // rust mode works through the CommonJS dist/ only. Through the public ESM and
 // browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
@@ -48,8 +47,7 @@ declare const __non_webpack_require__: NodeRequire;
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * Declaration defines the structure (model/schema) of composite data.
@@ -89,26 +87,14 @@ class Declaration extends Decorated {
     process() {
         super.process();
 
-        /* istanbul ignore if */
-        if (rust) {
-            if (!rust.modelUtilIsValidIdentifier(this.ast.name)) {
-                throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
-            }
-            // `rust.modelUtilIsValidIdentifier` is a plain boolean binding, not
-            // a type predicate the way `ModelUtil.isValidIdentifier` below is,
-            // so `this.ast.name` is not narrowed from `string | undefined` by
-            // the check above.
-            this.name = this.ast.name as string;
-            this.fqn = rust.modelUtilGetFullyQualifiedName(this.modelFile.getNamespace(), this.name);
-            return;
-        }
-
-        if (!ModelUtil.isValidIdentifier(this.ast.name)){
+        if (!rust.modelUtilIsValidIdentifier(this.ast.name)) {
             throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
         }
-
-        this.name = this.ast.name;
-        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
+        // `rust.modelUtilIsValidIdentifier` is a plain boolean binding, not a
+        // type predicate, so `this.ast.name` is not narrowed from
+        // `string | undefined` by the check above.
+        this.name = this.ast.name as string;
+        this.fqn = rust.modelUtilGetFullyQualifiedName(this.modelFile.getNamespace(), this.name);
     }
 
     /**

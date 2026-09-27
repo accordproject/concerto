@@ -59,6 +59,43 @@ This file only *checks*. It never fixes product code, never touches
   or point the corpus only at a concerto checkout whose `migration/ledger/`
   is present, or the report's owner breakdown (`stays-ts` vs `unowned`) is
   silently wrong — pass/fail and `baseline.tsv` are unaffected either way.
+- **`run.mjs`'s rust-mode steps (core-suite-rust, §0.1/§0.2; the oracle
+  WASM/JS-binding leg, §0.3c) resolve and honour `CONCERTO_ENGINE_MODULE`
+  explicitly** (task P5-01c, `accordproject/concerto-rust#250`), rather than
+  only relying on it being inherited from this process's own environment:
+  - If `CONCERTO_ENGINE_MODULE` is already set when `run.mjs` is invoked,
+    that exact path is used and passed through to the step's own
+    subprocess — **and if the file it names does not exist, the step fails
+    loudly** (an `unexpected` item, not a silent `na`/skip). This exists
+    because concerto-core's own fallback — the bare package
+    `@accordproject/concerto-engine` (`packages/concerto-engine/index.js`)
+    — resolves a *hardcoded* path one directory above `--rust-root`'s own
+    default, so from a worktree it can silently load the **shared clone's**
+    (possibly stale) prebuilt engine instead of the one this run is meant
+    to measure; an explicit but broken override must never fall back to
+    that either.
+  - Otherwise it falls back to `--rust-root`'s own default
+    (`<rust-root>/concerto-wasm/pkg/concerto-engine.cjs`, unchanged from
+    before). If that file doesn't exist either, the step is `na` (not built
+    yet), same as before.
+  - Either way, the resolved path and its build time (the file's mtime) are
+    recorded in `report.json` (`steps.<step>.engine_module`) and rendered
+    inline in `report.md`, next to that step's own numbers and in the §0.1/
+    §0.2/§0.3c criteria-summary lines, so a stale or wrong engine is visible
+    without having to dig into the raw logs.
+  - **`status.mjs`'s own rust-mode step honours it too.** `run.mjs`'s
+    `status` step forwards its own resolved `CONCERTO_ENGINE_MODULE` into
+    `status.mjs`'s child env, and `status.mjs`'s
+    `collectCoreTestsRustMode` resolves and honours it the same way (env
+    override wins and fails loudly if missing, else `<rustRoot>/
+    concerto-wasm/pkg/concerto-engine.cjs`) before spawning its own mocha
+    child — so `status.json`'s `metrics.concerto_core_tests.
+    engine_modes.rust` (and the `status` step's own `engine_module` in
+    `report.json`/`report.md`) reflect the same engine as the rest of the
+    run, not `status.mjs`'s hardcoded sibling default, whenever
+    `--rust-root` points elsewhere. A caller that runs `status.mjs`
+    directly (`--at`, the hourly report) still gets its old default
+    behaviour unless it exports `CONCERTO_ENGINE_MODULE` itself.
 
 ## §0 criterion → command → evidence
 
@@ -68,12 +105,14 @@ This file only *checks*. It never fixes product code, never touches
   ```
   cd packages/concerto-core
   CONCERTO_ENGINE=rust \
-  CONCERTO_ENGINE_MODULE=<concerto-rust>/concerto-wasm/pkg/web/concerto-engine.js \
+  CONCERTO_ENGINE_MODULE=<concerto-rust>/concerto-wasm/pkg/concerto-engine.cjs \
   npx mocha -r ts-node/register --recursive -t 10000 --reporter json test/ \
     > mocha-rust.json
   ```
-  (`run.mjs` gets the same numbers for free from `status.mjs`'s
-  `metrics.concerto_core_tests.by_tag`, keyed on `CONCERTO_ENGINE=rust`.)
+  (`run.mjs`'s own `core_suite_rust` step runs exactly this, resolving
+  `CONCERTO_ENGINE_MODULE` itself per the note above if you don't export it;
+  `status.mjs`'s `metrics.concerto_core_tests.by_tag` carries the same
+  numbers for any other caller.)
 - **Expected:** every test tagged `B` in `migration/tags/test-tags.tsv`
   passes. `test/**` is untouched (never edited to make this true).
 - **Evidence:** `migration/gate/reports/<run>/status.json`
@@ -94,6 +133,19 @@ This file only *checks*. It never fixes product code, never touches
   the sign-off itself is a human review artifact, not machine-checkable).
 
 ### 3. Oracle corpus: coverage of the reference; 0 fail / 0 regressions / 0 harness errors on Rust native + WASM
+
+**Error parity is class, not message** (maintainer decision 2026-09-27, task
+P5-09, accordproject/concerto-rust#253). Rust must throw in the same scenarios
+as TS with the same exception class; the exception message text may differ.
+Both oracle legs below judge on that rule: a fixture whose outcome differs
+only in `error.message` passes (the native report and `replay.js` count it as
+`message_only` and list it under `message_diffs`, for information), while a
+throw/no-throw, class, component, location, value or effects difference is
+still a failure. A message-only difference is never a gate failure and never
+needs a `DIVERGENCES.md` row. The same rule lets a `packages/concerto-core/test/**`
+assertion on exact message text be relaxed to a class check, but only when it
+is listed in `migration/guardrails/test-message-relaxations.tsv` and signed off
+in review (`check-guardrails.mjs` rule 1, §5).
 
 **Corpus currency caveat, found by this task's dry run (2026-09-25).** P2-10
 (#54) and P2-11 (#55) both closed `mig:done`, each reporting corpus-only

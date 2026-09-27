@@ -279,7 +279,7 @@ function buildOptionsFor(target) {
                 'import { createRequire as __createRequire } from "module";',
                 'const require = __createRequire(import.meta.url);',
                 ...(isConcertoCore ? [
-                    'if (typeof globalThis.module === "undefined" && typeof process !== "undefined" && process.env?.CONCERTO_ENGINE === "rust") {',
+                    'if (typeof globalThis.module === "undefined") {',
                     '    globalThis.__concertoEngineRequire = __createRequire(import.meta.url);',
                     '    let __engineDir;',
                     '    globalThis.module = { require(specifier) {',

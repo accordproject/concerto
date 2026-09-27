@@ -28,9 +28,10 @@ import type Field from './field';
 import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// Its bindings are typed `never` so that a view leaves the member's inferred
-// return type, and so the .d.ts, exactly as the TS body makes it.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
+// `never` so that a view leaves the member's inferred return type, and so
+// the .d.ts, exactly as the TS body used to make it.
 //
 // dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
 // with no .d.ts, since it is not public API (tsconfig.build.internal.json;
@@ -63,8 +64,7 @@ declare const __non_webpack_require__: NodeRequire;
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * The `options.regExp` hook configured on the validator's model manager, if
@@ -106,8 +106,7 @@ class StringValidator extends Validator{
     constructor(field: ValidatedElement, validator?: IStringRegexValidator, lengthValidator?: IStringLengthValidator) {
         super(field, validator);
 
-        /* istanbul ignore if */
-        if (rust && !customRegExp(field)) {
+        if (!customRegExp(field)) {
             Object.assign(this, rust.stringValidatorNew(this, validator, lengthValidator));
             this.regex = validator ? new RegExp(validator.pattern, validator.flags) : null;
             return;
@@ -158,8 +157,7 @@ class StringValidator extends Validator{
      * @private
      */
     validate(identifier: string | null, value: string): void {
-        /* istanbul ignore if */
-        if (rust && !customRegExp(this.field)) {
+        if (!customRegExp(this.field)) {
             rust.stringValidatorValidate(this, identifier, value);
             return;
         }
@@ -232,8 +230,7 @@ class StringValidator extends Validator{
      * validator, false otherwise.
      */
     compatibleWith(other: Validator | null): boolean {
-        /* istanbul ignore if */
-        if (rust && !customRegExp(this.field) && !(other instanceof StringValidator && customRegExp(other.field))) {
+        if (!customRegExp(this.field) && !(other instanceof StringValidator && customRegExp(other.field))) {
             return rust.stringValidatorCompatibleWith(this, other, StringValidator);
         }
         if (!(other instanceof StringValidator)) {

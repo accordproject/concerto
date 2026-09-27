@@ -445,7 +445,7 @@ declare function jsonToYaml(dcsJson: any): string;
  * @returns {object} the DCS JSON
  */
 declare function yamlToJson(yamlString: any): {
-    $class: any;
+    $class: string;
     name: any;
     version: any;
     commands: any;
@@ -456,196 +456,6 @@ declare const _default: {
     yamlToJson: typeof yamlToJson;
 };
 export default _default;
-
-// ==== decoratorextractor.d.ts ====
-import ModelManager from './modelmanager';
-import type { IModels } from '@accordproject/concerto-metamodel';
-import type { DecoratorCommandTarget } from './types';
-/**
- * Utility functions to work with
- * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
- * @memberof module:concerto-core
- * @private
- */
-/**
- * A decorator collected from a model, keyed in the extraction dictionary by
- * the namespace it was found in.
- */
-interface ExtractedDecorator {
-    declaration: string;
-    property: string;
-    mapElement: string;
-    dcs: string;
-}
-declare class DecoratorExtractor {
-    extractionDictionary: Record<string, ExtractedDecorator[]>;
-    removeDecoratorsFromModel: boolean;
-    locale: string;
-    dcs_version: string;
-    sourceModelAst: IModels;
-    updatedModelAst: IModels;
-    action: number;
-    /**
-     * The action to be performed to extract all, only vocab or only non-vocab decorators
-     */
-    static Action: {
-        EXTRACT_ALL: number;
-        EXTRACT_VOCAB: number;
-        EXTRACT_NON_VOCAB: number;
-    };
-    /**
-     * Create the DecoratorExtractor.
-     * @constructor
-     * @param {boolean} removeDecoratorsFromModel - flag to determine whether to remove decorators from source model
-     * @param {string} locale - locale for extracted vocabularies
-     * @param {string} dcs_version - version string
-     * @param {Object} sourceModelAst - the ast of source models
-     * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
-     * @param {object} [options] - decorator extractor options
-     */
-    constructor(removeDecoratorsFromModel: boolean, locale: string, dcs_version: string, sourceModelAst: IModels, action?: number, options?: Record<string, unknown>);
-    /**
-     * Returns if the decorator is vocab or not
-     * @param {string} decoractorName - the name of decorator
-     * @returns {boolean} - returns true if the decorator is a vocabulary decorator else false
-     * @private
-     */
-    isVocabDecorator(decoractorName: any): any;
-    /**
-     * Returns a value safe for embedding in a YAML scalar.
-     * String values containing YAML-special characters are wrapped in double quotes.
-     * Non-string decorator types (Number, Boolean) are returned as-is.
-     * @param {any} value - the value to emit
-     * @param {string} [type] - the $class of the decorator argument
-     * @returns {string|number|boolean|null} - double-quoted string for string args, raw value for non-string args
-     * @private
-     */
-    quoteStringValue(value: any, type?: string): string | number | boolean | null;
-    /**
-    * Adds a key-value pair to a dictionary (object) if the key exists,
-    * or creates a new key with the provided value.
-    *
-    * @param {string} key - The key to add or update.
-    * @param {any} value - The value to add or update.
-    * @param {Object} options - options containing target
-    * @param {string} options.declaration - Target declaration
-    * @param {string} options.property - Target property
-    * @param {string} options.mapElement - Target map element
-    * @private
-    */
-    constructDCSDictionary(key: any, value: any, options: any): void;
-    /**
-     * Transforms the collected decorators into proper decorator command sets
-     * @param {Array<Object>} dcsObjects - the collection of collected decorators
-     * @param {string} namespace - the current namespace
-     * @param {Array<Object>} decoratorData - the collection of existing decorator command sets
-     * @returns {Array<Object>} - the collection of decorator command sets
-     * @private
-     */
-    transformNonVocabularyDecorators(dcsObjects: any, namespace: any, decoratorData: any): any;
-    /**
-     * Transforms the collected vocabularies into proper vocabulary command sets
-     * @param {Array<Object>} vocabObject - the collection of collected vocabularies
-     * @param {string} namespace - the current namespace
-     * @param {Array<Object>} vocabData - the collection of existing vocabularies command sets
-     * @returns {Array<Object>} - the collection of vocabularies command sets
-     * @private
-     */
-    transformVocabularyDecorators(vocabObject: any, namespace: any, vocabData: any): any;
-    /**
-     * Constructs Target object for a given model
-     * @param {string} namespace - the current namespace
-     * @param {Object} obj - the ast of the model
-     * @returns {Object} - the target object
-     * @private
-     */
-    constructTarget(namespace: any, obj: any): DecoratorCommandTarget & {
-        $class: string;
-    };
-    /**
-     * Parses the dict data into an array of decorator jsons
-     * @param {Array<Object>} dcsObjects - the array of collected dcs objects
-     * @param {Object} dcs - the current dcs json to be parsed
-     * @param {String} DCS_VERSION - the version string
-     * @param {Object} target - target object for the command
-     * @returns {Array<Object>} - the array of collected dcs objects with the current dcs
-     * @private
-     */
-    parseNonVocabularyDecorators(dcsObjects: any, dcs: any, DCS_VERSION: any, target: any): any;
-    /**
-     * @param {Object} vocabObject - the collection of collected vocabularies
-     * @param {Object} vocabTarget - the declaration object
-     * @param {Object} dcs - the current dcs json to be parsed
-     * @returns {Object} - the collection of collected vocabularies with current dcs
-     * @private
-     */
-    parseVocabularies(vocabObject: any, vocabTarget: any, dcs: any): any;
-    /**
-    * parses the extracted decorators and generates arrays of decorator command set and vocabularies
-    *
-    * @returns {Object} - constructed DCS Dict and processed models ast
-    * @private
-    */
-    transformDecoratorsAndVocabularies(): {
-        decoratorCommandSet: never[];
-        vocabularies: never[];
-    };
-    /**
-     * Filter vocab or non-vocab decorators
-     * @param {Object} decorators - the collection of decorators
-     * @returns {Object} - the collection of filtered decorators
-     * @private
-     */
-    filterOutDecorators(decorators: any): any;
-    /**
-    * Process the map declarations to extract the decorators.
-    *
-    * @param {Object} declaration - The source AST of the model
-    * @param {string} namespace - namespace of the model
-    * @returns {Object} - processed map declarations ast
-    * @private
-    */
-    processMapDeclaration(declaration: any, namespace: any): any;
-    /**
-    * Process the properties to extract the decorators.
-    *
-    * @param {Object} sourceProperties - The source AST of the property
-    * @param {string} declarationName - The name of source declaration
-    * @param {string} namespace - namespace of the model
-    * @returns {Object} - processed properties ast
-    * @private
-    */
-    processProperties(sourceProperties: any, declarationName: any, namespace: any): any;
-    /**
-    * Process the declarations to extract the decorators.
-    *
-    * @param {Object} sourceDecl - The source AST of the model
-    * @param {string} namespace - namespace of the model
-    * @returns {Object} - processed declarations ast
-    * @private
-    */
-    processDeclarations(sourceDecl: any, namespace: any): any;
-    /**
-    * Process the models to extract the decorators.
-    *
-    * @private
-    */
-    processModels(): void;
-    /**
-    * Collects the decorators and vocabularies and updates the modelManager depending
-    * on the options.
-    *
-    * @returns {Object} - constructed DCS Dict and processed models ast
-    * @private
-    */
-    extract(): {
-        updatedModelManager: ModelManager;
-        decoratorCommandSet: never[];
-        vocabularies: never[];
-    };
-}
-export { DecoratorExtractor };
-export default DecoratorExtractor;
 
 // ==== decoratormanager.d.ts ====
 import ModelManager from './modelmanager';
@@ -685,47 +495,6 @@ declare class DecoratorManager {
      */
     static canMigrate(decoratorCommandSet: any, DCS_VERSION: any): boolean;
     /**
-     * Add decorator commands set with index object to the coresponding target map
-     * @param {*} targetMap the target map to add the command to
-     * @param {targetKey} targetKey the target key to add the command to
-     * @param {DcsIndexWrapper} dcsWithIndex the command to add
-     * @private
-     */
-    static addDcsWithIndexToMap(targetMap: any, targetKey: any, dcsWithIndex: any): void;
-    /**
-     * Creates five different maps to index decorator command sets by target type and returns them
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
-     * @returns {Object} object with all the decorator command maps based on the target
-     * @private
-     */
-    static getDecoratorMaps(decoratorCommandSet: any): {
-        namespaceCommandsMap: Map<any, any>;
-        declarationCommandsMap: Map<any, any>;
-        propertyCommandsMap: Map<any, any>;
-        mapElementCommandsMap: Map<any, any>;
-        typeCommandsMap: Map<any, any>;
-    };
-    /**
-     * Migrate or validate the DecoratorCommandSet object if the options are set as true
-     * @param {ModelManager} modelManager the input model manager
-     * @param {*} decoratorCommandSet a DecoratorCommandSet object, or an array of DecoratorCommandSet objects
-     * @param {boolean} shouldMigrate migrate the decoratorCommandSet $class to match the dcs model version
-     * @param {boolean} shouldValidate validate that decorator command set is valid
-     * with respect to to decorator command set model
-     * @param {boolean} shouldValidateCommands validate the decorator command set targets. Note that
-     * the validate option must also be true
-     * @private
-     */
-    static migrateAndValidate(modelManager: any, decoratorCommandSet: any, shouldMigrate: any, shouldValidate: any, shouldValidateCommands: any): void;
-    /**
-     * Adds decorator commands with index to the array passed
-     * @param {DcsIndexWrapper[]} array the array to add the command to
-     * @param {*} map the target map to add the command to
-     * @param {key} key the target key to add the command to
-     * @private
-     */
-    static pushMapValues(array: any, map: any, key: any): void;
-    /**
      * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object, or an array of DecoratorCommandSet objects
@@ -757,11 +526,7 @@ declare class DecoratorManager {
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {ExtractDecoratorsResult} - a new model manager with the decorations removed and a list of extracted decorator jsons and vocab yamls
      */
-    static extractDecorators(modelManager: any, options: any): {
-        modelManager: ModelManager;
-        decoratorCommandSet: never[];
-        vocabularies: never[];
-    };
+    static extractDecorators(modelManager: any, options: any): never;
     /**
      * Extracts all the vocab decorator commands from all the models in modelManager
      * @param {ModelManager} modelManager the input model manager
@@ -770,10 +535,7 @@ declare class DecoratorManager {
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
      */
-    static extractVocabularies(modelManager: any, options: any): {
-        modelManager: ModelManager;
-        vocabularies: never[];
-    };
+    static extractVocabularies(modelManager: any, options: any): never;
     /**
      * Extracts all the non-vocab decorator commands from all the models in modelManager
      * @param {ModelManager} modelManager the input model manager
@@ -782,26 +544,7 @@ declare class DecoratorManager {
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
      */
-    static extractNonVocabDecorators(modelManager: any, options: any): {
-        modelManager: ModelManager;
-        decoratorCommandSet: never[];
-    };
-    /**
-     * Throws an error if the decoractor command is invalid
-     * @param {ModelManager} validationModelManager the validation model manager
-     * @param {*} command the decorator command
-     */
-    static validateCommand(validationModelManager: any, command: any): void;
-    /**
-     * Applies a new decorator to the Map element
-     * @private
-     * @param {string} element the element to apply the decorator to
-     * @param {string} target the command target
-     * @param {*} declaration the map declaration
-     * @param {string} type the command type
-     * @param {*} newDecorator the decorator to add
-     */
-    static applyDecoratorForMapElement(element: any, target: any, declaration: any, type: any, newDecorator: any): void;
+    static extractNonVocabDecorators(modelManager: any, options: any): never;
     /**
      * Compares two arrays. If the first argument is falsy
      * the function returns true.
@@ -810,39 +553,7 @@ declare class DecoratorManager {
      * @returns {Boolean} true if the test is falsy or the intersection of
      * the test and values arrays is not empty (i.e. they have values in common)
      */
-    static falsyOrEqual(test: any, values: any): any;
-    /**
-     * Applies a decorator to a decorated model element.
-     * @param {*} decorated the type to apply the decorator to
-     * @param {string} type the command type
-     * @param {*} newDecorator the decorator to add
-     */
-    static applyDecorator(decorated: any, type: any, newDecorator: any): void;
-    /**
-     * Checks for duplicate decorators added to a decorated model element.
-     * @param {*} decoratedAst ast of the property or the declaration to apply the decorator to
-     * @throws {IllegalModelException} if the decoratedAst has duplicate decorators
-     * @private
-     */
-    static checkForDuplicateDecorators(decoratedAst: any): void;
-    /**
-     * Executes a Command against a Model Namespace, adding
-     * decorators to the Namespace.
-     * @private
-     * @param {*} model the model
-     * @param {*} command the Command object from the dcs
-     */
-    static executeNamespaceCommand(model: any, command: any): void;
-    /**
-     * Executes a Command against a Declaration, adding
-     * decorators to the Declaration, or its properties, as required.
-     * @param {string} namespace the namespace for the declaration
-     * @param {*} declaration the class declaration
-     * @param {*} command the Command object from the dcs
-     * @param {*} [property] the property of a declaration, optional, to be passed if the command is for a property
-     * @param {object} [options] - execute command options
-     */
-    static executeCommand(namespace: any, declaration: any, command: any, property?: any, options?: any): void;
+    static falsyOrEqual(test: any, values: any): never;
     /**
      * Executes a Command against a Property, adding
      * decorators to the Property as required.
@@ -851,16 +562,6 @@ declare class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property: any, command: any): void;
-    /**
-     * Applies the decorator on top of the namespace or else on all declarations
-     * within the namespace.
-     * @private
-     * @param {*} declaration the type to apply the decorator to
-     * @param {string} type the command type
-     * @param {*} decorator the decorator to add
-     * @param {*} target the target object for the decorator
-     */
-    static checkForNamespaceTargetAndApplyDecorator(declaration: any, type: any, decorator: any, target: any): void;
     /**
      * Legacy method. Kept for compatibility. Returns true.
      *  @returns {Boolean} true
@@ -880,7 +581,7 @@ declare class DecoratorManager {
      * @return {object} the corresponding JSON object
      */
     static yamlToJson(yamlInput: any): {
-        $class: any;
+        $class: string;
         name: any;
         version: any;
         commands: any;
@@ -1725,13 +1426,6 @@ declare class Decorator {
      */
     constructor(parent: Decorated, ast: AstNode);
     /**
-    * Handles a validation error, logging and throwing as required
-    * @param {string} level the log level
-    * @param {string | Error} err the message to log, or the error that was caught
-    * @private
-    */
-    handleError(level: string | undefined, err: string | Error): void;
-    /**
      * Visitor design pattern
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
@@ -1743,6 +1437,16 @@ declare class Decorator {
      * @return {ClassDeclaration|Property} the parent class or property declaration
      */
     getParent(): Decorated;
+    /**
+    * Handles a validation error, logging and throwing as required. Called
+    * back by the Rust engine's decoratorValidate binding (concerto-wasm
+    * src/lib.rs `handle_error`) for every non-fatal-or-fatal validation
+    * outcome, so this is a live collaborator, not TS-only fallback logic.
+    * @param {string} level the log level
+    * @param {string | Error} err the message to log, or the error that was caught
+    * @private
+    */
+    handleError(level: string | undefined, err: string | Error): void;
     /**
      * Process the AST and build the model
      * @throws {IllegalModelException}
@@ -2177,13 +1881,6 @@ declare class MapKeyType extends Decorated {
      */
     validate(): void;
     /**
-     * Sets the Type name for the Map Key
-     *
-     * @param {Object} ast - The AST created by the parser
-     * @private
-     */
-    processType(ast: AstNode): void;
-    /**
      * Returns the ModelFile that defines this class.
      *
      * @public
@@ -2267,13 +1964,6 @@ declare class MapValueType extends Decorated {
      * @protected
      */
     validate(): void;
-    /**
-     * Sets the Type name for the Map Value
-     *
-     * @param {Object} ast - The AST created by the parser
-     * @private
-     */
-    processType(ast: AstNode): void;
     /**
      * Returns the ModelFile that defines this class.
      *
@@ -2773,10 +2463,10 @@ export default ParticipantDeclaration;
 
 // ==== introspect/property.d.ts ====
 import Decorated from './decorated';
-import CollectionSizeValidator from './collectionsizevalidator';
 import type ClassDeclaration from './classdeclaration';
 import type ModelFile from './modelfile';
 import type { AstNode } from './decorated';
+import type CollectionSizeValidator from './collectionsizevalidator';
 /**
  * Property representing an attribute of a class declaration,
  * either a Field or a Relationship.
@@ -3331,7 +3021,7 @@ declare class Identifiable extends Typed {
      * Returns a URI representation of a reference to this identifiable
      * @return {String} the URI for the identifiable
      */
-    toURI(): string;
+    toURI(): never;
 }
 export { Identifiable };
 export default Identifiable;
@@ -3513,7 +3203,7 @@ declare class ResourceId {
      * URI representation of this identifier.
      * @return {String} A URI.
      */
-    toURI(): string;
+    toURI(): never;
 }
 export { ResourceId };
 export default ResourceId;
@@ -3768,7 +3458,6 @@ export { ModelManager };
 export default ModelManager;
 
 // ==== modelutil.d.ts ====
-import semver from 'semver';
 /**
  * Internal Model Utility Class
  * <p><a href="./diagrams-private/modelutil.svg"><img src="./diagrams-private/modelutil.svg" style="height:100%;"/></a></p>
@@ -3782,7 +3471,7 @@ declare class ModelUtil {
      * @param {string} fqn - the source string
      * @return {string} - the string after the last dot
      */
-    static getShortName(fqn: any): any;
+    static getShortName(fqn: any): string;
     /**
      * Returns the namespace for the fully qualified name of a type
      * @param {string} fqn - the fully qualified identifier of a type
@@ -3810,14 +3499,9 @@ declare class ModelUtil {
         disableVersionParsing?: boolean;
     }): {
         name: string;
-        escapedNamespace?: undefined;
-        version?: undefined;
-        versionParsed?: undefined;
-    } | {
-        name: string;
-        escapedNamespace: string;
-        version: string | null;
-        versionParsed: string | semver.SemVer | null;
+        escapedNamespace?: string;
+        version?: string | null;
+        versionParsed?: unknown;
     };
     /**
      * Return the fully qualified name for an import
@@ -3825,7 +3509,7 @@ declare class ModelUtil {
      * @return {string[]} - the fully qualified names for that import
      * @private
      */
-    static importFullyQualifiedNames(imp: any): string[];
+    static importFullyQualifiedNames(imp: any): never;
     /**
      * Returns true if the type is a primitive type
      * @param {string} typeName - the name of the type
@@ -3843,35 +3527,35 @@ declare class ModelUtil {
      * @return {boolean} - true if the type can be assigned to the property
      * @private
      */
-    static isAssignableTo(modelFile: any, typeName: any, property: any): any;
+    static isAssignableTo(modelFile: any, typeName: any, property: any): never;
     /**
      * Returns the passed string with the first character capitalized
      * @param {string} string - the string
      * @return {string} the string with the first letter capitalized
      * @private
      */
-    static capitalizeFirstLetter(string: any): any;
+    static capitalizeFirstLetter(string: any): string;
     /**
      * Returns true if the given field is an enumerated type
      * @param {Field} field - the string
      * @return {boolean} true if the field is declared as an enumeration
      * @private
      */
-    static isEnum(field: any): any;
+    static isEnum(field: any): never;
     /**
      * Returns true if the given field is an map type
      * @param {Field} field - the string
      * @return {boolean} true if the field is declared as an map
      * @private
      */
-    static isMap(field: any): any;
+    static isMap(field: any): never;
     /**
      * Returns true if the given field is a Scalar type
      * @param {Field} field - the Field to test
      * @return {boolean} true if the field is declared as an scalar
      * @private
      */
-    static isScalar(field: any): any;
+    static isScalar(field: any): never;
     /**
      * Return true if the name is a valid Concerto identifier
      * @param {string} name - the name of the identifier to test.
@@ -3884,14 +3568,14 @@ declare class ModelUtil {
      * @param {string} type - short name of the type.
      * @returns {string} the fully qualified type name.
      */
-    static getFullyQualifiedName(namespace: any, type: any): any;
+    static getFullyQualifiedName(namespace: any, type: any): string;
     /**
      * Converts a fully qualified type name to a FQN without a namespace version.
      * If the FQN is a primitive type it is returned unchanged.
      * @param {string} fqn fully qualified name of a type
      * @returns {string} the fully qualified name minus the namespace version
      */
-    static removeNamespaceVersionFromFullyQualifiedName(fqn: any): any;
+    static removeNamespaceVersionFromFullyQualifiedName(fqn: any): string;
     /**
      * Returns true if the property is a system property.
      * System properties are not declared in the model.
@@ -3914,21 +3598,21 @@ declare class ModelUtil {
      * @param {Object} key - the Key of the Map Declaration
      * @return {boolean} true if the Key is a valid Map Key
     */
-    static isValidMapKey(key: any): boolean;
+    static isValidMapKey(key: any): never;
     /**
      * Returns true if this Key is a valid Map Key Scalar Value.
      *
      * @param {Object} decl - the Map Key Scalar declaration
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
-    static isValidMapKeyScalar(decl: any): any;
+    static isValidMapKeyScalar(decl: any): never;
     /**
      * Returns true if this Value is a valid Map Value.
      *
      * @param {Object} value - the Value of the Map Declaration
      * @return {boolean} true if the Value is a valid Map Value
      */
-    static isValidMapValue(value: any): boolean;
+    static isValidMapValue(value: any): never;
 }
 export { ModelUtil };
 export default ModelUtil;
@@ -4175,7 +3859,7 @@ declare class JSONGenerator {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visitClassDeclaration(classDeclaration: any, parameters: any): string | Record<string, unknown>;
+    visitClassDeclaration(classDeclaration: any, parameters: any): Record<string, unknown>;
     /**
      * Visitor design pattern
      * @param {Field} field - the object being visited

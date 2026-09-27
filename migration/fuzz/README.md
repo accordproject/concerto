@@ -6,8 +6,13 @@ Issue: accordproject/concerto-rust#76.
 Mutates models and instances drawn from the oracle corpus (`migration/oracle/fixtures`,
 read-only) with a deterministic, seeded generator, runs each mutated case through the
 TS reference-mode engine and the Rust/WASM engine, and diffs the canonical outcome
-(verdict, error class, message, location) the same way `migration/oracle/lib/judge.js`
-does for the recorded corpus.
+(verdict, error class, location) the same way `migration/oracle/lib/judge.js`
+does for the recorded corpus. Since task P5-09 (accordproject/concerto-rust#253, maintainer
+decision 2026-09-27) the exception message text is not compared: a case whose outcomes differ
+only in message is an agreement, counted in `messageOnlyAgree` (a subset of `agree`); a
+throw/no-throw, class, component, location or value difference is still a divergence.
+`bin/reclassify-class-not-message.js` re-judges the stage-2 clusters under this rule
+(`results/stage2/reclassified-class-not-message.json`; see TRIAGE.md).
 
 **Scope, per the coordinator's comment on accordproject/concerto-rust#76:** this task
 owns the harness only. It never edits `migration/oracle/`, the canonical corpus or

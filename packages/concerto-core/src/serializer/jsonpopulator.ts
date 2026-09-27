@@ -27,13 +27,13 @@ import type MapDeclaration from '../introspect/mapdeclaration';
 import type Resource from '../model/resource';
 import Field from '../introspect/field';
 
-// CONCERTO_ENGINE=rust (task P4-10, accordproject/concerto-rust#69): the
-// visitor shell stays here (white-box tests spy on `visitX`), but
-// `convertToObject`'s primitive-type switch -- the per-field coercion and
-// its message -- delegates to the engine, one field at a time. See
-// introspect/property.ts's identical preamble for why `loadEngine` takes a
-// non-literal specifier and why rust mode only works through the CommonJS
-// dist/ today.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). The visitor shell stays
+// here (white-box tests spy on `visitX`), but `convertToObject`'s
+// primitive-type switch -- the per-field coercion and its message --
+// delegates to the engine, one field at a time. See introspect/property.ts's
+// identical preamble for why `loadEngine` takes a non-literal specifier and
+// why rust mode only works through the CommonJS dist/ today.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 // P5-06: memoised per specifier, so a call site on a per-element or
@@ -47,8 +47,7 @@ const loadEngine = (specifier: string) =>
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => any } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engine').rust;
 
 const debug = createDebug('concerto:JSONPopulator');
 
@@ -400,30 +399,27 @@ class JSONPopulator {
         // enum value), so once the engine has accepted the value the view
         // returns the caller's own object, not a copy decoded from the
         // wire: identity (`result === json`) is what TS gives.
-        /* istanbul ignore if */
-        if (rust) {
-            try {
-                const codec = loadEngine('../engine/serializer-codec');
-                // The type name and the path cross as plain strings (and the
-                // path appears in the message): a lone surrogate in either
-                // would reach Rust as U+FFFD, so fall back.
-                codec.checkString(String(field.getType()));
-                codec.checkString(path);
-                const options = { utcOffset: this.utcOffset, strictQualifiedDateTimes: this.strictQualifiedDateTimes };
-                const resultText = rust.populatorConvertPrimitive(
-                    field.getType(),
-                    JSON.stringify(codec.encodeValue(json)),
-                    JSON.stringify(codec.encodeValue(options)),
-                    path,
-                );
-                if (field.getType() !== 'DateTime' || typeof json !== 'string') {
-                    return json;
-                }
-                return codec.decodeValue(JSON.parse(resultText), parameters.modelManager);
-            } catch (err) {
-                if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
-                    throw err;
-                }
+        try {
+            const codec = loadEngine('../engine/serializer-codec');
+            // The type name and the path cross as plain strings (and the
+            // path appears in the message): a lone surrogate in either
+            // would reach Rust as U+FFFD, so fall back.
+            codec.checkString(String(field.getType()));
+            codec.checkString(path);
+            const options = { utcOffset: this.utcOffset, strictQualifiedDateTimes: this.strictQualifiedDateTimes };
+            const resultText = rust.populatorConvertPrimitive(
+                field.getType(),
+                JSON.stringify(codec.encodeValue(json)),
+                JSON.stringify(codec.encodeValue(options)),
+                path,
+            );
+            if (field.getType() !== 'DateTime' || typeof json !== 'string') {
+                return json;
+            }
+            return codec.decodeValue(JSON.parse(resultText), parameters.modelManager);
+        } catch (err) {
+            if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+                throw err;
             }
         }
 

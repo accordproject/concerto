@@ -43,7 +43,7 @@
   "private": true,
   "scripts": {
     "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",
-    "pretest": "npm run licchk",
+    "pretest": "npm run licchk && npm --prefix migration/oracle/reference ci",
     "test": "npm run test --workspaces --if-present",
     "test:esm": "node ./scripts/smoke-esm.mjs",
     "licchk": "license-check-and-add",

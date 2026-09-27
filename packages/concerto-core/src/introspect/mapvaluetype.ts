@@ -13,9 +13,6 @@
  */
 
 import Decorated from './decorated';
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-import IllegalModelException from './illegalmodelexception';
-import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -24,17 +21,17 @@ import type MapDeclaration from './mapdeclaration';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// See property.ts's own copy of this comment for the bundler/webpack
-// reasoning this loader relies on.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See property.ts's own
+// copy of this comment for the bundler/webpack reasoning this loader relies
+// on.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * MapValueType defines a Value type of MapDeclaration.
@@ -70,14 +67,7 @@ class MapValueType extends Decorated {
      */
     process() {
         super.process();
-
-        /* istanbul ignore if */
-        if (rust) {
-            this.type = rust.mapValueTypeProcess(this);
-            return;
-        }
-
-        this.processType(this.ast);
+        this.type = rust.mapValueTypeProcess(this);
     }
 
     /**
@@ -87,74 +77,7 @@ class MapValueType extends Decorated {
      * @protected
      */
     validate() {
-        /* istanbul ignore if */
-        if (rust) {
-            rust.mapValueTypeValidate(this);
-            return;
-        }
-
-        if (!ModelUtil.isPrimitiveType(this.type)) {
-
-            const decl = this.modelFile.getType(this.ast.type.name);
-
-            // All declarations, with the exception of MapDeclarations, are valid Values.
-            if(decl.isMapDeclaration?.()) {
-                throw new IllegalModelException(
-                    `MapDeclaration as Map Type Value is not supported: ${this.type}`
-                );
-            }
-        }
-    }
-
-    /**
-     * Sets the Type name for the Map Value
-     *
-     * @param {Object} ast - The AST created by the parser
-     * @private
-     */
-    processType(ast: AstNode) {
-        let decl;
-        switch(this.ast.$class) {
-        case `${MetaModelNamespace}.ObjectMapValueType`:
-        case `${MetaModelNamespace}.RelationshipMapValueType`:
-
-            // ObjectMapValueType must have TypeIdentifier.
-            if (!('type' in ast)) {
-                throw new IllegalModelException(`ObjectMapValueType must contain property 'type', for MapDeclaration named ${this.parent.name}`);
-            }
-
-            // ObjectMapValueType TypeIdentifier must be properly formed.
-            if (!('$class' in ast.type) || !('name' in ast.type)) {
-                throw new IllegalModelException(`ObjectMapValueType type must contain property '$class' and property 'name', for MapDeclaration named ${this.parent.name}`);
-            }
-
-            // And the $class must be valid.
-            if (ast.type.$class !== 'concerto.metamodel@1.0.0.TypeIdentifier') {
-                throw new IllegalModelException(`ObjectMapValueType type $class must be of TypeIdentifier for MapDeclaration named ${this.parent.name}`);
-            }
-
-            this.type = String(this.ast.type.name); // cast for correct type resolution in generated types.
-
-            break;
-        case `${MetaModelNamespace}.BooleanMapValueType`:
-            this.type = 'Boolean';
-            break;
-        case `${MetaModelNamespace}.DateTimeMapValueType`:
-            this.type = 'DateTime';
-            break;
-        case `${MetaModelNamespace}.StringMapValueType`:
-            this.type = 'String';
-            break;
-        case `${MetaModelNamespace}.IntegerMapValueType`:
-            this.type = 'Integer';
-            break;
-        case `${MetaModelNamespace}.LongMapValueType`:
-            this.type = 'Long';
-            break;
-        case `${MetaModelNamespace}.DoubleMapValueType`:
-            this.type = 'Double';
-            break;
-        }
+        rust.mapValueTypeValidate(this);
     }
 
     /**

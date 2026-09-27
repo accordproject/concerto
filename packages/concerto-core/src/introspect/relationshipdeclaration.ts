@@ -13,8 +13,6 @@
  */
 
 import Property from './property';
-import IllegalModelException from './illegalmodelexception';
-import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -22,17 +20,17 @@ import type { AstNode } from './decorated';
 import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// See property.ts's own copy of this comment for the bundler/webpack
-// reasoning this loader relies on.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See property.ts's own
+// copy of this comment for the bundler/webpack reasoning this loader relies
+// on.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * Class representing a relationship between model elements
@@ -62,49 +60,7 @@ class RelationshipDeclaration extends Property {
     validate(classDecl: ClassDeclaration): void {
         super.validate(classDecl);
 
-        /* istanbul ignore if */
-        if (rust) {
-            rust.relationshipDeclarationValidate(this, classDecl);
-            return;
-        }
-
-        // relationship cannot point to primitive types
-        if(!this.getType()) {
-            throw new IllegalModelException('Relationship must have a type', classDecl.getModelFile(), this.ast.location);
-        }
-
-        let classDeclaration: ClassDeclaration | null = null;
-
-        // you can't have a relationship with a primitive...
-        if(ModelUtil.isPrimitiveType(this.getType())) {
-            throw new IllegalModelException('Relationship ' + this.getName() + ' cannot be to the primitive type ' + this.getType(), classDecl.getModelFile(), this.ast.location );
-        } else {
-            let namespace = this.getParent().getNamespace();
-
-            // we first try to get the type from our own model file
-            // because during validate we have not yet been added to the model manager
-            if(namespace === ModelUtil.getNamespace(this.getFullyQualifiedTypeName())) {
-                classDeclaration = this.getParent().getModelFile().getType(this.getType());
-            }
-            else {
-                // otherwise we have to use the modelmanager to try to load
-                try {
-                    classDeclaration = this.getParent().getModelFile().getModelManager().getType(this.getFullyQualifiedTypeName());
-                } catch (err) {
-                    // Let classDeclaration remain null and get handled below
-                }
-            }
-
-            if(classDeclaration === null) {
-                throw new IllegalModelException('Relationship ' + this.getName() + ' points to a missing type ' + this.getFullyQualifiedTypeName(), classDecl.getModelFile(), this.ast.location);
-            }
-
-            if (classDeclaration.isIdentified()) {
-                // Relationship to a class with an identifier continue
-            } else {
-                throw new IllegalModelException('Relationship ' + this.getName() + ' must be to a class that has an identifier, but this is to ' + this.getFullyQualifiedTypeName(), classDecl.getModelFile(), this.ast.location);
-            }
-        }
+        rust.relationshipDeclarationValidate(this, classDecl);
     }
 
     /**

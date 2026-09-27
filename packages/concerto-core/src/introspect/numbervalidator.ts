@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-import { NullUtil } from '@accordproject/concerto-util';
-const { isNull } = NullUtil;
 import Validator from './validator';
 
 // Types needed for TypeScript generation.
@@ -27,22 +25,22 @@ import type Field from './field';
 import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// Its bindings are typed `never` so that a view leaves the member's inferred
-// return type, and so the .d.ts, exactly as the TS body makes it.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
+// `never` so that a view leaves the member's inferred return type, and so
+// the .d.ts, exactly as the TS body used to make it.
 //
 // dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
 // with no .d.ts, since it is not public API (tsconfig.build.internal.json;
-// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
-// must never see a specifier it would resolve: `loadEngine` takes a
-// non-literal one (esbuild, rollup and browserify leave it alone) and never
-// names the bare `require` (esbuild's ESM output would add its `__require`
-// shim, which webpack reports as a critical dependency), and webpack folds
-// the `typeof __webpack_require__` test and keeps only the dead-in-Node
-// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
-// bundles exactly as before (PORTING.md 1.5).
+// OD-11). A bundler must never see a specifier it would resolve: `loadEngine`
+// takes a non-literal one (esbuild, rollup and browserify leave it alone) and
+// never names the bare `require` (esbuild's ESM output would add its
+// `__require` shim, which webpack reports as a critical dependency), and
+// webpack folds the `typeof __webpack_require__` test and keeps only the
+// dead-in-Node `__non_webpack_require__` branch, so it neither resolves nor
+// warns.
 //
-// rust mode through the public ESM entry points (P4-11a, PORTING.md 1.5):
+// Loading through the public ESM entry points (P4-11a, PORTING.md 1.5):
 // - Node ESM (dist/esm/index.mjs) works unaided. scripts/build-esm.js's Node
 //   banner sets a `globalThis.module` whose `require` resolves the engine
 //   specifiers. It does not rely on the relative specifier above matching
@@ -62,8 +60,7 @@ declare const __non_webpack_require__: NodeRequire;
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * A Validator to enforce that non null numeric values are between two values.
@@ -86,46 +83,7 @@ class NumberValidator extends Validator{
      */
     constructor(field: ValidatedElement, ast: NumberDomainValidatorAst) {
         super(field, ast);
-
-        /* istanbul ignore if */
-        if (rust) {
-            Object.assign(this, rust.numberValidatorNew(this, ast));
-            return;
-        }
-
-        this.lowerBound = null;
-        this.upperBound = null;
-
-        // the hasOwnProperty guards establish that the bound is present
-        if(Object.prototype.hasOwnProperty.call(ast, 'lower')) {
-            this.lowerBound = ast.lower as number;
-        }
-
-        if(Object.prototype.hasOwnProperty.call(ast, 'upper')) {
-            this.upperBound = ast.upper as number;
-        }
-
-        if(this.lowerBound === null && this.upperBound === null) {
-            // can't specify no upper and lower value
-            this.reportError(null, 'Invalid range, lower and-or upper bound must be specified.');
-        } else if (this.lowerBound === null || this.upperBound === null) {
-            // this is fine and means that we don't need to check whether upper > lower
-        } else {
-            if(this.lowerBound > this.upperBound) {
-                this.reportError(null, 'Lower bound must be less than or equal to upper bound.');
-            }
-        }
-
-        if(this.field?.ast?.defaultValue !== undefined) {
-            let value = this.field.ast.defaultValue;
-            if(this.lowerBound !== null && value < this.lowerBound) {
-                this.reportError(null, `Value ${value} is outside lower bound ${this.lowerBound}`);
-            }
-
-            if(this.upperBound !== null && value > this.upperBound) {
-                this.reportError(null, `Value ${value} is outside upper bound ${this.upperBound}`);
-            }
-        }
+        Object.assign(this, rust.numberValidatorNew(this, ast));
     }
 
     /**
@@ -151,20 +109,7 @@ class NumberValidator extends Validator{
      * @private
      */
     validate(identifier: string | null, value: number): void {
-        /* istanbul ignore if */
-        if (rust) {
-            rust.numberValidatorValidate(this, identifier, value);
-            return;
-        }
-        if(value !== null) {
-            if(this.lowerBound !== null && value < this.lowerBound) {
-                this.reportError(identifier, `Value ${value} is outside lower bound ${this.lowerBound}`);
-            }
-
-            if(this.upperBound !== null && value > this.upperBound) {
-                this.reportError(identifier, `Value ${value} is outside upper bound ${this.upperBound}`);
-            }
-        }
+        rust.numberValidatorValidate(this, identifier, value);
     }
 
     /**
@@ -173,11 +118,7 @@ class NumberValidator extends Validator{
      * @private
      */
     toString(): string {
-        /* istanbul ignore if */
-        if (rust) {
-            return rust.numberValidatorToString(this);
-        }
-        return 'NumberValidator lower: ' + this.lowerBound + ' upper: ' + this.upperBound;
+        return rust.numberValidatorToString(this);
     }
 
     /**
@@ -189,32 +130,7 @@ class NumberValidator extends Validator{
      * validator, false otherwise.
      */
     compatibleWith(other: Validator | null): boolean {
-        /* istanbul ignore if */
-        if (rust) {
-            return rust.numberValidatorCompatibleWith(this, other, NumberValidator);
-        }
-        if (!(other instanceof NumberValidator)) {
-            return false;
-        }
-        const thisLowerBound = this.getLowerBound();
-        const otherLowerBound = other.getLowerBound();
-        if (isNull(thisLowerBound) && !isNull(otherLowerBound)) {
-            return false;
-        } else if (!isNull(thisLowerBound) && !isNull(otherLowerBound)) {
-            if (thisLowerBound < otherLowerBound) {
-                return false;
-            }
-        }
-        const thisUpperBound = this.getUpperBound();
-        const otherUpperBound = other.getUpperBound();
-        if (isNull(thisUpperBound) && !isNull(otherUpperBound)) {
-            return false;
-        } else if (!isNull(thisUpperBound) && !isNull(otherUpperBound)) {
-            if (thisUpperBound > otherUpperBound) {
-                return false;
-            }
-        }
-        return true;
+        return rust.numberValidatorCompatibleWith(this, other, NumberValidator);
     }
 }
 
