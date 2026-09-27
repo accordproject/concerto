@@ -6,7 +6,9 @@
  *
  * Usage: node extract-members.js [--check SEAM_LEDGER.tsv]
  *   --check diffs the extracted member keys (file|class|member|kind)
- *   against the ledger and exits non-zero on any difference or duplicate.
+ *   against the ledger and exits non-zero on any difference or duplicate,
+ *   or when a RUST row makes no engine call / a PARTIAL row does
+ *   (engine-calls.js, accordproject/concerto-rust#261).
  */
 'use strict';
 const fs = require('fs');
@@ -88,6 +90,7 @@ if (ci < 0) {
     for (const r of rows) { process.stdout.write([r.file, r.cls, r.member, r.kind, r.loc, r.line].join('\t') + '\n'); }
     process.exit(0);
 }
+const { scan } = require('./engine-calls.js');
 const ledgerPath = process.argv[ci + 1];
 const lines = fs.readFileSync(ledgerPath, 'utf8').split('\n').filter(Boolean);
 const hdr = lines.shift().split('\t');
@@ -99,9 +102,26 @@ for (const l of lines) {
     const k = [c[idx('file')], c[idx('class')], c[idx('member')], c[idx('kind')]].join('|');
     seen.set(k, (seen.get(k) || 0) + 1);
     const cls = c[idx('classification')];
-    if (!['RUST', 'HYBRID', 'TS'].includes(cls)) { console.log('BAD classification: ' + k); bad++; }
+    if (!['RUST', 'HYBRID', 'PARTIAL', 'TS'].includes(cls)) { console.log('BAD classification: ' + k); bad++; }
     if (cls !== 'RUST' && !(c[idx('reason')] || '').trim()) { console.log('MISSING reason: ' + k); bad++; }
     if (c.length !== hdr.length) { console.log('BAD column count: ' + k); bad++; }
+}
+// Engine-call check (accordproject/concerto-rust#261): the same AST scan
+// build-ledger.js uses. A RUST row must make an engine call in its own body
+// (SUMMARY.md: "the TS member becomes a delegation"); a PARTIAL row must not
+// (once it does, it has been converted: rebuild the ledger so it becomes RUST).
+// Run against the current source, so a view change that lands without a
+// ledger rebuild fails here.
+const byKey = new Map(rows.map(r => [key(r), r]));
+for (const l of lines) {
+    const c = l.split('\t');
+    const k = [c[idx('file')], c[idx('class')], c[idx('member')], c[idx('kind')]].join('|');
+    const r = byKey.get(k);
+    if (!r) { continue; }
+    const cls = c[idx('classification')];
+    const s = scan(r);
+    if (cls === 'RUST' && !s.engineCall) { console.log('RUST row makes no engine call (reclassify, or delegate to the engine): ' + k); bad++; }
+    if (cls === 'PARTIAL' && s.engineCall) { console.log('PARTIAL row now calls the engine (' + s.engineRefs.join(',') + '): rebuild the ledger: ' + k); bad++; }
 }
 const want = new Map();
 for (const r of rows) { want.set(key(r), (want.get(key(r)) || 0) + 1); }

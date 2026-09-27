@@ -10,6 +10,9 @@ name: migration-guardrails
 #   - changes the exported symbol list of packages/concerto-core/src/index.ts
 #   - drifts from the committed concerto-core API (.d.ts) snapshot under
 #     migration/api-snapshot/
+#   - leaves the seam ledger out of step with the source: a member, or a
+#     RUST row that makes no engine call, or a PARTIAL row that now does
+#     (migration/ledger/extract-members.js --check, accordproject/concerto-rust#261)
 #
 # This is intentionally separate from the package's own CI so it keeps
 # working (and stays easy to find) regardless of how that pipeline evolves
@@ -46,6 +49,9 @@ jobs:
 
       - name: Self-test the test-edit relaxation guard
         run: node --test migration/guardrails/relaxations.test.mjs
+
+      - name: Check the seam ledger against the source (members, engine calls)
+        run: node migration/ledger/extract-members.js --check migration/ledger/SEAM_LEDGER.tsv
 
       - name: Run migration guardrails
         run: |
