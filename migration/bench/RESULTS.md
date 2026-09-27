@@ -1,3 +1,82 @@
+# P5-10a: lazy views for ModelFile, ClassDeclaration and Property (2026-09-27)
+
+Task P5-10a (accordproject/concerto-rust#269) makes `ModelFile`
+declarations, `ClassDeclaration` and `Property` views lazy on the load
+path. Each file's view data now crosses the boundary once, in a single
+`modelFileViewSnapshot` call, instead of in hundreds of per-element calls.
+This re-runs the P5-04 load and load+validate suite (plus the other
+`run-ts.mjs` workloads, unchanged) before and after the change, on the
+same machine and interleaved round by round.
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 cores, 17 GB, Linux |
+| Toolchain | Node v22.22.2, rustc 1.94.1 |
+| Before | `concerto` `796669d5c`, `concerto-rust` `5498f61` (the integration head), `concerto-engine` built with `build.sh` (wasm-opt applied) |
+| After | `concerto` `388457398`, `concerto-rust` `cac2772` (P5-10a, integration head merged in), `concerto-engine` built the same way |
+| TS reference | published `@accordproject/concerto-core` 5.0.0, the oracle's reference |
+| TS-API runs | `results/P5-10a-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`: three interleaved rounds, `run-ts.mjs` defaults (5 warm-up + 30 samples) |
+
+## Through the TS public API
+
+Medians in µs per model or per instance, for runs 1, 2 and 3. The ratios
+use the median of the three runs. `load+validate` is `run-ts.mjs`'s
+`validate` metric. The P5-04b column is P5-04b's own after / TS ratio
+(mean of its two runs). P5-04b ran on a different machine, so only its
+ratios, not its µs, are comparable.
+
+| Model set | Metric | TS, runs 1 / 2 / 3 | Rust before, runs 1 / 2 / 3 | Rust after, runs 1 / 2 / 3 | before / TS | **after / TS** | speed-up | P5-04b after / TS |
+|---|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | load | 32.8 / 34.4 / 24.0 | 443.0 / 446.3 / 493.1 | 124.5 / 149.5 / 156.6 | 13.6× | **4.6×** | 2.99× | 16.9× |
+| concerto-core-test-data | load+validate | 69.4 / 64.0 / 56.1 | 534.6 / 551.6 / 567.1 | 150.8 / 190.4 / 203.1 | 8.6× | **3.0×** | 2.90× | 18.7× |
+| concerto-core-test-data | validateAst | 509.7 / 535.4 / 517.8 | 946.7 / 926.8 / 995.2 | 976.8 / 928.0 / 904.8 | 1.8× | **1.8×** | 1.02× | 1.5× |
+| conformance | load | 12.8 / 13.5 / 12.7 | 142.4 / 156.5 / 163.9 | 77.9 / 68.0 / 64.1 | 12.2× | **5.3×** | 2.30× | 28.6× |
+| conformance | load+validate | 22.0 / 20.0 / 19.2 | 278.3 / 263.8 / 357.6 | 179.6 / 153.9 / 162.5 | 13.9× | **8.1×** | 1.71× | 26.0× |
+| conformance | validateAst | 228.9 / 205.8 / 206.7 | 538.5 / 534.5 / 568.8 | 539.9 / 547.3 / 422.6 | 2.6× | **2.6×** | 1.00× | 2.1× |
+| synthetic-large | load | 970.8 / 672.4 / 546.8 | 22619.3 / 20026.0 / 20393.2 | 7283.7 / 6956.4 / 6618.1 | 30.3× | **10.3×** | 2.93× | 65.4× |
+| synthetic-large | load+validate | 2162.6 / 1939.4 / 2052.1 | 25551.8 / 25555.8 / 25704.2 | 10583.1 / 10345.6 / 11651.3 | 12.5× | **5.2×** | 2.41× | 29.2× |
+| (synthetic, 500) | fromJSON | 6.6 / 6.9 / 6.8 | 41.0 / 40.3 / 40.4 | 43.9 / 41.7 / 44.0 | 5.9× | **6.4×** | 0.92× | 6.2× |
+| (synthetic, 500) | resource.validate() | 1.5 / 1.7 / 1.6 | 15.1 / 15.0 / 15.4 | 11.9 / 15.1 / 19.4 | 9.2× | **9.2×** | 1.00× | 9.3× |
+
+Load gets 2.3× to 3.0× faster and load+validate 1.7× to 2.9× faster than
+the integration head. Against the TS reference, load goes from 12.2×–30.3×
+slower to 4.6×–10.3× slower, and load+validate from 8.6×–13.9× to
+3.0×–8.1×. P5-04b measured 16.9×–65.4× for load; part of that gap closed
+earlier (P5-06d and the integration head's other changes), and P5-10a
+closes about two thirds of what was left. validateAst and instance
+validation do not use the view layer and are unchanged within noise
+(0.92× to 1.02×; the `resource.validate()` after runs spread from 11.9 to
+19.4 µs). The Rust engine through the TS API is still slower than the TS
+reference on every operation, so parity is not reached by part 1 alone.
+
+### Boundary crossings
+
+A crossing probe on a cold load of concerto-core-test-data counts 2,177
+engine calls before and 187 after. The per-element calls
+(`propertyProcess` 273, `fieldProcess` 238, `classDeclarationProcess` 241,
+`getFullyQualifiedName` 257 before) are replaced by one
+`modelFileViewSnapshot` call per file, made when its declarations are
+first read.
+
+## Correctness
+
+- **concerto-core suite (nyc):** before and after give the same result:
+  1,445 pass, 154 pending (the same set) and 1 failure,
+  `ModelLoader #loadModelFromUrl`, which needs the network and gets HTTP
+  403 in this sandbox. Coverage stays above the thresholds (99.32%
+  statements, 96.21% branches, 99.81% functions, 99.31% lines). The same
+  holds with `CONCERTO_LAZY_VIEWS_CHECK=1`, with 0 LAZY-CHECK lines.
+- **Oracle:** the JS replay through the WASM engine agrees on 16,242 of
+  16,242 fixtures (canonical corpus plus supplement, CTO cache rebuilt),
+  in normal and check mode. `cargo test --workspace` with
+  `CONCERTO_ORACLE_FIXTURES` set passes; `baseline.tsv` is unchanged.
+- **Guardrails** pass, including the byte-identical API snapshot.
+- **WASM:** `concerto-engine` is 2,807,334 bytes, within the 4 MiB budget.
+  The WASM LEG checks pass: fmt, wasm32 clippy `-D warnings`, check,
+  `build.sh`, and 84 of 84 `smoke:node` checks.
+
+---
+
 # P5-06d: typed AST deserialisation (2026-09-27)
 
 Task P5-06d (accordproject/concerto-rust#239) adopts the P5-06c spike's
