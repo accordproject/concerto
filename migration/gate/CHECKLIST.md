@@ -93,7 +93,7 @@ This file only *checks*. It never fixes product code, never touches
   minus fallback-passing W tests (`run.mjs` reports the gap, not a verdict —
   the sign-off itself is a human review artifact, not machine-checkable).
 
-### 3. Oracle corpus: coverage of the reference, 100% on Rust native + WASM
+### 3. Oracle corpus: coverage of the reference; 0 fail / 0 regressions / 0 harness errors on Rust native + WASM
 
 **Corpus currency caveat, found by this task's dry run (2026-09-25).** P2-10
 (#54) and P2-11 (#55) both closed `mig:done`, each reporting corpus-only
