@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-// @accordproject/concerto-engine, linked locally (decision D9: not
-// published): re-exports the ESM loader that concerto-rust's
-// concerto-wasm/build.sh writes, from a concerto-rust checkout next to this
-// one. See README.md.
+// @accordproject/concerto-engine, linked locally: re-exports the ESM loader
+// that concerto-rust's concerto-wasm/build.sh writes, from a concerto-rust
+// checkout next to this one. The published package carries the built engine
+// instead (scripts/pack.js). See README.md.
 
 export * from '../../../concerto-rust/concerto-wasm/pkg/concerto-engine.mjs';
