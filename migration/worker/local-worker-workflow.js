@@ -16,6 +16,8 @@ const WORKER = (args && args.worker) || 'local-matt'
 const WS = (args && args.workspace) || '~/concerto-migration'
 const ROUNDS = (args && args.rounds) || 10
 const MAX_PER_ROUND = (args && args.maxPerRound) || 4
+// Issues the maintainer reviews and merges by hand: the merge stage is skipped for them.
+const NO_MERGE = new Set(((args && args.noMerge) || []).map(Number))
 const TRACKER = 'accordproject/concerto-rust'
 const INTEGRATION = 'claude/tender-pascal-ocwf9q'
 
@@ -198,9 +200,10 @@ Return the PR URLs, one per line.`,
     // merge: only tasks whose review passed
     async (h, it) => {
       if (!h || !h.reviewPass) return h
+      if (NO_MERGE.has(h.number)) { log(`${it.id}: merge held for maintainer review (noMerge)`); return { ...h, merge: { status: "held" } } }
       const m = await agent(`${RULES}
 
-MERGE task ${it.id} (${TRACKER}#${it.number}) into the integration branch ${INTEGRATION}. Its review passed. The final review verdict was:\n${JSON.stringify(h.review, null, 1)}\nIts PRs, from the handoff step:
+MERGE task ${it.id} (${TRACKER}#${it.number}) into the integration branch ${INTEGRATION}. Its review passed. MANUAL-MERGE CHECK FIRST: read the issue body and its mttrbrts comments; if they say DO NOT MERGE or that the maintainer will merge by hand, do not merge anything: leave the PRs as drafts, post the verdict on each PR, leave the issue labels unchanged, and report status held. The final review verdict was:\n${JSON.stringify(h.review, null, 1)}\nIts PRs, from the handoff step:
 ${h.prs}
 You may merge only into ${INTEGRATION}. NEVER merge or push to main or any other branch.
 1. For each PR, check that its base is ${INTEGRATION} (gh pr view <url> --json baseRefName,headRefName,headRefOid). Then wait for its checks: gh pr checks <url> --watch --interval 30, with a 20-minute limit. If any check fails, or checks are still running after that, do not merge anything. Report status ci_failed or ci_pending, name the failing check, and skip to step 4.
