@@ -67,7 +67,8 @@ class MapValueType extends Decorated {
      */
     process() {
         super.process();
-        this.type = rust.mapValueTypeProcess(this);
+        // P5-10b: from the file's view snapshot when it has it.
+        this.type = loadEngine('../engine/views').mapValueTypeProcess(this);
     }
 
     /**

@@ -266,5 +266,8 @@ class ScalarDeclaration extends Declaration {
 
 }
 
+// P5-10b: built on first read in a lazily built file (engine/views.ts).
+loadEngine('../engine/views').installLazyField(ScalarDeclaration.prototype, 'validator');
+
 export { ScalarDeclaration };
 export default ScalarDeclaration;
