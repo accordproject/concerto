@@ -128,9 +128,8 @@ class Decorated {
      * @private
      */
     process() {
-        // P5-10b: in a lazily built file, the decorators (and the decorator
-        // factories, BC-24) are built on first read (engine/views.ts
-        // `deferDecorators`).
+        // P5-10b: in a lazily built file, the decorators are built on first
+        // read (engine/views.ts `deferDecorators`).
         if (loadEngine('../engine/views').deferDecorators(this)) {
             return;
         }
@@ -138,7 +137,9 @@ class Decorated {
 
         if(this.ast.decorators) {
             const modelFile = this.getModelFile();
-            const factories = modelFile.getModelManager()?.getDecoratorFactories();
+            // `modelFile.getModelManager()?.getDecoratorFactories()`, except
+            // for a lazily built file (engine/views.ts `decoratorFactories`).
+            const factories = loadEngine('../engine/views').decoratorFactories(modelFile);
             const hasFactories = factories && factories.length > 0;
             for(let n=0; n < this.ast.decorators.length; n++ ) {
                 let thing = this.ast.decorators[n];

@@ -141,7 +141,10 @@ module.exports = {
         // are built by the ledgered view constructors.
         m: {
             'stageModelFile': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: sends a ModelFile\'s AST to Rust once and keeps the loaded file staged; decides lazy vs eager)' },
-            'markLazy': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: records a lazily built file and the decorator factories its manager had at construction)' },
+            'decoratorFactories': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: no decorator factory applies while a lazily built file\'s views are built; factories keep the eager path)' },
+            'probeCustomRegExp': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: with a custom options.regExp, builds the Fields\' StringValidators at construction so the user engine runs, and throws, at load)' },
+            'hasStringValidator': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: which property AST nodes the Rust fieldProcess selection gives a StringValidator)' },
+            'takeProbedStringValidator': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: hands a StringValidator built at construction to its Field)' },
             'materialise': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: builds a file\'s declaration views on first read through the ledgered view constructors, and caches them)' },
             'defineLazyFields': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: installs the declarations/localTypes accessors)' },
             'deferDeclarations': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: defers a file\'s declaration views; the migration check mode builds them at once)' },
@@ -164,7 +167,7 @@ module.exports = {
             'batchOf': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: the current snapshots of a file)' },
             'decoratorModule': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (requires introspect/decorator once)' },
             'decoratorFromSnapshot': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: rebuilds a Decorator from its Rust decoratorProcess snapshot)' },
-            'buildDecorators': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: Decorated.process\'s decorator loop on first read, running the decorator factories, BC-24)' },
+            'buildDecorators': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: Decorated.process\'s decorator loop on first read; no decorator factory applies in a lazily built file)' },
             'deferDecorators': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: defers an element\'s decorators when building them cannot throw)' },
             'inLazyFile': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: whether an element belongs to a lazily built file)' },
             'numberValidatorFromSnapshot': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (rebuilds a NumberValidator from its Rust snapshot)' },

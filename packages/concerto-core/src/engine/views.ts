@@ -463,11 +463,22 @@ function fieldProcess(field: any): void {
         snapshot = rust!.fieldProcess(field);
     }
     const kind = snapshot.validator?.kind;
+    // P5-10b: with a custom `options.regExp` engine, a lazily built file's
+    // StringValidators were built at construction (`probeCustomRegExp`).
+    const custom = !!field.parent?.modelFile?.modelManager?.options?.regExp;
+    if (kind === 'StringValidator' && custom) {
+        const probed = takeProbedStringValidator(field);
+        if (probed !== undefined) {
+            field.validator = probed;
+            field.defaultValue = snapshot.defaultValue;
+            return;
+        }
+    }
     // P5-10b: in a lazily built file, a validator whose construction is
     // known to succeed is built on first read: a NumberValidator from its
-    // snapshot, a StringValidator from its `stringValidatorNew` snapshot
-    // (a lazily built file's manager has no custom `options.regExp`).
-    const sv = entry?.sv;
+    // snapshot, a StringValidator (without a custom `options.regExp`) from
+    // its `stringValidatorNew` snapshot.
+    const sv = custom ? undefined : entry?.sv;
     if ((kind === 'NumberValidator' || (kind === 'StringValidator' && sv)) && inLazyFile(field)) {
         const numberSnapshot = snapshot.validator;
         const regexAst = field.ast.validator;
@@ -677,12 +688,15 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
 // sending the AST again.
 //
 // When Rust's load fails, or the manager is not a real BaseModelManager, or
-// it has a custom `options.regExp` engine (user code the StringValidator
-// constructor runs, and may throw from, during construction: the lifted
-// fallback SVR-CTOR-006 expects that throw at load), the ModelFile is built
-// eagerly exactly as before, so a TS error is thrown by the TS code, at the
-// same point. Decorator factories no longer force the eager path (P5-10b):
-// they run when a decorator is first read (BC-24).
+// it has decorator factories (user code `Decorated.process` runs, and may
+// throw from, during construction; running them on first read is BC-24,
+// not adopted), the ModelFile is built eagerly exactly as before, so a TS
+// error is thrown by the TS code, at the same point. A custom
+// `options.regExp` engine (user code the StringValidator constructor runs
+// during construction: the lifted fallback SVR-CTOR-006 expects its throw
+// at load) no longer forces the eager path (P5-10b): only the Fields'
+// StringValidators are built at construction (`probeCustomRegExp`), and
+// the file is built eagerly only when one of them throws.
 //
 // CONCERTO_LAZY_VIEWS_CHECK=1 is a migration diagnostic, not an option: it
 // keeps the lazy path but builds the declaration views, and every part
@@ -742,27 +756,13 @@ const stageFinalizer: { register(target: object, held: Stage, token: object): vo
 const acceptedUnmirrored = new WeakMap<object, string>();
 
 /**
- * P5-10b: the lazily built ModelFiles, with the decorator factories their
- * manager had when each was constructed: the ones that apply to its
- * elements' decorators, which are built (and those factories run) when
- * they are first read (BC-24), as the eager constructor would have built
- * them.
+ * P5-10b: the lazily built ModelFiles. Their manager had no decorator
+ * factories when each was constructed (factories keep the eager path), so
+ * none applies to their elements' decorators: a factory added after
+ * construction would not have applied to the views the eager constructor
+ * built.
  */
-interface LazyFile {
-    factories: any[];
-}
-
-const lazyFiles = new WeakMap<object, LazyFile>();
-
-/**
- * Records `modelFile` as lazily built, with its manager's current decorator
- * factories.
- * @param {object} modelFile the ModelFile
- * @param {object[]|undefined} factories the manager's decorator factories
- */
-function markLazy(modelFile: any, factories: any[] | undefined): void {
-    lazyFiles.set(modelFile, { factories: Array.isArray(factories) ? factories.slice() : [] });
-}
+const lazyFiles = new WeakSet<object>();
 
 /**
  * Called by the ModelFile constructor, before `process()` and the header
@@ -770,8 +770,9 @@ function markLazy(modelFile: any, factories: any[] | undefined): void {
  * decorators can be deferred too): loads the AST in the manager's
  * rustHandle staging slot, once. Returns true when the ModelFile may be
  * built lazily: the manager is a real BaseModelManager with a rustHandle
- * and no custom `options.regExp`, and Rust loaded the AST without
- * error. Never throws: on any
+ * and no decorator factories, Rust loaded the AST without error, and, with
+ * a custom `options.regExp`, the Fields' StringValidators were built
+ * without error (`probeCustomRegExp`). Never throws: on any
  * failure the caller builds the ModelFile eagerly, which throws the TS error
  * itself.
  * @param {object} modelFile the ModelFile being constructed
@@ -786,13 +787,12 @@ function stageModelFile(modelFile: any): boolean {
         return false;
     }
     try {
-        // P5-10b: decorator factories no longer force the eager path. They
-        // run when a decorator is first read (BC-24), with the factories
-        // the manager has now (`markLazy`).
+        // Decorator factories are user code `Decorated.process` runs (and
+        // may throw from) during construction: they keep the eager path, so
+        // `newDecorator` runs at the same point as before (running it on
+        // first read is BC-24, a maintainer decision not taken here).
         const factories = manager.getDecoratorFactories();
-        // A custom `options.regExp` engine is user code the StringValidator
-        // constructor runs (and may throw from) during construction too.
-        if (manager.options?.regExp) {
+        if (Array.isArray(factories) && factories.length > 0) {
             return false;
         }
         const ast = modelFile.ast;
@@ -801,11 +801,23 @@ function stageModelFile(modelFile: any): boolean {
         const fileName = modelFile.fileName ?? undefined;
         const unmirrored = !manager._needsRustWrite(ast.namespace);
         const key = unmirrored ? JSON.stringify([text, definitions ?? null, fileName ?? null]) : null;
+        // P5-10b: a custom `options.regExp` engine is user code the
+        // StringValidator constructor runs (and may throw from) during
+        // construction: once Rust has accepted the AST, those validators
+        // are built now (`probeCustomRegExp`), and only they.
+        const customRegExp = !!manager.options?.regExp;
         if (key !== null && acceptedUnmirrored.get(ast) === key) {
-            markLazy(modelFile, factories);
+            if (customRegExp && !probeCustomRegExp(modelFile, ast)) {
+                return false;
+            }
+            lazyFiles.add(modelFile);
             return true;
         }
         const id = handle.stageModelFile(text, definitions, fileName);
+        if (customRegExp && !probeCustomRegExp(modelFile, ast)) {
+            handle.dropStagedModelFile(id);
+            return false;
+        }
         if (key !== null) {
             // Never committed: keep the verdict, not the loaded file.
             handle.dropStagedModelFile(id);
@@ -815,13 +827,113 @@ function stageModelFile(modelFile: any): boolean {
             stages.set(modelFile, stage);
             stageFinalizer?.register(modelFile, stage, stage);
         }
-        markLazy(modelFile, factories);
+        lazyFiles.add(modelFile);
         return true;
     } catch (e) {
         return false;
     }
 }
 
+
+/**
+ * P5-10b: the StringValidators built by `probeCustomRegExp` when a lazily
+ * built file was constructed, by the property AST node each was built
+ * from, until `fieldProcess` gives each to the Field built from that node.
+ */
+const probedStringValidators = new WeakMap<object, any>();
+
+/**
+ * Whether a property AST node is one `Field.process` builds a
+ * StringValidator for: a String property (`propertyProcess` sets `type`
+ * to 'String') with a truthy `validator` or `lengthValidator` (the
+ * `fieldProcess` binding's selection).
+ * @param {object} node the property AST node
+ * @return {boolean} true if its Field gets a StringValidator
+ */
+function hasStringValidator(node: any): boolean {
+    if (!node || typeof node !== 'object' || typeof node.$class !== 'string') {
+        return false;
+    }
+    const $class = node.$class;
+    if ($class !== 'StringProperty' && !$class.endsWith('.StringProperty')) {
+        return false;
+    }
+    return !!node.validator || !!node.lengthValidator;
+}
+
+/**
+ * P5-10b: for a manager with a custom `options.regExp` engine, builds
+ * every StringValidator the eager constructor would build for the file's
+ * Fields, now, at construction, with the same arguments and the same
+ * engine, so a throw from that user code happens at the same point. Each
+ * is built against a stand-in for its Field (whose name, AST, parent file
+ * and fully qualified name are all the constructor reads) and handed to
+ * the Field when it is built. Returns false when one throws, or the AST
+ * cannot be walked; the caller then builds the file eagerly, which throws
+ * the TS error itself.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {object} ast its AST
+ * @return {boolean} true if every validator was built
+ */
+function probeCustomRegExp(modelFile: any, ast: any): boolean {
+    const declarations = ast?.declarations;
+    if (declarations === undefined || declarations === null) {
+        return true;
+    }
+    if (!Array.isArray(declarations)) {
+        return false;
+    }
+    const built: Array<[object, any]> = [];
+    try {
+        const { StringValidator } = stringValidatorModule();
+        const namespace = ast.namespace;
+        for (const declaration of declarations) {
+            const properties = declaration?.properties;
+            if (properties === undefined || properties === null) {
+                continue;
+            }
+            if (!Array.isArray(properties)) {
+                return false;
+            }
+            for (const node of properties) {
+                if (!hasStringValidator(node)) {
+                    continue;
+                }
+                const parent = { getModelFile: () => modelFile };
+                const standIn = {
+                    ast: node,
+                    getName: () => node.name,
+                    getParent: () => parent,
+                    getFullyQualifiedName: () => `${namespace}.${declaration.name}.${node.name}`,
+                };
+                built.push([node, new StringValidator(standIn, node.validator, node.lengthValidator)]);
+            }
+        }
+    } catch (e) {
+        return false;
+    }
+    for (const [node, validator] of built) {
+        probedStringValidators.set(node, validator);
+    }
+    return true;
+}
+
+/**
+ * The StringValidator `probeCustomRegExp` built for `field`'s AST node,
+ * now attached to `field`, once; undefined if there is none.
+ * @param {object} field the Field being processed
+ * @return {object|undefined} the StringValidator
+ */
+function takeProbedStringValidator(field: any): any {
+    const node = field.ast;
+    const validator = node && typeof node === 'object' ? probedStringValidators.get(node) : undefined;
+    if (validator === undefined) {
+        return undefined;
+    }
+    probedStringValidators.delete(node);
+    validator.field = field;
+    return validator;
+}
 
 /**
  * Builds a lazily built ModelFile's declaration views, the way its
@@ -1121,8 +1233,9 @@ function builtDeclaration(modelFile: any, index: number, node: any): any {
 // Lazy views, part 2 (P5-10b, accordproject/concerto-rust#270): the parts of
 // a lazily built file's views that are built on first read.
 //
-// - Decorators (`Decorated.decorators`): built, and the decorator factories
-//   the manager had at construction run, when first read (BC-24).
+// - Decorators (`Decorated.decorators`): built when first read (a file
+//   whose manager has decorator factories is built eagerly; BC-24 is not
+//   adopted).
 // - Validators: a Field's or a ScalarDeclaration's `validator` (number or
 //   string) and a Property's `sizeValidator`.
 // - A MapDeclaration's `key` and `value` types.
@@ -1288,40 +1401,28 @@ function decoratorFromSnapshot(element: any, ast: any, entry: any): any {
 }
 
 /**
- * `Decorated.process`'s decorator loop, for a deferred `decorators`: the
- * factories the manager had when the file was constructed run first, then
- * a Decorator is rebuilt from the snapshot (or constructed, where there is
- * none). The list is the element's `decorators` while it is filled, as it
- * was during `process()`.
+ * `Decorated.process`'s decorator loop, for a deferred `decorators` (no
+ * decorator factory applies in a lazily built file): a Decorator is
+ * rebuilt from the snapshot (or constructed, where there is none). The
+ * list is the element's `decorators` while it is filled, as it was during
+ * `process()`.
  * @param {object} element the decorated element
  * @param {object[]} nodes the decorator AST nodes
  * @param {object[]|undefined} snapshot their snapshots
- * @param {object[]} factories the decorator factories
  * @return {object[]} the decorators
  */
-function buildDecorators(element: any, nodes: any[], snapshot: any[] | undefined, factories: any[]): any[] {
+function buildDecorators(element: any, nodes: any[], snapshot: any[] | undefined): any[] {
     const list: any[] = [];
     defineOwn(element, 'decorators', list);
-    const hasFactories = factories.length > 0;
     for (let n = 0; n < nodes.length; n++) {
         const thing = nodes[n];
         let decorator;
-        if (hasFactories) {
-            for (const factory of factories) {
-                decorator = factory.newDecorator(element, thing);
-                if (decorator) {
-                    break;
-                }
-            }
-        }
-        if (!decorator) {
-            const entry = snapshot?.[n];
-            if (entry) {
-                decorator = decoratorFromSnapshot(element, thing, entry);
-            } else {
-                const { Decorator } = decoratorModule();
-                decorator = new Decorator(element, thing);
-            }
+        const entry = snapshot?.[n];
+        if (entry) {
+            decorator = decoratorFromSnapshot(element, thing, entry);
+        } else {
+            const { Decorator } = decoratorModule();
+            decorator = new Decorator(element, thing);
         }
         list.push(decorator);
     }
@@ -1354,13 +1455,28 @@ function deferDecorators(element: any): boolean {
         // The caller's own call raises it, at the same point.
         return false;
     }
-    const lazy = lazyFiles.get(modelFile);
-    if (!lazy) {
+    if (!lazyFiles.has(modelFile)) {
         return false;
     }
     const snapshot = batchOf(modelFile)?.decorators.get(nodes);
-    deferField(element, 'decorators', () => buildDecorators(element, nodes, snapshot, lazy.factories));
+    deferField(element, 'decorators', () => buildDecorators(element, nodes, snapshot));
     return true;
+}
+
+/**
+ * `Decorated.process`'s `modelFile.getModelManager()?.getDecoratorFactories()`,
+ * where it builds the decorators itself: for a lazily built file, the
+ * factories that apply (none: its manager had none at construction), since
+ * one added since would not have applied to the views the eager
+ * constructor built.
+ * @param {object} modelFile the ModelFile of the element being processed
+ * @return {object[]|undefined} the decorator factories that apply
+ */
+function decoratorFactories(modelFile: any): any[] | undefined {
+    if (lazyFiles.has(modelFile)) {
+        return [];
+    }
+    return modelFile.getModelManager()?.getDecoratorFactories();
 }
 
 /**
@@ -1508,6 +1624,7 @@ export {
     installLazyField,
     isPending,
     deferDecorators,
+    decoratorFactories,
     mapDeclarationProcess,
     mapKeyTypeProcess,
     mapValueTypeProcess,
