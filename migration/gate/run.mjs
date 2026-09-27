@@ -404,12 +404,24 @@ function stepOracleNative(opts, reportDir) {
   // task's own issue thread (accordproject/concerto-rust#72, e.g. comments
   // at 2026-09-26T13:25 and 2026-09-26T23:43), and by the coordinator's
   // framing of the criterion as "every validation gap mapped or reasoned"
-  // (2026-09-25T17:06), not "zero gaps". So `ok` is simply cargo's exit
-  // status; `fixtures` (when present) is reported for visibility only, not
-  // used to override it. A crashed/timed-out run with no fresh report
-  // (thanks to the rmSync above) still reads as whatever cargo's own exit
-  // code says -- a non-zero exit already fails `ok` in that case.
-  const ok = res.ok;
+  // (2026-09-25T17:06), not "zero gaps". So the fixture-level pass/fail/
+  // unsupported/unowned counts do NOT gate `ok` -- but cargo's exit status
+  // alone is not sufficient either: a run where CONCERTO_ORACLE_FIXTURES
+  // resolves to a missing or empty corpus (e.g. a detached shell that lost
+  // the env var, or a worktree too deep for the harness to find it on its
+  // own -- see the corpus-provenance step and the general task rules) can
+  // still exit 0 while silently validating nothing, which is not evidence
+  // (round-4 review on accordproject/concerto-rust#72: "a corpus-skipped
+  // run with no fixture report still reads PASS"). So `ok` additionally
+  // requires that this run actually produced a fresh, parseable fixture
+  // report (the rmSync above guarantees any report present is this run's
+  // own) whose total_fixtures matches the canonical corpus size recorded
+  // in the task rules (16,242 fixtures, pin + P2-11b supplement). A
+  // crashed/timed-out run with no fresh report, or one against a
+  // wrong-sized corpus, now fails `ok` even if cargo's own exit code was 0.
+  const EXPECTED_ORACLE_FIXTURE_TOTAL = 16242;
+  const fixturesValid = fixtures != null && !fixtures.error && fixtures.total_fixtures === EXPECTED_ORACLE_FIXTURE_TOTAL;
+  const ok = res.ok && fixturesValid;
 
   return {
     name: 'oracle native (cargo test --test oracle, §0.3 native leg)',
@@ -737,14 +749,26 @@ function buildCriteriaSummary(steps) {
     id: '§0.3b',
     label: 'Oracle corpus 100% pass, native (cargo test --test oracle)',
     // Read back from the step rather than re-derived here: stepOracleNative's
-    // own `ok` is cargo's exit status for `cargo test --test oracle` (see the
-    // long comment there for why unsupported/unowned fixtures don't gate it),
-    // so this can never disagree with the step. `detail` below still shows
-    // the fixture-level split for visibility.
+    // own `ok` is cargo's exit status AND a fresh, right-sized fixture
+    // report (see the long comment there for why unsupported/unowned
+    // fixtures don't additionally gate it, and why a missing/wrong-sized
+    // report does), so this can never disagree with the step. `detail`
+    // below still shows the fixture-level split for visibility.
     ok: steps.oracle_native ? steps.oracle_native.ok : null,
     detail: nativeFx
-      ? `${nativeFx.pass}/${nativeFx.total_fixtures} pass, ${nativeFx.fail} fail, ${nativeFx.unsupported} unsupported, ${nativeFx.harness_error} harness error, ${nativeFx.unowned} unowned, ${nativeFx.regressions} regressions vs baseline.tsv`
-      : (steps.oracle_native ? `harness self-test: ${steps.oracle_native.passed}/${(steps.oracle_native.passed ?? 0) + (steps.oracle_native.failed ?? 0)} (no fixture-level oracle-report.json found)` : 'not available'),
+      ? `${nativeFx.pass}/${nativeFx.total_fixtures} pass, ${nativeFx.fail} fail, ${nativeFx.unsupported} unsupported, ${nativeFx.harness_error} harness error, ${nativeFx.unowned} unowned, ${nativeFx.regressions} regressions vs baseline.tsv` +
+        (nativeFx.total_fixtures !== 16242 ? ` [total_fixtures != expected 16242 -- corpus-skipped or wrong corpus, treated as FAIL]` : '') +
+        // classifyStep() short-circuits a passing step to verdict 'pass' with
+        // no items, so report.md's per-step expected-pending groups (built
+        // from classification, below) never see this step's fixture-level
+        // detail even when ok is true -- render the unsupported-by-owner
+        // breakdown (<fixtures>/../../ledger/SEAM_LEDGER.tsv owners, plus
+        // 'stays-ts' for gaps with no ledger owner yet) directly from the
+        // harness's own report here instead, per the round-4 review ask.
+        (nativeFx.owners && Object.keys(nativeFx.owners).length
+          ? `; unsupported by owner: ${Object.entries(nativeFx.owners).map(([o, n]) => `${o} ${n}`).join(', ')}`
+          : '')
+      : (steps.oracle_native ? `harness self-test: ${steps.oracle_native.passed}/${(steps.oracle_native.passed ?? 0) + (steps.oracle_native.failed ?? 0)} (no fixture-level oracle-report.json found -- treated as FAIL, not a vacuous pass)` : 'not available'),
   });
   items.push({
     id: '§0.3c',
@@ -825,7 +849,6 @@ async function main() {
   steps.corpus_provenance = stepCorpusProvenance(opts);
   steps.guardrails = stepGuardrails(reportDir);
   if (!opts.skipConformanceInstall) steps.conformance_install = stepConformanceInstall(opts, reportDir);
-  if (!opts.skipStatus) steps.status = stepStatus(opts, reportDir);
   // Build concerto-wasm before anything that loads pkg/concerto-engine.cjs
   // (the CONCERTO_ENGINE=rust suite and the WASM oracle leg), so both run
   // against the module built from --rust-root, never a stale leftover.
@@ -837,6 +860,17 @@ async function main() {
     steps.oracle_coverage = stepOracleCoverage(opts, reportDir);
   }
   if (!opts.skipWasm) steps.oracle_wasm = stepOracleWasm(opts, reportDir);
+  // Run status.mjs (which reads migration/oracle/results/coverage.json and
+  // <rustRoot>/target/oracle-report.json off disk) only after the oracle
+  // steps above have (re)written those files for this run. Running it
+  // earlier (as this script did through P5-01 round 4) captures whatever
+  // stale data was left on disk by a *previous* gate invocation, so the
+  // committed status.json's oracle.native.generated_at and
+  // corpus_coverage_of_reference.generated_at timestamps silently predate
+  // this run -- round-4 review on accordproject/concerto-rust#72 flagged
+  // exactly this (a 01:51:40Z oracle.native next to a 01:17:48Z coverage
+  // timestamp from an unrelated earlier attempt).
+  if (!opts.skipStatus) steps.status = stepStatus(opts, reportDir);
 
   // §0.6 cargo-mutants (validation modules) sweep itself is not re-run by
   // this script (it is task P5-06's own long-running job), but P5-06
