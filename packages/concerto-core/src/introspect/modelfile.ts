@@ -129,18 +129,20 @@ class ModelFile extends Decorated {
             this.external = fileName.startsWith('@');
         }
 
-        // Set up the decorators.
-        this.process();
-        // Populate from the AST.
         // P5-10a lazy views (engine/views.ts): the AST crosses into Rust
         // once, here, and Rust loads it with every construction-time check
         // it makes. When it loads, only the header (namespace, version,
         // imports) is populated now, and the declaration views are built on
         // first use, from one batch snapshot per file. Otherwise the file is
         // built eagerly, as fromAst would, so a TS error is thrown here by
-        // the TS code.
+        // the TS code. P5-10b: staged before the decorators are set up, so
+        // that a lazily built file's own decorators are built on first read
+        // too (staging never throws, so every error keeps its point).
         const views = loadEngine('../engine/views');
         const lazy: boolean = views.stageModelFile(this);
+        // Set up the decorators.
+        this.process();
+        // Populate from the AST.
         if (lazy) {
             this._fromAstHeader(this.ast);
         } else {
@@ -678,6 +680,13 @@ class ModelFile extends Decorated {
      * @return {ClassDeclaration} the ClassDeclaration, or null if the type does not exist
      */
     getLocalType(type: string): Declaration | null {
+        // P5-10b: a lazily built file whose declaration views are not all
+        // built yet builds only the one asked for (engine/views.ts
+        // `localType`).
+        const lazy = loadEngine('../engine/views').localType(this, type);
+        if (lazy !== undefined) {
+            return lazy;
+        }
         if(!this.localTypes) {
             throw new Error('Internal error: local types are not yet initialized. Do not try to resolve types inside `process`.');
         }
@@ -1037,79 +1046,86 @@ class ModelFile extends Decorated {
      * @internal
      */
     _fromAstDeclarationViews(ast: AstNode) {
+        // P5-10b: a declaration view already built on its own (a lazily
+        // built file's `getLocalType`, engine/views.ts `localType`) is
+        // reused, so each declaration has one view.
+        const views = loadEngine('../engine/views');
         for(let n=0; n < ast.declarations.length; n++) {
-            let thing = ast.declarations[n];
+            const thing = ast.declarations[n];
+            const built = views.builtDeclaration(this, n, thing);
+            this.declarations.push(built !== undefined ? built : this._declarationView(thing));
+        }
+    }
 
-            switch(thing.$class) {
-            case `${MetaModelNamespace}.AssetDeclaration`:
-                // Default super type for asset
-                if (!thing.superType) {
-                    thing = Object.assign({}, thing);
-                    thing.superType = {
-                        $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Asset',
-                    };
-                }
-                this.declarations.push( new AssetDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.TransactionDeclaration`:
-                // Default super type for transaction
-                if (!thing.superType) {
-                    thing = Object.assign({}, thing);
-                    thing.superType = {
-                        $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Transaction',
-                    };
-                }
-                this.declarations.push( new TransactionDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.EventDeclaration`:
-                // Default super type for event
-                if (!thing.superType) {
-                    thing = Object.assign({}, thing);
-                    thing.superType = {
-                        $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Event',
-                    };
-                }
-                this.declarations.push( new EventDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.ParticipantDeclaration`:
-                // Default super type for participant
-                if (!thing.superType) {
-                    thing = Object.assign({}, thing);
-                    thing.superType = {
-                        $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Participant',
-                    };
-                }
-                this.declarations.push( new ParticipantDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.EnumDeclaration`:
-                this.declarations.push( new EnumDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.MapDeclaration`:
-                this.declarations.push( new MapDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.ConceptDeclaration`:
-                this.declarations.push( new ConceptDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.BooleanScalar`:
-            case `${MetaModelNamespace}.IntegerScalar`:
-            case `${MetaModelNamespace}.LongScalar`:
-            case `${MetaModelNamespace}.DoubleScalar`:
-            case `${MetaModelNamespace}.StringScalar`:
-            case `${MetaModelNamespace}.DateTimeScalar`:
-                this.declarations.push( new ScalarDeclaration(this, thing) );
-                break;
-            default: {
-                let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');
+    /**
+     * Builds the view of one declaration of the AST.
+     * @param {object} thing - the declaration's AST node
+     * @return {Declaration} the view
+     * @private
+     * @internal
+     */
+    _declarationView(thing: AstNode): Declaration {
+        switch(thing.$class) {
+        case `${MetaModelNamespace}.AssetDeclaration`:
+            // Default super type for asset
+            if (!thing.superType) {
+                thing = Object.assign({}, thing);
+                thing.superType = {
+                    $class: `${MetaModelNamespace}.TypeIdentified`,
+                    name: 'Asset',
+                };
+            }
+            return new AssetDeclaration(this, thing);
+        case `${MetaModelNamespace}.TransactionDeclaration`:
+            // Default super type for transaction
+            if (!thing.superType) {
+                thing = Object.assign({}, thing);
+                thing.superType = {
+                    $class: `${MetaModelNamespace}.TypeIdentified`,
+                    name: 'Transaction',
+                };
+            }
+            return new TransactionDeclaration(this, thing);
+        case `${MetaModelNamespace}.EventDeclaration`:
+            // Default super type for event
+            if (!thing.superType) {
+                thing = Object.assign({}, thing);
+                thing.superType = {
+                    $class: `${MetaModelNamespace}.TypeIdentified`,
+                    name: 'Event',
+                };
+            }
+            return new EventDeclaration(this, thing);
+        case `${MetaModelNamespace}.ParticipantDeclaration`:
+            // Default super type for participant
+            if (!thing.superType) {
+                thing = Object.assign({}, thing);
+                thing.superType = {
+                    $class: `${MetaModelNamespace}.TypeIdentified`,
+                    name: 'Participant',
+                };
+            }
+            return new ParticipantDeclaration(this, thing);
+        case `${MetaModelNamespace}.EnumDeclaration`:
+            return new EnumDeclaration(this, thing);
+        case `${MetaModelNamespace}.MapDeclaration`:
+            return new MapDeclaration(this, thing);
+        case `${MetaModelNamespace}.ConceptDeclaration`:
+            return new ConceptDeclaration(this, thing);
+        case `${MetaModelNamespace}.BooleanScalar`:
+        case `${MetaModelNamespace}.IntegerScalar`:
+        case `${MetaModelNamespace}.LongScalar`:
+        case `${MetaModelNamespace}.DoubleScalar`:
+        case `${MetaModelNamespace}.StringScalar`:
+        case `${MetaModelNamespace}.DateTimeScalar`:
+            return new ScalarDeclaration(this, thing);
+        default: {
+            let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');
 
-                throw new IllegalModelException(formatter({
-                    'type': thing.$class,
-                }),this);
-            }
-            }
+            throw new IllegalModelException(formatter({
+                'type': thing.$class,
+            }),this);
+        }
         }
     }
 

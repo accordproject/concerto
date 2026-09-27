@@ -73,24 +73,32 @@ function fieldModule(): any {
  * @param {object} declaration the ScalarDeclaration being processed
  */
 function scalarDeclarationProcess(declaration: any): void {
-    const snapshot = rust!.scalarDeclarationProcess(declaration);
+    // P5-10b: the file's view snapshot when it has this scalar (only where
+    // the binding succeeds, with a StringValidator's own snapshot too),
+    // else the binding.
+    const precomputed = batchOf(declaration.modelFile)?.scalars.get(declaration.ast);
+    const snapshot = precomputed ?? rust!.scalarDeclarationProcess(declaration);
     declaration.superType = null;
     declaration.superTypeDeclaration = null;
     declaration.idField = null;
     declaration.timestamped = false;
     declaration.abstract = false;
+    const kind = snapshot.validator?.kind;
+    if (precomputed && kind && inLazyFile(declaration)) {
+        // Built on first read (P5-10b).
+        const regexAst = declaration.ast.validator;
+        deferField(declaration, 'validator', () => (kind === 'NumberValidator'
+            ? numberValidatorFromSnapshot(declaration, snapshot.validator)
+            : stringValidatorFromSnapshot(declaration, regexAst, snapshot.validator)));
+        declaration.type = snapshot.type;
+        declaration.defaultValue = snapshot.defaultValue;
+        return;
+    }
     declaration.validator = null;
     declaration.type = snapshot.type;
-    if (snapshot.validator?.kind === 'NumberValidator') {
-        const { NumberValidator } = numberValidatorModule();
-        const validator = Object.create(NumberValidator.prototype);
-        // The fields the Validator and NumberValidator constructors set.
-        validator.validator = declaration.ast.validator;
-        validator.field = declaration;
-        validator.lowerBound = snapshot.validator.lowerBound;
-        validator.upperBound = snapshot.validator.upperBound;
-        declaration.validator = validator;
-    } else if (snapshot.validator?.kind === 'StringValidator') {
+    if (kind === 'NumberValidator') {
+        declaration.validator = numberValidatorFromSnapshot(declaration, snapshot.validator);
+    } else if (kind === 'StringValidator') {
         const { StringValidator } = stringValidatorModule();
         declaration.validator = new StringValidator(declaration, declaration.ast.validator, declaration.ast.lengthValidator);
     }
@@ -109,6 +117,10 @@ function scalarDeclarationProcess(declaration: any): void {
 interface PrecomputedProperty {
     p: any;
     f: any;
+    /** P5-10b: its `collectionSizeValidatorNew` snapshot, if any. */
+    sz?: any;
+    /** P5-10b: its `stringValidatorNew` snapshot, if any. */
+    sv?: any;
     owner?: object;
     parent?: object;
 }
@@ -150,6 +162,21 @@ interface Batch {
      * which the copy shares.
      */
     defaulted: Map<object, PrecomputedDeclaration>;
+    /**
+     * P5-10b: the `decoratorProcess` results of each `decorators` array of
+     * the file's declarations, properties and map key and value types, by
+     * that array (which a defaulted copy of a declaration shares).
+     */
+    decorators: Map<object, any[]>;
+    /** P5-10b: the `scalarDeclarationProcess` snapshots, by declaration AST node. */
+    scalars: Map<object, any>;
+    /** P5-10b: the map declarations whose `mapDeclarationProcess` passes, by AST node. */
+    maps: Set<object>;
+    /**
+     * P5-10b: the `mapKeyTypeProcess`/`mapValueTypeProcess` types of those
+     * maps' key and value types, by key or value AST node.
+     */
+    mapTypes: Map<object, string>;
 }
 
 let batch: Batch | null = null;
@@ -176,7 +203,29 @@ let batch: Batch | null = null;
  */
 function beginModelFile(modelFile: any, ast: any): Batch | null {
     const saved = batch;
-    batch = null;
+    // P5-10b: a lazily built file whose snapshot was already computed for a
+    // declaration built on its own reuses it.
+    const deferred = deferredFiles.get(modelFile);
+    if (deferred && deferred.batch !== undefined) {
+        batch = deferred.batch;
+        return saved;
+    }
+    batch = computeBatch(modelFile, ast);
+    if (deferred) {
+        deferred.batch = batch;
+    }
+    return saved;
+}
+
+/**
+ * The batch of view snapshots of `modelFile`'s declarations (see
+ * `beginModelFile`), or null. Never throws.
+ * @param {object} modelFile the ModelFile
+ * @param {object} ast the AST its declarations are built from
+ * @return {object|null} the batch
+ */
+function computeBatch(modelFile: any, ast: any): Batch | null {
+    let batch: Batch | null = null;
     try {
         const namespace = modelFile.namespace;
         if (ast && Array.isArray(ast.declarations)) {
@@ -192,6 +241,17 @@ function beginModelFile(modelFile: any, ast: any): Batch | null {
                     properties: new Map(),
                     declarations: new Map(),
                     defaulted: new Map(),
+                    decorators: new Map(),
+                    scalars: new Map(),
+                    maps: new Set(),
+                    mapTypes: new Map(),
+                };
+                const addDecorators = (node: any, dec: any) => {
+                    const nodes = node?.decorators;
+                    if (Array.isArray(dec) && Array.isArray(nodes) && nodes.length === dec.length &&
+                        !next.decorators.has(nodes)) {
+                        next.decorators.set(nodes, dec);
+                    }
                 };
                 ast.declarations.forEach((declaration: any, i: number) => {
                     const snapshot = Array.isArray(snapshots) ? snapshots[i] : null;
@@ -199,6 +259,20 @@ function beginModelFile(modelFile: any, ast: any): Batch | null {
                         return;
                     }
                     const properties = declaration.properties;
+                    addDecorators(declaration, snapshot.dec);
+                    if (snapshot.s && !next.scalars.has(declaration)) {
+                        next.scalars.set(declaration, snapshot.s);
+                    }
+                    const m = snapshot.m;
+                    const key = declaration.key;
+                    const value = declaration.value;
+                    if (m && key && typeof key === 'object' && value && typeof value === 'object' && key !== value) {
+                        next.maps.add(declaration);
+                        next.mapTypes.set(key, m.k.t);
+                        next.mapTypes.set(value, m.v.t);
+                        addDecorators(key, m.k.dec);
+                        addDecorators(value, m.v.dec);
+                    }
                     const d = snapshot.d;
                     if (d && typeof d.name === 'string' && d.name === declaration.name) {
                         if (!d.defaulted) {
@@ -217,6 +291,7 @@ function beginModelFile(modelFile: any, ast: any): Batch | null {
                         const entry = entries[j];
                         if (entry && node && typeof node === 'object' && !next.properties.has(node)) {
                             next.properties.set(node, entry);
+                            addDecorators(node, entry.dec);
                         }
                     });
                 });
@@ -226,7 +301,7 @@ function beginModelFile(modelFile: any, ast: any): Batch | null {
     } catch (e) {
         batch = null;
     }
-    return saved;
+    return batch;
 }
 
 /**
@@ -358,9 +433,16 @@ function propertyProcess(property: any): void {
     }
     property.array = snapshot.array;
     property.optional = snapshot.optional;
+    const sizeAst = property.ast.sizeValidator;
+    if (sizeAst && entry?.sz && inLazyFile(property)) {
+        // Built on first read, from the view snapshot (P5-10b).
+        const sz = entry.sz;
+        deferField(property, 'sizeValidator', () => sizeValidatorFromSnapshot(property, sizeAst, sz));
+        return;
+    }
     const { default: CollectionSizeValidator } = collectionSizeValidatorModule();
-    property.sizeValidator = property.ast.sizeValidator
-        ? new CollectionSizeValidator(property, property.ast.sizeValidator)
+    property.sizeValidator = sizeAst
+        ? new CollectionSizeValidator(property, sizeAst)
         : null;
 }
 
@@ -380,17 +462,25 @@ function fieldProcess(field: any): void {
     } else {
         snapshot = rust!.fieldProcess(field);
     }
+    const kind = snapshot.validator?.kind;
+    // P5-10b: in a lazily built file, a validator whose construction is
+    // known to succeed is built on first read: a NumberValidator from its
+    // snapshot, a StringValidator from its `stringValidatorNew` snapshot
+    // (a lazily built file's manager has no custom `options.regExp`).
+    const sv = entry?.sv;
+    if ((kind === 'NumberValidator' || (kind === 'StringValidator' && sv)) && inLazyFile(field)) {
+        const numberSnapshot = snapshot.validator;
+        const regexAst = field.ast.validator;
+        deferField(field, 'validator', () => (kind === 'NumberValidator'
+            ? numberValidatorFromSnapshot(field, numberSnapshot)
+            : stringValidatorFromSnapshot(field, regexAst, sv)));
+        field.defaultValue = snapshot.defaultValue;
+        return;
+    }
     field.validator = null;
-    if (snapshot.validator?.kind === 'NumberValidator') {
-        const { NumberValidator } = numberValidatorModule();
-        const validator = Object.create(NumberValidator.prototype);
-        // The fields the Validator and NumberValidator constructors set.
-        validator.validator = field.ast.validator;
-        validator.field = field;
-        validator.lowerBound = snapshot.validator.lowerBound;
-        validator.upperBound = snapshot.validator.upperBound;
-        field.validator = validator;
-    } else if (snapshot.validator?.kind === 'StringValidator') {
+    if (kind === 'NumberValidator') {
+        field.validator = numberValidatorFromSnapshot(field, snapshot.validator);
+    } else if (kind === 'StringValidator') {
         const { StringValidator } = stringValidatorModule();
         field.validator = new StringValidator(field, field.ast.validator, field.ast.lengthValidator);
     }
@@ -587,14 +677,16 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
 // sending the AST again.
 //
 // When Rust's load fails, or the manager is not a real BaseModelManager, or
-// it has decorator factories or a custom `options.regExp` engine (user code
-// that runs during construction: P5-10b moves them), the ModelFile is built
+// it has a custom `options.regExp` engine (user code the StringValidator
+// constructor runs, and may throw from, during construction: the lifted
+// fallback SVR-CTOR-006 expects that throw at load), the ModelFile is built
 // eagerly exactly as before, so a TS error is thrown by the TS code, at the
-// same point.
+// same point. Decorator factories no longer force the eager path (P5-10b):
+// they run when a decorator is first read (BC-24).
 //
 // CONCERTO_LAZY_VIEWS_CHECK=1 is a migration diagnostic, not an option: it
-// keeps the lazy path but builds the declaration views at construction too,
-// and reports on stderr any model Rust accepted whose TS construction throws
+// keeps the lazy path but builds the declaration views, and every part
+// P5-10b defers (`buildDeferredParts`), at construction too, and reports on stderr any model Rust accepted whose TS construction throws
 // (an under-rejection, which would move an error from construction to the
 // first read) or mutates the AST.
 // ---------------------------------------------------------------------------
@@ -650,17 +742,35 @@ const stageFinalizer: { register(target: object, held: Stage, token: object): vo
 const acceptedUnmirrored = new WeakMap<object, string>();
 
 /**
- * The ModelFiles whose declaration views `materialise` is building: their
- * manager's decorator factories are hidden from them (`decoratorFactories`).
+ * P5-10b: the lazily built ModelFiles, with the decorator factories their
+ * manager had when each was constructed: the ones that apply to its
+ * elements' decorators, which are built (and those factories run) when
+ * they are first read (BC-24), as the eager constructor would have built
+ * them.
  */
-const materialising = new Set<object>();
+interface LazyFile {
+    factories: any[];
+}
+
+const lazyFiles = new WeakMap<object, LazyFile>();
 
 /**
- * Called by the ModelFile constructor, after `process()` and before the
- * header part of `fromAst`: loads the AST in the manager's rustHandle
- * staging slot, once. Returns true when the ModelFile may be built lazily:
- * the manager is a real BaseModelManager with a rustHandle, no decorator
- * factories and no custom `options.regExp`, and Rust loaded the AST without
+ * Records `modelFile` as lazily built, with its manager's current decorator
+ * factories.
+ * @param {object} modelFile the ModelFile
+ * @param {object[]|undefined} factories the manager's decorator factories
+ */
+function markLazy(modelFile: any, factories: any[] | undefined): void {
+    lazyFiles.set(modelFile, { factories: Array.isArray(factories) ? factories.slice() : [] });
+}
+
+/**
+ * Called by the ModelFile constructor, before `process()` and the header
+ * part of `fromAst` (P5-10b: before `process()`, so the file's own
+ * decorators can be deferred too): loads the AST in the manager's
+ * rustHandle staging slot, once. Returns true when the ModelFile may be
+ * built lazily: the manager is a real BaseModelManager with a rustHandle
+ * and no custom `options.regExp`, and Rust loaded the AST without
  * error. Never throws: on any
  * failure the caller builds the ModelFile eagerly, which throws the TS error
  * itself.
@@ -676,10 +786,10 @@ function stageModelFile(modelFile: any): boolean {
         return false;
     }
     try {
+        // P5-10b: decorator factories no longer force the eager path. They
+        // run when a decorator is first read (BC-24), with the factories
+        // the manager has now (`markLazy`).
         const factories = manager.getDecoratorFactories();
-        if (factories && factories.length > 0) {
-            return false;
-        }
         // A custom `options.regExp` engine is user code the StringValidator
         // constructor runs (and may throw from) during construction too.
         if (manager.options?.regExp) {
@@ -692,6 +802,7 @@ function stageModelFile(modelFile: any): boolean {
         const unmirrored = !manager._needsRustWrite(ast.namespace);
         const key = unmirrored ? JSON.stringify([text, definitions ?? null, fileName ?? null]) : null;
         if (key !== null && acceptedUnmirrored.get(ast) === key) {
+            markLazy(modelFile, factories);
             return true;
         }
         const id = handle.stageModelFile(text, definitions, fileName);
@@ -704,28 +815,13 @@ function stageModelFile(modelFile: any): boolean {
             stages.set(modelFile, stage);
             stageFinalizer?.register(modelFile, stage, stage);
         }
+        markLazy(modelFile, factories);
         return true;
     } catch (e) {
         return false;
     }
 }
 
-
-/**
- * `Decorated.process`'s `modelFile.getModelManager()?.getDecoratorFactories()`:
- * none while `materialise` builds that file's views. A lazily built file was
- * deferred only because its manager had no decorator factories at
- * construction; one added since must not apply to it, just as it would not
- * have applied to the views its constructor built.
- * @param {object} modelFile the ModelFile of the element being processed
- * @return {object[]|undefined} the decorator factories that apply
- */
-function decoratorFactories(modelFile: any): any[] | undefined {
-    if (materialising.has(modelFile)) {
-        return [];
-    }
-    return modelFile.getModelManager()?.getDecoratorFactories();
-}
 
 /**
  * Builds a lazily built ModelFile's declaration views, the way its
@@ -741,7 +837,10 @@ function materialise(modelFile: any): void {
     });
     field('declarations', []);
     field('localTypes', null);
-    materialising.add(modelFile);
+    const deferred = deferredFiles.get(modelFile);
+    if (deferred) {
+        deferred.building = true;
+    }
     try {
         // `fromAst`'s declarations part (declarations is an optional field).
         if (modelFile.ast.declarations) {
@@ -751,8 +850,11 @@ function materialise(modelFile: any): void {
         defineLazyFields(modelFile);
         throw e;
     } finally {
-        materialising.delete(modelFile);
+        if (deferred) {
+            deferred.building = false;
+        }
     }
+    deferredFiles.delete(modelFile);
     const localTypes = new Map();
     const namespace = modelFile.getNamespace();
     for (const declaration of modelFile.declarations) {
@@ -767,6 +869,9 @@ function materialise(modelFile: any): void {
  * @param {object} modelFile the ModelFile
  */
 function defineLazyFields(modelFile: any): void {
+    if (!deferredFiles.has(modelFile)) {
+        deferredFiles.set(modelFile, { byName: undefined, built: new Map(), building: false, batch: undefined });
+    }
     for (const key of ['declarations', 'localTypes']) {
         Object.defineProperty(modelFile, key, {
             configurable: true,
@@ -795,6 +900,8 @@ function deferDeclarations(modelFile: any): void {
         const before = JSON.stringify(modelFile.ast);
         try {
             materialise(modelFile);
+            // P5-10b: and every part built on first read.
+            buildDeferredParts(modelFile);
         } catch (e: any) {
             process.stderr.write(`LAZY-CHECK under-rejection: ${modelFile.namespace} ${e?.name}: ${e?.message}\n`);
             throw e;
@@ -881,10 +988,531 @@ function validateLoaded(modelFile: any, handle: any): boolean {
     return false;
 }
 
+/**
+ * P5-10b: a lazily built file whose declaration views are not all built
+ * yet (its `declarations`/`localTypes` accessors are still installed).
+ */
+interface DeferredFile {
+    /**
+     * Each declaration's index in `ast.declarations`, by the key its view
+     * has in `localTypes`, or null when a declaration cannot be told apart
+     * without building every view; undefined until first needed.
+     */
+    byName: Map<string, number> | null | undefined;
+    /** The declaration views built on their own, by index, with their AST node. */
+    built: Map<number, { node: any; view: any }>;
+    /** True while a declaration view of the file is being built. */
+    building: boolean;
+    /** The file's view snapshots, once computed. */
+    batch: Batch | null | undefined;
+}
+
+const deferredFiles = new WeakMap<object, DeferredFile>();
+
+/**
+ * The metamodel classes `ModelFile._declarationView` builds a view for.
+ */
+const DECLARATION_CLASSES = new Set([
+    'AssetDeclaration', 'TransactionDeclaration', 'EventDeclaration', 'ParticipantDeclaration',
+    'EnumDeclaration', 'MapDeclaration', 'ConceptDeclaration', 'BooleanScalar', 'IntegerScalar',
+    'LongScalar', 'DoubleScalar', 'StringScalar', 'DateTimeScalar',
+].map((name) => `concerto.metamodel@1.0.0.${name}`));
+
+/**
+ * The `localTypes` key of each declaration of `ast`, or null when one is
+ * not a plain declaration node with a string name and a known class (then
+ * every view is built, as before, which raises any error there).
+ * @param {object} ast the file's AST
+ * @param {string} namespace the file's namespace
+ * @return {Map|null} the index of each declaration, by key
+ */
+function declarationIndex(ast: any, namespace: string): Map<string, number> | null {
+    const declarations = ast?.declarations;
+    const byName = new Map<string, number>();
+    if (declarations === undefined || declarations === null) {
+        return byName;
+    }
+    if (!Array.isArray(declarations)) {
+        return null;
+    }
+    for (let i = 0; i < declarations.length; i++) {
+        const node = declarations[i];
+        if (!node || typeof node !== 'object' || typeof node.name !== 'string' ||
+            !DECLARATION_CLASSES.has(node.$class)) {
+            return null;
+        }
+        // `localTypes` is filled in order: a later declaration of the same
+        // name replaces an earlier one.
+        byName.set(namespace + '.' + node.name, i);
+    }
+    return byName;
+}
+
+/**
+ * `ModelFile.getLocalType` for a lazily built file whose declaration views
+ * are not all built (P5-10b, the ModelManager-level accessors: `getType`,
+ * `getAssetDeclaration`, ... all resolve through it): builds only the view
+ * of the declaration asked for, once, with the file's view snapshots (one
+ * engine call per file, shared with the full build), and returns it, or
+ * null when the file declares no such type. That view is the one
+ * `declarations` then holds. Returns undefined when the caller must answer
+ * as before (the file is not lazily built, or all its views are built, or
+ * its declarations cannot be indexed without building them all). While a
+ * view of the file is being built, throws the error `getLocalType` throws
+ * during construction.
+ * @param {object} modelFile the ModelFile
+ * @param {string} type the short or fully qualified name
+ * @return {object|null|undefined} the declaration view, null, or undefined
+ */
+function localType(modelFile: any, type: string): any {
+    const deferred = deferredFiles.get(modelFile);
+    if (!deferred) {
+        return undefined;
+    }
+    if (deferred.building) {
+        throw new Error('Internal error: local types are not yet initialized. Do not try to resolve types inside `process`.');
+    }
+    const namespace = modelFile.getNamespace();
+    if (deferred.byName === undefined) {
+        deferred.byName = declarationIndex(modelFile.ast, namespace);
+    }
+    if (deferred.byName === null) {
+        return undefined;
+    }
+    const key = type.startsWith(namespace) ? type : namespace + '.' + type;
+    const index = deferred.byName.get(key);
+    if (index === undefined) {
+        return null;
+    }
+    const node = modelFile.ast.declarations[index];
+    const cached = deferred.built.get(index);
+    if (cached && cached.node === node) {
+        return cached.view;
+    }
+    if (deferred.batch === undefined) {
+        deferred.batch = computeBatch(modelFile, modelFile.ast);
+    }
+    deferred.building = true;
+    let view;
+    try {
+        view = withBatch(deferred.batch, () => modelFile._declarationView(node));
+    } finally {
+        deferred.building = false;
+    }
+    deferred.built.set(index, { node, view });
+    return view;
+}
+
+/**
+ * The view of declaration `index` of a lazily built file, if `localType`
+ * already built it from `node`, for `ModelFile._fromAstDeclarationViews` to
+ * reuse, else undefined.
+ * @param {object} modelFile the ModelFile
+ * @param {number} index the declaration's index
+ * @param {object} node its AST node
+ * @return {object|undefined} the view
+ */
+function builtDeclaration(modelFile: any, index: number, node: any): any {
+    const cached = deferredFiles.get(modelFile)?.built.get(index);
+    return cached && cached.node === node ? cached.view : undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Lazy views, part 2 (P5-10b, accordproject/concerto-rust#270): the parts of
+// a lazily built file's views that are built on first read.
+//
+// - Decorators (`Decorated.decorators`): built, and the decorator factories
+//   the manager had at construction run, when first read (BC-24).
+// - Validators: a Field's or a ScalarDeclaration's `validator` (number or
+//   string) and a Property's `sizeValidator`.
+// - A MapDeclaration's `key` and `value` types.
+//
+// Each is deferred only when the file's view snapshot proves that building
+// it cannot throw (an entry exists only where the per-element binding would
+// succeed), and is then built from that snapshot without another engine
+// call. Anything else is built as before, at the same point, so an error
+// is raised by the same call. The fields are prototype accessors
+// (`installLazyField`) over a pending builder, so an element whose part is
+// never read never builds it, and an element outside a lazily built file
+// (or a part that is not deferred) stores it as a plain own field, as
+// before. The first read replaces the accessor with a plain own field, so
+// every later read returns the same object; if building throws, the part
+// stays pending and every later read throws again.
+// ---------------------------------------------------------------------------
+
+/** The pending builders of each element's deferred parts, by field name. */
+const pendingFields = new WeakMap<object, Map<string, () => any>>();
+
+/**
+ * Stores `value` as `target`'s own plain field `key`.
+ * @param {object} target the element
+ * @param {string} key the field
+ * @param {*} value the value
+ */
+function defineOwn(target: any, key: string, value: any): void {
+    Object.defineProperty(target, key, { value, writable: true, enumerable: true, configurable: true });
+}
+
+/**
+ * Installs the accessor for field `key` on `proto`: a read builds a
+ * deferred value (or, for an element that never set the field, returns
+ * `initial()` and keeps it, when `initial` is given), and a write stores
+ * a plain own field, as the class field did.
+ * @param {object} proto the class prototype
+ * @param {string} key the field
+ * @param {Function} [initial] the value of a field never set
+ */
+function installLazyField(proto: object, key: string, initial?: () => any): void {
+    Object.defineProperty(proto, key, {
+        configurable: true,
+        enumerable: false,
+        get(this: any) {
+            if (this === proto) {
+                return undefined;
+            }
+            const thunks = pendingFields.get(this);
+            const thunk = thunks?.get(key);
+            if (thunk === undefined) {
+                if (!initial) {
+                    return undefined;
+                }
+                const value = initial();
+                defineOwn(this, key, value);
+                return value;
+            }
+            thunks!.delete(key);
+            let value;
+            try {
+                value = thunk();
+            } catch (e) {
+                if (Object.prototype.hasOwnProperty.call(this, key)) {
+                    delete this[key];
+                }
+                thunks!.set(key, thunk);
+                throw e;
+            }
+            defineOwn(this, key, value);
+            return value;
+        },
+        set(this: any, value: any) {
+            pendingFields.get(this)?.delete(key);
+            defineOwn(this, key, value);
+        },
+    });
+}
+
+/**
+ * Defers `target`'s field `key`: `build` makes its value on first read.
+ * @param {object} target the element
+ * @param {string} key the field
+ * @param {Function} build the builder
+ */
+function deferField(target: any, key: string, build: () => any): void {
+    if (Object.prototype.hasOwnProperty.call(target, key)) {
+        // The element runs process() again (IdentifiedDeclaration's
+        // constructor, MapDeclaration's) after its part was read.
+        delete target[key];
+    }
+    let thunks = pendingFields.get(target);
+    if (!thunks) {
+        thunks = new Map();
+        pendingFields.set(target, thunks);
+    }
+    thunks.set(key, build);
+}
+
+/**
+ * Whether `target`'s field `key` is deferred and not built yet.
+ * @param {object} target the element
+ * @param {string} key the field
+ * @return {boolean} true if pending
+ */
+function isPending(target: any, key: string): boolean {
+    return pendingFields.get(target)?.has(key) === true;
+}
+
+/**
+ * Runs `fn` with `saved` as the current batch (the snapshots of the file a
+ * deferred part belongs to), restoring the current one afterwards.
+ * @param {object} saved the batch
+ * @param {Function} fn what to run
+ * @return {*} what `fn` returns
+ */
+function withBatch<T>(saved: Batch | null, fn: () => T): T {
+    const current = batch;
+    batch = saved;
+    try {
+        return fn();
+    } finally {
+        batch = current;
+    }
+}
+
+/**
+ * The current batch, when it holds the snapshots of `modelFile`.
+ * @param {object} modelFile the ModelFile
+ * @return {object|null} the batch
+ */
+function batchOf(modelFile: any): Batch | null {
+    return batch && batch.modelFile === modelFile ? batch : null;
+}
+
+let decoratorCache: any;
+
+/**
+ * The introspect/decorator module, required once.
+ * @return {object} the module
+ */
+function decoratorModule(): any {
+    return decoratorCache ?? (decoratorCache = require('../introspect/decorator'));
+}
+
+/**
+ * A Decorator rebuilt from its `decoratorProcess` snapshot: the fields its
+ * constructor and `process()` set, in the same order.
+ * @param {object} element the decorated element
+ * @param {object} ast the decorator's AST node
+ * @param {object} entry the snapshot `{n, a}`
+ * @return {object} the Decorator
+ */
+function decoratorFromSnapshot(element: any, ast: any, entry: any): any {
+    const { Decorator } = decoratorModule();
+    const decorator = Object.create(Decorator.prototype);
+    decorator.ast = ast;
+    decorator.parent = element;
+    decorator.arguments = entry.a.map((a: any) => (a !== null && typeof a === 'object'
+        ? { type: a.type, name: a.name, array: a.array }
+        : a));
+    decorator.name = entry.n;
+    return decorator;
+}
+
+/**
+ * `Decorated.process`'s decorator loop, for a deferred `decorators`: the
+ * factories the manager had when the file was constructed run first, then
+ * a Decorator is rebuilt from the snapshot (or constructed, where there is
+ * none). The list is the element's `decorators` while it is filled, as it
+ * was during `process()`.
+ * @param {object} element the decorated element
+ * @param {object[]} nodes the decorator AST nodes
+ * @param {object[]|undefined} snapshot their snapshots
+ * @param {object[]} factories the decorator factories
+ * @return {object[]} the decorators
+ */
+function buildDecorators(element: any, nodes: any[], snapshot: any[] | undefined, factories: any[]): any[] {
+    const list: any[] = [];
+    defineOwn(element, 'decorators', list);
+    const hasFactories = factories.length > 0;
+    for (let n = 0; n < nodes.length; n++) {
+        const thing = nodes[n];
+        let decorator;
+        if (hasFactories) {
+            for (const factory of factories) {
+                decorator = factory.newDecorator(element, thing);
+                if (decorator) {
+                    break;
+                }
+            }
+        }
+        if (!decorator) {
+            const entry = snapshot?.[n];
+            if (entry) {
+                decorator = decoratorFromSnapshot(element, thing, entry);
+            } else {
+                const { Decorator } = decoratorModule();
+                decorator = new Decorator(element, thing);
+            }
+        }
+        list.push(decorator);
+    }
+    return list;
+}
+
+/**
+ * `Decorated.process` for an element of a lazily built file: defers its
+ * `decorators` when it has some and building them cannot throw (every node
+ * is an object, which `decoratorProcess` never rejects). Returns false when
+ * the caller builds them now, as before.
+ * @param {object} element the element being processed
+ * @return {boolean} true if deferred
+ */
+function deferDecorators(element: any): boolean {
+    const nodes = element.ast.decorators;
+    if (!Array.isArray(nodes) || nodes.length === 0) {
+        return false;
+    }
+    for (let n = 0; n < nodes.length; n++) {
+        const node = nodes[n];
+        if (node === null || typeof node !== 'object') {
+            return false;
+        }
+    }
+    let modelFile;
+    try {
+        modelFile = element.getModelFile();
+    } catch (e) {
+        // The caller's own call raises it, at the same point.
+        return false;
+    }
+    const lazy = lazyFiles.get(modelFile);
+    if (!lazy) {
+        return false;
+    }
+    const snapshot = batchOf(modelFile)?.decorators.get(nodes);
+    deferField(element, 'decorators', () => buildDecorators(element, nodes, snapshot, lazy.factories));
+    return true;
+}
+
+/**
+ * Whether `element`'s model file is lazily built.
+ * @param {object} element the element
+ * @return {boolean} true if lazy
+ */
+function inLazyFile(element: any): boolean {
+    const modelFile = element.modelFile ?? element.parent?.modelFile;
+    return modelFile !== undefined && lazyFiles.has(modelFile);
+}
+
+/**
+ * A NumberValidator rebuilt from its snapshot: the fields the Validator and
+ * NumberValidator constructors set.
+ * @param {object} element the field or scalar declaration
+ * @param {object} snapshot `{lowerBound, upperBound}`
+ * @return {object} the NumberValidator
+ */
+function numberValidatorFromSnapshot(element: any, snapshot: any): any {
+    const { NumberValidator } = numberValidatorModule();
+    const validator = Object.create(NumberValidator.prototype);
+    validator.validator = element.ast.validator;
+    validator.field = element;
+    validator.lowerBound = snapshot.lowerBound;
+    validator.upperBound = snapshot.upperBound;
+    return validator;
+}
+
+/**
+ * A StringValidator rebuilt from its `stringValidatorNew` snapshot (P5-10b):
+ * the fields its constructor sets when no custom `options.regExp` is
+ * configured, in the same order.
+ * @param {object} element the field or scalar declaration
+ * @param {object} regexAst the `validator` AST it was built from
+ * @param {object} snapshot `{minLength, maxLength}`
+ * @return {object} the StringValidator
+ */
+function stringValidatorFromSnapshot(element: any, regexAst: any, snapshot: any): any {
+    const { StringValidator } = stringValidatorModule();
+    const validator = Object.create(StringValidator.prototype);
+    validator.validator = regexAst;
+    validator.field = element;
+    validator.minLength = snapshot.minLength;
+    validator.maxLength = snapshot.maxLength;
+    validator.regex = regexAst ? new RegExp(regexAst.pattern, regexAst.flags) : null;
+    return validator;
+}
+
+/**
+ * A CollectionSizeValidator rebuilt from its `collectionSizeValidatorNew`
+ * snapshot (P5-10b): the fields its constructor sets, in the same order.
+ * @param {object} property the property
+ * @param {object} ast the `sizeValidator` AST it was built from
+ * @param {object} snapshot `{minSize, maxSize}`
+ * @return {object} the CollectionSizeValidator
+ */
+function sizeValidatorFromSnapshot(property: any, ast: any, snapshot: any): any {
+    const { default: CollectionSizeValidator } = collectionSizeValidatorModule();
+    const validator = Object.create(CollectionSizeValidator.prototype);
+    validator.validator = ast;
+    validator.field = property;
+    validator.minSize = snapshot.minSize;
+    validator.maxSize = snapshot.maxSize;
+    return validator;
+}
+
+/**
+ * `MapDeclaration.process`'s key and value types (P5-10b). When the file's
+ * view snapshot has the map (its `mapDeclarationProcess` check passes and
+ * its key and value types' processing cannot throw), the check is not run
+ * again, and, in a lazily built file, `key` and `value` are built on first
+ * read (`buildKey`/`buildValue`, with the file's snapshots). Otherwise the
+ * `mapDeclarationProcess` binding runs, and the types are built now, as
+ * before.
+ * @param {object} view the MapDeclaration being processed
+ * @param {Function} buildKey builds its MapKeyType
+ * @param {Function} buildValue builds its MapValueType
+ */
+function mapDeclarationProcess(view: any, buildKey: () => any, buildValue: () => any): void {
+    const current = batchOf(view.modelFile);
+    if (!current || !current.maps.has(view.ast)) {
+        rust!.mapDeclarationProcess(view);
+    } else if (lazyFiles.has(view.modelFile)) {
+        deferField(view, 'key', () => withBatch(current, buildKey));
+        deferField(view, 'value', () => withBatch(current, buildValue));
+        return;
+    }
+    view.key = buildKey();
+    view.value = buildValue();
+}
+
+/**
+ * `MapKeyType.process`'s type: from the view snapshot, else the binding.
+ * @param {object} view the MapKeyType
+ * @return {string} the type
+ */
+function mapKeyTypeProcess(view: any): string {
+    const type = batchOf(view.modelFile)?.mapTypes.get(view.ast);
+    return type !== undefined ? type : rust!.mapKeyTypeProcess(view);
+}
+
+/**
+ * `MapValueType.process`'s type: from the view snapshot, else the binding.
+ * @param {object} view the MapValueType
+ * @return {string} the type
+ */
+function mapValueTypeProcess(view: any): string {
+    const type = batchOf(view.modelFile)?.mapTypes.get(view.ast);
+    return type !== undefined ? type : rust!.mapValueTypeProcess(view);
+}
+
+/**
+ * Builds every deferred part of a lazily built file's views: its
+ * decorators, and each declaration's, property's and map type's
+ * decorators, validators and map types. Used by
+ * CONCERTO_LAZY_VIEWS_CHECK=1, which reports any that throws.
+ * @param {object} modelFile the ModelFile
+ */
+function buildDeferredParts(modelFile: any): void {
+    const touch = (element: any, keys: string[]) => {
+        for (const key of keys) {
+            // eslint-disable-next-line no-unused-expressions
+            element[key];
+        }
+    };
+    touch(modelFile, ['decorators']);
+    for (const declaration of modelFile.declarations) {
+        touch(declaration, ['decorators', 'validator', 'key', 'value']);
+        if (declaration.key) {
+            touch(declaration.key, ['decorators']);
+        }
+        if (declaration.value) {
+            touch(declaration.value, ['decorators']);
+        }
+        for (const property of declaration.properties ?? []) {
+            touch(property, ['decorators', 'validator', 'sizeValidator']);
+        }
+    }
+}
+
 export {
+    localType,
+    builtDeclaration,
+    installLazyField,
+    isPending,
+    deferDecorators,
+    mapDeclarationProcess,
+    mapKeyTypeProcess,
+    mapValueTypeProcess,
     stageModelFile,
     deferDeclarations,
-    decoratorFactories,
     commitStaged,
     dropStaged,
     validateLoaded,

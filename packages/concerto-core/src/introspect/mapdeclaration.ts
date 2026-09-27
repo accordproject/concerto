@@ -31,8 +31,6 @@ declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
-/* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * MapDeclaration defines a Map data structure, which allows storage of a collection
@@ -69,9 +67,16 @@ class MapDeclaration extends Declaration {
     process() {
         super.process();
 
-        rust.mapDeclarationProcess(this);
-        this.key = new MapKeyType(this, this.ast.key);
-        this.value = new MapValueType(this, this.ast.value);
+        // P5-10b: the `mapDeclarationProcess` check, then the key and value
+        // types, which a lazily built file builds on first read
+        // (engine/views.ts `mapDeclarationProcess`).
+        const key = this.ast.key;
+        const value = this.ast.value;
+        loadEngine('../engine/views').mapDeclarationProcess(
+            this,
+            () => new MapKeyType(this, key),
+            () => new MapValueType(this, value),
+        );
     }
 
     /**
@@ -130,6 +135,10 @@ class MapDeclaration extends Declaration {
         return true;
     }
 }
+
+// P5-10b: built on first read in a lazily built file (engine/views.ts).
+loadEngine('../engine/views').installLazyField(MapDeclaration.prototype, 'key');
+loadEngine('../engine/views').installLazyField(MapDeclaration.prototype, 'value');
 
 export { MapDeclaration };
 export default MapDeclaration;
