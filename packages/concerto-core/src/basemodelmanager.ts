@@ -64,6 +64,10 @@ const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('./engine').rust;
+// P5-10a: engine/views, required once on first use.
+let engineViewsModule: any;
+/* istanbul ignore next */
+const engineViews = () => engineViewsModule ?? (engineViewsModule = loadEngine('./engine/views'));
 
 /**
  * What has been read from one rustHandle (P5-06), valid while its `epoch()`
@@ -349,6 +353,36 @@ class BaseModelManager {
     }
 
     /**
+     * The rustHandle write for a model file being added: registers the file
+     * Rust already loaded when the `ModelFile` was constructed (P5-10a lazy
+     * views, engine/views.ts `commitStaged`), or else sends its AST, as
+     * before. A namespace `_needsRustWrite` excludes is never written; its
+     * stage, if any, is dropped.
+     * @param {ModelFile} modelFile - the model file being added
+     * @return {boolean} true if the namespace was written to rustHandle
+     * @private
+     * @internal
+     */
+    /* istanbul ignore next */
+    _mirrorAdd(modelFile) {
+        if (!this._needsRustWrite(modelFile.getNamespace())) {
+            this._mirrorWrite(() => engineViews().dropStaged(modelFile, this.rustHandle));
+            return false;
+        }
+        this._mirrorWrite(() => {
+            if (!engineViews().commitStaged(modelFile, this.rustHandle)) {
+                this.rustHandle.addModelWithDefinitions(
+                    JSON.stringify(modelFile.getAst()),
+                    modelFile.getDefinitions() ?? undefined,
+                    modelFile.getName() ?? undefined,
+                    false,
+                );
+            }
+        });
+        return true;
+    }
+
+    /**
      * Whether `rustHandle`'s mirror currently matches `this.modelFiles`
      * closely enough to answer a read: a content-based parity check
      * against `this.modelFiles` (the source of truth `_mirrorWrite`'s
@@ -479,15 +513,7 @@ class BaseModelManager {
                 modelFile.validate();
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
-            /* istanbul ignore next */
-            if (this._needsRustWrite(modelFile.getNamespace())) {
-                this._mirrorWrite(() => this.rustHandle.addModelWithDefinitions(
-                    JSON.stringify(modelFile.getAst()),
-                    modelFile.getDefinitions() ?? undefined,
-                    modelFile.getName() ?? undefined,
-                    false,
-                ));
-            }
+            this._mirrorAdd(modelFile);
         } else {
             this._throwAlreadyExists(modelFile);
         }
@@ -600,6 +626,9 @@ class BaseModelManager {
             }
         }
         this.modelFiles[modelFile.getNamespace()] = modelFile;
+        // P5-10a: an update always sends the AST (updateModelFile), so a
+        // lazily built file's stage is dropped rather than committed.
+        this._mirrorWrite(() => engineViews().dropStaged(modelFile, this.rustHandle));
         /* istanbul ignore next */
         if (this._needsRustWrite(modelFile.getNamespace())) {
             // TS has already validated (or was asked not to) above; the
@@ -692,14 +721,8 @@ class BaseModelManager {
             // only, and TS's own validateModelFiles() below is still what
             // decides pass/fail.
             newModelFiles.forEach((m) => {
-                if (this._needsRustWrite(m.getNamespace())) {
+                if (this._mirrorAdd(m)) {
                     mirroredNamespaces.add(m.getNamespace());
-                    this._mirrorWrite(() => this.rustHandle.addModelWithDefinitions(
-                        JSON.stringify(m.getAst()),
-                        m.getDefinitions() ?? undefined,
-                        m.getName() ?? undefined,
-                        false,
-                    ));
                 }
             });
 

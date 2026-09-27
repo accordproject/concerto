@@ -51,9 +51,13 @@ import type { AstNode } from './decorated';
 // chunks' location.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
+// P5-10a: memoised per specifier (see introspect/property.ts).
+const engineModules: { [specifier: string]: any } = {};
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
@@ -120,7 +124,10 @@ class ClassDeclaration extends Declaration {
         let shouldAddIdentifierField = false;
         let shouldAddTimestampField = false;
 
-        const decision = rust.classDeclarationProcess(this) as {
+        // P5-10a: the `classDeclarationProcess` binding, read from the
+        // file's view snapshot while its declarations are built
+        // (engine/views.ts).
+        const decision = loadEngine('../engine/views').classDeclarationProcess(this) as {
             superType: string | null;
             idField: string | null;
             addIdentifierField: boolean;

@@ -131,19 +131,28 @@ class ModelFile extends Decorated {
 
         // Set up the decorators.
         this.process();
-        // Populate from the AST
-        // P5-06: every property's engine snapshot in one call, read by
-        // the property views fromAst builds (engine/views.ts
-        // `beginModelFile`).
+        // Populate from the AST.
+        // P5-10a lazy views (engine/views.ts): the AST crosses into Rust
+        // once, here, and Rust loads it with every construction-time check
+        // it makes. When it loads, only the header (namespace, version,
+        // imports) is populated now, and the declaration views are built on
+        // first use, from one batch snapshot per file. Otherwise the file is
+        // built eagerly, as fromAst would, so a TS error is thrown here by
+        // the TS code.
         const views = loadEngine('../engine/views');
-        const saved = views.beginModelFile(this.ast);
-        try {
+        const lazy: boolean = views.stageModelFile(this);
+        if (lazy) {
+            this._fromAstHeader(this.ast);
+        } else {
             this.fromAst(this.ast);
-        } finally {
-            views.endModelFile(saved);
         }
         // Check version compatibility
         this.isCompatibleVersion();
+
+        if (lazy) {
+            views.deferDeclarations(this);
+            return;
+        }
 
         // Now build local types from Declarations
         this.localTypes = new Map();
@@ -187,15 +196,22 @@ class ModelFile extends Decorated {
     _rustHandleId(): number | undefined {
         const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustHandleMatchesModelFiles?: () => boolean; _rustModelFileId?: (namespace: string) => number | undefined; modelFiles?: Record<string, unknown> };
         /* istanbul ignore next */
-        if (!manager || !manager.rustHandle || typeof manager._rustHandleMatchesModelFiles !== 'function' || !manager._rustHandleMatchesModelFiles()) {
+        if (!manager || !manager.rustHandle || typeof manager._rustHandleMatchesModelFiles !== 'function') {
             return undefined;
         }
         // A ModelFile detached from its manager's own registration -- most
         // notably `filter()`'s result before it is ever added -- must never
         // answer from a same-namespace mirror that belongs to a different
-        // (unfiltered) ModelFile object.
+        // (unfiltered) ModelFile object. Checked before the mirror's own
+        // parity check, which reads rustHandle (P5-10a: a ModelFile being
+        // constructed or added is not registered yet, and needs no boundary
+        // call to say so).
         /* istanbul ignore next */
         if (!manager.modelFiles || manager.modelFiles[this.namespace] !== this) {
+            return undefined;
+        }
+        /* istanbul ignore next */
+        if (!manager._rustHandleMatchesModelFiles()) {
             return undefined;
         }
         /* istanbul ignore next */
@@ -365,11 +381,16 @@ class ModelFile extends Decorated {
         /* istanbul ignore next */
         if (manager && manager.rustHandle) {
             try {
-                manager.rustHandle.modelFileValidateDetached(
-                    JSON.stringify(this.getAst()),
-                    this.getDefinitions() ?? undefined,
-                    this.getName() ?? undefined,
-                );
+                // P5-10a: the file Rust already loaded (staged, or
+                // registered from its stage) is validated without sending
+                // the AST again (engine/views.ts `validateLoaded`).
+                if (!loadEngine('../engine/views').validateLoaded(this, manager.rustHandle)) {
+                    manager.rustHandle.modelFileValidateDetached(
+                        JSON.stringify(this.getAst()),
+                        this.getDefinitions() ?? undefined,
+                        this.getName() ?? undefined,
+                    );
+                }
                 return;
             } catch (e) {
                 if (e instanceof IllegalModelException) {
@@ -905,6 +926,24 @@ class ModelFile extends Decorated {
      * @private
      */
     fromAst(ast: AstNode) {
+        this._fromAstHeader(ast);
+
+        // declarations is an optional field
+        if (!ast.declarations) {
+            return;
+        }
+
+        this._fromAstDeclarations(ast);
+    }
+
+    /**
+     * The part of fromAst before the declarations: the namespace, its
+     * version and the imports.
+     * @param {object} ast - the AST obtained from the parser
+     * @private
+     * @internal
+     */
+    _fromAstHeader(ast: AstNode) {
         const nsInfo = ModelUtil.parseNamespace(ast.namespace);
 
         const namespaceParts = nsInfo.name.split('.');
@@ -970,12 +1009,34 @@ class ModelFile extends Decorated {
                 this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
             }
         });
+    }
 
-        // declarations is an optional field
-        if (!ast.declarations) {
-            return;
+    /**
+     * The part of fromAst that builds the declarations.
+     * @param {object} ast - the AST obtained from the parser, with declarations
+     * @private
+     * @internal
+     */
+    _fromAstDeclarations(ast: AstNode) {
+        // P5-06/P5-10a: every declaration's and property's engine snapshot
+        // in one call, read by the views built below (engine/views.ts
+        // `beginModelFile`).
+        const views = loadEngine('../engine/views');
+        const saved = views.beginModelFile(this, ast);
+        try {
+            this._fromAstDeclarationViews(ast);
+        } finally {
+            views.endModelFile(saved);
         }
+    }
 
+    /**
+     * Builds the declaration views of `ast.declarations`.
+     * @param {object} ast - the AST obtained from the parser, with declarations
+     * @private
+     * @internal
+     */
+    _fromAstDeclarationViews(ast: AstNode) {
         for(let n=0; n < ast.declarations.length; n++) {
             let thing = ast.declarations[n];
 
