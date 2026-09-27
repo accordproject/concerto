@@ -12,14 +12,7 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-
 import Declaration from './declaration';
-import IllegalModelException from './illegalmodelexception';
-import NumberValidator from './numbervalidator';
-import StringValidator from './stringvalidator';
-import { NullUtil as Util } from '@accordproject/concerto-util';
-import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -27,22 +20,22 @@ import type Validator from './validator';
 import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// Its bindings are typed `never` so that a view leaves the member's inferred
-// return type, and so the .d.ts, exactly as the TS body makes it.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
+// `never` so that a view leaves the member's inferred return type, and so
+// the .d.ts, exactly as the TS body used to make it.
 //
 // dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
 // with no .d.ts, since it is not public API (tsconfig.build.internal.json;
-// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
-// must never see a specifier it would resolve: `loadEngine` takes a
-// non-literal one (esbuild, rollup and browserify leave it alone) and never
-// names the bare `require` (esbuild's ESM output would add its `__require`
-// shim, which webpack reports as a critical dependency), and webpack folds
-// the `typeof __webpack_require__` test and keeps only the dead-in-Node
-// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
-// bundles exactly as before (PORTING.md 1.5).
+// OD-11). A bundler must never see a specifier it would resolve: `loadEngine`
+// takes a non-literal one (esbuild, rollup and browserify leave it alone) and
+// never names the bare `require` (esbuild's ESM output would add its
+// `__require` shim, which webpack reports as a critical dependency), and
+// webpack folds the `typeof __webpack_require__` test and keeps only the
+// dead-in-Node `__non_webpack_require__` branch, so it neither resolves nor
+// warns.
 //
-// rust mode through the public ESM entry points (P4-11a, PORTING.md 1.5):
+// Loading through the public ESM entry points (P4-11a, PORTING.md 1.5):
 // - Node ESM (dist/esm/index.mjs) works unaided. scripts/build-esm.js's Node
 //   banner sets a `globalThis.module` whose `require` resolves the engine
 //   specifiers. It does not rely on the relative specifier above matching
@@ -61,16 +54,12 @@ declare const __non_webpack_require__: NodeRequire;
 // P5-06: memoised per specifier, so a call site on a per-element or
 // per-instance path (propertyProcess, fastFromJson, ...) resolves the module
 // once rather than on every call.
-/* istanbul ignore next */
 const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     engineModules[specifier] ??
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
-/* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * ScalarDeclaration defines the structure (model/schema) of composite data.
@@ -106,63 +95,7 @@ class ScalarDeclaration extends Declaration {
     process() {
         super.process();
 
-        /* istanbul ignore if */
-        if (rust) {
-            loadEngine('../engine/views').scalarDeclarationProcess(this);
-            return;
-        }
-
-        const scalarName = this.getName(); // Get the local name of the scalar
-        if (ModelUtil.isPrimitiveType(scalarName)) {
-            throw new IllegalModelException(
-                `Invalid scalar name '${scalarName}'. Name conflicts with primitive type.`,
-                this.modelFile,
-                this.ast.location
-            );
-        }
-        this.superType = null;
-        this.superTypeDeclaration = null;
-        this.idField = null;
-        this.timestamped = false;
-        this.abstract = false;
-        this.validator = null;
-
-        if (this.ast.$class === `${MetaModelNamespace}.BooleanScalar`) {
-            this.type = 'Boolean';
-        } else if (this.ast.$class === `${MetaModelNamespace}.IntegerScalar`) {
-            this.type = 'Integer';
-        } else if (this.ast.$class === `${MetaModelNamespace}.LongScalar`) {
-            this.type = 'Long';
-        } else if (this.ast.$class === `${MetaModelNamespace}.DoubleScalar`) {
-            this.type = 'Double';
-        } else if (this.ast.$class === `${MetaModelNamespace}.StringScalar`) {
-            this.type = 'String';
-        } else if (this.ast.$class === `${MetaModelNamespace}.DateTimeScalar`) {
-            this.type = 'DateTime';
-        } else {
-            this.type = null;
-        }
-
-        switch(this.getType()) {
-        case 'Integer':
-        case 'Double':
-        case 'Long':
-            if(this.ast.validator) {
-                this.validator = new NumberValidator(this, this.ast.validator);
-            }
-            break;
-        case 'String':
-            if(this.ast.validator || this.ast.lengthValidator) {
-                this.validator = new StringValidator(this, this.ast.validator, this.ast.lengthValidator);
-            }
-            break;
-        }
-
-        if(!Util.isNull(this.ast.defaultValue)) {
-            this.defaultValue = this.ast.defaultValue;
-        } else {
-            this.defaultValue = null;
-        }
+        loadEngine('../engine/views').scalarDeclarationProcess(this);
     }
 
     /**
@@ -176,26 +109,7 @@ class ScalarDeclaration extends Declaration {
     validate() {
         super.validate();
 
-        /* istanbul ignore if */
-        if (rust) {
-            rust.scalarDeclarationValidate(this);
-            return;
-        }
-
-        const declarations = this.getModelFile().getAllDeclarations();
-        const declarationNames = declarations.map(
-            d => d.getFullyQualifiedName()
-        );
-        const uniqueNames = new Set(declarationNames);
-
-        if (uniqueNames.size !== declarations.length) {
-            const duplicateElements = declarationNames.filter(
-                (item, index) => declarationNames.indexOf(item) !== index
-            );
-            throw new IllegalModelException(
-                `Duplicate class name ${duplicateElements[0]}`
-            );
-        }
+        rust.scalarDeclarationValidate(this);
     }
 
     /**
@@ -276,11 +190,7 @@ class ScalarDeclaration extends Declaration {
      * @return {String} the string representation of the class
      */
     toString(): string {
-        /* istanbul ignore if */
-        if (rust) {
-            return rust.scalarDeclarationToString(this);
-        }
-        return 'ScalarDeclaration {id=' + this.getFullyQualifiedName() + '}';
+        return rust.scalarDeclarationToString(this);
     }
 
     /**

@@ -12,12 +12,7 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-
 import Property from './property';
-import NumberValidator from './numbervalidator';
-import StringValidator from './stringvalidator';
-import { NullUtil as Util } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -26,26 +21,23 @@ import type Validator from './validator';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
-// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
-// Its bindings are typed `never` so that a view leaves the member's inferred
-// return type, and so the .d.ts, exactly as the TS body makes it. See
-// property.ts's own copy of this comment for the bundler/webpack reasoning
-// this loader relies on.
+// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
+// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
+// `never` so that a view leaves the member's inferred return type, and so
+// the .d.ts, exactly as the TS body used to make it. See property.ts's own
+// copy of this comment for the bundler/webpack reasoning this loader relies
+// on.
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 // P5-06: memoised per specifier, so a call site on a per-element or
 // per-instance path (propertyProcess, fastFromJson, ...) resolves the module
 // once rather than on every call.
-/* istanbul ignore next */
 const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     engineModules[specifier] ??
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier));
-/* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } | null =
-    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
  * Class representing the definition of a Field. A Field is owned
@@ -82,41 +74,7 @@ class Field extends Property {
     process() {
         super.process();
 
-        /* istanbul ignore if */
-        if (rust) {
-            loadEngine('../engine/views').fieldProcess(this);
-            return;
-        }
-
-        this.validator = null;
-
-        switch (this.getType()) {
-        case 'Integer':
-        case 'Double':
-        case 'Long':
-            if (this.ast.validator) {
-                this.validator = new NumberValidator(
-                    this,
-                    this.ast.validator
-                );
-            }
-            break;
-        case 'String':
-            if (this.ast.validator || this.ast.lengthValidator) {
-                this.validator = new StringValidator(
-                    this,
-                    this.ast.validator,
-                    this.ast.lengthValidator
-                );
-            }
-            break;
-        }
-
-        if (!Util.isNull(this.ast.defaultValue)) {
-            this.defaultValue = this.ast.defaultValue;
-        } else {
-            this.defaultValue = null;
-        }
+        loadEngine('../engine/views').fieldProcess(this);
     }
 
     /**
@@ -140,21 +98,7 @@ class Field extends Property {
      * @return {String} the string version of the property.
      */
     toString(): string {
-        /* istanbul ignore if */
-        if (rust) {
-            return rust.fieldToString(this);
-        }
-        return (
-            'Field {name=' +
-            this.name +
-            ', type=' +
-            this.getFullyQualifiedTypeName() +
-            ', array=' +
-            this.array +
-            ', optional=' +
-            this.optional +
-            '}'
-        );
+        return rust.fieldToString(this);
     }
 
     /**
@@ -194,50 +138,9 @@ class Field extends Property {
             return this.scalarField;
         }
 
-        /* istanbul ignore if */
-        if (rust) {
-            const scalarField: Field = loadEngine('../engine/views').fieldGetScalarField(this);
-            this.scalarField = scalarField;
-            return scalarField;
-        }
-
-        if (!this.isTypeScalar()) {
-            throw new Error(`Field ${this.name} is not a scalar property.`);
-        }
-        const type = this.getParent().getModelFile().getType(this.getType());
-        const fieldAst = JSON.parse(JSON.stringify(type.ast));
-
-        switch (type.ast.$class) {
-        case `${MetaModelNamespace}.StringScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.StringProperty`;
-            break;
-        case `${MetaModelNamespace}.BooleanScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.BooleanProperty`;
-            break;
-
-        case `${MetaModelNamespace}.DateTimeScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.DateTimeProperty`;
-            break;
-
-        case `${MetaModelNamespace}.DoubleScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.DoubleProperty`;
-            break;
-
-        case `${MetaModelNamespace}.IntegerScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.IntegerProperty`;
-            break;
-
-        case `${MetaModelNamespace}.LongScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.LongProperty`;
-            break;
-        default:
-            throw new Error(`Unrecognized scalar type ${type.ast.$class}`);
-        }
-
-        fieldAst.name = this.ast.name;
-        this.scalarField = new Field(this.getParent(), fieldAst);
-        this.scalarField.array = this.isArray();
-        return this.scalarField;
+        const scalarField: Field = loadEngine('../engine/views').fieldGetScalarField(this);
+        this.scalarField = scalarField;
+        return scalarField;
     }
 }
 
