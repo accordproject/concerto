@@ -1,0 +1,68 @@
+name: Build the Rust engine (concerto-wasm)
+description: >
+  Builds @accordproject/concerto-engine from concerto-rust's concerto-wasm crate
+  at a pinned ref and places it where packages/concerto-engine expects it: in a
+  concerto-rust checkout next to this repository
+  (<workspace>/../concerto-rust/concerto-wasm/pkg). concerto-core loads the
+  engine when it is imported, so every job that builds or tests concerto-core
+  needs this first (accordproject/concerto-rust#259). Linux runners only; other
+  jobs download the built pkg/ instead (see build.yml).
+
+outputs:
+  pkg-dir:
+    description: Absolute path of the built concerto-wasm/pkg directory.
+    value: ${{ steps.build.outputs.pkg-dir }}
+
+runs:
+  using: composite
+  steps:
+    # The concerto-rust commit the engine is built from. Bump it (to a commit
+    # of concerto-rust's integration branch, claude/tender-pascal-ocwf9q) when
+    # concerto-core needs a newer engine.
+    - name: Check out concerto-rust
+      uses: actions/checkout@v4
+      with:
+        repository: accordproject/concerto-rust
+        ref: 5498f61190c98172627046753f040447f62a0141
+        path: .concerto-rust
+
+    # actions/checkout only writes inside the workspace; the engine link
+    # (packages/concerto-engine) and e2e/tests/wasm-engine.spec.ts look for a
+    # sibling checkout.
+    - name: Move the checkout next to this repository
+      shell: bash
+      run: |
+        rm -rf "$GITHUB_WORKSPACE/../concerto-rust"
+        mv "$GITHUB_WORKSPACE/.concerto-rust" "$GITHUB_WORKSPACE/../concerto-rust"
+
+    - name: Add the wasm32 target
+      shell: bash
+      run: rustup target add wasm32-unknown-unknown
+
+    # concerto-wasm pins wasm-bindgen = "=0.2.128"; the CLI must match exactly.
+    - name: Cache wasm-bindgen-cli
+      id: wasm-bindgen-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin/wasm-bindgen
+        key: wasm-bindgen-cli-0.2.128-${{ runner.os }}-${{ runner.arch }}
+
+    - name: Install wasm-bindgen-cli
+      if: steps.wasm-bindgen-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: cargo install wasm-bindgen-cli --version 0.2.128 --locked
+
+    # `npm run build` runs build.sh with the pinned binaryen's wasm-opt on
+    # PATH. The smoke tests are concerto-rust's job; no browser is needed here.
+    - name: Build concerto-wasm
+      id: build
+      shell: bash
+      env:
+        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      run: |
+        cd "$GITHUB_WORKSPACE/../concerto-rust/concerto-wasm"
+        npm ci
+        npm run build
+        test -f pkg/concerto-engine.cjs
+        test -f pkg/concerto-engine.mjs
+        echo "pkg-dir=$(pwd)/pkg" >> "$GITHUB_OUTPUT"

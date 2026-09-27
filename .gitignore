@@ -81,3 +81,7 @@ dist
 # beads issue tracker data (local only)
 issues.jsonl
 .beads/
+
+# @accordproject/concerto-engine's staged engine (packages/concerto-engine/scripts/pack.js)
+packages/concerto-engine/pkg/
+packages/concerto-engine/.workspace-link/
