@@ -97,15 +97,15 @@ ledger, checking that each TS or HYBRID row has a reason.
 | | members | loc | weight | share of weight |
 |---|---|---|---|---|
 | RUST | 242 | 2084 | 2224 | 37.8% |
-| HYBRID | 84 | 2052 | 2353.5 | 40.0% |
+| HYBRID | 84 | 2055 | 2358 | 40.0% |
 | TS | 224 | 1558 | 1308 | 22.2% |
-| **total** | 550 | 5694 | 5885.5 | 100% |
+| **total** | 550 | 5697 | 5890 | 100% |
 
 * **RUST+HYBRID weighted share (new D1 denominator): 78.9%**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. **Met.**
   Denominator excludes constant markers and `accept()` visitor entry points
   (54 members, weight 81) as not-logic, per the maintainer's
-  decision on open question 2 below. New total weight: 5804.5 (was 5885.5).
+  decision on open question 2 below. New total weight: 5809 (was 5890).
 * **Old figure (previous denominator, all 550 members): 77.8%.**
 * RUST only (new denominator): 38.3%.
 
@@ -115,7 +115,7 @@ By weight category:
 |---|---|---|---|---|---|---|
 | glue (x0.5) | 328 | 1139 | 569.5 | 249.5 | 57.5 | 262.5 |
 | logic (x1) | 166 | 3033 | 3033 | 806 | 1219 | 1008 |
-| validation (x1.5) | 56 | 1522 | 2283 | 1168.5 | 1077 | 37.5 |
+| validation (x1.5) | 56 | 1525 | 2287.5 | 1168.5 | 1081.5 | 37.5 |
 
 ## 2. By planned task
 
@@ -130,7 +130,7 @@ By weight category:
 | P2-06 | 22 | 55.5 | 1 |
 | P2-07 | 12 | 98 | 6 |
 | P2-08 | 91 | 1668 | 11 |
-| P3-01 | 37 | 1477 | 34 |
+| P3-01 | 37 | 1481.5 | 34 |
 | P3-04 | 4 | 97 | 0 |
 | P4-02 | 6 | 22.5 | 0 |
 | P4-03 | 22 | 74 | 1 |
@@ -140,7 +140,7 @@ By weight category:
 | P4-07 | 72 | 382.5 | 20 |
 | P4-08 | 95 | 1765 | 11 |
 | P4-09 | 12 | 119 | 3 |
-| P4-10 | 41 | 1552 | 38 |
+| P4-10 | 41 | 1556.5 | 38 |
 
 TS members have `planned_task = -` and need no migration work. The exception is the exception classes: they list P1-05 and P4-02 because the error mapper instantiates them. The table counts a member once per task it lists, so the rows do not sum to the total.
 
@@ -209,7 +209,7 @@ Columns: members; count RUST / HYBRID / TS; total weight; weight RUST / HYBRID /
 | serializer/instancegenerator.ts | 8 | 1 / 0 / 7 | 158 | 15 / 0 / 143 | 9.5% | P3-01+P4-10 |
 | serializer/jsongenerator.ts | 9 | 0 / 6 / 3 | 238.5 | 0 / 218 / 20.5 | 91.4% | P3-01+P4-10 |
 | serializer/jsonpopulator.ts | 12 | 2 / 7 / 3 | 503.5 | 48 / 432 / 23.5 | 95.3% | P3-01+P4-10 |
-| serializer/resourcevalidator.ts | 22 | 0 / 19 / 3 | 662.5 | 0 / 644 / 18.5 | 97.2% | P3-01+P4-10 |
+| serializer/resourcevalidator.ts | 22 | 0 / 19 / 3 | 667 | 0 / 648.5 / 18.5 | 97.2% | P3-01+P4-10 |
 | serializer/validationexception.ts | 1 | 0 / 0 / 1 | 1.5 | 0 / 0 / 1.5 | 0.0% | P1-05+P4-02 |
 | serializer/valuegenerator.ts | 32 | 0 / 0 / 32 | 136 | 0 / 0 / 136 | 0.0% | - |
 | typenotfoundexception.ts | 2 | 0 / 0 / 2 | 8 | 0 / 0 / 8 | 0.0% | P1-05+P4-02 |
@@ -491,7 +491,7 @@ Columns: members; count RUST / HYBRID / TS; total weight; weight RUST / HYBRID /
 
 ## 5. HYBRID items with reasons
 
-84 members, weight 2353.5 (40.0%).
+84 members, weight 2358 (40.0%).
 
 | file | class | member | weight | what stays in JS |
 |---|---|---|---|---|
@@ -567,7 +567,7 @@ Columns: members; count RUST / HYBRID / TS; total weight; weight RUST / HYBRID /
 | serializer/resourcevalidator.ts | ResourceValidator | visitField | 40.5 | visitor shell kept in TS because W tests spy on / stub visitX and build it over stub Resource/Field objects; per-field checks, coercions and messages it calls go to Rust (plan section 3) |
 | serializer/resourcevalidator.ts | ResourceValidator | checkEnum | 33 | visitor shell kept in TS because W tests spy on / stub visitX and build it over stub Resource/Field objects; per-field checks, coercions and messages it calls go to Rust (plan section 3) |
 | serializer/resourcevalidator.ts | ResourceValidator | checkArray | 19.5 | visitor shell kept in TS because W tests spy on / stub visitX and build it over stub Resource/Field objects; per-field checks, coercions and messages it calls go to Rust (plan section 3) |
-| serializer/resourcevalidator.ts | ResourceValidator | checkItem | 139.5 | visitor shell kept in TS because W tests spy on / stub visitX and build it over stub Resource/Field objects; per-field checks, coercions and messages it calls go to Rust (plan section 3) |
+| serializer/resourcevalidator.ts | ResourceValidator | checkItem | 144 | visitor shell kept in TS because W tests spy on / stub visitX and build it over stub Resource/Field objects; per-field checks, coercions and messages it calls go to Rust (plan section 3) |
 | serializer/resourcevalidator.ts | ResourceValidator | visitRelationshipDeclaration | 30 | visitor shell kept in TS because W tests spy on / stub visitX and build it over stub Resource/Field objects; per-field checks, coercions and messages it calls go to Rust (plan section 3) |
 | serializer/resourcevalidator.ts | ResourceValidator | checkRelationship | 28.5 | visitor shell kept in TS because W tests spy on / stub visitX and build it over stub Resource/Field objects; per-field checks, coercions and messages it calls go to Rust (plan section 3) |
 | serializer/resourcevalidator.ts | ResourceValidator | reportFieldTypeViolation | 32 | message template moves to the Rust catalogue (P1-05); the static stays as the TS throw site because tests call it directly with stub fields |
