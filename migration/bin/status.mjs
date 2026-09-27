@@ -293,6 +293,40 @@ function ensureCoreBuilt(concertoRoot, logDir) {
   return { ok: true, built };
 }
 
+// Resolves the engine module collectCoreTestsRustMode() below loads,
+// exactly the way migration/gate/run.mjs's own resolveEngineModule() does
+// (task P5-01c, accordproject/concerto-rust#250): an explicit
+// CONCERTO_ENGINE_MODULE env override, if set, is honoured — and, since a
+// caller setting it explicitly is a deliberate choice, a set-but-missing
+// override fails loudly rather than being reported as merely "not built
+// yet". Otherwise this falls back to the module <rustRoot>/concerto-wasm/
+// pkg/concerto-engine.cjs resolves to (this function's only caller has no
+// --rust-root of its own; rustRoot is always the hardcoded RUST_ROOT
+// below). run.mjs's stepStatus forwards its own resolved engine path as
+// this same env var when it spawns this script, so a gate run's status.mjs
+// step measures the identical module the rest of that run does, even when
+// --rust-root differs from RUST_ROOT.
+function resolveEngineModule(rustRoot) {
+  const defaultPath = path.join(rustRoot, 'concerto-wasm', 'pkg', 'concerto-engine.cjs');
+  const envOverride = process.env.CONCERTO_ENGINE_MODULE;
+  if (envOverride) {
+    const exists = fs.existsSync(envOverride);
+    return {
+      path: envOverride,
+      source: 'env (CONCERTO_ENGINE_MODULE)',
+      exists,
+      built_at: exists ? fs.statSync(envOverride).mtime.toISOString() : null,
+    };
+  }
+  const exists = fs.existsSync(defaultPath);
+  return {
+    path: defaultPath,
+    source: 'default (<rustRoot>/concerto-wasm/pkg)',
+    exists,
+    built_at: exists ? fs.statSync(defaultPath).mtime.toISOString() : null,
+  };
+}
+
 // The CONCERTO_ENGINE=rust suite (§0.1/§0.2, real run). This mirrors
 // migration/gate/run.mjs's stepCoreSuiteRust, which had to work around the
 // hardcoded na() stub below by re-running the suite itself and noting in
@@ -302,9 +336,20 @@ function ensureCoreBuilt(concertoRoot, logDir) {
 // the gate runner (e.g. --at, the hourly report).
 function collectCoreTestsRustMode(concertoRoot, rustRoot, logDir, tagInfo) {
   const coreDir = path.join(concertoRoot, 'packages', 'concerto-core');
-  const engineCjs = path.join(rustRoot, 'concerto-wasm', 'pkg', 'concerto-engine.cjs');
-  if (!fs.existsSync(engineCjs)) {
-    return na(`${engineCjs} does not exist (run concerto-wasm/build.sh first)`);
+  const engine = resolveEngineModule(rustRoot);
+  if (!engine.exists) {
+    if (engine.source.startsWith('env')) {
+      // CONCERTO_ENGINE_MODULE was set explicitly but points nowhere: a
+      // setup mistake worth failing loudly over (task P5-01c, #250), never
+      // silently folded into the generic "not built yet" na() below.
+      return {
+        available: false,
+        reason: `CONCERTO_ENGINE_MODULE=${engine.path} is set but does not exist`,
+        error: `CONCERTO_ENGINE_MODULE=${engine.path} is set but does not exist`,
+        engine_module: engine,
+      };
+    }
+    return { ...na(`${engine.path} does not exist (run concerto-wasm/build.sh first)`), engine_module: engine };
   }
   const rawOutputPath = path.join(logDir, 'core-suite-rust-raw-stdout.log');
   const res = run(
@@ -312,7 +357,7 @@ function collectCoreTestsRustMode(concertoRoot, rustRoot, logDir, tagInfo) {
     ['mocha', '-r', 'ts-node/register', '--recursive', '-t', '10000', '--reporter', 'json', 'test/'],
     {
       cwd: coreDir,
-      env: { TS_NODE_PROJECT: 'tsconfig.build.json', TZ: 'UTC', CONCERTO_ENGINE: 'rust' },
+      env: { TS_NODE_PROJECT: 'tsconfig.build.json', TZ: 'UTC', CONCERTO_ENGINE: 'rust', CONCERTO_ENGINE_MODULE: engine.path },
       timeoutMs: 8 * 60 * 1000,
       logFile: path.join(logDir, 'core-suite-rust-stderr.log'),
     }
@@ -346,14 +391,18 @@ function collectCoreTestsRustMode(concertoRoot, rustRoot, logDir, tagInfo) {
     mocha = JSON.parse(res.stdout.slice(jsonStart, jsonEnd));
     fs.writeFileSync(path.join(logDir, 'mocha-results-rust.json'), JSON.stringify(mocha, null, 2));
   } catch (e) {
-    return na(
-      `could not parse mocha JSON reporter output for CONCERTO_ENGINE=rust (exit ${res.status}, timedOut=${res.timedOut}): ${e.message}; see core-suite-rust-raw-stdout.log`
-    );
+    return {
+      ...na(
+        `could not parse mocha JSON reporter output for CONCERTO_ENGINE=rust (exit ${res.status}, timedOut=${res.timedOut}): ${e.message}; see core-suite-rust-raw-stdout.log`
+      ),
+      engine_module: engine,
+    };
   }
 
   const overall = {
     available: true,
     engine: 'rust',
+    engine_module: engine,
     suites: mocha.stats.suites,
     tests: mocha.stats.tests,
     passing: mocha.stats.passes,

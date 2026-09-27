@@ -287,9 +287,20 @@ function stepStatus(opts, reportDir) {
   const args = [path.join(MIGRATION_ROOT, 'bin', 'status.mjs')];
   if (opts.fast) args.push('--fast');
   const logFile = path.join(reportDir, 'status-run.log');
+  // Forward the same resolved engine module stepCoreSuiteRust/stepOracleWasm
+  // use (task P5-01c, accordproject/concerto-rust#250): status.mjs's own
+  // collectCoreTestsRustMode resolves its engine against a hardcoded
+  // sibling of the concerto checkout, with no --rust-root of its own, so
+  // without this its mocha child can silently measure a different
+  // (possibly stale) engine than the rest of this run whenever --rust-root
+  // points elsewhere. status.mjs's run() merges process.env into its
+  // children (and, since its own env override for that child does not set
+  // CONCERTO_ENGINE_MODULE itself, does not shadow this), so setting it
+  // here also reaches the mocha child collectCoreTestsRustMode spawns.
+  const engine = resolveEngineModule(opts);
   const res = run('node', args, {
     cwd: CONCERTO_ROOT,
-    env: { CONCERTO_ORACLE_FIXTURES: opts.oracleFixtures },
+    env: { CONCERTO_ORACLE_FIXTURES: opts.oracleFixtures, CONCERTO_ENGINE_MODULE: engine.path },
     timeoutMs: 30 * 60 * 1000,
     logFile,
   });
@@ -316,7 +327,7 @@ function stepStatus(opts, reportDir) {
   // ok requires: the script itself ran cleanly, status.json was produced,
   // and every §0 threshold it carries was both judged (not `na`) and met.
   const ok = res.ok && thresholds != null && Object.values(thresholds).every((t) => t.meets === true);
-  return { name: 'status.mjs (full run)', ok, exit: res.status, log: path.relative(reportDir, logFile), status, thresholds, ts_failures: tsFailures };
+  return { name: 'status.mjs (full run)', ok, exit: res.status, log: path.relative(reportDir, logFile), status, thresholds, ts_failures: tsFailures, engine_module: engine };
 }
 
 // ---------------------------------------------------------------------------

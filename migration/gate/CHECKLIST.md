@@ -83,6 +83,19 @@ This file only *checks*. It never fixes product code, never touches
     inline in `report.md`, next to that step's own numbers and in the §0.1/
     §0.2/§0.3c criteria-summary lines, so a stale or wrong engine is visible
     without having to dig into the raw logs.
+  - **`status.mjs`'s own rust-mode step honours it too.** `run.mjs`'s
+    `status` step forwards its own resolved `CONCERTO_ENGINE_MODULE` into
+    `status.mjs`'s child env, and `status.mjs`'s
+    `collectCoreTestsRustMode` resolves and honours it the same way (env
+    override wins and fails loudly if missing, else `<rustRoot>/
+    concerto-wasm/pkg/concerto-engine.cjs`) before spawning its own mocha
+    child — so `status.json`'s `metrics.concerto_core_tests.
+    engine_modes.rust` (and the `status` step's own `engine_module` in
+    `report.json`/`report.md`) reflect the same engine as the rest of the
+    run, not `status.mjs`'s hardcoded sibling default, whenever
+    `--rust-root` points elsewhere. A caller that runs `status.mjs`
+    directly (`--at`, the hourly report) still gets its old default
+    behaviour unless it exports `CONCERTO_ENGINE_MODULE` itself.
 
 ## §0 criterion → command → evidence
 
