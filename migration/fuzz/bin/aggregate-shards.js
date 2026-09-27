@@ -67,7 +67,7 @@ function readJsonl(file) {
     return fs.readFileSync(file, 'utf8').split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l));
 }
 
-const COUNT_KEYS = ['ran', 'agree', 'divergences', 'expectedDivergences', 'harnessErrorCases', 'harnessErrorsTs', 'harnessErrorsRust'];
+const COUNT_KEYS = ['ran', 'agree', 'messageOnlyAgree', 'divergences', 'expectedDivergences', 'harnessErrorCases', 'harnessErrorsTs', 'harnessErrorsRust'];
 
 function addCounts(into, from) {
     for (const k of COUNT_KEYS) { into[k] = (into[k] || 0) + (from[k] || 0); }

@@ -10,6 +10,48 @@ stage-2 re-run is reported first, below**, then the superseded first stage-2 run
 then **stage 1**'s report (the harness and the 60,000-case triage) unchanged. No
 product code is changed by any of the three.
 
+# P5-09: stage-2 residuals under the class-not-message rule
+
+Maintainer decision 2026-09-27 (accordproject/concerto-rust#253): Rust and TS must throw in the
+same scenarios with the same exception class; the message text may differ. `lib/classify.js`
+now counts a case whose outcomes differ only in exception message as an agreement
+(`messageOnlyAgree`), not a divergence. `bin/reclassify-class-not-message.js` re-judges the
+stage-2 re-run's residual clusters (`results/stage2/triage-clusters.json`) under that rule,
+without re-running the engines: each cluster is judged by its recorded sample, and its whole
+count moves with it. That is exact for class and throw/no-throw (both are in the cluster
+signature); location and component are not, so a cluster counts as message-only when its sample
+is. Output: `results/stage2/reclassified-class-not-message.json`.
+
+**Result: 5,787 of the 38,617 stage-2 divergences (118 of 1,086 clusters) were
+message-only and now agree; 32,830 divergences in 968 clusters remain: 17,524 throw/no-throw
+differences, 13,423 class differences and 1,883 where the class matches but the error location
+differs (location is still compared).**
+
+| owner | before: divergences (clusters) | after |
+|---|---|---|
+| accordproject/concerto-rust#217 | 17,229 (69) | 17,229 (69) |
+| accordproject/concerto-rust#219 | 21,093 (1,009) | 15,306 (891) |
+| accordproject/concerto-rust#218 | 287 (6) | 287 (6) |
+| DIVERGENCES.md DV-009 | 8 (2) | 8 (2) |
+
+| op | before: divergences (clusters) | after |
+|---|---|---|
+| ModelManager.addModelFile | 14,481 (319) | 14,405 (307) |
+| ModelManager.fromAst | 24,128 (765) | 18,417 (659) |
+| Serializer.fromJSON | 8 (2) | 8 (2) |
+
+Every message-only cluster is in theme T2c (#219, "both reject, class or message differs"); T2a
+(#217), T2b (#218) and DV-009 are class or outcome differences and are unchanged. The largest
+message-only clusters:
+
+| cases | op | TS message | Rust message |
+|---|---|---|---|
+| 1,893 | ModelManager.fromAst | `Invalid property name '1e+308'` | `Invalid property name ''` |
+| 771 | ModelManager.fromAst | `type.startsWith is not a function` | `this.ast.superType.name.toString is not a function` |
+| 325 | ModelManager.fromAst | `Duplicate decorator undefined` | `Duplicate decorator` |
+| 302 | ModelManager.fromAst | `MapDeclaration must contain Key & Value properties M` | `MapDeclaration must contain valid MapKeyType  M` |
+| 255 | ModelManager.fromAst | `ObjectMapValueType must contain property 'type', for MapDecl` | `Invalid property name ''` |
+
 # Stage 2 re-run: the second 1,000,000-case run
 
 ## Run

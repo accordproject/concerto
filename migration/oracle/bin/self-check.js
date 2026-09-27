@@ -31,6 +31,14 @@
  * ScalarDeclaration constructor). Each names the fixtures that must catch it
  * (`mustFlag`): it counts as detected only when at least one failing fixture
  * is of that kind.
+ *
+ * Task P5-09 (accordproject/concerto-rust#253): the judge compares
+ * throw/no-throw and exception class, not message text. The
+ * `error-message-changed` mutant is therefore a *tolerated* mutant
+ * (`tolerated: true`): it holds only when no fixture fails and at least one
+ * pass reports the message difference (`message_only`), which checks that
+ * the information channel still sees it. `error-class-swapped` and
+ * `verdict-flipped` still must fail.
  */
 
 process.env.TZ = 'UTC';
@@ -132,7 +140,8 @@ const replace = (obj, key, make) => () => {
 const MUTANTS = [
     {
         name: 'error-message-changed',
-        description: 'IllegalModelException messages gain a trailing full stop',
+        description: 'IllegalModelException messages gain a trailing full stop (tolerated since P5-09: must pass, reported as message_only)',
+        tolerated: true,
         adapter: wrapOutcome('error-message-changed', (op, o) => {
             if (o.error && o.error.class === 'IllegalModelException') {
                 o.error.message += '.';
@@ -274,7 +283,9 @@ const MUTANTS = [
                 }
             }).length;
         }
-        const detected = s.fail > 0 && (flagged === null || flagged > 0);
+        const detected = m.tolerated
+            ? s.fail === 0 && s.harness_error === 0 && s.message_only > 0
+            : s.fail > 0 && (flagged === null || flagged > 0);
         const firstOps = {};
         for (const f of s.failures) {
             firstOps[f.op] = (firstOps[f.op] || 0) + 1;
@@ -283,13 +294,19 @@ const MUTANTS = [
             name: m.name,
             description: m.description,
             detected,
+            tolerated: m.tolerated || undefined,
             failing_fixtures: s.fail,
+            message_only: s.message_only,
             must_flag: m.mustFlag ? { what: m.mustFlag.what, failing: flagged } : undefined,
             harness_errors: s.harness_error,
             by_op: firstOps,
             example: s.failures[0] ? { file: s.failures[0].file, detail: s.failures[0].detail } : null,
         });
-        out(`${detected ? 'DETECTED' : 'ERROR MISSED'} ${m.name}: ${s.fail} fixtures fail` + (m.mustFlag ? ` (${flagged} of them ${m.mustFlag.what})` : ''));
+        if (m.tolerated) {
+            out(`${detected ? 'TOLERATED' : 'ERROR NOT TOLERATED'} ${m.name}: ${s.fail} fixtures fail, ${s.message_only} pass with a message difference`);
+        } else {
+            out(`${detected ? 'DETECTED' : 'ERROR MISSED'} ${m.name}: ${s.fail} fixtures fail` + (m.mustFlag ? ` (${flagged} of them ${m.mustFlag.what})` : ''));
+        }
     }
 
     // Harness checks: missing blob and missing inputs must be harness errors.

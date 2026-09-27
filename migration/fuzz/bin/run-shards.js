@@ -129,7 +129,7 @@ function runShard(o, state, s) {
                 const run = JSON.parse(fs.readFileSync(runFile, 'utf8'));
                 s.status = 'done';
                 s.counts = {
-                    ran: run.ran, agree: run.agree, divergences: run.divergences,
+                    ran: run.ran, agree: run.agree, messageOnlyAgree: run.messageOnlyAgree || 0, divergences: run.divergences,
                     expectedDivergences: run.expectedDivergences || 0,
                     harnessErrorCases: run.harnessErrorCases,
                     harnessErrorsTs: run.harnessErrorsTs, harnessErrorsRust: run.harnessErrorsRust,
