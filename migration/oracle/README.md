@@ -664,22 +664,24 @@ No suite-covered branch is unexplained and no reason is stale.
 
 ### Judge self-check
 
-`results/self-check.json` (`bin/self-check.js`), run on this corpus: baseline 15,850 / 15,850 pass,
-0 fail, 0 harness errors; every seeded mutant is detected. The last five (task
+`results/self-check.json` (`bin/self-check.js`), run on the canonical corpus plus supplement (task P5-09):
+baseline 16,242 / 16,242 pass, 0 fail, 0 harness errors; every seeded mutant is detected, except
+`error-message-changed`, which is tolerated under the class-not-message policy (0 fixtures fail, 643
+pass with a message difference). The last five (task
 accordproject/concerto-rust#94) each name the kind of fixture that must catch them, and count as detected
 only when such a fixture fails.
 
-| Mutant | Kind | Fixtures that flag it |
+| Mutant | Kind | Fixtures that fail |
 |---|---|---:|
-| error-message-changed: IllegalModelException messages gain a full stop | adapter wrapper | 638 |
+| error-message-changed: IllegalModelException messages gain a full stop | adapter wrapper | 0 (tolerated; 643 `message_only`) |
 | verdict-flipped: `validateModelFiles` succeeds where the reference throws and vice versa | adapter wrapper | 376 |
 | identifier-check-dropped: `ModelUtil.isValidIdentifier` always true | in-engine patch | 5 |
 | abstract-check-dropped: `ClassDeclaration.isAbstract` always false | in-engine patch | 180 |
 | canonical-result-altered: `Serializer.toJSON` results lose `$class` | adapter wrapper | 1,670 |
-| error-class-swapped: TypeNotFoundException reported as Error | adapter wrapper | 285 |
-| optional-field-rule-dropped: `Property.isOptional` always true | in-engine patch | 11,326 |
+| error-class-swapped: TypeNotFoundException reported as Error | adapter wrapper | 286 |
+| optional-field-rule-dropped: `Property.isOptional` always true | in-engine patch | 11,427 |
 | datetime-shifted: DateTime values serialised 1 ms late | in-engine patch | 585 |
-| filter-imports-unpruned: `filter` keeps every import whatever the predicate says | in-engine patch | 12 (all `ModelManager.filter`) |
+| filter-imports-unpruned: `filter` keeps every import whatever the predicate says | in-engine patch | 8 (all `ModelManager.filter`) |
 | offline-flag-inverted: `ModelLoader` resolves external models offline, only validates online | in-engine patch | 4 (all `ModelLoader.*`) |
 | async-rejection-swallowed: a rejected async op reported as resolving to undefined | adapter wrapper | 6 (3 `updateExternalModels`) |
 | decorator-factories-ignored: `getDecoratorFactories` always empty | in-engine patch | 9 (all with an `addDecoratorFactory` step) |
