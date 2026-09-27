@@ -30,13 +30,6 @@ jobs:
       # Ensure npm 11.5.1 or later for trusted publishing
       - run: npm install -g npm@latest
 
-      # concerto-core loads the Rust engine when it is imported, so the build
-      # needs it, and @accordproject/concerto-engine publishes it: its prepack
-      # copies the built engine from this sibling checkout into the package
-      # (accordproject/concerto-rust#259).
-      - name: Build the Rust engine (concerto-wasm)
-        uses: ./.github/actions/concerto-engine
-
       - run: npm ci
       - run: npm run build --if-present
 

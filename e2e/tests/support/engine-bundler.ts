@@ -86,9 +86,11 @@ function engineModules(): string[] {
  *     `loadEngine`, read through scripts/browser-module-shim.js);
  *   - the public modules the engine requires back (see engineRequires).
  *
- * Every specifier asked for is recorded in
- * `globalThis.__concertoBundler.requested`, from before the first
- * concerto-core module is imported.
+ * Every specifier asked for while this function loads the registry (the
+ * engine and the views' own modules) is discarded before it returns:
+ * `globalThis.__concertoBundler.requested` starts empty for the public graph
+ * that a test imports afterwards, so a check against it is proof of what that
+ * public graph itself asked for.
  *
  * @param {Page} page - the Playwright page
  * @param {string} baseUrl - the server's base URL
@@ -123,5 +125,7 @@ export async function installEngineBundler(page: Page, baseUrl: string): Promise
         for (const specifier of requires) {
             bundled.set(specifier, await import(`${baseUrl}/concerto-core/engine/${specifier}`));
         }
+        // Only what the public graph asks for from here on counts.
+        requested.clear();
     }, { baseUrl, modules: engineModules(), requires: engineRequires() });
 }
