@@ -121,6 +121,35 @@ function filterDetached(cto, predicate) {
 }
 
 const T = 'namespace org.acme.p502b.t@1.0.0';
+const HB = 'namespace org.acme.p502b.hb@1.0.0';
+const HBNS = 'org.acme.p502b.hb@1.0.0';
+
+/**
+ * A ModelManager read on a manager that holds a hand-built ModelFile the
+ * engine mirror could not take: `B`'s declaration carries a location
+ * without `$class` (as a host building an AST by hand might write it), so
+ * `addModelFile(..., disableValidation = true)` keeps it on the TS side
+ * while the engine rejects its copy. The manager's reads
+ * (`derivesFrom`, `isAssignableTo`, `getModelFileByFileName`,
+ * `resolveType`) then answer from the TS body over `modelFiles`
+ * (basemodelmanager.ts, `_rustHandleMatchesModelFiles()` false).
+ * @param {Function} read `(mm) => value`
+ * @returns {Function} the check body
+ */
+function readHandBuilt(read) {
+    return (core) => {
+        const mm = new core.ModelManager();
+        const scratch = new core.ModelManager();
+        const ast = JSON.parse(JSON.stringify(scratch.addCTOModel(
+            `${HB}\nabstract concept A {}\nconcept B extends A {}\nconcept Z {}`, 'hb.cto', true).getAst()));
+        ast.declarations[1].location = {
+            start: { line: 3, column: 1, offset: 0 },
+            end: { line: 3, column: 26, offset: 25 },
+        };
+        mm.addModelFile(new core.ModelFile(mm, ast, undefined, 'hb.cto'), undefined, 'hb.cto', true);
+        return read(mm);
+    };
+}
 
 module.exports = [
     {
@@ -738,6 +767,74 @@ asset A2 extends IdA {}`, (d) => d.getName() !== 'D'),
                     ]
                 },
                 name: 'x.cto'
+            }
+        },
+    },
+    // ---- BaseModelManager reads over a hand-built ModelFile ------------
+    {
+        id: 'CO-MM-001',
+        covers: 'BaseModelManager.derivesFrom TS body: a subtype',
+        run: readHandBuilt((mm) => mm.derivesFrom(`${HBNS}.B`, `${HBNS}.A`)),
+        expect: { ok: true },
+    },
+    {
+        id: 'CO-MM-002',
+        covers: 'BaseModelManager.derivesFrom TS body: an unrelated type',
+        run: readHandBuilt((mm) => mm.derivesFrom(`${HBNS}.Z`, `${HBNS}.A`)),
+        expect: { ok: false },
+    },
+    {
+        id: 'CO-MM-003',
+        covers: 'BaseModelManager.isAssignableTo TS body: a concrete subtype',
+        run: readHandBuilt((mm) => mm.isAssignableTo(`${HBNS}.B`, `${HBNS}.A`)),
+        expect: { ok: true },
+    },
+    {
+        id: 'CO-MM-004',
+        covers: 'BaseModelManager.isAssignableTo TS body: an abstract type',
+        run: readHandBuilt((mm) => mm.isAssignableTo(`${HBNS}.A`, `${HBNS}.A`)),
+        expect: { ok: false },
+    },
+    {
+        id: 'CO-MM-005',
+        covers: 'BaseModelManager.isAssignableTo TS body: an unknown type',
+        run: readHandBuilt((mm) => mm.isAssignableTo(`${HBNS}.Q`, `${HBNS}.A`)),
+        expect: { ok: false },
+    },
+    {
+        id: 'CO-MM-006',
+        covers: 'BaseModelManager.getModelFileByFileName TS body: a known and an unknown file name',
+        run: readHandBuilt((mm) => [
+            mm.getModelFileByFileName('hb.cto').getNamespace(),
+            mm.getModelFileByFileName('nope.cto'),
+        ]),
+        expect: { ok: [HBNS, '<undefined>'] },
+    },
+    {
+        id: 'CO-MM-007',
+        covers: 'BaseModelManager.resolveType TS body: a primitive and a local type',
+        run: readHandBuilt((mm) => [mm.resolveType('ctx', 'String'), mm.resolveType('ctx', `${HBNS}.B`)]),
+        expect: { ok: ['String', `${HBNS}.B`] },
+    },
+    {
+        id: 'CO-MM-008',
+        covers: 'BaseModelManager.resolveType TS body: an unregistered namespace',
+        run: readHandBuilt((mm) => mm.resolveType('ctx', 'org.acme.p502b.nope@1.0.0.B')),
+        expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: 'No registered namespace for type "org.acme.p502b.nope@1.0.0.B" in "ctx". '
+            }
+        },
+    },
+    {
+        id: 'CO-MM-009',
+        covers: 'BaseModelManager.resolveType TS body: an unknown type in a registered namespace',
+        run: readHandBuilt((mm) => mm.resolveType('ctx', `${HBNS}.Q`)),
+        expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: `No type "${HBNS}.Q" in namespace "${HBNS}" for "ctx". `
             }
         },
     },

@@ -300,9 +300,15 @@ without editing `packages/concerto-core/test/**`:
   `regExp` engine;
 * `collaborator.checks.js`: `ModelFile.validate()` and `ModelFile.filter()`
   for a model file whose manager is not engine-backed, or that is detached
-  from its manager;
+  from its manager, and `BaseModelManager`'s reads (`derivesFrom`,
+  `isAssignableTo`, `getModelFileByFileName`, `resolveType`) on a manager
+  holding a hand-built model file the engine mirror did not take;
 * `public-api.checks.js`: small public members (`ModelUtil`'s engine memo,
   `ResourceId` guards, and so on).
+
+`serializer-fallback.checks.js` also passes a boxed `utcOffset`
+(`new Number(0)`) to `fromJSON`: the codec cannot carry it, so plain, valid
+primitive values take `convertToObject`'s TS switch too.
 
 Each check is `{ id, covers, run(core), expect }`. `fallbacks.spec.js` runs
 `run` against the workspace `src/` and against the frozen v5.0.0 reference

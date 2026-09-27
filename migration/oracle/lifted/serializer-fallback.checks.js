@@ -599,6 +599,36 @@ module.exports = [
             }
         },
     },
+    // A boxed `utcOffset` (`new Number(0)`) is a fromJSON option the codec
+    // cannot carry, so every primitive field takes convertToObject's TS
+    // switch even for plain, valid values.
+    {
+        id: 'SF-CO-016',
+        covers: 'convertToObject TS switch, Integer/Long/Double/Boolean: valid values (boxed utcOffset)',
+        run: (core) => {
+            const { ser } = setup(core);
+            const r = ser.fromJSON({ $class: `${NS}.C`, i: 3, l: 7, d: 2.5, b: true }, { validate: false, utcOffset: new Number(0) });
+            return [r.i, r.l, r.d, r.b];
+        },
+        expect: { ok: [3, 7, 2.5, true] },
+    },
+    {
+        id: 'SF-CO-017',
+        covers: 'convertToObject TS switch, Integer: a fractional number is rejected (boxed utcOffset)',
+        run: populate({ i: 1.5 }, 'i', { utcOffset: new Number(0) }),
+        expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Expected value at path `$.i` to be of type `Integer`'
+            }
+        },
+    },
+    {
+        id: 'SF-CO-018',
+        covers: 'convertToObject TS switch, DateTime: a qualified string, strict (boxed utcOffset)',
+        run: populate({ t: '2020-01-01T10:00:00Z' }, 't', { strictQualifiedDateTimes: true, utcOffset: new Number(0) }),
+        expect: { ok: '2020-01-01T10:00:00Z' },
+    },
     // ---- JSONGenerator ---------------------------------------------------
     {
         id: 'SF-JG-001',
