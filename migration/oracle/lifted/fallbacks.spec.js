@@ -78,6 +78,33 @@ function outcome(run, core) {
     }
 }
 
+/**
+ * The outcome of an `async` check's `run(core)`, whose promise settles with
+ * its value or rejects with the error it threw (P5-11,
+ * accordproject/concerto-rust#287: `updateExternalModels` is async).
+ * @param {Function} run the check body, returning a promise
+ * @param {object} core a loaded core
+ * @returns {Promise<object>} `{ ok }` or `{ throws: { name, message } }`
+ */
+async function settle(run, core) {
+    try {
+        return { ok: plain(await run(core)) };
+    } catch (e) {
+        return { throws: { name: e && e.constructor ? e.constructor.name : typeof e, message: e && e.message } };
+    }
+}
+
+/**
+ * The outcome of a check against `core`: `settle` for an `async` check,
+ * `outcome` for any other.
+ * @param {object} check the check
+ * @param {object} core a loaded core
+ * @returns {Promise<object>} the outcome
+ */
+async function outcomeOf(check, core) {
+    return check.async ? settle(check.run, core) : outcome(check.run, core);
+}
+
 const checkFiles = fs
     .readdirSync(LIFTED_DIR)
     .filter((f) => f.endsWith('.checks.js'))
@@ -96,19 +123,19 @@ describe('lifted fallback checks (P5-02b)', function () {
                 assert.ok(!ids.has(check.id), `duplicate check id ${check.id}`);
                 ids.add(check.id);
 
-                it(`${check.id} (src)`, () => {
-                    assert.deepStrictEqual(outcome(check.run, getSrcCore()), check.expect);
+                it(`${check.id} (src)`, async () => {
+                    assert.deepStrictEqual(await outcomeOf(check, getSrcCore()), check.expect);
                 });
 
-                it(`${check.id} (reference@5.0.0)`, function () {
+                it(`${check.id} (reference@5.0.0)`, async function () {
                     if (!referenceInstalled) {
                         this.skip();
                     }
-                    assert.deepStrictEqual(outcome(check.run, getRefCore()), check.expect);
+                    assert.deepStrictEqual(await outcomeOf(check, getRefCore()), check.expect);
                 });
             }
         });
     }
 });
 
-module.exports = { outcome, plain };
+module.exports = { outcome, settle, outcomeOf, plain };

@@ -97,10 +97,10 @@ module.exports = {
             'BaseModelManager.addModel': { c: 'TS', r: R.fwdParse + ' (then addModelFile)' },
             'BaseModelManager.updateModelFile': { c: 'HYBRID', r: R.parseThenRust },
             'BaseModelManager.addModelFiles': { c: 'HYBRID', r: R.parseThenRust },
-            // P5-11 (accordproject/concerto-rust#276): the apply/validate/rollback
-            // part is a port candidate (Rust update_external_models), deferred by
-            // maintainer decision; the body makes no engine call, so it is PARTIAL.
-            'BaseModelManager.updateExternalModels': { c: 'RUST', deferred: true },
+            // P5-11 (accordproject/concerto-rust#276, ported by #287): the
+            // apply/validate/rollback part runs in Rust (update_external_models);
+            // the download stays in JS.
+            'BaseModelManager.updateExternalModels': { c: 'RUST' },
             'BaseModelManager.writeModelsToFileSystem': { c: 'TS', t: NONE, p: NONE, r: R.fsWrite },
             'BaseModelManager.getFactory': { c: 'TS', t: NONE, p: NONE, r: R.ownerRef },
             'BaseModelManager.getSerializer': { c: 'TS', t: NONE, p: NONE, r: R.ownerRef },
@@ -418,8 +418,11 @@ module.exports = {
 // 2026-09-28 on the stage 1 evaluation of the rows that make no engine call
 // (the PARTIAL rows of #261 and the HYBRID rows with no engine call):
 //   - no more code moves to Rust for now: the 14 rows the evaluation
-//     recommended moving stay RUST in the rules, so the engine-call scan
-//     keeps them PARTIAL, marked `deferred` (port candidates, SUMMARY 5b);
+//     recommended moving stayed RUST in the rules, so the engine-call scan
+//     kept them PARTIAL, marked `deferred` (port candidates, SUMMARY 5b).
+//     The pause was lifted on 2026-09-28 and accordproject/concerto-rust#287
+//     ported all 14: each now makes an engine call, so the scan counts it
+//     RUST, and none is marked `deferred` any more;
 //   - every row recommended "stay in TS" or "forward" becomes TS with the
 //     reason below (SUMMARY 4); none was found dead;
 //   - the six HYBRID rows whose engine call is one hop away are counted by
@@ -429,10 +432,6 @@ module.exports = {
 // override is an error, so each row is decided in exactly one place.
 const P5_11 = {
     'src/basemodelmanager.ts': {
-        // Port candidates, deferred.
-        'BaseModelManager.getType': { deferred: true },
-        'BaseModelManager.validateModelFiles': { deferred: true },
-        'BaseModelManager._throwAlreadyExists': { deferred: true },
         // Stay TS.
         'BaseModelManager.getModelFiles': { c: 'TS', r: R.lazyAccessor + ' (a filter over the model-file view map: 0.23 us in TS against 3.1 us for a string[] crossing)' },
         'BaseModelManager.getModels': { c: 'TS', r: 'returns the CTO definitions text, which lives in JS (ModelFile.getDefinitions); a crossing would copy every CTO text back. ' + R.p511 },
@@ -494,8 +493,6 @@ const P5_11 = {
         'ConceptDeclaration.constructor': { c: 'TS', r: R.superCtor },
     },
     'src/introspect/declaration.ts': {
-        'Declaration.validate': { deferred: true },
-        'Declaration.isReservedSystemTypeImport': { deferred: true },
         'Declaration.getModelFile': { c: 'TS', r: R.fieldRead },
         'Declaration.getName': { c: 'TS', r: R.fieldRead },
         'Declaration.getNamespace': { c: 'TS', r: R.fwd },
@@ -554,14 +551,10 @@ const P5_11 = {
         'MapValueType.getNamespace': { c: 'TS', r: R.fwd },
     },
     'src/introspect/metamodel.ts': {
-        'validateMetaModel': { deferred: true },
         'newMetaModelManager': { c: 'TS', r: R.fixedData },
         'modelManagerFromMetaModel': { c: 'TS', r: R.fwd + ' (orchestration over RUST members)' },
     },
     'src/introspect/modelfile.ts': {
-        'ModelFile.getType': { deferred: true },
-        'ModelFile.getFullyQualifiedTypeName': { deferred: true },
-        'ModelFile.resolveType': { deferred: true },
         'ModelFile.resolveImport': { c: 'TS', r: R.lazyAccessor + ' (a lookup in the import map of the header; 148 ns in TS against 1.4 us for a string crossing, on the getType hot path)' },
         'ModelFile.getImportURI': { c: 'TS', r: R.lazyAccessor + ' (a map read of the header)' },
         'ModelFile.getAssetDeclaration': { c: 'TS', r: R.lazyAccessor + ' (getLocalType plus a kind check)' },
@@ -653,11 +646,6 @@ const P5_11 = {
         'ResourceValidator.reportInvalidFieldAssignment',
     ].map(k => [k, { c: 'TS', r: R.rvShell }])),
 };
-// ModelFile header rows: the checks already run in Rust staging (stageModelFile);
-// the port would fold the TS body into the stage call. Deferred.
-for (const k of ['ModelFile._fromAstHeader', 'ModelFile.isCompatibleVersion', 'ModelFile.enforceImportVersioning', 'ModelFile.fromAst']) {
-    P5_11['src/introspect/modelfile.ts'][k] = { deferred: true };
-}
 P5_11['src/introspect/modelfile.ts']['ModelFile._declarationView'] = {
     c: 'TS', r: 'JS view-class factory (`new AssetDeclaration(...)` by AST $class); Rust staging has already rejected an unknown $class, and the injected default super type mirrors Rust implicit_super_type for 4 fixed cases. ' + R.p511,
 };

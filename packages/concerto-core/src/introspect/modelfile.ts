@@ -14,7 +14,6 @@
 
 import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-import semver from 'semver';
 import AssetDeclaration from './assetdeclaration';
 import EnumDeclaration from './enumdeclaration';
 import ClassDeclaration from './classdeclaration';
@@ -28,14 +27,13 @@ import MapDeclaration from './mapdeclaration';
 import ModelUtil from '../modelutil';
 import Globalize from '../globalize';
 import Decorated from './decorated';
-import packageJson from '../../package.json';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type BaseModelManager from '../basemodelmanager';
 import type Declaration from './declaration';
 import type { AstNode } from './decorated';
-import type { IImportType, IModel } from '@accordproject/concerto-metamodel';
+import type { IModel } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -501,6 +499,19 @@ class ModelFile extends Decorated {
      * @private
      */
     resolveType(context, type, fileLocation?) {
+        // P5-11 (accordproject/concerto-rust#287): resolved in Rust
+        // (concerto-wasm `modelFileResolveType`) for a file its manager has
+        // mirrored into rustHandle, with the IllegalModelException TS throws
+        // (naming this file). A file that is not mirrored (a stub manager,
+        // a detached file) and non-string arguments, which the binding's
+        // `&str` parameters cannot take, keep the TS body below.
+        const id = typeof context === 'string' && typeof type === 'string' ? this._rustHandleId() : undefined;
+        /* istanbul ignore if */
+        if (id !== undefined) {
+            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            manager.rustHandle.modelFileResolveType(id, context, type, fileLocation, this);
+            return;
+        }
         // is the type a primitive?
         if(!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?
@@ -602,6 +613,24 @@ class ModelFile extends Decorated {
      * @private
      */
     getType(type) {
+        // P5-11 (accordproject/concerto-rust#287): resolved in Rust
+        // (concerto-wasm `modelFileGetTypeName`) for a file its manager has
+        // mirrored into rustHandle. Rust answers by name: a primitive's own
+        // name (no dot), the fully-qualified name of the declaration found,
+        // which is mapped to its view in the model file of its namespace, or
+        // undefined for null. A file that is not mirrored and a non-string
+        // type keep the TS body below.
+        const id = typeof type === 'string' ? this._rustHandleId() : undefined;
+        /* istanbul ignore if */
+        if (id !== undefined) {
+            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any }; modelFiles: Record<string, ModelFile> };
+            const name: string | undefined = manager.rustHandle.modelFileGetTypeName(id, type);
+            if (name === undefined) {
+                return null;
+            }
+            const dot = name.lastIndexOf('.');
+            return dot < 0 ? name : manager.modelFiles[name.substring(0, dot)].getLocalType(name);
+        }
         // is the type a primitive?
         if(!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?
@@ -639,6 +668,16 @@ class ModelFile extends Decorated {
      * @private
      */
     getFullyQualifiedTypeName(type) {
+        // P5-11 (accordproject/concerto-rust#287): resolved in Rust
+        // (concerto-wasm `modelFileGetFullyQualifiedTypeName`, undefined for
+        // null) for a file its manager has mirrored into rustHandle. A file
+        // that is not mirrored and a non-string type keep the TS body below.
+        const id = typeof type === 'string' ? this._rustHandleId() : undefined;
+        /* istanbul ignore if */
+        if (id !== undefined) {
+            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            return manager.rustHandle.modelFileGetFullyQualifiedTypeName(id, type) ?? null;
+        }
         // is the type a primitive?
         if(!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?
@@ -890,18 +929,11 @@ class ModelFile extends Decorated {
      * with newer runtimes (e.g. a model declaring "^3.0.0" loads under v4).
      */
     isCompatibleVersion() {
-        if (this.ast.concertoVersion) {
-            if (semver.satisfies(packageJson.version, this.ast.concertoVersion, { includePrerelease: true })) {
-                this.concertoVersion = this.ast.concertoVersion;
-            } else {
-                // Allow v3 models to load under newer runtimes
-                if (semver.minSatisfying(['3.0.0'], this.ast.concertoVersion)) {
-                    this.concertoVersion = this.ast.concertoVersion;
-                } else {
-                    throw new Error(`This version of Concerto supports a language version of v3.0.0 or greater, but this model is for ${this.ast.concertoVersion}`);
-                }
-            }
-        }
+        // P5-11 (accordproject/concerto-rust#287): checked in Rust
+        // (concerto-wasm `modelFileIsCompatibleVersion`, node-semver's range
+        // grammar ported in concerto-rust semver_range.rs), which sets
+        // `this.concertoVersion` or throws the Error TS throws.
+        rust.modelFileIsCompatibleVersion(this);
     }
     /**
      * Verifies that an import is versioned if the strict
@@ -910,10 +942,9 @@ class ModelFile extends Decorated {
      * @private
      */
     enforceImportVersioning(imp) {
-        const nsInfo = ModelUtil.parseNamespace(imp.namespace);
-        if(!nsInfo.version) {
-            throw new Error(`Cannot use an unversioned import ${imp.namespace}.`);
-        }
+        // P5-11 (accordproject/concerto-rust#287): checked in Rust
+        // (concerto-wasm `modelFileEnforceImportVersioning`).
+        rust.modelFileEnforceImportVersioning(imp);
     }
 
     /**
@@ -922,7 +953,10 @@ class ModelFile extends Decorated {
      * @private
      */
     fromAst(ast: AstNode) {
-        this._fromAstHeader(ast);
+        // P5-11 (accordproject/concerto-rust#287): the header (namespace,
+        // version and imports, `_fromAstHeader`) is read and checked in Rust
+        // (concerto-wasm `modelFileFromAstHeader`).
+        rust.modelFileFromAstHeader(this, ast);
 
         // declarations is an optional field
         if (!ast.declarations) {
@@ -940,71 +974,17 @@ class ModelFile extends Decorated {
      * @internal
      */
     _fromAstHeader(ast: AstNode) {
-        const nsInfo = ModelUtil.parseNamespace(ast.namespace);
-
-        const namespaceParts = nsInfo.name.split('.');
-        namespaceParts.forEach(part => {
-            if (!ModelUtil.isValidIdentifier(part)){
-                throw new IllegalModelException(`Invalid namespace part '${part}'`, this, this.ast.location);
-            }
-        });
-
-        this.namespace = ast.namespace;
-        this.version = nsInfo.version;
-
-        // In v4, all non-system models must declare a namespace version (e.g., @1.0.0)
-        if (!this.version && !this.isSystemModelFile()) {
-            throw new Error(`Cannot create a ModelFile with an unversioned namespace: ${ast.namespace}. All models must specify a version (e.g., @1.0.0).`);
-        }
-
-        // Make sure to clone imports since we will add built-in imports
-        const imports = ast.imports ? ast.imports.concat([]) : [];
-
-        if(!this.isSystemModelFile()) {
-            imports.push(
-                {
-                    $class: `${MetaModelNamespace}.ImportTypes`,
-                    namespace: 'concerto@1.0.0',
-                    types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event']
-                }
-            );
-        }
-
-        this.imports = imports;
-        this.imports.forEach((imp) => {
-            this.enforceImportVersioning(imp);
-            switch(imp.$class) {
-            case `${MetaModelNamespace}.ImportAll`:
-                throw new Error('Wildcard Imports are not permitted.');
-            case `${MetaModelNamespace}.ImportTypes`: {
-                const ns = imp.namespace;
-                if (imp.aliasedTypes && imp.aliasedTypes.length > 0) {
-                    const aliasedTypes = new Map();
-                    imp.aliasedTypes.forEach(({ name, aliasedName }) => {
-                        if(ModelUtil.isPrimitiveType(aliasedName)){
-                            throw new Error('Types cannot be aliased to primitive type');
-                        }
-                        aliasedTypes.set(name, aliasedName);
-                    });
-                    // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
-                    imp.types.forEach((type) => {
-                        const alias = aliasedTypes.get(type);
-                        this.importShortNames.set(alias ?? type, `${ns}.${type}`);
-                    });
-                } else {
-                    imp.types.forEach((type) =>
-                        this.importShortNames.set(type, `${ns}.${type}`)
-                    );
-                }
-                break;
-            }
-            default:
-                this.importShortNames.set((imp as IImportType).name, ModelUtil.importFullyQualifiedNames(imp)[0]);
-            }
-            if(imp.uri) {
-                this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
-            }
-        });
+        // P5-11 (accordproject/concerto-rust#287): read and checked in Rust
+        // (concerto-wasm `modelFileFromAstHeader`), over this ModelFile and
+        // the AST's own JS values in TS's order: `ast.namespace` (every part
+        // a valid identifier, and a version unless isSystemModelFile()),
+        // then `this.namespace`, `this.version` and `this.imports` (a copy of
+        // `ast.imports` plus, for a non-system file, the implicit import of
+        // the system types), and `this.importShortNames` and
+        // `this.importUriMap` from each import, which must be versioned
+        // (enforceImportVersioning), not a wildcard import, and not alias a
+        // primitive type. Each error keeps TS's class.
+        rust.modelFileFromAstHeader(this, ast);
     }
 
     /**
