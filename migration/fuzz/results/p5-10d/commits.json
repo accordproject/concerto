@@ -1,9 +1,9 @@
 {
   "_about": "P5-10d (accordproject/concerto-rust#285): verification re-runs of the P5-10c plan (run-seeds 1001-1010, 100,000 cases each, batch 1000, 25 seeds per op) on the fixed engine, against the same pre-lazy control",
   "lazy": {
-    "concerto": "60169b6f48afd0f8054f3e93a38654b243ea96ab",
-    "concerto-rust": "f2c4ad99d1178ba0f833dbad5d2e5da4a5f83532",
-    "note": "P5-10d fix on the integration heads (concerto dafa53e9c, concerto-rust e7c0163); concerto-wasm/pkg built from concerto-rust f2c4ad9"
+    "concerto": "72ab01381288bf31b5ca0100e6a2122821348963",
+    "concerto-rust": "ed637c0ee598bcc8fe163463d0fc06721ef597d4",
+    "note": "P5-10d fixes (property $class f2c4ad9, map key and value $class ed637c0) on the integration heads (concerto dafa53e9c, concerto-rust 6d57140); concerto-wasm/pkg built from concerto-rust ed637c0"
   },
   "prelazy": {
     "concerto": "796669d5c1d391c5f40d246143e55150931dd926",

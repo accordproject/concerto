@@ -61,8 +61,8 @@
     {
       "shard": 1,
       "runSeed": 1001,
-      "started": "2026-09-28T01:02:30.811Z",
-      "finished": "2026-09-28T01:36:53.880Z",
+      "started": "2026-09-28T04:17:07.575Z",
+      "finished": "2026-09-28T04:58:08.658Z",
       "byOp": {
         "ModelManager.fromAst": {
           "ran": 32083,

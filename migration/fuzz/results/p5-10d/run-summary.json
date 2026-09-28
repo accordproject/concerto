@@ -7,9 +7,9 @@
   "commits": {
     "_about": "P5-10d (accordproject/concerto-rust#285): verification re-runs of the P5-10c plan (run-seeds 1001-1010, 100,000 cases each, batch 1000, 25 seeds per op) on the fixed engine, against the same pre-lazy control",
     "lazy": {
-      "concerto": "60169b6f48afd0f8054f3e93a38654b243ea96ab",
-      "concerto-rust": "f2c4ad99d1178ba0f833dbad5d2e5da4a5f83532",
-      "note": "P5-10d fix on the integration heads (concerto dafa53e9c, concerto-rust e7c0163); concerto-wasm/pkg built from concerto-rust f2c4ad9"
+      "concerto": "72ab01381288bf31b5ca0100e6a2122821348963",
+      "concerto-rust": "ed637c0ee598bcc8fe163463d0fc06721ef597d4",
+      "note": "P5-10d fixes (property $class f2c4ad9, map key and value $class ed637c0) on the integration heads (concerto dafa53e9c, concerto-rust 6d57140); concerto-wasm/pkg built from concerto-rust ed637c0"
     },
     "prelazy": {
       "concerto": "796669d5c1d391c5f40d246143e55150931dd926",
@@ -77,8 +77,8 @@
     {
       "shard": 1,
       "runSeed": 1001,
-      "started": "2026-09-28T01:02:30.807Z",
-      "finished": "2026-09-28T01:28:50.390Z",
+      "started": "2026-09-28T04:17:07.569Z",
+      "finished": "2026-09-28T04:49:31.641Z",
       "byOp": {
         "ModelManager.fromAst": {
           "ran": 32083,
@@ -133,8 +133,8 @@
     {
       "shard": 2,
       "runSeed": 1002,
-      "started": "2026-09-28T01:02:30.802Z",
-      "finished": "2026-09-28T01:28:45.690Z",
+      "started": "2026-09-28T04:17:07.563Z",
+      "finished": "2026-09-28T04:49:31.460Z",
       "byOp": {
         "ModelManager.fromAst": {
           "ran": 32069,
@@ -189,8 +189,8 @@
     {
       "shard": 3,
       "runSeed": 1003,
-      "started": "2026-09-28T01:02:30.821Z",
-      "finished": "2026-09-28T01:28:49.017Z",
+      "started": "2026-09-28T04:17:07.583Z",
+      "finished": "2026-09-28T04:49:35.268Z",
       "byOp": {
         "Resource.validate": {
           "ran": 26532,
@@ -245,8 +245,8 @@
     {
       "shard": 4,
       "runSeed": 1004,
-      "started": "2026-09-28T01:28:46.230Z",
-      "finished": "2026-09-28T01:58:55.395Z",
+      "started": "2026-09-28T04:17:07.582Z",
+      "finished": "2026-09-28T04:49:32.293Z",
       "byOp": {
         "ModelManager.fromAst": {
           "ran": 32374,
@@ -301,8 +301,8 @@
     {
       "shard": 5,
       "runSeed": 1005,
-      "started": "2026-09-28T01:28:49.533Z",
-      "finished": "2026-09-28T01:58:56.488Z",
+      "started": "2026-09-28T04:49:31.910Z",
+      "finished": "2026-09-28T05:16:21.834Z",
       "byOp": {
         "ModelManager.fromAst": {
           "ran": 32245,
@@ -357,8 +357,8 @@
     {
       "shard": 6,
       "runSeed": 1006,
-      "started": "2026-09-28T01:28:50.997Z",
-      "finished": "2026-09-28T01:59:00.571Z",
+      "started": "2026-09-28T04:49:32.098Z",
+      "finished": "2026-09-28T05:16:19.727Z",
       "byOp": {
         "Serializer.fromJSON": {
           "ran": 20816,
@@ -413,8 +413,8 @@
     {
       "shard": 7,
       "runSeed": 1007,
-      "started": "2026-09-28T01:58:55.802Z",
-      "finished": "2026-09-28T02:19:31.911Z",
+      "started": "2026-09-28T04:49:32.797Z",
+      "finished": "2026-09-28T05:16:25.586Z",
       "byOp": {
         "Serializer.fromJSON": {
           "ran": 20909,
@@ -469,8 +469,8 @@
     {
       "shard": 8,
       "runSeed": 1008,
-      "started": "2026-09-28T01:58:56.879Z",
-      "finished": "2026-09-28T02:19:27.919Z",
+      "started": "2026-09-28T04:49:35.994Z",
+      "finished": "2026-09-28T05:16:26.605Z",
       "byOp": {
         "ModelManager.fromAst": {
           "ran": 32242,
@@ -525,8 +525,8 @@
     {
       "shard": 9,
       "runSeed": 1009,
-      "started": "2026-09-28T01:59:01.047Z",
-      "finished": "2026-09-28T02:19:37.428Z",
+      "started": "2026-09-28T05:16:20.081Z",
+      "finished": "2026-09-28T05:30:33.020Z",
       "byOp": {
         "ModelManager.fromAst": {
           "ran": 32120,
@@ -581,8 +581,8 @@
     {
       "shard": 10,
       "runSeed": 1010,
-      "started": "2026-09-28T02:19:28.371Z",
-      "finished": "2026-09-28T02:31:33.542Z",
+      "started": "2026-09-28T05:16:22.267Z",
+      "finished": "2026-09-28T05:30:35.449Z",
       "byOp": {
         "ModelManager.fromAst": {
           "ran": 32115,
