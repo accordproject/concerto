@@ -73,13 +73,18 @@ the final report are all queries over.
   against the synthetic fixtures instead, for a repeatable check that
   the nine rules still work.
 
-- **`final-report.mjs [--out PATH]`**
+- **`final-report.mjs [--out PATH] [--rust-root PATH]`**
   Generates the end-of-migration markdown report (critical path,
   time lost to stuck periods, stuck-rule/escalation performance,
-  coverage curves, rework, cost, and data-derived candidate lessons)
-  from the same three inputs, plus a read-only glance at
-  `migration/queue.yaml` for the planned dependency order. It never
-  writes to `queue.yaml`.
+  coverage curves, rework, cost, a native-Rust-vs-TS-only feature-parity
+  table, and data-derived candidate lessons) from the same three inputs,
+  plus a read-only glance at `migration/queue.yaml` for the planned
+  dependency order. It never writes to `queue.yaml`. The feature-parity
+  table (P6-02, accordproject/concerto-rust#84) is read from
+  `docs/native-guide.md` in a concerto-rust checkout -- `--rust-root`
+  (default: a sibling `concerto-rust` checkout, as `migration/gate/run.mjs`
+  assumes) -- and the section is omitted with a note if that file or
+  section can't be found.
 
 - **`../dashboard/build.mjs [--out PATH]`**
   Builds `migration/dashboard/out/index.html`: a single self-contained

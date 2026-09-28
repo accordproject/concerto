@@ -4,7 +4,9 @@
 // Generates the end-of-migration markdown report (plan §5.1) from
 // events.jsonl, metrics.jsonl and runs/, plus a read-only look at
 // migration/queue.yaml for the planned dependency order (queue.yaml is
-// owned by another task; this script only reads it, never writes it).
+// owned by another task; this script only reads it, never writes it), and
+// (P6-02, accordproject/concerto-rust#84) a read-only look at concerto-rust's
+// docs/native-guide.md for the native-vs-TS-only feature-parity table.
 //
 // Sections (plan §5.1 "Final report"):
 //   - the actual critical path against the planned one
@@ -13,17 +15,27 @@
 //   - the coverage curves
 //   - rework: review rejections and regressions per phase
 //   - cost per task, phase and model
+//   - feature parity: native Rust vs TS-only (P6-02)
 //   - lessons learned
 //
 // Usage:
 //   node final-report.mjs [--events PATH] [--metrics PATH] [--runs-dir PATH]
-//        [--queue PATH] [--out PATH]
+//        [--queue PATH] [--rust-root PATH] [--out PATH]
+//
+// --rust-root defaults to a sibling `concerto-rust` checkout, matching
+// migration/gate/run.mjs's convention.
 //
 // Prints the report to stdout when --out is omitted.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { readJsonl, parseArgs, EVENTS_FILE, METRICS_FILE, RUNS_DIR, MIGRATION_ROOT } from './lib.mjs';
+
+const CONCERTO_ROOT = path.resolve(MIGRATION_ROOT, '..');
+// Sibling-checkout convention used elsewhere in migration/ (e.g.
+// migration/gate/run.mjs's --rust-root): concerto-rust is expected to be
+// checked out next to this concerto checkout unless overridden.
+const DEFAULT_RUST_ROOT = path.resolve(CONCERTO_ROOT, '..', 'concerto-rust');
 
 const TERMINAL = new Set(['merged', 'failed', 'blocked']);
 
@@ -114,7 +126,30 @@ function section(title) {
   return `\n## ${title}\n`;
 }
 
-function buildReport({ events, metricsRows, runsDir, queuePath }) {
+/** P6-02 (accordproject/concerto-rust#84), plan §5.1 / queue.yaml P6-02: pull
+ *  the "Feature-parity: native Rust vs TS-only" table out of concerto-rust's
+ *  docs/native-guide.md and fold it into the final report, rather than
+ *  re-deriving it here -- the guide is the source of truth for what D11
+ *  covers. Returns null if the guide (or that section of it) can't be found,
+ *  so the report degrades the same way its other sections do when their
+ *  source data is missing. */
+function readFeatureParityTable(guidePath) {
+  let text;
+  try {
+    text = fs.readFileSync(guidePath, 'utf8');
+  } catch {
+    return null;
+  }
+  const headingRe = /^##\s+Feature-parity:.*$/im;
+  const start = text.search(headingRe);
+  if (start === -1) return null;
+  const rest = text.slice(start);
+  const nextHeading = rest.slice(1).search(/^##\s+/m);
+  const section = nextHeading === -1 ? rest : rest.slice(0, nextHeading + 1);
+  return section.trim();
+}
+
+function buildReport({ events, metricsRows, runsDir, queuePath, rustRoot }) {
   const tasks = byTask(events);
   const generatedAt = new Date().toISOString();
   let md = `# Migration telemetry: final report\n\nGenerated ${generatedAt} from migration/telemetry/events.jsonl, metrics.jsonl and runs/.\n`;
@@ -275,6 +310,17 @@ function buildReport({ events, metricsRows, runsDir, queuePath }) {
     }
   }
 
+  // --- feature parity: native Rust vs TS-only (P6-02) ---
+  md += section('Feature parity: native Rust vs TS-only (P6-02)');
+  const guidePath = path.join(rustRoot, 'docs', 'native-guide.md');
+  const parityTable = readFeatureParityTable(guidePath);
+  if (parityTable) {
+    md += `Reproduced from \`docs/native-guide.md\` in the concerto-rust checkout at ${guidePath}:\n\n`;
+    md += parityTable + '\n';
+  } else {
+    md += `_Could not read the "Feature-parity: native Rust vs TS-only" section from ${guidePath}; pass --rust-root if concerto-rust is checked out somewhere other than a sibling of this concerto checkout._\n`;
+  }
+
   // --- lessons learned ---
   md += section('Lessons learned');
   const bullets = [];
@@ -351,17 +397,18 @@ function collectFailureSignatures(runsDir) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2), {
-    flags: ['events', 'metrics', 'runs-dir', 'queue', 'out'],
+    flags: ['events', 'metrics', 'runs-dir', 'queue', 'out', 'rust-root'],
   });
   const eventsFile = args.events ? path.resolve(args.events) : EVENTS_FILE;
   const metricsFile = args.metrics ? path.resolve(args.metrics) : METRICS_FILE;
   const runsDir = args['runs-dir'] ? path.resolve(args['runs-dir']) : RUNS_DIR;
   const queuePath = args.queue ? path.resolve(args.queue) : path.join(MIGRATION_ROOT, 'queue.yaml');
+  const rustRoot = args['rust-root'] ? path.resolve(args['rust-root']) : DEFAULT_RUST_ROOT;
 
   const events = readJsonl(eventsFile);
   const metricsRows = readJsonl(metricsFile);
 
-  const md = buildReport({ events, metricsRows, runsDir, queuePath });
+  const md = buildReport({ events, metricsRows, runsDir, queuePath, rustRoot });
 
   if (args.out) {
     fs.mkdirSync(path.dirname(path.resolve(args.out)), { recursive: true });
