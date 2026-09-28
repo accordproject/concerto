@@ -1,0 +1,3164 @@
+{
+  "totalDivergences": 5685,
+  "excludedAsExpected": 0,
+  "clusterCount": 88,
+  "clusters": [
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"model '…' must be an array \"",
+      "op": "ModelManager.fromAst",
+      "count": 379,
+      "byShard": {
+        "1": 38,
+        "2": 38,
+        "3": 45,
+        "4": 41,
+        "5": 30,
+        "6": 41,
+        "7": 43,
+        "8": 25,
+        "9": 37,
+        "10": 41
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 3760268293,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "model 'declarations' must be an array "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: sequence, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 363,
+      "byShard": {
+        "1": 38,
+        "2": 35,
+        "3": 35,
+        "4": 40,
+        "5": 35,
+        "6": 38,
+        "7": 34,
+        "8": 33,
+        "9": 33,
+        "10": 42
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2906765118,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: sequence, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: string \"…\", expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 326,
+      "byShard": {
+        "1": 35,
+        "2": 46,
+        "3": 34,
+        "4": 27,
+        "5": 29,
+        "6": 33,
+        "7": 23,
+        "8": 36,
+        "9": 29,
+        "10": 34
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1509157295,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: string \"undefined\", expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: sequence, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 290,
+      "byShard": {
+        "1": 29,
+        "2": 27,
+        "3": 19,
+        "4": 35,
+        "5": 26,
+        "6": 26,
+        "7": 30,
+        "8": 34,
+        "9": 40,
+        "10": 24
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 26,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: sequence, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: boolean `true`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 290,
+      "byShard": {
+        "1": 33,
+        "2": 28,
+        "3": 29,
+        "4": 34,
+        "5": 25,
+        "6": 30,
+        "7": 33,
+        "8": 34,
+        "9": 18,
+        "10": 26
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 4261615990,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: boolean `true`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: string \"…\", expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 273,
+      "byShard": {
+        "1": 32,
+        "2": 17,
+        "3": 23,
+        "4": 34,
+        "5": 24,
+        "6": 29,
+        "7": 31,
+        "8": 25,
+        "9": 28,
+        "10": 30
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 4284981982,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: string \"__proto__\", expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: sequence, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 266,
+      "byShard": {
+        "1": 30,
+        "2": 30,
+        "3": 26,
+        "4": 22,
+        "5": 27,
+        "6": 24,
+        "7": 24,
+        "8": 27,
+        "9": 27,
+        "10": 29
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2860778937,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: sequence, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: integer `<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 247,
+      "byShard": {
+        "1": 21,
+        "2": 16,
+        "3": 23,
+        "4": 31,
+        "5": 30,
+        "6": 17,
+        "7": 31,
+        "8": 25,
+        "9": 28,
+        "10": 25
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 10,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: integer `9007199254740992`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: boolean `true`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 246,
+      "byShard": {
+        "1": 25,
+        "2": 26,
+        "3": 27,
+        "4": 21,
+        "5": 20,
+        "6": 24,
+        "7": 25,
+        "8": 25,
+        "9": 25,
+        "10": 28
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 1,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: boolean `true`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: string \"…\", expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 239,
+      "byShard": {
+        "1": 27,
+        "2": 25,
+        "3": 24,
+        "4": 28,
+        "5": 24,
+        "6": 21,
+        "7": 21,
+        "8": 22,
+        "9": 23,
+        "10": 24
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2169459965,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: string \"../../etc\", expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: sequence, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 237,
+      "byShard": {
+        "1": 27,
+        "2": 21,
+        "3": 26,
+        "4": 30,
+        "5": 26,
+        "6": 30,
+        "7": 27,
+        "8": 18,
+        "9": 15,
+        "10": 17
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 2194999251,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: sequence, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: missing field `$class` \"",
+      "op": "ModelManager.fromAst",
+      "count": 231,
+      "byShard": {
+        "1": 24,
+        "2": 19,
+        "3": 24,
+        "4": 26,
+        "5": 28,
+        "6": 22,
+        "7": 32,
+        "8": 22,
+        "9": 12,
+        "10": 22
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 6,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: missing field `$class` "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: boolean `true`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 215,
+      "byShard": {
+        "1": 21,
+        "2": 23,
+        "3": 21,
+        "4": 24,
+        "5": 16,
+        "6": 31,
+        "7": 15,
+        "8": 23,
+        "9": 18,
+        "10": 23
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 21,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: boolean `true`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: null, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 194,
+      "byShard": {
+        "1": 16,
+        "2": 29,
+        "3": 29,
+        "4": 15,
+        "5": 24,
+        "6": 11,
+        "7": 18,
+        "8": 14,
+        "9": 19,
+        "10": 19
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 4294967285,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: null, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: sequence, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 185,
+      "byShard": {
+        "1": 16,
+        "2": 20,
+        "3": 20,
+        "4": 16,
+        "5": 22,
+        "6": 13,
+        "7": 20,
+        "8": 16,
+        "9": 20,
+        "10": 22
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2897676794,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: sequence, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: sequence, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 175,
+      "byShard": {
+        "1": 11,
+        "2": 19,
+        "3": 20,
+        "4": 21,
+        "5": 15,
+        "6": 15,
+        "7": 17,
+        "8": 18,
+        "9": 15,
+        "10": 24
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 3704168199,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: sequence, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: integer `<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 93,
+      "byShard": {
+        "1": 6,
+        "2": 11,
+        "3": 6,
+        "4": 14,
+        "5": 5,
+        "6": 11,
+        "7": 7,
+        "8": 15,
+        "9": 12,
+        "10": 6
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 2751547257,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: integer `9007199254740991`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: null, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 91,
+      "byShard": {
+        "1": 8,
+        "2": 13,
+        "3": 5,
+        "4": 6,
+        "5": 11,
+        "6": 8,
+        "7": 6,
+        "8": 10,
+        "9": 11,
+        "10": 13
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 3914137389,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: null, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: integer `<n>`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 83,
+      "byShard": {
+        "1": 11,
+        "2": 3,
+        "3": 8,
+        "4": 10,
+        "5": 11,
+        "6": 10,
+        "7": 10,
+        "8": 6,
+        "9": 10,
+        "10": 4
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 1666212167,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: integer `1`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: boolean `true`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 81,
+      "byShard": {
+        "1": 13,
+        "2": 9,
+        "3": 8,
+        "4": 7,
+        "5": 6,
+        "6": 8,
+        "7": 9,
+        "8": 10,
+        "9": 5,
+        "10": 6
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1919673587,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: boolean `true`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: integer `<n>`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 74,
+      "byShard": {
+        "1": 5,
+        "2": 6,
+        "3": 12,
+        "4": 9,
+        "5": 7,
+        "6": 6,
+        "7": 5,
+        "8": 7,
+        "9": 10,
+        "10": 7
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 4246822229,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: integer `9007199254740992`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: sequence, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 74,
+      "byShard": {
+        "1": 6,
+        "2": 6,
+        "3": 7,
+        "4": 7,
+        "5": 10,
+        "6": 5,
+        "7": 7,
+        "8": 7,
+        "9": 12,
+        "10": 7
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 3728467325,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: sequence, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: integer `<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 72,
+      "byShard": {
+        "1": 6,
+        "2": 10,
+        "3": 9,
+        "4": 7,
+        "5": 7,
+        "6": 8,
+        "7": 4,
+        "8": 8,
+        "9": 8,
+        "10": 5
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 3709370524,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: integer `0`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: integer `-<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 57,
+      "byShard": {
+        "1": 5,
+        "2": 4,
+        "3": 6,
+        "4": 10,
+        "5": 3,
+        "6": 6,
+        "7": 7,
+        "8": 2,
+        "9": 7,
+        "10": 7
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 3381943587,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: integer `-9007199254740991`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: null, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 57,
+      "byShard": {
+        "1": 5,
+        "2": 5,
+        "3": 1,
+        "4": 6,
+        "5": 11,
+        "6": 10,
+        "7": 6,
+        "8": 5,
+        "9": 5,
+        "10": 3
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 606418228,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: null, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: null, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 54,
+      "byShard": {
+        "1": 4,
+        "2": 7,
+        "3": 3,
+        "4": 8,
+        "5": 5,
+        "6": 3,
+        "7": 6,
+        "8": 11,
+        "9": 4,
+        "10": 3
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1611018561,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: null, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: integer `-<n>`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 52,
+      "byShard": {
+        "1": 3,
+        "2": 8,
+        "3": 4,
+        "4": 4,
+        "5": 4,
+        "6": 3,
+        "7": 5,
+        "8": 4,
+        "9": 10,
+        "10": 7
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1613428478,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: integer `-9007199254740991`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: integer `-<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 51,
+      "byShard": {
+        "1": 5,
+        "2": 7,
+        "3": 5,
+        "4": 2,
+        "5": 4,
+        "6": 7,
+        "7": 2,
+        "8": 8,
+        "9": 2,
+        "10": 9
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 728918093,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: integer `-1`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: map, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 49,
+      "byShard": {
+        "1": 9,
+        "2": 5,
+        "3": 4,
+        "4": 1,
+        "6": 6,
+        "7": 4,
+        "8": 6,
+        "9": 9,
+        "10": 5
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1095293616,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: map, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: integer `-<n>`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 37,
+      "byShard": {
+        "1": 6,
+        "2": 2,
+        "3": 4,
+        "4": 6,
+        "5": 4,
+        "6": 3,
+        "7": 3,
+        "8": 3,
+        "9": 5,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 2762557400,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: integer `-9007199254740992`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: map, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 34,
+      "byShard": {
+        "1": 2,
+        "2": 5,
+        "3": 1,
+        "4": 4,
+        "5": 3,
+        "6": 8,
+        "7": 1,
+        "8": 3,
+        "9": 2,
+        "10": 5
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1337183165,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: map, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: integer `-<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 33,
+      "byShard": {
+        "1": 2,
+        "2": 3,
+        "3": 8,
+        "4": 2,
+        "5": 2,
+        "6": 2,
+        "7": 2,
+        "8": 3,
+        "9": 3,
+        "10": 6
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 3191267425,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: integer `-9007199254740991`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: map, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 30,
+      "byShard": {
+        "1": 5,
+        "3": 3,
+        "4": 7,
+        "5": 5,
+        "6": 2,
+        "7": 2,
+        "8": 2,
+        "9": 3,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 3233454881,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: map, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: floating point `<n>.<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 30,
+      "byShard": {
+        "1": 1,
+        "2": 2,
+        "3": 2,
+        "4": 2,
+        "5": 4,
+        "6": 5,
+        "7": 3,
+        "8": 3,
+        "9": 3,
+        "10": 5
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 3282481243,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: floating point `0.1`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: floating point `1e+<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 29,
+      "byShard": {
+        "1": 3,
+        "2": 3,
+        "3": 2,
+        "4": 3,
+        "5": 4,
+        "6": 3,
+        "7": 1,
+        "8": 3,
+        "9": 4,
+        "10": 3
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 690187061,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: floating point `1e+308`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: floating point `1e+<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 28,
+      "byShard": {
+        "1": 4,
+        "2": 5,
+        "3": 1,
+        "4": 3,
+        "5": 1,
+        "6": 2,
+        "7": 3,
+        "8": 3,
+        "9": 4,
+        "10": 2
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 2871629217,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: floating point `1e+308`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: map, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 26,
+      "byShard": {
+        "1": 2,
+        "2": 2,
+        "4": 1,
+        "5": 1,
+        "6": 4,
+        "7": 5,
+        "8": 4,
+        "9": 4,
+        "10": 3
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1697017755,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: map, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: integer `<n>`, expected struct TypeIdentifier \"",
+      "op": "ModelManager.fromAst",
+      "count": 24,
+      "byShard": {
+        "2": 2,
+        "3": 2,
+        "4": 3,
+        "5": 1,
+        "7": 8,
+        "8": 2,
+        "9": 3,
+        "10": 3
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2391307889,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: integer `0`, expected struct TypeIdentifier "
+          }
+        },
+        "shard": 2,
+        "runSeed": 1002
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: floating point `-<n>.<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 22,
+      "byShard": {
+        "1": 2,
+        "2": 3,
+        "4": 2,
+        "5": 6,
+        "7": 1,
+        "8": 4,
+        "9": 1,
+        "10": 3
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 1897945723,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: floating point `-0.1`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: boolean `false`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 21,
+      "byShard": {
+        "1": 4,
+        "3": 2,
+        "4": 4,
+        "5": 2,
+        "6": 2,
+        "7": 3,
+        "9": 2,
+        "10": 2
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 638967060,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: boolean `false`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: floating point `-<n>.<n>`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 21,
+      "byShard": {
+        "1": 1,
+        "2": 4,
+        "3": 1,
+        "4": 4,
+        "5": 1,
+        "6": 1,
+        "7": 5,
+        "8": 3,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 1514519865,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: floating point `-0.1`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: map, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 21,
+      "byShard": {
+        "1": 4,
+        "2": 1,
+        "3": 1,
+        "4": 2,
+        "5": 1,
+        "6": 3,
+        "7": 2,
+        "8": 2,
+        "9": 2,
+        "10": 3
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 3042259355,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: map, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: floating point `<n>.<n>`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 20,
+      "byShard": {
+        "1": 2,
+        "2": 1,
+        "3": 3,
+        "4": 2,
+        "5": 1,
+        "6": 2,
+        "7": 3,
+        "8": 1,
+        "9": 4,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 1866765908,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: floating point `0.1`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: floating point `<n>.<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 20,
+      "byShard": {
+        "1": 4,
+        "2": 2,
+        "3": 2,
+        "5": 1,
+        "6": 2,
+        "7": 3,
+        "9": 3,
+        "10": 3
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 2160681059,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: floating point `0.1`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: floating point `1e+<n>`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 17,
+      "byShard": {
+        "1": 3,
+        "2": 2,
+        "4": 2,
+        "5": 1,
+        "6": 2,
+        "7": 1,
+        "8": 2,
+        "9": 1,
+        "10": 3
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 516560631,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: floating point `1e+308`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: floating point `-<n>.<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 16,
+      "byShard": {
+        "1": 3,
+        "2": 1,
+        "4": 4,
+        "5": 1,
+        "7": 1,
+        "8": 2,
+        "9": 2,
+        "10": 2
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 1308618388,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: floating point `-0.1`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid DoubleProperty: invalid type: floating point `-<n>.<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 16,
+      "byShard": {
+        "1": 2,
+        "3": 2,
+        "4": 2,
+        "5": 1,
+        "6": 3,
+        "7": 1,
+        "8": 2,
+        "9": 1,
+        "10": 2
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1044466033,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: floating point `-0.1`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: floating point `1e+<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 16,
+      "byShard": {
+        "1": 1,
+        "2": 2,
+        "3": 1,
+        "4": 1,
+        "5": 2,
+        "6": 1,
+        "7": 3,
+        "8": 1,
+        "9": 2,
+        "10": 2
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 1129467023,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: floating point `1e+308`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: sequence, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 15,
+      "byShard": {
+        "1": 1,
+        "2": 2,
+        "3": 2,
+        "4": 2,
+        "5": 1,
+        "6": 1,
+        "7": 1,
+        "8": 3,
+        "9": 2
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 2062776052,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: sequence, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: floating point `1e+<n>`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 14,
+      "byShard": {
+        "1": 1,
+        "2": 1,
+        "4": 1,
+        "6": 3,
+        "8": 4,
+        "9": 3,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 3786458281,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: floating point `1e+308`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid StringProperty: invalid type: floating point `<n>.<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 14,
+      "byShard": {
+        "1": 4,
+        "2": 3,
+        "4": 1,
+        "5": 1,
+        "6": 1,
+        "7": 2,
+        "9": 1,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 3292523450,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: floating point `0.1`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: floating point `<n>.<n>`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 13,
+      "byShard": {
+        "1": 1,
+        "2": 2,
+        "3": 1,
+        "4": 3,
+        "5": 2,
+        "6": 3,
+        "9": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2932695931,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: floating point `0.1`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: floating point `-<n>.<n>`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 12,
+      "byShard": {
+        "1": 1,
+        "2": 1,
+        "3": 2,
+        "5": 1,
+        "6": 2,
+        "7": 1,
+        "9": 2,
+        "10": 2
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 236371501,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: floating point `-0.1`, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: string \"…\", expected struct TypeIdentifier \"",
+      "op": "ModelManager.fromAst",
+      "count": 11,
+      "byShard": {
+        "2": 3,
+        "4": 2,
+        "5": 2,
+        "8": 2,
+        "9": 1,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 4261138355,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: string \"\", expected struct TypeIdentifier "
+          }
+        },
+        "shard": 2,
+        "runSeed": 1002
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"invalid ConceptDeclaration: invalid type: boolean `false`, expected struct TypeIdentifier \"",
+      "op": "ModelManager.fromAst",
+      "count": 10,
+      "byShard": {
+        "1": 2,
+        "2": 1,
+        "3": 1,
+        "6": 1,
+        "7": 2,
+        "8": 1,
+        "9": 2
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2677213769,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: boolean `false`, expected struct TypeIdentifier "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"model '…' must be an array \"",
+      "op": "ModelManager.fromAst",
+      "count": 9,
+      "byShard": {
+        "1": 2,
+        "4": 2,
+        "6": 3,
+        "8": 1,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 4053929942,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "model 'imports' must be an array "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(Error) | rust=error(IllegalModelException) | ts:\"Invalid namespace org.vehicle@<n>.<n>.<n>.<n>\" | rust:\"ImportType missing '…' \"",
+      "op": "ModelManager.fromAst",
+      "count": 8,
+      "byShard": {
+        "3": 1,
+        "4": 2,
+        "5": 1,
+        "6": 1,
+        "7": 1,
+        "9": 1,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 3211389533,
+        "ts": {
+          "error": {
+            "class": "Error",
+            "component": null,
+            "location": null,
+            "message": "Invalid namespace org.vehicle@1.0.0.0"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "ImportType missing 'name' "
+          }
+        },
+        "shard": 3,
+        "runSeed": 1003
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: string \"…\", expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 6,
+      "byShard": {
+        "2": 1,
+        "5": 2,
+        "6": 1,
+        "8": 1,
+        "9": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 2797404742,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: string \"__proto__\", expected a boolean "
+          }
+        },
+        "shard": 2,
+        "runSeed": 1002
+      }
+    },
+    {
+      "sig": "Serializer.fromJSON | ts=ok | rust=error(ValidationException) | rust:\"Expected value at path `$.t` to be of type `DateTime`\"",
+      "op": "Serializer.fromJSON",
+      "count": 6,
+      "byShard": {
+        "8": 1,
+        "9": 3,
+        "10": 2
+      },
+      "sample": {
+        "op": "Serializer.fromJSON",
+        "seedFile": "data/Serializer.fromJSON/024a285d00093fff73ca0e8d.json",
+        "mutationSeed": 927039764,
+        "ts": {
+          "ok": {
+            "@@oracle": "typed",
+            "ctor": "ValidatedResource",
+            "fields": {
+              "t": {
+                "@@oracle": "dayjs",
+                "iso": "2000-01-01T00:00:00.000Z",
+                "offset": 0,
+                "utc": true,
+                "valid": true
+              }
+            },
+            "fqn": "org.test@1.0.0.C",
+            "id": {
+              "@@oracle": "undefined"
+            },
+            "ns": "org.test@1.0.0",
+            "timestamp": null,
+            "type": "C"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "ValidationException",
+            "component": "@accordproject/concerto-util",
+            "location": null,
+            "message": "Expected value at path `$.t` to be of type `DateTime`"
+          }
+        },
+        "shard": 8,
+        "runSeed": 1008
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(Error) | rust=error(IllegalModelException) | ts:\"Invalid namespace org.vehicle@<n>.<n>.<n>.-<n>\" | rust:\"ImportType missing '…' \"",
+      "op": "ModelManager.fromAst",
+      "count": 5,
+      "byShard": {
+        "3": 1,
+        "4": 1,
+        "5": 2,
+        "7": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 3933765948,
+        "ts": {
+          "error": {
+            "class": "Error",
+            "component": null,
+            "location": null,
+            "message": "Invalid namespace org.vehicle@1.0.0.-0"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "ImportType missing 'name' "
+          }
+        },
+        "shard": 3,
+        "runSeed": 1003
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"Namespace is not defined for type \"…\". \"",
+      "op": "ModelManager.fromAst",
+      "count": 5,
+      "byShard": {
+        "1": 1,
+        "5": 2,
+        "8": 1,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1799598348,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "Namespace is not defined for type \"org.vehicle@1.0.0.Vehicle\". "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid DoubleProperty: invalid type: boolean `true`, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 4,
+      "byShard": {
+        "4": 3,
+        "8": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 4062177513,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: boolean `true`, expected a string "
+          }
+        },
+        "shard": 4,
+        "runSeed": 1004
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"ImportType missing '…' \"",
+      "op": "ModelManager.fromAst",
+      "count": 3,
+      "byShard": {
+        "4": 1,
+        "8": 1,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 1238328606,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "ImportType missing 'name' "
+          }
+        },
+        "shard": 4,
+        "runSeed": 1004
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: null, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 3,
+      "byShard": {
+        "7": 1,
+        "9": 2
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2093242842,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: null, expected a boolean "
+          }
+        },
+        "shard": 7,
+        "runSeed": 1007
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: missing field `$class` \"",
+      "op": "ModelManager.fromAst",
+      "count": 3,
+      "byShard": {
+        "1": 1,
+        "4": 1,
+        "9": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2880435829,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: missing field `$class` "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid DoubleProperty: invalid type: sequence, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 3,
+      "byShard": {
+        "1": 1,
+        "5": 1,
+        "9": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2986165552,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: sequence, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid StringProperty: invalid type: string \"…\", expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 3,
+      "byShard": {
+        "1": 1,
+        "2": 1,
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 4202092271,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: string \"\", expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=ok | rust=error(IllegalModelException) | rust:\"ImportType missing '…' \"",
+      "op": "ModelManager.fromAst",
+      "count": 3,
+      "byShard": {
+        "4": 1,
+        "5": 1,
+        "6": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2960255952,
+        "ts": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "ImportType missing 'name' "
+          }
+        },
+        "shard": 4,
+        "runSeed": 1004
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(Error) | rust=error(IllegalModelException) | ts:\"Invalid namespace org.vehicle@<n>.<n>.<n>.-<n>\" | rust:\"model '…' must be an array \"",
+      "op": "ModelManager.fromAst",
+      "count": 2,
+      "byShard": {
+        "7": 1,
+        "9": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 2858311531,
+        "ts": {
+          "error": {
+            "class": "Error",
+            "component": null,
+            "location": null,
+            "message": "Invalid namespace org.vehicle@1.0.0.-0"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "model 'declarations' must be an array "
+          }
+        },
+        "shard": 7,
+        "runSeed": 1007
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: floating point `1e+<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 2,
+      "byShard": {
+        "3": 1,
+        "7": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 807271602,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: floating point `1e+308`, expected a boolean "
+          }
+        },
+        "shard": 3,
+        "runSeed": 1003
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: integer `<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 2,
+      "byShard": {
+        "2": 1,
+        "7": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1612517422,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: integer `0`, expected a boolean "
+          }
+        },
+        "shard": 2,
+        "runSeed": 1002
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: map, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 2,
+      "byShard": {
+        "4": 1,
+        "6": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1750600465,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: map, expected a boolean "
+          }
+        },
+        "shard": 4,
+        "runSeed": 1004
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid DoubleProperty: invalid type: string \"…\", expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 2,
+      "byShard": {
+        "2": 1,
+        "3": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 393702849,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: string \"constructor\", expected a boolean "
+          }
+        },
+        "shard": 2,
+        "runSeed": 1002
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid StringProperty: invalid type: map, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 2,
+      "byShard": {
+        "4": 1,
+        "7": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 3426515918,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: map, expected a boolean "
+          }
+        },
+        "shard": 4,
+        "runSeed": 1004
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid StringProperty: invalid type: null, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 2,
+      "byShard": {
+        "2": 1,
+        "5": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 4232557448,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: null, expected a boolean "
+          }
+        },
+        "shard": 2,
+        "runSeed": 1002
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid StringProperty: invalid type: sequence, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 2,
+      "byShard": {
+        "8": 1,
+        "9": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 3535728028,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: sequence, expected a boolean "
+          }
+        },
+        "shard": 8,
+        "runSeed": 1008
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid StringProperty: invalid type: sequence, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 2,
+      "byShard": {
+        "2": 1,
+        "6": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 3376246433,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: sequence, expected a string "
+          }
+        },
+        "shard": 2,
+        "runSeed": 1002
+      }
+    },
+    {
+      "sig": "Serializer.fromJSON | ts=ok | rust=error(ValidationException) | rust:\"Expected value at path `$.dateTimeValue` to be of type `DateTime`\"",
+      "op": "Serializer.fromJSON",
+      "count": 2,
+      "byShard": {
+        "5": 1,
+        "6": 1
+      },
+      "sample": {
+        "op": "Serializer.fromJSON",
+        "seedFile": "data/Serializer.fromJSON/01a89fc055ceeb10d7f8f93c.json",
+        "mutationSeed": 709475590,
+        "ts": {
+          "ok": {
+            "@@oracle": "typed",
+            "ctor": "ValidatedResource",
+            "fields": {
+              "booleanValue": false,
+              "conceptValue": {
+                "@@oracle": "typed",
+                "ctor": "ValidatedResource",
+                "fields": {
+                  "description": "Elit tempor magna.",
+                  "sku": "Nisi."
+                },
+                "fqn": "org.accordproject.test@1.0.0.Product",
+                "id": {
+                  "@@oracle": "undefined"
+                },
+                "ns": "org.accordproject.test@1.0.0",
+                "timestamp": null,
+                "type": "Product"
+              },
+              "dateTimeValue": {
+                "@@oracle": "dayjs",
+                "iso": "2000-01-01T00:00:00.000Z",
+                "offset": 0,
+                "utc": true,
+                "valid": true
+              },
+              "departmentArrayValue": [
+                "ACCOUNTS"
+              ],
+              "departmentValue": "SALES",
+              "doubleValue": 76.292,
+              "integerValue": 50910,
+              "longValue": 1562183176,
+              "relationshipArrayValue": [],
+              "relationshipValue": {
+                "@@oracle": "typed",
+                "ctor": "Relationship",
+                "fields": {
+                  "$class": "Relationship",
+                  "ssn": "4137"
+                },
+                "fqn": "org.accordproject.test@1.0.0.Employee",
+                "id": "4137",
+                "ns": "org.accordproject.test@1.0.0",
+                "timestamp": {
+                  "@@oracle": "undefined"
+                },
+                "type": "Employee"
+              },
+              "stringArrayValue": [
+                "Nostrud sit magna amet."
+              ],
+              "stringValue": "Veniam."
+            },
+            "fqn": "org.accordproject.test@1.0.0.Types",
+            "id": {
+              "@@oracle": "undefined"
+            },
+            "ns": "org.accordproject.test@1.0.0",
+            "timestamp": null,
+            "type": "Types"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "ValidationException",
+            "component": "@accordproject/concerto-util",
+            "location": null,
+            "message": "Expected value at path `$.dateTimeValue` to be of type `DateTime`"
+          }
+        },
+        "shard": 5,
+        "runSeed": 1005
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(Error) | rust=error(IllegalModelException) | ts:\"Invalid namespace org.vehicle@<n>.<n>.<n>.-<n>\" | rust:\"invalid ConceptDeclaration: invalid type: string \"…\", expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 1,
+      "byShard": {
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 1247553164,
+        "ts": {
+          "error": {
+            "class": "Error",
+            "component": null,
+            "location": null,
+            "message": "Invalid namespace org.vehicle@1.0.0.-0"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: string \"NaN\", expected a boolean "
+          }
+        },
+        "shard": 10,
+        "runSeed": 1010
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(Error) | rust=error(IllegalModelException) | ts:\"Invalid namespace org.vehicle@<n>.<n>.<n>.-<n>\" | rust:\"invalid DoubleProperty: invalid type: integer `<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 1,
+      "byShard": {
+        "10": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 6947828,
+        "ts": {
+          "error": {
+            "class": "Error",
+            "component": null,
+            "location": null,
+            "message": "Invalid namespace org.vehicle@1.0.0.-0"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: integer `0`, expected a boolean "
+          }
+        },
+        "shard": 10,
+        "runSeed": 1010
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(Error) | rust=error(IllegalModelException) | ts:\"Invalid namespace org.vehicle@<n>.<n>.<n>.-<n>\" | rust:\"invalid StringProperty: invalid type: string \"…\", expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 1,
+      "byShard": {
+        "2": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1683561545,
+        "ts": {
+          "error": {
+            "class": "Error",
+            "component": null,
+            "location": null,
+            "message": "Invalid namespace org.vehicle@1.0.0.-0"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: string \"-0\", expected a boolean "
+          }
+        },
+        "shard": 2,
+        "runSeed": 1002
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(Error) | rust=error(IllegalModelException) | ts:\"Invalid namespace org.vehicle@<n>.<n>.<n>.Vehicle../.\" | rust:\"invalid StringProperty: invalid type: floating point `1e+<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 1,
+      "byShard": {
+        "6": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1370190436,
+        "ts": {
+          "error": {
+            "class": "Error",
+            "component": null,
+            "location": null,
+            "message": "Invalid namespace org.vehicle@1.0.0.Vehicle../."
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: floating point `1e+308`, expected a boolean "
+          }
+        },
+        "shard": 6,
+        "runSeed": 1006
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(IllegalModelException) | rust=ok | ts:\"Could not find super type undefined \"",
+      "op": "ModelManager.fromAst",
+      "count": 1,
+      "byShard": {
+        "3": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 333199039,
+        "ts": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "Could not find super type undefined "
+          }
+        },
+        "rust": {
+          "ok": {
+            "@@oracle": "undefined"
+          }
+        },
+        "shard": 3,
+        "runSeed": 1003
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"Namespace is not defined for type \"…\". \"",
+      "op": "ModelManager.fromAst",
+      "count": 1,
+      "byShard": {
+        "9": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 2214131345,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "Namespace is not defined for type \"org.vehicle@1.0.0.Vehicle\". "
+          }
+        },
+        "shard": 9,
+        "runSeed": 1009
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: integer `-<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 1,
+      "byShard": {
+        "7": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 1455077165,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: integer `-1`, expected a boolean "
+          }
+        },
+        "shard": 7,
+        "runSeed": 1007
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid ConceptDeclaration: invalid type: null, expected a string \"",
+      "op": "ModelManager.fromAst",
+      "count": 1,
+      "byShard": {
+        "1": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/8335247dee104b114d18afa8.json",
+        "mutationSeed": 1485402691,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid ConceptDeclaration: invalid type: null, expected a string "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid DoubleProperty: invalid type: floating point `<n>.<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 1,
+      "byShard": {
+        "1": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 772510135,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid DoubleProperty: invalid type: floating point `0.1`, expected a boolean "
+          }
+        },
+        "shard": 1,
+        "runSeed": 1001
+      }
+    },
+    {
+      "sig": "ModelManager.fromAst | ts=error(TypeError) | rust=error(IllegalModelException) | ts:\"type.startsWith is not a function\" | rust:\"invalid StringProperty: invalid type: integer `-<n>`, expected a boolean \"",
+      "op": "ModelManager.fromAst",
+      "count": 1,
+      "byShard": {
+        "5": 1
+      },
+      "sample": {
+        "op": "ModelManager.fromAst",
+        "seedFile": "data/ModelManager.fromAst/6287c8da05a81a766dd6845b.json",
+        "mutationSeed": 940501269,
+        "ts": {
+          "error": {
+            "class": "TypeError",
+            "component": null,
+            "location": null,
+            "message": "type.startsWith is not a function"
+          }
+        },
+        "rust": {
+          "error": {
+            "class": "IllegalModelException",
+            "component": "@accordproject/concerto-core",
+            "location": null,
+            "message": "invalid StringProperty: invalid type: integer `-1`, expected a boolean "
+          }
+        },
+        "shard": 5,
+        "runSeed": 1005
+      }
+    }
+  ]
+}
