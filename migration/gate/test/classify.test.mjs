@@ -140,6 +140,20 @@ test('core_suite_rust: non-zero exit with no failing tests → unexpected', () =
   assert.equal(classifyStep('core_suite_rust', { ok: false, exit: 1, stats: { failures: 0 }, failures: [] }).verdict, 'unexpected');
 });
 
+// accordproject/concerto-rust#262: a swallowed engine error that re-ran a TS
+// body fails the step even when every test passed, and is never folded into
+// the known network failure's expected-pending set.
+test('core_suite_rust: rustHandle fallback lines → unexpected', () => {
+  const sample = ['concerto:BaseModelManager resolveType rustHandle.resolveType failed, falling back to the TS body'];
+  const clean = { ...rustStep([]), ok: false, unexpected_fallbacks: 1, unexpected_fallback_sample: sample };
+  const c = classifyStep('core_suite_rust', clean);
+  assert.equal(c.verdict, 'unexpected');
+  assert.equal(c.items.length, 1);
+  assert.match(c.items[0].reason, /falling back/);
+  const withNetwork = { ...rustStep([NETWORK_FAILURE]), ok: false, unexpected_fallbacks: 3, unexpected_fallback_sample: sample };
+  assert.equal(classifyStep('core_suite_rust', withNetwork).verdict, 'unexpected');
+});
+
 test('core_suite_rust: failure matched on title but a different file → unexpected', () => {
   const c = classifyTestFailure({ ...NETWORK_FAILURE, file: 'other.js' });
   assert.equal(c.verdict, 'unexpected');

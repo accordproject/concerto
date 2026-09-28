@@ -218,12 +218,12 @@ class BaseModelManager {
             // it in rustHandle.
             /* istanbul ignore next */
             if (this.rustHandle.modelFileId(MetaModelNamespace) === undefined) {
-                this._mirrorWrite(() => this.rustHandle.addModelWithDefinitions(
+                this.rustHandle.addModelWithDefinitions(
                     JSON.stringify(this.metamodelModelFile.getAst()),
                     this.metamodelModelFile.getDefinitions() ?? undefined,
                     this.metamodelModelFile.getName() ?? undefined,
                     false,
-                ));
+                );
             }
         }
     }
@@ -330,27 +330,24 @@ class BaseModelManager {
     }
 
     /**
-     * Runs a rustHandle mirror write, swallowing any error it throws: a stub
-     * `ModelFile` a white-box test builds with `sinon.createStubInstance`
-     * answers `getAst()`/`getDefinitions()` with whatever that test
-     * configured, often not a real AST, so mirroring it can fail even
-     * though the TS-side write above already succeeded and must not be
-     * undone by this best-effort cache sync. Unlike the P4-08 original, this
-     * carries no state across calls: `_rustHandleMatchesModelFiles` checks
-     * `rustHandle`'s namespaces against `this.modelFiles` afresh on every
-     * read instead of trusting a remembered flag, so one swallowed failure
-     * cannot silently poison every later read this manager ever answers.
-     * @param {Function} fn - the mirror write to run
+     * Whether a model file is mirrored into `rustHandle`: every model file
+     * built by the ModelFile constructor, and so through the engine path
+     * (engine/views.ts `isEngineBuilt`). A stub `ModelFile` the constructor
+     * never ran for (a white-box test's `sinon.createStubInstance(ModelFile)`, whose
+     * `getAst()`/`getDefinitions()` answer whatever that test configured) is
+     * the one exception: it is never written to `rustHandle`, so its
+     * namespace is missing there and `_rustHandleMatchesModelFiles` sends
+     * reads to the TS body. That is the only case the TS body still serves.
+     * Every mirror write for an engine-built file runs unguarded: its error
+     * propagates with its exception class (accordproject/concerto-rust#262).
+     * @param {ModelFile} modelFile - the model file
+     * @return {boolean} true if `modelFile` is mirrored into rustHandle
      * @private
      * @internal
      */
     /* istanbul ignore next */
-    _mirrorWrite(fn) {
-        try {
-            fn();
-        } catch (e) {
-            debug('_mirrorWrite', 'rustHandle mirror failed, continuing on the TS-only state', e);
-        }
+    _isMirrored(modelFile) {
+        return engineViews().isEngineBuilt(modelFile);
     }
 
     /**
@@ -358,7 +355,8 @@ class BaseModelManager {
      * Rust already loaded when the `ModelFile` was constructed (P5-10a lazy
      * views, engine/views.ts `commitStaged`), or else sends its AST, as
      * before. A namespace `_needsRustWrite` excludes is never written; its
-     * stage, if any, is dropped.
+     * stage, if any, is dropped. A stub `ModelFile` is not
+     * written at all (`_isMirrored`). Any error the write throws propagates.
      * @param {ModelFile} modelFile - the model file being added
      * @return {boolean} true if the namespace was written to rustHandle
      * @private
@@ -366,37 +364,84 @@ class BaseModelManager {
      */
     /* istanbul ignore next */
     _rustMirrorAdd(modelFile) {
-        if (!this._needsRustWrite(modelFile.getNamespace())) {
-            this._mirrorWrite(() => engineViews().dropStaged(modelFile, this.rustHandle));
+        if (!this._isMirrored(modelFile)) {
             return false;
         }
-        this._mirrorWrite(() => {
-            if (!engineViews().commitStaged(modelFile, this.rustHandle)) {
-                this.rustHandle.addModelWithDefinitions(
-                    JSON.stringify(modelFile.getAst()),
-                    modelFile.getDefinitions() ?? undefined,
-                    modelFile.getName() ?? undefined,
-                    false,
-                );
-            }
-        });
+        if (!this._needsRustWrite(modelFile.getNamespace())) {
+            engineViews().dropStaged(modelFile, this.rustHandle);
+            return false;
+        }
+        if (!engineViews().commitStaged(modelFile, this.rustHandle)) {
+            this.rustHandle.addModelWithDefinitions(
+                JSON.stringify(modelFile.getAst()),
+                modelFile.getDefinitions() ?? undefined,
+                modelFile.getName() ?? undefined,
+                false,
+            );
+        }
         return true;
+    }
+
+    /**
+     * The rustHandle write for a model file replacing `existing`: an update
+     * when both are mirrored, an add when only the new one is, and a delete
+     * when only `existing` is, so that rustHandle never keeps answering for
+     * a namespace whose TS file is now a stub (`_isMirrored`). Any error the
+     * write throws propagates.
+     * @param {ModelFile} existing - the model file being replaced
+     * @param {ModelFile} modelFile - the model file replacing it
+     * @private
+     * @internal
+     */
+    /* istanbul ignore next */
+    _rustMirrorUpdate(existing, modelFile) {
+        const namespace = modelFile.getNamespace();
+        const wasMirrored = this._isMirrored(existing) && this._needsRustWrite(namespace);
+        if (!this._isMirrored(modelFile)) {
+            if (wasMirrored) {
+                this.rustHandle.deleteModelFile(namespace);
+            }
+            return;
+        }
+        // P5-10a: an update always sends the AST (updateModelFile), so a
+        // lazily built file's stage is dropped rather than committed.
+        engineViews().dropStaged(modelFile, this.rustHandle);
+        if (!this._needsRustWrite(namespace)) {
+            return;
+        }
+        if (!wasMirrored) {
+            this.rustHandle.addModelWithDefinitions(
+                JSON.stringify(modelFile.getAst()),
+                modelFile.getDefinitions() ?? undefined,
+                modelFile.getName() ?? undefined,
+                false,
+            );
+            return;
+        }
+        // TS has already validated (or was asked not to); the mirror call
+        // only needs to keep rustHandle's state in sync, so it never
+        // re-validates itself.
+        this.rustHandle.updateModelFile(
+            JSON.stringify(modelFile.getAst()),
+            modelFile.getDefinitions() ?? undefined,
+            modelFile.getName() ?? undefined,
+            false,
+        );
     }
 
     /**
      * Whether `rustHandle`'s mirror currently matches `this.modelFiles`
      * closely enough to answer a read: a content-based parity check
-     * against `this.modelFiles` (the source of truth `_mirrorWrite`'s
-     * swallowed failures never touch), computed fresh on every call so one
-     * swallowed write failure cannot make an unrelated later read distrust
-     * rustHandle forever. A read that trusted rustHandle without this could
+     * against `this.modelFiles`, computed fresh on every call. It is false
+     * exactly when `this.modelFiles` holds a stub `ModelFile`
+     * that was never mirrored (`_isMirrored`), or was assigned directly. A read that trusted rustHandle without this could
      * silently answer from an incomplete or differently-shaped model --
      * wrong, not merely absent, for `isAssignableTo`/`derivesFrom`'s boolean
      * results in particular, which do not otherwise surface a mismatch as a
      * thrown error the caller would catch and fall back from. Comparing the
      * namespace *sets*, not just their sizes, matters for exactly the case a
      * white-box test creates by assigning `this.modelFiles` directly
-     * (bypassing `addModelFile`/`_mirrorWrite` entirely): a `rustHandle`
+     * (bypassing `addModelFile` and the mirror entirely): a `rustHandle`
      * that mirrors only the two system models could otherwise coincidentally
      * match the count of a manager whose `modelFiles` was hand-populated
      * with two unrelated stub namespaces, and a length-only check would
@@ -407,21 +452,17 @@ class BaseModelManager {
      */
     /* istanbul ignore next */
     _rustHandleMatchesModelFiles() {
-        try {
-            // P5-06: rustHandle's namespaces are read across the boundary
-            // only when its epoch has moved since the last read
-            // (`rustHandleReads`); the comparison against this.modelFiles,
-            // which can change without rustHandle knowing, still runs on
-            // every call.
-            const reads = rustHandleReads(this.rustHandle);
-            const tsNamespaces = Object.keys(this.modelFiles);
-            if (reads.namespaceCount !== tsNamespaces.length) {
-                return false;
-            }
-            return tsNamespaces.every((ns) => reads.namespaces.has(ns));
-        } catch (e) {
+        // P5-06: rustHandle's namespaces are read across the boundary only
+        // when its epoch has moved since the last read (`rustHandleReads`);
+        // the comparison against this.modelFiles, which can change without
+        // rustHandle knowing, still runs on every call. An error reading
+        // rustHandle propagates (accordproject/concerto-rust#262).
+        const reads = rustHandleReads(this.rustHandle);
+        const tsNamespaces = Object.keys(this.modelFiles);
+        if (reads.namespaceCount !== tsNamespaces.length) {
             return false;
         }
+        return tsNamespaces.every((ns) => reads.namespaces.has(ns));
     }
 
     /**
@@ -513,8 +554,9 @@ class BaseModelManager {
                 // options to `rustHandle` before this call can be reached.
                 modelFile.validate();
             }
-            this.modelFiles[modelFile.getNamespace()] = modelFile;
+            // Mirrored first, so a mirror error leaves both unchanged.
             this._rustMirrorAdd(modelFile);
+            this.modelFiles[modelFile.getNamespace()] = modelFile;
         } else {
             this._throwAlreadyExists(modelFile);
         }
@@ -615,34 +657,20 @@ class BaseModelManager {
             const { ast } = this.processFile(fileName, modelFile);
             let m = new ModelFile(this, ast as AstNode, modelFile, fileName);
             return this.updateModelFile(m,fileName,disableValidation);
-        } else {
-            let existing = this.modelFiles[modelFile.getNamespace()];
-            if (!existing) {
-                throw new Error(`Model file for namespace ${modelFile.getNamespace()} not found`);
-            }
-            if (!modelFile.getVersion()) {
-                throw new Error(`Cannot update with an unversioned namespace: ${modelFile.getNamespace()}`);
-            }
-            if (!disableValidation) {
-                modelFile.validate();
-            }
         }
+        const existing = this.modelFiles[modelFile.getNamespace()];
+        if (!existing) {
+            throw new Error(`Model file for namespace ${modelFile.getNamespace()} not found`);
+        }
+        if (!modelFile.getVersion()) {
+            throw new Error(`Cannot update with an unversioned namespace: ${modelFile.getNamespace()}`);
+        }
+        if (!disableValidation) {
+            modelFile.validate();
+        }
+        // Mirrored first, so a mirror error leaves both unchanged.
+        this._rustMirrorUpdate(existing, modelFile);
         this.modelFiles[modelFile.getNamespace()] = modelFile;
-        // P5-10a: an update always sends the AST (updateModelFile), so a
-        // lazily built file's stage is dropped rather than committed.
-        this._mirrorWrite(() => engineViews().dropStaged(modelFile, this.rustHandle));
-        /* istanbul ignore next */
-        if (this._needsRustWrite(modelFile.getNamespace())) {
-            // TS has already validated (or was asked not to) above; the
-            // mirror call only needs to keep rustHandle's state in sync, so
-            // it never re-validates itself.
-            this._mirrorWrite(() => this.rustHandle.updateModelFile(
-                JSON.stringify(modelFile.getAst()),
-                modelFile.getDefinitions() ?? undefined,
-                modelFile.getName() ?? undefined,
-                false,
-            ));
-        }
         return modelFile;
     }
 
@@ -654,11 +682,13 @@ class BaseModelManager {
         if (!this.modelFiles[namespace]) {
             throw new Error('Model file does not exist');
         } else {
-            delete this.modelFiles[namespace];
+            // Mirrored first, so a mirror error leaves both unchanged. A
+            // stub file was never mirrored (`_isMirrored`).
             /* istanbul ignore next */
-            if (this._needsRustWrite(namespace)) {
-                this._mirrorWrite(() => this.rustHandle.deleteModelFile(namespace));
+            if (this._needsRustWrite(namespace) && this._isMirrored(this.modelFiles[namespace])) {
+                this.rustHandle.deleteModelFile(namespace);
             }
+            delete this.modelFiles[namespace];
         }
     }
 
@@ -738,7 +768,7 @@ class BaseModelManager {
         } catch (err) {
             this.modelFiles = {};
             Object.assign(this.modelFiles, originalModelFiles);
-            // Undo any rustHandle mirroring this batch made, best-effort: a
+            // Undo any rustHandle mirroring this batch made: a
             // partially-mirrored or now-invalid batch must not leave
             // rustHandle out of sync with `this.modelFiles`, which the lines
             // above already rolled back. Only namespaces this batch actually
@@ -749,16 +779,15 @@ class BaseModelManager {
             // error on a later file in the batch), in which case
             // `newModelFiles` can contain namespaces that were never mirrored
             // at all, and calling `deleteModelFile` on those would throw
-            // (rustHandle never heard of them). Swallow that: rustHandle and
-            // `this.modelFiles` are still in agreement in that case, and
-            // `_rustHandleMatchesModelFiles` recomputes freshly on every read,
-            // so there is nothing left to mark stale.
+            // (rustHandle never heard of them). A delete of a namespace this
+            // batch did mirror propagates its error
+            // (accordproject/concerto-rust#262).
             /* istanbul ignore next */
             newModelFiles.forEach((m) => {
                 if (!mirroredNamespaces.has(m.getNamespace())) {
                     return;
                 }
-                this._mirrorWrite(() => this.rustHandle.deleteModelFile(m.getNamespace()));
+                this.rustHandle.deleteModelFile(m.getNamespace());
             });
             throw err;
         } finally {
@@ -921,16 +950,15 @@ class BaseModelManager {
      */
     resolveType(context, type) {
         /* istanbul ignore next */
-        if (this._rustHandleMatchesModelFiles()) {
-            // A stale or partially mirrored rustHandle (a W test's stub
-            // ModelFile never reached it: see _mirrorWrite) falls back to
-            // the TS body below, which reads this.modelFiles directly and
-            // so is never stale.
-            try {
-                return this.rustHandle.resolveType(context, type);
-            } catch (e) {
-                debug('resolveType', 'rustHandle.resolveType failed, falling back to the TS body', e);
-            }
+        if (typeof context === 'string' && typeof type === 'string' && this._rustHandleMatchesModelFiles()) {
+            // The mirror holds exactly TS's namespaces, so the engine's
+            // answer is final, including any error it throws
+            // (accordproject/concerto-rust#262). Only a rustHandle that does
+            // not match this.modelFiles (a W test's stub ModelFile never
+            // reached it: see _isMirrored) takes the TS body below, as do
+            // non-string arguments, which the binding's `&str` parameters
+            // cannot take (a JS non-string traps the engine).
+            return this.rustHandle.resolveType(context, type);
         }
         // is the type a primitive?
         if (ModelUtil.isPrimitiveType(type)) {
@@ -993,14 +1021,14 @@ class BaseModelManager {
      * @private
      */
     getModelFileByFileName(fileName): ModelFile {
+        // Only a string or undefined crosses the boundary: the binding's
+        // `Option<String>` turns a JS null into None (which would match an
+        // unnamed file, where TS's `=== null` does not), and a number or
+        // object traps the engine. Any other argument takes the TS body.
         /* istanbul ignore next */
-        if (this._rustHandleMatchesModelFiles()) {
-            try {
-                const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
-                return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
-            } catch (e) {
-                debug('getModelFileByFileName', 'rustHandle.modelManagerGetModelFileByFileName failed, falling back to the TS body', e);
-            }
+        if ((typeof fileName === 'string' || fileName === undefined) && this._rustHandleMatchesModelFiles()) {
+            const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
+            return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
         }
         return this.getModelFiles().filter(mf => mf.getName() === fileName)[0];
     }
@@ -1013,11 +1041,7 @@ class BaseModelManager {
         const namespaces = Object.keys(this.modelFiles);
         /* istanbul ignore next */
         if (this._rustHandleMatchesModelFiles()) {
-            try {
-                return this.rustHandle.getNamespaces();
-            } catch (e) {
-                debug('getNamespaces', 'rustHandle.getNamespaces failed, falling back to the TS body', e);
-            }
+            return this.rustHandle.getNamespaces();
         }
         return namespaces;
     }
@@ -1163,13 +1187,11 @@ class BaseModelManager {
      * qualified type name, false otherwise.
      */
     derivesFrom(fqt1, fqt2): boolean {
+        // Non-string arguments take the TS body: the binding's `&str`
+        // parameters cannot take them (a JS non-string traps the engine).
         /* istanbul ignore next */
-        if (this._rustHandleMatchesModelFiles()) {
-            try {
-                return this.rustHandle.derivesFrom(fqt1, fqt2);
-            } catch (e) {
-                debug('derivesFrom', 'rustHandle.derivesFrom failed, falling back to the TS body', e);
-            }
+        if (typeof fqt1 === 'string' && typeof fqt2 === 'string' && this._rustHandleMatchesModelFiles()) {
+            return this.rustHandle.derivesFrom(fqt1, fqt2);
         }
         // Check to see if this is an exact instance of the specified type.
         let typeDeclaration = this.getType(fqt1);

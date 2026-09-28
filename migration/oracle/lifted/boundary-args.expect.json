@@ -1,0 +1,146 @@
+{
+  "BOUNDARY-ARG-001": {
+    "ok": "test@1.0.0"
+  },
+  "BOUNDARY-ARG-002": {
+    "ok": "<none>"
+  },
+  "BOUNDARY-ARG-003": {
+    "ok": "<none>"
+  },
+  "BOUNDARY-ARG-004": {
+    "ok": "<none>"
+  },
+  "BOUNDARY-ARG-005": {
+    "ok": "<none>"
+  },
+  "BOUNDARY-ARG-006": {
+    "throws": {
+      "name": "Error",
+      "message": "FQN is invalid."
+    }
+  },
+  "BOUNDARY-ARG-007": {
+    "throws": {
+      "name": "Error",
+      "message": "FQN is invalid."
+    }
+  },
+  "BOUNDARY-ARG-008": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-009": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-010": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-011": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-012": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-013": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-014": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-015": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-016": {
+    "throws": {
+      "name": "Error",
+      "message": "FQN is invalid."
+    }
+  },
+  "BOUNDARY-ARG-017": {
+    "throws": {
+      "name": "Error",
+      "message": "FQN is invalid."
+    }
+  },
+  "BOUNDARY-ARG-018": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-019": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-020": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-021": {
+    "throws": {
+      "name": "IllegalModelException",
+      "message": "No registered namespace for type \"A\" in \"undefined\". "
+    }
+  },
+  "BOUNDARY-ARG-022": {
+    "throws": {
+      "name": "IllegalModelException",
+      "message": "No registered namespace for type \"A\" in \"null\". "
+    }
+  },
+  "BOUNDARY-ARG-023": {
+    "throws": {
+      "name": "IllegalModelException",
+      "message": "No registered namespace for type \"A\" in \"123\". "
+    }
+  },
+  "BOUNDARY-ARG-024": {
+    "throws": {
+      "name": "IllegalModelException",
+      "message": "No registered namespace for type \"A\" in \"[object Object]\". "
+    }
+  },
+  "BOUNDARY-ARG-025": {
+    "throws": {
+      "name": "IllegalModelException",
+      "message": "No registered namespace for type \"A\" in \"true\". "
+    }
+  },
+  "BOUNDARY-ARG-026": {
+    "ok": "<undefined>"
+  },
+  "BOUNDARY-ARG-027": {
+    "ok": null
+  },
+  "BOUNDARY-ARG-028": {
+    "throws": {
+      "name": "TypeError",
+      "message": "type.startsWith is not a function"
+    }
+  },
+  "BOUNDARY-ARG-029": {
+    "throws": {
+      "name": "TypeError",
+      "message": "type.startsWith is not a function"
+    }
+  },
+  "BOUNDARY-ARG-030": {
+    "throws": {
+      "name": "TypeError",
+      "message": "type.startsWith is not a function"
+    }
+  }
+}

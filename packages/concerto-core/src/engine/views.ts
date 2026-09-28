@@ -779,6 +779,7 @@ const lazyFiles = new WeakSet<object>();
  * @return {boolean} true if the declarations may be built lazily
  */
 function stageModelFile(modelFile: any): boolean {
+    constructedFiles.add(modelFile);
     const manager = modelFile.modelManager;
     const handle = manager?.rustHandle;
     if (!handle || typeof handle.stageModelFile !== 'function' ||
@@ -813,7 +814,7 @@ function stageModelFile(modelFile: any): boolean {
             lazyFiles.add(modelFile);
             return true;
         }
-        const id = handle.stageModelFile(text, definitions, fileName);
+        const id: number = handle.stageModelFile(text, definitions, fileName);
         if (customRegExp && !probeCustomRegExp(modelFile, ast)) {
             handle.dropStagedModelFile(id);
             return false;
@@ -1029,6 +1030,28 @@ function deferDeclarations(modelFile: any): void {
             process.stderr.write(`LAZY-CHECK ast-mutated: ${modelFile.namespace}\n`);
         }
     }
+}
+
+/**
+ * Every ModelFile the ModelFile constructor ran for: the constructor always
+ * calls `stageModelFile`, the start of the engine path. A stub ModelFile
+ * (`sinon.createStubInstance(ModelFile)`, `Object.create`) never ran the
+ * constructor, so it is not here (accordproject/concerto-rust#262).
+ */
+const constructedFiles = new WeakSet<object>();
+
+/**
+ * Whether `modelFile` was built through the engine path, that is, whether the
+ * ModelFile constructor ran for it. False only for a stub ModelFile the
+ * constructor never ran for, the one case a manager does not mirror into its
+ * rustHandle (accordproject/concerto-rust#262). A constructor-built file
+ * whose AST the engine refuses is still engine-built: its mirror write
+ * throws the engine's error.
+ * @param {object} modelFile the ModelFile
+ * @return {boolean} true if the ModelFile was built through the engine path
+ */
+function isEngineBuilt(modelFile: any): boolean {
+    return constructedFiles.has(modelFile);
 }
 
 /**
@@ -1639,6 +1662,7 @@ export {
     deferDeclarations,
     commitStaged,
     dropStaged,
+    isEngineBuilt,
     validateLoaded,
     beginModelFile,
     endModelFile,
