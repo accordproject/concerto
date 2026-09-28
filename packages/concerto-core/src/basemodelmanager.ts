@@ -530,20 +530,21 @@ class BaseModelManager {
      * @private
      */
     validateAst(modelFile) {
-        // Delegates to rustHandle.validateAst (P4-08b, concerto-wasm), which
-        // runs the same version check plus structural (metamodel) check
-        // over the AST alone -- it needs no registered model file, so it
-        // never needs `this.modelFiles`/`rustHandle` parity the way a read
-        // over `this.modelFiles` would. A thrown error already arrives as
-        // the mapped `MetamodelException` (or other TS exception class,
+        // Delegates to rustHandle.validateAstValue (P4-08b, P5-13;
+        // concerto-wasm), which runs the same version check plus structural
+        // (metamodel) check over the AST alone -- it needs no registered
+        // model file, so it never needs `this.modelFiles`/`rustHandle`
+        // parity the way a read over `this.modelFiles` would, and it builds
+        // no engine-side ModelFile either (the check never reads one, and
+        // its constructor would reject a malformed AST with an
+        // IllegalModelException before the check could throw TS's
+        // MetamodelException). A thrown error already arrives as the mapped
+        // `MetamodelException` (or other TS exception class,
         // src/engine/errors.ts) via the host error factory, so it
         // propagates unchanged.
         const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
         try {
-            this.rustHandle.validateAst(
-                JSON.stringify(modelFile.getAst()),
-                modelFile.getName() ?? undefined,
-            );
+            this.rustHandle.validateAstValue(JSON.stringify(modelFile.getAst()));
         } catch (err) {
             // rustHandle's own validate_ast (concerto-core
             // ModelManager::validate_ast) only leaks its copy of the
