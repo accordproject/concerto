@@ -16,17 +16,19 @@
 
 /**
  * P5-03 #262 lifted checks: non-string arguments to the members whose
- * catch-all fallback #262 removed.
+ * catch-all fallback #262 removed. Extended by #294 (audit of the other
+ * string-taking concerto-wasm bindings) to add `isAssignableTo`, the one
+ * other de-fallbacked member the audit found unguarded.
  *
  * The WASM bindings behind `BaseModelManager.getModelFileByFileName`,
- * `derivesFrom`, `resolveType` and `ModelFile.isLocalType` take `&str` or
- * `Option<String>`. A JS number, object or boolean passed to one of them
- * traps the engine (`RuntimeError: memory access out of bounds`), and a JS
- * null becomes `None`. The catch-all used to hide this by running the TS
- * body; with it gone, each wrapper sends only a string (or `undefined`,
- * where the binding takes `Option<String>`) to Rust and runs the TS body
- * for any other argument. `expect` is the frozen v5.0.0 reference's
- * outcome. Run by fallbacks.spec.js.
+ * `derivesFrom`, `resolveType`, `isAssignableTo` and `ModelFile.isLocalType`
+ * take `&str` or `Option<String>`. A JS number, object or boolean passed to
+ * one of them traps the engine (`RuntimeError: memory access out of
+ * bounds`), and a JS null becomes `None`. The catch-all used to hide this by
+ * running the TS body; with it gone, each wrapper sends only a string (or
+ * `undefined`, where the binding takes `Option<String>`) to Rust and runs
+ * the TS body for any other argument. `expect` is the frozen v5.0.0
+ * reference's outcome. Run by fallbacks.spec.js.
  */
 
 const ODD = { undefined: undefined, null: null, number: 123, object: {}, boolean: true };
@@ -60,6 +62,8 @@ const CALLS = {
     'resolveType(n, x)': (core, x) => manager(core).resolveType('n@1.0.0', x),
     'resolveType(x, A)': (core, x) => manager(core).resolveType(x, 'A'),
     'isLocalType(x)': (core, x) => manager(core).getModelFile('n@1.0.0').isLocalType(x),
+    'isAssignableTo(x, A)': (core, x) => manager(core).isAssignableTo(x, 'test@1.0.0.A'),
+    'isAssignableTo(B, x)': (core, x) => manager(core).isAssignableTo('test@1.0.0.B', x),
 };
 
 const EXPECT = require('./boundary-args.expect.json');

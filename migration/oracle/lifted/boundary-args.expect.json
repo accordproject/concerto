@@ -142,5 +142,35 @@
       "name": "TypeError",
       "message": "type.startsWith is not a function"
     }
+  },
+  "BOUNDARY-ARG-031": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-032": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-033": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-034": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-035": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-036": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-037": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-038": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-039": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-040": {
+    "ok": false
   }
 }

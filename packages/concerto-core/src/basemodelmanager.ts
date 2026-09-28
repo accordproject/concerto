@@ -1228,8 +1228,11 @@ class BaseModelManager {
      * @returns {boolean} True if fqn is assignable to baseFqn
      */
     isAssignableTo(fqn: string, baseFqn: string): boolean {
+        // Non-string arguments take the TS body: the binding's `&str`
+        // parameters cannot take them (a JS non-string traps the engine;
+        // accordproject/concerto-rust#294, follow-up to #262).
         /* istanbul ignore next */
-        if (this._rustHandleMatchesModelFiles()) {
+        if (typeof fqn === 'string' && typeof baseFqn === 'string' && this._rustHandleMatchesModelFiles()) {
             return this.rustHandle.isAssignableTo(fqn, baseFqn);
         }
         let typeDeclaration;
