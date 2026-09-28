@@ -949,12 +949,14 @@ class BaseModelManager {
      */
     resolveType(context, type) {
         /* istanbul ignore next */
-        if (this._rustHandleMatchesModelFiles()) {
+        if (typeof context === 'string' && typeof type === 'string' && this._rustHandleMatchesModelFiles()) {
             // The mirror holds exactly TS's namespaces, so the engine's
             // answer is final, including any error it throws
             // (accordproject/concerto-rust#262). Only a rustHandle that does
             // not match this.modelFiles (a W test's stub ModelFile never
-            // reached it: see _isMirrored) takes the TS body below.
+            // reached it: see _isMirrored) takes the TS body below, as do
+            // non-string arguments, which the binding's `&str` parameters
+            // cannot take (a JS non-string traps the engine).
             return this.rustHandle.resolveType(context, type);
         }
         // is the type a primitive?
@@ -1018,8 +1020,12 @@ class BaseModelManager {
      * @private
      */
     getModelFileByFileName(fileName): ModelFile {
+        // Only a string or undefined crosses the boundary: the binding's
+        // `Option<String>` turns a JS null into None (which would match an
+        // unnamed file, where TS's `=== null` does not), and a number or
+        // object traps the engine. Any other argument takes the TS body.
         /* istanbul ignore next */
-        if (this._rustHandleMatchesModelFiles()) {
+        if ((typeof fileName === 'string' || fileName === undefined) && this._rustHandleMatchesModelFiles()) {
             const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
             return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
         }
@@ -1180,8 +1186,10 @@ class BaseModelManager {
      * qualified type name, false otherwise.
      */
     derivesFrom(fqt1, fqt2): boolean {
+        // Non-string arguments take the TS body: the binding's `&str`
+        // parameters cannot take them (a JS non-string traps the engine).
         /* istanbul ignore next */
-        if (this._rustHandleMatchesModelFiles()) {
+        if (typeof fqt1 === 'string' && typeof fqt2 === 'string' && this._rustHandleMatchesModelFiles()) {
             return this.rustHandle.derivesFrom(fqt1, fqt2);
         }
         // Check to see if this is an exact instance of the specified type.

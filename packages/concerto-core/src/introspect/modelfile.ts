@@ -520,9 +520,12 @@ class ModelFile extends Decorated {
      * @private
      */
     isLocalType(type) {
-        /* istanbul ignore if */
-        if (!type) {
-            return false;
+        // A non-string never crosses the boundary (the binding's `&str`
+        // parameter cannot take it: a JS non-string traps the engine). It
+        // takes TS's own expression, which returns a falsy argument itself
+        // and throws for a truthy non-string.
+        if (typeof type !== 'string' || !type) {
+            return (type && this.getLocalType(type) !== null);
         }
         const id = this._rustHandleId();
         /* istanbul ignore if */
