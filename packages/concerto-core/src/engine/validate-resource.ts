@@ -49,6 +49,11 @@
 // a valid value returns `true`, an invalid one throws with the class TS
 // 5.0.0 throws.
 //
+// A Resource whose `$identifierFieldName` is not its model's identifying
+// field, or whose identifier is truthy but not a string, also takes the
+// visitor: the engine reads the model's field and treats a non-string as
+// empty, where the visitor reads `getIdentifier()` and calls `trim()` on it.
+//
 // The `$identifier` write-back of `ResourceValidator.visitClassDeclaration`
 // (`obj.$identifier = obj.getIdentifier()` for an identified Resource whose
 // identifying field is not `$identifier`) happens here while the resource
@@ -395,9 +400,21 @@ function writeTyped(v, seen: Set<object>): void {
         putU32(countAt, count);
         return;
     }
+    // The engine reads a Resource's identifier from its model's identifying
+    // field, and treats any value there that is not a string as empty.
+    // `visitClassDeclaration` reads `getIdentifier()` (the instance's own
+    // `$identifierFieldName`) and calls `id.trim()` on it. Where the two can
+    // differ, the visitor runs instead.
     const field = v.$identifierFieldName;
-    if (field && field !== '$identifier') {
-        v.$identifier = v.getIdentifier();
+    if (field !== modelIdentifierField(v.$classDeclaration)) {
+        throw new EngineFastPathUnsupported('identifier-field');
+    }
+    const id = v.getIdentifier();
+    if (id && typeof id !== 'string') {
+        throw new EngineFastPathUnsupported('identifier-type');
+    }
+    if (field !== '$identifier') {
+        v.$identifier = id;
     }
     writeRawStr('$class');
     writeStr(fqn);
@@ -419,6 +436,29 @@ function writeTyped(v, seen: Set<object>): void {
         count++;
     }
     putU32(countAt, count);
+}
+
+// A class declaration view's identifying field never changes (a model
+// update replaces the views), so it is read once per view.
+const identifierFields = new WeakMap<object, string>();
+
+/**
+ * The identifying field the engine uses for a Resource of `decl`: as the
+ * Identifiable constructor computes `$identifierFieldName`,
+ * `getIdentifierFieldName() || '$identifier'`.
+ * @param {*} decl the Resource's `$classDeclaration`
+ * @return {string} the field name
+ */
+function modelIdentifierField(decl): string {
+    if (!decl || typeof decl !== 'object' || typeof decl.getIdentifierFieldName !== 'function') {
+        throw new EngineFastPathUnsupported('class-declaration');
+    }
+    let field = identifierFields.get(decl);
+    if (field === undefined) {
+        field = decl.getIdentifierFieldName() || '$identifier';
+        identifierFields.set(decl, field as string);
+    }
+    return field as string;
 }
 
 // ---------------------------------------------------------------------
