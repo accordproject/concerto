@@ -68,7 +68,8 @@ for (const r of rounds) {
     }
     const n = readJson(path.join(dir, 'n.json'));
     for (const [id, items] of Object.entries(n)) {
-        const e = path.join(dir, id, 'estimates.json');
+        // criterion flattens the bench id's '/' into '_' for its directory.
+        const e = path.join(dir, id.replace(/\//g, '_'), 'estimates.json');
         if (!exists(e)) {
             continue;
         }
