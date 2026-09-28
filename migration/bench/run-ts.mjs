@@ -40,7 +40,9 @@
 //      concept and times Serializer#fromJSON (populate+validate) and
 //      Resource#validate() on its own. Under CONCERTO_ENGINE=rust this
 //      exercises concerto-core's instance validator (task P3-01) through
-//      the same TS entry points; there is still no Rust JSONPopulator (see
+//      the same TS entry points (task P5-14 adds toJSON and the
+//      ClassDeclaration getProperties()/getProperty() lookups, per call);
+//      there is still no Rust JSONPopulator (see
 //      concerto-rust's instance_validate.rs bench docs), so fromJSON's
 //      populate step is TS-only work even in rust mode - only the combined
 //      fromJSON number and validate_only are comparable to the ts-mode run
@@ -265,6 +267,37 @@ function benchInstanceValidate(ModelManager, sampleOpts) {
         { ...sampleOpts, n: resources.length },
     );
 
+    // task P5-14 (accordproject/concerto-rust#308): toJSON through the TS
+    // API, and the ClassDeclaration property lookups the serializer and
+    // validator make (`getProperties()`, `getProperty()` for each of Item's
+    // properties), per call.
+    const toJson = timeit(
+        () => {
+            for (const r of resources) {
+                serializer.toJSON(r);
+            }
+        },
+        { ...sampleOpts, n: resources.length },
+    );
+    const item = mm.getType('org.accordproject.bench.instance@1.0.0.Item');
+    const names = item.getProperties().map((p) => p.getName());
+    const LOOKUPS = 1000;
+    const getProperties = timeit(
+        () => {
+            for (let i = 0; i < LOOKUPS; i++) {
+                item.getProperties();
+            }
+        },
+        { ...sampleOpts, n: LOOKUPS },
+    );
+    const getProperty = timeit(
+        () => {
+            for (let i = 0; i < LOOKUPS; i++) {
+                item.getProperty(names[i % names.length]);
+            }
+        },
+        { ...sampleOpts, n: LOOKUPS },
+    );
     // Task P5-12c (accordproject/concerto-rust#293): the two per-property
     // validations of a ValidatedResource. `labels` is reset by plain
     // assignment (no validation) before each `addArrayValue`, so every call
@@ -290,6 +323,9 @@ function benchInstanceValidate(ModelManager, sampleOpts) {
     return {
         populate_and_validate: populate,
         validate_only: validateOnly,
+        to_json: toJson,
+        get_properties: getProperties,
+        get_property: getProperty,
         set_property_value: setProperty,
         add_array_value: addArray,
         n: instances.length,
@@ -401,6 +437,9 @@ function main() {
     if (iv) {
         lines.push(`| instance_validate | (synthetic) | ${iv.n} | fromJSON (populate+validate) | ${(iv.populate_and_validate.median_ms * 1000).toFixed(1)} µs | ${(iv.populate_and_validate.cv * 100).toFixed(1)}% |`);
         lines.push(`| instance_validate | (synthetic) | ${iv.n} | resource.validate() | ${(iv.validate_only.median_ms * 1000).toFixed(1)} µs | ${(iv.validate_only.cv * 100).toFixed(1)}% |`);
+        lines.push(`| instance_validate | (synthetic) | ${iv.n} | toJSON | ${(iv.to_json.median_ms * 1000).toFixed(1)} µs | ${(iv.to_json.cv * 100).toFixed(1)}% |`);
+        lines.push(`| instance_validate | Item | 1000 | getProperties() | ${(iv.get_properties.median_ms * 1000).toFixed(3)} µs | ${(iv.get_properties.cv * 100).toFixed(1)}% |`);
+        lines.push(`| instance_validate | Item | 1000 | getProperty() | ${(iv.get_property.median_ms * 1000).toFixed(3)} µs | ${(iv.get_property.cv * 100).toFixed(1)}% |`);
         lines.push(`| instance_validate | (synthetic) | ${iv.n} | setPropertyValue() | ${(iv.set_property_value.median_ms * 1000).toFixed(1)} µs | ${(iv.set_property_value.cv * 100).toFixed(1)}% |`);
         lines.push(`| instance_validate | (synthetic) | ${iv.n} | addArrayValue() | ${(iv.add_array_value.median_ms * 1000).toFixed(1)} µs | ${(iv.add_array_value.cv * 100).toFixed(1)}% |`);
     }
