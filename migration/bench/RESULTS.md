@@ -1,3 +1,115 @@
+# P5-13: validator performance, resident metamodel and fewer allocations (2026-09-28)
+
+Task P5-13 (accordproject/concerto-rust#297) makes the Rust validators
+faster without moving any TS logic to Rust:
+
+- `validateAst` checks the AST through the new `validateAstValue` binding,
+  with no engine-side ModelFile build (spike (a) from P5-12d).
+- The metamodel stays resident, on a per-thread manager.
+- The metamodel check and the instance validator allocate less: borrowed
+  property lists and super chains, a per-declaration class cache, cached
+  FQNs and field defaults, and FxHash for maps that are never iterated.
+
+This section records workloads 2 (validateAst) and 3 (fromJSON and
+`resource.validate()`) through the TS API, and the crate-direct criterion
+benches. Each compares the P5-13 build against the integration head it
+branched from and the TS reference, interleaved round by round on one
+machine.
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz, 8 logical CPUs, 17 GB, macOS (darwin x64), a shared developer laptop |
+| Toolchain | Node v24.21.0, rustc 1.98.1, wasm-bindgen 0.2.128, wasm-opt applied by `concerto-wasm/build.sh` |
+| Quiet-check | The driver waited until no fuzz, cargo or mocha process was running and the 1-minute load average was below 3. The TS-API rounds started at load 2.54 and finished at 5.18 (all three rounds took 26 seconds). The criterion rounds followed straight after, at load 3.0 to 5.0. So the machine was **not fully quiet**. Treat differences of about 10% as noise. |
+| Before | `concerto` `f4c55d90b`, `concerto-rust` `98e0412`: the integration head that P5-13 branched from. Its engine is 2,758,816 bytes. |
+| After | `concerto` `1fa390dca`, `concerto-rust` `4cbb61a`: the P5-13 commits, before the later integration-head merge. That merge changes neither the validateAst path nor the instance-validator path. Its engine is 2,747,863 bytes. Both engines are within the 4 MiB budget. |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, the oracle's reference, run with `run-ts.mjs --core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist` |
+| TS-API runs | `results/P5-13-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`: three interleaved rounds of `--workloads validate_ast,instance_validate` with the defaults (5 warm-up and 30 samples). Their `concerto_engine` field reads `ts` because it echoes the retired `CONCERTO_ENGINE` variable. The before and after builds both run the Rust engine: concerto-core has had no TS engine since P5-02. |
+| Crate runs | `concerto-rust`'s `benches/results/P5-13/rust-crit-{before,after}-{1,2}.json`: two interleaved rounds with criterion defaults. The before tree runs P5-13's bench files, so both sides measure the same benchmarks. |
+
+## Through the TS public API
+
+Medians are in µs per model or per instance, for runs 1, 2 and 3. The
+ratios use the median of the three runs.
+
+| Model set | Metric | TS 5.0.0, runs 1 / 2 / 3 | Rust before, runs 1 / 2 / 3 | Rust P5-13, runs 1 / 2 / 3 | before / TS | **P5-13 / TS** | speed-up |
+|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | validateAst | 824.9 / 847.2 / 871.5 | 1029.1 / 1035.9 / 1015.4 | 304.2 / 294.3 / 289.0 | 1.21× | **0.35×** | 3.50× |
+| conformance | validateAst | 309.6 / 328.2 / 328.4 | 587.6 / 597.6 / 586.8 | 132.8 / 134.0 / 135.0 | 1.79× | **0.41×** | 4.38× |
+| (synthetic, 500) | fromJSON | 9.7 / 9.9 / 10.3 | 65.2 / 64.9 / 65.8 | 40.9 / 41.6 / 40.5 | 6.57× | **4.13×** | 1.59× |
+| (synthetic, 500) | resource.validate() | 2.5 / 2.3 / 2.3 | 23.7 / 23.8 / 28.0 | 25.1 / 24.1 / 23.4 | 10.17× | **10.30×** | 0.99× |
+
+- **validateAst meets its target.** Through the TS API, it is now 2.4× to
+  2.9× *faster* than TS 5.0.0 on both model sets. Before P5-13 it was 1.2×
+  to 1.8× slower. The P5-13 build is 3.5× to 4.4× faster than the
+  integration head.
+- **fromJSON is 1.59× faster** than before, but still 4.1× slower than
+  TS.
+- **resource.validate() through the TS API has not changed** (0.99×) and
+  is still about 10× slower than TS. The crate's own validator got 3.6×
+  faster (below), so this path's cost is outside the validator, in the
+  per-call work between TS and the engine. This run did not measure the
+  in-WASM validator on its own. **The target of an in-WASM instance
+  validator at or below TS's `validate()` is not shown to be met.** Only
+  the native crate figure (1.4 µs, against TS's 2.3 µs) is below it.
+
+## The Rust crate directly (criterion)
+
+Medians are in µs per model or per instance, for runs 1 and 2. The
+speed-up uses the mean of the two runs.
+
+| Benchmark | Before (`98e0412`), runs 1 / 2 | P5-13 (`4cbb61a`), runs 1 / 2 | Speed-up |
+|---|---|---|---|
+| `ModelManager::validate_ast`, concerto-core-test-data | 1922.7 / 1854.3 | 304.8 / 303.5 | 6.21× |
+| `ModelManager::validate_ast`, conformance | 984.7 / 967.2 | 141.0 / 141.5 | 6.91× |
+| `ModelFile::from_json`, concerto-core-test-data | 132.4 / 128.2 | 135.0 / 138.5 | 0.95× |
+| `ModelFile::from_json`, conformance | 52.2 / 51.2 | 52.3 / 52.2 | 0.99× |
+| `ModelFile::from_json`, synthetic-large | 9405.3 / 9400.3 | 9075.4 / 9382.0 | 1.02× |
+| `validate_instance` (`validate_only`, 500) | 5.2 / 4.7 | 1.4 / 1.3 | 3.62× |
+| `Serializer::from_json` (concerto-core-js, 500) | 52.8 / 45.4 | 12.5 / 12.6 | 3.90× |
+| `ModelManager::validate_instance` (native, 500) | 44.1 / 39.9 | 8.9 / 9.2 | 4.63× |
+
+- **The metamodel check is 6.2× to 6.9× faster.** It no longer inserts and
+  removes the metamodel on every call, and it clones and allocates less.
+  The native time per model (about 300 µs and 140 µs) is close to the
+  time through the TS API. So on this path, most of the remaining cost is
+  in the check itself, not in crossing between TS and the engine.
+- **The instance paths are 3.6× to 4.6× faster.**
+- **`ModelFile::from_json` is unchanged within noise.** P5-13 does not
+  touch it; it is listed as a control.
+
+## Remaining profile
+
+These figures come from native `sample` profiles of
+`concerto-core/examples/validator_profile.rs`, bucketed by
+`flame.py` from P5-12d. The P5-13 profiles were taken on the round-1
+work tree, shortly before the final commit, so they are indicative rather
+than exact.
+
+- **validate_ast on concerto-core-test-data:**
+  - Allocation and free fell from 74.8% of self time (base) to 52.9%.
+  - The next largest buckets are SipHash and IndexMap lookups (8.0%) and
+    `JsValue::from_json`/`Instance::set` (6.6%).
+  - Most of the remaining allocator calls come from dropping temporaries,
+    building `JsValue` and `Instance` objects, and cloning.
+- **Instance validation:** allocation and free fell from 76.0% to 60.8%.
+  The next largest buckets are `JsValue::from_json`/`Instance::set`
+  (9.3%) and hashing (7.8%).
+- **What is left:**
+  - The rest of the metamodel check still builds a `JsValue`/`Instance`
+    tree per call.
+  - Some SipHash cost remains (3.4% self time in
+    `Sip13Rounds::Hasher::write`). P5-13 changed only maps whose
+    iteration order is never observable. The ordered IndexMaps stay as
+    they are, as PORTING.md 3.7 requires.
+
+## Correctness during the run
+
+The P5-13 verification (the oracle, the fuzz shard, the concerto-core
+suite and the WASM leg) is reported on accordproject/concerto-rust#297.
+
+---
+
 # P5-10c: lazy views, full benchmark after parts 1 and 2 (2026-09-27)
 
 Task P5-10c (accordproject/concerto-rust#271) re-runs the full P5-04

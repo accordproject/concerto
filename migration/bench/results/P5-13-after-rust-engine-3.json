@@ -1,0 +1,89 @@
+{
+  "harness": "run-ts.mjs",
+  "recorded_at": "2026-09-28T11:58:59.565Z",
+  "machine": {
+    "platform": "darwin",
+    "arch": "x64",
+    "cpus": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+    "cpu_count": 8,
+    "total_mem_gb": 17,
+    "node": "v24.21.0"
+  },
+  "concerto_commit": "1fa390dca1b51b983d07440ee262424f58ac99b7",
+  "concerto_engine": "ts",
+  "core_dist": "packages/concerto-core/dist",
+  "workloads_run": [
+    "validate_ast",
+    "instance_validate"
+  ],
+  "loadavg": [
+    5.18115234375,
+    5.58642578125,
+    10.17529296875
+  ],
+  "sample_opts": {
+    "warmup": 5,
+    "samples": 30
+  },
+  "workloads": {
+    "load_validate": {},
+    "validate_ast": {
+      "concerto-core-test-data": {
+        "validateAst": {
+          "samples": 30,
+          "n": 34,
+          "median_ms": 0.28903282352941173,
+          "mean_ms": 0.317797037254902,
+          "stddev_ms": 0.09768101619583634,
+          "min_ms": 0.2774300294117647,
+          "max_ms": 0.8021023529411765,
+          "cv": 0.30736918455752416
+        },
+        "n": 34,
+        "totalInSet": 35
+      },
+      "conformance": {
+        "validateAst": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.1350445975609756,
+          "mean_ms": 0.14139517642276422,
+          "stddev_ms": 0.019572168898345666,
+          "min_ms": 0.12331709756097561,
+          "max_ms": 0.22799424390243903,
+          "cv": 0.13842175803668083
+        },
+        "n": 41,
+        "totalInSet": 41
+      },
+      "synthetic-large": {
+        "validateAst": null,
+        "n": 1,
+        "error": "validateAst rejects every model in this set"
+      }
+    },
+    "instance_validate": {
+      "populate_and_validate": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.040488053999999996,
+        "mean_ms": 0.04391922780000001,
+        "stddev_ms": 0.014455490983461279,
+        "min_ms": 0.038087076000000004,
+        "max_ms": 0.118475616,
+        "cv": 0.32913809526180415
+      },
+      "validate_only": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.023405611,
+        "mean_ms": 0.02362831486666667,
+        "stddev_ms": 0.0008164699895704397,
+        "min_ms": 0.022575983999999997,
+        "max_ms": 0.026293286,
+        "cv": 0.03455472784147903
+      },
+      "n": 500
+    }
+  }
+}
