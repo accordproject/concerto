@@ -52,7 +52,7 @@ below load byte-identical models.
 | `concerto-rust` commit | `ce50e3ab835321d70b079e234d4a2fcff9b2285f` (branch `claude/tender-pascal-ocwf9q-local-matt-P6-04`, based on the integration branch) |
 | Load at run time | 1-minute load average 1.77 to 1.98 across all four runs (`loadavg` field of each result file); a normally-loaded developer laptop, not dedicated hardware |
 | TS reference | Published `@accordproject/concerto-core` 5.0.0, the oracle's reference (`--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist`) |
-| Native runs | `concerto-rust`'s `benches/results/P6-04-native-{1,2}.json`: two rounds of `cargo bench --manifest-path benches/Cargo.toml -- public_api` (criterion defaults: 3 s warm-up, 100 samples), reduced with `extract-results.sh` |
+| Native runs | `concerto-rust`'s `benches/results/P6-04-native-{1,2}.json`: two rounds of `cargo bench --manifest-path benches/Cargo.toml --bench public_api` (criterion defaults: 3 s warm-up, 100 samples), reduced with `extract-results.sh` |
 | TS-API runs | `results/P6-04-{ts-reference-5.0.0,rust-via-ts}-{1,2}.json`: two rounds of `run-ts.mjs --workloads load_validate,validate_ast,instance_validate` with the defaults (5 warm-up, 30 samples) |
 
 ## The three-way table
@@ -109,8 +109,9 @@ a measurement error; see "Open question" below.
 populate-and-validate route (P5-13/P6-01, §5.7): it comes within 13% of
 the TS reference directly, and is 3.4× faster than the same work done
 through the TS public API (WASM marshalling overhead on every call). The
-collect-all counterpart, `check_instance` (accordproject/concerto#1239,
-no TS-side equivalent recorded here), was 11.6 / 19.1 µs across the two
+collect-all counterpart, `public_api/instance/check_instance`
+(accordproject/concerto#1239, no TS-side equivalent recorded here), was
+11.6 / 19.1 µs across the two
 runs — modestly slower than `validate_instance`, as expected for walking
 every violation instead of stopping at the first.
 
@@ -120,9 +121,10 @@ every violation instead of stopping at the first.
   three interleaved rounds; this table uses two, run back to back rather
   than interleaved, since this task is informational with no gate to
   satisfy. Run 2's native numbers are consistently higher than run 1's
-  (e.g. `synthetic-large` load: 8.9 ms vs 13.8 ms; `instance/
-  check_instance`: 11.6 µs vs 19.1 µs) — the load average dropped between
-  runs (see the machine table), so this is ordinary shared-laptop noise,
+  (e.g. `synthetic-large` load: 8.9 ms vs 13.8 ms;
+  `public_api/instance/check_instance`: 11.6 µs vs 19.1 µs) — the load
+  average dropped between runs (see the machine table), so this is
+  ordinary shared-laptop noise,
   not a regression; both runs are reported rather than picking one.
 - **The commits are a few commits behind the current integration head.**
   This branch (`claude/tender-pascal-ocwf9q-local-matt-P6-04`) was created
