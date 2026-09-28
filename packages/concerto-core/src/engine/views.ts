@@ -798,8 +798,16 @@ function stageModelFile(modelFile: any): boolean {
         }
         const ast = modelFile.ast;
         const text = JSON.stringify(ast);
-        const definitions = modelFile.definitions ?? undefined;
-        const fileName = modelFile.fileName ?? undefined;
+        // `ModelFile`'s constructor only rejects a *truthy* non-string
+        // `definitions`/`fileName` (introspect/modelfile.ts): `0`, `false`
+        // and `NaN` are stored as-is, and `?? undefined` maps only
+        // null/undefined, so either would otherwise reach `stageModelFile`'s
+        // wasm `Option<String>` params raw and trap the engine
+        // (accordproject/concerto-rust#294 follow-up). Only a genuine string
+        // is forwarded; anything else becomes `undefined`, matching v5.0.0
+        // (no wasm call at all).
+        const definitions = typeof modelFile.definitions === 'string' ? modelFile.definitions : undefined;
+        const fileName = typeof modelFile.fileName === 'string' ? modelFile.fileName : undefined;
         const unmirrored = !manager._needsRustWrite(ast.namespace);
         const key = unmirrored ? JSON.stringify([text, definitions ?? null, fileName ?? null]) : null;
         // P5-10b: a custom `options.regExp` engine is user code the
