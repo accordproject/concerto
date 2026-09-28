@@ -1,3 +1,99 @@
+# P5-14: cached property lookups on the lazy views (2026-09-28)
+
+Task P5-14 (accordproject/concerto-rust#308) caches a ClassDeclaration
+view's `getProperties()` list, and the name lookup `getProperty()` makes
+over it, once per view (`packages/concerto-core/src/engine/views.ts`). A
+repeated call no longer crosses into the engine. A miss still runs the
+`classDeclarationGetProperties` binding, so every error is raised by the
+same call. The cache is dropped whenever a ModelManager's model files
+change (add, update or replace, delete, clear, and the roll-back of a
+failed batch). It is also dropped when a view's own properties, its
+`superType`, its model file or its super type's entry change. The change is
+TS-side only: no engine or WASM change.
+
+**Why TS-side, and not a Rust port.** The coordinator lifted the porting
+pause on #308, so a Rust port was an option. The measurements below favour
+the cache. Before P5-14, `getProperties()` on the Item concept took about
+6 µs per call. That is JS→WASM→JS work: the binding calls back into the
+views for `getOwnProperties`, the super type's resolution and the super
+type's own `getProperties()`. A Rust port would still cross the boundary
+at least once per call, and would still need the JS view objects returned.
+The cache answers a repeated call without crossing at all (0.09 µs), which
+is below TS 5.0.0's own 0.40 µs. `getProperty()` goes from 0.56 µs to
+0.09 µs.
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 logical CPUs, 17 GB, Linux x64 (a cloud container) |
+| Toolchain | Node v22.22.2, wasm-bindgen 0.2.128, wasm-opt applied by `concerto-wasm/build.sh`. The engine is 2,863,571 bytes, within the 4 MiB budget. |
+| Quiet-check | Before every run, the driver waited until the 1-minute load average was below 1. All 9 runs met it. The 1-minute load was 0.77 to 0.93 at each start. |
+| Before | `concerto` `201e6a748` (the integration head) with `concerto-rust` `2ea80b0` |
+| After | the P5-14 branch (the same heads plus this change). Both sides used the same engine build and the same `run-ts.mjs`. |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0 (the oracle's reference), run with `--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist` |
+| Runs | `results/P5-14-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`: three interleaved rounds of all three workloads, with the defaults (5 warm-up and 30 samples) |
+
+`run-ts.mjs` workload 3 now also times `toJSON` over the same 500
+resources. It also times `getProperties()` and `getProperty()` on the Item
+declaration: 1,000 calls per sample, with `getProperty()` cycling through
+Item's property names.
+
+## Through the TS public API
+
+Medians are in µs per model, per instance or per call, for runs 1, 2 and 3.
+The ratios use the median of the three runs.
+
+| Model set | Metric | TS 5.0.0, runs 1 / 2 / 3 | Rust before, runs 1 / 2 / 3 | Rust P5-14, runs 1 / 2 / 3 | before / TS | **P5-14 / TS** | speed-up |
+|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | load | 31.2 / 30.0 / 33.6 | 165.1 / 154.6 / 212.1 | 172.1 / 142.9 / 137.4 | 5.30× | **4.58×** | 1.16× |
+| concerto-core-test-data | validate | 69.4 / 61.0 / 69.7 | 175.3 / 180.2 / 184.5 | 178.2 / 167.7 / 183.2 | 2.60× | **2.57×** | 1.01× |
+| concerto-core-test-data | validateAst | 543.5 / 549.8 / 559.0 | 227.1 / 239.5 / 243.5 | 230.5 / 226.8 / 241.0 | 0.44× | **0.42×** | 1.04× |
+| conformance | load | 13.6 / 14.1 / 13.4 | 72.5 / 78.8 / 59.9 | 71.9 / 68.7 / 62.9 | 5.33× | **5.04×** | 1.06× |
+| conformance | validate | 21.1 / 21.6 / 23.5 | 185.7 / 151.2 / 158.8 | 165.5 / 154.4 / 177.2 | 7.34× | **7.64×** | 0.96× |
+| conformance | validateAst | 207.5 / 214.2 / 216.6 | 108.0 / 112.8 / 148.9 | 99.4 / 112.0 / 124.5 | 0.53× | **0.52×** | 1.01× |
+| synthetic-large | load | 611.4 / 642.8 / 591.1 | 7443.0 / 6884.8 / 8896.5 | 7102.2 / 7490.5 / 7602.9 | 12.17× | **12.25×** | 0.99× |
+| synthetic-large | validate | 2003.2 / 2346.9 / 2262.4 | 9678.0 / 9589.1 / 10104.3 | 9364.6 / 8794.7 / 8214.7 | 4.28× | **3.89×** | 1.10× |
+| (synthetic, 500) | fromJSON | 6.8 / 7.4 / 6.3 | 25.3 / 24.4 / 25.3 | 27.5 / 27.4 / 26.0 | 3.70× | **4.02×** | 0.92× |
+| (synthetic, 500) | resource.validate() | 1.6 / 1.7 / 1.6 | 15.2 / 17.9 / 14.7 | 5.8 / 6.3 / 6.3 | 9.53× | **3.92×** | 2.43× |
+| (synthetic, 500) | toJSON | 3.5 / 3.6 / 3.7 | 20.5 / 20.9 / 21.4 | 19.3 / 20.9 / 19.6 | 5.88× | **5.52×** | 1.07× |
+| Item | getProperties() | 0.409 / 0.401 / 0.399 | 5.4 / 5.8 / 6.8 | 0.091 / 0.091 / 0.101 | 14.55× | **0.23×** | 64.00× |
+| Item | getProperty() | 0.038 / 0.037 / 0.038 | 0.517 / 0.564 / 0.570 | 0.090 / 0.096 / 0.087 | 15.04× | **2.39×** | 6.29× |
+
+(`validateAst` rejects every model in synthetic-large, so it has no row, as
+in earlier runs.)
+
+- **`getProperties()` is 64× faster** and now takes 0.23× the time of TS
+  5.0.0. It returns a copy of the cached list, a new array on every call,
+  as the binding did.
+- **`getProperty()` is 6.3× faster.** It is still 2.4× TS: each call
+  checks that the cache is still valid (the view's own properties and each
+  super type's entry) before the map lookup.
+- **`resource.validate()` is 2.43× faster** (15.2 µs to 6.3 µs; 9.5× to
+  3.9× TS). The validator calls `getProperties()` twice and `getProperty()`
+  five times per Item instance through the views, and those calls were
+  most of its boundary cost (P5-12's profile).
+- **`fromJSON` and `toJSON` are unchanged** (0.92× and 1.07×, within
+  noise). Both take the serializer's engine fast path (one engine call per
+  document), which makes no
+  `getProperties()`/`getProperty()` call through the views. With the
+  prototype methods wrapped, one `fromJSON` and one `toJSON` of an Item
+  made none, and one `validate()` made 2 and 5. Their remaining cost is in
+  that fast path, not in the property lookups.
+- **Load, validate and validateAst are unchanged** within the noise of this
+  shared container (0.96× to 1.16×; the load CVs were 17% to 52%). They
+  make few repeated lookups.
+
+## Correctness during the run
+
+The P5-14 verification (the native oracle, the WASM leg, the concerto-core
+suite with nyc and CONCERTO_LAZY_VIEWS_CHECK=1, and the guardrails) is
+reported on accordproject/concerto-rust#308. Cache invalidation (add,
+update or replace, delete, clear, roll-back) and the returned-array
+semantics are covered by the lifted checks in
+`migration/oracle/lifted/property-cache.checks.js` (PROP-CACHE-001 to 008),
+checked against both `src/` and the TS 5.0.0 reference.
+
+---
+
 # P5-13: validator performance, resident metamodel and fewer allocations (2026-09-28)
 
 Task P5-13 (accordproject/concerto-rust#297) makes the Rust validators

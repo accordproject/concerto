@@ -1656,7 +1656,303 @@ function buildDeferredParts(modelFile: any): void {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Property lookups (P5-14, accordproject/concerto-rust#308): a
+// ClassDeclaration view's `getProperties()` list, and the name lookup
+// `getProperty()` makes over it, are cached once per view, so repeated calls
+// do not cross into the engine again.
+//
+// A miss runs the `classDeclarationGetProperties` binding exactly as before,
+// so every error is raised by the same call. While it runs, the super type's
+// `getProperties()` call it makes (TS: `classDecl.getProperties()`) comes
+// back through this module and is recorded, so the entry knows which view
+// supplied the inherited part and which of that view's entries it copied.
+// An entry is reused only while:
+// - no model file was added, updated or deleted in any ModelManager since
+//   it was built (`invalidatePropertyLookups`, called by BaseModelManager
+//   where it changes its `modelFiles` map in place: `addModelFile`,
+//   `updateModelFile`, `deleteModelFile`, `addModelFiles`), and the view's
+//   manager still holds the same `modelFiles` map (`clearModelFiles` and the
+//   roll-back of a failed `addModelFiles` or `updateExternalModels` replace
+//   the whole map). These are the points where TS 5.0.0 could resolve a
+//   super type differently;
+// - the view's own properties array, its length, its `superType` and its
+//   `modelFile` are the ones it was built from;
+// - the super type's view still holds the entry it was built from, and
+//   that entry is itself still reusable.
+// Only views of model files the ModelFile constructor built for a real
+// BaseModelManager are cached (a stub collaborator's answers can change
+// without a model change); anything else calls the binding every time, as
+// before.
+//
+// `getProperties()` returns a new array on every call, as TS 5.0.0 did
+// whenever it concatenated a super type's properties, and as the binding did
+// on every call: mutating it reaches neither the cache nor the engine. The
+// Property objects in it are the views themselves, so identity is unchanged
+// (BC-23).
+// ---------------------------------------------------------------------------
+
+/** Bumped whenever any ModelManager's model files change. */
+let propertyGeneration = 0;
+
+/**
+ * Drops every cached property lookup: called by BaseModelManager whenever
+ * it adds, replaces or deletes a model file in its `modelFiles` map. (A
+ * manager that replaces the whole map is caught by `lookupValid`.)
+ */
+function invalidatePropertyLookups(): void {
+    propertyGeneration++;
+}
+
+/** One ClassDeclaration view's cached `getProperties()` list. */
+interface PropertyLookup {
+    /** `propertyGeneration` when it was built. */
+    generation: number;
+    /** The own properties array (`getOwnProperties()`, `properties`) it was built from. */
+    own: any[];
+    /** That array's length then. */
+    ownLength: number;
+    /** The view's `superType` then. */
+    superType: any;
+    /** The view's `modelFile` then. */
+    modelFile: any;
+    /** Its manager's `modelFiles` map then. */
+    modelFiles: any;
+    /** The super type's view that supplied the inherited part, or null. */
+    superView: any;
+    /** That view's entry the inherited part was copied from, or null. */
+    superEntry: PropertyLookup | null;
+    /** The list: own properties, then the super type's. Never handed out. */
+    list: any[];
+    /** The first property of each name in `list`, built on first `getProperty`. */
+    byName?: Map<string, any>;
+}
+
+const propertyLookups = new WeakMap<object, PropertyLookup>();
+
+/** A `getProperties()` call the binding made while an entry was being built. */
+interface LookupCall {
+    view: any;
+    result: any[];
+}
+
+/** The entries being built, innermost last, with the calls each one made. */
+const lookupFrames: LookupCall[][] = [];
+
+/**
+ * Whether `view`'s property lookups may be cached: its model file was built
+ * by the ModelFile constructor for a real BaseModelManager.
+ * @param {object} view the ClassDeclaration view
+ * @return {boolean} true if cacheable
+ */
+function lookupCacheable(view: any): boolean {
+    const modelFile = view?.modelFile;
+    if (!modelFile || typeof modelFile !== 'object' || !constructedFiles.has(modelFile)) {
+        return false;
+    }
+    const manager = modelFile.modelManager;
+    return !!manager && !!manager.rustHandle && typeof manager._needsRustWrite === 'function';
+}
+
+/**
+ * Whether `entry` is still `view`'s answer (see the section comment).
+ * @param {object} view the ClassDeclaration view
+ * @param {object} entry its cached entry
+ * @return {boolean} true if it may be reused
+ */
+function lookupValid(view: any, entry: PropertyLookup): boolean {
+    if (entry.generation !== propertyGeneration || view.superType !== entry.superType ||
+        view.modelFile !== entry.modelFile || view.properties !== entry.own ||
+        view.modelFile.modelManager?.modelFiles !== entry.modelFiles) {
+        return false;
+    }
+    const own = view.getOwnProperties();
+    if (own !== entry.own || own.length !== entry.ownLength) {
+        return false;
+    }
+    if (entry.superView === null) {
+        return true;
+    }
+    return propertyLookups.get(entry.superView) === entry.superEntry && lookupValid(entry.superView, entry.superEntry!);
+}
+
+/**
+ * `view`'s cached entry, if it may be reused, else undefined.
+ * @param {object} view the ClassDeclaration view
+ * @return {object|undefined} the entry
+ */
+function validLookup(view: any): PropertyLookup | undefined {
+    const entry = propertyLookups.get(view);
+    if (entry === undefined) {
+        return undefined;
+    }
+    if (lookupValid(view, entry)) {
+        return entry;
+    }
+    propertyLookups.delete(view);
+    return undefined;
+}
+
+/**
+ * The entry for a list the binding just returned, or undefined when it
+ * cannot be cached: the own properties are not the view's `properties`
+ * array, or, with a super type, the inherited part did not come from
+ * exactly one recorded `getProperties()` call of a cached view.
+ * @param {object} view the ClassDeclaration view
+ * @param {any[]} own the own properties array before the call
+ * @param {object} state the view's `superType`, `modelFile` and manager's
+ * `modelFiles`, and `propertyGeneration`, before the call
+ * @param {any[]} list what the binding returned
+ * @param {object[]} calls the `getProperties()` calls it made
+ * @return {object|undefined} the entry
+ */
+function newLookup(view: any, own: any, state: { superType: any; modelFile: any; modelFiles: any; generation: number },
+    list: any, calls: LookupCall[]): PropertyLookup | undefined {
+    if (!Array.isArray(own) || view.properties !== own || view.superType !== state.superType ||
+        view.modelFile !== state.modelFile || !Array.isArray(list) || state.generation !== propertyGeneration ||
+        view.modelFile.modelManager?.modelFiles !== state.modelFiles) {
+        return undefined;
+    }
+    const ownLength = own.length;
+    let superView: any = null;
+    let superEntry: PropertyLookup | null = null;
+    let inherited: any[] = [];
+    if (state.superType !== null) {
+        if (calls.length !== 1) {
+            return undefined;
+        }
+        superView = calls[0].view;
+        superEntry = propertyLookups.get(superView) ?? null;
+        inherited = calls[0].result;
+        if (superEntry === null || superView === view) {
+            return undefined;
+        }
+    } else if (calls.length !== 0) {
+        return undefined;
+    }
+    if (list.length !== ownLength + inherited.length) {
+        return undefined;
+    }
+    for (let n = 0; n < ownLength; n++) {
+        if (list[n] !== own[n]) {
+            return undefined;
+        }
+    }
+    for (let n = 0; n < inherited.length; n++) {
+        if (list[ownLength + n] !== inherited[n]) {
+            return undefined;
+        }
+    }
+    return {
+        generation: state.generation,
+        own,
+        ownLength,
+        superType: state.superType,
+        modelFile: state.modelFile,
+        modelFiles: state.modelFiles,
+        superView,
+        superEntry,
+        list: list.slice(),
+    };
+}
+
+/**
+ * `ClassDeclaration.getProperties` (P5-14): a copy of the cached list, or
+ * the `classDeclarationGetProperties` binding's answer, cached when it can
+ * be. Throws what the binding throws.
+ * @param {object} view the ClassDeclaration view
+ * @return {object[]} the properties, own first, then the super type's
+ */
+function classDeclarationGetProperties(view: any): any[] {
+    const parent = lookupFrames.length > 0 ? lookupFrames[lookupFrames.length - 1] : undefined;
+    const result = propertiesOf(view);
+    parent?.push({ view, result });
+    return result;
+}
+
+/**
+ * The body of `classDeclarationGetProperties`, without recording the call
+ * in the enclosing frame.
+ * @param {object} view the ClassDeclaration view
+ * @return {object[]} the properties
+ */
+function propertiesOf(view: any): any[] {
+    if (!lookupCacheable(view)) {
+        return rust!.classDeclarationGetProperties(view);
+    }
+    const cached = validLookup(view);
+    if (cached !== undefined) {
+        return cached.list.slice();
+    }
+    const own = view.properties;
+    const state = {
+        superType: view.superType,
+        modelFile: view.modelFile,
+        modelFiles: view.modelFile.modelManager.modelFiles,
+        generation: propertyGeneration,
+    };
+    const calls: LookupCall[] = [];
+    lookupFrames.push(calls);
+    let list;
+    try {
+        list = rust!.classDeclarationGetProperties(view);
+    } finally {
+        lookupFrames.pop();
+    }
+    const entry = newLookup(view, own, state, list, calls);
+    if (entry !== undefined) {
+        propertyLookups.set(view, entry);
+    }
+    return list;
+}
+
+/**
+ * `ClassDeclaration.getProperty` (P5-14): the first property of that name in
+ * the cached `getProperties()` list, which is the property the binding
+ * returns (the own property of that name, else the super type's answer),
+ * or null. The list is built (with the binding, as `getProperties()` builds
+ * it) when it is not cached; when that is not possible, or it throws, the
+ * `classDeclarationGetProperty` binding answers, as before, and throws what
+ * it throws.
+ * @param {object} view the ClassDeclaration view
+ * @param {string} name the property name
+ * @return {object|null} the property, or null
+ */
+function classDeclarationGetProperty(view: any, name: any): any {
+    if (typeof name === 'string' && lookupCacheable(view)) {
+        let entry = validLookup(view);
+        if (entry === undefined) {
+            try {
+                propertiesOf(view);
+                entry = propertyLookups.get(view);
+            } catch (e) {
+                // The binding below raises its own error, if any.
+                entry = undefined;
+            }
+        }
+        if (entry !== undefined) {
+            let byName = entry.byName;
+            if (byName === undefined) {
+                byName = new Map();
+                for (const property of entry.list) {
+                    const key = property.getName();
+                    if (!byName.has(key)) {
+                        byName.set(key, property);
+                    }
+                }
+                entry.byName = byName;
+            }
+            const property = byName.get(name);
+            return property === undefined ? null : property;
+        }
+    }
+    return rust!.classDeclarationGetProperty(view, name);
+}
+
 export {
+    invalidatePropertyLookups,
+    classDeclarationGetProperties,
+    classDeclarationGetProperty,
     localType,
     builtDeclaration,
     installLazyField,

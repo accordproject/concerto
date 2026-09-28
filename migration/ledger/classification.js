@@ -196,6 +196,17 @@ module.exports = {
             'stringValidatorFromSnapshot': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (rebuilds a StringValidator from its Rust stringValidatorNew snapshot)' },
             'sizeValidatorFromSnapshot': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (rebuilds a CollectionSizeValidator from its Rust collectionSizeValidatorNew snapshot)' },
             'buildDeferredParts': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: the migration check mode builds every deferred part at once)' },
+            // P5-14 (accordproject/concerto-rust#308): the per-view cache of
+            // ClassDeclaration.getProperties/getProperty; a miss still runs
+            // the Rust classDeclarationGetProperties binding.
+            'classDeclarationGetProperties': { c: 'HYBRID', p: 'P5-14', r: R.engineShim + ' (property lookup cache: a copy of the cached list, else the Rust classDeclarationGetProperties binding, whose answer it caches)' },
+            'propertiesOf': { c: 'HYBRID', p: 'P5-14', r: R.engineShim + ' (property lookup cache: the cached list, else the Rust classDeclarationGetProperties binding, recording the super type\'s call)' },
+            'classDeclarationGetProperty': { c: 'HYBRID', p: 'P5-14', r: R.engineShim + ' (property lookup cache: a name lookup over the cached list, else the Rust classDeclarationGetProperty binding)' },
+            'invalidatePropertyLookups': { c: 'TS', p: 'P5-14', r: R.engineShim + ' (property lookup cache: dropped when a ModelManager changes its model files)' },
+            'lookupCacheable': { c: 'TS', p: 'P5-14', r: R.engineShim + ' (property lookup cache: only views of engine-built files of a real ModelManager)' },
+            'lookupValid': { c: 'TS', p: 'P5-14', r: R.engineShim + ' (property lookup cache: whether an entry still holds)' },
+            'validLookup': { c: 'TS', p: 'P5-14', r: R.engineShim + ' (property lookup cache: a view\'s entry, if it still holds)' },
+            'newLookup': { c: 'TS', p: 'P5-14', r: R.engineShim + ' (property lookup cache: builds an entry from the binding\'s answer)' },
         },
     },
     'src/factory.ts': { c: 'TS', t: NONE, p: NONE, r: R.d7Factory },
