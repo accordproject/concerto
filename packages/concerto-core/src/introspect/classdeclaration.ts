@@ -442,7 +442,9 @@ class ClassDeclaration extends Declaration {
      * @return {Property} the field, or null if it does not exist
      */
     getProperty(name: string): Property | null {
-        return rust.classDeclarationGetProperty(this, name) as Property | null;
+        // P5-14: the `classDeclarationGetProperty` binding, answered from
+        // the view's cached property list when it has one (engine/views.ts).
+        return loadEngine('../engine/views').classDeclarationGetProperty(this, name) as Property | null;
     }
 
     /**
@@ -451,7 +453,9 @@ class ClassDeclaration extends Declaration {
      * @return {Property[]} the array of fields
      */
     getProperties(): Property[] {
-        return rust.classDeclarationGetProperties(this) as Property[];
+        // P5-14: the `classDeclarationGetProperties` binding, cached per view
+        // (engine/views.ts).
+        return loadEngine('../engine/views').classDeclarationGetProperties(this) as Property[];
     }
 
     /**

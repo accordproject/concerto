@@ -586,6 +586,8 @@ class BaseModelManager {
             // Mirrored first, so a mirror error leaves both unchanged.
             this._rustMirrorAdd(modelFile);
             this.modelFiles[modelFile.getNamespace()] = modelFile;
+            // P5-14: a model change drops the cached property lookups.
+            engineViews().invalidatePropertyLookups();
         } else {
             this._throwAlreadyExists(modelFile);
         }
@@ -700,6 +702,7 @@ class BaseModelManager {
         // Mirrored first, so a mirror error leaves both unchanged.
         this._rustMirrorUpdate(existing, modelFile);
         this.modelFiles[modelFile.getNamespace()] = modelFile;
+        engineViews().invalidatePropertyLookups();
         return modelFile;
     }
 
@@ -725,6 +728,7 @@ class BaseModelManager {
                 this.rustHandle.deleteModelFile(namespace);
             }
             delete this.modelFiles[namespace];
+            engineViews().invalidatePropertyLookups();
         }
     }
 
@@ -765,6 +769,7 @@ class BaseModelManager {
                 }
                 if (!this.modelFiles[m.getNamespace()]) {
                     this.modelFiles[m.getNamespace()] = m;
+                    engineViews().invalidatePropertyLookups();
                     newModelFiles.push(m);
                 } else {
                     this._throwAlreadyExists(m);
