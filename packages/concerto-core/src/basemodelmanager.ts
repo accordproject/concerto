@@ -218,10 +218,18 @@ class BaseModelManager {
             // it in rustHandle.
             /* istanbul ignore next */
             if (this.rustHandle.modelFileId(MetaModelNamespace) === undefined) {
+                // Not reachable with a non-string in practice --
+                // `metamodelModelFile` is built above from fixed internal
+                // values (`undefined`, `MetaModelNamespace`) -- but guarded
+                // the same way as every other `getDefinitions()`/`getName()`
+                // forward for consistency (accordproject/concerto-rust#294
+                // follow-up).
+                const definitions = this.metamodelModelFile.getDefinitions();
+                const fileName = this.metamodelModelFile.getName();
                 this.rustHandle.addModelWithDefinitions(
                     JSON.stringify(this.metamodelModelFile.getAst()),
-                    this.metamodelModelFile.getDefinitions() ?? undefined,
-                    this.metamodelModelFile.getName() ?? undefined,
+                    typeof definitions === 'string' ? definitions : undefined,
+                    typeof fileName === 'string' ? fileName : undefined,
                     false,
                 );
             }
@@ -372,10 +380,18 @@ class BaseModelManager {
             return false;
         }
         if (!engineViews().commitStaged(modelFile, this.rustHandle)) {
+            // `ModelFile`'s constructor only rejects a *truthy* non-string
+            // `definitions`/`fileName`: `0`, `false` and `NaN` are stored
+            // as-is and reach here raw. Only a genuine string is forwarded
+            // to the wasm `Option<String>` params, matching v5.0.0 (which
+            // makes no wasm call at all) (accordproject/concerto-rust#294
+            // follow-up).
+            const definitions = modelFile.getDefinitions();
+            const fileName = modelFile.getName();
             this.rustHandle.addModelWithDefinitions(
                 JSON.stringify(modelFile.getAst()),
-                modelFile.getDefinitions() ?? undefined,
-                modelFile.getName() ?? undefined,
+                typeof definitions === 'string' ? definitions : undefined,
+                typeof fileName === 'string' ? fileName : undefined,
                 false,
             );
         }
@@ -416,10 +432,15 @@ class BaseModelManager {
             return;
         }
         if (!wasMirrored) {
+            // Same falsy-non-string forward as `_rustMirrorAdd`: only a
+            // genuine string reaches the wasm `Option<String>` params
+            // (accordproject/concerto-rust#294 follow-up).
+            const addDefinitions = modelFile.getDefinitions();
+            const addFileName = modelFile.getName();
             this.rustHandle.addModelWithDefinitions(
                 JSON.stringify(modelFile.getAst()),
-                modelFile.getDefinitions() ?? undefined,
-                modelFile.getName() ?? undefined,
+                typeof addDefinitions === 'string' ? addDefinitions : undefined,
+                typeof addFileName === 'string' ? addFileName : undefined,
                 false,
             );
             return;
@@ -427,10 +448,12 @@ class BaseModelManager {
         // TS has already validated (or was asked not to); the mirror call
         // only needs to keep rustHandle's state in sync, so it never
         // re-validates itself.
+        const updateDefinitions = modelFile.getDefinitions();
+        const updateFileName = modelFile.getName();
         this.rustHandle.updateModelFile(
             JSON.stringify(modelFile.getAst()),
-            modelFile.getDefinitions() ?? undefined,
-            modelFile.getName() ?? undefined,
+            typeof updateDefinitions === 'string' ? updateDefinitions : undefined,
+            typeof updateFileName === 'string' ? updateFileName : undefined,
             false,
         );
     }
@@ -588,9 +611,14 @@ class BaseModelManager {
         // propagates unchanged.
         const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
         try {
+            // Reachable with a falsy non-string `fileName` (`0`, `false`,
+            // `NaN`) via `addModelFile`'s `options.metamodelValidation` path:
+            // only a genuine string reaches the wasm `Option<String>` param
+            // (accordproject/concerto-rust#294 follow-up).
+            const fileName = modelFile.getName();
             this.rustHandle.validateAst(
                 JSON.stringify(modelFile.getAst()),
-                modelFile.getName() ?? undefined,
+                typeof fileName === 'string' ? fileName : undefined,
             );
         } catch (err) {
             // rustHandle's own validate_ast (concerto-core

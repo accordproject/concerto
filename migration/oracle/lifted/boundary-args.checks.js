@@ -151,4 +151,85 @@ for (const [call, run] of Object.entries(COERCE_CALLS)) {
     }
 }
 
+/**
+ * #294 review follow-up: the `ModelFile` constructor only rejects a
+ * *truthy* non-string `definitions`/`fileName`
+ * (`if (definitions && typeof definitions !== 'string') throw ...`,
+ * introspect/modelfile.ts) -- a falsy non-string (`0`, `false`, `NaN`) is
+ * stored as-is. `BaseModelManager`/`ModelFile` forwarded that raw value to
+ * several wasm `Option<String>` params via `x ?? undefined` (which maps
+ * only null/undefined), trapping the engine at each of: `stageModelFile`
+ * (engine/views.ts, run by the `ModelFile` constructor itself),
+ * `_rustMirrorAdd`'s and `_rustMirrorUpdate`'s `addModelWithDefinitions`/
+ * `updateModelFile` calls, `ModelFile#validate()`'s
+ * `modelFileValidateDetached` fallback, and `BaseModelManager#validateAst`
+ * (reachable via `options.metamodelValidation`). Each now forwards only a
+ * genuine string, matching v5.0.0 (no wasm call at all).
+ */
+const FALSY_NONSTRING = { zero: 0, false: false, nan: NaN };
+
+const TEST_CTO = 'namespace test@1.0.0\nconcept A{}';
+const TEST_CTO_V2 = 'namespace test@1.0.0\nconcept A{}\nconcept D{}';
+
+/**
+ * The AST for a CTO string, via a throwaway ModelManager's own processFile.
+ * @param {object} core the core under test
+ * @param {string} cto the CTO source
+ * @returns {object} the AST
+ */
+function astFor(core, cto) {
+    return new core.ModelManager({ strict: true }).processFile(null, cto).ast;
+}
+
+const FALSY_CALLS = {
+    'addCTOModel(cto, x)': (core, x) => {
+        const mm = new core.ModelManager({ strict: true });
+        const mf = mm.addCTOModel(TEST_CTO, x);
+        return [ns(mf), mf.getName()];
+    },
+    'addCTOModel(cto, x) [metamodelValidation]': (core, x) => {
+        const mm = new core.ModelManager({ strict: true, metamodelValidation: true });
+        const mf = mm.addCTOModel(TEST_CTO, x);
+        return [ns(mf), mf.getName()];
+    },
+    'addModelFile(new ModelFile(mm, ast, cto, x))': (core, x) => {
+        const mm = new core.ModelManager({ strict: true });
+        const mf = new core.ModelFile(mm, astFor(core, TEST_CTO), TEST_CTO, x);
+        mm.addModelFile(mf);
+        return [ns(mf), mf.getName()];
+    },
+    'addModelFile(new ModelFile(mm, ast, x, "a.cto"))': (core, x) => {
+        const mm = new core.ModelManager({ strict: true });
+        const mf = new core.ModelFile(mm, astFor(core, TEST_CTO), x, 'a.cto');
+        mm.addModelFile(mf);
+        return [ns(mf), mf.getDefinitions()];
+    },
+    'addModelFiles([new ModelFile(mm, ast, cto, x)])': (core, x) => {
+        const mm = new core.ModelManager({ strict: true });
+        const mf = new core.ModelFile(mm, astFor(core, TEST_CTO), TEST_CTO, x);
+        mm.addModelFiles([mf]);
+        return [ns(mf), mf.getName()];
+    },
+    'updateModelFile(new ModelFile(mm, ast2, cto2, x))': (core, x) => {
+        const mm = new core.ModelManager({ strict: true });
+        mm.addCTOModel(TEST_CTO);
+        const mf2 = new core.ModelFile(mm, astFor(core, TEST_CTO_V2), TEST_CTO_V2, x);
+        mm.updateModelFile(mf2);
+        return [mm.getModelFile('test@1.0.0') === mf2, mf2.getName()];
+    },
+};
+
+for (const [call, run] of Object.entries(FALSY_CALLS)) {
+    for (const [kind, value] of Object.entries(FALSY_NONSTRING)) {
+        n++;
+        const id = `BOUNDARY-ARG-${String(n).padStart(3, '0')}`;
+        checks.push({
+            id,
+            covers: `${call.replace('x', kind)}`,
+            run: (core) => run(core, value),
+            expect: EXPECT[id],
+        });
+    }
+}
+
 module.exports = checks;

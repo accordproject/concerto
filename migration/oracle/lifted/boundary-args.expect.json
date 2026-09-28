@@ -184,5 +184,113 @@
   },
   "BOUNDARY-ARG-044": {
     "ok": "1.0.1"
+  },
+  "BOUNDARY-ARG-045": {
+    "ok": [
+      "test@1.0.0",
+      0
+    ]
+  },
+  "BOUNDARY-ARG-046": {
+    "ok": [
+      "test@1.0.0",
+      false
+    ]
+  },
+  "BOUNDARY-ARG-047": {
+    "ok": [
+      "test@1.0.0",
+      null
+    ]
+  },
+  "BOUNDARY-ARG-048": {
+    "ok": [
+      "test@1.0.0",
+      0
+    ]
+  },
+  "BOUNDARY-ARG-049": {
+    "ok": [
+      "test@1.0.0",
+      false
+    ]
+  },
+  "BOUNDARY-ARG-050": {
+    "ok": [
+      "test@1.0.0",
+      null
+    ]
+  },
+  "BOUNDARY-ARG-051": {
+    "ok": [
+      "test@1.0.0",
+      0
+    ]
+  },
+  "BOUNDARY-ARG-052": {
+    "ok": [
+      "test@1.0.0",
+      false
+    ]
+  },
+  "BOUNDARY-ARG-053": {
+    "ok": [
+      "test@1.0.0",
+      null
+    ]
+  },
+  "BOUNDARY-ARG-054": {
+    "ok": [
+      "test@1.0.0",
+      0
+    ]
+  },
+  "BOUNDARY-ARG-055": {
+    "ok": [
+      "test@1.0.0",
+      false
+    ]
+  },
+  "BOUNDARY-ARG-056": {
+    "ok": [
+      "test@1.0.0",
+      null
+    ]
+  },
+  "BOUNDARY-ARG-057": {
+    "ok": [
+      "test@1.0.0",
+      0
+    ]
+  },
+  "BOUNDARY-ARG-058": {
+    "ok": [
+      "test@1.0.0",
+      false
+    ]
+  },
+  "BOUNDARY-ARG-059": {
+    "ok": [
+      "test@1.0.0",
+      null
+    ]
+  },
+  "BOUNDARY-ARG-060": {
+    "ok": [
+      true,
+      0
+    ]
+  },
+  "BOUNDARY-ARG-061": {
+    "ok": [
+      true,
+      false
+    ]
+  },
+  "BOUNDARY-ARG-062": {
+    "ok": [
+      true,
+      null
+    ]
   }
 }
