@@ -206,6 +206,21 @@ for the numbers as found.
   (sourced from `SUMMARY.md`, not re-derived — see `status.mjs`'s own
   comment on why re-summing `SEAM_LEDGER.tsv` directly reproduces the
   superseded denominator).
+- **Current result: FAIL, D1 = 39.4%** (P5-11, `accordproject/concerto-rust#276`;
+  ledger rebuilt with `build-ledger.js` on the integration head `f0f535612`).
+  The P5-01 evidence (85.3%, green) is stale: it predates two
+  reclassifications of rows that make no engine call.
+  - `accordproject/concerto-rust#261` demoted RUST rows with no engine call to
+    PARTIAL (D1 61.5% at #261, 57.4% after P5-10).
+  - P5-11 evaluated every PARTIAL row and every HYBRID row with no engine call.
+    By maintainer decision (2026-09-28, recorded on #276): no more code moves to
+    Rust for now; the 14 port candidates (weight 379.5) stay PARTIAL, deferred;
+    the rest are reclassified TS. The engine-call scan now also counts a call one
+    hop away through a same-module helper or local handle, which keeps 6 HYBRID
+    rows HYBRID.
+  - **D1 stays as defined, with the 70% bar** (the proposed D1′ was not
+    adopted), so §0.4 is reported honestly as FAIL. The maintainer accepts that
+    for now.
 
 ### 5. The public TS API is unchanged (exports, deep paths, `.d.ts` snapshot)
 
