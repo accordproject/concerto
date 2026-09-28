@@ -384,9 +384,11 @@ without a ledger rebuild fails the build.
 
     PARTIAL rows keep their planned task (so the oracle's owner attribution is unchanged)
     and are **not** counted as Rust in D1. P5-11 (accordproject/concerto-rust#276) evaluated
-    every PARTIAL row: the ones recommended to move to Rust stay PARTIAL as *port candidates,
+    every PARTIAL row: the ones recommended to move to Rust stayed PARTIAL as *port candidates,
     deferred* by maintainer decision (2026-09-28; the \`deferred\` marker in
-    \`classification.js\`), and the rest were reclassified TS (section 4).
+    \`classification.js\`), and the rest were reclassified TS (section 4). The pause was
+    lifted the same day, and accordproject/concerto-rust#287 ported the 14 port candidates,
+    so they are RUST now.
   * **TS**: the member stays in TS with no Rust involvement.
 * **Automatic TS rules**, which an explicit override can reverse:
   * \`accept()\` visitor entry points;
@@ -506,11 +508,12 @@ ${hyFull.join('\n')}
 ${paItems.length} members, weight ${wP} (${pct(wP, totW)}). Set automatically by the engine-call
 scan (see Method); accordproject/concerto-rust#261. ${paDeferred.length} of them (weight
 ${sum(paDeferred, l => l.weight)}) are **port candidates, deferred by maintainer decision**
-(accordproject/concerto-rust#276, 2026-09-28): the P5-11 evaluation recommended moving them to
-Rust (resolution and validation primitives, and throw sites that re-derive a Rust verdict),
-and the maintainer decided that no more code moves to Rust for now. The evaluation, with the
-evidence for each row, is on #276, and the deferred list, with option F, is kept in the \`mig:post-migration\`
-backlog issue accordproject/concerto-rust#287. A row marked **undecided** has not been evaluated.
+(accordproject/concerto-rust#276, 2026-09-28). The P5-11 evaluation recommended moving 14 rows
+to Rust (resolution and validation primitives, and throw sites that re-derive a Rust verdict);
+the maintainer first deferred them, then lifted the pause the same day, and
+accordproject/concerto-rust#287 ported all 14 (they are RUST now). The evaluation, with the
+evidence for each row, is on #276; option F is superseded by accordproject/concerto-rust#293.
+A row marked **undecided** has not been evaluated.
 
 ### PARTIAL *logic*: unconverted TS bodies
 

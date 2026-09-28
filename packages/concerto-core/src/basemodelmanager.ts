@@ -519,6 +519,20 @@ class BaseModelManager {
      * @private
      */
     _throwAlreadyExists(modelFile) {
+        const namespace = modelFile.getNamespace();
+        const fileName = modelFile.getName();
+        /* istanbul ignore next */
+        if (typeof namespace === 'string' && (typeof fileName === 'string' || fileName === undefined || fileName === null) &&
+            this._rustHandleMatchesModelFiles()) {
+            // P5-11 (accordproject/concerto-rust#287): the plain Error is
+            // raised by Rust (concerto-wasm `throwAlreadyExists`), naming the
+            // file rustHandle holds under the namespace, which mirrors
+            // this.modelFiles. A rustHandle that does not mirror
+            // this.modelFiles (a W test's stub ModelFile, or a batch of
+            // addModelFiles not yet mirrored) and arguments the binding
+            // cannot take keep the TS body below.
+            this.rustHandle.throwAlreadyExists(namespace, fileName ?? undefined);
+        }
         const existingModelFileName = this.modelFiles[modelFile.getNamespace()].getName();
         const postfix = existingModelFileName ? ` in file ${existingModelFileName}` : '';
         const prefix = modelFile.getName() ? ` specified in file ${modelFile.getName()}` : '';
@@ -840,11 +854,22 @@ class BaseModelManager {
      * Validates all models files in this model manager
      */
     validateModelFiles() {
+        /* istanbul ignore next */
+        if (this._rustHandleMatchesModelFiles()) {
+            // P5-11 (accordproject/concerto-rust#287): every model file is
+            // validated in one Rust call (concerto-wasm `validateModelFiles`)
+            // rather than one `modelFile.validate()` crossing per file; the
+            // first error found is thrown naming the ModelFile of this
+            // manager it was found in, as that file's own validate() does.
+            this.rustHandle.validateModelFiles(this.modelFiles);
+            return;
+        }
         // P4-08 (accordproject/concerto-rust#67, maintainer decision
-        // 2026-09-26): this call site is unchanged -- each file's own
-        // `validate()` (introspect/modelfile.ts) now delegates fully to Rust
-        // for a real `ModelFile` in rust mode, since `rustHandle` is told
-        // about `ModelManagerOptions` (`decoratorValidation`,
+        // 2026-09-26): a rustHandle that does not mirror this.modelFiles (a
+        // W test's stub ModelFile, whose stubbed `validate` spy must see its
+        // call) validates each file through its own `validate()`, which
+        // delegates fully to Rust for a real `ModelFile`, since `rustHandle`
+        // is told about `ModelManagerOptions` (`decoratorValidation`,
         // `dangerouslyAllowReservedSystemTypeNamesInUserModels`) by
         // `BaseModelManager`'s constructor.
         for (let ns in this.modelFiles) {
@@ -875,21 +900,91 @@ class BaseModelManager {
         try {
             const externalModels = await downloader.downloadExternalDependencies(this.getModelFiles(), options);
 
-            const externalModelFiles: ModelFileInstance[] = [];
-            externalModels.forEach((file) => {
-                const mf = new ModelFile(this, file.ast as AstNode, file.definitions, file.fileName);
-                const existing = this.modelFiles[mf.getNamespace()];
+            // P5-11 (accordproject/concerto-rust#287): every downloaded
+            // file's view is built first, so a file the ModelFile
+            // constructor rejects fails the update before anything changed.
+            const views: ModelFileInstance[] = externalModels.map((file) =>
+                new ModelFile(this, file.ast as AstNode, file.definitions, file.fileName));
 
-                if (existing) {
-                    externalModelFiles.push(this.updateModelFile(mf, mf.getName(), true)); // disable validation
-                } else {
-                    externalModelFiles.push(this.addModelFile(mf, null, mf.getName(), true)); // disable validation
+            /* istanbul ignore next */
+            if (this._rustHandleMatchesModelFiles() &&
+                views.every((mf) => this._isMirrored(mf) && this._needsRustWrite(mf.getNamespace()))) {
+                // P5-11 (accordproject/concerto-rust#287): rustHandle adds
+                // each file (or replaces the file under its namespace) and
+                // validates every model file, in one call that leaves it
+                // unchanged when it fails (concerto-wasm
+                // `updateExternalModels`). Only then do the views replace
+                // this.modelFiles' entries, so a failure leaves both
+                // unchanged. A rustHandle that does not mirror
+                // this.modelFiles (a W test's stub ModelFile) and a
+                // namespace rustHandle is never written for
+                // (`_needsRustWrite`) keep the TS body below.
+                try {
+                    const next: Record<string, ModelFileInstance> = Object.assign({}, this.modelFiles);
+                    views.forEach((mf) => {
+                        next[mf.getNamespace()] = mf;
+                    });
+                    // Only a genuine string crosses for `definitions` and
+                    // `fileName` (accordproject/concerto-rust#294 follow-up),
+                    // as for every other mirror write.
+                    const sources = views.map((mf) => {
+                        const definitions = mf.getDefinitions();
+                        const fileName = mf.getName();
+                        return {
+                            ast: mf.getAst(),
+                            definitions: typeof definitions === 'string' ? definitions : undefined,
+                            fileName: typeof fileName === 'string' ? fileName : undefined,
+                        };
+                    });
+                    this.rustHandle.updateExternalModels(JSON.stringify(sources), next);
+                } finally {
+                    // rustHandle loaded each file from `sources`, not from
+                    // the stage its constructor made.
+                    views.forEach((mf) => engineViews().dropStaged(mf, this.rustHandle));
                 }
-            });
+                views.forEach((mf) => {
+                    this.modelFiles[mf.getNamespace()] = mf;
+                });
+                engineViews().invalidatePropertyLookups();
+                return views;
+            }
 
-            // now everything is applied, we need to revalidate all models
-            this.validateModelFiles();
-            return externalModelFiles;
+            // Each file is added or replaces the file under its namespace
+            // without validation, and every file is then validated. Each
+            // add or update writes rustHandle too, so a failure undoes
+            // those writes, newest first, before this.modelFiles is
+            // restored below: an added file is deleted from rustHandle
+            // again, and a replaced one is replaced by the file it replaced
+            // (`_rustMirrorUpdate`). An error the undo raises propagates
+            // (accordproject/concerto-rust#262).
+            const externalModelFiles: ModelFileInstance[] = [];
+            const applied: [ModelFileInstance, ModelFileInstance | undefined][] = [];
+            try {
+                views.forEach((mf) => {
+                    const existing = this.modelFiles[mf.getNamespace()];
+
+                    if (existing) {
+                        externalModelFiles.push(this.updateModelFile(mf, mf.getName(), true)); // disable validation
+                    } else {
+                        externalModelFiles.push(this.addModelFile(mf, null, mf.getName(), true)); // disable validation
+                    }
+                    applied.push([mf, existing]);
+                });
+
+                // now everything is applied, we need to revalidate all models
+                this.validateModelFiles();
+                return externalModelFiles;
+            } catch (err) {
+                applied.reverse().forEach(([mf, existing]) => {
+                    const namespace = mf.getNamespace();
+                    if (existing) {
+                        this._rustMirrorUpdate(mf, existing);
+                    } else if (this._isMirrored(mf) && this._needsRustWrite(namespace)) {
+                        this.rustHandle.deleteModelFile(namespace);
+                    }
+                });
+                throw err;
+            }
         } catch (err) {
             // Restore original files
             this.modelFiles = {};
@@ -1095,6 +1190,19 @@ class BaseModelManager {
      * @throws {TypeNotFoundException} - if the type cannot be found or is a primitive type.
      */
     getType(qualifiedName) {
+        /* istanbul ignore next */
+        if (typeof qualifiedName === 'string' && this._rustHandleMatchesModelFiles()) {
+            // P5-11 (accordproject/concerto-rust#287): resolved in Rust
+            // (concerto-wasm `getTypeName`), which throws the
+            // TypeNotFoundException TS throws. Rust answers with the
+            // declaration's fully-qualified name, mapped here to its view in
+            // the model file of its namespace. A rustHandle that does not
+            // mirror this.modelFiles (a W test's stub ModelFile) and a
+            // non-string name, which the binding's `&str` parameter cannot
+            // take, keep the TS body below.
+            const fqn: string = this.rustHandle.getTypeName(qualifiedName);
+            return this.modelFiles[fqn.substring(0, fqn.lastIndexOf('.'))].getLocalType(fqn);
+        }
 
         const namespace = ModelUtil.getNamespace(qualifiedName);
 

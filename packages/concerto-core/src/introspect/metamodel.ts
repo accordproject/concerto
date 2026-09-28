@@ -19,6 +19,16 @@ import Factory from '../factory';
 import Serializer from '../serializer';
 import ModelFile from '../introspect/modelfile';
 
+// The Rust engine (src/engine/index.ts) is the only path. See
+// classdeclaration.ts's own copy of this comment for the bundler/webpack
+// reasoning this loader relies on.
+import { createRequire } from 'module';
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier);
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type { AstNode } from './decorated';
@@ -46,6 +56,20 @@ function newMetaModelManager() {
  * @return {object} the validated metamodel instance in JSON
  */
 function validateMetaModel(input) {
+    // P5-11 (accordproject/concerto-rust#287): validated in one engine call
+    // against a metamodel model manager the engine keeps (engine/serializer.ts
+    // `validateMetaModel`), rather than building a metamodel ModelManager,
+    // its Factory and its Serializer on every call. An input the engine
+    // cannot cross (EngineFastPathUnsupported) is validated below, through
+    // the Serializer's own fallback path.
+    try {
+        loadEngine('../engine/serializer').validateMetaModel(input);
+        return input;
+    } catch (err) {
+        if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+            throw err;
+        }
+    }
     const metaModelManager = newMetaModelManager();
     const factory = new Factory(metaModelManager);
     const serializer = new Serializer(factory, metaModelManager);
