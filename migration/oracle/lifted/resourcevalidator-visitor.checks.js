@@ -135,6 +135,25 @@ function validate(type, fields, visitor) {
 }
 
 /**
+ * `validate()` of a validated (`Factory.newResource`) `Box` with `fields`
+ * assigned directly.
+ * @param {object} fields the fields
+ * @param {boolean} visitor whether to force the visitor path
+ * @returns {Function} the check body
+ */
+function validateBox(fields, visitor) {
+    return (core) => {
+        const { factory } = setup(core, visitor);
+        const r = factory.newResource(NS, 'Box', 'b1');
+        Object.assign(r, fields);
+        return classOnly(visitor, () => {
+            r.validate();
+            return { valid: true, $identifier: r.$identifier };
+        });
+    };
+}
+
+/**
  * `setPropertyValue` or `addArrayValue` on a validated `Box`, returning the
  * property afterwards.
  * @param {string} method `setPropertyValue` or `addArrayValue`
@@ -191,6 +210,10 @@ const SCENARIOS = [
     { id: 'REL-001', covers: 'checkRelationship: a relationship whose target type is not identified', run: (v) => validate('C', (core, factory, mm) => ({ ref: core.Relationship.fromURI(mm, `resource:${NS}.Sub#x`) }), v) },
     { id: 'REL-002', covers: 'checkRelationship: a Resource where a relationship is expected', run: (v) => validate('C', (core, factory) => ({ ref: factory.newResource(NS, 'A', 'a1') }), v) },
     { id: 'REL-003', covers: 'visitRelationshipDeclaration: a valid relationship array', run: (v) => validate('C', (core, factory) => ({ refs: [factory.newRelationship(NS, 'A', 'a1')] }), v) },
+    { id: 'ID-001', covers: 'visitClassDeclaration: a valid identified resource, and the $identifier write-back', run: (v) => validateBox({ bid: 'b2' }, v) },
+    { id: 'ID-002', covers: 'visitClassDeclaration: an identifier that is not a string (id.trim)', run: (v) => validateBox({ bid: 5 }, v) },
+    { id: 'ID-003', covers: 'visitClassDeclaration: an empty identifier', run: (v) => validateBox({ bid: ' ' }, v) },
+    { id: 'ID-004', covers: 'visitClassDeclaration: an instance $identifierFieldName that is not the model\'s', run: (v) => validateBox({ $identifierFieldName: 'nope' }, v) },
     { id: 'SET-001', covers: 'setPropertyValue: a valid value', run: (v) => assign('setPropertyValue', 'tags', ['a'], v) },
     { id: 'SET-002', covers: 'setPropertyValue: an invalid value', run: (v) => assign('setPropertyValue', 'tags', [1], v) },
     { id: 'SET-003', covers: 'setPropertyValue: a valid nested concept', run: (v) => assign('setPropertyValue', 'sub', (core, factory) => factory.newConcept(NS, 'Sub'), v) },
@@ -243,6 +266,14 @@ const EXPECT = {
     'VE-REL-002': {'ok': {'threw': 'ValidationException'}},
     'VV-REL-003': {'ok': 'valid'},
     'VE-REL-003': {'ok': 'valid'},
+    'VV-ID-001': {'ok': {'valid': true, '$identifier': 'b2'}},
+    'VE-ID-001': {'ok': {'valid': true, '$identifier': 'b2'}},
+    'VV-ID-002': {'throws': {'name': 'TypeError', 'message': 'id.trim is not a function'}},
+    'VE-ID-002': {'ok': {'threw': 'TypeError'}},
+    'VV-ID-003': {'throws': {'name': 'ValidationException', 'message': 'Instance "org.acme.lifted.p512c.validate@1.0.0.Box# " has an empty identifier.'}},
+    'VE-ID-003': {'ok': {'threw': 'ValidationException'}},
+    'VV-ID-004': {'throws': {'name': 'ValidationException', 'message': 'Instance "org.acme.lifted.p512c.validate@1.0.0.Box" has an empty identifier.'}},
+    'VE-ID-004': {'ok': {'threw': 'ValidationException'}},
     'VV-SET-001': {'ok': ['a']},
     'VE-SET-001': {'ok': ['a']},
     'VV-SET-002': {'throws': {'name': 'ValidationException', 'message': 'Model violation in the "org.acme.lifted.p512c.validate@1.0.0.Box#b1" instance. The field "tags" has a value of "1" (type of value: "number"). Expected type of value: "String[]".'}},
