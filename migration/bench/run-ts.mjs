@@ -4,6 +4,15 @@
 // Rust-backed concerto-core through the same public API.
 //
 //   node migration/bench/run-ts.mjs [--samples N] [--warmup N] [--out FILE]
+//       [--core-dist DIR] [--workloads LIST]
+//
+// --core-dist (task P5-13, accordproject/concerto-rust#297) runs against
+// another concerto-core `dist/` instead of this checkout's, e.g. the TS
+// reference 5.0.0 the oracle installs under
+// migration/oracle/reference/node_modules/@accordproject/concerto-core/dist
+// (P5-02 removed the in-tree TS engine, so that is the TS comparison).
+// --workloads runs only the named workloads, comma-separated
+// (load_validate, validate_ast, instance_validate; default all three).
 //
 // Runs against the built `dist/` of packages/concerto-core (`npm run build
 // -w packages/concerto-core`, after `npm ci` at the repo root - see
@@ -51,12 +60,14 @@ import { timeit } from './lib/timeit.mjs';
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const CORE_DIST = path.join(REPO_ROOT, 'packages', 'concerto-core', 'dist');
+const DEFAULT_CORE_DIST = path.join(REPO_ROOT, 'packages', 'concerto-core', 'dist');
+const WORKLOADS = ['load_validate', 'validate_ast', 'instance_validate'];
+let CORE_DIST = DEFAULT_CORE_DIST;
 const FIXTURES_DIR = path.join(__dirname, 'fixtures', 'model-sets');
 const RESULTS_DIR = path.join(__dirname, 'results');
 
 function parseArgs(argv) {
-    const args = { samples: 30, warmup: 5, out: null };
+    const args = { samples: 30, warmup: 5, out: null, coreDist: DEFAULT_CORE_DIST, workloads: WORKLOADS };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--samples') {
@@ -65,6 +76,14 @@ function parseArgs(argv) {
             args.warmup = Number(argv[++i]);
         } else if (a === '--out') {
             args.out = argv[++i];
+        } else if (a === '--core-dist') {
+            args.coreDist = path.resolve(argv[++i]);
+        } else if (a === '--workloads') {
+            args.workloads = argv[++i].split(',');
+            const unknown = args.workloads.filter((w) => !WORKLOADS.includes(w));
+            if (unknown.length > 0) {
+                throw new Error(`unknown workload(s): ${unknown.join(', ')}`);
+            }
         } else {
             throw new Error(`unknown argument: ${a}`);
         }
@@ -259,6 +278,8 @@ function gitCommit(dir) {
 
 function main() {
     const args = parseArgs(process.argv.slice(2));
+    CORE_DIST = args.coreDist;
+    const run = (workload) => args.workloads.includes(workload);
     const AstModelManager = requireDist('astmodelmanager.js');
     const ModelManager = requireDist('modelmanager.js');
 
@@ -282,6 +303,12 @@ function main() {
         // packages/concerto-core/src/engine/). Recorded so a results file
         // is self-describing without cross-checking how it was invoked.
         concerto_engine: process.env.CONCERTO_ENGINE === 'rust' ? 'rust' : 'ts',
+        // task P5-13: the concerto-core dist/ that served the run
+        // (--core-dist), the workloads run, and the load average at the
+        // start (the machine is not always quiet).
+        core_dist: path.relative(REPO_ROOT, CORE_DIST),
+        workloads_run: args.workloads,
+        loadavg: os.loadavg(),
         sample_opts: sampleOpts,
         workloads: {},
     };
@@ -295,11 +322,17 @@ function main() {
             results.workloads.validate_ast[setName] = { error: 'fixture set missing' };
             continue;
         }
-        results.workloads.load_validate[setName] = benchLoadValidate(AstModelManager, set, sampleOpts);
-        results.workloads.validate_ast[setName] = benchValidateAst(ModelManager, set, sampleOpts);
+        if (run('load_validate')) {
+            results.workloads.load_validate[setName] = benchLoadValidate(AstModelManager, set, sampleOpts);
+        }
+        if (run('validate_ast')) {
+            results.workloads.validate_ast[setName] = benchValidateAst(ModelManager, set, sampleOpts);
+        }
     }
 
-    results.workloads.instance_validate = benchInstanceValidate(ModelManager, sampleOpts);
+    if (run('instance_validate')) {
+        results.workloads.instance_validate = benchInstanceValidate(ModelManager, sampleOpts);
+    }
 
     // --- report ---
     const lines = [];
@@ -307,7 +340,15 @@ function main() {
     lines.push('|---|---|---|---|---|---|');
     for (const setName of setNames) {
         const lv = results.workloads.load_validate[setName];
-        if (lv?.error) {
+        const va = results.workloads.validate_ast[setName];
+        if (!lv && va?.validateAst) {
+            lines.push(`| validate_ast | ${setName} | ${va.n} | validateAst | ${(va.validateAst.median_ms * 1000).toFixed(1)} µs | ${(va.validateAst.cv * 100).toFixed(1)}% |`);
+            continue;
+        }
+        if (!lv) {
+            continue;
+        }
+        if (lv.error) {
             lines.push(`| load_validate | ${setName} | - | - | ${lv.error} | - |`);
             continue;
         }
@@ -317,7 +358,9 @@ function main() {
         } else {
             lines.push(`| load_validate | ${setName} | ${lv.n} | validate | SKIPPED: ${lv.validateError} | - |`);
         }
-        const va = results.workloads.validate_ast[setName];
+        if (!va) {
+            continue;
+        }
         if (va.validateAst) {
             lines.push(`| validate_ast | ${setName} | ${va.n} | validateAst | ${(va.validateAst.median_ms * 1000).toFixed(1)} µs | ${(va.validateAst.cv * 100).toFixed(1)}% |`);
         } else {
@@ -325,8 +368,10 @@ function main() {
         }
     }
     const iv = results.workloads.instance_validate;
-    lines.push(`| instance_validate | (synthetic) | ${iv.n} | fromJSON (populate+validate) | ${(iv.populate_and_validate.median_ms * 1000).toFixed(1)} µs | ${(iv.populate_and_validate.cv * 100).toFixed(1)}% |`);
-    lines.push(`| instance_validate | (synthetic) | ${iv.n} | resource.validate() | ${(iv.validate_only.median_ms * 1000).toFixed(1)} µs | ${(iv.validate_only.cv * 100).toFixed(1)}% |`);
+    if (iv) {
+        lines.push(`| instance_validate | (synthetic) | ${iv.n} | fromJSON (populate+validate) | ${(iv.populate_and_validate.median_ms * 1000).toFixed(1)} µs | ${(iv.populate_and_validate.cv * 100).toFixed(1)}% |`);
+        lines.push(`| instance_validate | (synthetic) | ${iv.n} | resource.validate() | ${(iv.validate_only.median_ms * 1000).toFixed(1)} µs | ${(iv.validate_only.cv * 100).toFixed(1)}% |`);
+    }
 
     console.log(`# TS benchmark results (${results.recorded_at}), engine=${results.concerto_engine}\n`);
     console.log(`Node ${results.machine.node} on ${results.machine.cpus} (${results.machine.cpu_count} cpus), concerto@${results.concerto_commit?.slice(0, 12)}\n`);
