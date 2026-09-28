@@ -128,25 +128,25 @@ without a ledger rebuild fails the build.
 
 | | members | loc | weight | share of weight |
 |---|---|---|---|---|
-| RUST | 101 | 1074 | 1236 | 18.7% |
+| RUST | 101 | 1085 | 1248 | 18.9% |
 | HYBRID | 34 | 1131 | 1282.5 | 19.4% |
 | PARTIAL | 14 | 288 | 379.5 | 5.7% |
-| TS | 447 | 3912 | 3704 | 56.1% |
-| **total** | 596 | 6405 | 6602 | 100% |
+| TS | 447 | 3912 | 3704 | 56.0% |
+| **total** | 596 | 6416 | 6614 | 100% |
 
-* **RUST+HYBRID weighted share (new D1 denominator): 38.6%**, HYBRID at full weight
+* **RUST+HYBRID weighted share (new D1 denominator): 38.7%**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. **NOT met.**
   PARTIAL rows (section 5b) are not in the numerator.
   Denominator excludes constant markers and `accept()` visitor entry points
   (54 members, weight 81) as not-logic, per the maintainer's
-  decision on open question 2 below. New total weight: 6521 (was 6602).
+  decision on open question 2 below. New total weight: 6533 (was 6614).
   D1 stays as defined, with the 70% bar, by maintainer decision (accordproject/concerto-rust#276,
   2026-09-28): the proposed D1′ was not adopted, and the gate reports §0.4 as FAIL at this figure.
-* **Old figure (previous denominator, all 596 members): 38.1%.**
-* RUST only (new denominator): 19.0%.
+* **Old figure (previous denominator, all 596 members): 38.3%.**
+* RUST only (new denominator): 19.1%.
 * For comparison only, not the D1 figure: counting PARTIAL *read* rows (1 members,
-  weight 15) as Rust gives 38.9%; counting every PARTIAL row (14 members,
-  weight 379.5) gives 44.4%. That is how the ledger counted them before
+  weight 15) as Rust gives 39.0%; counting every PARTIAL row (14 members,
+  weight 379.5) gives 44.5%. That is how the ledger counted them before
   accordproject/concerto-rust#261 (then 78.9%, which also counted three `rustHandle`
   plumbing helpers as RUST; they are now TS, engine shim). After #261 and before P5-11 the
   figure was 57.4% (61.5% at #261 itself): P5-11 reclassified TS 128 PARTIAL rows and 57 HYBRID
@@ -157,8 +157,8 @@ By weight category:
 | category | members | loc | weight | RUST w | HYBRID w | PARTIAL w | TS w |
 |---|---|---|---|---|---|---|---|
 | glue (x0.5) | 339 | 1182 | 591 | 84.5 | 32 | 0 | 474.5 |
-| logic (x1) | 196 | 3647 | 3647 | 412 | 700 | 105 | 2430 |
-| validation (x1.5) | 61 | 1576 | 2364 | 739.5 | 550.5 | 274.5 | 799.5 |
+| logic (x1) | 196 | 3656 | 3656 | 421 | 700 | 105 | 2430 |
+| validation (x1.5) | 61 | 1578 | 2367 | 742.5 | 550.5 | 274.5 | 799.5 |
 
 ## 2. By planned task
 
@@ -172,7 +172,7 @@ By weight category:
 | P2-05 | 6 | 16 | 0 |
 | P2-06 | 22 | 63.5 | 0 |
 | P2-07 | 12 | 105 | 1 |
-| P2-08 | 92 | 1643.5 | 6 |
+| P2-08 | 92 | 1655.5 | 6 |
 | P3-01 | 37 | 1481.5 | 5 |
 | P3-04 | 4 | 97 | 0 |
 | P4-02 | 6 | 22.5 | 0 |
@@ -181,7 +181,7 @@ By weight category:
 | P4-05 | 20 | 175.5 | 1 |
 | P4-06 | 67 | 621 | 16 |
 | P4-07 | 79 | 469.5 | 16 |
-| P4-08 | 96 | 1740.5 | 6 |
+| P4-08 | 96 | 1752.5 | 6 |
 | P4-09 | 12 | 119 | 1 |
 | P4-10 | 41 | 1556.5 | 8 |
 | P5-10a | 9 | 186 | 0 |
@@ -196,7 +196,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | file | n | R / H / P / T | weight | weight R / H / P / T | R+H | tasks |
 |---|---|---|---|---|---|---|
 | astmodelmanager.ts | 2 | 0 / 0 / 0 / 2 | 8.5 | 0 / 0 / 0 / 8.5 | 0.0% | - |
-| basemodelmanager.ts | 55 | 11 / 3 / 4 / 37 | 767 | 258 / 146 / 100 / 263 | 52.7% | P2-08+P4-08, P3-04+P4-08 |
+| basemodelmanager.ts | 55 | 11 / 3 / 4 / 37 | 776 | 267 / 146 / 100 / 263 | 53.2% | P2-08+P4-08, P3-04+P4-08 |
 | datetimeutil.ts | 1 | 0 / 0 / 0 / 1 | 16 | 0 / 0 / 0 / 16 | 0.0% | - |
 | dcsconverter.ts | 9 | 0 / 0 / 0 / 9 | 120 | 0 / 0 / 0 / 120 | 0.0% | - |
 | decoratormanager.ts | 14 | 7 / 1 / 0 / 6 | 122.5 | 69.5 / 27 / 0 / 26 | 78.8% | P4-09 |
@@ -229,7 +229,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | introspect/mapkeytype.ts | 11 | 2 / 0 / 0 / 9 | 21.5 | 7 / 0 / 0 / 14.5 | 32.6% | P2-06+P4-07 |
 | introspect/mapvaluetype.ts | 11 | 2 / 0 / 0 / 9 | 21.5 | 7 / 0 / 0 / 14.5 | 32.6% | P2-06+P4-07 |
 | introspect/metamodel.ts | 3 | 0 / 0 / 1 / 2 | 40 | 0 / 0 / 15 / 25 | 0.0% | P3-04+P4-08 |
-| introspect/modelfile.ts | 51 | 9 / 3 / 7 / 32 | 987.5 | 335 / 221 / 226.5 / 205 | 56.3% | P2-08+P4-08 |
+| introspect/modelfile.ts | 51 | 9 / 3 / 7 / 32 | 990.5 | 338 / 221 / 226.5 / 205 | 56.4% | P2-08+P4-08 |
 | introspect/numbervalidator.ts | 7 | 4 / 0 / 0 / 3 | 13.5 | 9.5 / 0 / 0 / 4 | 70.4% | P2-02+P4-04 |
 | introspect/participantdeclaration.ts | 3 | 1 / 0 / 0 / 2 | 4 | 1.5 / 0 / 0 / 2.5 | 37.5% | P2-03+P4-06 |
 | introspect/property.ts | 16 | 2 / 0 / 0 / 14 | 73 | 23.5 / 0 / 0 / 49.5 | 32.2% | P2-04+P4-07 |
@@ -261,7 +261,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 4. TS items (stay in TypeScript) with reasons
 
-447 members, weight 3704 (56.1%).
+447 members, weight 3704 (56.0%).
 
 ### 4a. Grouped by reason
 
@@ -1128,8 +1128,8 @@ fallback (plan section 3): `ModelFile`'s is HYBRID, and the others are TS view g
 
 Kept for history; every question below has a maintainer decision now, linked from each item.
 
-1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 38.6%
-   (old figure, previous denominator: 38.1%). See section 1.
+1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 38.7%
+   (old figure, previous denominator: 38.3%). See section 1.
 2. **Constant markers and `accept()` count as TS. Settled: excluded from the D1
    denominator.** They are not "logic". 54 members, weight 81,
    removed from the denominator (section 1).
