@@ -38,6 +38,19 @@ Then push, close the tracking issue as `mig:done` with a short evidence comment,
 
 A PR whose review failed: post the findings on its tracking issue, set it back to `mig:ready`, and tell the worker to continue on the same branch and PR.
 
+## Milestone fuzz check
+
+Maintainer decision (2026-09-28, accordproject/concerto-rust#307): differential fuzzing otherwise only runs on tasks that change Rust engine semantics, never at merge. At the end of a phase, or another key milestone, the **coordinator** dispatches one fuzz shard against the integration branch as a safety net for anything that slipped between tasks. It is never scheduled or automatic.
+
+Dispatch `concerto`'s `.github/workflows/fuzz-milestone.yml` (`workflow_dispatch`) against `claude/tender-pascal-ocwf9q`, with:
+- `concerto_rust_ref` — leave at its default (the pinned ref `.github/actions/concerto-engine` uses) for the routine milestone check, or set it to a specific concerto-rust commit to check a particular milestone state of concerto-rust itself.
+- `run_seed` — leave empty for today's date; only set it to replay a specific past run.
+- `case_count` — leave at 100,000 unless the run needs to be shorter.
+
+It fails only on a divergence-cluster *signature* not already in the committed baseline (`migration/fuzz/results/milestone-baseline/known-clusters.json`) — a genuinely new engine-gap shape, not a fresh case of one already tracked. Details: `migration/fuzz/README.md` §"CI: the milestone fuzz check".
+
+On a run with new clusters: download the `fuzz-milestone-<run-seed>` artifact, read `triage-clusters.json`'s new entries, and either file a tracking issue for each new engine gap (same as any other fuzz-found gap — see `migration/fuzz/README.md`'s triage workflow) or, if a cluster is actually already known but the baseline wasn't updated after the fix that removed an old one, regenerate the baseline per the README and commit it as a normal reviewed change.
+
 ## Check-in (run hourly)
 In a local session in the workspace, run:
 ```

@@ -1,5 +1,5 @@
 {
-  "_generatedBy": "migration/fuzz/bin/check-nightly.js baseline capture (task P2, accordproject/concerto-rust#307); regenerate via migration/fuzz/README.md#ci-the-nightly-safety-net, do not hand-edit",
+  "_generatedBy": "migration/fuzz/bin/check-milestone.js baseline capture (task P2, accordproject/concerto-rust#307); regenerate via migration/fuzz/README.md#ci-the-milestone-fuzz-check, do not hand-edit",
   "generatedFrom": {
     "runSeed": 1,
     "count": 100000,

@@ -16,37 +16,39 @@
 'use strict';
 
 /**
- * Nightly fuzz safety net (task P2, accordproject/concerto-rust#307): decide
- * pass/fail for one shard.
+ * Milestone fuzz check (task P2, accordproject/concerto-rust#307; rescoped
+ * from a nightly schedule to a coordinator-dispatched, milestone-end check
+ * by the maintainer's 2026-09-28 comment on that issue): decide pass/fail
+ * for one shard.
  *
  * bin/fuzz.js's own `divergences` count already excludes every
  * maintainer-accepted, permanent divergence in lib/expected-divergences.js
- * (the DV-* rows). That alone is not enough to gate a *nightly* job on,
- * though: this migration's differential fuzzing has also found a long tail
- * of divergences that are real engine gaps, each already tracked by its own
+ * (the DV-* rows). That alone is not enough to gate this check on, though:
+ * this migration's differential fuzzing has also found a long tail of
+ * divergences that are real engine gaps, each already tracked by its own
  * issue (see migration/fuzz/results/stage2/triage-clusters.json's `owners`),
  * but not yet fixed and not a "permanent, accepted" divergence in the DV-*
  * sense — fixing them is other tasks' work, not this job's. Gating on
- * `divergences > 0` directly would make the job fail every single night for
- * already-known reasons, which defeats its purpose as a *safety net* for
- * something NEW breaking between tasks.
+ * `divergences > 0` directly would make the job fail on every dispatch for
+ * already-known reasons, which defeats its purpose as a safety net for
+ * something NEW breaking between milestones.
  *
- * So this script clusters tonight's unresolved divergences by signature
+ * So this script clusters this run's unresolved divergences by signature
  * (lib/signature.js, the same function bin/triage.js uses) and fails only on
  * a cluster signature that is not already in the committed baseline
- * (results/nightly-baseline/known-clusters.json): a divergence *shape*
+ * (results/milestone-baseline/known-clusters.json): a divergence *shape*
  * nobody has seen and attributed yet. A new *case* of an already-known
  * cluster (same signature, different seed/mutation) is not new and does not
  * fail the job.
  *
  * Usage:
- *   node migration/fuzz/bin/check-nightly.js \
- *     --divergences results/nightly/divergences.jsonl \
- *     --baseline results/nightly-baseline/known-clusters.json \
- *     --out results/nightly/triage-clusters.json
+ *   node migration/fuzz/bin/check-milestone.js \
+ *     --divergences results/milestone/divergences.jsonl \
+ *     --baseline results/milestone-baseline/known-clusters.json \
+ *     --out results/milestone/triage-clusters.json
  *
- * Exits 0 and prints a one-line summary when every tonight's cluster is
- * already known; exits 1 and lists the new cluster(s) otherwise.
+ * Exits 0 and prints a one-line summary when every one of this run's
+ * clusters is already known; exits 1 and lists the new cluster(s) otherwise.
  */
 
 const fs = require('fs');
@@ -97,7 +99,7 @@ function main() {
     const newClusters = sorted.filter((c) => c.isNew);
 
     const report = {
-        _generatedBy: 'migration/fuzz/bin/check-nightly.js; do not edit by hand',
+        _generatedBy: 'migration/fuzz/bin/check-milestone.js; do not edit by hand',
         baselineFile: path.relative(process.cwd(), o.baseline),
         baselineClusterCount: known.size,
         totalDivergences: divergences.length,

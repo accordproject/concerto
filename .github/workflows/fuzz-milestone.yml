@@ -1,0 +1,211 @@
+name: Milestone fuzz check
+
+# P2 (accordproject/concerto-rust#307), plan accordproject/concerto-rust#29 §2.5
+# ("Differential fuzzing") and §4 (Phase 5, P5-05/accordproject/concerto-rust#76).
+#
+# Fuzz runs otherwise happen only on tasks that change Rust engine semantics,
+# never at merge (maintainer decision 2026-09-27). Revised maintainer decision
+# (2026-09-28, accordproject/concerto-rust#307 comment): fuzz runs at the end
+# of key milestones or phases, not on a schedule — this workflow is that
+# milestone step, dispatched by the coordinator (migration/COORDINATOR.md,
+# "Milestone fuzz check") against the migration integration branch, never
+# fired automatically.
+#
+# bin/fuzz.js's own "unresolved divergence" count already excludes every
+# maintainer-accepted, permanent divergence (lib/expected-divergences.js, the
+# DV-* rows) — but this migration's fuzzing has also found a long tail of
+# real engine gaps that are individually tracked by their own issue and not
+# yet fixed (results/stage2/triage-clusters.json's `owners`), so gating on
+# that count alone would fail every dispatch for already-known reasons.
+# bin/check-milestone.js clusters this run's divergences by signature
+# (lib/signature.js, same as bin/triage.js) and fails only on a cluster
+# signature that is not already in the committed baseline
+# (results/milestone-baseline/known-clusters.json) — i.e. only on something
+# NEW. See migration/fuzz/README.md "CI: the milestone fuzz check" and
+# migration/COORDINATOR.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      concerto_rust_ref:
+        description: >-
+          concerto-rust ref to build the engine from. Defaults to the same
+          pinned ref every other job in this repo's CI uses
+          (.github/actions/concerto-engine), not concerto-rust's own
+          integration head, which carries no CI gate of its own and can be
+          red between tasks. Pass the integration branch
+          (claude/tender-pascal-ocwf9q) or a commit on it to fuzz against a
+          specific milestone state instead.
+        required: false
+        default: '5498f61190c98172627046753f040447f62a0141'
+      run_seed:
+        description: >-
+          Fixed seed for this shard (bin/fuzz.js --run-seed). Leave empty to
+          use today's date (UTC, YYYYMMDD) so repeat dispatches on the same
+          day are reproducible and dispatches on different days sample a
+          different slice of the mutation space.
+        required: false
+        default: ''
+      case_count:
+        description: 'Number of cases for the shard (bin/fuzz.js --count).'
+        required: false
+        default: '100000'
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  fuzz-shard:
+    name: Fuzz shard
+    runs-on: ubuntu-latest
+    # Budget (see migration/fuzz/README.md "CI: the milestone fuzz check"):
+    # setup (checkouts, engine build, npm installs, workspace build) is
+    # normally under 15 minutes; the shard itself measured at roughly 90
+    # cases/s in this task's verification run (batch size 1000), so the
+    # default 100,000 cases is about 20 minutes. 60 minutes leaves
+    # comfortable headroom without risking a silent partial run on a slow
+    # day. Lower case_count or split into parallel shards
+    # (bin/run-shards.js's pattern) before raising the timeout.
+    timeout-minutes: 60
+
+    steps:
+      - name: git checkout (integration branch)
+        uses: actions/checkout@v4
+        with:
+          ref: claude/tender-pascal-ocwf9q
+
+      # concerto-core loads the Rust engine when it is imported, so the build
+      # needs it first (accordproject/concerto-rust#259).
+      #
+      # Not ./.github/actions/concerto-engine directly: that composite action
+      # hardcodes its concerto-rust ref, and this job needs the ref to be a
+      # dispatch input (maintainer decision 2026-09-28). Its steps are
+      # reproduced below with the input substituted in; keep this in sync
+      # with .github/actions/concerto-engine's own steps if that changes.
+      - name: Check out concerto-rust
+        uses: actions/checkout@v4
+        with:
+          repository: accordproject/concerto-rust
+          ref: ${{ inputs.concerto_rust_ref }}
+          path: .concerto-rust
+
+      - name: Move the checkout next to this repository
+        run: |
+          rm -rf "$GITHUB_WORKSPACE/../concerto-rust"
+          mv "$GITHUB_WORKSPACE/.concerto-rust" "$GITHUB_WORKSPACE/../concerto-rust"
+
+      - name: Add the wasm32 target
+        run: rustup target add wasm32-unknown-unknown
+
+      # concerto-wasm pins wasm-bindgen = "=0.2.128"; the CLI must match exactly.
+      - name: Cache wasm-bindgen-cli
+        id: wasm-bindgen-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/wasm-bindgen
+          key: wasm-bindgen-cli-0.2.128-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Install wasm-bindgen-cli
+        if: steps.wasm-bindgen-cache.outputs.cache-hit != 'true'
+        run: cargo install wasm-bindgen-cli --version 0.2.128 --locked
+
+      - name: Build concerto-wasm
+        id: engine
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: |
+          cd "$GITHUB_WORKSPACE/../concerto-rust/concerto-wasm"
+          npm ci
+          npm run build
+          test -f pkg/concerto-engine.cjs
+          test -f pkg/concerto-engine.mjs
+          echo "pkg-dir=$(pwd)/pkg" >> "$GITHUB_OUTPUT"
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install workspace dependencies
+        run: npm ci
+
+      # The fuzz harness runs packages/concerto-core/src through ts-node
+      # (CONCERTO_ENGINE=rust); ts-node's type checker needs the other
+      # workspace packages' dist/*.d.ts already built, or it fails with
+      # TS2307 on a fresh checkout (migration/oracle/bin/coverage.sh has the
+      # full explanation).
+      - name: Build workspace packages
+        run: npm run build
+
+      - name: Install the frozen TS reference
+        working-directory: migration/oracle/reference
+        run: npm ci
+
+      - name: Install the fuzz harness
+        working-directory: migration/fuzz
+        run: npm ci
+
+      - name: Resolve the run-seed
+        id: seed
+        run: |
+          SEED="${{ inputs.run_seed }}"
+          if [ -z "$SEED" ]; then SEED="$(date -u +%Y%m%d)"; fi
+          echo "run-seed=$SEED" >> "$GITHUB_OUTPUT"
+          echo "### Milestone fuzz shard" >> "$GITHUB_STEP_SUMMARY"
+          echo "concerto-rust ref: \`${{ inputs.concerto_rust_ref }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "run-seed: \`$SEED\` (${{ inputs.case_count }} cases, batch size 1000)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run the fuzz shard
+        id: fuzz
+        env:
+          FIXTURES_DIR: ${{ github.workspace }}/migration/oracle/fixtures
+          CONCERTO_ENGINE_MODULE: ${{ steps.engine.outputs.pkg-dir }}/concerto-engine.cjs
+        run: |
+          mkdir -p migration/fuzz/results/milestone
+          node migration/fuzz/bin/fuzz.js \
+            --count "${{ inputs.case_count }}" \
+            --batch-size 1000 \
+            --run-seed "${{ steps.seed.outputs.run-seed }}" \
+            --out migration/fuzz/results/milestone/run.json \
+            --divergences migration/fuzz/results/milestone/divergences.jsonl \
+            --expected migration/fuzz/results/milestone/expected-divergences.jsonl \
+            --harness-errors migration/fuzz/results/milestone/harness-errors.jsonl
+
+      # Writes triage-clusters.json into the same results dir (so the
+      # artifact below always carries it) without failing the step itself —
+      # the dedicated failing step after the upload is what gates the job,
+      # so the report is uploaded either way.
+      - name: Cluster this run's divergences against the baseline
+        id: check
+        if: always()
+        run: |
+          set +e
+          node migration/fuzz/bin/check-milestone.js \
+            --divergences migration/fuzz/results/milestone/divergences.jsonl \
+            --baseline migration/fuzz/results/milestone-baseline/known-clusters.json \
+            --out migration/fuzz/results/milestone/triage-clusters.json > /tmp/check-milestone.out 2>&1
+          CODE=$?
+          set -e
+          cat /tmp/check-milestone.out
+          cat /tmp/check-milestone.out >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CODE" -ne 0 ]; then echo "new=1" >> "$GITHUB_OUTPUT"; else echo "new=0" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Upload the cluster report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-milestone-${{ steps.seed.outputs.run-seed }}
+          path: migration/fuzz/results/milestone/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Fail on new divergence clusters
+        if: steps.check.outputs.new == '1'
+        run: |
+          echo "::error::new, unowned divergence cluster(s) — see the fuzz-milestone-${{ steps.seed.outputs.run-seed }} artifact's triage-clusters.json"
+          exit 1
