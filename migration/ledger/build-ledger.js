@@ -18,7 +18,7 @@ const path = require('path');
 const { extract, repo } = require('./extract-members.js');
 const rules = require('./classification.js');
 const { computeEvidence, fmtTestSet } = require('./test-evidence.js');
-const { scan } = require('./engine-calls.js');
+const { scan, crossingHelpers } = require('./engine-calls.js');
 
 const pkg = path.join(repo, 'packages', 'concerto-core');
 const outDir = __dirname;
@@ -124,11 +124,16 @@ function autoCategory(row) {
 // is its TS body's, so it is not counted as Rust in D1.
 const PARTIAL_LOGIC_REASON = 'no engine call: the TS body (branches, loops or throw sites) still runs and decides the result and any exception; not yet converted to a delegation. Planned task kept; porting it is follow-up after P5-10 (accordproject/concerto-rust#261)';
 const PARTIAL_READ_REASON = 'no engine call: a straight-line read of view state (a snapshot field, the wrapped AST node or a child view), a fixed-data builder or a forward to other members; PORTING 1.5 snapshot design allows it on a view, but the member itself runs no Rust (accordproject/concerto-rust#261)';
+// P5-11 (accordproject/concerto-rust#276): a PARTIAL row whose rule is marked
+// `deferred` is a port candidate the stage 1 evaluation recommended moving to
+// Rust; the maintainer deferred the port on 2026-09-28.
+const PARTIAL_DEFERRED_NOTE = 'Port candidate: moving it to Rust was recommended by the P5-11 evaluation and deferred by maintainer decision (accordproject/concerto-rust#276, 2026-09-28).';
 function memberKey(row) {
     return row.cls ? `${row.cls}.${row.member}` : row.member;
 }
 
 const rows = extract();
+const helpers = crossingHelpers(rows);
 const usedOverrides = new Set();
 const ledger = rows.map(row => {
     const fr = rules[row.file];
@@ -150,12 +155,16 @@ const ledger = rows.map(row => {
         if (ov.c && ov.c !== 'TS' && t === '-') { t = fr.t; p = fr.p; }
     }
     if (c === 'RUST' && !(ov && ov.r)) { r = ''; }
-    const sc = scan(row);
+    const sc = scan(row, helpers);
     let partialKind = '';
     if (c === 'RUST' && !sc.engineCall) {
         c = 'PARTIAL';
         partialKind = sc.substantive ? 'logic' : 'read';
         r = sc.substantive ? PARTIAL_LOGIC_REASON : PARTIAL_READ_REASON;
+        if (ov && ov.deferred) { r += ' ' + PARTIAL_DEFERRED_NOTE; }
+    }
+    if (ov && ov.deferred && c !== 'PARTIAL') {
+        throw new Error('`deferred` rule on a row that is not PARTIAL (' + c + '): ' + row.file + ' ' + key);
     }
     if (!cat) { cat = autoCategory(row); }
     if (c === 'TS' && t !== '-') { t = '-'; }
@@ -164,7 +173,7 @@ const ledger = rows.map(row => {
         file: row.file, cls: row.cls, member: row.member, kind: row.kind, loc: row.loc,
         weight: +(row.loc * FACTOR[cat]).toFixed(1), category: cat, classification: c, reason: r,
         coupled_tests_grep: cp.text, target: t, planned: p, line: row.line, cw: cp.w, cs: cp.s, cb: cp.b,
-        partialKind, engineCall: sc.engineCall,
+        partialKind, engineCall: sc.engineCall, deferred: !!(ov && ov.deferred),
     };
 });
 
@@ -252,7 +261,8 @@ const paLogic = paItems.filter(l => l.partialKind === 'logic');
 const paRead = paItems.filter(l => l.partialKind === 'read');
 const wPLogic = sum(paLogic, l => l.weight);
 const wPRead = sum(paRead, l => l.weight);
-const paRow = (l) => `| ${l.file.replace(/^src\//, '')} | ${l.cls || '(function)'} | ${l.member} | ${l.loc} | ${l.weight} | ${l.planned} |`;
+const paRow = (l) => `| ${l.file.replace(/^src\//, '')} | ${l.cls || '(function)'} | ${l.member} | ${l.loc} | ${l.weight} | ${l.planned} | ${l.deferred ? 'port candidate, deferred (#276)' : '**undecided**'} |`;
+const paDeferred = paItems.filter(l => l.deferred);
 const hyFull = hyItems.map(l => `| ${l.file.replace(/^src\//, '')} | ${l.cls || '(function)'} | ${l.member} | ${l.weight} | ${l.reason} |`);
 const wCoupled = ledger.filter(l => l.cw > 0);
 const wCoupledRows = wCoupled.map(l => `| ${l.file.replace(/^src\//, '')} | ${l.cls ? l.cls + '.' : ''}${l.member} | ${l.classification} | ${l.coupled_tests_grep.split(' ').filter(s => s.startsWith('W:')).join('')} |`);
@@ -350,21 +360,33 @@ without a ledger rebuild fails the build.
 * **Classification** follows plan section 3: Rust owns the graph, and the TS classes become views.
   * **RUST**: the logic runs in Rust. The TS member becomes a one-line delegation on the view.
   * **HYBRID**: part of the member stays in JS, and the reason says which part. The member
-    still calls Rust for its model logic.
+    still calls Rust for its model logic: since P5-11 (accordproject/concerto-rust#276) no
+    HYBRID row lacks an engine call by the scan below (of the 64 that did, 6 are counted by the
+    scan's one-hop rule, 57 were reclassified TS and \`updateExternalModels\` is PARTIAL).
+    
   * **PARTIAL** (accordproject/concerto-rust#261): the rules put the member in Rust, but
     its own body makes no engine call: no reference to the module's \`rust\` binding, a
     \`rustHandle\`/\`_rust*\` handle or \`loadEngine(...)\` (nested closures included;
-    \`engine-calls.js\`). It is set automatically, never by hand: a RUST row that fails
-    the scan becomes PARTIAL. Two kinds, by the same scan:
+    \`engine-calls.js\`). Since P5-11 (accordproject/concerto-rust#276) the scan also counts
+    an engine call one hop away in the same source file: a call to a top-level helper of
+    that file whose own body crosses (directly or through another such helper, e.g.
+    \`beginModelFile\` -> \`computeBatch\`), and a method call on a local handle initialised
+    from such a helper (\`const handle = handleFor(mm); handle.serializerFromJson(...)\`).
+    Imported functions and \`this.x()\` methods are not followed. It is set automatically,
+    never by hand: a RUST row that fails the scan becomes PARTIAL. Two kinds, by the same
+    scan:
     * *logic*: the body has a branch, loop, \`throw\`, \`try\` or conditional and spans more
       than 4 lines. The TS body still decides the result and which exception is thrown; it
-      was never converted. Porting these is follow-up work after P5-10.
+      was never converted.
     * *read*: a straight-line body: a snapshot getter or field read, a fixed-data builder
       or a forward to other members. PORTING 1.5's snapshot design allows these on a view,
       but the member itself runs no Rust.
 
     PARTIAL rows keep their planned task (so the oracle's owner attribution is unchanged)
-    and are **not** counted as Rust in D1.
+    and are **not** counted as Rust in D1. P5-11 (accordproject/concerto-rust#276) evaluated
+    every PARTIAL row: the ones recommended to move to Rust stay PARTIAL as *port candidates,
+    deferred* by maintainer decision (2026-09-28; the \`deferred\` marker in
+    \`classification.js\`), and the rest were reclassified TS (section 4).
   * **TS**: the member stays in TS with no Rust involvement.
 * **Automatic TS rules**, which an explicit override can reverse:
   * \`accept()\` visitor entry points;
@@ -421,13 +443,17 @@ ${cls.map(x => `| ${x.c} | ${x.n} | ${x.loc} | ${x.w} | ${pct(x.w, totW)} |`).jo
   Denominator excludes constant markers and \`accept()\` visitor entry points
   (${d1Excluded.length} members, weight ${d1ExcludedW}) as not-logic, per the maintainer's
   decision on open question 2 below. New total weight: ${d1TotW} (was ${totW}).
+  D1 stays as defined, with the 70% bar, by maintainer decision (accordproject/concerto-rust#276,
+  2026-09-28): the proposed D1′ was not adopted, and the gate reports §0.4 as FAIL at this figure.
 * **Old figure (previous denominator, all ${ledger.length} members): ${oldPct}.**
 * RUST only (new denominator): ${pct(wR, d1TotW)}.
 * For comparison only, not the D1 figure: counting PARTIAL *read* rows (${paRead.length} members,
   weight ${wPRead}) as Rust gives ${d1PctWithReads}; counting every PARTIAL row (${paItems.length} members,
   weight ${wP}) gives ${d1PctWithPartial}. That is how the ledger counted them before
   accordproject/concerto-rust#261 (then 78.9%, which also counted three \`rustHandle\`
-  plumbing helpers as RUST; they are now TS, engine shim).
+  plumbing helpers as RUST; they are now TS, engine shim). After #261 and before P5-11 the
+  figure was 57.4% (61.5% at #261 itself): P5-11 reclassified TS 128 PARTIAL rows and 57 HYBRID
+  rows that make no engine call (accordproject/concerto-rust#276).
 
 By weight category:
 
@@ -441,7 +467,7 @@ ${catRows.join('\n')}
 |---|---|---|---|
 ${taskRows.join('\n')}
 
-TS members have \`planned_task = -\` and need no migration work. The exception is the exception classes: they list P1-05 and P4-02 because the error mapper instantiates them. The table counts a member once per task it lists, so the rows do not sum to the total.
+TS members have \`planned_task = -\` and need no migration work, with two exceptions. The exception classes list P1-05 and P4-02 because the error mapper instantiates them. The rows P5-11 reclassified TS (reason ending "Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28)") keep the planned task they had, so the oracle's owner attribution is unchanged. The table counts a member once per task it lists, so the rows do not sum to the total.
 
 ## 3. By file
 
@@ -478,23 +504,29 @@ ${hyFull.join('\n')}
 ## 5b. PARTIAL items (no engine call)
 
 ${paItems.length} members, weight ${wP} (${pct(wP, totW)}). Set automatically by the engine-call
-scan (see Method); accordproject/concerto-rust#261.
+scan (see Method); accordproject/concerto-rust#261. ${paDeferred.length} of them (weight
+${sum(paDeferred, l => l.weight)}) are **port candidates, deferred by maintainer decision**
+(accordproject/concerto-rust#276, 2026-09-28): the P5-11 evaluation recommended moving them to
+Rust (resolution and validation primitives, and throw sites that re-derive a Rust verdict),
+and the maintainer decided that no more code moves to Rust for now. The evaluation, with the
+evidence for each row, is on #276, and the deferred list, with option F, is kept in the \`mig:post-migration\`
+backlog issue accordproject/concerto-rust#287. A row marked **undecided** has not been evaluated.
 
 ### PARTIAL *logic*: unconverted TS bodies
 
 ${paLogic.length} members, weight ${wPLogic}. The TS body is still the live path, including which
-exception is thrown. Follow-up: convert each to a delegation (after P5-10).
+exception is thrown.
 
-| file | class | member | loc | weight | planned task |
-|---|---|---|---|---|---|
+| file | class | member | loc | weight | planned task | P5-11 |
+|---|---|---|---|---|---|---|
 ${paLogic.map(paRow).join('\n') || '(none)'}
 
 ### PARTIAL *read*: straight-line reads and forwards
 
 ${paRead.length} members, weight ${wPRead}.
 
-| file | class | member | loc | weight | planned task |
-|---|---|---|---|---|---|
+| file | class | member | loc | weight | planned task | P5-11 |
+|---|---|---|---|---|---|---|
 ${paRead.map(paRow).join('\n') || '(none)'}
 
 ## 6. White-box coupling seen in tests
@@ -514,7 +546,8 @@ ${wCoupledRows.join('\n')}
 
 A class stubbed wholesale must keep its method set on the TS prototype, because sinon
 stubs prototype methods. Views keep every public method as a TS method that delegates,
-so this holds. It is also why constructors taking a stubbed parent are HYBRID (context fallback).
+so this holds. It is also why constructors taking a stubbed parent keep the context
+fallback (plan section 3): \`ModelFile\`'s is HYBRID, and the others are TS view glue (P5-11).
 
 | class | ctor classification | S files |
 |---|---|---|
@@ -524,32 +557,42 @@ ${stubbedClasses.join('\n')}
 
 * **Constructors of introspect classes that tests build directly**
   (\`ModelFile\`, \`Declaration\`, \`Decorated\`, \`Property\`, \`Field\`, \`MapDeclaration\`)
-  are HYBRID. The test files construct them over sinon-stubbed parents: 36 ModelFile and
-  42 Field stub instances, and \`new Field(mockClassDeclaration, ...)\`. So these
-  constructors keep the collaborator-context fallback from plan section 3. Subclass
-  constructors that no test builds directly are RUST.
-* **Serializer and visitors (P3-01, P4-10).** \`Serializer.toJSON\`/\`fromJSON\` and every \`visitX\`/\`checkX\`
-  are HYBRID: the TS visitor shell stays, and each per-field check, coercion and message
-  goes to Rust. \`visit()\` dispatchers and visitor constructors are TS.
-  \`getAssignableProperties\`/\`validateProperties\` are planned for Rust but still run
-  their TS bodies, so they are PARTIAL (section 5b).
+  keep the collaborator-context fallback from plan section 3: the test files construct them
+  over sinon-stubbed parents (36 ModelFile and 42 Field stub instances, and
+  \`new Field(mockClassDeclaration, ...)\`). \`ModelFile\`'s constructor stages the file in
+  Rust, so it is HYBRID. The others make no engine call of their own (their \`process()\` is
+  counted separately), so P5-11 reclassified them TS as view glue, and the subclass
+  constructors that only call \`super\`/\`process()\` likewise.
+* **Serializer and visitors (P3-01, P4-10).** \`Serializer.toJSON\`/\`fromJSON\` are HYBRID:
+  the fast path validates and populates or generates the whole document in one Rust call.
+  In the visitor classes, the members that call Rust per value are HYBRID
+  (\`ResourceValidator.checkItem\`, \`JSONPopulator.convertToObject\`,
+  \`JSONGenerator.convertToJSON\`). The rest of the visitor shells make no engine call and are
+  TS (P5-11, accordproject/concerto-rust#276): the JSONPopulator/JSONGenerator \`visitX\`
+  and \`getAssignableProperties\`/\`validateProperties\` run only on the fast path's
+  fallback, and the ResourceValidator \`visitX\`/\`checkX\`/\`reportX\` shell is the main path
+  of \`Resource.validate\` (moving its entry point to Rust, option F, was declined).
+  \`visit()\` dispatchers and visitor constructors are TS.
 * **Factory, \`model/*\`, InstanceGenerator and ValueGenerator** stay TS under D7.
-  \`ResourceId\` is the exception: plan P4-03 converts it, so its URI parsing is RUST
-  and only its value-object constructor is HYBRID.
-  \`InstanceGenerator.findConcreteSubclass\` is a pure graph query planned for Rust; it
-  still runs its TS body, so it is PARTIAL (section 5b).
+  \`ResourceId\` is the exception: plan P4-03 converts it, so its URI parsing is RUST;
+  its value-object constructor makes no engine call and is TS (P5-11).
+  \`InstanceGenerator.findConcreteSubclass\` stays TS with the rest of InstanceGenerator
+  (P5-11); the ordering it uses comes from the RUST \`getAssignableClassDeclarations\`.
 * **DCS (D7: the ledger decides).**
-  * DecoratorManager command application and DecoratorExtractor are RUST
-    (\`concerto_core::dcs\`).
-  * The CTO-compiled DCS model validation entry points are HYBRID.
-  * \`dcsconverter.ts\` stays TS, because it is YAML via the \`yaml\` npm lib.
-  * \`DecoratorExtractor.quoteStringValue\` is HYBRID, because its quoting follows
-    the \`yaml\` library's rules.
+  * DecoratorManager command application and extraction are RUST
+    (\`concerto_core::dcs\`). \`DecoratorExtractor\` was deleted by P5-02 (BC-37): the
+    \`extract*\` methods delegate straight to the engine.
+  * \`assignDeep\`, which merges the result of the Rust \`decoratorManagerMigrateTo\` into the
+    caller's object in place to keep JS object identity, stays TS (P5-11).
+  * The CTO-compiled DCS model validation entry point (\`DecoratorManager.validate\`) is HYBRID.
+  * \`dcsconverter.ts\` stays TS, because it is YAML via the \`yaml\` npm lib, and so do the
+    \`jsonToYaml\`/\`yamlToJson\` forwards to it (P5-11).
 * **CTO parsing seam.**
   * The \`processFile\` callbacks (default, AST, CTO) and the ModelManager/AstModelManager
     constructors stay TS.
-  * Methods that accept CTO strings are HYBRID: \`addModel\`, \`addModelFiles\`,
-    \`updateModelFile\`, \`validateModelFile\` and \`addCTOModel\`.
+  * Methods that accept CTO strings and call Rust themselves are HYBRID: \`addModelFiles\`
+    and \`updateModelFile\`. \`addModel\`, \`validateModelFile\` and \`addCTOModel\` only parse
+    and forward to RUST members, so they are TS (P5-11).
   * ModelLoader stays TS because it is I/O orchestration.
 * **Exceptions** stay TS classes. Rust returns \`{kind, code, params, location}\` and the
   P4-02 mapper builds these classes. \`Globalize\` stays as a TS helper, and its templates
