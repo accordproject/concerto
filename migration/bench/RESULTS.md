@@ -1,3 +1,132 @@
+# P5-16: Serializer.fromJSON through the TS API (2026-09-28)
+
+Task P5-16 (accordproject/concerto-rust#310) profiles `Serializer.fromJSON`
+through the TS API stage by stage and cuts the cost around the engine's
+populate-and-validate. The coordinator lifted the porting pause on #310;
+no TS logic needed porting, because the profile put the cost in the
+boundary work and in the TS-side result building, not in TS logic.
+
+**Result: fromJSON is 1.91× faster (26.3 µs to 13.7 µs), from 4.33× to
+2.26× TS 5.0.0.** The 2× target is not reached. What remains is mostly
+the engine's own populate and validate (see "Remaining profile").
+
+## What changed
+
+In `concerto-rust` (`concerto-wasm/src/lib.rs`, `concerto-core-js/src/serializer.rs`):
+
+- `serializerFromJson` reads its document straight into the engine's value
+  type (`parse_wire`) and writes its result straight to JSON text
+  (`WireOut`, `WireInstanceOut`). Before, both directions went through an
+  intermediate `serde_json::Value` tree, which was built, hashed and dropped
+  on every call. The values and the text are unchanged (unit tests check
+  both against the old route, byte for byte).
+- The serializer and its decoded options are kept while the options text is
+  unchanged (`FROM_JSON_SERIALIZER`), and `Serializer::options` borrows the
+  defaults instead of copying them.
+- New binding `serializerFromJsonCompact` (additive): the same resource,
+  with its top level as an array, `[ctor, fqn, $namespace, $type,
+  $identifierFieldName, $identifier, $timestamp, fields]`. It drops the
+  keys the view never copies, so the result parses in about 0.8 µs instead
+  of 1.2 µs. `serializerFromJson` is unchanged.
+
+In `concerto` (`packages/concerto-core/src/engine/serializer.ts`,
+`serializer-codec.ts`):
+
+- The fast path uses `serializerFromJsonCompact` when the engine has it and
+  decodes the parsed result in place instead of copying it.
+- The class lookups the instance constructors make (`getType(fqn)` and
+  `Identifiable`'s own `getModelFile(ns).getType(fqn).getIdentifierFieldName()`,
+  about 2.9 µs per instance, each crossing into the engine) are made once per
+  class and kept next to the cached engine handle. They are dropped with it
+  whenever the model files change. Later instances get the same own
+  properties, in the same order, without the lookups. The first instance of
+  each class is still built by the real constructor.
+- The options' wire text is reused while the options object and its
+  primitive values are unchanged, the `env` object is shared, and strings
+  are checked with `isWellFormed()` where the runtime has it.
+
+## Before and after, through the TS public API
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 logical CPUs, 17 GB, Linux x64 (a cloud container) |
+| Toolchain | Node v22.22.2, wasm-bindgen 0.2.128, wasm-opt from `concerto-wasm/build.sh`. The P5-16 engine is 2,935,709 bytes (before: 2,912,432), within the 4 MiB budget. |
+| Quiet-check | Before every run, the driver waited until the 1-minute load average was below 1 and no cargo, rustc, mocha, nyc, wasm-opt or fuzz process was running. All 9 runs met it; the load was 0.96 to 0.97 at each start. |
+| Before | `concerto` `4ed605ca2` (integration head, after P5-11) with `concerto-rust` `cd04cb1` |
+| After | the P5-16 branches: `concerto` at this commit, `concerto-rust` `ae799a9` |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, run with `--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist` |
+| Runs | `results/P5-16-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`: three interleaved rounds of `--workloads instance_validate`, with the defaults (5 warm-up and 30 samples). Their `concerto_commit` field is the checkout's HEAD for all three; the before runs used the integration head's `dist/` and engine through `--core-dist` and `CONCERTO_ENGINE_MODULE`. |
+
+Medians in µs per instance, for runs 1, 2 and 3. The ratios use the median of
+the three runs.
+
+| Metric | TS 5.0.0, runs 1 / 2 / 3 | Rust before, runs 1 / 2 / 3 | Rust P5-16, runs 1 / 2 / 3 | before / TS | **P5-16 / TS** | speed-up |
+|---|---|---|---|---|---|---|
+| fromJSON | 6.9 / 6.1 / 5.3 | 25.9 / 27.0 / 26.3 | 13.7 / 14.6 / 13.1 | 4.33× | **2.26×** | 1.91× |
+| resource.validate() | 1.5 / 1.3 / 1.5 | 6.6 / 6.8 / 5.1 | 6.2 / 6.8 / 7.2 | 4.58× | **4.66×** | 0.98× |
+| toJSON | 2.6 / 3.1 / 3.3 | 15.7 / 20.3 / 21.3 | 20.8 / 19.9 / 20.3 | 6.66× | **6.66×** | 1.00× |
+
+`validate()` and `toJSON` are unchanged within noise: this task does not
+touch them, and they run on the resources `fromJSON` returns, which now
+share one object layout per class (checked with V8's `%HaveSameMap`).
+
+## Stage profile
+
+Stages timed one at a time over the same 500 instances (median of 40 to 100
+passes, µs per instance), in one process per build. They are not additive to
+the total: the total also holds `fromJSON`'s own work and garbage collection.
+
+| Stage | Before | P5-16 |
+|---|---|---|
+| fromJSON, whole call | 26.2 | 14.1 |
+| Encode the document and the options (`encodeValue`, `JSON.stringify`) | 1.06 | 0.82 (the options text is reused) |
+| Engine call (strings in, Rust decode, populate, validate, encode, string out) | 15.2 | 9.2 |
+| `JSON.parse` of the result | 1.23 | 0.82 |
+| Build the resource objects in TS (`decodeValue`/`materializeCompact`) | 3.89 | 0.62 (1.44 with the parse) |
+
+CPU profiles (`node --cpu-prof`, an engine built with symbol names) split the
+engine call. Before: the `serde_json::Value` round trip (parse, decode, encode,
+serialize and drop), the options decode and the serializer's construction
+took about half of the call.
+After, about 64% of the call is `concerto-core-js`'s own populate and
+validate. The rest is parsing the document, writing the result and the two
+string crossings.
+
+## Remaining profile
+
+The P5-16 fromJSON call (14.1 µs in the stage run above) splits roughly as
+follows.
+
+- **Engine populate and validate: about 5.8 µs.** `Serializer::from_json`
+  inside WASM (`benches/wasm-instance`, one run on this build: 5.82 µs; P5-13
+  measured 7.26 µs). That is close to TS 5.0.0's whole `fromJSON` (about
+  6.1 µs). Within it: `resource::validate` (copying the instance into a
+  `serde_json::Value` for the validator, then `validate_instance_from`),
+  the populator's `visit_class_declaration`, and `new_resource_of`. SipHash
+  on the `IndexMap`s and `format!` in the path tracking are visible
+  throughout.
+- **The rest of the engine call: about 3.4 µs.** Parsing the document into
+  engine values (about 1.2 µs), writing the result, and the string crossings
+  (UTF-8 encode in, `TextDecoder` out).
+- **TS: about 4.9 µs.** Encoding the document (0.8), parsing the result and
+  building the resource (1.4), and the rest in `fromJSON`'s own work (the
+  handle and options checks, the call into the fast path) and garbage
+  collection.
+
+Getting to 2× (about 12 µs) needs the engine's populate and validate to get
+faster: for example, validating the populated instance without copying it into
+a `serde_json::Value` first, and a cheaper hasher for the instance maps. Those
+are changes to the validator and to `concerto-core-js`'s value types,
+beyond this task's fast-path work.
+
+## Correctness during the run
+
+The P5-16 verification (the native oracle, the TS-API replay of the corpus
+through `src/`, the WASM leg, the concerto-core suite with nyc, and the
+guardrails) is reported on accordproject/concerto-rust#310.
+
+---
+
 # P5-14: cached property lookups on the lazy views (2026-09-28)
 
 Task P5-14 (accordproject/concerto-rust#308) caches a ClassDeclaration
