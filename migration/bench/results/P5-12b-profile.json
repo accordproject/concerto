@@ -1,0 +1,181 @@
+{
+  "harness": "p512b-profile.mjs",
+  "recorded_at": "2026-09-28T08:33:12.262Z",
+  "node": "v24.21.0",
+  "cpus": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+  "loadavg": [
+    10.1904296875,
+    20.7998046875,
+    29.263671875
+  ],
+  "rows": [
+    {
+      "group": "total",
+      "name": "resource.validate() (P5-12 B, full)",
+      "us": 21.131,
+      "cv": 0.085
+    },
+    {
+      "group": "B",
+      "name": "handleFor(modelManager)",
+      "us": 0.164,
+      "cv": 0.642
+    },
+    {
+      "group": "B",
+      "name": "TS encode: JSON.stringify(encodeValue(r)) + options",
+      "us": 2.801,
+      "cv": 0.127
+    },
+    {
+      "group": "B",
+      "name": "getFullyQualifiedType() (inside encode)",
+      "us": 0.008,
+      "cv": 0.958
+    },
+    {
+      "group": "B",
+      "name": "engine stage 0: call + JS->WASM copy of both strings",
+      "us": 1.339,
+      "cv": 0.196
+    },
+    {
+      "group": "B",
+      "name": "engine stage 1: + serde_json parse to Value",
+      "us": 4.676,
+      "cv": 0.086
+    },
+    {
+      "group": "B",
+      "name": "engine stage 2: + decode_wire to JsValue",
+      "us": 6.466,
+      "cv": 0.081
+    },
+    {
+      "group": "B",
+      "name": "engine stage 3: + options decode + to_validator_value",
+      "us": 8.761,
+      "cv": 0.078
+    },
+    {
+      "group": "B",
+      "name": "engine stage 4: + validate_instance_from (= validateResource)",
+      "us": 13.623,
+      "cv": 0.077
+    },
+    {
+      "group": "B",
+      "name": "syncIdentifiers(r)",
+      "us": 0.197,
+      "cv": 0.143
+    },
+    {
+      "group": "B",
+      "name": "wire text length (chars, not µs)",
+      "us": 329,
+      "cv": 0.806
+    },
+    {
+      "group": "floor",
+      "name": "empty engine call (p512bStageJson(\"\", 0))",
+      "us": 0.112,
+      "cv": 0.242
+    },
+    {
+      "group": "floor",
+      "name": "validator alone in WASM (prepared Value) + call",
+      "us": 3.87,
+      "cv": 0.113
+    },
+    {
+      "group": "a",
+      "name": "TS encode: toTree + JSON.stringify + rootId",
+      "us": 1.506,
+      "cv": 0.163
+    },
+    {
+      "group": "a",
+      "name": "engine: call + copy",
+      "us": 0.849,
+      "cv": 0.34
+    },
+    {
+      "group": "a",
+      "name": "engine: + parse to Value",
+      "us": 2.68,
+      "cv": 0.132
+    },
+    {
+      "group": "a",
+      "name": "engine: parse to IgnoredAny instead ((d) floor)",
+      "us": 1.099,
+      "cv": 0.177
+    },
+    {
+      "group": "a",
+      "name": "engine: validateResourceJson (full)",
+      "us": 6.662,
+      "cv": 0.086
+    },
+    {
+      "group": "a",
+      "name": "text length (chars, not µs)",
+      "us": 178,
+      "cv": 0.639
+    },
+    {
+      "group": "a+e",
+      "name": "encodeInto scratch",
+      "us": 0.156,
+      "cv": 0.421
+    },
+    {
+      "group": "a+e",
+      "name": "engine: validateResourceJsonScratch (full)",
+      "us": 6.244,
+      "cv": 0.134
+    },
+    {
+      "group": "b",
+      "name": "TS encode: toTree (checkString on)",
+      "us": 0.838,
+      "cv": 0.377
+    },
+    {
+      "group": "b",
+      "name": "engine: validateResourceObject (full)",
+      "us": 11.613,
+      "cv": 0.129
+    },
+    {
+      "group": "c",
+      "name": "TS encode: one-pass binary",
+      "us": 1.161,
+      "cv": 0.331
+    },
+    {
+      "group": "c",
+      "name": "engine: validateResourceBinary (full, copy in)",
+      "us": 5.798,
+      "cv": 0.123
+    },
+    {
+      "group": "c+e",
+      "name": "TS encode: one-pass binary into engine buffer",
+      "us": 1.167,
+      "cv": 0.242
+    },
+    {
+      "group": "c+e",
+      "name": "engine: validateResourceBinaryScratch (full)",
+      "us": 7.304,
+      "cv": 0.108
+    },
+    {
+      "group": "c",
+      "name": "binary length (bytes, not µs)",
+      "us": 201,
+      "cv": 0.735
+    }
+  ]
+}

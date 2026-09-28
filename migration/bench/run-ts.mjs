@@ -286,6 +286,8 @@ function main() {
         concerto_engine: process.env.CONCERTO_ENGINE === 'rust' ? 'rust' : 'ts',
         core_dist: CORE_DIST,
         p512_variant: process.env.CONCERTO_P512_VARIANT || 'base',
+        // P5-12b SPIKE: the variant-B transport (engine/validate-transport.ts).
+        p512b_transport: process.env.CONCERTO_P512B_TRANSPORT || null,
         loadavg: os.loadavg(),
         sample_opts: sampleOpts,
         workloads: {},
@@ -293,7 +295,9 @@ function main() {
 
     results.workloads.load_validate = {};
     results.workloads.validate_ast = {};
-    for (const setName of setNames) {
+    // P5-12b SPIKE: BENCH_WORKLOADS=instance runs workload 3 alone.
+    const instanceOnly = process.env.BENCH_WORKLOADS === 'instance';
+    for (const setName of instanceOnly ? [] : setNames) {
         const set = loadModelSet(setName);
         if (!set) {
             results.workloads.load_validate[setName] = { error: 'fixture set missing' };
@@ -310,7 +314,7 @@ function main() {
     const lines = [];
     lines.push('| Workload | Model set | n | Metric | Median (per op) | CV |');
     lines.push('|---|---|---|---|---|---|');
-    for (const setName of setNames) {
+    for (const setName of instanceOnly ? [] : setNames) {
         const lv = results.workloads.load_validate[setName];
         if (lv?.error) {
             lines.push(`| load_validate | ${setName} | - | - | ${lv.error} | - |`);

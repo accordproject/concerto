@@ -1,3 +1,148 @@
+# P5-12b SPIKE: cheaper TS↔WASM transport for instance validation (2026-09-28) - DO NOT MERGE
+
+Task P5-12b (accordproject/concerto-rust#292) profiles P5-12 variant B's single
+`validateResource` call and measures cheaper ways to pass the resource across
+the boundary. Measure only. It builds on P5-12's spike branches (concerto#1403,
+concerto-rust#290); every binding is additive.
+
+The candidates all run under `CONCERTO_P512_VARIANT=B`, with the transport
+selected at load by `CONCERTO_P512B_TRANSPORT`
+(`packages/concerto-core/src/engine/validate-transport.ts`, and
+`concerto-wasm/src/p512b.rs` on the Rust side). Every candidate builds, on the
+TS side, the value shape the validator already reads (`validate.rs` module doc
+"Scope": `$class`-tagged objects and the `$$dayjs`, `$$relationship`,
+`$$undefined`, `$$number` and `$$map` markers). This is exactly what
+`JsValue::to_validator_value` produces from the P5-12 wire, so the engine skips
+both `decode_wire` and `to_validator_value`. The options cross as a bit set and
+the root identifier as a short string, in place of JSON (candidate (e)).
+Errors leave through the same `run`/error-factory path, so the TS classes are
+unchanged.
+
+| Transport | Candidate | What crosses |
+|---|---|---|
+| `json` | (a) | `JSON.stringify` of the validator tree, then `serde_json::from_str` straight into the validator's `Value` |
+| `json-scratch` | (a)+(e) | the same text, `TextEncoder.encodeInto` a reused engine-owned buffer, with no per-call malloc or free |
+| `object` | (b) | the JS validator tree itself, through `serde-wasm-bindgen` |
+| `binary` | (c) | a compact tagged layout (null/bool/i32/f64/string/array/object), written in one pass from the live resource into a reused TS `Uint8Array`, then copied in as `&[u8]` |
+| `binary-scratch` | (c)+(e) | the same layout written straight into the reused engine buffer, with no copy |
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ @ 2.90GHz, 8 threads, macOS 13 (Darwin 22.6.0). **Not quiet**: shared with the user's desktop session and other agents. |
+| Toolchain | Node v24.21.0, rustc 1.98.1, wasm-bindgen 0.2.128, wasm-opt (binaryen 132) applied by `npm run build` (2,837,115 bytes) |
+| Load average | 1-minute load was 5.5 to 14.7 during the rounds (recorded in every results file). It was 100+ earlier in the session, so the runs waited for it to fall below 4 first. |
+| Heads | `concerto` `fcdd55ca0` (P5-12 spike) and `concerto-rust` `c48c03f` (P5-12 spike), plus this spike |
+| TS reference | published `@accordproject/concerto-core` 5.0.0 (`migration/oracle/reference`), via `BENCH_CORE_DIST` |
+| Runs | `results/P5-12b-{ts-reference-5.0.0,p512-B,json,json-scratch,object,binary,binary-scratch}-{1,2,3}.json`, from `sh migration/bench/p512b-rounds.sh` with `BENCH_ARGS="--samples 150 --warmup 20"`. That is three interleaved rounds of `run-ts.mjs` workload 3 alone (`BENCH_WORKLOADS=instance`). The run-ts default of 30 samples gave CVs up to 37% on this machine, so 150 samples were used. |
+
+## Per-stage cost of P5-12 B
+
+`node migration/bench/p512b-profile.mjs` (`results/P5-12b-profile.json`, 1-minute
+load 10.2). Median µs per resource. Each stage runs the engine's profiling
+binding `p512bStage` with precomputed input and stops after the named step, so
+each row gives its own cost as a difference.
+
+| Stage | µs | Share of the stage sum |
+|---|---|---|
+| TS: `handleFor(modelManager)` | 0.16 | 1% |
+| TS encode: `JSON.stringify(encodeValue(r))` plus options JSON (329 chars) | 2.80 | 17% |
+| JS→WASM: the call and the UTF-8 copy of both strings | 1.34 | 8% |
+| WASM: `serde_json` parse to `Value` | 3.34 | 20% |
+| WASM: `decode_wire` to `JsValue` | 1.79 | 11% |
+| WASM: options decode and `to_validator_value` | 2.30 | 14% |
+| WASM: `validate_instance_from` | 4.86 | 29% |
+| TS: `syncIdentifiers` write-back (the result return is `undefined` on success) | 0.20 | 1% |
+| **Stage sum** | **16.8** | |
+| Whole `resource.validate()`, same run | 21.1 | |
+
+The stage sum is about 20% below the whole call. The isolated rows reuse
+precomputed inputs, so they leave out some of the GC and allocation cost of the
+real path.
+
+Floors from the same run:
+- **An empty engine call** costs 0.11 µs.
+- **The validator alone in WASM** costs **3.87 µs**, on an already-parsed validator `Value` plus a call with one short string.
+- The 3.87 µs floor is **already above TS 5.0.0's whole `validate()` (2.5 µs)**.
+
+## Candidates
+
+Medians in µs per instance, `resource.validate()`, synthetic 500. × TS uses the
+median of the three rounds.
+
+| Variant | runs 1 / 2 / 3 | median | × TS | vs P5-12 B |
+|---|---|---|---|---|
+| TS reference 5.0.0 | 2.2 / 2.5 / 2.6 | 2.5 | 1.0× | - |
+| P5-12 B (`validateResource`, wire JSON) | 19.8 / 20.1 / 20.7 | 20.1 | **8.0×** | 1.00× |
+| (a) `json` | 10.4 / 10.8 / 12.9 | 10.8 | **4.3×** | 1.9× faster |
+| (a+e) `json-scratch` | 12.4 / 10.9 / 14.1 | 12.4 | 5.0× | 1.6× faster |
+| (b) `object` (serde-wasm-bindgen) | 14.5 / 14.0 / 15.8 | 14.5 | 5.8× | 1.4× faster |
+| **(c) `binary`** | 8.9 / 8.9 / 8.8 | **8.9** | **3.6×** | **2.3× faster** |
+| (c+e) `binary-scratch` | 8.6 / 8.7 / 9.2 | 8.7 | 3.5× | 2.3× faster |
+| Crate-direct `validate_instance`, native, reference only | 10.3 (this machine, load ~8) / 1.86 (P5-10c, quiet Linux Xeon) | | | |
+
+`fromJSON` is unchanged in every variant (TS 10.9, the others 68 to 86 with
+wide variance). It validates inside `serializerFromJson` and never reaches
+`validate()`.
+
+The crate-direct number on this machine is higher than the in-WASM
+validator floor (3.87 µs). It was measured under load, with macOS's system
+allocator (the WASM build uses its own allocator in linear memory). The P5-10c
+1.86 µs figure came from a different, quiet Linux machine. Neither is a
+same-conditions comparison. The same-run in-WASM floor is the number to plan
+against.
+
+The split of each candidate (from the same profile run, µs):
+
+| | TS encode | engine call, full | notes |
+|---|---|---|---|
+| (a) `json` | 1.51 | 6.66 | 0.85 is the call and copy, 1.83 the parse (178 chars), and about 3.9 the validator |
+| (a+e) `json-scratch` | 1.51 + 0.16 `encodeInto` | 6.24 | saves the malloc and copy, but the end-to-end gain is lost in noise |
+| (b) `object` | 0.84 | 11.61 | serde-wasm-bindgen reads each property through `Reflect`, which is clearly the worst; **dropped** |
+| (c) `binary` | 1.16 | 5.80 | decode about 1.9 (5.80 minus the 3.87 floor), including the call and the `&[u8]` copy (201 bytes) |
+| (c+e) `binary-scratch` | 1.17 | 7.30 including the encode | the same as (c) within noise |
+
+**(d) No intermediate tree: dropped, measured as a bound.**
+- Parsing the (a) text into `serde::de::IgnoredAny` costs 1.10 µs, including the call. Parsing it into `Value` costs 2.68 µs.
+- So building the tree costs at most about 1.6 µs on the JSON path. On the binary path, the whole decode, including the call and the copy, is about 1.9 µs.
+- A borrowed or streaming validator would need `validate.rs` (3.9k lines over `&serde_json::Value`) rewritten over a value trait or visitor, to save at most about 1.6 µs of the ~9 µs.
+- That is not worth it before the validator itself gets faster.
+
+**(e) Fixed per-call overhead:**
+- The options JSON and the extra string are replaced by a bit set and the root-identifier string in every candidate above.
+- `handleFor` (0.16 µs), the empty call (0.11 µs) and `syncIdentifiers` (0.20 µs) are already small.
+- Reusing an engine-owned buffer saves the wasm-bindgen malloc and copy. That is under 0.3 µs at these sizes, inside the noise.
+- The success path returns `undefined`, so there is nothing to cut there. The error path still builds its payload through the error factory (`run`). It only runs for invalid instances and was not timed.
+
+## Correctness (quick; best two candidates)
+
+- **Oracle `Resource.validate`** (75 fixtures; `rust-adapter.js`, canonical corpus):
+  - `json`: 75/75.
+  - `binary`: 75/75.
+  - In both, all 75 took the one-call path, with 0 fallbacks (`globalThis.__p512`).
+- **concerto-core suite** (mocha + nyc, the package's `test` arguments, one run each):
+  - `json` and `binary` both give 1624 passing, 8 pending and 0 failing.
+  - Both miss the 99% statements threshold at 98.97%, exactly as P5-12 B did, because `validate()` bypasses the visitor code.
+- **Error classes** (`node migration/bench/p512b-error-classes.mjs`, 14 cases):
+  - The cases cover: string in Integer, number in Boolean, NaN in Double, `undefined` or missing required field, undeclared field, number in `String[]`, string in DateTime, empty identifier, a Resource in a relationship field, the wrong nested concept type, a nested regex violation, a Double in an Integer field, and a valid resource.
+  - P5-12 B, `json` and `binary` print exactly what TS 5.0.0 prints: `ValidationException`, with `BaseException` for the nested regex case and `ok` for the Double-in-Integer and valid cases.
+  - All ran with 0 fallbacks.
+
+## Recommendation
+
+**Use the binary layout (c), copied in as `&[u8]`, for the production B.**
+- **Cost:** about **9 µs** per resource on this machine (**~3.6× TS**, 2.3× faster than P5-12 B's wire JSON).
+- **(a) `json`** is the simpler fallback option: about 11 µs, 4.3× TS, with no new format to maintain.
+- **Skip the engine-owned scratch buffer.** It needs detached-view and memory-growth handling for a gain lost in noise.
+- **Skip serde-wasm-bindgen.** It is the slowest of the four.
+
+**The transport is no longer the bottleneck.**
+- On (c), about 45% of the call is the validator itself (3.9 µs in WASM). The rest is about 1.2 µs of TS encode, about 1.9 µs of engine decode including the call and copy, and about 0.5 µs of fixed cost. GC accounts for the remainder.
+- The in-WASM validator alone is already slower than TS's whole `validate()` (2.5 µs). So no transport reaches parity on this workload.
+- The next lever is the validator's own cost. After that comes (d), for at most a further ~1.5 µs.
+- Re-measure on a quiet machine before quoting exact numbers.
+
+---
+
 # P5-12 SPIKE: instance validation design (2026-09-28) - DO NOT MERGE
 
 Task P5-12 (accordproject/concerto-rust#289) measures three designs for

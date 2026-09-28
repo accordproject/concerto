@@ -232,4 +232,6 @@ function syncIdentifiers(v: any) {
     }
 }
 
-export { fastFromJson, fastToJson, fastValidateResource };
+// P5-12b SPIKE (DO NOT MERGE): handleFor, syncIdentifiers and asUnsupported
+// are also exported for engine/validate-transport.ts.
+export { fastFromJson, fastToJson, fastValidateResource, handleFor, syncIdentifiers, asUnsupported };
