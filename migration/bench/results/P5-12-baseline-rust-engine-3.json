@@ -1,0 +1,159 @@
+{
+  "harness": "run-ts.mjs",
+  "recorded_at": "2026-09-28T07:31:42.511Z",
+  "machine": {
+    "platform": "darwin",
+    "arch": "x64",
+    "cpus": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+    "cpu_count": 8,
+    "total_mem_gb": 17,
+    "node": "v24.21.0"
+  },
+  "concerto_commit": "f4c55d90ba9e19908d9e95a8642c6a5d57292fcd",
+  "concerto_engine": "ts",
+  "core_dist": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-12/concerto/packages/concerto-core/dist",
+  "p512_variant": "base",
+  "loadavg": [
+    2.89208984375,
+    4.63330078125,
+    5.7392578125
+  ],
+  "sample_opts": {
+    "warmup": 5,
+    "samples": 30
+  },
+  "workloads": {
+    "load_validate": {
+      "concerto-core-test-data": {
+        "load": {
+          "samples": 30,
+          "n": 35,
+          "median_ms": 0.1935117,
+          "mean_ms": 0.20473448285714288,
+          "stddev_ms": 0.034998682339073536,
+          "min_ms": 0.16256371428571428,
+          "max_ms": 0.29252537142857143,
+          "cv": 0.17094669080974742
+        },
+        "validate": {
+          "samples": 30,
+          "n": 35,
+          "median_ms": 0.2602077285714286,
+          "mean_ms": 0.27376737523809525,
+          "stddev_ms": 0.048499288020572504,
+          "min_ms": 0.2212618857142857,
+          "max_ms": 0.4016927714285714,
+          "cv": 0.17715510468839726
+        },
+        "validateError": null,
+        "n": 35
+      },
+      "conformance": {
+        "load": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.13760191463414634,
+          "mean_ms": 0.13175033333333336,
+          "stddev_ms": 0.027909673580032407,
+          "min_ms": 0.09277165853658537,
+          "max_ms": 0.18520434146341463,
+          "cv": 0.21183759368122335
+        },
+        "validate": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.21943600000000002,
+          "mean_ms": 0.21094861382113822,
+          "stddev_ms": 0.03857721800180447,
+          "min_ms": 0.14431273170731707,
+          "max_ms": 0.2617070487804878,
+          "cv": 0.18287495377672314
+        },
+        "validateError": null,
+        "n": 41
+      },
+      "synthetic-large": {
+        "load": {
+          "samples": 30,
+          "n": 1,
+          "median_ms": 7.458033,
+          "mean_ms": 7.576478499999999,
+          "stddev_ms": 0.36924139497098735,
+          "min_ms": 7.233506,
+          "max_ms": 8.584792,
+          "cv": 0.04873522639455618
+        },
+        "validate": {
+          "samples": 30,
+          "n": 1,
+          "median_ms": 13.2985095,
+          "mean_ms": 13.313814899999995,
+          "stddev_ms": 0.20322005122787126,
+          "min_ms": 12.907793,
+          "max_ms": 13.822399,
+          "cv": 0.01526384832253236
+        },
+        "validateError": null,
+        "n": 1
+      }
+    },
+    "validate_ast": {
+      "concerto-core-test-data": {
+        "validateAst": {
+          "samples": 30,
+          "n": 34,
+          "median_ms": 1.1436451617647059,
+          "mean_ms": 1.1548427490196078,
+          "stddev_ms": 0.039717004844903904,
+          "min_ms": 1.1091699705882352,
+          "max_ms": 1.2599481764705882,
+          "cv": 0.034391699544047236
+        },
+        "n": 34,
+        "totalInSet": 35
+      },
+      "conformance": {
+        "validateAst": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.6271539146341464,
+          "mean_ms": 0.6300745390243904,
+          "stddev_ms": 0.011461312587008813,
+          "min_ms": 0.6174804878048781,
+          "max_ms": 0.6600591219512195,
+          "cv": 0.01819040744727687
+        },
+        "n": 41,
+        "totalInSet": 41
+      },
+      "synthetic-large": {
+        "validateAst": null,
+        "n": 1,
+        "error": "validateAst rejects every model in this set"
+      }
+    },
+    "instance_validate": {
+      "populate_and_validate": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.067532828,
+        "mean_ms": 0.06662617166666668,
+        "stddev_ms": 0.0036485422702964743,
+        "min_ms": 0.06182452,
+        "max_ms": 0.07316341,
+        "cv": 0.05476139749632131
+      },
+      "validate_only": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.022285717,
+        "mean_ms": 0.022265664266666665,
+        "stddev_ms": 0.000693582124992739,
+        "min_ms": 0.02110122,
+        "max_ms": 0.023705116000000002,
+        "cv": 0.031150300152108304
+      },
+      "n": 500
+    }
+  }
+}

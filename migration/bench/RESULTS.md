@@ -1,3 +1,62 @@
+# P5-12 SPIKE: instance validation design (2026-09-28) - DO NOT MERGE
+
+Task P5-12 (accordproject/concerto-rust#289) measures three designs for
+`ValidatedResource.validate()` against the integration head. Measure only.
+The variants are switched at load by `CONCERTO_P512_VARIANT`:
+
+- **A**: `ResourceValidator.checkItem` skips the per-field engine call and runs its existing TS `switch`.
+- **B**: `ValidatedResource.validate()` makes one engine call per resource. This uses the additive concerto-wasm binding `ModelManagerHandle.validateResource(wireText, optionsText)`, which runs the existing `validate.rs` instance validator. TS then applies the `$identifier` write-back. The visitor remains the `EngineFastPathUnsupported` fallback.
+- **C** (control): the codec and binding lookups are hoisted out of the per-field path, and the per-field engine call is kept.
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ @ 2.90GHz, 8 threads, macOS 13 (Darwin 22.6.0), shared with other agents |
+| Toolchain | Node v24.21.0, rustc 1.98.1, wasm-bindgen 0.2.128, wasm-opt (binaryen 132) applied by `npm run build` |
+| Load average | 1-minute load was 2.2 to 3.2 during the runs. `loadavg` is recorded in every results file. `mds_stores` (Spotlight) was active. |
+| Baseline | `concerto` `f4c55d90b`, `concerto-rust` `af207c5`, engine built unmodified (2,757,411 bytes) |
+| Variants | the same heads plus this spike. The engine is built with the additive binding (2,761,376 bytes). |
+| TS reference | published `@accordproject/concerto-core` 5.0.0 (`migration/oracle/reference`), via `BENCH_CORE_DIST` |
+| Runs | `results/P5-12-{ts-reference-5.0.0,baseline-rust-engine,variant-{A,B,C}-rust-engine}-{1,2,3}.json`. Three interleaved rounds with `run-ts.mjs` defaults (5 warm-up + 30 samples). |
+
+Medians in µs per instance (synthetic, 500). × TS uses the median of the three runs.
+
+| Variant | resource.validate(), runs 1 / 2 / 3 | × TS | vs baseline | fromJSON, runs 1 / 2 / 3 | × TS |
+|---|---|---|---|---|---|
+| TS reference 5.0.0 | 2.4 / 2.4 / 2.3 | 1.0× | - | 9.1 / 8.9 / 9.5 | 1.0× |
+| Baseline | 21.0 / 21.7 / 22.3 | **9.2×** | 1.00× | 65.9 / 65.6 / 67.5 | 7.2× |
+| A: TS primitive check | 18.0 / 18.6 / 17.3 | **7.6×** | 1.21× faster | 63.9 / 60.8 / 64.9 | 7.0× |
+| B: one Rust call per resource | 15.7 / 16.5 / 15.6 | **6.6×** | 1.38× faster | 65.0 / 62.9 / 65.6 | 7.1× |
+| C: hoist only | 21.5 / 21.7 / 21.5 | **9.1×** | 1.01× faster | 66.6 / 64.8 / 64.0 | 7.1× |
+
+`fromJSON` does not change in any variant. It already validates inside
+`serializerFromJson` (P4-10), so it never reaches these paths.
+
+**Per-call counts** (one `validate()` of the bench instance): baseline and C
+make 6 per-field engine calls. A makes none. B makes 1 resource call and no
+per-field calls, with 0 fallbacks.
+
+**Profiles** (`node --cpu-prof`, 200,000 `validate()` calls):
+
+- **Variant A**: about 70% of the time is still spent crossing the boundary.
+  - `ClassDeclaration.getProperties()` takes 47%. It is a view call that rebuilds the property list across WASM on every call.
+  - `getProperty()` takes 22%, from the undeclared-field check on each own property.
+
+  So the per-field primitive call accounts for only about 4 µs of the baseline's 21.7 µs. The visitor's introspection calls account for most of the rest.
+- **Variant B**: about 72% is the `validateResource` call itself: wire decode, `to_validator_value` and the validator in WASM. That is about 11 µs, against the crate-direct `validate_instance` at about 1.9 µs (P5-10c). Encoding takes about 7%.
+  - The first B build called `require()` on each call, and that cost 15%.
+  - The write-back called `getIdentifierFieldName()` through the engine, and that cost 7%.
+  - Both are fixed in the measured build: the module is memoised, and the write-back reads `$identifierFieldName`.
+
+**Correctness** (quick; no fuzz, no lifted tests):
+
+- **Oracle `Resource.validate`** (75 fixtures, `rust-adapter.js`, canonical corpus): 75/75 for base, A, B and C. Under B, all 75 took the one-call path, with 0 fallbacks.
+- **concerto-core suite** (mocha + nyc, one run per variant): 1624 passing, 8 pending and 0 failing in every variant.
+  - Base, A and C meet the nyc thresholds.
+  - B fails the 99% statements threshold (98.97%) because the bypassed visitor code is no longer covered by `validate()`.
+- **Error classes**: string in an Integer field, number in a Boolean field, empty identifier, undeclared field and missing required field all give `ValidationException` in every variant, matching TS 5.0.0. A Double in an Integer field is accepted in every variant, as TS accepts it.
+
+---
+
 # P5-10c: lazy views, full benchmark after parts 1 and 2 (2026-09-27)
 
 Task P5-10c (accordproject/concerto-rust#271) re-runs the full P5-04

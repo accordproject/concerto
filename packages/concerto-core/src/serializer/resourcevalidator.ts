@@ -42,6 +42,19 @@ const loadEngine = (specifier: string) =>
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
 /* istanbul ignore next */
 const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engine').rust;
+// P5-12 SPIKE (DO NOT MERGE): instance validation variants, selected once at
+// load by CONCERTO_P512_VARIANT: unset/'base' = unchanged, 'A' = TS primitive
+// check only (no per-field engine call), 'B' = one Rust call per resource
+// (validatedresource.ts; this per-field path is unchanged), 'C' = hoist the
+// codec lookup out of the per-field path, keep the per-field engine call.
+/* istanbul ignore next */
+const P512_VARIANT: string = (typeof process !== 'undefined' && process.env && process.env.CONCERTO_P512_VARIANT) || 'base';
+/* istanbul ignore next */
+const p512Codec: any = P512_VARIANT === 'C' ? loadEngine('../engine/serializer-codec') : null;
+/* istanbul ignore next */
+const p512PrimitiveValid: (...args: any[]) => any = rust.resourceValidatorPrimitiveValid;
+/* istanbul ignore next */
+const p512Counter = ((globalThis as any).__p512 ??= { primitiveCalls: 0, resourceCalls: 0, resourceFallbacks: 0 });
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -423,7 +436,24 @@ class ResourceValidator {
             // exactly as the whole-document fast path falls back on the
             // same `EngineFastPathUnsupported`.
             let delegated = false;
-            try {
+            /* istanbul ignore next */
+            if (P512_VARIANT === 'A') {
+                // P5-12 variant A: skip the delegation, use the TS switch.
+            } else if (P512_VARIANT === 'C') {
+                // P5-12 variant C: the codec and binding are hoisted.
+                try {
+                    p512Counter.primitiveCalls++;
+                    p512Codec.checkString(String(field.getType()));
+                    invalid = !p512PrimitiveValid(
+                        field.getType(),
+                        JSON.stringify(p512Codec.encodeValue(obj)),
+                    );
+                    delegated = true;
+                } catch (err) {
+                    // as below: fall through to the TS switch
+                }
+            } else try {
+                p512Counter.primitiveCalls++;
                 const codec = loadEngine('../engine/serializer-codec');
                 codec.checkString(String(field.getType()));
                 invalid = !rust.resourceValidatorPrimitiveValid(
