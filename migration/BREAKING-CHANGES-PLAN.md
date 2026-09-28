@@ -15,6 +15,17 @@ Heads read: concerto `98eed8099` and concerto-rust `78566e7`
 (`claude/tender-pascal-ocwf9q`), plus the GitHub issues named in each row, as
 of 2026-09-26.
 
+**Update, P5-10c (accordproject/concerto-rust#271, 2026-09-27).** The
+maintainer decided on 2026-09-27 to implement lazy views now, before the
+migration release. P5-10a (#269) and P5-10b (#270) shipped them, so
+**BC-23, BC-24 and BC-25 move to R1**, the engine-switch release (1.4,
+section 3). A later maintainer decision on #270 (comment 5859088256,
+option (b)) keeps decorator factories on the eager path, so R1 ships BC-24's
+non-breaking part only. The factory-timing change is not in R1 and stays a
+proposal for a later major. The mutation and identity semantics that changed
+are recorded in 1.4 (BC-23), with changelog wording in section 4. Heads
+checked for this update: concerto `d2be3f7be` and concerto-rust `e7c0163`.
+
 ## 0. How to read this
 
 **IDs.** `BC-nn` rows affect JS users of concerto-core, and possibly Rust
@@ -128,13 +139,15 @@ P5-06d (#239), typed deserialisation behind a fallback, is **non-breaking** and
 not listed. The rows below are the performance gains that need an API or
 behaviour change. The ratios are Rust engine / TS through the public API,
 after P5-06: load 13–40×, load+validate 17–21×, validateAst 1.7–2.5×,
-`fromJSON` 5.7×, `resource.validate()` 6.8×.
+`fromJSON` 5.7×, `resource.validate()` 6.8×. After lazy views (P5-10c,
+2026-09-27): load 4.1–12.4×, load+validate 3.2–8.0×, validateAst 1.8–2.7×,
+`fromJSON` 5.8×, `resource.validate()` 9.7×.
 
 | ID | Source | Current behaviour | Proposed behaviour | Category | Affects | Evidence | Risk | Benefit | Semver | Size |
 |---|---|---|---|---|---|---|---|---|---|---|
-| **BC-23** | #67 hybrid decision (comment 5844197262); #220 structural finding; #226 no-go | In rust mode the **TS view graph is built eagerly** (hybrid construction), and the AST crosses into WASM two or three times. Public fields (`declarations`, `properties`, `ast`) are plain mutable TS objects with stable identity. | Handle-backed views: declarations and properties are materialised from the Rust arena on demand, and public fields become getters. Identity is guaranteed only through the view cache. Mutating a returned array or field no longer reaches the engine. | performance-enabling / API | JS | #220: the two load-time round trips are about 45% of `synthetic-large` load, GC is 16% and system-model views are 10%. #226: lazy views give 2–3× (load 4.7–21× TS), and the crate's own load is the floor. | **high:** identity, mutation, `instanceof` and subclassing assumptions | 2–3× on load (measured), more with BR-09 | major | L |
-| **BC-24** | #226 design note §3 (decorator factories force the eager path) | A `DecoratorFactory.newDecorator` runs during model construction, so user code runs synchronously at load. The ledger keeps it as a TS user extension point. | Run factories at first access to a decorator, or replace factories with a post-load hook. | API / performance-enabling | JS | #226 design note, and a factory added after load was hidden in the prototype | medium: users of `DecoratorFactory` | lets BC-23 apply to every model manager | major | M |
-| **BC-25** | #226 §3 (error-timing parity) | Every model error is thrown at construction. Laziness is sound only if Rust rejects everything TS construction rejects. | Keep errors eager: this is a **constraint, not a change**. BC-23 must not move error timing. Its prerequisite is zero under-rejections in the P5-05 fuzzer on the stage op, which BC-19 makes easy. | constraint | – | #226 `CONCERTO_LAZY_VIEWS_CHECK`: 0 under-rejections in the suite and the corpus | – | – | – | – |
+| **BC-23** | #67 hybrid decision (comment 5844197262); #220 structural finding; #226 design note; **shipped in R1 by P5-10a (#269) and P5-10b (#270)** | Before P5-10a, the engine built the **TS view graph eagerly** (hybrid construction), and the AST crossed into WASM two or three times. **Now (R1):** a `ModelFile` is staged in Rust once at construction, and its declaration and property views are built on first use, from one batched snapshot per file. Decorators, validators and map key and value types are built on first read. There is no user-facing option; lazy is the only path. Public classes, the `.d.ts` and the api-snapshot are unchanged (BC-37 baseline). | **Ships in R1, as built, subject to BC-25 (see its row: P5-10c found one error-timing gap).** Probes against the TS 5.0.0 reference and the pre-lazy head (concerto `796669d5c`) show that object identity is unchanged. `getType`, `getLocalType`, `getAllDeclarations`, `getProperties`, `getDecorators` and `getValidator` return the same object on every call, as before. What changed: **(a)** A `ModelFile`'s AST is read twice: at construction, when Rust stages and validates it, and again when its views are first built, which can be after the file is added. A caller that mutates the AST in between gets views (declarations, properties, decorator arguments, validators) built from the mutated AST; TS 5.0.0 and the pre-lazy engine built them at construction. The Rust side keeps the construction-time AST, so the two can disagree: for example, renaming a declaration in the AST after `addModelFile` and before the first read makes `getType` of the old name throw `TypeNotFoundException`, where TS 5.0.0 returns the declaration. **(b)** Object shape: until first read, `ModelFile.declarations` and `localTypes` are own enumerable accessors, not data properties. `decorators` (every decorated element), `validator` (Field, ScalarDeclaration), `sizeValidator` (Property) and `key`/`value` (MapDeclaration) are prototype accessors, so `Object.keys`, `hasOwnProperty`, `Object.assign` and spread copies do not see them until they have been read once. The first read turns each into a plain own field. | performance-enabling / API | JS | P5-10c (`migration/bench/RESULTS.md`): load 2.2–2.9× and load+validate 1.7–3.0× faster than the pre-lazy head; against TS, load goes from 10.0–35.7× to 4.1–12.4× slower. The object-shape and AST-mutation probes are listed in the P5-10c report on #271. The concerto-core suite, the oracle (16,242 of 16,242 fixtures) and the conformance suite pass unchanged. | **medium:** code that mutates a model's AST after constructing its `ModelFile`, or copies view objects by enumerating own properties. Neither is a documented use. `instanceof`, subclassing and identity are unchanged. | 2.2–2.9× on load (measured) | major (R1, which is already major) | L (done) |
+| **BC-24** | #226 design note §3; P5-10b (#270); **maintainer decision on #270 (comment 5859088256): option (b), decorator factories stay eager** | A `DecoratorFactory.newDecorator` runs during model construction, so user code runs synchronously at load. **R1 keeps this:** a model manager with any registered decorator factory builds its files eagerly, as before. Managers without factories, including heavily decorated models, get lazy decorators (BC-23). A factory added after a file was constructed does not apply to that file's decorators, as before. | **R1 ships only the non-breaking part** (lazy decorators when no factory is registered). The breaking part (run factories at first access to a decorator, or replace factories with a post-load hook) is **not in R1**. It stays a proposal for a later major, per the #270 decision. | API / performance-enabling | JS | P5-10b: running factories on first read moved 9 recorded `gaps/` fixtures' `abstract function called` throw from `addCTOModel` to the first decorator read, and was reverted. | medium: users of `DecoratorFactory` (for the later major) | lets BC-23 apply to model managers with factories | major (later major) | M |
+| **BC-25** | #226 §3 (error-timing parity); P5-10a/b `CONCERTO_LAZY_VIEWS_CHECK`; **P5-10c fuzz (#271)** | Every model error is thrown at construction. Laziness is sound only if Rust rejects everything TS construction rejects. | **A constraint on R1, not a change: errors stay eager.** Where Rust rejects, or user code runs at construction (decorator factories, a custom `options.regExp`), the file is built eagerly, so the TS error is thrown at the same point. **P5-10c found that R1 does not yet meet it:** Rust accepts a property whose `$class` is not a metamodel class but ends in a property class's short name (for example `StringProperty`, `foo.StringProperty`, or a doubled `concerto.metamodel@1.0.0.StringPropertyconcerto.metamodel@1.0.0.StringProperty`). TS rejects it with `IllegalModelException: Unrecognised model element`. Before lazy views the TS constructor threw at construction; now the file is staged lazily and the same error is thrown only when the declarations are first read (after `addModelFile`, or never). Fixing this is a Rust under-rejection fix (the #218 direction), reported on #271 and not fixed in P5-10c. | constraint | – | `CONCERTO_LAZY_VIEWS_CHECK=1`: 0 under-rejections in the concerto-core suite and the oracle (P5-10a/b) and in the concerto-conformance JS suite (109 semantic and 42 instance scenarios, P5-10c). The P5-10c fuzz check shard (100,000 cases, run-seed 1001): 21 `LAZY-CHECK` under-rejection lines, all this `Unrecognised model element` gap, and the shard's 578 divergences match the pre-lazy engine's case for case (check mode restores eager errors). The 1,000,000-case lazy run has 236 divergences the pre-lazy run on the same cases does not (12 clusters, each minimised to a malformed property `$class`; 222 are TS-throws/Rust-accepts, 14 are a different error class because another error now surfaces first), and none the other way. The lazy-only divergences in the 1,000,000-case run: `migration/fuzz/TRIAGE.md` ("P5-10c"). | – | – | – | – |
 | **BC-26** | D7 (plan §6); #227 profile | Instances are TS `Resource` objects (D7), so every `resource.validate()` and `fromJSON` marshals the instance (`JSON.stringify` and UTF-8 into WASM). Marshalling alone (about 2.75 µs) costs more than TS's whole `validate()` (2.1 µs). | Additive first: a plain-JSON entry point (for example `modelManager.validateJSON(obj, type, options)`) that skips `Resource` construction. Later, and optionally, Rust-owned instance values. | performance-enabling / API | JS | #227: `fromJSON` 5.6× → 2.4× and `validate()` 9.1× → 2.9× on the unmerged prototype; parity blocked by marshalling | low for the additive form; high for Rust-owned instances | instance throughput | minor (additive), or major (Rust-owned) | M / L |
 | **BC-27** | #227 review (comment 5848906482) | `ResourceValidator` **writes** `$identifier`, follows the **prototype chain** for declared fields, and so throws on a **frozen** resource (`Cannot assign to read only property '$identifier'`). A one-call fast path cannot reproduce that, so #227's fast path diverged on frozen and inherited-field resources. | `validate()` becomes read-only. It reads own enumerable data properties only and validates frozen objects. | performance-enabling / bug fix | JS | 2 behaviour differences found by #227's differential review | low to medium: code that relies on validate's `$identifier` write or on inherited fields | lets the one-call validate fast path apply always | major (narrow) | S–M |
 | **BC-28** | plan §3 ("pluggable `options.regExp` stays in JS"); `engine/serializer.ts` (`model-manager-regExp-option`); ledger `StringValidator.getRegex` (stays-ts); lifted MAP.tsv (2 not-liftable rows) | `new ModelManager({regExp})`, a custom engine such as XRegExp, forces the TS path, because the Rust fast path cannot call it. `StringValidator.getRegex()` returns a JS `RegExp`. | Deprecate `options.regExp`. Make `getRegex()` return `{pattern, flags}` (or keep the `RegExp` but build it from Rust's validated source). | removal / API | JS | 2 not-liftable W tests; fast-path bail-out | medium: XRegExp users | Rust validates every regex, and removes a TS-only branch | major | S–M |
@@ -190,10 +203,10 @@ and BC-34 from happening during the migration. P4-08's `stripInternal` and
 | Class | Rows |
 |---|---|
 | **Safe after the migration as minor or patch** | BC-01, BC-06, BC-08, BC-11, BC-12, BC-14 (crash to domain exception, or message text only); BC-38 (additive error codes, minor); BC-09 (subject to Q8); BC-21 as a faithful fix (patch); BC-29 (patch, non-breaking form); BC-26 additive form, BC-30 (minor, additive); BC-35 generation form (patch); BR-02 |
-| **Needs a major release** | BC-37 (already shipped in R1), BC-39, BC-40, BC-02, BC-04 (until Q6), BC-05, BC-07 (default flip), BC-10, BC-17, BC-19 (with BC-18 and BC-20 folded in), BC-21 extending DV-018, BC-23, BC-24, BC-26 Rust-owned form, BC-27, BC-28, BC-31, BC-32, BC-33, BC-34, BC-35 removal form |
+| **Needs a major release** | BC-37 (already shipped in R1), BC-23 (shipped in R1 by P5-10a/b), BC-39, BC-40, BC-02, BC-04 (until Q6), BC-05, BC-07 (default flip), BC-10, BC-17, BC-19 (with BC-18 and BC-20 folded in), BC-21 extending DV-018, BC-24 factory-timing part (its non-breaking part shipped in R1), BC-26 Rust-owned form, BC-27, BC-28, BC-31, BC-32, BC-33, BC-34, BC-35 removal form |
 | **Changelog-only: already Rust behaviour, universal at P5-02** | BC-03 (DV-004), BC-07 part (a) (DV-009), BC-13 (DV-015), BC-15 (DV-017), BC-16 (DV-018) |
 | **Rust-crate-API-only** (feeds P6-01 #83) | BR-01 to BR-11 |
-| **No change proposed** | BR-01, BC-25 (a constraint), BC-36, BC-22 (pending #219) |
+| **No change proposed** | BR-01, BC-25 (a constraint on R1; not yet met, see its row), BC-36, BC-22 (pending #219) |
 
 ---
 
@@ -211,6 +224,7 @@ otherwise "same behaviour, new engine".
 - **Packaging:** BC-31 (the Node floor, or an ESM loader) and BC-32 (a browser init entry and bundler docs).
 - **Changelog for already-built divergences:** BC-03 (DV-004), BC-07(a) (DV-009), BC-13 (DV-015), BC-15 (DV-017) and BC-16 (DV-018).
 - **Changelog for P5-02's accepted API removals:** BC-37 (`DecoratorExtractor`, internal `DecoratorManager` statics, `MapKeyType`/`MapValueType.processType`).
+- **Lazy views (maintainer decision 2026-09-27; shipped by P5-10a #269 and P5-10b #270; verified by P5-10c #271):** BC-23 as built, BC-24's non-breaking part (decorator factories stay eager, #270 option (b)), and BC-25 as the constraint they must meet. **P5-10c found one gap in BC-25** (a Rust under-rejection now surfaces at first read instead of at construction); it must be fixed, or accepted by the maintainer, before R1. Changelog entries for the mutation and object-shape changes in BC-23 (section 4).
 - **Optionally, the minor-class fixes, because after P5-02 they are one-place Rust changes:**
   - BC-06, BC-08, BC-11, BC-12 and BC-14: TS crash to domain exception, or message text;
   - BC-01;
@@ -248,21 +262,19 @@ otherwise "same behaviour, new engine".
   - BC-07(c), removing non-strict `DateTime` support (maintainer decision 2026-09-27; only strict ISO 8601 values accepted);
   - BC-39 (validator errors leave `BaseException`) and BC-40 (reject `length=[,]`), both maintainer decisions of 2026-09-27 (#249).
 - **Performance and API:**
-  - BC-23 and BC-24 (BC-25 is their constraint);
+  - BC-24's factory-timing part, if the maintainer adopts it (BC-23 and BC-25 moved to R1);
   - BC-27 and BC-28;
   - BC-34 and BC-35 (removal form).
 
 **Dependencies and order inside R3:**
-1. **BC-19 first.** It is the prerequisite for BC-25's zero-under-rejection guarantee, and so for BC-23, and it lets BR-09 drop the `Value` fallback.
-2. **BC-24** before BC-23 is turned on by default.
-3. **BC-23.** It re-uses the unmerged P5-06a prototype (concerto#1373, concerto-rust#231), which first needs the integration head merged in (#226, comment 5849126577).
+1. **BC-19 first.** It makes BC-25's zero-under-rejection guarantee structural (Rust checks the full metamodel shape), rather than measured as in R1, and it lets BR-09 drop the `Value` fallback.
+2. **BC-24's factory-timing part**, if adopted, after BC-19.
+3. ~~BC-23~~ moved to R1 (P5-10a/b).
 4. **BC-27** before the #227 fast path is revived (concerto-rust#232, concerto#1374, kept for reference).
 
-**Tie to the P5-02 outcome:**
-- If P5-02 keeps the hybrid TS construction, as #67 decided, BC-23 is where most of the remaining load gap closes. #226 measured the non-breaking variant at 2–3×, and parity needs crate work as well: BR-09, allocation, and so on.
-- If the P5-02 chunks delete the TS graph outright, BC-23 is partly done by P5-02, and R3 carries only its API consequences: identity, getters and mutation.
+**Tie to the P5-02 outcome (superseded by P5-10c):** P5-02 kept the hybrid TS construction, as #67 decided, and BC-23 then closed most of the remaining load gap in R1 (2.2–2.9× on load; P5-10c). Parity still needs crate work: BR-09, allocation, and so on.
 
-**Size:** BC-19 L, BC-23 L, the rest S–M.
+**Size:** BC-19 L, the rest S–M.
 
 ### RB: Rust crate 1.0 (P6-01 #83 onward)
 
@@ -296,8 +308,8 @@ RB does not affect JS users and can run in parallel with R2.
 | BC-15 / BC-16 | – | none | "A relationship without a type, or a `null` decorator, is rejected with an `IllegalModelException` instead of a `TypeError`." |
 | BC-17, BC-18, BC-19, BC-20 | R2: `ModelManager` option `strictAst` (default false) that runs the metamodel shape check on load, with a warning when it would reject. R3: flip the default. | `strictAst` (or re-use `metamodelValidation`, Q10) | "Models are checked against the Concerto metamodel when they are loaded. Malformed ASTs that used to load, or that failed with a `TypeError`, now fail with an `IllegalModelException`. Set `strictAst: false` to restore the old behaviour for this major." |
 | BC-21 (extended) | – | covered by `strictAst` | "Non-object decorators are rejected." |
-| BC-23 | R2: an opt-in `lazyViews` option, with the #226 check mode as a debugging aid. Deprecate mutating `declarations` and `properties` arrays (warn in dev builds). | `lazyViews` (opt-in in R2, default in R3, removed in the major after) | "Declarations and properties are views over the engine and are built on first access. Treat them as read-only. Mutating returned arrays or fields is no longer supported." |
-| BC-24 | Deprecate synchronous side effects in `DecoratorFactory.newDecorator`. Add a post-load hook in R2. | none | "Decorator factories run when a decorator is first read, not while the model loads." |
+| BC-23 | – (shipped in R1 with no option, per the maintainer's "lazy is the only path"). Document in the R1 changelog. | none | R1: "Declaration, property, decorator and validator objects are now built when they are first read, not when a model file is constructed. Object identity is unchanged. A model file's AST is treated as read-only once the `ModelFile` is constructed: changing it afterwards is not supported, and the declarations may reflect the change or not depending on when they are first read. Some view fields (`declarations`, `decorators`, `validator` and similar) are accessors until first read, so copying a view by enumerating its own properties (spread, `Object.assign`, `Object.keys`) may omit them; call the getters (`getDeclarations()`, `getDecorators()`, `getValidator()`) instead." |
+| BC-24 | R1: none (factories stay eager). Later major, if adopted: deprecate synchronous side effects in `DecoratorFactory.newDecorator` and add a post-load hook first. | none | Later major, if adopted: "Decorator factories run when a decorator is first read, not while the model loads." |
 | BC-26 (Rust-owned) | Only after the additive entry point has one major of uptake. | – | – |
 | BC-27 | Warn in R2 when `validate()` would write `$identifier` or read an inherited field. | none | "`Resource.validate()` no longer modifies the resource, and reads only its own properties. Frozen resources can be validated." |
 | BC-28 | Deprecate `options.regExp` in R2, with a warning. | `options.regExp` is kept until R3 (on the TS-fallback path). | "The `regExp` option is removed. Regular expressions are evaluated by the Concerto engine. `StringValidator.getRegex()` returns `{pattern, flags}`." |
@@ -321,7 +333,7 @@ baseline regenerated.
 2. A follow-up for DV-009's default flip (BC-07).
 3. A DIVERGENCES row plus a follow-up for BC-17 (see 5.2).
 4. BC-19, the design of strict AST loading.
-5. BC-23 and BC-24, handle-backed views.
+5. ~~BC-23 and BC-24, handle-backed views~~ done as P5-10a/b/c (#269, #270, #271); only BC-24's factory-timing part remains, as a later-major proposal.
 6. BC-27, a read-only `validate`.
 7. BC-28, deprecating `options.regExp`.
 8. BC-33, the type fix.
@@ -375,7 +387,7 @@ DV-019 row and a follow-up issue, done by a docs-only task, not by P5-07.
 - **Q9. BC-21.** For a non-object decorator (`[7]`), port TS's acceptance (a faithful patch), or extend DV-018's clearer rejection (a maintainer-accepted exception)?
 - **Q10. BC-19.** Should strict AST loading reuse the existing `metamodelValidation` option, or get a new name? Should R2 ship it opt-in, with the default flipped in R3?
 - **Q11. Evidence gaps.** The independent review should spot-check review comments on merged migration PRs for "out of scope" notes this plan may have missed (5.1). Should the plan also be refreshed when #219 closes (BC-22)?
-- **Q12. Sequencing.** The coordinator's order on #73 was P5-02, then P5-06d, then P5-07, while this issue says "runs now". This plan was written now, from records only. Should it be re-checked after P5-02 lands, because P5-02 may make BC-23 moot?
+- **Q12. Sequencing.** The coordinator's order on #73 was P5-02, then P5-06d, then P5-07, while this issue says "runs now". This plan was written now, from records only. Should it be re-checked after P5-02 lands, because P5-02 may make BC-23 moot? **Superseded 2026-09-27:** the maintainer decided to ship lazy views before the migration release; BC-23 and BC-25 moved to R1 (P5-10c).
 
 ---
 

@@ -17,6 +17,7 @@
 const { spawn } = require('child_process');
 const readline = require('readline');
 const path = require('path');
+const fs = require('fs');
 
 /**
  * Run one batch of {id, op, inputs} cases through one engine worker.
@@ -47,6 +48,11 @@ function runBatch(engine, cases, env) {
         child.stderr.on('data', (d) => { stderr += d; });
         child.on('error', reject);
         child.on('close', (code) => {
+            // Opt-in (task P5-10c): keep each worker's stderr, e.g. the
+            // engine's CONCERTO_LAZY_VIEWS_CHECK=1 "LAZY-CHECK" reports.
+            if (process.env.FUZZ_STDERR_LOG && stderr) {
+                fs.appendFileSync(process.env.FUZZ_STDERR_LOG, stderr);
+            }
             if (results.size < cases.length && code !== 0) {
                 return reject(new Error(`${engine} worker exited ${code} after ${results.size}/${cases.length} results: ${stderr.slice(-2000)}`));
             }

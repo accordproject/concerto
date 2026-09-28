@@ -60,9 +60,14 @@ if (!process.env.ORACLE_VERBOSE) {
     }
 }
 
+// The TS side is the frozen reference, @accordproject/concerto-core 5.0.0
+// (migration/oracle/reference, `npm ci` there first), the same reference the
+// oracle recorded the corpus from. P5-02 removed the in-tree TS engine, so
+// the workspace src/ (srcAdapter) now runs the Rust engine too and cannot
+// serve as the TS side (task P5-10c, accordproject/concerto-rust#271).
 const adapter = engineKind === 'rust'
     ? require(path.join(ORACLE_LIB, 'rust-adapter')).createAdapter()
-    : require(path.join(ORACLE_LIB, 'adapter')).srcAdapter();
+    : require(path.join(ORACLE_LIB, 'adapter')).referenceAdapter();
 
 const store = blobStore(fixturesDir);
 
