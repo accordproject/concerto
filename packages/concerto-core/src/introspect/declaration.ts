@@ -115,17 +115,14 @@ class Declaration extends Decorated {
      */
     validate(...args: any[]) {
         super.validate(...args);
-        const modelFile = this.getModelFile();
-
-        // #648 - check for clashes against imported types
-        if (modelFile.isImportedType(this.getName())) {
-            const dangerouslyAllowReservedSystemTypeNamesInUserModels = Boolean(modelFile.getModelManager()?.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels);
-            if (dangerouslyAllowReservedSystemTypeNamesInUserModels && this.isReservedSystemTypeImport(modelFile, this.getName())) {
-                return;
-            }
-
-            throw new IllegalModelException(`Type '${this.getName()}' clashes with an imported type with the same name.`, this.modelFile, this.ast.location);
-        }
+        // #648 - check for clashes against imported types. P5-11
+        // (accordproject/concerto-rust#287): the rule runs in Rust
+        // (concerto-wasm `declarationValidate`) over this view's
+        // collaborators (`getModelFile().isImportedType`, the manager's
+        // `dangerouslyAllowReservedSystemTypeNamesInUserModels` option and
+        // `isReservedSystemTypeImport`), and throws the
+        // IllegalModelException TS throws.
+        loadEngine('../engine').rust.declarationValidate(this);
     }
 
     /**
@@ -136,21 +133,12 @@ class Declaration extends Decorated {
      * @returns {boolean} true if the resolved import is a reserved system type
      */
     private isReservedSystemTypeImport(modelFile: ModelFile, typeName: string): boolean {
-        const importedType = modelFile.getType(typeName);
-        if (!importedType || typeof importedType === 'string') {
-            return false;
-        }
-
-        const importedModelFile = importedType.getModelFile();
-        if (!importedModelFile || !importedModelFile.isSystemModelFile()) {
-            return false;
-        }
-
-        return importedType.isConcept()
-            || importedType.isAsset()
-            || importedType.isTransaction()
-            || importedType.isParticipant()
-            || importedType.isEvent();
+        // P5-11 (accordproject/concerto-rust#287): decided in Rust
+        // (concerto-wasm `declarationIsReservedSystemTypeImport`) over
+        // `modelFile.getType(typeName)` and the declaration it resolves to:
+        // a concept, asset, transaction, participant or event of a system
+        // model file.
+        return loadEngine('../engine').rust.declarationIsReservedSystemTypeImport(modelFile, typeName);
     }
 
     /**
