@@ -1,6 +1,6 @@
 {
   "harness": "run-ts.mjs",
-  "recorded_at": "2026-09-28T14:15:39.588Z",
+  "recorded_at": "2026-09-28T15:11:05.641Z",
   "machine": {
     "platform": "darwin",
     "arch": "x64",
@@ -9,17 +9,17 @@
     "total_mem_gb": 17,
     "node": "v24.21.0"
   },
-  "concerto_commit": "a4959e42d4eb011cc5a2c3f0ad00e9ec54913cbb",
+  "concerto_commit": "697dbc900642eabfd886c93fe339f10684b18d5f",
   "concerto_engine": "ts",
-  "core_dist": "migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+  "core_dist": "../base/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
   "workloads_run": [
     "validate_ast",
     "instance_validate"
   ],
   "loadavg": [
-    1.421875,
-    3.55810546875,
-    11.62158203125
+    1.96337890625,
+    2.40673828125,
+    4.08544921875
   ],
   "sample_opts": {
     "warmup": 5,
@@ -32,12 +32,12 @@
         "validateAst": {
           "samples": 30,
           "n": 34,
-          "median_ms": 0.7459167352941176,
-          "mean_ms": 0.7567896568627451,
-          "stddev_ms": 0.04312499801701522,
-          "min_ms": 0.7168000000000001,
-          "max_ms": 0.9355255882352942,
-          "cv": 0.05698412712957647
+          "median_ms": 0.7312311029411764,
+          "mean_ms": 0.7366585794117647,
+          "stddev_ms": 0.03429355737679094,
+          "min_ms": 0.7038173235294117,
+          "max_ms": 0.8666672352941176,
+          "cv": 0.04655285139579175
         },
         "n": 34,
         "totalInSet": 35
@@ -46,12 +46,12 @@
         "validateAst": {
           "samples": 30,
           "n": 41,
-          "median_ms": 0.2782438780487805,
-          "mean_ms": 0.2821120105691057,
-          "stddev_ms": 0.01129942531148375,
-          "min_ms": 0.2707670487804878,
-          "max_ms": 0.31535387804878046,
-          "cv": 0.04005297501758034
+          "median_ms": 0.27862073170731705,
+          "mean_ms": 0.2811194512195122,
+          "stddev_ms": 0.012354311862634961,
+          "min_ms": 0.2680101463414634,
+          "max_ms": 0.31565965853658534,
+          "cv": 0.043946841134760516
         },
         "n": 41,
         "totalInSet": 41
@@ -66,22 +66,22 @@
       "populate_and_validate": {
         "samples": 30,
         "n": 500,
-        "median_ms": 0.008772725,
-        "mean_ms": 0.00893434086666667,
-        "stddev_ms": 0.0006337691161195431,
-        "min_ms": 0.00784758,
-        "max_ms": 0.010166582,
-        "cv": 0.07093630359281303
+        "median_ms": 0.008954847,
+        "mean_ms": 0.009136728466666666,
+        "stddev_ms": 0.0010762216815870147,
+        "min_ms": 0.007711184,
+        "max_ms": 0.01297955,
+        "cv": 0.11779070435477772
       },
       "validate_only": {
         "samples": 30,
         "n": 500,
-        "median_ms": 0.002541395,
-        "mean_ms": 0.002584475466666667,
-        "stddev_ms": 0.0003838006409758832,
-        "min_ms": 0.002203024,
-        "max_ms": 0.00370947,
-        "cv": 0.14850233477777638
+        "median_ms": 0.0021180699999999997,
+        "mean_ms": 0.0022076381333333336,
+        "stddev_ms": 0.00026990211666936284,
+        "min_ms": 0.002061314,
+        "max_ms": 0.003183504,
+        "cv": 0.1222583142563474
       },
       "n": 500
     }
