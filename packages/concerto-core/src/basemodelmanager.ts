@@ -398,7 +398,13 @@ class BaseModelManager {
         const namespace = modelFile.getNamespace();
         const wasMirrored = this._isMirrored(existing) && this._needsRustWrite(namespace);
         if (!this._isMirrored(modelFile)) {
-            if (wasMirrored) {
+            // `updateModelFile`'s public API accepts any object with a
+            // `getNamespace()` (not only a real `ModelFile`), so `namespace`
+            // is not guaranteed to be a string here the way it is for an
+            // engine-built file. `rustHandle.deleteModelFile` takes a WASM
+            // `&str`: guard it the same way the public `deleteModelFile`
+            // does (accordproject/concerto-rust#294 follow-up).
+            if (wasMirrored && typeof namespace === 'string') {
                 this.rustHandle.deleteModelFile(namespace);
             }
             return;
@@ -682,9 +688,16 @@ class BaseModelManager {
             throw new Error('Model file does not exist');
         } else {
             // Mirrored first, so a mirror error leaves both unchanged. A
-            // stub file was never mirrored (`_isMirrored`).
+            // stub file was never mirrored (`_isMirrored`). `this.modelFiles[namespace]`
+            // above coerces `namespace` to a string key (matching v5.0.0,
+            // which deletes cleanly for a non-string whose string form is a
+            // loaded namespace), but `rustHandle.deleteModelFile` takes a
+            // WASM `&str`: a non-string reaching it traps the engine
+            // (accordproject/concerto-rust#294 follow-up). Only a genuine
+            // string is sent to Rust; the TS-side delete below still runs
+            // for any type, as v5.0.0 does.
             /* istanbul ignore next */
-            if (this._needsRustWrite(namespace) && this._isMirrored(this.modelFiles[namespace])) {
+            if (typeof namespace === 'string' && this._needsRustWrite(namespace) && this._isMirrored(this.modelFiles[namespace])) {
                 this.rustHandle.deleteModelFile(namespace);
             }
             delete this.modelFiles[namespace];

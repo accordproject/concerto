@@ -18,7 +18,9 @@
  * P5-03 #262 lifted checks: non-string arguments to the members whose
  * catch-all fallback #262 removed. Extended by #294 (audit of the other
  * string-taking concerto-wasm bindings) to add `isAssignableTo`, the one
- * other de-fallbacked member the audit found unguarded.
+ * other de-fallbacked member the audit found unguarded, and then again
+ * (review follow-up) to add `deleteModelFile` and the `updateModelFile` ->
+ * `_rustMirrorUpdate` delete path.
  *
  * The WASM bindings behind `BaseModelManager.getModelFileByFileName`,
  * `derivesFrom`, `resolveType`, `isAssignableTo` and `ModelFile.isLocalType`
@@ -29,6 +31,15 @@
  * `undefined`, where the binding takes `Option<String>`) to Rust and runs
  * the TS body for any other argument. `expect` is the frozen v5.0.0
  * reference's outcome. Run by fallbacks.spec.js.
+ *
+ * `deleteModelFile` and `_rustMirrorUpdate` are a different shape: the ODD
+ * loop below never reaches their `rustHandle.deleteModelFile` call, because
+ * that call only runs when `this.modelFiles[namespace]` (or
+ * `modelFile.getNamespace()`) already resolved to a loaded namespace, and
+ * none of `undefined`/`null`/`123`/`{}`/`true` coerce (via the object-key
+ * lookup both use) to one. v5.0.0 lets a non-string whose *string form* is a
+ * loaded namespace delete cleanly (plain-object coercion); the WASM mirror
+ * traps on the same non-string. See the `COERCE_CALLS` block below.
  */
 
 const ODD = { undefined: undefined, null: null, number: 123, object: {}, boolean: true };
@@ -72,6 +83,63 @@ const checks = [];
 let n = 0;
 for (const [call, run] of Object.entries(CALLS)) {
     for (const [kind, value] of Object.entries(ODD)) {
+        n++;
+        const id = `BOUNDARY-ARG-${String(n).padStart(3, '0')}`;
+        checks.push({
+            id,
+            covers: `${call.replace('x', kind)}`,
+            run: (core) => run(core, value),
+            expect: EXPECT[id],
+        });
+    }
+}
+
+/**
+ * A duck-typed "modelFile" for `updateModelFile`'s non-string API path:
+ * `getNamespace()` is not a plain string but coerces (via `toString`) to an
+ * existing namespace, the way an object-key lookup does. `getVersion()` is
+ * truthy so it clears `updateModelFile`'s version guard.
+ * @param {*} nsObj the non-string namespace value
+ * @returns {object} a fake ModelFile
+ */
+function fakeModelFile(nsObj) {
+    return {
+        getNamespace: () => nsObj,
+        getVersion: () => '1.0.1',
+        validate: () => {},
+        getAst: () => ({ $class: 'concerto.metamodel@1.0.0.Model', namespace: 'test@1.0.1', declarations: [] }),
+        getDefinitions: () => undefined,
+        getName: () => undefined,
+    };
+}
+
+// Non-ODD non-string values whose string form ('test@1.0.0') is a loaded
+// namespace, so the object-key lookups in deleteModelFile/_rustMirrorUpdate
+// find it and the rustHandle mirror call is reached.
+const COERCE = {
+    'toString-object': { toString() { return 'test@1.0.0'; } },
+    'single-element array': ['test@1.0.0'],
+};
+
+const COERCE_CALLS = {
+    'deleteModelFile(x)': (core, x) => {
+        const mm = manager(core);
+        mm.deleteModelFile(x);
+        try {
+            return mm.getModelFile('test@1.0.0') ? 'present' : 'absent';
+        } catch (e) {
+            return `absent:${e.constructor.name}`;
+        }
+    },
+    'updateModelFile({getNamespace: () => x})': (core, x) => {
+        const mm = manager(core);
+        mm.updateModelFile(fakeModelFile(x));
+        return mm.getModelFile('test@1.0.0').getVersion();
+    },
+};
+
+for (const [call, run] of Object.entries(COERCE_CALLS)) {
+    for (const [kind, value] of Object.entries(COERCE)) {
         n++;
         const id = `BOUNDARY-ARG-${String(n).padStart(3, '0')}`;
         checks.push({
