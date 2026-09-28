@@ -921,15 +921,12 @@ class BaseModelManager {
     resolveType(context, type) {
         /* istanbul ignore next */
         if (this._rustHandleMatchesModelFiles()) {
-            // A stale or partially mirrored rustHandle (a W test's stub
-            // ModelFile never reached it: see _mirrorWrite) falls back to
-            // the TS body below, which reads this.modelFiles directly and
-            // so is never stale.
-            try {
-                return this.rustHandle.resolveType(context, type);
-            } catch (e) {
-                debug('resolveType', 'rustHandle.resolveType failed, falling back to the TS body', e);
-            }
+            // The mirror holds exactly TS's namespaces, so the engine's
+            // answer is final, including any error it throws
+            // (accordproject/concerto-rust#262). Only a rustHandle that does
+            // not match this.modelFiles (a W test's stub ModelFile never
+            // reached it: see _mirrorWrite) takes the TS body below.
+            return this.rustHandle.resolveType(context, type);
         }
         // is the type a primitive?
         if (ModelUtil.isPrimitiveType(type)) {
@@ -994,12 +991,8 @@ class BaseModelManager {
     getModelFileByFileName(fileName): ModelFile {
         /* istanbul ignore next */
         if (this._rustHandleMatchesModelFiles()) {
-            try {
-                const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
-                return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
-            } catch (e) {
-                debug('getModelFileByFileName', 'rustHandle.modelManagerGetModelFileByFileName failed, falling back to the TS body', e);
-            }
+            const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
+            return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
         }
         return this.getModelFiles().filter(mf => mf.getName() === fileName)[0];
     }
@@ -1012,11 +1005,7 @@ class BaseModelManager {
         const namespaces = Object.keys(this.modelFiles);
         /* istanbul ignore next */
         if (this._rustHandleMatchesModelFiles()) {
-            try {
-                return this.rustHandle.getNamespaces();
-            } catch (e) {
-                debug('getNamespaces', 'rustHandle.getNamespaces failed, falling back to the TS body', e);
-            }
+            return this.rustHandle.getNamespaces();
         }
         return namespaces;
     }
@@ -1164,11 +1153,7 @@ class BaseModelManager {
     derivesFrom(fqt1, fqt2): boolean {
         /* istanbul ignore next */
         if (this._rustHandleMatchesModelFiles()) {
-            try {
-                return this.rustHandle.derivesFrom(fqt1, fqt2);
-            } catch (e) {
-                debug('derivesFrom', 'rustHandle.derivesFrom failed, falling back to the TS body', e);
-            }
+            return this.rustHandle.derivesFrom(fqt1, fqt2);
         }
         // Check to see if this is an exact instance of the specified type.
         let typeDeclaration = this.getType(fqt1);

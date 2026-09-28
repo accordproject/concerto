@@ -30,9 +30,6 @@ import Globalize from '../globalize';
 import Decorated from './decorated';
 import packageJson from '../../package.json';
 
-import debugLib from 'debug';
-const debug = debugLib('concerto:ModelFile');
-
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type BaseModelManager from '../basemodelmanager';
@@ -237,12 +234,8 @@ class ModelFile extends Decorated {
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
-            try {
-                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-                return manager.rustHandle.modelFileGetVersion(id) ?? null;
-            } catch (e) {
-                debug('getVersion', 'rustHandle.modelFileGetVersion failed, falling back to the TS field', e);
-            }
+            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            return manager.rustHandle.modelFileGetVersion(id) ?? null;
         }
         return this.version;
     }
@@ -255,12 +248,8 @@ class ModelFile extends Decorated {
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
-            try {
-                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-                return manager.rustHandle.modelFileIsSystemModelFile(id);
-            } catch (e) {
-                debug('isSystemModelFile', 'rustHandle.modelFileIsSystemModelFile failed, falling back to the TS body', e);
-            }
+            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            return manager.rustHandle.modelFileIsSystemModelFile(id);
         }
         return this.namespace.startsWith('concerto@') || this.namespace === 'concerto';
     }
@@ -298,12 +287,8 @@ class ModelFile extends Decorated {
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
-            try {
-                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-                return manager.rustHandle.modelFileGetExternalImports(id);
-            } catch (e) {
-                debug('getExternalImports', 'rustHandle.modelFileGetExternalImports failed, falling back to the TS field', e);
-            }
+            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            return manager.rustHandle.modelFileGetExternalImports(id);
         }
         return this.importUriMap;
     }
@@ -337,12 +322,8 @@ class ModelFile extends Decorated {
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
-            try {
-                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-                return manager.rustHandle.modelFileGetImports(id);
-            } catch (e) {
-                debug('getImports', 'rustHandle.modelFileGetImports failed, falling back to the TS body', e);
-            }
+            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            return manager.rustHandle.modelFileGetImports(id);
         }
         let result: string[] = [];
         this.imports.forEach( imp => {
@@ -548,12 +529,8 @@ class ModelFile extends Decorated {
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
-            try {
-                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-                return manager.rustHandle.modelFileIsLocalType(id, type);
-            } catch (e) {
-                debug('isLocalType', 'rustHandle.modelFileIsLocalType failed, falling back to the TS body', e);
-            }
+            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            return manager.rustHandle.modelFileIsLocalType(id, type);
         }
         return this.getLocalType(type) !== null;
     }
@@ -1156,42 +1133,38 @@ class ModelFile extends Decorated {
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
-            try {
-                const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-                const sourceManager = this.getModelManager();
-                // A scratch handle, never `modelManager`'s own `rustHandle`:
-                // `filter`'s result is returned *detached* (TS never adds it
-                // to `modelManager` here -- `BaseModelManager.filter` does
-                // that later, via `addModelFiles`), so writing straight into
-                // `modelManager`'s real mirror here would register a
-                // namespace there ahead of the TS side, breaking the
-                // namespace-set invariant `_rustHandleMatchesModelFiles` relies on.
-                const scratch = new (rust.ModelManagerHandle as unknown as { new (): { [binding: string]: (...args: any[]) => any } })();
-                // The Rust predicate carries no Declaration objects of its
-                // own -- it calls back with each candidate's
-                // fully-qualified name (its own namespace, not necessarily
-                // this file's, for a declaration reached while pruning an
-                // import) -- so look the FQN back up to the real TS
-                // Declaration before calling the original predicate.
-                const wrappedPredicate = (fqn: string): boolean => {
-                    const namespace = ModelUtil.getNamespace(fqn);
-                    const shortName = ModelUtil.getShortName(fqn);
-                    const sourceFile = sourceManager.getModelFile(namespace);
-                    const decl = sourceFile ? sourceFile.getLocalType(shortName) : null;
-                    if (!decl) {
-                        return false;
-                    }
-                    return predicate(decl);
-                };
-                const filteredId = manager.rustHandle.modelFileFilter(id, wrappedPredicate, scratch);
-                if (filteredId === undefined) {
-                    return null;
+            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            const sourceManager = this.getModelManager();
+            // A scratch handle, never `modelManager`'s own `rustHandle`:
+            // `filter`'s result is returned *detached* (TS never adds it
+            // to `modelManager` here -- `BaseModelManager.filter` does
+            // that later, via `addModelFiles`), so writing straight into
+            // `modelManager`'s real mirror here would register a
+            // namespace there ahead of the TS side, breaking the
+            // namespace-set invariant `_rustHandleMatchesModelFiles` relies on.
+            const scratch = new (rust.ModelManagerHandle as unknown as { new (): { [binding: string]: (...args: any[]) => any } })();
+            // The Rust predicate carries no Declaration objects of its
+            // own -- it calls back with each candidate's
+            // fully-qualified name (its own namespace, not necessarily
+            // this file's, for a declaration reached while pruning an
+            // import) -- so look the FQN back up to the real TS
+            // Declaration before calling the original predicate.
+            const wrappedPredicate = (fqn: string): boolean => {
+                const namespace = ModelUtil.getNamespace(fqn);
+                const shortName = ModelUtil.getShortName(fqn);
+                const sourceFile = sourceManager.getModelFile(namespace);
+                const decl = sourceFile ? sourceFile.getLocalType(shortName) : null;
+                if (!decl) {
+                    return false;
                 }
-                const filteredSnapshot = JSON.parse(scratch.modelFileSnapshot(filteredId));
-                return new ModelFile(modelManager, filteredSnapshot.ast, undefined, this.fileName);
-            } catch (e) {
-                debug('filter', 'rustHandle.modelFileFilter failed, falling back to the TS body', e);
+                return predicate(decl);
+            };
+            const filteredId = manager.rustHandle.modelFileFilter(id, wrappedPredicate, scratch);
+            if (filteredId === undefined) {
+                return null;
             }
+            const filteredSnapshot = JSON.parse(scratch.modelFileSnapshot(filteredId));
+            return new ModelFile(modelManager, filteredSnapshot.ast, undefined, this.fileName);
         }
         const declarations: AstNode[] = [];
         for (const declaration of this.declarations) {
