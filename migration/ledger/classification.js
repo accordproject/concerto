@@ -78,7 +78,7 @@ R.superCtor = 'JS class wiring: a constructor that only calls super and/or proce
 R.fixedData = 'fixed-data builder: returns or adds a fixed system model/field definition (rootmodel.json/decoratormodel.json are duplicated in concerto-rust src/); no model logic to port. ' + R.p511;
 R.viewGlue = 'view constructor glue: stores the parent and AST and calls process(), which is counted separately (the Rust snapshot or the collaborator-context fallback for W tests over stubbed parents, plan section 3); no engine call of its own. ' + R.p511;
 R.visitorFallback = 'visitor fallback path: runs only when Serializer.fromJSON/toJSON hit EngineFastPathUnsupported (a custom options.regExp, a lone surrogate, a cycle or a wire shape the codec rejects) or when a caller drives the visitor directly; the fast path runs the same work in Rust in one call. ' + R.p511;
-R.rvShell = 'ResourceValidator visitor shell: the main path of ValidatedResource.validate/setPropertyValue/addArrayValue (Factory resources, Resource.validate) and the Serializer visitor fallback; W tests spy on visitX. Moving the entry point to Rust (option F) was declined. ' + R.p511;
+R.rvShell = 'ResourceValidator visitor: the fallback path behind EngineFastPathUnsupported of ValidatedResource.validate/setPropertyValue/addArrayValue, which validate in one Rust call since P5-12c (accordproject/concerto-rust#293; the entry point moved by maintainer decision on #289), and the Serializer visitor fallback; W tests drive visitX directly. ' + R.p511;
 R.shimP511 = R.engineShim + ' (P5-11: reclassified from HYBRID; it makes no engine call of its own)';
 
 module.exports = {
@@ -151,6 +151,15 @@ module.exports = {
     'src/engine/index.ts': { c: 'TS', t: NONE, p: NONE, r: 'engine loader entry point: requires rust.ts and re-exports the loaded engine; no model logic' },
     'src/engine/rust.ts': { c: 'TS', t: NONE, p: NONE, r: 'loads the @accordproject/concerto-engine WASM module and registers its host callbacks (the error factory, semver.parse); no model logic' },
     'src/engine/serializer-codec.ts': { c: 'TS', t: NONE, p: NONE, r: 'JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own' },
+    'src/engine/validate-resource.ts': {
+        c: 'TS', t: NONE, p: NONE, r: 'binary wire codec for one-call instance validation (P5-12c): writes a live JS value (numbers, strings, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) in the validator\'s value shape, and rejects shapes it cannot carry so the caller falls back to the TS visitor; pure transcoding, no validation logic of its own',
+        m: {
+            'validateResource': { c: 'HYBRID', p: 'P5-12c', r: 'one validateResourceBinary call per ValidatedResource.validate(): the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust' },
+            'validateProperty': { c: 'HYBRID', p: 'P5-12c', r: 'one validatePropertyBinary call per ValidatedResource.setPropertyValue/addArrayValue: the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust' },
+            'visitorIsCheaper': { r: 'routing decision (P5-12c): a string, number or boolean set on a plain primitive field with no validator stays on the ResourceValidator visitor, which is cheaper there than an engine call; reads the field\'s shape only, no validation logic of its own' },
+            'outcome': { c: 'TS', r: R.engineShim + ' (maps a result code to the exception the error factory builds, or to the visitor fallback)' },
+        },
+    },
     'src/engine/serializer.ts': {
         c: 'HYBRID', t: NONE, p: 'P4-10', r: 'JSON envelope building, the ModelManagerHandle cache and the options.regExp fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path)',
     },
@@ -326,7 +335,16 @@ module.exports = {
         },
     },
     'src/model/typed.ts': { c: 'TS', t: NONE, p: NONE, r: R.d7Instance },
-    'src/model/validatedresource.ts': { c: 'TS', t: NONE, p: NONE, r: R.d7Instance + '; these shells hand the value to the ResourceValidator visitor, whose checks are ledgered separately' },
+    'src/model/validatedresource.ts': {
+        c: 'TS', t: NONE, p: NONE, r: R.d7Instance,
+        // P5-12c (accordproject/concerto-rust#293): one Rust call per
+        // validation, the visitor behind EngineFastPathUnsupported.
+        m: {
+            'ValidatedResource.validate': { c: 'HYBRID', t: INST, p: 'P5-12c', r: 'fast path (P5-12c): one Rust call (validateResourceBinary, src/engine/validate-resource.ts) validates the whole resource; the ResourceValidator visitor runs only behind EngineFastPathUnsupported; the Resource object stays TS (D7)' },
+            'ValidatedResource.setPropertyValue': { c: 'HYBRID', t: INST, p: 'P5-12c', r: 'the undeclared-field check and the assignment stay TS (D7); the value is validated by one Rust call (validatePropertyBinary, src/engine/validate-resource.ts), with the ResourceValidator visitor behind EngineFastPathUnsupported, and for a string, number or boolean on a plain primitive field with no validator, where the visitor is cheaper (visitorIsCheaper)' },
+            'ValidatedResource.addArrayValue': { c: 'HYBRID', t: INST, p: 'P5-12c', r: 'the undeclared-field and not-an-array checks, the array copy and the assignment stay TS (D7); the new array is validated by one Rust call (validatePropertyBinary, src/engine/validate-resource.ts), with the ResourceValidator visitor behind EngineFastPathUnsupported' },
+        },
+    },
     'src/modelloader.ts': { c: 'TS', t: NONE, p: NONE, r: R.loader },
     'src/modelmanager.ts': {
         c: 'TS', t: NONE, p: NONE, r: R.processFile,

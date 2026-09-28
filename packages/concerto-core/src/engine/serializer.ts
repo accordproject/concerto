@@ -228,4 +228,6 @@ function validateMetaModel(input: unknown): void {
     }
 }
 
-export { fastFromJson, fastToJson, validateMetaModel };
+// `handleFor` is also used by validate-resource.ts (P5-12c), so instance
+// validation shares the Serializer's cached handle.
+export { fastFromJson, fastToJson, handleFor, validateMetaModel };
