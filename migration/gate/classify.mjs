@@ -226,8 +226,13 @@ function coreSuiteRustItems(step) {
     return [unexpected('core suite (CONCERTO_ENGINE=rust)', `mocha exited ${step.exit} and its JSON reporter output could not be parsed`)];
   }
   const items = classifyTestFailures(step.failures ?? null, failing, 'core suite (CONCERTO_ENGINE=rust)');
-  if (items.length === 0) {
+  if (items.length === 0 && !step.unexpected_fallbacks) {
     items.push(unexpected('core suite (CONCERTO_ENGINE=rust)', `mocha exited ${step.exit} with no failing tests reported`));
+  }
+  // accordproject/concerto-rust#262: a rustHandle fallback that swallowed an
+  // engine error and re-ran a TS body. Never expected-pending.
+  if (step.unexpected_fallbacks) {
+    items.push(unexpected('core suite: rustHandle fallbacks (#262)', `${step.unexpected_fallbacks} "falling back" debug line(s), e.g. ${(step.unexpected_fallback_sample || [])[0] ?? ''}`));
   }
   return items;
 }

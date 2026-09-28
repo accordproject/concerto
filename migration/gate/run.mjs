@@ -363,11 +363,19 @@ function stepCoreSuiteRust(opts, reportDir) {
     ['mocha', '-r', 'ts-node/register', '--recursive', '-t', '10000', '--reporter', 'json', 'test/'],
     {
       cwd: coreDir,
-      env: { TS_NODE_PROJECT: 'tsconfig.build.json', TZ: 'UTC', CONCERTO_ENGINE: 'rust', CONCERTO_ENGINE_MODULE: engine.path },
+      // DEBUG on for every concerto-core namespace, so a rustHandle
+      // fallback that discards an engine error and re-runs a TS body still
+      // leaves its "falling back" debug line (accordproject/concerto-rust#262).
+      env: { TS_NODE_PROJECT: 'tsconfig.build.json', TZ: 'UTC', CONCERTO_ENGINE: 'rust', CONCERTO_ENGINE_MODULE: engine.path, DEBUG: 'concerto:*' },
       timeoutMs: 8 * 60 * 1000,
       logFile,
     }
   );
+  // accordproject/concerto-rust#262: an engine error must propagate, never
+  // be swallowed so the TS body answers instead. No fallback is expected, so
+  // any such debug line fails the step.
+  const fallbackLines = res.stderr.split('\n').filter((l) => /falling back/i.test(l));
+  fs.writeFileSync(path.join(reportDir, 'core-suite-rust-fallbacks.log'), fallbackLines.join('\n') + (fallbackLines.length ? '\n' : ''));
   let mocha = null;
   try {
     const jsonStart = res.stdout.search(/\{\s*\n\s*"stats"/);
@@ -393,9 +401,11 @@ function stepCoreSuiteRust(opts, reportDir) {
 
   return {
     name: realRunName,
-    ok: res.ok,
+    ok: res.ok && fallbackLines.length === 0,
     exit: res.status,
     engine_module: engine,
+    unexpected_fallbacks: fallbackLines.length,
+    unexpected_fallback_sample: fallbackLines.slice(0, 5),
     stats: mocha ? mocha.stats : null,
     by_tag,
     failures: mocha ? mochaFailures(mocha, map) : null,
@@ -851,7 +861,9 @@ function buildCriteriaSummary(steps) {
     id: '§0.1',
     label: 'Behavioural (B) unit tests pass unchanged, CONCERTO_ENGINE=rust',
     ok: rustSuite ? rustSuite.ok && (!byTag || (byTag.B && byTag.B.failing === 0)) : null,
-    detail: `tag B: ${tagLine('B')}` + (rustSuite && rustSuite.exit != null ? `; suite exit ${rustSuite.exit}` : '') + fmtEngineModule(rustSuite),
+    detail: `tag B: ${tagLine('B')}` + (rustSuite && rustSuite.exit != null ? `; suite exit ${rustSuite.exit}` : '') +
+      (rustSuite && rustSuite.unexpected_fallbacks ? `; ${rustSuite.unexpected_fallbacks} unexpected rustHandle fallback line(s), see core-suite-rust-fallbacks.log (#262)` : '') +
+      fmtEngineModule(rustSuite),
   });
   items.push({
     id: '§0.2',
