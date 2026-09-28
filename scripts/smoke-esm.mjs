@@ -65,6 +65,10 @@ check('Node resolves the import condition, not the browser build', async () => {
     );
 });
 
+// `Serializer`'s default `utcOffset` resolves from `dayjs().utcOffset()`
+// (datetimeutil.ts), the *local machine's* offset, at module-load time. Run
+// under TZ=UTC (npm script `test:esm`), so this round trip is independent of
+// the machine running it; anywhere else it runs, pin TZ=UTC too.
 check('model round-trips through Factory and Serializer', () => {
     const modelManager = new ModelManager();
     modelManager.addCTOModel(MODEL, 'smoke.cto');
