@@ -23,6 +23,36 @@ name: Milestone fuzz check
 # (results/milestone-baseline/known-clusters.json) — i.e. only on something
 # NEW. See migration/fuzz/README.md "CI: the milestone fuzz check" and
 # migration/COORDINATOR.md.
+#
+# Review fixes (P2 blocking findings):
+# - The canonical oracle corpus (migration/oracle/fixtures/) is gitignored
+#   and ships only as assets on draft releases in accordproject/concerto-rust
+#   (oracle-corpus-p107-06aa375 plus the supplement
+#   oracle-corpus-supplement-d842c0ab7). The "Download the canonical oracle
+#   corpus" step below fetches, sha256-verifies and extracts both, then
+#   rebuilds the derived CTO cache — see migration/fuzz/README.md "CI: the
+#   milestone fuzz check" for the CONCERTO_RUST_ASSETS_TOKEN secret this
+#   needs (DECISION NEEDED, unresolved — see this task's status comment on
+#   accordproject/concerto-rust#307).
+# - `run_seed` now defaults to `1`, the seed results/milestone-baseline/
+#   known-clusters.json was captured from, not today's date: the earlier
+#   date-based default made a green default-input dispatch unlikely (see
+#   migration/fuzz/README.md for why) with no committed evidence any other
+#   seed passes. Pass a different run_seed to deliberately sample new
+#   mutation space; expect that to surface not-yet-triaged clusters.
+# - bin/check-milestone.js now also fails when the run itself looks broken
+#   (incomplete, or an abnormal harness-error rate) instead of reading a
+#   missing/broken run as a clean pass — see its own header comment.
+#
+# KNOWN LIMITATION (unresolved, DECISION NEEDED — see status comment on
+# accordproject/concerto-rust#307): GitHub only lists a workflow_dispatch
+# workflow as dispatchable (UI or API) when the same workflow file path also
+# exists, with a workflow_dispatch trigger, on the repository's default
+# branch. This file exists only on claude/tender-pascal-ocwf9q; origin/main
+# has no fuzz-milestone.yml. Until a (possibly inert) copy of this file is
+# added to main, "dispatch this workflow against claude/tender-pascal-ocwf9q"
+# is not actually possible through GitHub's UI or API, regardless of what
+# this file's own content does.
 
 on:
   workflow_dispatch:
@@ -40,12 +70,18 @@ on:
         default: '5498f61190c98172627046753f040447f62a0141'
       run_seed:
         description: >-
-          Fixed seed for this shard (bin/fuzz.js --run-seed). Leave empty to
-          use today's date (UTC, YYYYMMDD) so repeat dispatches on the same
-          day are reproducible and dispatches on different days sample a
-          different slice of the mutation space.
+          Fixed seed for this shard (bin/fuzz.js --run-seed). Defaults to 1,
+          the seed results/milestone-baseline/known-clusters.json was
+          captured from, so a routine dispatch with the defaults compares
+          against a run the baseline is actually known to cover. Pass a
+          different seed to deliberately sample a different slice of the
+          mutation space — expect that to surface divergence clusters not
+          yet in the baseline, which need triage (see
+          migration/fuzz/README.md) before the check will pass again for
+          that seed. Leave empty to fall back to today's date (UTC,
+          YYYYMMDD) instead of 1.
         required: false
-        default: ''
+        default: '1'
       case_count:
         description: 'Number of cases for the shard (bin/fuzz.js --count).'
         required: false
@@ -77,6 +113,38 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: claude/tender-pascal-ocwf9q
+
+      # The canonical oracle corpus (migration/oracle/fixtures/) is
+      # gitignored (migration/oracle/.gitignore: fixtures/) and ships only as
+      # assets on draft releases in accordproject/concerto-rust, so it is
+      # never present from the checkout above and must be fetched here —
+      # without it, migration/fuzz/lib/seeds.js finds no usable seed
+      # fixtures and bin/fuzz.js refuses to run ("no usable seed fixtures").
+      # `gh release download` needs a token that can read draft releases in
+      # a DIFFERENT repository; the default, repo-scoped GITHUB_TOKEN cannot
+      # (see migration/fuzz/README.md "CI: the milestone fuzz check").
+      # migration/ledger/ (which the oracle harness's owner-attribution
+      # reads relative to the fixtures dir) is already present here since
+      # this checkout is of claude/tender-pascal-ocwf9q itself.
+      - name: Download the canonical oracle corpus (accordproject/concerto-rust)
+        env:
+          GH_TOKEN: ${{ secrets.CONCERTO_RUST_ASSETS_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::CONCERTO_RUST_ASSETS_TOKEN is not set. The canonical oracle corpus ships only as assets on draft releases in accordproject/concerto-rust, which this repository's default GITHUB_TOKEN cannot read cross-repo. A PAT with read access to accordproject/concerto-rust, stored here as the CONCERTO_RUST_ASSETS_TOKEN secret, is required — see migration/fuzz/README.md 'CI: the milestone fuzz check' and the DECISION NEEDED on accordproject/concerto-rust#307."
+            exit 1
+          fi
+          mkdir -p /tmp/oracle-corpus/pin /tmp/oracle-corpus/supplement
+          (cd /tmp/oracle-corpus/pin && gh release download oracle-corpus-p107-06aa375 -R accordproject/concerto-rust -p '*.tgz')
+          (cd /tmp/oracle-corpus/supplement && gh release download oracle-corpus-supplement-d842c0ab7 -R accordproject/concerto-rust -p '*.tgz')
+          PIN_TGZ="$(ls /tmp/oracle-corpus/pin/*.tgz)"
+          SUPP_TGZ="$(ls /tmp/oracle-corpus/supplement/*.tgz)"
+          echo "e8a2bf72c7775a2d45123dea7b6ff897823c74a108603f5412251ced2619fce1  $PIN_TGZ" | sha256sum -c -
+          echo "e2f6a2145843aca294edaafa33afc0ddfa46a8f28e96082af0c9ef5bceec27be  $SUPP_TGZ" | sha256sum -c -
+          tar xzf "$PIN_TGZ" -C "$GITHUB_WORKSPACE"
+          tar xzf "$SUPP_TGZ" -C "$GITHUB_WORKSPACE"
+          test -d "$GITHUB_WORKSPACE/migration/oracle/fixtures"
+          test -d "$GITHUB_WORKSPACE/migration/oracle/fixtures/supplement"
 
       # concerto-core loads the Rust engine when it is imported, so the build
       # needs it first (accordproject/concerto-rust#259).
@@ -146,6 +214,16 @@ jobs:
         working-directory: migration/oracle/reference
         run: npm ci
 
+      # The CTO cache next to the corpus is DERIVED and must match
+      # migration/oracle/bin/build-cto-cache.js (P2-09b,
+      # accordproject/concerto-rust#153) — the tarballs' own cto-cache/ is
+      # stale relative to this checkout's script and shows about 89 false
+      # addModel/updateExternalModels regressions if left unrebuilt (see
+      # migration/COORDINATOR.md "Oracle CTO cache"). Never rebuild or
+      # re-record fixtures/ itself here — only the cache.
+      - name: Rebuild the CTO cache
+        run: node migration/oracle/bin/build-cto-cache.js
+
       - name: Install the fuzz harness
         working-directory: migration/fuzz
         run: npm ci
@@ -179,7 +257,11 @@ jobs:
       # Writes triage-clusters.json into the same results dir (so the
       # artifact below always carries it) without failing the step itself —
       # the dedicated failing step after the upload is what gates the job,
-      # so the report is uploaded either way.
+      # so the report is uploaded either way. bin/check-milestone.js now
+      # exits non-zero either for a new, unowned divergence cluster, or for
+      # a run that looks broken rather than clean (its own `runHealth`
+      # check — see its header comment); either way this step's output
+      # captures that as `failed=1` and the job fails on it below.
       - name: Cluster this run's divergences against the baseline
         id: check
         if: always()
@@ -193,7 +275,7 @@ jobs:
           set -e
           cat /tmp/check-milestone.out
           cat /tmp/check-milestone.out >> "$GITHUB_STEP_SUMMARY"
-          if [ "$CODE" -ne 0 ]; then echo "new=1" >> "$GITHUB_OUTPUT"; else echo "new=0" >> "$GITHUB_OUTPUT"; fi
+          if [ "$CODE" -ne 0 ]; then echo "failed=1" >> "$GITHUB_OUTPUT"; else echo "failed=0" >> "$GITHUB_OUTPUT"; fi
 
       - name: Upload the cluster report
         if: always()
@@ -204,8 +286,8 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Fail on new divergence clusters
-        if: steps.check.outputs.new == '1'
+      - name: Fail on new divergence clusters or a broken run
+        if: steps.check.outputs.failed == '1'
         run: |
-          echo "::error::new, unowned divergence cluster(s) — see the fuzz-milestone-${{ steps.seed.outputs.run-seed }} artifact's triage-clusters.json"
+          echo "::error::new, unowned divergence cluster(s) or a broken run — see the fuzz-milestone-${{ steps.seed.outputs.run-seed }} artifact's triage-clusters.json (runHealth field) and the 'Cluster this run's divergences against the baseline' step's log above"
           exit 1

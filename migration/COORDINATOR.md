@@ -42,9 +42,11 @@ A PR whose review failed: post the findings on its tracking issue, set it back t
 
 Maintainer decision (2026-09-28, accordproject/concerto-rust#307): differential fuzzing otherwise only runs on tasks that change Rust engine semantics, never at merge. At the end of a phase, or another key milestone, the **coordinator** dispatches one fuzz shard against the integration branch as a safety net for anything that slipped between tasks. It is never scheduled or automatic.
 
-Dispatch `concerto`'s `.github/workflows/fuzz-milestone.yml` (`workflow_dispatch`) against `claude/tender-pascal-ocwf9q`, with:
+**Unresolved (DECISION NEEDED, see the status comment on accordproject/concerto-rust#307):** this workflow cannot actually be dispatched yet. `workflow_dispatch` only becomes available (UI or API) once a copy of the same file exists, with a `workflow_dispatch` trigger, on `origin/main` — it currently exists only on `claude/tender-pascal-ocwf9q`. It also needs a `CONCERTO_RUST_ASSETS_TOKEN` repository secret (a PAT with read access to `accordproject/concerto-rust`) to download the canonical oracle corpus, which is not yet provisioned. Both need a maintainer decision; see `migration/fuzz/README.md` "CI: the milestone fuzz check" for the details.
+
+Once dispatchable, dispatch `concerto`'s `.github/workflows/fuzz-milestone.yml` (`workflow_dispatch`) against `claude/tender-pascal-ocwf9q`, with:
 - `concerto_rust_ref` — leave at its default (the pinned ref `.github/actions/concerto-engine` uses) for the routine milestone check, or set it to a specific concerto-rust commit to check a particular milestone state of concerto-rust itself.
-- `run_seed` — leave empty for today's date; only set it to replay a specific past run.
+- `run_seed` — leave at its default (`1`, the seed the committed baseline was captured from) for the routine milestone check; only set it to a different seed to deliberately sample new mutation space (expect that to surface clusters needing triage before the check passes again for that seed).
 - `case_count` — leave at 100,000 unless the run needs to be shorter.
 
 It fails only on a divergence-cluster *signature* not already in the committed baseline (`migration/fuzz/results/milestone-baseline/known-clusters.json`) — a genuinely new engine-gap shape, not a fresh case of one already tracked. Details: `migration/fuzz/README.md` §"CI: the milestone fuzz check".

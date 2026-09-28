@@ -330,6 +330,45 @@ the **coordinator** dispatches at the end of a phase or other key milestone to
 catch anything that slipped between tasks. See `migration/COORDINATOR.md`
 ("Milestone fuzz check") for when and how it's dispatched.
 
+- **KNOWN LIMITATION — dispatching this workflow is not actually possible
+  yet** (DECISION NEEDED, unresolved — see this task's status comment on
+  accordproject/concerto-rust#307): GitHub only lists a `workflow_dispatch`
+  workflow as dispatchable (UI or API) when the same workflow file path also
+  exists, with a `workflow_dispatch` trigger, on the repository's *default*
+  branch. `fuzz-milestone.yml` exists only on `claude/tender-pascal-ocwf9q`;
+  `origin/main`'s `.github/workflows/` has no such file. Until a (possibly
+  inert) copy of this file is added to `main`, there is no way — through the
+  UI or the API — to dispatch this workflow against
+  `claude/tender-pascal-ocwf9q`, independent of what this file's own content
+  does. This task did not add that copy: doing so means a PR against `main`
+  itself, outside the integration-branch flow every other migration change
+  goes through, which needs the maintainer's say either way.
+- **The oracle corpus in CI:** `migration/oracle/fixtures/` is gitignored and
+  ships only as assets on draft releases in `accordproject/concerto-rust`
+  (the pin `oracle-corpus-p107-06aa375` plus the additive supplement
+  `oracle-corpus-supplement-d842c0ab7` — see `migration/oracle/README.md`).
+  The workflow's "Download the canonical oracle corpus" step downloads,
+  sha256-verifies and extracts both with `gh release download` (preinstalled
+  on GitHub-hosted runners), then rebuilds the derived CTO cache with
+  `migration/oracle/bin/build-cto-cache.js` (never re-records `fixtures/`
+  itself — see `migration/COORDINATOR.md` "Oracle CTO cache" and "Oracle
+  corpus supplement"). `migration/ledger/` (which the oracle harness's
+  owner-attribution reads relative to the fixtures dir) needs no separate
+  step: the job checks out `claude/tender-pascal-ocwf9q` itself, where it
+  already lives.
+
+  **This needs a secret the workflow does not yet have** (DECISION NEEDED,
+  unresolved — see this task's status comment on
+  accordproject/concerto-rust#307): `gh release download` must authenticate
+  as something with read access to *draft* releases in a *different*
+  repository (`accordproject/concerto-rust`); this repository's own,
+  repo-scoped `GITHUB_TOKEN` cannot do that regardless of workflow
+  permissions. The step reads a `CONCERTO_RUST_ASSETS_TOKEN` secret and
+  fails with a clear error if it is unset. Provisioning that secret (a PAT
+  with read access to `accordproject/concerto-rust`, added as a repository
+  or organization secret here) is a maintainer action, not something this
+  workflow file can do on its own.
+
 - **Inputs (`workflow_dispatch`):**
   - `concerto_rust_ref` — the concerto-rust ref to build the engine from.
     Defaults to the same pinned ref every other job in this repo's CI uses
@@ -339,12 +378,17 @@ catch anything that slipped between tasks. See `migration/COORDINATOR.md`
     did not compile at the then-current integration head, but built cleanly
     from the pinned ref). Pass `claude/tender-pascal-ocwf9q` (or a commit on
     it) to check a specific milestone state of concerto-rust instead.
-  - `run_seed` — fixed seed for the shard. Left empty, resolves to today's
-    date (UTC, `YYYYMMDD`), so repeat dispatches the same day are
-    reproducible and dispatches on different days sample a different slice
-    of the mutation space (a different `(seedIndex, mutationSeed)` plan,
-    `bin/fuzz.js` §"Usage"). Recorded in `run.json`'s `runSeed` field and the
-    job summary either way.
+  - `run_seed` — fixed seed for the shard. Defaults to `1`, the seed
+    `results/milestone-baseline/known-clusters.json` was captured from, so a
+    routine dispatch with the defaults is checked against a run the baseline
+    is actually known to cover (see "Positive-path evidence" below for why
+    that matters). Pass a different seed to deliberately sample a different
+    slice of the mutation space (a different `(seedIndex, mutationSeed)`
+    plan, `bin/fuzz.js` §"Usage") — expect that to surface clusters not yet
+    in the baseline, which need triage before the check passes again for
+    that seed (see "Regenerating the baseline" below). An empty value falls
+    back to today's date (UTC, `YYYYMMDD`) instead of `1`. Recorded in
+    `run.json`'s `runSeed` field and the job summary either way.
   - `case_count` — shard size, default 100,000.
 - **Budget:** default 100,000 cases, batch size 1000. Measured at roughly 90
   cases/s on one core (task P2 verification run; the harness's own README
@@ -368,6 +412,37 @@ catch anything that slipped between tasks. See `migration/COORDINATOR.md`
   nobody has seen and attributed yet. A new *case* of an already-known
   cluster (same signature, a different seed or mutation) is not new and does
   not fail the job.
+- **Positive-path evidence and the default seed:** the baseline
+  (`known-clusters.json`) was captured from exactly one run, `--run-seed 1`.
+  `lib/signature.js`'s message templating masks quoted strings, numbers and
+  UUIDs but not every literal in a message (bareword literals like `false`
+  or a type name survive), and 551 clusters out of 12,779 divergences at
+  that seed is a long tail — so there is no reason to expect an *arbitrary*
+  seed's clusters to already be a subset of seed 1's. This task's earlier
+  positive-path check (500 lines from that same seed-1 run) could only ever
+  pass, and the workflow's original date-based default seed made a routine,
+  default-input dispatch unlikely to pass for already-known reasons rather
+  than a real regression — `run_seed` defaulting to `1` (above) is the fix:
+  the routine, default dispatch is checked against the seed the baseline
+  actually covers. `lib/signature.js`'s masking is fuzz-harness semantics
+  (not touched by this task — see "Never a corpus or baseline" below); if
+  the long tail keeps making other seeds impractical to baseline, that is a
+  maintainer call, not one this workflow-only fix makes on its own.
+- **A missing or broken run is not a pass:** `bin/check-milestone.js` reads
+  the shard's `run.json` (written by `bin/fuzz.js` next to
+  `divergences.jsonl`) and fails the check — separately from, and before,
+  cluster comparison — when the run looks broken rather than clean: fewer
+  cases ran than were planned, or more than 5% of cases hit a harness error
+  (in the two historical reference runs under `results/`, that figure was
+  0%). This catches, for example, the Rust engine failing to load or
+  erroring on every case: every case is then classified `'harness'`, not
+  `'divergence'` (`lib/classify.js`), which without this check would leave
+  `divergences.jsonl` empty and the job green for the wrong reason. See
+  `bin/check-milestone.js`'s own header comment for the full rationale and
+  the `--max-harness-error-ratio` override. When `run.json` is absent
+  entirely (only the "verifying a real failure locally" walkthrough below
+  does this — it doesn't produce a matching `run.json`), this check is
+  skipped rather than failed.
 - **Regenerating the baseline:** the baseline is a plain list of cluster
   signatures from one full shard run (this task recorded it at
   `--run-seed 1`, the pinned `concerto-rust` ref, and the canonical corpus,
