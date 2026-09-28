@@ -24,7 +24,9 @@ import type ResourceValidator from '../serializer/resourcevalidator';
 // and `addArrayValue` validate in one Rust engine call each
 // (src/engine/validate-resource.ts). The `ResourceValidator` visitor below
 // runs only when the engine cannot take the value
-// (`EngineFastPathUnsupported`). See serializer.ts's identical preamble for
+// (`EngineFastPathUnsupported`), or, in `setPropertyValue`, for a string,
+// number or boolean on a plain primitive field with no validator, where the
+// visitor is the cheaper path (validate-resource.ts, `visitorIsCheaper`). See serializer.ts's identical preamble for
 // why `loadEngine` takes a non-literal specifier.
 import { createRequire } from 'module';
 declare const __webpack_require__: unknown;
@@ -91,7 +93,7 @@ class ValidatedResource extends Resource {
         // }
 
         const rootResourceIdentifier = this.getFullyQualifiedIdentifier();
-        if (!loadEngine('../engine/validate-resource').validateProperty(this, propName, value, rootResourceIdentifier)) {
+        if (!loadEngine('../engine/validate-resource').validateProperty(this, propName, value, rootResourceIdentifier, field)) {
             const parameters:any = {};
             parameters.stack = new TypedStack(value);
             parameters.modelManager = this.getModelManager();

@@ -312,6 +312,10 @@ without editing `packages/concerto-core/test/**`:
   `EngineFastPathUnsupported`. The `VV-*` checks drive it through a model
   manager with a custom `regExp` engine; the `VE-*` checks run the same
   scenarios through the engine and compare only the thrown class.
+  `SET-004`/`SET-005` set a string, number or boolean on a plain primitive
+  field with no validator, which `setPropertyValue` keeps on the visitor
+  because it is cheaper there (`visitorIsCheaper`); `SET-006`/`SET-007`
+  set one on a field with a `regex` validator, which goes to the engine.
 
 `serializer-fallback.checks.js` also passes a boxed `utcOffset`
 (`new Number(0)`) to `fromJSON`: the codec cannot carry it, so plain, valid

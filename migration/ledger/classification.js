@@ -156,6 +156,7 @@ module.exports = {
         m: {
             'validateResource': { c: 'HYBRID', p: 'P5-12c', r: 'one validateResourceBinary call per ValidatedResource.validate(): the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust' },
             'validateProperty': { c: 'HYBRID', p: 'P5-12c', r: 'one validatePropertyBinary call per ValidatedResource.setPropertyValue/addArrayValue: the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust' },
+            'visitorIsCheaper': { r: 'routing decision (P5-12c): a string, number or boolean set on a plain primitive field with no validator stays on the ResourceValidator visitor, which is cheaper there than an engine call; reads the field\'s shape only, no validation logic of its own' },
             'outcome': { c: 'TS', r: R.engineShim + ' (maps a result code to the exception the error factory builds, or to the visitor fallback)' },
         },
     },
@@ -340,7 +341,7 @@ module.exports = {
         // validation, the visitor behind EngineFastPathUnsupported.
         m: {
             'ValidatedResource.validate': { c: 'HYBRID', t: INST, p: 'P5-12c', r: 'fast path (P5-12c): one Rust call (validateResourceBinary, src/engine/validate-resource.ts) validates the whole resource; the ResourceValidator visitor runs only behind EngineFastPathUnsupported; the Resource object stays TS (D7)' },
-            'ValidatedResource.setPropertyValue': { c: 'HYBRID', t: INST, p: 'P5-12c', r: 'the undeclared-field check and the assignment stay TS (D7); the value is validated by one Rust call (validatePropertyBinary, src/engine/validate-resource.ts), with the ResourceValidator visitor behind EngineFastPathUnsupported' },
+            'ValidatedResource.setPropertyValue': { c: 'HYBRID', t: INST, p: 'P5-12c', r: 'the undeclared-field check and the assignment stay TS (D7); the value is validated by one Rust call (validatePropertyBinary, src/engine/validate-resource.ts), with the ResourceValidator visitor behind EngineFastPathUnsupported, and for a string, number or boolean on a plain primitive field with no validator, where the visitor is cheaper (visitorIsCheaper)' },
             'ValidatedResource.addArrayValue': { c: 'HYBRID', t: INST, p: 'P5-12c', r: 'the undeclared-field and not-an-array checks, the array copy and the assignment stay TS (D7); the new array is validated by one Rust call (validatePropertyBinary, src/engine/validate-resource.ts), with the ResourceValidator visitor behind EngineFastPathUnsupported' },
         },
     },

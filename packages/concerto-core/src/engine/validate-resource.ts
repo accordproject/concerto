@@ -47,7 +47,10 @@
 // a plain `ResourceValidator` (a subclass or another object may override
 // the visitor, which the engine cannot run). Every other outcome is final:
 // a valid value returns `true`, an invalid one throws with the class TS
-// 5.0.0 throws.
+// 5.0.0 throws. The one other `false` is a speed choice, not a fallback:
+// `setPropertyValue` of a string, number or boolean on a plain primitive
+// field with no validator stays on the visitor, which is cheaper there than
+// an engine call (`visitorIsCheaper`).
 //
 // A Resource whose `$identifierFieldName` is not its model's identifying
 // field, or whose identifier is truthy but not a string, also takes the
@@ -531,17 +534,53 @@ function validateResource(resource, rootId: string): boolean {
 }
 
 /**
+ * Whether the visitor checks `value` against `field` more cheaply than an
+ * engine call: a string, number or boolean set on a single primitive field
+ * with no enum type, no scalar type and no validator. The visitor then does
+ * one type check (itself one small engine call, P4-10) and nothing more,
+ * while the engine call pays a fixed cost to encode the value, cross into
+ * WASM and look the property up (measured on workload 3's
+ * `setPropertyValue('sequence', i)`: 0.55 µs through the visitor, 1.3 µs
+ * through `validatePropertyBinary`). A field with a validator (`regex`,
+ * `length`, `range`), or any object or array value, costs the visitor far
+ * more (8.8 µs for a `regex`+`length` String, 40 µs for a concept) and goes
+ * to the engine. The visitor is the TS reference path, so the choice
+ * changes speed only, never the outcome.
+ * @param {*} field the property TS found on the class declaration
+ * @param {*} value the value being set
+ * @return {boolean} `true` when the visitor should run
+ */
+function visitorIsCheaper(field, value): boolean {
+    const t = typeof value;
+    if (t !== 'string' && t !== 'number' && t !== 'boolean') {
+        return false;
+    }
+    return typeof field.isField === 'function' && field.isField() &&
+        !field.isArray() &&
+        !field.isTypeEnum() &&
+        !field.isTypeScalar() &&
+        field.isPrimitive() &&
+        field.getValidator() === null;
+}
+
+/**
  * `field.accept(this.$validator, parameters)` in
  * `ValidatedResource.setPropertyValue`/`addArrayValue`, in one engine call.
  * @param {object} resource the ValidatedResource
  * @param {string} propName the property TS found on its class declaration
  * @param {*} value the value to check (for `addArrayValue`, the new array)
  * @param {string} rootId the resource's `getFullyQualifiedIdentifier()`
- * @return {boolean} `true` when valid; `false` when the engine cannot
- * validate it (the caller runs the visitor)
+ * @param {*} [field] the property's declaration; when given and
+ * `visitorIsCheaper` holds, the visitor runs instead of the engine
+ * @return {boolean} `true` when valid; `false` when the caller should run
+ * the visitor (the engine cannot validate the value, or the visitor is the
+ * cheaper path for it)
  * @throws {Error} the error TS throws for an invalid value
  */
-function validateProperty(resource, propName: string, value, rootId: string): boolean {
+function validateProperty(resource, propName: string, value, rootId: string, field?): boolean {
+    if (field && visitorIsCheaper(field, value)) {
+        return false;
+    }
     const flags = flagsOf(resource.$validator);
     if (flags < 0) {
         return false;

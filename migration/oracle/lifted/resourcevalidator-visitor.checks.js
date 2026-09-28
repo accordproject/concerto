@@ -31,6 +31,10 @@
  * P5-12c. The `VE-*` checks run the same scenarios in a plain model
  * manager, where the engine answers, and return only the class of what is
  * thrown: error parity is by class (maintainer decision 2026-09-27, P5-09).
+ * `setPropertyValue` of a string, number or boolean on a plain primitive
+ * field with no validator stays on the visitor even in a plain model
+ * manager, where it is cheaper than an engine call (`visitorIsCheaper`,
+ * SET-004 and SET-005).
  *
  * `expect` is the frozen v5.0.0 reference's outcome. Run by
  * fallbacks.spec.js.
@@ -81,6 +85,8 @@ asset Box identified by bid {
   o Sub sub optional
   o Sub[] subs optional
   o String[] tags optional
+  o Integer n optional
+  o String code regex=/^[a-z]+$/ optional
 }
 `;
 
@@ -217,6 +223,10 @@ const SCENARIOS = [
     { id: 'SET-001', covers: 'setPropertyValue: a valid value', run: (v) => assign('setPropertyValue', 'tags', ['a'], v) },
     { id: 'SET-002', covers: 'setPropertyValue: an invalid value', run: (v) => assign('setPropertyValue', 'tags', [1], v) },
     { id: 'SET-003', covers: 'setPropertyValue: a valid nested concept', run: (v) => assign('setPropertyValue', 'sub', (core, factory) => factory.newConcept(NS, 'Sub'), v) },
+    { id: 'SET-004', covers: 'setPropertyValue: a valid number on a plain primitive field (visitorIsCheaper)', run: (v) => assign('setPropertyValue', 'n', 5, v) },
+    { id: 'SET-005', covers: 'setPropertyValue: a string on a plain Integer field (visitorIsCheaper)', run: (v) => assign('setPropertyValue', 'n', 'five', v) },
+    { id: 'SET-006', covers: 'setPropertyValue: a string that fails a regex validator (engine, not visitorIsCheaper)', run: (v) => assign('setPropertyValue', 'code', 'A1', v) },
+    { id: 'SET-007', covers: 'setPropertyValue: a string that passes a regex validator (engine, not visitorIsCheaper)', run: (v) => assign('setPropertyValue', 'code', 'ab', v) },
     { id: 'ADD-001', covers: 'addArrayValue: a valid item', run: (v) => assign('addArrayValue', 'tags', 'a', v) },
     { id: 'ADD-002', covers: 'addArrayValue: an invalid item', run: (v) => assign('addArrayValue', 'tags', 2, v) },
     { id: 'ADD-003', covers: 'addArrayValue: an invalid concept item', run: (v) => assign('addArrayValue', 'subs', { x: 'a' }, v) },
@@ -280,6 +290,14 @@ const EXPECT = {
     'VE-SET-002': {'ok': {'threw': 'ValidationException'}},
     'VV-SET-003': {'ok': {'$class': 'org.acme.lifted.p512c.validate@1.0.0.Sub'}},
     'VE-SET-003': {'ok': {'$class': 'org.acme.lifted.p512c.validate@1.0.0.Sub'}},
+    'VV-SET-004': {'ok': 5},
+    'VE-SET-004': {'ok': 5},
+    'VV-SET-005': {'throws': {'name': 'ValidationException', 'message': 'Model violation in the "org.acme.lifted.p512c.validate@1.0.0.Box#b1" instance. The field "n" has a value of ""five"" (type of value: "string"). Expected type of value: "Integer".'}},
+    'VE-SET-005': {'ok': {'threw': 'ValidationException'}},
+    'VV-SET-006': {'throws': {'name': 'BaseException', 'message': 'Validator error for field `undefined`. org.acme.lifted.p512c.validate@1.0.0.Box.code: Value \'A1\' failed to match validation regex: /^[a-z]+$/'}},
+    'VE-SET-006': {'ok': {'threw': 'BaseException'}},
+    'VV-SET-007': {'ok': 'ab'},
+    'VE-SET-007': {'ok': 'ab'},
     'VV-ADD-001': {'ok': ['a']},
     'VE-ADD-001': {'ok': ['a']},
     'VV-ADD-002': {'throws': {'name': 'ValidationException', 'message': 'Model violation in the "org.acme.lifted.p512c.validate@1.0.0.Box#b1" instance. The field "tags" has a value of "2" (type of value: "number"). Expected type of value: "String[]".'}},
