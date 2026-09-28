@@ -1,3 +1,39 @@
+# P5-21: native `metamodel::validate_ast` on a resident metamodel (2026-09-28)
+
+Task P5-21 (accordproject/concerto-rust#319), plan accordproject/concerto-rust#29.
+P6-04 (below) found the public native free function
+`concerto_core::metamodel::validate_ast` 7.35× slower than TS on
+conformance, because it built a fresh metamodel ModelManager on every call
+(see "The validateAst outlier" below). P5-21 runs it on a per-thread
+resident metamodel manager, built on first use, as P5-13's
+`ModelManager::validate_ast` does. The public signature, results and error
+kinds are unchanged. It is a `concerto-rust` change only; the TS-API route
+is not affected.
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 logical CPUs, 17 GB, Linux x64 (a shared cloud container). **Not the machine P6-04 used** (a darwin laptop), so compare each P5-21 figure only with the TS figure from the same machine below, not with P6-04's figures. |
+| Toolchain | cargo/rustc 1.94.1, Node v22.22.2 |
+| Native runs | `concerto-rust`'s `benches/results/P5-21/native-{1,2}.json`: two rounds of `cargo bench --manifest-path benches/Cargo.toml --bench validate_metamodel` (criterion defaults), reduced with `extract-results.sh`. The free function is the new `concerto-core/metamodel::validate_ast` case in `validate_metamodel.rs`, next to `concerto-core/validate_ast` (`ModelManager::validate_ast`). The files record `concerto_rust_commit` `cd04cb1` (the integration head the P5-21 change was built on; the benchmarked tree had the change applied). They carry no `loadavg` field. |
+| TS runs | `results/P5-21-ts-reference-5.0.0-{1,2,3}.json`: three rounds of `run-ts.mjs --workloads validate_ast` against the published 5.0.0 reference (`--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist`), defaults (5 warm-up, 30 samples), `concerto` `4ed605ca2`. |
+| Load | 1-minute load at the start of the TS runs: 3.59, 2.04 and 2.24. None met P6-04's load1 < 2 quiet gate; the machine is shared with other tasks. The native result files were extracted at 21:31:43Z and 21:33:14Z, the times TS runs 2 and 3 finished; whether the native and TS runs overlapped was not recorded. Treat the figures as indicative: P6-04 saw contention move ratios by up to 1.6×, well inside the margin below. |
+
+Medians in µs per model:
+
+| Model set | n | Native free function, runs 1 / 2 | Native `ModelManager::validate_ast`, runs 1 / 2 | TS 5.0.0, runs 1 / 2 / 3 | **free function / TS** |
+|---|---|---|---|---|---|
+| concerto-core-test-data | 34 | 147.1 / 147.0 | 132.0 / 133.5 | 532.0 / 521.2 / 516.7 | **0.28× (3.5× faster)** |
+| conformance | 41 | 60.6 / 61.7 | 56.1 / 56.6 | 202.6 / 215.4 / 204.5 | **0.30× (3.4× faster)** |
+| synthetic-large | 1 | SKIPPED | SKIPPED | SKIPPED | - |
+
+The ratio uses native run 1 against the TS median (runs 2 and 3 give the
+same ratio to two places). The free function is now within 8-11% of the
+resident-metamodel method, and below TS on both sets, which meets
+P5-21's target (at or below TS on conformance). `synthetic-large` is still
+rejected by `validateAst` on every route, as in P5-04 onwards.
+
+---
+
 # P6-04: native Rust benchmarks through the public API (informational, 2026-09-28)
 
 Task P6-04 (accordproject/concerto-rust#273), plan accordproject/concerto-rust#29,
@@ -110,6 +146,12 @@ which is why it beats both the native free function *and* TS. This is a
 gap in what the public API exposes as a fast validateAst entry point, not
 a measurement error; see "Open question" below.
 
+**Update (P5-21, accordproject/concerto-rust#319):** the free function now
+runs on a per-thread resident metamodel manager. Re-measured on a
+different machine, it is 0.30× of TS on conformance (3.4× faster) and
+0.28× on concerto-core-test-data; see the "P5-21" section above. The
+figures in this table are P6-04's and are kept as recorded.
+
 ### Instance: populate and validate (`Serializer.fromJSON` equivalent)
 
 | | n | Native `validate_instance`, runs 1/2 (µs) | Rust-via-TS `fromJSON`, runs 1/2 (µs) | TS 5.0.0 `fromJSON`, runs 1/2 (µs) | native/TS* | Rust-via-TS/TS | native/Rust-via-TS* |
@@ -180,6 +222,9 @@ regression.
   that wants TS-API-competitive validateAst performance today has to go
   through `ModelFile::from_json` first. Not a P6-04 finding to fix
   (measurement only) — flagged for P6-01/P6-03 to consider.
+  *Addressed by P5-21 (accordproject/concerto-rust#319): the free
+  function now caches the metamodel per thread; see the "P5-21" section
+  at the top.*
 
 ## Reproducing this table
 

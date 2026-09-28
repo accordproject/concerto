@@ -1,0 +1,65 @@
+{
+  "harness": "run-ts.mjs",
+  "recorded_at": "2026-09-28T21:33:14.376Z",
+  "machine": {
+    "platform": "linux",
+    "arch": "x64",
+    "cpus": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "cpu_count": 4,
+    "total_mem_gb": 17,
+    "node": "v22.22.2"
+  },
+  "concerto_commit": "4ed605ca2cffb66c4844a041c9608aa021197ef3",
+  "concerto_engine": "ts",
+  "core_dist": "migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+  "workloads_run": [
+    "validate_ast"
+  ],
+  "loadavg": [
+    2.24,
+    1.87,
+    1.44
+  ],
+  "sample_opts": {
+    "warmup": 5,
+    "samples": 30
+  },
+  "workloads": {
+    "load_validate": {},
+    "validate_ast": {
+      "concerto-core-test-data": {
+        "validateAst": {
+          "samples": 30,
+          "n": 34,
+          "median_ms": 0.5167406323529412,
+          "mean_ms": 0.5209745362745098,
+          "stddev_ms": 0.0473568664238526,
+          "min_ms": 0.4672607058823529,
+          "max_ms": 0.7071826470588235,
+          "cv": 0.0909005395206101
+        },
+        "n": 34,
+        "totalInSet": 35
+      },
+      "conformance": {
+        "validateAst": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.20445370731707316,
+          "mean_ms": 0.2068821008130081,
+          "stddev_ms": 0.011378386363516154,
+          "min_ms": 0.19524158536585368,
+          "max_ms": 0.24638434146341465,
+          "cv": 0.05499937558059018
+        },
+        "n": 41,
+        "totalInSet": 41
+      },
+      "synthetic-large": {
+        "validateAst": null,
+        "n": 1,
+        "error": "validateAst rejects every model in this set"
+      }
+    }
+  }
+}
