@@ -1,0 +1,99 @@
+{
+  "harness": "p512b-error-profile.mjs",
+  "transport": "binary-code",
+  "recorded_at": "2026-09-28T08:43:58.871Z",
+  "node": "v24.21.0",
+  "cpus": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+  "loadavg": [
+    7.02001953125,
+    8.49462890625,
+    17.5546875
+  ],
+  "sample_message": "Model violation in the \"org.accordproject.bench.instance@1.0.0.Item#item-0\" instance. The field \"sequence\" has a value of \"\"not-a-number-0\"\" (type of value: \"string\"). Expected type of value: \"Integer\".",
+  "rows": [
+    {
+      "group": "total",
+      "name": "valid resource.validate() [binary-code]",
+      "us": 9.321,
+      "cv": 0.074
+    },
+    {
+      "group": "total",
+      "name": "invalid resource.validate(), caught [binary-code]",
+      "us": 56.019,
+      "cv": 0.07
+    },
+    {
+      "group": "B",
+      "name": "validateResource, valid",
+      "us": 14.082,
+      "cv": 0.075
+    },
+    {
+      "group": "B",
+      "name": "validateResource, invalid, caught (run + factory)",
+      "us": 83.44,
+      "cv": 0.088
+    },
+    {
+      "group": "c",
+      "name": "validateResourceBinary, valid",
+      "us": 6.589,
+      "cv": 0.183
+    },
+    {
+      "group": "c",
+      "name": "validateResourceBinary, invalid, caught (run + factory)",
+      "us": 64.182,
+      "cv": 0.121
+    },
+    {
+      "group": "c-code",
+      "name": "validateResourceBinaryCode, valid",
+      "us": 5.363,
+      "cv": 0.082
+    },
+    {
+      "group": "c-code",
+      "name": "validateResourceBinaryCode, invalid: code only (error kept in the engine)",
+      "us": 6.094,
+      "cv": 0.1
+    },
+    {
+      "group": "c-code",
+      "name": "+ p512bLastErrorMessage (message rendered, crosses as a string)",
+      "us": 11.177,
+      "cv": 0.09
+    },
+    {
+      "group": "c-code",
+      "name": "+ throw new ValidationException(message), caught",
+      "us": 47.095,
+      "cv": 0.05
+    },
+    {
+      "group": "c-code",
+      "name": "code, then p512bTakeError (the full factory path, deferred), caught",
+      "us": 66.743,
+      "cv": 0.122
+    },
+    {
+      "group": "ts",
+      "name": "throw new ValidationException(message), caught",
+      "us": 25.088,
+      "cv": 0.065
+    },
+    {
+      "group": "ts",
+      "name": "throw new Error(message), caught",
+      "us": 10.092,
+      "cv": 0.085
+    },
+    {
+      "group": "ts",
+      "name": "message length (chars, not µs)",
+      "us": 202,
+      "cv": 0.719
+    }
+  ]
+}

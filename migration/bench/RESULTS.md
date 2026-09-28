@@ -16,7 +16,8 @@ TS side, the value shape the validator already reads (`validate.rs` module doc
 both `decode_wire` and `to_validator_value`. The options cross as a bit set and
 the root identifier as a short string, in place of JSON (candidate (e)).
 Errors leave through the same `run`/error-factory path, so the TS classes are
-unchanged.
+unchanged, except in `binary-code`, which builds the error return cheaply
+(see "Error return").
 
 | Transport | Candidate | What crosses |
 |---|---|---|
@@ -25,6 +26,7 @@ unchanged.
 | `object` | (b) | the JS validator tree itself, through `serde-wasm-bindgen` |
 | `binary` | (c) | a compact tagged layout (null/bool/i32/f64/string/array/object), written in one pass from the live resource into a reused TS `Uint8Array`, then copied in as `&[u8]` |
 | `binary-scratch` | (c)+(e) | the same layout written straight into the reused engine buffer, with no copy |
+| `binary-code` | (c)+(e), error return | the (c) layout, but the engine returns a code (0 valid, 1 `Validation` error, 2 other) instead of throwing through `run` and the error factory. For code 1, TS fetches only the message and throws `new ValidationException(message)` itself. Code 2 builds the exception through the unchanged factory path. See "Error return" below. |
 
 | | |
 |---|---|
@@ -111,7 +113,53 @@ The split of each candidate (from the same profile run, µs):
 - The options JSON and the extra string are replaced by a bit set and the root-identifier string in every candidate above.
 - `handleFor` (0.16 µs), the empty call (0.11 µs) and `syncIdentifiers` (0.20 µs) are already small.
 - Reusing an engine-owned buffer saves the wasm-bindgen malloc and copy. That is under 0.3 µs at these sizes, inside the noise.
-- The success path returns `undefined`, so there is nothing to cut there. The error path still builds its payload through the error factory (`run`). It only runs for invalid instances and was not timed.
+- The success path returns `undefined`, so there is nothing to cut there.
+- The error path is timed and split in "Error return" below. A code plus a message fetched on demand is built (`binary-code`). It cuts about 15 µs from each invalid `validate()`.
+
+## Error return
+
+`sh migration/bench/p512b-error-rounds.sh` runs `migration/bench/p512b-error-profile.mjs` in three interleaved rounds, for TS 5.0.0, P5-12 B, (c) `binary` and `binary-code`. The results are in `results/P5-12b-error-{ts-reference-5.0.0,p512-B,binary,binary-code}-{1,2,3}.json`. The 1-minute load was 4.8 to 8.0.
+
+- **Workload:** the same 500 synthetic resources, each also made invalid with a string in the `Integer` field.
+- **Result:** every path throws `ValidationException` with the same message (checked before timing), with 0 fallbacks.
+- **Timing:** each invalid call is caught with try/catch, as a caller would catch it.
+
+**Whole `resource.validate()`**, median µs per resource:
+
+| Variant | valid, runs 1 / 2 / 3 | valid median | invalid, runs 1 / 2 / 3 | invalid median | error cost (invalid − valid) | invalid × TS |
+|---|---|---|---|---|---|---|
+| TS reference 5.0.0 | 2.3 / 3.4 / 2.5 | 2.5 | 46.2 / 56.1 / 50.8 | 50.8 | 48.2 | 1.0× |
+| P5-12 B (`validateResource`) | 18.5 / 21.4 / 18.9 | 18.9 | 88.0 / 147.8 / 91.8 | 91.8 | 72.9 | 1.8× |
+| (c) `binary` (recommended transport) | 9.8 / 9.0 / 8.8 | 9.0 | 71.5 / 70.4 / 71.2 | 71.2 | 62.2 | 1.4× |
+| **`binary-code`** (code plus message on demand) | 8.1 / 9.3 / 8.7 | 8.7 | 54.2 / 56.0 / 55.7 | **55.7** | **47.0** | **1.1×** |
+
+**An error costs 5 to 20 times a valid call on every path, including TS's own.** The cost is almost all the JS exception, not the validator:
+
+**Split of the invalid engine call.** These are direct binding calls with precomputed input. Each value is the median over the 9 engine runs, in µs.
+
+| Step | µs | Cost of the step |
+|---|---|---|
+| `validateResource` (P5-12 B), valid / invalid through `run` and the factory | 13.9 / 77.1 | 63.2 for the error |
+| `validateResourceBinary` (c), valid / invalid through `run` and the factory | 5.6 / 62.9 | **57.2** for the error |
+| `validateResourceBinaryCode`, valid / invalid, code only (the error stays in the engine) | 5.5 / 6.0 | 0.5: the validator finding the error and building the Rust `ContractError` |
+| + `p512bLastErrorMessage` (render the 202-char message, cross it as a string) | 10.5 | 4.5 |
+| + `throw new ValidationException(message)`, caught | 41.9 | 31.4 |
+| code, then `p512bTakeError` (the full payload and factory path, deferred), caught | 59.4 | 53.4. That is 17.5 more than the cheap return for the same exception. |
+| TS alone: `throw new ValidationException(message)`, caught | 26.1 | the `BaseException` constructor (a second `captureStackTrace`) and the throw |
+| TS alone: `throw new Error(message)`, caught | 9.4 | |
+
+The payload object, the factory call and the throw out through wasm-bindgen together cost about **17.5 µs**. The code return removes that cost. It is the ~15 µs difference between `binary` and `binary-code` for the whole call.
+
+**Lazy message: dropped, with numbers.**
+- Rendering the message and crossing it costs 4.5 µs. That is the most a lazy message could save, about 8% of the 55.7 µs invalid call.
+- The TS exception class needs its message at construction. A lazy message would need a getter over an error kept alive in the engine per exception, with a slab and a `FinalizationRegistry` to free it. That is not worth 4.5 µs.
+- The remaining ~26 to 31 µs is `ValidationException` itself. TS 5.0.0 pays the same cost (its invalid call is 50.8 µs). It is TS class code, not engine or transport cost.
+
+**Scope and checks of `binary-code`:**
+- **Scope:** only code 1 (`Validation`) takes the cheap return. Other kinds, such as the nested regex `BaseException` and wire errors that fall back, go through `p512bTakeError`, so their classes and fallback behaviour are unchanged.
+- **Error classes:** `p512b-error-classes.mjs` prints output identical to TS 5.0.0 for `binary-code` (and for P5-12 B and `binary`), with 0 fallbacks.
+- **Oracle:** `Resource.validate` passes 75/75 under both `binary` and `binary-code`, with 0 fallbacks.
+- **concerto-core suite:** mocha + nyc with the package's `test` arguments gives 1624 passing, 8 pending and 0 failing. The statements threshold is missed at 98.97%, exactly as for P5-12 B, `json` and `binary`.
 
 ## Correctness (quick; best two candidates)
 
@@ -131,6 +179,7 @@ The split of each candidate (from the same profile run, µs):
 
 **Use the binary layout (c), copied in as `&[u8]`, for the production B.**
 - **Cost:** about **9 µs** per resource on this machine (**~3.6× TS**, 2.3× faster than P5-12 B's wire JSON).
+- **Return errors as a code (`binary-code`).** A `Validation` error then costs 55.7 µs, against 71.2 µs through `run` and the factory, 91.8 µs for P5-12 B and 50.8 µs for TS 5.0.0. The success path is unchanged. Any other kind keeps the factory path.
 - **(a) `json`** is the simpler fallback option: about 11 µs, 4.3× TS, with no new format to maintain.
 - **Skip the engine-owned scratch buffer.** It needs detached-view and memory-growth handling for a gain lost in noise.
 - **Skip serde-wasm-bindgen.** It is the slowest of the four.

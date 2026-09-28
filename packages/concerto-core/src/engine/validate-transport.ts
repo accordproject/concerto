@@ -33,6 +33,12 @@
 //                      live resource into a reused TS buffer, copied in
 //   binary-scratch (c+e) the same layout written straight into the reused
 //                      engine buffer (no copy)
+//   binary-code  (c) + cheap error return: the engine returns a code instead
+//                      of throwing through `run`/the error factory; for a
+//                      `Validation` error TS fetches only the message and
+//                      throws `new ValidationException(message)` itself
+//                      (what the factory builds for that kind); any other
+//                      error is built through the unchanged factory path
 //
 // All send the options as a bit set and the root identifier as a string
 // (candidate (e)). Anything the codec cannot express throws
@@ -42,6 +48,7 @@
 import { rust } from './index';
 import { EngineFastPathUnsupported, checkString } from './serializer-codec';
 import { handleFor, syncIdentifiers, asUnsupported } from './serializer';
+import ValidationException from '../serializer/validationexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -566,6 +573,22 @@ function fastValidateResource(modelManager: BaseModelManager, resource: any, opt
             const view = scratchFor(text.length * 3);
             const { written } = encoder.encodeInto(text, view);
             handle.validateResourceJsonScratch(written, rootId(resource, tree.$class), flags);
+            break;
+        }
+        case 'binary-code': {
+            scratch = false;
+            pos = 0;
+            if (!isTypedLike(resource)) {
+                throw new EngineFastPathUnsupported('root-not-typed');
+            }
+            const fqn = writeTyped(resource, new Set<object>([resource]));
+            const code = handle.validateResourceBinaryCode(buf.subarray(0, pos), rootId(resource, fqn), flags);
+            if (code === 1) {
+                throw new ValidationException(rust.p512bLastErrorMessage());
+            }
+            if (code !== 0) {
+                throw rust.p512bTakeError();
+            }
             break;
         }
         case 'binary':
