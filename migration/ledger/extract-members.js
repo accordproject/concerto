@@ -90,7 +90,8 @@ if (ci < 0) {
     for (const r of rows) { process.stdout.write([r.file, r.cls, r.member, r.kind, r.loc, r.line].join('\t') + '\n'); }
     process.exit(0);
 }
-const { scan } = require('./engine-calls.js');
+const { scan, crossingHelpers } = require('./engine-calls.js');
+const helpers = crossingHelpers(rows);
 const ledgerPath = process.argv[ci + 1];
 const lines = fs.readFileSync(ledgerPath, 'utf8').split('\n').filter(Boolean);
 const hdr = lines.shift().split('\t');
@@ -119,7 +120,7 @@ for (const l of lines) {
     const r = byKey.get(k);
     if (!r) { continue; }
     const cls = c[idx('classification')];
-    const s = scan(r);
+    const s = scan(r, helpers);
     if (cls === 'RUST' && !s.engineCall) { console.log('RUST row makes no engine call (reclassify, or delegate to the engine): ' + k); bad++; }
     if (cls === 'PARTIAL' && s.engineCall) { console.log('PARTIAL row now calls the engine (' + s.engineRefs.join(',') + '): rebuild the ledger: ' + k); bad++; }
 }
