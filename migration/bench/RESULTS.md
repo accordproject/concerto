@@ -1,3 +1,135 @@
+# P5-17 (F1): one resolve snapshot per `models_ast` call (2026-09-28)
+
+Task P5-17 F1 (accordproject/concerto-rust#315) fixes finding F1 of the
+P5-15 profiling sweep (#309). `models_ast(resolve = true)` called
+`resolve_meta_model` for each model file, and each call deep-cloned the
+whole registered model set (`models_ast(false, true)`) to resolve against.
+That is O(N²) cloning for `getAst(true)`, the DCS decorate and validate
+paths, and `extractDecorators` / `extractVocabularies`. Nothing registers
+or removes a model file inside that loop. So the call now takes one
+borrowed snapshot, indexed by namespace, and reuses it for every file. As
+in TS `findNamespace`'s `Array.find`, the first model registered for a
+namespace wins. `resolve_meta_model` uses the same borrowed snapshot. The
+change is in `concerto-core/src/model_manager.rs` only. Results and errors
+are unchanged, and there is no TS, WASM binding or engine shim change.
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz, 4 cores / 8 logical CPUs, 16 GB, macOS 13.7.8 (a developer laptop) |
+| Toolchain | Node v24.21.0, rustc 1.98.1, wasm-bindgen 0.2.128, wasm-opt applied by `concerto-wasm/build.sh`. The P5-17 engine is 2,799,916 bytes, within the 4 MiB budget (before: 2,797,957). |
+| Quiet-check | Before every run, the driver waited until the 1-minute load average was below 2 and the 5-minute below 3, with no other benchmark process running. All 15 runs met it; the 1-minute load was 1.58 to 1.98 at each start. This laptop does not settle below 1, so the gate is looser than P5-14's. |
+| Before | `concerto-rust` `cd04cb1` (the integration head when the task started), with `concerto` `4ed605ca2` |
+| After | `concerto-rust` `338cbaf` (the P5-17 F1 commit on `cd04cb1`), with the same `concerto` `4ed605ca2` and the same `concerto-core` dist. Only the engine module (`CONCERTO_ENGINE_MODULE`) differs between the two sides. |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0 (the oracle's reference), run with `--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist` |
+| Driver | P5-15's sweep (`p515-sweep.mjs` from `ad82d6b1c`, and the crate bench `benches/p515_sweep.rs` from `concerto-rust` `0a7edac`), ops `extract_decorators,extract_vocabularies,dcs_decorate,dcs_validate`, 5 warm-up and 30 samples. Criterion: 1 s warm-up, 3 s measurement. |
+| Runs | `results/P5-17F1-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`: three interleaved rounds (TS reference, then before and after through the TS API and the crate) |
+
+## Through the TS public API
+
+Medians are in ms per call over the whole model set (each op runs once
+over every model in the set), for runs 1, 2 and 3. The ratios use the
+median of the three runs.
+
+| Model set | Op | TS 5.0.0, runs 1 / 2 / 3 | Rust before, runs 1 / 2 / 3 | Rust P5-17, runs 1 / 2 / 3 | before / TS | **P5-17 / TS** | speed-up |
+|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | extract_decorators | 8.2 / 7.5 / 8.0 | 88.9 / 88.4 / 94.1 | 30.7 / 32.3 / 30.7 | 11.11× | **3.84×** | 2.89× |
+| conformance | extract_decorators | 3.2 / 3.0 / 3.1 | 43.6 / 43.3 / 44.6 | 15.3 / 16.3 / 15.2 | 14.26× | **4.99×** | 2.86× |
+| synthetic-large | extract_decorators | 10.4 / 9.6 / 9.9 | 64.0 / 63.4 / 65.4 | 54.0 / 57.9 / 54.2 | 6.44× | **5.45×** | 1.18× |
+| concerto-core-test-data | extract_vocabularies | 7.1 / 7.0 / 6.7 | 102.6 / 101.1 / 101.6 | 41.9 / 40.5 / 41.3 | 14.51× | **5.90×** | 2.46× |
+| conformance | extract_vocabularies | 2.5 / 2.4 / 2.5 | 51.5 / 51.5 / 52.2 | 20.5 / 20.8 / 20.1 | 20.77× | **8.28×** | 2.51× |
+| synthetic-large | extract_vocabularies | 10.1 / 9.1 / 9.6 | 79.4 / 77.1 / 79.5 | 67.7 / 69.3 / 65.6 | 8.26× | **7.04×** | 1.17× |
+| concerto-core-test-data | dcs_decorate | 40.1 / 37.1 / 38.1 | 89.6 / 90.9 / 90.2 | 58.0 / 60.8 / 57.6 | 2.37× | **1.52×** | 1.56× |
+| conformance | dcs_decorate | 20.7 / 18.7 / 19.5 | 48.4 / 49.6 / 48.2 | 30.5 / 29.4 / 28.1 | 2.48× | **1.50×** | 1.65× |
+| synthetic-large | dcs_decorate | 64.6 / 58.3 / 60.3 | 93.7 / 95.6 / 92.5 | 83.6 / 88.4 / 82.5 | 1.55× | **1.39×** | 1.12× |
+| concerto-core-test-data | dcs_validate | 34.8 / 31.6 / 32.9 | 46.9 / 46.8 / 45.2 | 45.7 / 47.2 / 44.4 | 1.42× | **1.39×** | 1.02× |
+| conformance | dcs_validate | 17.9 / 16.5 / 17.3 | 31.5 / 32.7 / 31.0 | 31.1 / 31.9 / 30.3 | 1.83× | **1.80×** | 1.01× |
+| synthetic-large | dcs_validate | 54.4 / 50.9 / 53.8 | 67.8 / 68.7 / 67.3 | 68.5 / 69.9 / 66.9 | 1.26× | **1.27×** | 0.99× |
+
+- **`extract_*` is 2.5× to 2.9× faster on the two many-file sets**
+  (concerto-core-test-data and conformance). It goes from 11× to 21× TS
+  to 3.8× to 8.3× TS. The issue estimated 3× to 5× TS. `extract_decorators`
+  is inside that range (3.8× and 5.0×). `extract_vocabularies` is not
+  (5.9× and 8.3×).
+- **`dcs_decorate` is 1.6× faster** on those sets (2.4× to 2.5× TS, now
+  1.5× TS). The issue estimated about 1× TS. What remains is the binding's
+  per-call work: it rebuilds a manager from the model ASTs and hands back
+  the whole AST. The crate's `dcs_decorate_rebuild` row below measures that
+  cost.
+- **synthetic-large gains less (1.1× to 1.2×).** It is a single large
+  model file (the other two sets have 35 and 41), so the old code cloned
+  the set once per call there, not once per file. What it gains comes from
+  resolving against a borrowed snapshot instead of a clone.
+- **`dcs_validate` is unchanged (0.99× to 1.02×).** `dcs::validate` builds
+  its own validation manager and does not call `models_ast`, so F1 does
+  not touch it. It is listed as a control.
+- CVs were 12% or less, except one before run (run 2, 27%). The ratios use
+  medians of three runs, so that run does not move them.
+
+## The Rust crate directly (criterion)
+
+Criterion's median estimate, in ms per call over the whole model set, for
+runs 1, 2 and 3. The speed-up uses the median of the three runs. The
+`*_rebuild` rows add what the WASM binding does per call: they rebuild a
+manager from the model ASTs first and, for decorate, hand back the whole
+AST. The crate numbers are native and measured on a resident manager, so
+only the before/after ratio is meaningful, not a comparison with the TS
+rows above.
+
+| Benchmark | Before (`cd04cb1`), runs 1 / 2 / 3 | P5-17 (`338cbaf`), runs 1 / 2 / 3 | Speed-up |
+|---|---|---|---|
+| `extract_decorators`, concerto-core-test-data | 280.0 / 270.6 / 250.1 | 25.5 / 27.3 / 24.8 | 10.62× |
+| `extract_decorators_rebuild`, concerto-core-test-data | 298.7 / 297.1 / 258.1 | 35.3 / 36.5 / 34.9 | 8.41× |
+| `extract_vocabularies`, concerto-core-test-data | 277.6 / 262.5 / 250.8 | 27.3 / 27.0 / 26.8 | 9.71× |
+| `extract_vocabularies_rebuild`, concerto-core-test-data | 287.5 / 275.0 / 260.0 | 36.1 / 36.7 / 36.5 | 7.54× |
+| `dcs_decorate`, concerto-core-test-data | 169.7 / 168.7 / 170.1 | 48.9 / 53.7 / 47.5 | 3.47× |
+| `dcs_decorate_rebuild`, concerto-core-test-data | 177.1 / 181.3 / 182.7 | 61.1 / 63.6 / 60.2 | 2.97× |
+| `dcs_validate`, concerto-core-test-data | 21.4 / 22.4 / 22.0 | 22.2 / 22.9 / 21.4 | 0.99× |
+| `dcs_validate_rebuild`, concerto-core-test-data | 26.8 / 28.0 / 27.0 | 27.3 / 28.2 / 27.0 | 0.99× |
+| `extract_decorators`, conformance | 112.0 / 113.2 / 107.4 | 10.6 / 11.1 / 10.3 | 10.59× |
+| `extract_decorators_rebuild`, conformance | 115.7 / 164.1 / 112.0 | 14.2 / 14.8 / 14.1 | 8.13× |
+| `extract_vocabularies`, conformance | 113.0 / 300.0 / 108.7 | 10.8 / 11.4 / 10.3 | 10.49× |
+| `extract_vocabularies_rebuild`, conformance | 115.8 / 132.0 / 112.9 | 18.3 / 15.1 / 14.0 | 7.68× |
+| `dcs_decorate`, conformance | 99.4 / 91.4 / 89.7 | 24.9 / 29.6 / 23.8 | 3.67× |
+| `dcs_decorate_rebuild`, conformance | 98.1 / 147.8 / 95.3 | 29.7 / 58.4 / 29.3 | 3.30× |
+| `dcs_validate`, conformance | 14.2 / 14.4 / 14.0 | 13.8 / 26.4 / 13.5 | 1.03× |
+| `dcs_validate_rebuild`, conformance | 16.8 / 16.9 / 16.5 | 16.6 / 20.8 / 16.0 | 1.01× |
+| `extract_decorators`, synthetic-large | 79.5 / 94.7 / 75.6 | 44.3 / 71.9 / 43.9 | 1.79× |
+| `extract_decorators_rebuild`, synthetic-large | 97.1 / 145.6 / 94.9 | 62.1 / 77.4 / 59.3 | 1.56× |
+| `extract_vocabularies`, synthetic-large | 82.5 / 91.2 / 78.4 | 47.4 / 49.9 / 47.2 | 1.74× |
+| `extract_vocabularies_rebuild`, synthetic-large | 100.9 / 131.5 / 94.8 | 63.3 / 66.2 / 62.5 | 1.59× |
+| `dcs_decorate`, synthetic-large | 101.9 / 112.4 / 97.8 | 83.0 / 82.4 / 79.0 | 1.24× |
+| `dcs_decorate_rebuild`, synthetic-large | 126.6 / 137.3 / 121.7 | 104.1 / 107.6 / 102.5 | 1.22× |
+| `dcs_validate`, synthetic-large | 37.5 / 76.7 / 36.1 | 35.8 / 46.1 / 35.5 | 1.05× |
+| `dcs_validate_rebuild`, synthetic-large | 45.6 / 56.4 / 45.4 | 44.5 / 106.2 / 44.4 | 1.03× |
+
+- **In the crate, `extract_*` is 9.7× to 10.6× faster, and `dcs_decorate`
+  3.5× to 3.7×**, on the many-file sets. With the rebuild the binding
+  does, the gains are 7.5× to 8.4× and 3.0× to 3.3×.
+- The TS API gains are smaller than the crate's. Through the TS API, the
+  per-call boundary cost (JSON encoding in and out of WASM) is now a large
+  part of what is left.
+- Round 2 was noisy: the 1-minute load reached 7.56 by its end. Some round
+  2 figures are outliers on both sides (for example
+  `extract_vocabularies`, conformance, before: 300.0; `dcs_validate_rebuild`,
+  synthetic-large, after: 106.2). The medians of three runs discard them.
+- The absolute crate times (native, resident manager) are higher than the
+  TS API times for the same op. This was not investigated here, because
+  the exit condition compares before with after, and the TS API with TS
+  5.0.0.
+
+## Correctness during the run
+
+The full tier ran on the P5-17 tree (`concerto-rust` `338cbaf`) before
+the benchmark. `cargo fmt --check` and `cargo clippy --workspace
+--all-targets -D warnings` were clean. `cargo test --workspace` passed
+987 tests with 0 failures, with `CONCERTO_ORACLE_FIXTURES` set: the oracle
+covered 16,242 fixtures (14,132 pass, 2,110 unsupported, 0 fail) with 0
+regressions. The concerto-wasm leg (fmt, wasm32 clippy, check, `build.sh`,
+`smoke:node`) passed. The concerto-core suite with nyc had 1,822 passing,
+8 pending and 0 failing (statements 99.48%, branches 96.74%, functions
+99.81%, lines 99.51%). The guardrails were OK against `origin/main`. No
+fuzz run, per the milestone-only policy.
+
 # P5-14: cached property lookups on the lazy views (2026-09-28)
 
 Task P5-14 (accordproject/concerto-rust#308) caches a ClassDeclaration
