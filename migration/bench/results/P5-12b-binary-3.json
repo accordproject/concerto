@@ -1,0 +1,53 @@
+{
+  "harness": "run-ts.mjs",
+  "recorded_at": "2026-09-28T08:32:40.502Z",
+  "machine": {
+    "platform": "darwin",
+    "arch": "x64",
+    "cpus": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+    "cpu_count": 8,
+    "total_mem_gb": 17,
+    "node": "v24.21.0"
+  },
+  "concerto_commit": "fcdd55ca0f0928042bfc0424840e3e962389fd23",
+  "concerto_engine": "ts",
+  "core_dist": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-12b/concerto/packages/concerto-core/dist",
+  "p512_variant": "B",
+  "p512b_transport": "binary",
+  "loadavg": [
+    13.80029296875,
+    22.6640625,
+    30.24951171875
+  ],
+  "sample_opts": {
+    "warmup": 20,
+    "samples": 150
+  },
+  "workloads": {
+    "load_validate": {},
+    "validate_ast": {},
+    "instance_validate": {
+      "populate_and_validate": {
+        "samples": 150,
+        "n": 500,
+        "median_ms": 0.073155007,
+        "mean_ms": 0.0832906729333333,
+        "stddev_ms": 0.027773119871671963,
+        "min_ms": 0.062981196,
+        "max_ms": 0.25357569,
+        "cv": 0.33344813883184554
+      },
+      "validate_only": {
+        "samples": 150,
+        "n": 500,
+        "median_ms": 0.008790800000000001,
+        "mean_ms": 0.00905569796,
+        "stddev_ms": 0.0011731999370728462,
+        "min_ms": 0.00735128,
+        "max_ms": 0.012948342,
+        "cv": 0.12955378395514047
+      },
+      "n": 500
+    }
+  }
+}

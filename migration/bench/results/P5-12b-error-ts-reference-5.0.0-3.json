@@ -1,0 +1,45 @@
+{
+  "harness": "p512b-error-profile.mjs",
+  "transport": "ts-reference",
+  "recorded_at": "2026-09-28T08:44:00.850Z",
+  "node": "v24.21.0",
+  "cpus": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+  "loadavg": [
+    7.02001953125,
+    8.49462890625,
+    17.5546875
+  ],
+  "sample_message": "Model violation in the \"org.accordproject.bench.instance@1.0.0.Item#item-0\" instance. The field \"sequence\" has a value of \"\"not-a-number-0\"\" (type of value: \"string\"). Expected type of value: \"Integer\".",
+  "rows": [
+    {
+      "group": "total",
+      "name": "valid resource.validate() [ts-reference]",
+      "us": 2.531,
+      "cv": 0.195
+    },
+    {
+      "group": "total",
+      "name": "invalid resource.validate(), caught [ts-reference]",
+      "us": 50.776,
+      "cv": 0.261
+    },
+    {
+      "group": "ts",
+      "name": "throw new ValidationException(message), caught",
+      "us": 26.515,
+      "cv": 0.092
+    },
+    {
+      "group": "ts",
+      "name": "throw new Error(message), caught",
+      "us": 9.163,
+      "cv": 0.084
+    },
+    {
+      "group": "ts",
+      "name": "message length (chars, not µs)",
+      "us": 202,
+      "cv": 0.635
+    }
+  ]
+}

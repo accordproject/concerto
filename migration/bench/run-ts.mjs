@@ -51,7 +51,9 @@ import { timeit } from './lib/timeit.mjs';
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const CORE_DIST = path.join(REPO_ROOT, 'packages', 'concerto-core', 'dist');
+// P5-12 SPIKE: BENCH_CORE_DIST points the run at another concerto-core dist
+// (the TS reference 5.0.0 under migration/oracle/reference/node_modules).
+const CORE_DIST = process.env.BENCH_CORE_DIST || path.join(REPO_ROOT, 'packages', 'concerto-core', 'dist');
 const FIXTURES_DIR = path.join(__dirname, 'fixtures', 'model-sets');
 const RESULTS_DIR = path.join(__dirname, 'results');
 
@@ -282,13 +284,20 @@ function main() {
         // packages/concerto-core/src/engine/). Recorded so a results file
         // is self-describing without cross-checking how it was invoked.
         concerto_engine: process.env.CONCERTO_ENGINE === 'rust' ? 'rust' : 'ts',
+        core_dist: CORE_DIST,
+        p512_variant: process.env.CONCERTO_P512_VARIANT || 'base',
+        // P5-12b SPIKE: the variant-B transport (engine/validate-transport.ts).
+        p512b_transport: process.env.CONCERTO_P512B_TRANSPORT || null,
+        loadavg: os.loadavg(),
         sample_opts: sampleOpts,
         workloads: {},
     };
 
     results.workloads.load_validate = {};
     results.workloads.validate_ast = {};
-    for (const setName of setNames) {
+    // P5-12b SPIKE: BENCH_WORKLOADS=instance runs workload 3 alone.
+    const instanceOnly = process.env.BENCH_WORKLOADS === 'instance';
+    for (const setName of instanceOnly ? [] : setNames) {
         const set = loadModelSet(setName);
         if (!set) {
             results.workloads.load_validate[setName] = { error: 'fixture set missing' };
@@ -305,7 +314,7 @@ function main() {
     const lines = [];
     lines.push('| Workload | Model set | n | Metric | Median (per op) | CV |');
     lines.push('|---|---|---|---|---|---|');
-    for (const setName of setNames) {
+    for (const setName of instanceOnly ? [] : setNames) {
         const lv = results.workloads.load_validate[setName];
         if (lv?.error) {
             lines.push(`| load_validate | ${setName} | - | - | ${lv.error} | - |`);

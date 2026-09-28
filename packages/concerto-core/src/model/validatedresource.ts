@@ -29,6 +29,13 @@ import type ResourceValidator from '../serializer/resourcevalidator';
  * @class
  * @memberof module:concerto-core
  */
+/* istanbul ignore next */
+let p512FastValidate: any;
+/* istanbul ignore next */
+const P512_VARIANT_B = typeof process !== 'undefined' && !!process.env && process.env.CONCERTO_P512_VARIANT === 'B';
+/* istanbul ignore next */
+const P512B_TRANSPORT = typeof process !== 'undefined' && !!process.env && !!process.env.CONCERTO_P512B_TRANSPORT;
+
 class ValidatedResource extends Resource {
     $validator: ResourceValidator;
     /**
@@ -122,6 +129,38 @@ class ValidatedResource extends Resource {
      * @throws {Error} - if the instance if invalid with respect to the model
      */
     validate() {
+        // P5-12 SPIKE (DO NOT MERGE; accordproject/concerto-rust#289):
+        // variant B, one Rust call per resource; the visitor below stays the
+        // `EngineFastPathUnsupported` fallback.
+        /* istanbul ignore next */
+        if (P512_VARIANT_B) {
+            const counter = (globalThis as any).__p512;
+            try {
+                if (counter) {
+                    counter.resourceCalls++;
+                }
+                // Memoised: a bare require() per call costs ~15% of the call
+                // in module resolution (first profile of this spike).
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                // P5-12b SPIKE (DO NOT MERGE; accordproject/concerto-rust#292):
+                // CONCERTO_P512B_TRANSPORT selects a cheaper transport.
+                p512FastValidate ??= P512B_TRANSPORT
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    ? require('../engine/validate-transport').fastValidateResource
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    : require('../engine/serializer').fastValidateResource;
+                p512FastValidate(
+                    this.getModelManager(), this, this.$validator && this.$validator.options);
+                return;
+            } catch (err) {
+                if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+                    throw err;
+                }
+                if (counter) {
+                    counter.resourceFallbacks++;
+                }
+            }
+        }
         const classDeclaration = this.getClassDeclaration();
         const parameters:any = {};
         parameters.stack = new TypedStack(this);

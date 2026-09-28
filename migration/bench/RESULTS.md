@@ -1,3 +1,256 @@
+# P5-12b SPIKE: cheaper TS↔WASM transport for instance validation (2026-09-28) - DO NOT MERGE
+
+Task P5-12b (accordproject/concerto-rust#292) profiles P5-12 variant B's single
+`validateResource` call and measures cheaper ways to pass the resource across
+the boundary. Measure only. It builds on P5-12's spike branches (concerto#1403,
+concerto-rust#290); every binding is additive.
+
+The candidates all run under `CONCERTO_P512_VARIANT=B`, with the transport
+selected at load by `CONCERTO_P512B_TRANSPORT`
+(`packages/concerto-core/src/engine/validate-transport.ts`, and
+`concerto-wasm/src/p512b.rs` on the Rust side). Every candidate builds, on the
+TS side, the value shape the validator already reads (`validate.rs` module doc
+"Scope": `$class`-tagged objects and the `$$dayjs`, `$$relationship`,
+`$$undefined`, `$$number` and `$$map` markers). This is exactly what
+`JsValue::to_validator_value` produces from the P5-12 wire, so the engine skips
+both `decode_wire` and `to_validator_value`. The options cross as a bit set and
+the root identifier as a short string, in place of JSON (candidate (e)).
+Errors leave through the same `run`/error-factory path, so the TS classes are
+unchanged, except in `binary-code`, which builds the error return cheaply
+(see "Error return").
+
+| Transport | Candidate | What crosses |
+|---|---|---|
+| `json` | (a) | `JSON.stringify` of the validator tree, then `serde_json::from_str` straight into the validator's `Value` |
+| `json-scratch` | (a)+(e) | the same text, `TextEncoder.encodeInto` a reused engine-owned buffer, with no per-call malloc or free |
+| `object` | (b) | the JS validator tree itself, through `serde-wasm-bindgen` |
+| `binary` | (c) | a compact tagged layout (null/bool/i32/f64/string/array/object), written in one pass from the live resource into a reused TS `Uint8Array`, then copied in as `&[u8]` |
+| `binary-scratch` | (c)+(e) | the same layout written straight into the reused engine buffer, with no copy |
+| `binary-code` | (c)+(e), error return | the (c) layout, but the engine returns a code (0 valid, 1 `Validation` error, 2 other) instead of throwing through `run` and the error factory. For code 1, TS fetches only the message and throws `new ValidationException(message)` itself. Code 2 builds the exception through the unchanged factory path. See "Error return" below. |
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ @ 2.90GHz, 8 threads, macOS 13 (Darwin 22.6.0). **Not quiet**: shared with the user's desktop session and other agents. |
+| Toolchain | Node v24.21.0, rustc 1.98.1, wasm-bindgen 0.2.128, wasm-opt (binaryen 132) applied by `npm run build` (2,837,115 bytes) |
+| Load average | 1-minute load was 5.5 to 14.7 during the rounds (recorded in every results file). It was 100+ earlier in the session, so the runs waited for it to fall below 4 first. |
+| Heads | `concerto` `fcdd55ca0` (P5-12 spike) and `concerto-rust` `c48c03f` (P5-12 spike), plus this spike |
+| TS reference | published `@accordproject/concerto-core` 5.0.0 (`migration/oracle/reference`), via `BENCH_CORE_DIST` |
+| Runs | `results/P5-12b-{ts-reference-5.0.0,p512-B,json,json-scratch,object,binary,binary-scratch}-{1,2,3}.json`, from `sh migration/bench/p512b-rounds.sh` with `BENCH_ARGS="--samples 150 --warmup 20"`. That is three interleaved rounds of `run-ts.mjs` workload 3 alone (`BENCH_WORKLOADS=instance`). The run-ts default of 30 samples gave CVs up to 37% on this machine, so 150 samples were used. |
+
+## Per-stage cost of P5-12 B
+
+`node migration/bench/p512b-profile.mjs` (`results/P5-12b-profile.json`, 1-minute
+load 10.2). Median µs per resource. Each stage runs the engine's profiling
+binding `p512bStage` with precomputed input and stops after the named step, so
+each row gives its own cost as a difference.
+
+| Stage | µs | Share of the stage sum |
+|---|---|---|
+| TS: `handleFor(modelManager)` | 0.16 | 1% |
+| TS encode: `JSON.stringify(encodeValue(r))` plus options JSON (329 chars) | 2.80 | 17% |
+| JS→WASM: the call and the UTF-8 copy of both strings | 1.34 | 8% |
+| WASM: `serde_json` parse to `Value` | 3.34 | 20% |
+| WASM: `decode_wire` to `JsValue` | 1.79 | 11% |
+| WASM: options decode and `to_validator_value` | 2.30 | 14% |
+| WASM: `validate_instance_from` | 4.86 | 29% |
+| TS: `syncIdentifiers` write-back (the result return is `undefined` on success) | 0.20 | 1% |
+| **Stage sum** | **16.8** | |
+| Whole `resource.validate()`, same run | 21.1 | |
+
+The stage sum is about 20% below the whole call. The isolated rows reuse
+precomputed inputs, so they leave out some of the GC and allocation cost of the
+real path.
+
+Floors from the same run:
+- **An empty engine call** costs 0.11 µs.
+- **The validator alone in WASM** costs **3.87 µs**, on an already-parsed validator `Value` plus a call with one short string.
+- The 3.87 µs floor is **already above TS 5.0.0's whole `validate()` (2.5 µs)**.
+
+## Candidates
+
+Medians in µs per instance, `resource.validate()`, synthetic 500. × TS uses the
+median of the three rounds.
+
+| Variant | runs 1 / 2 / 3 | median | × TS | vs P5-12 B |
+|---|---|---|---|---|
+| TS reference 5.0.0 | 2.2 / 2.5 / 2.6 | 2.5 | 1.0× | - |
+| P5-12 B (`validateResource`, wire JSON) | 19.8 / 20.1 / 20.7 | 20.1 | **8.0×** | 1.00× |
+| (a) `json` | 10.4 / 10.8 / 12.9 | 10.8 | **4.3×** | 1.9× faster |
+| (a+e) `json-scratch` | 12.4 / 10.9 / 14.1 | 12.4 | 5.0× | 1.6× faster |
+| (b) `object` (serde-wasm-bindgen) | 14.5 / 14.0 / 15.8 | 14.5 | 5.8× | 1.4× faster |
+| **(c) `binary`** | 8.9 / 8.9 / 8.8 | **8.9** | **3.6×** | **2.3× faster** |
+| (c+e) `binary-scratch` | 8.6 / 8.7 / 9.2 | 8.7 | 3.5× | 2.3× faster |
+| Crate-direct `validate_instance`, native, reference only | 10.3 (this machine, load ~8) / 1.86 (P5-10c, quiet Linux Xeon) | | | |
+
+`fromJSON` is unchanged in every variant (TS 10.9, the others 68 to 86 with
+wide variance). It validates inside `serializerFromJson` and never reaches
+`validate()`.
+
+The crate-direct number on this machine is higher than the in-WASM
+validator floor (3.87 µs). It was measured under load, with macOS's system
+allocator (the WASM build uses its own allocator in linear memory). The P5-10c
+1.86 µs figure came from a different, quiet Linux machine. Neither is a
+same-conditions comparison. The same-run in-WASM floor is the number to plan
+against.
+
+The split of each candidate (from the same profile run, µs):
+
+| | TS encode | engine call, full | notes |
+|---|---|---|---|
+| (a) `json` | 1.51 | 6.66 | 0.85 is the call and copy, 1.83 the parse (178 chars), and about 3.9 the validator |
+| (a+e) `json-scratch` | 1.51 + 0.16 `encodeInto` | 6.24 | saves the malloc and copy, but the end-to-end gain is lost in noise |
+| (b) `object` | 0.84 | 11.61 | serde-wasm-bindgen reads each property through `Reflect`, which is clearly the worst; **dropped** |
+| (c) `binary` | 1.16 | 5.80 | decode about 1.9 (5.80 minus the 3.87 floor), including the call and the `&[u8]` copy (201 bytes) |
+| (c+e) `binary-scratch` | 1.17 | 7.30 including the encode | the same as (c) within noise |
+
+**(d) No intermediate tree: dropped, measured as a bound.**
+- Parsing the (a) text into `serde::de::IgnoredAny` costs 1.10 µs, including the call. Parsing it into `Value` costs 2.68 µs.
+- So building the tree costs at most about 1.6 µs on the JSON path. On the binary path, the whole decode, including the call and the copy, is about 1.9 µs.
+- A borrowed or streaming validator would need `validate.rs` (3.9k lines over `&serde_json::Value`) rewritten over a value trait or visitor, to save at most about 1.6 µs of the ~9 µs.
+- That is not worth it before the validator itself gets faster.
+
+**(e) Fixed per-call overhead:**
+- The options JSON and the extra string are replaced by a bit set and the root-identifier string in every candidate above.
+- `handleFor` (0.16 µs), the empty call (0.11 µs) and `syncIdentifiers` (0.20 µs) are already small.
+- Reusing an engine-owned buffer saves the wasm-bindgen malloc and copy. That is under 0.3 µs at these sizes, inside the noise.
+- The success path returns `undefined`, so there is nothing to cut there.
+- The error path is timed and split in "Error return" below. A code plus a message fetched on demand is built (`binary-code`). It cuts about 15 µs from each invalid `validate()`.
+
+## Error return
+
+`sh migration/bench/p512b-error-rounds.sh` runs `migration/bench/p512b-error-profile.mjs` in three interleaved rounds, for TS 5.0.0, P5-12 B, (c) `binary` and `binary-code`. The results are in `results/P5-12b-error-{ts-reference-5.0.0,p512-B,binary,binary-code}-{1,2,3}.json`. The 1-minute load was 4.8 to 8.0.
+
+- **Workload:** the same 500 synthetic resources, each also made invalid with a string in the `Integer` field.
+- **Result:** every path throws `ValidationException` with the same message (checked before timing), with 0 fallbacks.
+- **Timing:** each invalid call is caught with try/catch, as a caller would catch it.
+
+**Whole `resource.validate()`**, median µs per resource:
+
+| Variant | valid, runs 1 / 2 / 3 | valid median | invalid, runs 1 / 2 / 3 | invalid median | error cost (invalid − valid) | invalid × TS |
+|---|---|---|---|---|---|---|
+| TS reference 5.0.0 | 2.3 / 3.4 / 2.5 | 2.5 | 46.2 / 56.1 / 50.8 | 50.8 | 48.2 | 1.0× |
+| P5-12 B (`validateResource`) | 18.5 / 21.4 / 18.9 | 18.9 | 88.0 / 147.8 / 91.8 | 91.8 | 72.9 | 1.8× |
+| (c) `binary` (recommended transport) | 9.8 / 9.0 / 8.8 | 9.0 | 71.5 / 70.4 / 71.2 | 71.2 | 62.2 | 1.4× |
+| **`binary-code`** (code plus message on demand) | 8.1 / 9.3 / 8.7 | 8.7 | 54.2 / 56.0 / 55.7 | **55.7** | **47.0** | **1.1×** |
+
+**An error costs 5 to 20 times a valid call on every path, including TS's own.** The cost is almost all the JS exception, not the validator:
+
+**Split of the invalid engine call.** These are direct binding calls with precomputed input. Each value is the median over the 9 engine runs, in µs.
+
+| Step | µs | Cost of the step |
+|---|---|---|
+| `validateResource` (P5-12 B), valid / invalid through `run` and the factory | 13.9 / 77.1 | 63.2 for the error |
+| `validateResourceBinary` (c), valid / invalid through `run` and the factory | 5.6 / 62.9 | **57.2** for the error |
+| `validateResourceBinaryCode`, valid / invalid, code only (the error stays in the engine) | 5.5 / 6.0 | 0.5: the validator finding the error and building the Rust `ContractError` |
+| + `p512bLastErrorMessage` (render the 202-char message, cross it as a string) | 10.5 | 4.5 |
+| + `throw new ValidationException(message)`, caught | 41.9 | 31.4 |
+| code, then `p512bTakeError` (the full payload and factory path, deferred), caught | 59.4 | 53.4. That is 17.5 more than the cheap return for the same exception. |
+| TS alone: `throw new ValidationException(message)`, caught | 26.1 | the `BaseException` constructor (a second `captureStackTrace`) and the throw |
+| TS alone: `throw new Error(message)`, caught | 9.4 | |
+
+The payload object, the factory call and the throw out through wasm-bindgen together cost about **17.5 µs**. The code return removes that cost. It is the ~15 µs difference between `binary` and `binary-code` for the whole call.
+
+**Lazy message: dropped, with numbers.**
+- Rendering the message and crossing it costs 4.5 µs. That is the most a lazy message could save, about 8% of the 55.7 µs invalid call.
+- The TS exception class needs its message at construction. A lazy message would need a getter over an error kept alive in the engine per exception, with a slab and a `FinalizationRegistry` to free it. That is not worth 4.5 µs.
+- The remaining ~26 to 31 µs is `ValidationException` itself. TS 5.0.0 pays the same cost (its invalid call is 50.8 µs). It is TS class code, not engine or transport cost.
+
+**Scope and checks of `binary-code`:**
+- **Scope:** only code 1 (`Validation`) takes the cheap return. Other kinds, such as the nested regex `BaseException` and wire errors that fall back, go through `p512bTakeError`, so their classes and fallback behaviour are unchanged.
+- **Error classes:** `p512b-error-classes.mjs` prints output identical to TS 5.0.0 for `binary-code` (and for P5-12 B and `binary`), with 0 fallbacks.
+- **Oracle:** `Resource.validate` passes 75/75 under both `binary` and `binary-code`, with 0 fallbacks.
+- **concerto-core suite:** mocha + nyc with the package's `test` arguments gives 1624 passing, 8 pending and 0 failing. The statements threshold is missed at 98.97%, exactly as for P5-12 B, `json` and `binary`.
+
+## Correctness (quick; best two candidates)
+
+- **Oracle `Resource.validate`** (75 fixtures; `rust-adapter.js`, canonical corpus):
+  - `json`: 75/75.
+  - `binary`: 75/75.
+  - In both, all 75 took the one-call path, with 0 fallbacks (`globalThis.__p512`).
+- **concerto-core suite** (mocha + nyc, the package's `test` arguments, one run each):
+  - `json` and `binary` both give 1624 passing, 8 pending and 0 failing.
+  - Both miss the 99% statements threshold at 98.97%, exactly as P5-12 B did, because `validate()` bypasses the visitor code.
+- **Error classes** (`node migration/bench/p512b-error-classes.mjs`, 14 cases):
+  - The cases cover: string in Integer, number in Boolean, NaN in Double, `undefined` or missing required field, undeclared field, number in `String[]`, string in DateTime, empty identifier, a Resource in a relationship field, the wrong nested concept type, a nested regex violation, a Double in an Integer field, and a valid resource.
+  - P5-12 B, `json` and `binary` print exactly what TS 5.0.0 prints: `ValidationException`, with `BaseException` for the nested regex case and `ok` for the Double-in-Integer and valid cases.
+  - All ran with 0 fallbacks.
+
+## Recommendation
+
+**Use the binary layout (c), copied in as `&[u8]`, for the production B.**
+- **Cost:** about **9 µs** per resource on this machine (**~3.6× TS**, 2.3× faster than P5-12 B's wire JSON).
+- **Return errors as a code (`binary-code`).** A `Validation` error then costs 55.7 µs, against 71.2 µs through `run` and the factory, 91.8 µs for P5-12 B and 50.8 µs for TS 5.0.0. The success path is unchanged. Any other kind keeps the factory path.
+- **(a) `json`** is the simpler fallback option: about 11 µs, 4.3× TS, with no new format to maintain.
+- **Skip the engine-owned scratch buffer.** It needs detached-view and memory-growth handling for a gain lost in noise.
+- **Skip serde-wasm-bindgen.** It is the slowest of the four.
+
+**The transport is no longer the bottleneck.**
+- On (c), about 45% of the call is the validator itself (3.9 µs in WASM). The rest is about 1.2 µs of TS encode, about 1.9 µs of engine decode including the call and copy, and about 0.5 µs of fixed cost. GC accounts for the remainder.
+- The in-WASM validator alone is already slower than TS's whole `validate()` (2.5 µs). So no transport reaches parity on this workload.
+- The next lever is the validator's own cost. After that comes (d), for at most a further ~1.5 µs.
+- Re-measure on a quiet machine before quoting exact numbers.
+
+---
+
+# P5-12 SPIKE: instance validation design (2026-09-28) - DO NOT MERGE
+
+Task P5-12 (accordproject/concerto-rust#289) measures three designs for
+`ValidatedResource.validate()` against the integration head. Measure only.
+The variants are switched at load by `CONCERTO_P512_VARIANT`:
+
+- **A**: `ResourceValidator.checkItem` skips the per-field engine call and runs its existing TS `switch`.
+- **B**: `ValidatedResource.validate()` makes one engine call per resource. This uses the additive concerto-wasm binding `ModelManagerHandle.validateResource(wireText, optionsText)`, which runs the existing `validate.rs` instance validator. TS then applies the `$identifier` write-back. The visitor remains the `EngineFastPathUnsupported` fallback.
+- **C** (control): the codec and binding lookups are hoisted out of the per-field path, and the per-field engine call is kept.
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ @ 2.90GHz, 8 threads, macOS 13 (Darwin 22.6.0), shared with other agents |
+| Toolchain | Node v24.21.0, rustc 1.98.1, wasm-bindgen 0.2.128, wasm-opt (binaryen 132) applied by `npm run build` |
+| Load average | 1-minute load was 2.2 to 3.2 during the runs. `loadavg` is recorded in every results file. `mds_stores` (Spotlight) was active. |
+| Baseline | `concerto` `f4c55d90b`, `concerto-rust` `af207c5`, engine built unmodified (2,757,411 bytes) |
+| Variants | the same heads plus this spike. The engine is built with the additive binding (2,761,376 bytes). |
+| TS reference | published `@accordproject/concerto-core` 5.0.0 (`migration/oracle/reference`), via `BENCH_CORE_DIST` |
+| Runs | `results/P5-12-{ts-reference-5.0.0,baseline-rust-engine,variant-{A,B,C}-rust-engine}-{1,2,3}.json`. Three interleaved rounds with `run-ts.mjs` defaults (5 warm-up + 30 samples). |
+
+Medians in µs per instance (synthetic, 500). × TS uses the median of the three runs.
+
+| Variant | resource.validate(), runs 1 / 2 / 3 | × TS | vs baseline | fromJSON, runs 1 / 2 / 3 | × TS |
+|---|---|---|---|---|---|
+| TS reference 5.0.0 | 2.4 / 2.4 / 2.3 | 1.0× | - | 9.1 / 8.9 / 9.5 | 1.0× |
+| Baseline | 21.0 / 21.7 / 22.3 | **9.2×** | 1.00× | 65.9 / 65.6 / 67.5 | 7.2× |
+| A: TS primitive check | 18.0 / 18.6 / 17.3 | **7.6×** | 1.21× faster | 63.9 / 60.8 / 64.9 | 7.0× |
+| B: one Rust call per resource | 15.7 / 16.5 / 15.6 | **6.6×** | 1.38× faster | 65.0 / 62.9 / 65.6 | 7.1× |
+| C: hoist only | 21.5 / 21.7 / 21.5 | **9.1×** | 1.01× faster | 66.6 / 64.8 / 64.0 | 7.1× |
+
+`fromJSON` does not change in any variant. It already validates inside
+`serializerFromJson` (P4-10), so it never reaches these paths.
+
+**Per-call counts** (one `validate()` of the bench instance): baseline and C
+make 6 per-field engine calls. A makes none. B makes 1 resource call and no
+per-field calls, with 0 fallbacks.
+
+**Profiles** (`node --cpu-prof`, 200,000 `validate()` calls):
+
+- **Variant A**: about 70% of the time is still spent crossing the boundary.
+  - `ClassDeclaration.getProperties()` takes 47%. It is a view call that rebuilds the property list across WASM on every call.
+  - `getProperty()` takes 22%, from the undeclared-field check on each own property.
+
+  So the per-field primitive call accounts for only about 4 µs of the baseline's 21.7 µs. The visitor's introspection calls account for most of the rest.
+- **Variant B**: about 72% is the `validateResource` call itself: wire decode, `to_validator_value` and the validator in WASM. That is about 11 µs, against the crate-direct `validate_instance` at about 1.9 µs (P5-10c). Encoding takes about 7%.
+  - The first B build called `require()` on each call, and that cost 15%.
+  - The write-back called `getIdentifierFieldName()` through the engine, and that cost 7%.
+  - Both are fixed in the measured build: the module is memoised, and the write-back reads `$identifierFieldName`.
+
+**Correctness** (quick; no fuzz, no lifted tests):
+
+- **Oracle `Resource.validate`** (75 fixtures, `rust-adapter.js`, canonical corpus): 75/75 for base, A, B and C. Under B, all 75 took the one-call path, with 0 fallbacks.
+- **concerto-core suite** (mocha + nyc, one run per variant): 1624 passing, 8 pending and 0 failing in every variant.
+  - Base, A and C meet the nyc thresholds.
+  - B fails the 99% statements threshold (98.97%) because the bypassed visitor code is no longer covered by `validate()`.
+- **Error classes**: string in an Integer field, number in a Boolean field, empty identifier, undeclared field and missing required field all give `ValidationException` in every variant, matching TS 5.0.0. A Double in an Integer field is accepted in every variant, as TS accepts it.
+
+---
+
 # P5-10c: lazy views, full benchmark after parts 1 and 2 (2026-09-27)
 
 Task P5-10c (accordproject/concerto-rust#271) re-runs the full P5-04

@@ -167,4 +167,71 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
     return decodeValue(node, modelManager);
 }
 
-export { fastFromJson, fastToJson };
+/**
+ * P5-12 SPIKE (DO NOT MERGE; accordproject/concerto-rust#289, variant B):
+ * `ValidatedResource.validate()` as one engine call per resource
+ * (`ModelManagerHandle.validateResource`), then the `$identifier`
+ * write-back `ResourceValidator.visitClassDeclaration` does on success.
+ * Throws `EngineFastPathUnsupported` for anything the wire codec cannot
+ * cross, so the caller falls back to the visitor.
+ * @param {BaseModelManager} modelManager the model manager
+ * @param {object} resource the resource to validate
+ * @param {SerializerOptions} options the resource validator's options
+ */
+function fastValidateResource(modelManager: BaseModelManager, resource: any, options: SerializerOptions) {
+    const handle = handleFor(modelManager);
+    const wire = JSON.stringify(encodeValue(resource));
+    const opts = options ? {
+        convertResourcesToRelationships: !!options.convertResourcesToRelationships,
+        permitResourcesForRelationships: !!options.permitResourcesForRelationships,
+    } : null;
+    try {
+        handle.validateResource(wire, JSON.stringify(opts));
+    } catch (err) {
+        throw asUnsupported(err);
+    }
+    syncIdentifiers(resource);
+}
+
+/**
+ * `resource::sync_identifiers` (concerto-core instance/resource.rs) on the
+ * live object: for every Resource in the tree (not a Relationship) whose
+ * identifying field is not `$identifier`, `$identifier = getIdentifier()`.
+ * @param {*} v the value
+ */
+function syncIdentifiers(v: any) {
+    if (v === null || typeof v !== 'object') {
+        return;
+    }
+    if (Array.isArray(v)) {
+        v.forEach(syncIdentifiers);
+        return;
+    }
+    if (v instanceof Map) {
+        v.forEach((x) => syncIdentifiers(x));
+        return;
+    }
+    const ctorName = v.constructor && v.constructor.name;
+    if (ctorName === 'Relationship') {
+        return;
+    }
+    if (ctorName !== 'Resource' && ctorName !== 'ValidatedResource') {
+        return;
+    }
+    // `$identifierFieldName` is set by Identifiable's constructor from the
+    // same `getIdentifierFieldName()` (or '$identifier'), without another
+    // engine call per resource.
+    const field = v.$identifierFieldName;
+    if (field && field !== '$identifier') {
+        v.$identifier = v.getIdentifier();
+    }
+    for (const key of Object.keys(v)) {
+        if (!key.startsWith('$')) {
+            syncIdentifiers(v[key]);
+        }
+    }
+}
+
+// P5-12b SPIKE (DO NOT MERGE): handleFor, syncIdentifiers and asUnsupported
+// are also exported for engine/validate-transport.ts.
+export { fastFromJson, fastToJson, fastValidateResource, handleFor, syncIdentifiers, asUnsupported };
