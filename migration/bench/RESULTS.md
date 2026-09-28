@@ -246,6 +246,124 @@ CONCERTO_ENGINE=ts node migration/bench/run-ts.mjs --out migration/bench/results
 
 ---
 
+# P5-12c: instance validation in one Rust call per resource (2026-09-28)
+
+Task P5-12c (accordproject/concerto-rust#293) sends `ValidatedResource.validate()`,
+`setPropertyValue` and `addArrayValue` to the engine. Each makes one call
+(`validateResourceBinary` or `validatePropertyBinary` on #292's compact binary
+transport, run through the P5-13 validator). The `ResourceValidator` visitor
+now runs only for `EngineFastPathUnsupported`.
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz, 8 logical CPUs, 17 GB, macOS (darwin x64), a shared developer laptop |
+| Toolchain | Node v24.21.0, rustc 1.98.1. Both engines were built with `npm run build` in `concerto-wasm`, which puts the `wasm-opt` from `node_modules/.bin` on the PATH, so **`wasm-opt` was applied to both** |
+| Quiet-check | Before every run, the driver waited until the 1-minute load average was below 2, the 5-minute load average was below 3, and no cargo, rustc, mocha, nyc, fuzz or linker process was running. **All 9 runs met this gate.** The 1-minute load was 1.92 to 1.95 when runs started and at most 2.51 when they ended. |
+| Before | `concerto` `201e6a748`, `concerto-rust` `2ea80b0`: the integration head that P5-12c is merged with. All three sides run the P5-12c checkout's `run-ts.mjs` and differ only in `--core-dist`. Its engine is 2,749,403 bytes. |
+| After | `concerto` `0b8cfd1e2`, `concerto-rust` `14d5ff0`: the P5-12c branches. The engine is 2,755,357 bytes (+5,954), within the 4 MiB budget. |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, run with `--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist` |
+| Runs | `results/P5-12c-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`: three interleaved rounds of `run-ts.mjs --workloads instance_validate`, each with 5 warm-up and 30 samples. As in P5-13, the `concerto_engine` field reads `ts` and `concerto_commit` gives the driver's checkout. `core_dist` identifies the side. |
+
+## Workload 3 through the TS public API
+
+Medians are in µs per instance for runs 1, 2 and 3 (synthetic, n=500). Each
+ratio uses the median of the three runs.
+
+| Metric | TS 5.0.0 | Rust before | Rust P5-12c | before / TS | **P5-12c / TS** | before / P5-12c |
+|---|---|---|---|---|---|---|
+| fromJSON (populate+validate) | 8.82 / 8.84 / 8.67 | 39.72 / 37.93 / 37.28 | 41.31 / 38.15 / 37.27 | 4.30× | **4.33×** | 0.99× |
+| resource.validate() | 1.94 / 1.96 / 1.87 | 22.27 / 22.36 / 21.39 | 5.17 / 4.79 / 4.86 | 11.50× | **2.51×** | **4.58×** |
+| setPropertyValue() | 0.16 / 0.16 / 0.17 | 1.63 / 1.62 / 1.43 | 2.54 / 2.39 / 2.49 | 9.88× | **15.13×** | **0.65×** |
+| addArrayValue() | 0.29 / 0.28 / 0.28 | 2.78 / 2.66 / 2.59 | 2.84 / 2.73 / 2.83 | 9.36× | **9.95×** | 0.94× |
+
+- **`resource.validate()` meets the target of about 2.5× TS.** It is now
+  2.51× TS (4.8 µs against 1.9 µs), down from 11.5×, a 4.58× speed-up on the
+  integration head.
+- **`fromJSON` has not changed** (0.99×), as expected: P5-12c does not
+  change the populate-and-validate path it measures.
+- **`setPropertyValue()` is slower: 1.54× the integration head's time**
+  (2.49 µs against 1.62 µs). The single-property visitor walk was already
+  cheap, and one engine call per property (encoding the value, crossing
+  into WASM, looking up the declaration) costs more than it. The
+  maintainer's scope comment on #293 routes it through the engine anyway.
+  Whether it should go back to the visitor is left to review.
+- **`addArrayValue()` is within noise of the integration head** (0.94×,
+  CV 7% to 11%). It revalidates the whole new array, so the engine call's
+  fixed cost is a smaller share.
+- The TS 5.0.0 `setPropertyValue` and `addArrayValue` runs are 0.2 to 0.3
+  µs per operation, with CVs of 53% to 73%, close to the timer's
+  resolution. Treat the ratios against TS for those two rows as indicative
+  only.
+
+A first pass of this benchmark (not kept) used an engine that `sh build.sh`
+had built with no `wasm-opt` on the PATH. It compared an unoptimised
+P5-12c engine (3,018,921 bytes) with an optimised before engine, so it was
+not like for like. It was rerun as above. Its figures were close to these
+(`resource.validate()` 5.0 µs, `setPropertyValue()` 2.5 µs). The oracle
+replay (16242 pass, 0 fail) and the concerto-core suite (1912 passing, nyc
+statements 99.37%) were rerun on the optimised engine.
+
+## Round 2: after the P5-11 merge and the setPropertyValue fix
+
+The continuation brief on #293 asked for workload 3 again on the tree that
+merges P5-11 (#287), and for the `setPropertyValue()` regression above to be
+fixed or explained. Since round 1, `setPropertyValue` keeps a string,
+number or boolean on a plain primitive field with no validator (not an
+array, enum or scalar) on the `ResourceValidator` visitor
+(`visitorIsCheaper` in `engine/validate-resource.ts`). The visitor is the
+TS reference path, so outcomes do not change. Every other value still takes
+the engine call. `addArrayValue` still always takes the engine.
+
+| | |
+|---|---|
+| Before | `concerto` `4ed605ca2`, `concerto-rust` `cd04cb1`: the integration head, which includes P5-11 and P5-14. Its engine is 2,798,129 bytes. |
+| After | `concerto` `8825225b7`, `concerto-rust` `77d50bf`: the P5-12c branches merged with that head, plus the fix. The engine is 2,804,075 bytes (+5,946). |
+| Build | Both engines were built with `npm run build` in `concerto-wasm`, so `wasm-opt` was applied to both. Each side's concerto-core `dist` loads the engine from its own sibling concerto-rust checkout. |
+| Quiet-check | The same gate as round 1. All 9 runs met it, and they started after P5-15's timed benchmark had finished. The 1-minute load was 1.86 to 1.98 when runs started and at most 2.22 when they ended. |
+| Runs | `results/P5-12c-r2-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`, three interleaved rounds with 5 warm-up and 30 samples each. The driver is the P5-12c checkout's `run-ts.mjs` for all three sides. |
+
+Medians are in µs per instance for runs 1, 2 and 3 (synthetic, n=500). Each
+ratio uses the median of the three runs.
+
+| Metric | TS 5.0.0 | Rust before | Rust P5-12c | before / TS | **P5-12c / TS** | before / P5-12c |
+|---|---|---|---|---|---|---|
+| fromJSON (populate+validate) | 9.50 / 9.05 / 9.06 | 42.02 / 41.69 / 40.43 | 41.49 / 42.83 / 39.19 | 4.60× | **4.58×** | 1.00× |
+| resource.validate() | 2.07 / 2.06 / 2.01 | 9.35 / 9.36 / 9.01 | 4.75 / 5.13 / 4.44 | 4.54× | **2.31×** | **1.97×** |
+| setPropertyValue() | 0.167 / 0.167 / 0.164 | 0.700 / 0.650 / 0.686 | 0.760 / 0.824 / 0.773 | 4.10× | **4.63×** | 0.89× |
+| addArrayValue() | 0.282 / 0.277 / 0.279 | 1.823 / 1.776 / 1.717 | 2.157 / 2.051 / 1.839 | 6.37× | **7.36×** | 0.87× |
+
+- **`resource.validate()` is 2.31× TS**, which meets the target of about
+  2.5×. That is 1.97× faster than the current head, which includes P5-11.
+  P5-12c's own figure (4.75 µs) is level with round 1 (4.86 µs), so merging
+  P5-11 did not slow P5-12c's path. The head's own `validate()` is 9.35 µs
+  here against 22.36 µs for round 1's before side. P5-14's cached property
+  lookups also landed in between, so this run cannot isolate P5-11's ~23%
+  on its own. Against the current head, P5-12c removes about half of
+  `validate()`'s time.
+- **`setPropertyValue()` is no longer a large regression.** In round 1 it
+  took 1.54× the head's time (2.49 against 1.62 µs). Now it takes 1.13×
+  (0.773 against 0.686 µs), a difference of about 0.09 µs per call. The
+  workload sets `sequence`, a plain number field, so both sides run the
+  same visitor walk. The remaining 0.09 µs is the routing check: the
+  memoised `loadEngine` lookup and `visitorIsCheaper`'s six declaration
+  calls (`isField`, `isArray`, `isTypeEnum`, `isTypeScalar`,
+  `isPrimitive`, `getValidator`). The values that do go to the engine
+  gain a lot. Microbenchmarks run for this fix on a loaded machine
+  (indicative only) showed: a String with a
+  regex and length validator drops from 8.8 to 1.4 µs, a concept from 40 to
+  4.1 µs, and adding to a 20-item String[] from 10 to 3.4 µs.
+- **`addArrayValue()` is 1.15× the head's time** (2.05 against 1.78 µs,
+  CV 12% to 19%). The workload adds a third short string to a two-item
+  array, which is the engine call's worst case: its fixed cost is not yet
+  paid back by the visitor walk it replaces. In the same microbenchmarks
+  the engine is about 8% slower at 3 items and 3× to 9× faster as arrays
+  or items grow, so `addArrayValue` stays on the engine.
+- As in round 1, the TS 5.0.0 `setPropertyValue` and `addArrayValue` runs
+  are 0.2 to 0.3 µs with CVs of 44% to 71%. Treat the ratios against TS for
+  those two rows as indicative only.
+
+---
+
 # P5-14: cached property lookups on the lazy views (2026-09-28)
 
 Task P5-14 (accordproject/concerto-rust#308) caches a ClassDeclaration

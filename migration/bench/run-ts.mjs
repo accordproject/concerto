@@ -47,6 +47,8 @@
 //      populate step is TS-only work even in rust mode - only the combined
 //      fromJSON number and validate_only are comparable to the ts-mode run
 //      of this same script, not to the Rust crate's own criterion number.
+//      Task P5-12c adds setPropertyValue() and addArrayValue() on the same
+//      500 validated resources.
 //
 // Prints a markdown table to stdout and writes the full JSON results to
 // `--out` (default: migration/bench/results/<timestamp>-ts.json).
@@ -296,6 +298,27 @@ function benchInstanceValidate(ModelManager, sampleOpts) {
         },
         { ...sampleOpts, n: LOOKUPS },
     );
+    // Task P5-12c (accordproject/concerto-rust#293): the two per-property
+    // validations of a ValidatedResource. `labels` is reset by plain
+    // assignment (no validation) before each `addArrayValue`, so every call
+    // checks a three-item array.
+    const setProperty = timeit(
+        () => {
+            for (let i = 0; i < resources.length; i++) {
+                resources[i].setPropertyValue('sequence', i);
+            }
+        },
+        { ...sampleOpts, n: resources.length },
+    );
+    const addArray = timeit(
+        () => {
+            for (const r of resources) {
+                r.labels = ['a', 'b'];
+                r.addArrayValue('labels', 'c');
+            }
+        },
+        { ...sampleOpts, n: resources.length },
+    );
 
     return {
         populate_and_validate: populate,
@@ -303,6 +326,8 @@ function benchInstanceValidate(ModelManager, sampleOpts) {
         to_json: toJson,
         get_properties: getProperties,
         get_property: getProperty,
+        set_property_value: setProperty,
+        add_array_value: addArray,
         n: instances.length,
     };
 }
@@ -415,6 +440,8 @@ function main() {
         lines.push(`| instance_validate | (synthetic) | ${iv.n} | toJSON | ${(iv.to_json.median_ms * 1000).toFixed(1)} µs | ${(iv.to_json.cv * 100).toFixed(1)}% |`);
         lines.push(`| instance_validate | Item | 1000 | getProperties() | ${(iv.get_properties.median_ms * 1000).toFixed(3)} µs | ${(iv.get_properties.cv * 100).toFixed(1)}% |`);
         lines.push(`| instance_validate | Item | 1000 | getProperty() | ${(iv.get_property.median_ms * 1000).toFixed(3)} µs | ${(iv.get_property.cv * 100).toFixed(1)}% |`);
+        lines.push(`| instance_validate | (synthetic) | ${iv.n} | setPropertyValue() | ${(iv.set_property_value.median_ms * 1000).toFixed(1)} µs | ${(iv.set_property_value.cv * 100).toFixed(1)}% |`);
+        lines.push(`| instance_validate | (synthetic) | ${iv.n} | addArrayValue() | ${(iv.add_array_value.median_ms * 1000).toFixed(1)} µs | ${(iv.add_array_value.cv * 100).toFixed(1)}% |`);
     }
 
     console.log(`# TS benchmark results (${results.recorded_at}), engine=${results.concerto_engine}\n`);

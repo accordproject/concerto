@@ -1,0 +1,74 @@
+{
+  "harness": "run-ts.mjs",
+  "recorded_at": "2026-09-28T18:59:46.729Z",
+  "machine": {
+    "platform": "darwin",
+    "arch": "x64",
+    "cpus": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+    "cpu_count": 8,
+    "total_mem_gb": 17,
+    "node": "v24.21.0"
+  },
+  "concerto_commit": "0b8cfd1e2c69afba0b79c267c4d7f64079cd1b05",
+  "concerto_engine": "ts",
+  "core_dist": "packages/concerto-core/dist",
+  "workloads_run": [
+    "instance_validate"
+  ],
+  "loadavg": [
+    1.919921875,
+    2.5322265625,
+    3.56982421875
+  ],
+  "sample_opts": {
+    "warmup": 5,
+    "samples": 30
+  },
+  "workloads": {
+    "load_validate": {},
+    "validate_ast": {},
+    "instance_validate": {
+      "populate_and_validate": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.03815266,
+        "mean_ms": 0.03878688833333334,
+        "stddev_ms": 0.003105962315270648,
+        "min_ms": 0.034641174,
+        "max_ms": 0.044563832,
+        "cv": 0.08007763573551202
+      },
+      "validate_only": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.004790303,
+        "mean_ms": 0.005043522066666667,
+        "stddev_ms": 0.0006623807821576043,
+        "min_ms": 0.00431363,
+        "max_ms": 0.0065253740000000005,
+        "cv": 0.1313329798902577
+      },
+      "set_property_value": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.0023933389999999995,
+        "mean_ms": 0.002361564400000001,
+        "stddev_ms": 0.00023047200233607546,
+        "min_ms": 0.001970174,
+        "max_ms": 0.002913486,
+        "cv": 0.09759293557104577
+      },
+      "add_array_value": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.002728241,
+        "mean_ms": 0.002787648666666666,
+        "stddev_ms": 0.0002527234458963931,
+        "min_ms": 0.002553684,
+        "max_ms": 0.003664644,
+        "cv": 0.0906582844955808
+      },
+      "n": 500
+    }
+  }
+}
