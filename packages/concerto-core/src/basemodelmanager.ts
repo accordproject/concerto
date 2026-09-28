@@ -332,8 +332,8 @@ class BaseModelManager {
     /**
      * Whether a model file is mirrored into `rustHandle`: every model file
      * built by the ModelFile constructor, and so through the engine path
-     * (engine/views.ts `isEngineBuilt`). A stub or hand-built `ModelFile` (a
-     * white-box test's `sinon.createStubInstance(ModelFile)`, whose
+     * (engine/views.ts `isEngineBuilt`). A stub `ModelFile` the constructor
+     * never ran for (a white-box test's `sinon.createStubInstance(ModelFile)`, whose
      * `getAst()`/`getDefinitions()` answer whatever that test configured) is
      * the one exception: it is never written to `rustHandle`, so its
      * namespace is missing there and `_rustHandleMatchesModelFiles` sends
@@ -355,7 +355,7 @@ class BaseModelManager {
      * Rust already loaded when the `ModelFile` was constructed (P5-10a lazy
      * views, engine/views.ts `commitStaged`), or else sends its AST, as
      * before. A namespace `_needsRustWrite` excludes is never written; its
-     * stage, if any, is dropped. A stub or hand-built `ModelFile` is not
+     * stage, if any, is dropped. A stub `ModelFile` is not
      * written at all (`_isMirrored`). Any error the write throws propagates.
      * @param {ModelFile} modelFile - the model file being added
      * @return {boolean} true if the namespace was written to rustHandle
@@ -433,7 +433,7 @@ class BaseModelManager {
      * Whether `rustHandle`'s mirror currently matches `this.modelFiles`
      * closely enough to answer a read: a content-based parity check
      * against `this.modelFiles`, computed fresh on every call. It is false
-     * exactly when `this.modelFiles` holds a stub or hand-built `ModelFile`
+     * exactly when `this.modelFiles` holds a stub `ModelFile`
      * that was never mirrored (`_isMirrored`), or was assigned directly. A read that trusted rustHandle without this could
      * silently answer from an incomplete or differently-shaped model --
      * wrong, not merely absent, for `isAssignableTo`/`derivesFrom`'s boolean
@@ -682,7 +682,7 @@ class BaseModelManager {
             throw new Error('Model file does not exist');
         } else {
             // Mirrored first, so a mirror error leaves both unchanged. A
-            // stub or hand-built file was never mirrored (`_isMirrored`).
+            // stub file was never mirrored (`_isMirrored`).
             /* istanbul ignore next */
             if (this._needsRustWrite(namespace) && this._isMirrored(this.modelFiles[namespace])) {
                 this.rustHandle.deleteModelFile(namespace);

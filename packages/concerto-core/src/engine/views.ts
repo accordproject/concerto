@@ -814,16 +814,7 @@ function stageModelFile(modelFile: any): boolean {
             lazyFiles.add(modelFile);
             return true;
         }
-        let id: number;
-        try {
-            id = handle.stageModelFile(text, definitions, fileName);
-        } catch (e) {
-            // The engine refused the AST: `isEngineBuilt` is false for this
-            // file (the caller builds it eagerly, which throws the TS error
-            // for an AST TS refuses too).
-            engineRejectedFiles.add(modelFile);
-            throw e;
-        }
+        const id: number = handle.stageModelFile(text, definitions, fileName);
         if (customRegExp && !probeCustomRegExp(modelFile, ast)) {
             handle.dropStagedModelFile(id);
             return false;
@@ -1050,23 +1041,17 @@ function deferDeclarations(modelFile: any): void {
 const constructedFiles = new WeakSet<object>();
 
 /**
- * Every ModelFile whose AST the engine refused when the constructor staged
- * it (`handle.stageModelFile` threw), and which the TS constructor then
- * built eagerly anyway: a hand-built AST the engine cannot load, such as a
- * location without `$class` (accordproject/concerto-rust#262).
- */
-const engineRejectedFiles = new WeakSet<object>();
-
-/**
- * Whether `modelFile` was built through the engine path: by the ModelFile
- * constructor, from an AST the engine did not refuse. False only for a stub
- * or hand-built ModelFile, the one case a manager does not mirror into its
- * rustHandle (accordproject/concerto-rust#262).
+ * Whether `modelFile` was built through the engine path, that is, whether the
+ * ModelFile constructor ran for it. False only for a stub ModelFile the
+ * constructor never ran for, the one case a manager does not mirror into its
+ * rustHandle (accordproject/concerto-rust#262). A constructor-built file
+ * whose AST the engine refuses is still engine-built: its mirror write
+ * throws the engine's error.
  * @param {object} modelFile the ModelFile
  * @return {boolean} true if the ModelFile was built through the engine path
  */
 function isEngineBuilt(modelFile: any): boolean {
-    return constructedFiles.has(modelFile) && !engineRejectedFiles.has(modelFile);
+    return constructedFiles.has(modelFile);
 }
 
 /**
