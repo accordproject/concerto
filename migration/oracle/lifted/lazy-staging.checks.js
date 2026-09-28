@@ -30,7 +30,13 @@
  * (`foo.StringProperty`) and the doubled class the P5-10c fuzz run found
  * (`concerto.metamodel@1.0.0.StringPropertyconcerto.metamodel@1.0.0.StringProperty`).
  *
- * Each check is one of the minimised cases of the 12 lazy-only clusters in
+ * The same holds for a `MapDeclaration`'s key and value `$class`: TS
+ * `MapDeclaration.process` checks them with `ModelUtil.isValidMapKey`/
+ * `isValidMapValue`, which also compare the full metamodel class with `===`
+ * and throw `IllegalModelException: MapDeclaration must contain valid
+ * MapKeyType`/`MapValueType` at construction (LAZY-STAGE-013 to 015).
+ *
+ * Checks 001 to 012 are the minimised cases of the 12 lazy-only clusters in
  * migration/fuzz/results/p5-10c/lazy-only-clusters.json (P5-10c, #271),
  * rebuilt on a small model. The `ModelFile` checks return 'constructed' if
  * construction does not throw, so an error deferred to the first read fails
@@ -147,6 +153,43 @@ function unrecognised($class) {
 }
 
 const GOOD = prop(`${MM}.StringProperty`, 'id');
+
+/**
+ * A model with a map `M` whose key and value nodes have the given `$class`.
+ * @param {string} ns the namespace
+ * @param {string} keyClass the key node's `$class`
+ * @param {string} valueClass the value node's `$class`
+ * @returns {object} the model AST
+ */
+function mapModel(ns, keyClass, valueClass) {
+    return {
+        $class: `${MM}.Model`,
+        decorators: [],
+        namespace: ns,
+        imports: [],
+        declarations: [{ $class: `${MM}.MapDeclaration`, name: 'M', key: { $class: keyClass }, value: { $class: valueClass } }],
+    };
+}
+
+/**
+ * Constructs a map model file named `models/map.json` for each
+ * `[keyClass, valueClass]` pair.
+ * @param {object} core the core under test
+ * @param {string} ns the namespace
+ * @param {Array<Array<string>>} pairs the key and value classes
+ * @returns {string[]} 'constructed', or the error each construction threw
+ */
+function constructMaps(core, ns, pairs) {
+    return pairs.map(([keyClass, valueClass]) => {
+        try {
+            return construct(core, mapModel(ns, keyClass, valueClass), 'models/map.json');
+        } catch (e) {
+            return `${e.constructor.name}: ${e.message}`;
+        }
+    });
+}
+
+const NOT_METAMODEL = (kind) => [kind, `foo.${kind}`, `${MM.replace('1.0.0', '1.0.1')}.${kind}`, doubled(kind)];
 
 module.exports = [
     // ---- the doubled class, per property kind ------------------------
@@ -285,6 +328,47 @@ module.exports = [
         covers: 'cluster 11 (fromAst, 1): a later model that is not an AST',
         run: (core) => fromAst(core, [model('org.acme.lazy.s11@1.0.0', [prop(doubled('StringProperty'), 's')]), false]),
         expect: unrecognised(doubled('StringProperty')),
+    },
+    // ---- map key and value $class --------------------------------------
+    {
+        id: 'LAZY-STAGE-013',
+        covers: 'a map key $class that is not the full metamodel class (short name, another namespace, another version, doubled)',
+        run: (core) => constructMaps(core, 'org.acme.lazy.s13@1.0.0',
+            NOT_METAMODEL('StringMapKeyType').map((keyClass) => [keyClass, `${MM}.StringMapValueType`])),
+        expect: {
+            ok: NOT_METAMODEL('StringMapKeyType')
+                .map(() => 'IllegalModelException: MapDeclaration must contain valid MapKeyType  M File \'models/map.json\': '),
+        },
+    },
+    {
+        id: 'LAZY-STAGE-014',
+        covers: 'a map value $class that is not the full metamodel class (short name, another namespace, another version, doubled)',
+        run: (core) => constructMaps(core, 'org.acme.lazy.s14@1.0.0',
+            NOT_METAMODEL('StringMapValueType').map((valueClass) => [`${MM}.StringMapKeyType`, valueClass])),
+        expect: {
+            ok: NOT_METAMODEL('StringMapValueType')
+                .map(() => 'IllegalModelException: MapDeclaration must contain valid MapValueType, for MapDeclaration M File \'models/map.json\': '),
+        },
+    },
+    {
+        id: 'LAZY-STAGE-015',
+        covers: 'the full metamodel classes of the primitive map key and value kinds still load',
+        run: (core) => {
+            const keys = ['StringMapKeyType', 'DateTimeMapKeyType'];
+            const values = ['BooleanMapValueType', 'DateTimeMapValueType', 'StringMapValueType', 'IntegerMapValueType', 'LongMapValueType', 'DoubleMapValueType'];
+            const out = [];
+            keys.forEach((key, i) => values.forEach((value, j) => {
+                const mm = new core.ModelManager();
+                const ns = `org.acme.lazy.s15k${i}v${j}@1.0.0`;
+                mm.fromAst({ $class: `${MM}.Models`, models: [mapModel(ns, `${MM}.${key}`, `${MM}.${value}`)] });
+                const map = mm.getType(`${ns}.M`);
+                out.push(`${map.getKey().getType()}:${map.getValue().getType()}`);
+            }));
+            return out;
+        },
+        expect: {
+            ok: ['String', 'DateTime'].flatMap((k) => ['Boolean', 'DateTime', 'String', 'Integer', 'Long', 'Double'].map((v) => `${k}:${v}`)),
+        },
     },
     // ---- the well-formed control -------------------------------------
     {
