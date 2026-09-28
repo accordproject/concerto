@@ -427,8 +427,16 @@ function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModel
     const resource = validator !== undefined
         ? new Ctor(modelManager, classDeclaration, ns, type, id, timestamp, validator)
         : new Ctor(modelManager, classDeclaration, ns, type, id, timestamp);
-    types?.set(key, { classDeclaration, identifierFieldName: resource.$identifierFieldName });
-    return resource;
+    if (!types) {
+        return resource;
+    }
+    const learned = { classDeclaration, identifierFieldName: resource.$identifierFieldName };
+    types.set(key, learned);
+    // The first instance of a class is built again the way every later one
+    // is, so that all of them share one object layout (V8 map): the
+    // constructor's instance has a different one, and code that reads
+    // instances of both (validate, toJSON) would see two.
+    return constructCached(Ctor, learned, modelManager, ns, type, id, timestamp, Ctor === Relationship, validator);
 }
 
 /**
