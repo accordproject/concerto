@@ -1,3 +1,251 @@
+# P5-21: native `metamodel::validate_ast` on a resident metamodel (2026-09-28)
+
+Task P5-21 (accordproject/concerto-rust#319), plan accordproject/concerto-rust#29.
+P6-04 (below) found the public native free function
+`concerto_core::metamodel::validate_ast` 7.35× slower than TS on
+conformance, because it built a fresh metamodel ModelManager on every call
+(see "The validateAst outlier" below). P5-21 runs it on a per-thread
+resident metamodel manager, built on first use, as P5-13's
+`ModelManager::validate_ast` does. The public signature, results and error
+kinds are unchanged. It is a `concerto-rust` change only; the TS-API route
+is not affected.
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 logical CPUs, 17 GB, Linux x64 (a shared cloud container). **Not the machine P6-04 used** (a darwin laptop), so compare each P5-21 figure only with the TS figure from the same machine below, not with P6-04's figures. |
+| Toolchain | cargo/rustc 1.94.1, Node v22.22.2 |
+| Native runs | `concerto-rust`'s `benches/results/P5-21/native-{1,2}.json`: two rounds of `cargo bench --manifest-path benches/Cargo.toml --bench validate_metamodel` (criterion defaults), reduced with `extract-results.sh`. The free function is the new `concerto-core/metamodel::validate_ast` case in `validate_metamodel.rs`, next to `concerto-core/validate_ast` (`ModelManager::validate_ast`). The files record `concerto_rust_commit` `cd04cb1` (the integration head the P5-21 change was built on; the benchmarked tree had the change applied). They carry no `loadavg` field. |
+| TS runs | `results/P5-21-ts-reference-5.0.0-{1,2,3}.json`: three rounds of `run-ts.mjs --workloads validate_ast` against the published 5.0.0 reference (`--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist`), defaults (5 warm-up, 30 samples), `concerto` `4ed605ca2`. |
+| Load | 1-minute load at the start of the TS runs: 3.59, 2.04 and 2.24. None met P6-04's load1 < 2 quiet gate; the machine is shared with other tasks. The native result files were extracted at 21:31:43Z and 21:33:14Z, the times TS runs 2 and 3 finished; whether the native and TS runs overlapped was not recorded. Treat the figures as indicative: P6-04 saw contention move ratios by up to 1.6×, well inside the margin below. |
+
+Medians in µs per model:
+
+| Model set | n | Native free function, runs 1 / 2 | Native `ModelManager::validate_ast`, runs 1 / 2 | TS 5.0.0, runs 1 / 2 / 3 | **free function / TS** |
+|---|---|---|---|---|---|
+| concerto-core-test-data | 34 | 147.1 / 147.0 | 132.0 / 133.5 | 532.0 / 521.2 / 516.7 | **0.28× (3.5× faster)** |
+| conformance | 41 | 60.6 / 61.7 | 56.1 / 56.6 | 202.6 / 215.4 / 204.5 | **0.30× (3.4× faster)** |
+| synthetic-large | 1 | SKIPPED | SKIPPED | SKIPPED | - |
+
+The ratio uses native run 1 against the TS median (runs 2 and 3 give the
+same ratio to two places). The free function is now within 8-11% of the
+resident-metamodel method, and below TS on both sets, which meets
+P5-21's target (at or below TS on conformance). `synthetic-large` is still
+rejected by `validateAst` on every route, as in P5-04 onwards.
+
+---
+
+# P6-04: native Rust benchmarks through the public API (informational, 2026-09-28)
+
+Task P6-04 (accordproject/concerto-rust#273), plan accordproject/concerto-rust#29,
+depends on P6-01 (#83, the Rust public API design) and P6-02 (#84, the
+native acceptance example and `docs/native-guide.md`). Per the maintainer's
+request of 2026-09-27, this benchmarks the native Rust crate **through
+`concerto-core`'s D11 public API alone** — no TypeScript, no WASM, no
+`js-compat` feature — and reports it next to the existing P5-04 numbers so
+all three routes are comparable: **native Rust**, **Rust through the TS
+public API** (the WASM-backed engine, `run-ts.mjs` with
+`CONCERTO_ENGINE=rust`), and **the TS reference**
+(`@accordproject/concerto-core` 5.0.0). This is informational only: no CI
+regression gate, and no engine change of any kind.
+
+The new native harness is `concerto-rust`'s `benches/benches/public_api.rs`
+(a fourth criterion bench target alongside P5-04's `load_validate.rs`,
+`validate_metamodel.rs` and `instance_validate.rs`). It compiles and runs
+with no `js-compat` feature and no `concerto-core-js` dependency — the same
+surface `concerto-core/examples/standalone.rs` (P6-02) walks — and covers:
+
+- **model load**: `ModelManager::add_model_ast` (the stable,
+  non-deprecated replacement for `load_validate.rs`'s `add_model`) and the
+  batch `add_model_asts`;
+- **model validate**: `ModelManager::validate_models`;
+- **validateAst**: the crate-root free function `metamodel::validate_ast`
+  (see "The validateAst outlier" below — this is *not* the same code path
+  as the TS-API number in this table);
+- **instance populate and validate**: `ModelManager::validate_instance`
+  (first error) and `ModelManager::check_instance` (collect-all,
+  accordproject/concerto#1239) — both read the document the way TS
+  `Serializer.fromJSON` does (P5-13/P6-01, `docs/public-api.md` §5.7),
+  populate and validate in one call;
+- **serialisation**: *not exposed*. `Serializer`/`Factory`/`Resource`/
+  `InstanceGenerator` are explicitly out of D11's scope
+  (`docs/public-api.md` §1) and live in the unpublished `concerto-core-js`
+  crate, not in `concerto-core`'s public API, so there is nothing to
+  benchmark here.
+
+Same model sets as P5-04: `concerto-core-test-data` (35 files),
+`conformance` (41 files), `synthetic-large` (1 file, 300 declarations), and
+the 500-instance synthetic `Item` workload, all from
+`migration/bench/fixtures/` (`generate-fixtures.mjs`), so all three routes
+below load byte-identical models.
+
+## Machine and toolchain
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz, 8 logical CPUs, 17 GB, macOS (darwin x64, Darwin kernel 22.6.0), a shared developer laptop |
+| Toolchain | Node v24.21.0, rustc 1.98.1 / cargo 1.98.1 |
+| `concerto` commit | `201e6a74886a1f43db994b41c3187fb2c62f2e83` (branch `claude/tender-pascal-ocwf9q-local-matt-P6-04`, based on the integration branch) |
+| `concerto-rust` commit | `ce50e3ab835321d70b079e234d4a2fcff9b2285f` (branch `claude/tender-pascal-ocwf9q-local-matt-P6-04`, based on the integration branch) |
+| Load at run time | The 4 TS-API result files (`results/P6-04-{ts-reference-5.0.0,rust-via-ts}-{1,2}.json`) each carry a `loadavg` field, sampled once at the start of that run: 1-minute load 1.77 to 1.98 across those four. The native result JSONs have **no** `loadavg` field; the corresponding start/end loads are logged in `.longrun/native.log` instead. Native round 1 started at load 2.12/2.99 and ended at 1.89/2.48, quiet throughout. **Native round 2 did not stay quiet**: it started at load 1.90/2.42 (18:38:46Z) but ended at 8.36/5.29 (18:45:14Z) — another workload started during the run, and the next quiet gate did not re-clear until 18:58:21. See "Native round 2 was contended" below; the `native/TS` and `native/Rust-via-TS` ratios in the tables use native round 1 only for this reason. |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, the oracle's reference (`--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist`) |
+| Native runs | `concerto-rust`'s `benches/results/P6-04-native-{1,2}.json`: two rounds of `cargo bench --manifest-path benches/Cargo.toml --bench public_api` (criterion defaults: 3 s warm-up, 100 samples), reduced with `extract-results.sh`. Round 2 ran under load contention (see "Load at run time" above); its figures are shown for reference but excluded from the ratio columns. |
+| TS-API runs | `results/P6-04-{ts-reference-5.0.0,rust-via-ts}-{1,2}.json`: two rounds of `run-ts.mjs --workloads load_validate,validate_ast,instance_validate` with the defaults (5 warm-up, 30 samples). Both rounds of both routes started under the quiet gate (native's contention did not carry over, since each round waits for the gate again before it starts). |
+
+## The three-way table
+
+Medians are in µs per model (load/validate/validateAst) or per instance
+(instance), for runs 1 and 2. Both figures for every route are shown, but
+the ratio columns are computed differently per route because **native
+round 2 ran under load contention** (see "Machine and toolchain" and
+"Native round 2 was contended" below): `Rust-via-TS/TS` uses the median of
+its two (both quiet) runs, as before; `native/TS` and `native/Rust-via-TS`
+use **native run 1 only** (both quiet), against the TS/Rust-via-TS median
+as usual. "native/TS" and "Rust-via-TS/TS" are speed relative to the TS
+5.0.0 reference (lower is faster); "native/Rust-via-TS" compares the two
+Rust routes directly.
+
+### Load
+
+| Model set | n | Native, runs 1/2 (µs) | Rust-via-TS, runs 1/2 (µs) | TS 5.0.0, runs 1/2 (µs) | native/TS* | Rust-via-TS/TS | native/Rust-via-TS* |
+|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | 35 | 132.8 / 138.0 | 175.2 / 184.2 | 35.9 / 35.8 | 3.70× | 5.02× | 0.74× |
+| conformance | 41 | 53.7 / 62.7 | 94.4 / 106.4 | 12.7 / 13.5 | 4.10× | 7.65× | 0.53× |
+| synthetic-large | 1 (300 decls) | 8871.4 / 13824.8 | 7843.0 / 7555.3 | 836.8 / 838.4 | 10.59× | 9.19× | 1.15× |
+
+\* native run 2 ran under load contention; these two columns use native run 1 only (see "Native round 2 was contended" below). Rust-via-TS/TS is unaffected — both its runs were quiet — and still uses the median of runs 1 and 2.
+
+### Validate (`validate_models`)
+
+| Model set | n | Native, runs 1/2 (µs) | Rust-via-TS, runs 1/2 (µs) | TS 5.0.0, runs 1/2 (µs) | native/TS* | Rust-via-TS/TS | native/Rust-via-TS* |
+|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | 35 | 95.7 / 102.9 | 203.7 / 211.0 | 73.5 / 72.3 | 1.31× | 2.84× | **0.46× (2.2× faster)** |
+| conformance | 41 | 74.1 / 113.9 | 134.9 / 154.2 | 28.2 / 30.8 | 2.51× | 4.90× | 0.51× |
+| synthetic-large | 1 (300 decls) | 5565.3 / 8662.0 | 11548.1 / 10008.3 | 2717.1 / 2689.4 | 2.06× | 3.99× | 0.52× |
+
+\* native run 2 ran under load contention; these two columns use native run 1 only (see "Native round 2 was contended" below). Rust-via-TS/TS is unaffected and still uses the median of runs 1 and 2.
+
+### validateAst
+
+| Model set | n | Native, runs 1/2 (µs) | Rust-via-TS, runs 1/2 (µs) | TS 5.0.0, runs 1/2 (µs) | native/TS* | Rust-via-TS/TS | native/Rust-via-TS* |
+|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | 34 | 2363.8 / 2396.3 | 265.4 / 275.2 | 795.8 / 835.7 | 2.90× | **0.33× (3.0× faster)** | 8.75× (slower) |
+| conformance | 41 | 2230.0 / 3423.5 | 118.5 / 131.1 | 304.0 / 302.8 | 7.35× | **0.41× (2.4× faster)** | 17.87× (slower) |
+
+\* native run 2 ran under load contention; these two columns use native run 1 only (see "Native round 2 was contended" below). Rust-via-TS/TS is unaffected and still uses the median of runs 1 and 2.
+
+**The validateAst outlier is expected, not a regression.** The native
+number times the crate-root free function `concerto_core::metamodel::
+validate_ast`, which builds and checks against the metamodel schema fresh
+on every call — there is no other `validateAst` entry point in the D11
+public surface today (`ModelManager::validate_ast(&ModelFile)`, the
+resident-metamodel method P5-13 optimised, is a second-tier/seam item
+benchmarked in `validate_metamodel.rs`, not part of this file). The
+Rust-via-TS number goes through WASM to that resident-metamodel method, so
+it pays the metamodel cost once per `ModelManager`, not once per call —
+which is why it beats both the native free function *and* TS. This is a
+gap in what the public API exposes as a fast validateAst entry point, not
+a measurement error; see "Open question" below.
+
+**Update (P5-21, accordproject/concerto-rust#319):** the free function now
+runs on a per-thread resident metamodel manager. Re-measured on a
+different machine, it is 0.30× of TS on conformance (3.4× faster) and
+0.28× on concerto-core-test-data; see the "P5-21" section above. The
+figures in this table are P6-04's and are kept as recorded.
+
+### Instance: populate and validate (`Serializer.fromJSON` equivalent)
+
+| | n | Native `validate_instance`, runs 1/2 (µs) | Rust-via-TS `fromJSON`, runs 1/2 (µs) | TS 5.0.0 `fromJSON`, runs 1/2 (µs) | native/TS* | Rust-via-TS/TS | native/Rust-via-TS* |
+|---|---|---|---|---|---|---|---|
+| (synthetic, 500) | 500 | 8.9 / 14.1 | 36.3 / 40.4 | 10.4 / 9.9 | **0.88× (1.1× faster)** | 3.77× | **0.23× (4.3× faster)** |
+
+\* native run 2 ran under load contention; these two columns use native run 1 only (see "Native round 2 was contended" below). Rust-via-TS/TS is unaffected and still uses the median of runs 1 and 2.
+
+`ModelManager::validate_instance` is the public API's one-call
+populate-and-validate route (P5-13/P6-01, §5.7): on the one quiet native
+run (run 1, 8.9 µs), it is slightly *faster* than the TS reference
+(10.15 µs median), and is 4.3× faster than the same work done through the
+TS public API (WASM marshalling overhead on every call). Native run 2
+(14.1 µs) ran under load contention and is excluded from these ratios;
+using both runs' median (11.5 µs) instead would show native 1.13× *slower*
+than TS, which is the contended figure the original write-up reported —
+see "Native round 2 was contended" below. The collect-all counterpart,
+`public_api/instance/check_instance` (accordproject/concerto#1239, no
+TS-side equivalent recorded here), was 11.6 µs on the quiet run 1 and
+19.1 µs on the contended run 2 — on run 1, modestly slower than
+`validate_instance`, as expected for walking every violation instead of
+stopping at the first; run 2's figure reflects the same contention, not a
+regression.
+
+## Notes and caveats
+
+- **Two runs, not three.** P5-04's later refreshes (P5-06 onward) used
+  three interleaved rounds; this table uses two, run back to back rather
+  than interleaved, since this task is informational with no gate to
+  satisfy.
+- **Native round 2 was contended, not ordinary noise.** Run 2's native
+  numbers are consistently higher than run 1's (e.g. `synthetic-large`
+  load: 8871.4 µs vs 13824.8 µs; `check_instance`: 11.6 µs vs 19.1 µs),
+  and every row in the three-way tables shows the same 1.2×-1.6× slowdown
+  from run 1 to run 2. The load average did **not** drop between runs —
+  it rose. `.longrun/native.log` records native round 2 starting at load
+  1.90/2.42 (18:38:46Z, past the quiet gate) and ending at 8.36/5.29
+  (18:45:14Z): another workload started on the machine partway through
+  the criterion run. `.longrun/quiet-loads.tsv` shows the next quiet gate
+  (before the following leg, `rust-via-ts` round 2) did not clear until
+  18:58:21, nearly 13 minutes later. This breaks the "run on a quiet
+  machine" rule for native round 2's own duration, which this task owns
+  (`concerto-rust`'s `benches/`), so its figures are kept for reference in
+  the tables above but excluded from every `native/TS` and
+  `native/Rust-via-TS` ratio, which use native run 1 (quiet start to
+  finish) only. Rust-via-TS and TS-reference round 2 are unaffected: each
+  leg waits for the quiet gate again before it starts, and both started
+  and finished quiet (loads 1.95/2.67 and 1.77/2.40 at their own starts).
+  A future refresh of this table should re-run native round 2 under the
+  quiet gate rather than rely on this correction.
+- **The commits are a few commits behind the current integration head.**
+  This branch (`claude/tender-pascal-ocwf9q-local-matt-P6-04`) was created
+  from `origin/claude/tender-pascal-ocwf9q` before P5-11 (#287) and P5-14
+  (#308) landed there; the commits above are recorded exactly as run.
+  Measurement only, no engine change, so this does not affect the
+  comparison's validity — only its currency. A later refresh should
+  re-branch from the current head.
+- **`add_model_asts` (batch)** was also benchmarked (`public_api.rs`) but
+  is not in the three-way table above since `run-ts.mjs` has no batch-load
+  counterpart to compare it with; see `concerto-rust`'s
+  `benches/results/P6-04-native-{1,2}.json` for its numbers directly
+  (roughly 1.5-3× the single-file `add_model_ast` loop, dominated by the
+  whole-batch validate-then-rollback bookkeeping).
+- **Open question for a follow-up:** the D11 public API has no
+  resident-metamodel `validateAst` entry point that does not also require
+  a `ModelFile` (`ModelManager::validate_ast` takes one; the free function
+  `metamodel::validate_ast` does not cache the metamodel). A native caller
+  that wants TS-API-competitive validateAst performance today has to go
+  through `ModelFile::from_json` first. Not a P6-04 finding to fix
+  (measurement only) — flagged for P6-01/P6-03 to consider.
+  *Addressed by P5-21 (accordproject/concerto-rust#319): the free
+  function now caches the metamodel per thread; see the "P5-21" section
+  at the top.*
+
+## Reproducing this table
+
+```sh
+# Native Rust, through the public API alone (the `--bench public_api`
+# selects just this task's bench target, out of the four in benches/)
+cd concerto-rust
+cargo bench --manifest-path benches/Cargo.toml --bench public_api
+./benches/extract-results.sh benches/results/native.json
+
+# Rust engine via the TS public API (needs the WASM engine built first:
+# cd ../concerto-rust/concerto-wasm && sh build.sh)
+cd ../concerto
+CONCERTO_ENGINE=rust node migration/bench/run-ts.mjs --out migration/bench/results/rust-via-ts.json
+
+# TS reference
+CONCERTO_ENGINE=ts node migration/bench/run-ts.mjs --out migration/bench/results/ts-reference.json
+```
+
+---
+
 # P5-14: cached property lookups on the lazy views (2026-09-28)
 
 Task P5-14 (accordproject/concerto-rust#308) caches a ClassDeclaration
