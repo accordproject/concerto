@@ -779,6 +779,7 @@ const lazyFiles = new WeakSet<object>();
  * @return {boolean} true if the declarations may be built lazily
  */
 function stageModelFile(modelFile: any): boolean {
+    constructedFiles.add(modelFile);
     const manager = modelFile.modelManager;
     const handle = manager?.rustHandle;
     if (!handle || typeof handle.stageModelFile !== 'function' ||
@@ -813,7 +814,16 @@ function stageModelFile(modelFile: any): boolean {
             lazyFiles.add(modelFile);
             return true;
         }
-        const id = handle.stageModelFile(text, definitions, fileName);
+        let id: number;
+        try {
+            id = handle.stageModelFile(text, definitions, fileName);
+        } catch (e) {
+            // The engine refused the AST: `isEngineBuilt` is false for this
+            // file (the caller builds it eagerly, which throws the TS error
+            // for an AST TS refuses too).
+            engineRejectedFiles.add(modelFile);
+            throw e;
+        }
         if (customRegExp && !probeCustomRegExp(modelFile, ast)) {
             handle.dropStagedModelFile(id);
             return false;
@@ -1029,6 +1039,34 @@ function deferDeclarations(modelFile: any): void {
             process.stderr.write(`LAZY-CHECK ast-mutated: ${modelFile.namespace}\n`);
         }
     }
+}
+
+/**
+ * Every ModelFile the ModelFile constructor ran for: the constructor always
+ * calls `stageModelFile`, the start of the engine path. A stub ModelFile
+ * (`sinon.createStubInstance(ModelFile)`, `Object.create`) never ran the
+ * constructor, so it is not here (accordproject/concerto-rust#262).
+ */
+const constructedFiles = new WeakSet<object>();
+
+/**
+ * Every ModelFile whose AST the engine refused when the constructor staged
+ * it (`handle.stageModelFile` threw), and which the TS constructor then
+ * built eagerly anyway: a hand-built AST the engine cannot load, such as a
+ * location without `$class` (accordproject/concerto-rust#262).
+ */
+const engineRejectedFiles = new WeakSet<object>();
+
+/**
+ * Whether `modelFile` was built through the engine path: by the ModelFile
+ * constructor, from an AST the engine did not refuse. False only for a stub
+ * or hand-built ModelFile, the one case a manager does not mirror into its
+ * rustHandle (accordproject/concerto-rust#262).
+ * @param {object} modelFile the ModelFile
+ * @return {boolean} true if the ModelFile was built through the engine path
+ */
+function isEngineBuilt(modelFile: any): boolean {
+    return constructedFiles.has(modelFile) && !engineRejectedFiles.has(modelFile);
 }
 
 /**
@@ -1639,6 +1677,7 @@ export {
     deferDeclarations,
     commitStaged,
     dropStaged,
+    isEngineBuilt,
     validateLoaded,
     beginModelFile,
     endModelFile,

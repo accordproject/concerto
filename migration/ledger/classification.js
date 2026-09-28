@@ -114,7 +114,10 @@ module.exports = {
             // ported model logic, so engine shim like src/engine/*.
             'rustHandleReads': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (caches a rustHandle\'s epoch/namespaces reads)' },
             'BaseModelManager._needsRustWrite': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (decides which namespaces are mirrored to rustHandle)' },
-            'BaseModelManager._mirrorWrite': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (runs a rustHandle mirror write, swallowing its error)' },
+            // accordproject/concerto-rust#262: mirror writes are unguarded;
+            // only a stub or hand-built ModelFile is not mirrored.
+            'BaseModelManager._isMirrored': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (decides which model files are mirrored to rustHandle: not a stub or hand-built one)' },
+            'BaseModelManager._rustMirrorUpdate': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (the rustHandle write for a replaced model file: update, add or delete)' },
             // P5-10a lazy views (accordproject/concerto-rust#269).
             'engineViews': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (requires engine/views once, on first use)' },
             'BaseModelManager._rustMirrorAdd': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (the rustHandle write for an added model file: registers the file Rust loaded at construction, or sends the AST)' },
@@ -169,6 +172,7 @@ module.exports = {
             'takeStage': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: stage bookkeeping)' },
             'commitStaged': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: registers the staged file in rustHandle)' },
             'dropStaged': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: drops a stage that will not be registered)' },
+            'isEngineBuilt': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (whether a model file was built through the engine path; false for a stub or a hand-built AST the engine refused, accordproject/concerto-rust#262)' },
             'validateLoaded': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: validates the staged or registered file without sending the AST again)' },
             // P5-10b lazy views, part 2 (accordproject/concerto-rust#270):
             // per-declaration building, and the decorators, validators and

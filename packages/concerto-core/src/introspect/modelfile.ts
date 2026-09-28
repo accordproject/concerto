@@ -214,15 +214,13 @@ class ModelFile extends Decorated {
         if (!manager._rustHandleMatchesModelFiles()) {
             return undefined;
         }
+        // P5-06: memoised per rustHandle epoch where the manager offers it.
+        // An error reading rustHandle propagates
+        // (accordproject/concerto-rust#262).
         /* istanbul ignore next */
-        try {
-            // P5-06: memoised per rustHandle epoch where the manager offers it.
-            return typeof manager._rustModelFileId === 'function'
-                ? manager._rustModelFileId(this.namespace)
-                : manager.rustHandle.modelFileId(this.namespace);
-        } catch (e) {
-            return undefined;
-        }
+        return typeof manager._rustModelFileId === 'function'
+            ? manager._rustModelFileId(this.namespace)
+            : manager.rustHandle.modelFileId(this.namespace);
     }
 
     /**

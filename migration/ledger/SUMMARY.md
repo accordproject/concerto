@@ -37,7 +37,7 @@ without a ledger rebuild fails the build.
 
 ## Method
 
-* **Scope.** 594 members in 63 files. Nested closures count
+* **Scope.** 596 members in 63 files. Nested closures count
   as part of the member that encloses them. `index.ts`, `types.ts` and
   `dayjs-setup.ts` have no members: they hold re-exports, types and a dayjs
   plugin setup only.
@@ -128,25 +128,25 @@ without a ledger rebuild fails the build.
 
 | | members | loc | weight | share of weight |
 |---|---|---|---|---|
-| RUST | 101 | 1077 | 1239 | 18.8% |
-| HYBRID | 34 | 1146 | 1297.5 | 19.7% |
-| PARTIAL | 14 | 288 | 379.5 | 5.8% |
-| TS | 445 | 3868 | 3663 | 55.7% |
-| **total** | 594 | 6379 | 6579 | 100% |
+| RUST | 101 | 1074 | 1236 | 18.7% |
+| HYBRID | 34 | 1131 | 1282.5 | 19.4% |
+| PARTIAL | 14 | 288 | 379.5 | 5.7% |
+| TS | 447 | 3912 | 3704 | 56.1% |
+| **total** | 596 | 6405 | 6602 | 100% |
 
-* **RUST+HYBRID weighted share (new D1 denominator): 39.0%**, HYBRID at full weight
+* **RUST+HYBRID weighted share (new D1 denominator): 38.6%**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. **NOT met.**
   PARTIAL rows (section 5b) are not in the numerator.
   Denominator excludes constant markers and `accept()` visitor entry points
   (54 members, weight 81) as not-logic, per the maintainer's
-  decision on open question 2 below. New total weight: 6498 (was 6579).
+  decision on open question 2 below. New total weight: 6521 (was 6602).
   D1 stays as defined, with the 70% bar, by maintainer decision (accordproject/concerto-rust#276,
   2026-09-28): the proposed D1′ was not adopted, and the gate reports §0.4 as FAIL at this figure.
-* **Old figure (previous denominator, all 594 members): 38.6%.**
-* RUST only (new denominator): 19.1%.
+* **Old figure (previous denominator, all 596 members): 38.1%.**
+* RUST only (new denominator): 19.0%.
 * For comparison only, not the D1 figure: counting PARTIAL *read* rows (1 members,
-  weight 15) as Rust gives 39.3%; counting every PARTIAL row (14 members,
-  weight 379.5) gives 44.9%. That is how the ledger counted them before
+  weight 15) as Rust gives 38.9%; counting every PARTIAL row (14 members,
+  weight 379.5) gives 44.4%. That is how the ledger counted them before
   accordproject/concerto-rust#261 (then 78.9%, which also counted three `rustHandle`
   plumbing helpers as RUST; they are now TS, engine shim). After #261 and before P5-11 the
   figure was 57.4% (61.5% at #261 itself): P5-11 reclassified TS 128 PARTIAL rows and 57 HYBRID
@@ -156,8 +156,8 @@ By weight category:
 
 | category | members | loc | weight | RUST w | HYBRID w | PARTIAL w | TS w |
 |---|---|---|---|---|---|---|---|
-| glue (x0.5) | 337 | 1176 | 588 | 84.5 | 32 | 0 | 471.5 |
-| logic (x1) | 196 | 3627 | 3627 | 415 | 715 | 105 | 2392 |
+| glue (x0.5) | 339 | 1182 | 591 | 84.5 | 32 | 0 | 474.5 |
+| logic (x1) | 196 | 3647 | 3647 | 412 | 700 | 105 | 2430 |
 | validation (x1.5) | 61 | 1576 | 2364 | 739.5 | 550.5 | 274.5 | 799.5 |
 
 ## 2. By planned task
@@ -172,7 +172,7 @@ By weight category:
 | P2-05 | 6 | 16 | 0 |
 | P2-06 | 22 | 63.5 | 0 |
 | P2-07 | 12 | 105 | 1 |
-| P2-08 | 92 | 1661.5 | 6 |
+| P2-08 | 92 | 1643.5 | 6 |
 | P3-01 | 37 | 1481.5 | 5 |
 | P3-04 | 4 | 97 | 0 |
 | P4-02 | 6 | 22.5 | 0 |
@@ -181,10 +181,10 @@ By weight category:
 | P4-05 | 20 | 175.5 | 1 |
 | P4-06 | 67 | 621 | 16 |
 | P4-07 | 79 | 469.5 | 16 |
-| P4-08 | 96 | 1758.5 | 6 |
+| P4-08 | 96 | 1740.5 | 6 |
 | P4-09 | 12 | 119 | 1 |
 | P4-10 | 41 | 1556.5 | 8 |
-| P5-10a | 9 | 176 | 0 |
+| P5-10a | 9 | 186 | 0 |
 | P5-10b | 22 | 376 | 0 |
 
 TS members have `planned_task = -` and need no migration work, with two exceptions. The exception classes list P1-05 and P4-02 because the error mapper instantiates them. The rows P5-11 reclassified TS (reason ending "Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28)") keep the planned task they had, so the oracle's owner attribution is unchanged. The table counts a member once per task it lists, so the rows do not sum to the total.
@@ -196,7 +196,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | file | n | R / H / P / T | weight | weight R / H / P / T | R+H | tasks |
 |---|---|---|---|---|---|---|
 | astmodelmanager.ts | 2 | 0 / 0 / 0 / 2 | 8.5 | 0 / 0 / 0 / 8.5 | 0.0% | - |
-| basemodelmanager.ts | 54 | 11 / 3 / 4 / 36 | 753.5 | 259 / 161 / 100 / 233.5 | 55.7% | P2-08+P4-08, P3-04+P4-08 |
+| basemodelmanager.ts | 55 | 11 / 3 / 4 / 37 | 767 | 258 / 146 / 100 / 263 | 52.7% | P2-08+P4-08, P3-04+P4-08 |
 | datetimeutil.ts | 1 | 0 / 0 / 0 / 1 | 16 | 0 / 0 / 0 / 16 | 0.0% | - |
 | dcsconverter.ts | 9 | 0 / 0 / 0 / 9 | 120 | 0 / 0 / 0 / 120 | 0.0% | - |
 | decoratormanager.ts | 14 | 7 / 1 / 0 / 6 | 122.5 | 69.5 / 27 / 0 / 26 | 78.8% | P4-09 |
@@ -207,7 +207,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/rust.ts | 1 | 0 / 0 / 0 / 1 | 7 | 0 / 0 / 0 / 7 | 0.0% | - |
 | engine/serializer-codec.ts | 12 | 0 / 0 / 0 / 12 | 205 | 0 / 0 / 0 / 205 | 0.0% | - |
 | engine/serializer.ts | 4 | 0 / 3 / 0 / 1 | 75 | 0 / 66 / 0 / 9 | 88.0% | P4-10 |
-| engine/views.ts | 55 | 0 / 16 / 0 / 39 | 824.5 | 0 / 224 / 0 / 600.5 | 27.2% | P4-06+P4-07, P5-10b, P5-10a |
+| engine/views.ts | 56 | 0 / 16 / 0 / 40 | 836 | 0 / 224 / 0 / 612 | 26.8% | P4-06+P4-07, P5-10b, P5-10a |
 | factory.ts | 9 | 0 / 0 / 0 / 9 | 143.5 | 0 / 0 / 0 / 143.5 | 0.0% | - |
 | globalize.ts | 3 | 0 / 0 / 0 / 3 | 16.5 | 0 / 0 / 0 / 16.5 | 0.0% | - |
 | introspect/assetdeclaration.ts | 3 | 1 / 0 / 0 / 2 | 4 | 1.5 / 0 / 0 / 2.5 | 37.5% | P2-03+P4-06 |
@@ -229,7 +229,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | introspect/mapkeytype.ts | 11 | 2 / 0 / 0 / 9 | 21.5 | 7 / 0 / 0 / 14.5 | 32.6% | P2-06+P4-07 |
 | introspect/mapvaluetype.ts | 11 | 2 / 0 / 0 / 9 | 21.5 | 7 / 0 / 0 / 14.5 | 32.6% | P2-06+P4-07 |
 | introspect/metamodel.ts | 3 | 0 / 0 / 1 / 2 | 40 | 0 / 0 / 15 / 25 | 0.0% | P3-04+P4-08 |
-| introspect/modelfile.ts | 51 | 9 / 3 / 7 / 32 | 989.5 | 337 / 221 / 226.5 / 205 | 56.4% | P2-08+P4-08 |
+| introspect/modelfile.ts | 51 | 9 / 3 / 7 / 32 | 987.5 | 335 / 221 / 226.5 / 205 | 56.3% | P2-08+P4-08 |
 | introspect/numbervalidator.ts | 7 | 4 / 0 / 0 / 3 | 13.5 | 9.5 / 0 / 0 / 4 | 70.4% | P2-02+P4-04 |
 | introspect/participantdeclaration.ts | 3 | 1 / 0 / 0 / 2 | 4 | 1.5 / 0 / 0 / 2.5 | 37.5% | P2-03+P4-06 |
 | introspect/property.ts | 16 | 2 / 0 / 0 / 14 | 73 | 23.5 / 0 / 0 / 49.5 | 32.2% | P2-04+P4-07 |
@@ -261,7 +261,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 4. TS items (stay in TypeScript) with reasons
 
-445 members, weight 3663 (55.7%).
+447 members, weight 3704 (56.1%).
 
 ### 4a. Grouped by reason
 
@@ -279,9 +279,9 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: reads a file's one-call Rust view snapshot into per-node lookups) | 1 | 79 | `engine/views.ts` computeBatch |
 | constant-return member (type/kind marker or fixed default, body is `return <literal>`); stays as-is on the TS class, nothing to port | 47 | 70.5 | `basemodelmanager.ts` BaseModelManager.isModelManager; `basemodelmanager.ts` BaseModelManager.isAliasedTypeEnabled; `decoratormanager.ts` DecoratorManager.isNamespaceTargetEnabled; `introspect/classdeclaration.ts` ClassDeclaration.isClassDeclaration; `introspect/declaration.ts` Declaration.isIdentified; `introspect/declaration.ts` Declaration.isSystemIdentified; `introspect/declaration.ts` Declaration.getIdentifierFieldName; `introspect/declaration.ts` Declaration.getType; `introspect/declaration.ts` Declaration.toString; `introspect/declaration.ts` Declaration.isEnum; `introspect/declaration.ts` Declaration.isClassDeclaration; `introspect/declaration.ts` Declaration.isScalarDeclaration; `introspect/declaration.ts` Declaration.isMapDeclaration; `introspect/declaration.ts` Declaration.isAsset; `introspect/declaration.ts` Declaration.isParticipant; `introspect/declaration.ts` Declaration.isTransaction; `introspect/declaration.ts` Declaration.isEvent; `introspect/declaration.ts` Declaration.isConcept; `introspect/decorator.ts` Decorator.isDecorator; `introspect/enumvaluedeclaration.ts` EnumValueDeclaration.isEnumValue; `introspect/field.ts` Field.isField; `introspect/mapdeclaration.ts` MapDeclaration.declarationKind; `introspect/mapdeclaration.ts` MapDeclaration.isMapDeclaration; `introspect/mapkeytype.ts` MapKeyType.isKey; `introspect/mapkeytype.ts` MapKeyType.isValue; `introspect/mapvaluetype.ts` MapValueType.isKey; `introspect/mapvaluetype.ts` MapValueType.isValue; `introspect/modelfile.ts` ModelFile.isModelFile; `introspect/relationshipdeclaration.ts` RelationshipDeclaration.isRelationship; `introspect/scalardeclaration.ts` ScalarDeclaration.isIdentified; `introspect/scalardeclaration.ts` ScalarDeclaration.isSystemIdentified; `introspect/scalardeclaration.ts` ScalarDeclaration.getIdentifierFieldName; `introspect/scalardeclaration.ts` ScalarDeclaration.getSuperType; `introspect/scalardeclaration.ts` ScalarDeclaration.getSuperTypeDeclaration; `introspect/scalardeclaration.ts` ScalarDeclaration.isAbstract; `introspect/scalardeclaration.ts` ScalarDeclaration.isScalarDeclaration; `introspect/scalardeclaration.ts` ScalarDeclaration.isAsset; `introspect/scalardeclaration.ts` ScalarDeclaration.isParticipant; `introspect/scalardeclaration.ts` ScalarDeclaration.isTransaction; `introspect/scalardeclaration.ts` ScalarDeclaration.isEvent; `introspect/scalardeclaration.ts` ScalarDeclaration.isConcept; `introspect/validator.ts` Validator.compatibleWith; `model/identifiable.ts` Identifiable.isRelationship; `model/identifiable.ts` Identifiable.isResource; `model/relationship.ts` Relationship.isRelationship; `model/resource.ts` Resource.isResource; `serializer/valuegenerator.ts` EmptyValueGenerator.getBoolean |
 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 43 | 65 | `basemodelmanager.ts` BaseModelManager.getDecoratorValidation; `introspect/classdeclaration.ts` ClassDeclaration.isAbstract; `introspect/classdeclaration.ts` ClassDeclaration.isExplicitlyIdentified; `introspect/classdeclaration.ts` ClassDeclaration.getOwnProperties; `introspect/collectionsizevalidator.ts` CollectionSizeValidator.getMinSize; `introspect/collectionsizevalidator.ts` CollectionSizeValidator.getMaxSize; `introspect/declaration.ts` Declaration.getModelFile; `introspect/declaration.ts` Declaration.getName; `introspect/declaration.ts` Declaration.getFullyQualifiedName; `introspect/decorator.ts` Decorator.getParent; `introspect/decorator.ts` Decorator.getName; `introspect/decorator.ts` Decorator.getArguments; `introspect/field.ts` Field.getValidator; `introspect/field.ts` Field.getDefaultValue; `introspect/introspector.ts` Introspector.getModelManager; `introspect/mapdeclaration.ts` MapDeclaration.getKey; `introspect/mapdeclaration.ts` MapDeclaration.getValue; `introspect/mapkeytype.ts` MapKeyType.getParent; `introspect/mapkeytype.ts` MapKeyType.getType; `introspect/mapvaluetype.ts` MapValueType.getParent; `introspect/mapvaluetype.ts` MapValueType.getType; `introspect/modelfile.ts` ModelFile.isExternal; `introspect/modelfile.ts` ModelFile.getModelManager; `introspect/modelfile.ts` ModelFile.getNamespace; `introspect/modelfile.ts` ModelFile.getName; `introspect/modelfile.ts` ModelFile.getAllDeclarations; `introspect/modelfile.ts` ModelFile.getDefinitions; `introspect/modelfile.ts` ModelFile.getAst; `introspect/modelfile.ts` ModelFile.getConcertoVersion; `introspect/numbervalidator.ts` NumberValidator.getLowerBound; `introspect/numbervalidator.ts` NumberValidator.getUpperBound; `introspect/property.ts` Property.getParent; `introspect/property.ts` Property.getName; `introspect/property.ts` Property.getType; `introspect/property.ts` Property.isOptional; `introspect/property.ts` Property.isArray; `introspect/property.ts` Property.getSizeValidator; `introspect/scalardeclaration.ts` ScalarDeclaration.getType; `introspect/scalardeclaration.ts` ScalarDeclaration.getValidator; `introspect/scalardeclaration.ts` ScalarDeclaration.getDefaultValue; `introspect/stringvalidator.ts` StringValidator.getMinLength; `introspect/stringvalidator.ts` StringValidator.getMaxLength; `introspect/validator.ts` Validator.getFieldOrScalarDeclaration |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: sends a ModelFile's AST to Rust once and keeps the loaded file staged; decides lazy vs eager) | 1 | 65 | `engine/views.ts` stageModelFile |
 | D7: Resource/Typed dynamic objects stay TS (user-visible JS objects with arbitrary properties and dayjs values); these shells hand the value to the ResourceValidator visitor, whose checks are ledgered separately | 4 | 63 | `model/validatedresource.ts` ValidatedResource.constructor; `model/validatedresource.ts` ValidatedResource.setPropertyValue; `model/validatedresource.ts` ValidatedResource.addArrayValue; `model/validatedresource.ts` ValidatedResource.validate |
 | async file/URL loading orchestration (fs, FileLoader, concerto-cto Parser); all model work goes through the ledgered ModelManager methods it calls | 3 | 56 | `modelloader.ts` ModelLoader.addModel; `modelloader.ts` ModelLoader.loadModelManager; `modelloader.ts` ModelLoader.loadModelManagerFromModelFiles |
-| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: sends a ModelFile's AST to Rust once and keeps the loaded file staged; decides lazy vs eager) | 1 | 55 | `engine/views.ts` stageModelFile |
 | visitor fallback path: runs only when Serializer.fromJSON/toJSON hit EngineFastPathUnsupported (a custom options.regExp, a lone surrogate, a cycle or a wire shape the codec rejects) or when a caller drives the visitor directly; the fast path runs the same work in Rust in one call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (Rust serializer.rs carries the same checks and messages) | 2 | 48 | `serializer/jsonpopulator.ts` getAssignableProperties; `serializer/jsonpopulator.ts` validateProperties |
 | fixed-data builder: returns or adds a fixed system model/field definition (rootmodel.json/decoratormodel.json are duplicated in concerto-rust src/); no model logic to port. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 5 | 44 | `decoratormodelhelper.ts` getDecoratorModel; `introspect/classdeclaration.ts` ClassDeclaration.addTimestampField; `introspect/classdeclaration.ts` ClassDeclaration.addIdentifierField; `introspect/metamodel.ts` newMetaModelManager; `rootmodelhelper.ts` getRootModel |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: with a custom options.regExp, builds the Fields' StringValidators at construction so the user engine runs, and throws, at load) | 1 | 44 | `engine/views.ts` probeCustomRegExp |
@@ -289,6 +289,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | forward/orchestration over members counted elsewhere: the logic is in the callee(s) it calls, which is where any Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 21 | 38.5 | `basemodelmanager.ts` BaseModelManager.getAssetDeclarations; `basemodelmanager.ts` BaseModelManager.getTransactionDeclarations; `basemodelmanager.ts` BaseModelManager.getEventDeclarations; `basemodelmanager.ts` BaseModelManager.getParticipantDeclarations; `basemodelmanager.ts` BaseModelManager.getMapDeclarations; `basemodelmanager.ts` BaseModelManager.getEnumDeclarations; `basemodelmanager.ts` BaseModelManager.getConceptDeclarations; `introspect/classdeclaration.ts` ClassDeclaration.isIdentified; `introspect/classdeclaration.ts` ClassDeclaration.isSystemIdentified; `introspect/declaration.ts` Declaration.getNamespace; `introspect/mapdeclaration.ts` MapDeclaration.toString; `introspect/mapkeytype.ts` MapKeyType.getModelFile; `introspect/mapkeytype.ts` MapKeyType.toString; `introspect/mapkeytype.ts` MapKeyType.getNamespace; `introspect/mapvaluetype.ts` MapValueType.getModelFile; `introspect/mapvaluetype.ts` MapValueType.toString; `introspect/mapvaluetype.ts` MapValueType.getNamespace; `introspect/property.ts` Property.getModelFile; `introspect/property.ts` Property.getFullyQualifiedName; `introspect/property.ts` Property.getNamespace; `introspect/relationshipdeclaration.ts` RelationshipDeclaration.toString |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: getLocalType for a lazily built file builds only the declaration view asked for) | 1 | 38 | `engine/views.ts` localType |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: the prototype accessor over a deferred part) | 1 | 38 | `engine/views.ts` installLazyField |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (the rustHandle write for a replaced model file: update, add or delete) | 1 | 34 | `basemodelmanager.ts` BaseModelManager._rustMirrorUpdate |
 | trivial accessor or filter over lazily built views: the state it reads was computed by Rust at load; a crossing costs more than it saves. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (getLocalType plus a kind check) | 4 | 32 | `introspect/modelfile.ts` ModelFile.getAssetDeclaration; `introspect/modelfile.ts` ModelFile.getTransactionDeclaration; `introspect/modelfile.ts` ModelFile.getEventDeclaration; `introspect/modelfile.ts` ModelFile.getParticipantDeclaration |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: builds a file's declaration views on first read through the ledgered view constructors, and caches them) | 1 | 31 | `engine/views.ts` materialise |
 | processFile callback is the pluggable parse seam: CTO text is parsed by concerto-cto in JS (tests stub Parser.parse); the resulting AST is what crosses into Rust | 3 | 25 | `astmodelmanager.ts` astProcessFile; `basemodelmanager.ts` defaultProcessFile; `modelmanager.ts` ctoProcessFile |
@@ -304,8 +305,8 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | trivial accessor or filter over lazily built views: the state it reads was computed by Rust at load; a crossing costs more than it saves. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (a lookup in the import map of the header; 148 ns in TS against 1.4 us for a string crossing, on the getType hot path) | 1 | 19.5 | `introspect/modelfile.ts` ModelFile.resolveImport |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (restores `decorators: undefined` on the Rust extract result so the JS object shape matches the input) | 1 | 19 | `engine/views.ts` restoreUndefinedDecorators |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: installs the declarations/localTypes accessors) | 1 | 19 | `engine/views.ts` defineLazyFields |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (the rustHandle write for an added model file: registers the file Rust loaded at construction, or sends the AST) | 1 | 18 | `basemodelmanager.ts` BaseModelManager._rustMirrorAdd |
 | orchestration: parses CTO text through the JS processFile callback (concerto-cto) and forwards to RUST members, where the Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (then addModelFile) | 2 | 18 | `basemodelmanager.ts` BaseModelManager.addModel; `modelmanager.ts` ModelManager.addCTOModel |
-| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (the rustHandle write for an added model file: registers the file Rust loaded at construction, or sends the AST) | 1 | 17 | `basemodelmanager.ts` BaseModelManager._rustMirrorAdd |
 | takes a JS predicate callback over Declaration views; Rust does the AST copy and import pruning; this member only runs the JS predicate and forwards to ModelFile.filter, where the Rust work is counted. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 1 | 17 | `basemodelmanager.ts` BaseModelManager.filter |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: defers a file's declaration views; the migration check mode builds them at once) | 1 | 17 | `engine/views.ts` deferDeclarations |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: Decorated.process's decorator loop on first read; no decorator factory applies in a lazily built file) | 1 | 17 | `engine/views.ts` buildDecorators |
@@ -352,7 +353,6 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | trivial accessor or filter over lazily built views: the state it reads was computed by Rust at load; a crossing costs more than it saves. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (a map read of the header) | 1 | 9 | `introspect/modelfile.ts` ModelFile.getImportURI |
 | forward/orchestration over members counted elsewhere: the logic is in the callee(s) it calls, which is where any Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (ModelFile.getType) | 1 | 9 | `introspect/property.ts` Property.isTypeEnum |
 | forward/orchestration over members counted elsewhere: the logic is in the callee(s) it calls, which is where any Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (super.validate and the key/value validate, which run in Rust) | 1 | 7.5 | `introspect/mapdeclaration.ts` MapDeclaration.validate |
-| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (runs a rustHandle mirror write, swallowing its error) | 1 | 7 | `basemodelmanager.ts` BaseModelManager._mirrorWrite |
 | JS error-class mapping for engine results: builds the TS exception (IllegalModelException/TypeNotFoundException/ValidationException/MetamodelException/BaseException/Error/TypeError/RangeError) for an engine error payload {kind, code, params, message, location}; Rust decides the kind and renders the message, this only picks the constructor | 1 | 7 | `engine/errors.ts` makeError |
 | loads the @accordproject/concerto-engine WASM module and registers its host callbacks (the error factory, semver.parse); no model logic | 1 | 7 | `engine/rust.ts` loadRustEngine |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: drops a stage that will not be registered) | 1 | 6 | `engine/views.ts` dropStaged |
@@ -376,6 +376,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | options-object bookkeeping; no model logic | 1 | 2 | `serializer.ts` Serializer.setDefaultOptions |
 | subclass wiring only: passes the AST processFile callback to BaseModelManager | 1 | 1.5 | `astmodelmanager.ts` AstModelManager.constructor |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (decides which namespaces are mirrored to rustHandle) | 1 | 1.5 | `basemodelmanager.ts` BaseModelManager._needsRustWrite |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (decides which model files are mirrored to rustHandle: not a stub or hand-built one) | 1 | 1.5 | `basemodelmanager.ts` BaseModelManager._isMirrored |
 | trivial accessor or filter over lazily built views: the state it reads was computed by Rust at load; a crossing costs more than it saves. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (a map read) | 1 | 1.5 | `basemodelmanager.ts` BaseModelManager.getModelFile |
 | registers a user JS DecoratorFactory; factories are JS callbacks invoked while decorators are materialised | 1 | 1.5 | `basemodelmanager.ts` BaseModelManager.addDecoratorFactory |
 | engine loader entry point: requires rust.ts and re-exports the loaded engine; no model logic | 1 | 1.5 | `engine/index.ts` selectEngine |
@@ -384,6 +385,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (requires introspect/collectionsizevalidator once) | 1 | 1.5 | `engine/views.ts` collectionSizeValidatorModule |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (requires introspect/field once) | 1 | 1.5 | `engine/views.ts` fieldModule |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (restores the previous snapshot batch) | 1 | 1.5 | `engine/views.ts` endModelFile |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (whether a model file was built through the engine path; false for a stub or a hand-built AST the engine refused, accordproject/concerto-rust#262) | 1 | 1.5 | `engine/views.ts` isEngineBuilt |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: stores a built part as a plain own field) | 1 | 1.5 | `engine/views.ts` defineOwn |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: whether a part is still deferred) | 1 | 1.5 | `engine/views.ts` isPending |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: the current snapshots of a file) | 1 | 1.5 | `engine/views.ts` batchOf |
@@ -421,8 +423,9 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | basemodelmanager.ts | BaseModelManager | validateModelFile | method | 9 | 13.5 | orchestration: parses CTO text through the JS processFile callback (concerto-cto) and forwards to RUST members, where the Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (then ModelFile.validate) |
 | basemodelmanager.ts | BaseModelManager | addDecoratorModel | method | 12 | 12 | JS module-interop guard (`getDecoratorModel || module`) around adding the fixed decorator model; Rust mirrors the system models itself. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
 | basemodelmanager.ts | BaseModelManager | _needsRustWrite | method | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (decides which namespaces are mirrored to rustHandle) |
-| basemodelmanager.ts | BaseModelManager | _mirrorWrite | method | 7 | 7 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (runs a rustHandle mirror write, swallowing its error) |
-| basemodelmanager.ts | BaseModelManager | _rustMirrorAdd | method | 17 | 17 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (the rustHandle write for an added model file: registers the file Rust loaded at construction, or sends the AST) |
+| basemodelmanager.ts | BaseModelManager | _isMirrored | method | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (decides which model files are mirrored to rustHandle: not a stub or hand-built one) |
+| basemodelmanager.ts | BaseModelManager | _rustMirrorAdd | method | 18 | 18 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (the rustHandle write for an added model file: registers the file Rust loaded at construction, or sends the AST) |
+| basemodelmanager.ts | BaseModelManager | _rustMirrorUpdate | method | 34 | 34 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (the rustHandle write for a replaced model file: update, add or delete) |
 | basemodelmanager.ts | BaseModelManager | addModel | method | 12 | 12 | orchestration: parses CTO text through the JS processFile callback (concerto-cto) and forwards to RUST members, where the Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (then addModelFile) |
 | basemodelmanager.ts | BaseModelManager | writeModelsToFileSystem | method | 15 | 15 | writes files through concerto-util ModelWriter (Node fs); no model logic |
 | basemodelmanager.ts | BaseModelManager | getDecoratorValidation | method | 3 | 1.5 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
@@ -490,13 +493,14 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/views.ts | (function) | declarationEntry | function | 20 | 20 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (finds the precomputed Rust snapshot entry of a declaration view) |
 | engine/views.ts | (function) | sameType | function | 4 | 2 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (compares a view's AST super type with the one its snapshot entry was computed with) |
 | engine/views.ts | (function) | restoreUndefinedDecorators | function | 19 | 19 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (restores `decorators: undefined` on the Rust extract result so the JS object shape matches the input) |
-| engine/views.ts | (function) | stageModelFile | function | 55 | 55 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: sends a ModelFile's AST to Rust once and keeps the loaded file staged; decides lazy vs eager) |
+| engine/views.ts | (function) | stageModelFile | function | 65 | 65 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: sends a ModelFile's AST to Rust once and keeps the loaded file staged; decides lazy vs eager) |
 | engine/views.ts | (function) | hasStringValidator | function | 10 | 10 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: which property AST nodes the Rust fieldProcess selection gives a StringValidator) |
 | engine/views.ts | (function) | probeCustomRegExp | function | 44 | 44 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: with a custom options.regExp, builds the Fields' StringValidators at construction so the user engine runs, and throws, at load) |
 | engine/views.ts | (function) | takeProbedStringValidator | function | 12 | 12 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: hands a StringValidator built at construction to its Field) |
 | engine/views.ts | (function) | materialise | function | 31 | 31 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: builds a file's declaration views on first read through the ledgered view constructors, and caches them) |
 | engine/views.ts | (function) | defineLazyFields | function | 19 | 19 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: installs the declarations/localTypes accessors) |
 | engine/views.ts | (function) | deferDeclarations | function | 17 | 17 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: defers a file's declaration views; the migration check mode builds them at once) |
+| engine/views.ts | (function) | isEngineBuilt | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (whether a model file was built through the engine path; false for a stub or a hand-built AST the engine refused, accordproject/concerto-rust#262) |
 | engine/views.ts | (function) | takeStage | function | 9 | 9 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: stage bookkeeping) |
 | engine/views.ts | (function) | commitStaged | function | 12 | 12 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: registers the staged file in rustHandle) |
 | engine/views.ts | (function) | dropStaged | function | 6 | 6 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: drops a stage that will not be registered) |
@@ -855,13 +859,13 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 5. HYBRID items with reasons
 
-34 members, weight 1297.5 (19.7%).
+34 members, weight 1282.5 (19.4%).
 
 | file | class | member | weight | what stays in JS |
 |---|---|---|---|---|
 | basemodelmanager.ts | BaseModelManager | constructor | 28 | creates the Rust ModelManager handle; also builds the TS Factory/Serializer, keeps the JS processFile callback and the options object (options.regExp, decoratorValidation) |
-| basemodelmanager.ts | BaseModelManager | updateModelFile | 37 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
-| basemodelmanager.ts | BaseModelManager | addModelFiles | 96 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
+| basemodelmanager.ts | BaseModelManager | updateModelFile | 23 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
+| basemodelmanager.ts | BaseModelManager | addModelFiles | 95 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
 | decoratormanager.ts | DecoratorManager | validate | 27 | the DCS model is CTO text compiled by concerto-cto in JS (via addCTOModel); the command-set instance validation itself is Rust (Serializer fast path / validateCommand) |
 | engine/serializer.ts | (function) | handleFor | 31 | JSON envelope building, the ModelManagerHandle cache and the options.regExp fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
 | engine/serializer.ts | (function) | fastFromJson | 21 | JSON envelope building, the ModelManagerHandle cache and the options.regExp fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
@@ -896,7 +900,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 5b. PARTIAL items (no engine call)
 
-14 members, weight 379.5 (5.8%). Set automatically by the engine-call
+14 members, weight 379.5 (5.7%). Set automatically by the engine-call
 scan (see Method); accordproject/concerto-rust#261. 14 of them (weight
 379.5) are **port candidates, deferred by maintainer decision**
 (accordproject/concerto-rust#276, 2026-09-28): the P5-11 evaluation recommended moving them to
@@ -1124,8 +1128,8 @@ fallback (plan section 3): `ModelFile`'s is HYBRID, and the others are TS view g
 
 Kept for history; every question below has a maintainer decision now, linked from each item.
 
-1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 39.0%
-   (old figure, previous denominator: 38.6%). See section 1.
+1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 38.6%
+   (old figure, previous denominator: 38.1%). See section 1.
 2. **Constant markers and `accept()` count as TS. Settled: excluded from the D1
    denominator.** They are not "logic". 54 members, weight 81,
    removed from the denominator (section 1).
