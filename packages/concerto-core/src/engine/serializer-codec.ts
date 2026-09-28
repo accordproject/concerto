@@ -283,7 +283,8 @@ function modelClasses(): any {
 
 /**
  * What `materializeTyped` needs to know about an instance's class, kept per
- * (constructor, class, namespace, type) by a caller that decodes many
+ * class (and checked against the constructor, namespace and type it was
+ * learned for) by a caller that decodes many
  * instances against the same, unchanged model files (P5-16,
  * accordproject/concerto-rust#310): the class declaration
  * `modelManager.getType(fqn)` answers, and the `$identifierFieldName` the
@@ -293,11 +294,31 @@ function modelClasses(): any {
  * change (`engine/serializer.ts` keeps it next to its handle).
  */
 interface TypeInfo {
+    ctor: string;
+    ns: unknown;
+    type: unknown;
     classDeclaration: any;
     identifierFieldName: string;
 }
 
-type TypeCache = Map<string, TypeInfo>;
+/**
+ * The `TypeInfo`s of each class, by fully-qualified name and then by TS
+ * class (`ctor`), and the entry found last: a run of instances of one
+ * class then compares the name with the last one's instead of hashing it
+ * again (P5-16).
+ */
+interface TypeCache {
+    byFqn: Map<string, Record<string, TypeInfo>>;
+    last: { fqn: string; entry: Record<string, TypeInfo> } | undefined;
+}
+
+/**
+ * A new, empty `TypeCache`.
+ * @return {object} the cache
+ */
+function newTypeCache(): TypeCache {
+    return { byFqn: new Map(), last: undefined };
+}
 
 /**
  * `new Ctor(modelManager, classDeclaration, ns, type, id, timestamp[, validator])`,
@@ -418,9 +439,15 @@ function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModel
     const { Resource, ValidatedResource, Relationship, ResourceValidator } = modelClasses();
     const Ctor = ctor === 'ValidatedResource' ? ValidatedResource : ctor === 'Relationship' ? Relationship : Resource;
     const validator = ctor === 'ValidatedResource' ? new ResourceValidator({}) : undefined;
-    const key = types ? `${ctor}\u0000${fqn}\u0000${ns}\u0000${type}` : '';
-    const info = types?.get(key);
-    if (info) {
+    // Looked up by the strings `JSON.parse` already made (no key is built),
+    // and checked against the namespace and type it was learned for.
+    const last = types?.last;
+    const entry = last && last.fqn === fqn ? last.entry : types?.byFqn.get(fqn);
+    const info = entry?.[ctor];
+    if (info && info.ns === ns && info.type === type) {
+        if (last?.entry !== entry) {
+            types!.last = { fqn, entry: entry! };
+        }
         return constructCached(Ctor, info, modelManager, ns, type, id, timestamp, Ctor === Relationship, validator);
     }
     const classDeclaration = modelManager.getType(fqn);
@@ -430,8 +457,14 @@ function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModel
     if (!types) {
         return resource;
     }
-    const learned = { classDeclaration, identifierFieldName: resource.$identifierFieldName };
-    types.set(key, learned);
+    const learned = { ctor, ns, type, classDeclaration, identifierFieldName: resource.$identifierFieldName };
+    let learnedEntry = types.byFqn.get(fqn);
+    if (!learnedEntry) {
+        learnedEntry = Object.create(null) as Record<string, TypeInfo>;
+        types.byFqn.set(fqn, learnedEntry);
+    }
+    learnedEntry[ctor] = learned;
+    types.last = { fqn, entry: learnedEntry };
     // The first instance of a class is built again the way every later one
     // is, so that all of them share one object layout (V8 map): the
     // constructor's instance has a different one, and code that reads
@@ -549,3 +582,4 @@ function decodeValue(v, modelManager: BaseModelManager) {
 
 export { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, checkString, checkJsonText };
 export type { TypeCache };
+export { newTypeCache };

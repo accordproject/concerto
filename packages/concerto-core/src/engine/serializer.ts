@@ -36,7 +36,7 @@
 
 import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 import { rust } from './index';
-import { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, checkString, checkJsonText } from './serializer-codec';
+import { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, newTypeCache, checkString, checkJsonText } from './serializer-codec';
 import Factory from '../factory';
 import Serializer from '../serializer';
 
@@ -120,7 +120,7 @@ function cachedHandleFor(modelManager: BaseModelManager): CachedHandle {
         }
         handle.addModel(checkJsonText(JSON.stringify(modelFile.getAst())), name);
     }
-    const entry = { handle, modelFiles, types: new Map() };
+    const entry = { handle, modelFiles, types: newTypeCache() };
     handles.set(modelManager, entry);
     return entry;
 }
@@ -156,10 +156,11 @@ const fromJsonEnv = {
 };
 
 /**
- * The options object last encoded by `optionsText`, its own keys and
- * values at the time, and its wire text (P5-16).
+ * The options objects `optionsText` has encoded: each one's own keys and
+ * values at the time, and its wire text (P5-16). A WeakMap, so it never
+ * keeps a caller's options object alive.
  */
-let lastOptions: { options: object; keys: string[]; values: unknown[]; text: string } | undefined;
+const encodedOptions = new WeakMap<object, { keys: string[]; values: unknown[]; text: string }>();
 
 /**
  * `JSON.stringify(encodeValue(options))`, reused while `options` is the
@@ -171,19 +172,22 @@ let lastOptions: { options: object; keys: string[]; values: unknown[]; text: str
  * @return {string} the options' wire text
  */
 function optionsText(options: SerializerOptions): string {
-    const last = lastOptions;
-    if (last && last.options === options) {
+    const isObject = options !== null && typeof options === 'object';
+    const last = isObject ? encodedOptions.get(options) : undefined;
+    if (last) {
         const keys = Object.keys(options);
         if (keys.length === last.keys.length && keys.every((k, i) => k === last.keys[i] && Object.is(options[k], last.values[i]))) {
             return last.text;
         }
     }
     const text = JSON.stringify(encodeValue(options));
-    if (options !== null && typeof options === 'object') {
+    if (isObject) {
         const keys = Object.keys(options);
         const values = keys.map((k) => options[k]);
         if (values.every((v) => v === null || (typeof v !== 'object' && typeof v !== 'function'))) {
-            lastOptions = { options, keys, values, text };
+            encodedOptions.set(options, { keys, values, text });
+        } else {
+            encodedOptions.delete(options);
         }
     }
     return text;

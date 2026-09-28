@@ -13,6 +13,12 @@
 // (P5-02 removed the in-tree TS engine, so that is the TS comparison).
 // --workloads runs only the named workloads, comma-separated
 // (load_validate, validate_ast, instance_validate; default all three).
+// --concerto-commit and --concerto-rust-commit (task P5-16,
+// accordproject/concerto-rust#310) record the commits the measured dist/
+// and engine were built from, for a run whose --core-dist or
+// CONCERTO_ENGINE_MODULE is not this checkout's own build. Without them,
+// concerto_commit is this checkout's HEAD and concerto_rust_commit the HEAD
+// of the concerto-rust checkout next to it.
 //
 // Runs against the built `dist/` of packages/concerto-core (`npm run build
 // -w packages/concerto-core`, after `npm ci` at the repo root - see
@@ -69,7 +75,7 @@ const FIXTURES_DIR = path.join(__dirname, 'fixtures', 'model-sets');
 const RESULTS_DIR = path.join(__dirname, 'results');
 
 function parseArgs(argv) {
-    const args = { samples: 30, warmup: 5, out: null, coreDist: DEFAULT_CORE_DIST, workloads: WORKLOADS };
+    const args = { samples: 30, warmup: 5, out: null, coreDist: DEFAULT_CORE_DIST, workloads: WORKLOADS, concertoCommit: null, concertoRustCommit: null };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--samples') {
@@ -80,6 +86,10 @@ function parseArgs(argv) {
             args.out = argv[++i];
         } else if (a === '--core-dist') {
             args.coreDist = path.resolve(argv[++i]);
+        } else if (a === '--concerto-commit') {
+            args.concertoCommit = argv[++i];
+        } else if (a === '--concerto-rust-commit') {
+            args.concertoRustCommit = argv[++i];
         } else if (a === '--workloads') {
             args.workloads = argv[++i].split(',');
             const unknown = args.workloads.filter((w) => !WORKLOADS.includes(w));
@@ -337,7 +347,12 @@ function main() {
             total_mem_gb: Math.round(os.totalmem() / 1e9),
             node: process.version,
         },
-        concerto_commit: gitCommit(REPO_ROOT),
+        concerto_commit: args.concertoCommit || gitCommit(REPO_ROOT),
+        // task P5-16: the engine the run used (CONCERTO_ENGINE_MODULE, or
+        // the linked @accordproject/concerto-engine) and the concerto-rust
+        // commit it was built from (see --concerto-rust-commit above).
+        concerto_rust_commit: args.concertoRustCommit || gitCommit(path.join(REPO_ROOT, '..', 'concerto-rust')),
+        engine_module: process.env.CONCERTO_ENGINE_MODULE || '@accordproject/concerto-engine',
         // task P5-04 (accordproject/concerto-rust#75): which engine served
         // concerto-core's public API for this run - 'ts' (the default) or
         // 'rust' (CONCERTO_ENGINE=rust, the WASM-backed engine, see
