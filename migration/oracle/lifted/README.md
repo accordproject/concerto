@@ -304,7 +304,14 @@ without editing `packages/concerto-core/test/**`:
   `isAssignableTo`, `getModelFileByFileName`, `resolveType`) on a manager
   holding a hand-built model file the engine mirror did not take;
 * `public-api.checks.js`: small public members (`ModelUtil`'s engine memo,
-  `ResourceId` guards, and so on).
+  `ResourceId` guards, and so on);
+* `resourcevalidator-visitor.checks.js` (task P5-12c,
+  accordproject/concerto-rust#293): `ValidatedResource.validate()`,
+  `setPropertyValue` and `addArrayValue` now validate in one engine call,
+  so the `ResourceValidator` visitor runs only behind
+  `EngineFastPathUnsupported`. The `VV-*` checks drive it through a model
+  manager with a custom `regExp` engine; the `VE-*` checks run the same
+  scenarios through the engine and compare only the thrown class.
 
 `serializer-fallback.checks.js` also passes a boxed `utcOffset`
 (`new Number(0)`) to `fromJSON`: the codec cannot carry it, so plain, valid
