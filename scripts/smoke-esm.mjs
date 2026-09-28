@@ -66,21 +66,22 @@ check('Node resolves the import condition, not the browser build', async () => {
 });
 
 // `Serializer`'s default `utcOffset` resolves from `dayjs().utcOffset()`
-// (datetimeutil.ts), the *local machine's* offset, at module-load time. Run
-// under TZ=UTC (npm script `test:esm`), so this round trip is independent of
-// the machine running it; anywhere else it runs, pin TZ=UTC too.
+// (datetimeutil.ts), the *local machine's* offset, at module-load time, so a
+// round trip through the default `toJSON()` would only match the original
+// Zulu string on a UTC machine. Pin `utcOffset: 0` on the `toJSON()` call
+// instead, so the check is independent of the machine running it.
 check('model round-trips through Factory and Serializer', () => {
     const modelManager = new ModelManager();
     modelManager.addCTOModel(MODEL, 'smoke.cto');
     const serializer = new Serializer(new Factory(modelManager), modelManager);
     const json = { $class: 'smoke@1.0.0.Ping', id: 'e1', when: '2020-01-01T12:00:00.000Z' };
-    const resource = serializer.fromJSON(json);
+    const resource = serializer.fromJSON(json, { utcOffset: 0 });
     assert.strictEqual(resource.getIdentifier(), 'e1');
     // A DateTime only parses into a dayjs instance with the utc plugin
     // registered, which is the one module-level side effect in the tree and so
     // the thing most at risk from tree shaking.
     assert.strictEqual(typeof resource.when.utcOffset, 'function');
-    assert.strictEqual(serializer.toJSON(resource).when, json.when);
+    assert.strictEqual(serializer.toJSON(resource, { utcOffset: 0 }).when, json.when);
     assert.strictEqual(ModelUtil.getNamespace('smoke@1.0.0.Ping'), 'smoke@1.0.0');
 });
 
