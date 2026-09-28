@@ -317,3 +317,80 @@ of them through one `engineCall()` helper that applies the same tag (never to a
 at a TS-side harness error before looking at the Rust side: every case is classified
 once (`lib/classify.js`), harness errors are counted per side and per op, and each
 harness-error case is written to `results/harness-errors.jsonl` with both sides.
+
+## CI: the nightly safety net (task P2, accordproject/concerto-rust#307)
+
+`.github/workflows/fuzz-nightly.yml` runs one fixed-seed, 100,000-case shard of
+`bin/fuzz.js` nightly (03:17 UTC) and on manual dispatch, against the migration
+integration branch. It is the safety net for the maintainer decision (2026-09-27)
+that fuzzing otherwise happens only on tasks that change Rust engine semantics,
+never at merge — this catches anything slipping between tasks.
+
+- **Engine:** built from the pinned `concerto-rust` ref in
+  `.github/actions/concerto-engine`, the same ref every other job in this repo's CI
+  uses — not `concerto-rust`'s own integration head, which carries no such CI gate
+  of its own and can be red between tasks (as it was when this task verified the
+  workflow: `concerto-wasm` did not compile at the then-current integration head,
+  but built cleanly from the pinned ref).
+- **Run-seed:** `date -u +%Y%m%d` (UTC), so each night samples a different slice of
+  the mutation space (a different `(seedIndex, mutationSeed)` plan, `bin/fuzz.js`
+  §"Usage") while staying individually reproducible — replay any night's shard with
+  `--run-seed <that date>`. Recorded in `run.json`'s `runSeed` field and the job
+  summary.
+- **Budget:** one shard of 100,000 cases, batch size 1000. Measured at roughly 90
+  cases/s on one core (task P2 verification run; the harness's own README previously
+  measured 60-70 cases/s on different hardware) — about 20 minutes, plus setup, well
+  inside the 60-minute job timeout. No sharding was needed to hit that budget; if a
+  future op addition or slowdown pushes the shard over budget, lower `--count` or
+  split into parallel shards (`bin/run-shards.js`'s pattern) before raising the
+  timeout.
+- **Baseline and pass/fail:** `bin/fuzz.js`'s own `divergences` count already
+  excludes every maintainer-accepted, *permanent* divergence
+  (`lib/expected-divergences.js`, the DV-\* rows). It does **not** exclude the much
+  larger set of divergences this migration's fuzzing has found that are real,
+  individually-tracked engine gaps not yet fixed (see `results/stage2/triage-clusters.json`'s
+  `owners` for the issue each is attributed to) — gating on `divergences > 0` alone
+  would fail the job every night for already-known reasons. `bin/check-nightly.js`
+  instead clusters tonight's divergences by signature (`lib/signature.js`, the same
+  function `bin/triage.js` uses) and fails only when a cluster's signature is not
+  already in the committed baseline, `results/nightly-baseline/known-clusters.json`
+  — a divergence *shape* nobody has seen and attributed yet. A new *case* of an
+  already-known cluster (same signature, a different seed or mutation) is not new
+  and does not fail the job.
+- **Regenerating the baseline:** the baseline is a plain list of cluster signatures
+  from one full shard run (this task recorded it at `--run-seed 1`, the pinned
+  `concerto-rust` ref, and the canonical corpus, listed in
+  `results/nightly-baseline/known-clusters.json`'s `generatedFrom`). Regenerate it
+  (after a fix lands and a cluster should stop being "known", or after enough new,
+  individually-triaged-and-owned clusters accumulate that re-baselining is cheaper
+  than listing them all) with:
+  ```sh
+  FIXTURES_DIR=<concerto checkout>/migration/oracle/fixtures \
+  CONCERTO_ENGINE_MODULE=<concerto-rust checkout>/concerto-wasm/pkg/concerto-engine.cjs \
+    node migration/fuzz/bin/fuzz.js --count 100000 --batch-size 1000 --run-seed 1 \
+      --out migration/fuzz/results/nightly-baseline/run.json \
+      --divergences migration/fuzz/results/nightly-baseline/divergences.jsonl
+  node migration/fuzz/bin/triage.js migration/fuzz/results/nightly-baseline/divergences.jsonl \
+    > /tmp/triage.json   # then update known-clusters.json's "signatures" from its
+                          # clusters[].sig and its generatedFrom metadata by hand
+  ```
+  A baseline update is a review point like any other change here: shrinking it
+  (removing a signature) asserts a fix landed; growing it asserts a newly-owned,
+  already-tracked gap, not a shrug.
+- **Never a corpus or baseline (P5-05 sense) change:** this task only adds the
+  workflow, `bin/check-nightly.js` and the nightly nightly-baseline snapshot files
+  above. It does not touch `bin/fuzz.js`'s case generation or classification,
+  `lib/expected-divergences.js`, the oracle corpus, or `concerto-core/tests/oracle/baseline.tsv`.
+- **Verifying a real failure locally** (not committed — the exit condition is a
+  *local*, deliberately injected divergence): append a fabricated line to a copy of
+  `results/nightly/divergences.jsonl` with an `op`/`ts`/`rust` shape that
+  `lib/signature.js` cannot match to any signature in `known-clusters.json` (a
+  new op name is the simplest), then run `bin/check-nightly.js` against it — it
+  exits 1, lists the new cluster, and writes it into `triage-clusters.json`'s
+  `newClusterCount`.
+
+**Schedule caveat:** GitHub only fires a workflow's `schedule` trigger from the copy
+of the workflow file on the repository's *default* branch (`main`), not from a
+feature/integration branch, even though `workflow_dispatch` runs the branch's own
+copy on demand. Until `claude/tender-pascal-ocwf9q` merges to `main`, exercise this
+job with "Run workflow"; the nightly cron activates itself, unmodified, once merged.
