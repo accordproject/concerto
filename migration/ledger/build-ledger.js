@@ -509,8 +509,8 @@ ${sum(paDeferred, l => l.weight)}) are **port candidates, deferred by maintainer
 (accordproject/concerto-rust#276, 2026-09-28): the P5-11 evaluation recommended moving them to
 Rust (resolution and validation primitives, and throw sites that re-derive a Rust verdict),
 and the maintainer decided that no more code moves to Rust for now. The evaluation, with the
-evidence for each row, is on #276, and the deferred list is kept in a \`mig:post-migration\`
-backlog issue. A row marked **undecided** has not been evaluated.
+evidence for each row, is on #276, and the deferred list, with option F, is kept in the \`mig:post-migration\`
+backlog issue accordproject/concerto-rust#287. A row marked **undecided** has not been evaluated.
 
 ### PARTIAL *logic*: unconverted TS bodies
 
