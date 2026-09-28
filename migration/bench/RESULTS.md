@@ -1,3 +1,110 @@
+# P5-10c: lazy views, full benchmark after parts 1 and 2 (2026-09-27)
+
+Task P5-10c (accordproject/concerto-rust#271) re-runs the full P5-04
+suite on the integration heads after lazy views parts 1 and 2 (P5-10a
+#269, P5-10b #270) merged. It compares them against the last pre-lazy
+integration head (the same "before" build P5-10a used) and the TS
+reference, on one machine, interleaved round by round. The crate-direct
+criterion suite is re-run too.
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 cores, 17 GB, Linux, used only by this task |
+| Toolchain | Node v22.22.2, rustc 1.94.1, wasm-bindgen 0.2.128, wasm-opt (binaryen 132) applied by `npm run build` |
+| Quiet-check | The TS-API runs started when the 1-minute load average was 0.47 (`.longrun/chain.log`), after all builds and the criterion runs had finished. The three rounds took 41 seconds. The criterion runs followed the builds directly (load average 1.1 to 1.5, with no other job running). |
+| Pre-lazy ("before") | `concerto` `796669d5c`, `concerto-rust` `5498f61`: the integration head immediately before P5-10a, the same as P5-10a's "before" |
+| Lazy ("after") | `concerto` `d2be3f7be`, `concerto-rust` `e7c0163`: the integration head after the P5-10b merge |
+| Engine builds | Both built fresh with `npm run build` in `concerto-wasm` (wasm-opt applied): 2,775,931 bytes before and 2,846,550 bytes after, both within the 4 MiB budget |
+| TS reference | published `@accordproject/concerto-core` 5.0.0, the oracle's reference |
+| TS-API runs | `results/P5-10c-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`: three interleaved rounds, `run-ts.mjs` defaults (5 warm-up + 30 samples) |
+| Crate runs | `concerto-rust`'s `benches/results/P5-10c/2026-09-27-rust-crit-{before,after}-{1,2}.json`: two interleaved rounds, criterion defaults |
+
+## Through the TS public API
+
+Medians in µs per model or per instance, for runs 1, 2 and 3. Ratios
+use the median of the three runs. `load+validate` is `run-ts.mjs`'s
+`validate` metric. The last three columns are earlier tasks' own
+engine / TS ratios, for comparison: P5-04b (post-P5-02, on a different
+machine, mean of its two runs), P5-06d (after typed deserialisation) and
+P5-10a (after lazy views part 1). Only their ratios are comparable, not
+their µs.
+
+| Model set | Metric | TS, runs 1 / 2 / 3 | Rust pre-lazy, runs 1 / 2 / 3 | Rust lazy, runs 1 / 2 / 3 | pre-lazy / TS | **lazy / TS** | speed-up | P5-04b | P5-06d | P5-10a |
+|---|---|---|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | load | 37.3 / 35.9 / 33.5 | 520.8 / 416.5 / 429.3 | 148.8 / 145.8 / 149.2 | 12.0× | **4.1×** | 2.89× | 16.9× | 14.9× | 4.6× |
+| concerto-core-test-data | load+validate | 71.2 / 57.7 / 60.9 | 536.0 / 568.6 / 582.2 | 224.0 / 191.7 / 184.7 | 9.3× | **3.2×** | 2.97× | 18.7× | 8.2× | 3.0× |
+| concerto-core-test-data | validateAst | 588.6 / 541.3 / 485.4 | 954.4 / 883.2 / 1163.6 | 874.1 / 970.4 / 957.3 | 1.8× | **1.8×** | 1.00× | 1.5× | 1.4× | 1.8× |
+| conformance | load | 13.4 / 14.8 / 13.4 | 134.5 / 128.6 / 143.7 | 51.7 / 61.5 / 70.2 | 10.0× | **4.6×** | 2.19× | 28.6× | 10.4× | 5.3× |
+| conformance | load+validate | 27.7 / 19.3 / 20.0 | 299.7 / 244.1 / 273.5 | 180.4 / 159.9 / 160.7 | 13.7× | **8.0×** | 1.70× | 26.0× | 12.1× | 8.1× |
+| conformance | validateAst | 209.3 / 191.6 / 199.2 | 548.7 / 550.4 / 486.0 | 548.2 / 504.3 / 541.0 | 2.8× | **2.7×** | 1.01× | 2.1× | 2.4× | 2.6× |
+| synthetic-large | load | 655.9 / 571.5 / 560.5 | 19819.6 / 20377.5 / 20938.4 | 8431.8 / 6302.6 / 7089.7 | 35.7× | **12.4×** | 2.87× | 65.4× | 28.6× | 10.3× |
+| synthetic-large | load+validate | 1993.4 / 1704.6 / 1558.1 | 23417.2 / 25671.8 / 25584.9 | 10190.5 / 12117.6 / 9527.1 | 15.0× | **6.0×** | 2.51× | 29.2× | 9.0× | 5.2× |
+| (synthetic, 500) | fromJSON | 6.8 / 6.5 / 5.6 | 41.3 / 41.7 / 36.9 | 38.0 / 37.8 / 40.9 | 6.3× | **5.8×** | 1.09× | 6.2× | 7.0× | 6.4× |
+| (synthetic, 500) | resource.validate() | 1.6 / 1.7 / 1.4 | 15.3 / 14.7 / 13.8 | 15.9 / 15.6 / 15.1 | 9.2× | **9.7×** | 0.95× | 9.3× | 9.3× | 9.2× |
+
+- **Load and load+validate:** with lazy views, load is 2.2× to 2.9× faster
+  than the pre-lazy head, and load+validate is 1.7× to 3.0× faster.
+  Against TS, load is now 4.1× to 12.4× slower, and load+validate 3.2×
+  to 8.0× slower. P5-04b measured 16.9× to 65.4× for load, and P5-06d
+  measured 10.4× to 28.6×.
+- **Against P5-10a:** parts 1 and 2 together are within run-to-run noise of
+  part 1 alone (P5-10a: load 4.6× to 10.3×, load+validate 3.0× to 8.1×).
+  Part 2's deferred decorators, validators and map types do not change
+  these three model sets measurably. On this run, test-data and
+  conformance load come out a little faster than P5-10a's, and
+  synthetic-large load a little slower (its lazy runs spread from 6.3 to
+  8.4 ms).
+- **validateAst and instance validation** do not use the view layer. They
+  are unchanged within noise (0.95× to 1.09×).
+- **Parity is not reached.** The Rust engine through the TS API is still
+  slower than the TS reference on every operation. The largest remaining
+  gap is synthetic-large load (12.4×). The crate itself loads that model
+  in about 3.3 ms (below), against TS's 0.6 ms for the whole public-API
+  load, so part of that gap is the crate's own floor, not the view layer.
+
+## The Rust crate directly (criterion)
+
+Medians in µs per model or per instance, for runs 1 and 2. The speed-up
+uses the mean of the two runs. The crate diff between the two heads is
+small: `concerto-core/src/model_manager.rs` (+26) and the #265 native
+oracle comparison (`instance/metamodel.rs`), plus the concerto-wasm
+bindings, which criterion does not exercise. The last column is P5-06d's
+"after" runs (`benches/results/P5-06d/`), from the same machine type.
+
+| Benchmark | Pre-lazy (`5498f61`), runs 1 / 2 | Lazy (`e7c0163`), runs 1 / 2 | Speed-up | P5-06d after, runs 1 / 2 |
+|---|---|---|---|---|
+| `load`, concerto-core-test-data | 70.6 / 57.9 | 52.5 / 56.2 | 1.18× | 56.2 / 58.5 |
+| `load_text_typed`, concerto-core-test-data | 44.1 / 43.7 | 40.5 / 41.3 | 1.07× | 43.8 / 43.7 |
+| `load_text_value`, concerto-core-test-data | 64.1 / 64.3 | 68.2 / 65.8 | 0.96× | 62.9 / 66.6 |
+| validate, concerto-core-test-data | 57.5 / 53.5 | 48.9 / 53.6 | 1.08× | 53.7 / 56.9 |
+| `load`, conformance | 27.6 / 21.9 | 21.5 / 21.1 | 1.16× | 21.3 / 21.4 |
+| `load_text_typed`, conformance | 15.2 / 15.4 | 14.8 / 13.4 | 1.09× | 14.6 / 14.9 |
+| `load_text_value`, conformance | 25.8 / 25.2 | 25.0 / 25.0 | 1.02× | 23.9 / 24.7 |
+| validate, conformance | 25.7 / 24.7 | 25.5 / 19.7 | 1.11× | 25.4 / 25.5 |
+| `load`, synthetic-large | 3727.6 / 3309.7 | 3256.3 / 3244.6 | 1.08× | 3323.9 / 3393.6 |
+| `load_text_typed`, synthetic-large | 1823.4 / 1793.5 | 1752.3 / 1768.5 | 1.03× | 1770.0 / 1766.9 |
+| `load_text_value`, synthetic-large | 3694.2 / 3722.3 | 3831.7 / 3722.5 | 0.98× | 3356.7 / 3721.4 |
+| validate, synthetic-large | 3779.5 / 2647.1 | 2963.2 / 2835.1 | 1.11× | 2783.6 / 2921.2 |
+| `ModelFile::from_json`, concerto-core-test-data | 54.8 / 52.1 | 52.5 / 53.7 | 1.01× | 51.4 / 52.0 |
+| `ModelFile::from_json`, conformance | 18.3 / 18.0 | 18.4 / 18.9 | 0.97× | 18.3 / 19.1 |
+| `ModelFile::from_json`, synthetic-large | 3313.2 / 3364.7 | 3377.1 / 3220.9 | 1.01× | 3430.9 / 3120.7 |
+| `validate_instance` (500) | 2.0 / 1.9 | 1.9 / 2.0 | 1.02× | 1.9 / 1.9 |
+
+The crate is unchanged within noise, as expected: lazy views change the
+TS view layer and add concerto-wasm bindings, not the crate's load or
+validate. The pre-lazy runs' first round was noisier (`load` 70.6 and
+27.6, synthetic-large validate 3779.5), which accounts for most of the
+1.1× to 1.2× "speed-ups".
+
+## Correctness during the run
+
+The P5-10c verification results for the same lazy build (the fuzz run, the
+conformance suite and the lazy-views check mode) are reported in
+`migration/fuzz/TRIAGE.md` ("P5-10c") and on
+accordproject/concerto-rust#271.
+
+---
+
 # P5-10a: lazy views for ModelFile, ClassDeclaration and Property (2026-09-27)
 
 Task P5-10a (accordproject/concerto-rust#269) makes `ModelFile`
