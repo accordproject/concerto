@@ -51,7 +51,9 @@ import { timeit } from './lib/timeit.mjs';
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const CORE_DIST = path.join(REPO_ROOT, 'packages', 'concerto-core', 'dist');
+// P5-12 SPIKE: BENCH_CORE_DIST points the run at another concerto-core dist
+// (the TS reference 5.0.0 under migration/oracle/reference/node_modules).
+const CORE_DIST = process.env.BENCH_CORE_DIST || path.join(REPO_ROOT, 'packages', 'concerto-core', 'dist');
 const FIXTURES_DIR = path.join(__dirname, 'fixtures', 'model-sets');
 const RESULTS_DIR = path.join(__dirname, 'results');
 
@@ -282,6 +284,9 @@ function main() {
         // packages/concerto-core/src/engine/). Recorded so a results file
         // is self-describing without cross-checking how it was invoked.
         concerto_engine: process.env.CONCERTO_ENGINE === 'rust' ? 'rust' : 'ts',
+        core_dist: CORE_DIST,
+        p512_variant: process.env.CONCERTO_P512_VARIANT || 'base',
+        loadavg: os.loadavg(),
         sample_opts: sampleOpts,
         workloads: {},
     };
