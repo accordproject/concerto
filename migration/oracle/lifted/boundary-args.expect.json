@@ -292,5 +292,32 @@
       true,
       null
     ]
+  },
+  "BOUNDARY-ARG-063": {
+    "ok": {
+      "$class": "test@1.0.0.A",
+      "id": "r1"
+    }
+  },
+  "BOUNDARY-ARG-064": {
+    "ok": {
+      "$class": "test@1.0.0.A",
+      "id": "r1"
+    }
+  },
+  "BOUNDARY-ARG-065": {
+    "ok": {
+      "$class": "test@1.0.0.A",
+      "id": "r1"
+    }
+  },
+  "BOUNDARY-ARG-066": {
+    "ok": "Resource {id=test@1.0.0.A#r1}"
+  },
+  "BOUNDARY-ARG-067": {
+    "ok": "Resource {id=test@1.0.0.A#r1}"
+  },
+  "BOUNDARY-ARG-068": {
+    "ok": "Resource {id=test@1.0.0.A#r1}"
   }
 }

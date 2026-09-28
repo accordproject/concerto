@@ -87,8 +87,18 @@ function handleFor(modelManager: BaseModelManager): any {
         // A lone surrogate in the AST (a string default, a regex) or in the
         // file name cannot cross unchanged (serializer-codec.ts
         // `checkJsonText`): fall back to the visitor path.
-        const name = modelFile.getName();
-        if (typeof name === 'string') {
+        //
+        // `getName()` is not guaranteed to be a string: `ModelFile`'s
+        // constructor only rejects a *truthy* non-string `fileName`
+        // (introspect/modelfile.ts), so a falsy non-string -- `0`, `false`,
+        // `NaN` -- is stored and returned as-is (2ab40c9f7, #294). This
+        // `handle.addModel` call takes concerto-wasm's `file_name:
+        // Option<String>` the same as every other forward guarded there;
+        // send only a genuine string, `undefined` otherwise, matching
+        // v5.0.0 (which makes no wasm call for a falsy fileName at all).
+        const rawName = modelFile.getName();
+        const name = typeof rawName === 'string' ? rawName : undefined;
+        if (name !== undefined) {
             checkString(name);
         }
         handle.addModel(checkJsonText(JSON.stringify(modelFile.getAst())), name);

@@ -20,7 +20,12 @@
  * string-taking concerto-wasm bindings) to add `isAssignableTo`, the one
  * other de-fallbacked member the audit found unguarded, and then again
  * (review follow-up) to add `deleteModelFile` and the `updateModelFile` ->
- * `_rustMirrorUpdate` delete path.
+ * `_rustMirrorUpdate` delete path, then again to add the falsy-non-string
+ * `fileName`/`definitions` forwards (`addCTOModel`, `addModelFile(s)`,
+ * `updateModelFile`), and once more (further re-review) to add
+ * `engine/serializer.ts`'s `handleFor` -> `handle.addModel`, a fourth
+ * falsy-fileName forward the previous pass missed because it is reached
+ * only through `Serializer.toJSON`/`fromJSON`, not `addCTOModel` alone.
  *
  * The WASM bindings behind `BaseModelManager.getModelFileByFileName`,
  * `derivesFrom`, `resolveType`, `isAssignableTo` and `ModelFile.isLocalType`
@@ -220,6 +225,51 @@ const FALSY_CALLS = {
 };
 
 for (const [call, run] of Object.entries(FALSY_CALLS)) {
+    for (const [kind, value] of Object.entries(FALSY_NONSTRING)) {
+        n++;
+        const id = `BOUNDARY-ARG-${String(n).padStart(3, '0')}`;
+        checks.push({
+            id,
+            covers: `${call.replace('x', kind)}`,
+            run: (core) => run(core, value),
+            expect: EXPECT[id],
+        });
+    }
+}
+
+/**
+ * #294 re-review: the same falsy-non-string `fileName` also reaches
+ * `engine/serializer.ts`'s `handleFor`, a fourth forward the FALSY_CALLS
+ * audit above missed -- it builds the engine's own mirror ModelManager for
+ * `Serializer.fromJSON`/`toJSON`'s fast path and sent `modelFile.getName()`
+ * to `handle.addModel`'s `file_name: Option<String>` unguarded. Exercises
+ * that path (not just `addCTOModel` itself) end to end: add the model with
+ * a falsy non-string fileName, then round-trip a resource through
+ * `Serializer.toJSON`/`fromJSON`, which is what actually calls
+ * `handleFor`/`addModel` (`addCTOModel` alone never reaches it).
+ */
+const SERIALIZER_TEST_CTO = 'namespace test@1.0.0\nconcept A identified by id { o String id }';
+
+const SERIALIZER_FALSY_CALLS = {
+    'Serializer.toJSON after addCTOModel(cto, x)': (core, x) => {
+        const mm = new core.ModelManager({ strict: true });
+        mm.addCTOModel(SERIALIZER_TEST_CTO, x);
+        const factory = new core.Factory(mm);
+        const serializer = new core.Serializer(factory, mm);
+        const resource = factory.newResource('test@1.0.0', 'A', 'r1');
+        return serializer.toJSON(resource);
+    },
+    'Serializer.fromJSON after addCTOModel(cto, x)': (core, x) => {
+        const mm = new core.ModelManager({ strict: true });
+        mm.addCTOModel(SERIALIZER_TEST_CTO, x);
+        const factory = new core.Factory(mm);
+        const serializer = new core.Serializer(factory, mm);
+        const resource = serializer.fromJSON({ $class: 'test@1.0.0.A', id: 'r1' });
+        return resource.toString();
+    },
+};
+
+for (const [call, run] of Object.entries(SERIALIZER_FALSY_CALLS)) {
     for (const [kind, value] of Object.entries(FALSY_NONSTRING)) {
         n++;
         const id = `BOUNDARY-ARG-${String(n).padStart(3, '0')}`;
