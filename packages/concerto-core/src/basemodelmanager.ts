@@ -218,10 +218,18 @@ class BaseModelManager {
             // it in rustHandle.
             /* istanbul ignore next */
             if (this.rustHandle.modelFileId(MetaModelNamespace) === undefined) {
+                // Not reachable with a non-string in practice --
+                // `metamodelModelFile` is built above from fixed internal
+                // values (`undefined`, `MetaModelNamespace`) -- but guarded
+                // the same way as every other `getDefinitions()`/`getName()`
+                // forward for consistency (accordproject/concerto-rust#294
+                // follow-up).
+                const definitions = this.metamodelModelFile.getDefinitions();
+                const fileName = this.metamodelModelFile.getName();
                 this.rustHandle.addModelWithDefinitions(
                     JSON.stringify(this.metamodelModelFile.getAst()),
-                    this.metamodelModelFile.getDefinitions() ?? undefined,
-                    this.metamodelModelFile.getName() ?? undefined,
+                    typeof definitions === 'string' ? definitions : undefined,
+                    typeof fileName === 'string' ? fileName : undefined,
                     false,
                 );
             }
@@ -372,10 +380,18 @@ class BaseModelManager {
             return false;
         }
         if (!engineViews().commitStaged(modelFile, this.rustHandle)) {
+            // `ModelFile`'s constructor only rejects a *truthy* non-string
+            // `definitions`/`fileName`: `0`, `false` and `NaN` are stored
+            // as-is and reach here raw. Only a genuine string is forwarded
+            // to the wasm `Option<String>` params, matching v5.0.0 (which
+            // makes no wasm call at all) (accordproject/concerto-rust#294
+            // follow-up).
+            const definitions = modelFile.getDefinitions();
+            const fileName = modelFile.getName();
             this.rustHandle.addModelWithDefinitions(
                 JSON.stringify(modelFile.getAst()),
-                modelFile.getDefinitions() ?? undefined,
-                modelFile.getName() ?? undefined,
+                typeof definitions === 'string' ? definitions : undefined,
+                typeof fileName === 'string' ? fileName : undefined,
                 false,
             );
         }
@@ -398,7 +414,13 @@ class BaseModelManager {
         const namespace = modelFile.getNamespace();
         const wasMirrored = this._isMirrored(existing) && this._needsRustWrite(namespace);
         if (!this._isMirrored(modelFile)) {
-            if (wasMirrored) {
+            // `updateModelFile`'s public API accepts any object with a
+            // `getNamespace()` (not only a real `ModelFile`), so `namespace`
+            // is not guaranteed to be a string here the way it is for an
+            // engine-built file. `rustHandle.deleteModelFile` takes a WASM
+            // `&str`: guard it the same way the public `deleteModelFile`
+            // does (accordproject/concerto-rust#294 follow-up).
+            if (wasMirrored && typeof namespace === 'string') {
                 this.rustHandle.deleteModelFile(namespace);
             }
             return;
@@ -410,10 +432,15 @@ class BaseModelManager {
             return;
         }
         if (!wasMirrored) {
+            // Same falsy-non-string forward as `_rustMirrorAdd`: only a
+            // genuine string reaches the wasm `Option<String>` params
+            // (accordproject/concerto-rust#294 follow-up).
+            const addDefinitions = modelFile.getDefinitions();
+            const addFileName = modelFile.getName();
             this.rustHandle.addModelWithDefinitions(
                 JSON.stringify(modelFile.getAst()),
-                modelFile.getDefinitions() ?? undefined,
-                modelFile.getName() ?? undefined,
+                typeof addDefinitions === 'string' ? addDefinitions : undefined,
+                typeof addFileName === 'string' ? addFileName : undefined,
                 false,
             );
             return;
@@ -421,10 +448,12 @@ class BaseModelManager {
         // TS has already validated (or was asked not to); the mirror call
         // only needs to keep rustHandle's state in sync, so it never
         // re-validates itself.
+        const updateDefinitions = modelFile.getDefinitions();
+        const updateFileName = modelFile.getName();
         this.rustHandle.updateModelFile(
             JSON.stringify(modelFile.getAst()),
-            modelFile.getDefinitions() ?? undefined,
-            modelFile.getName() ?? undefined,
+            typeof updateDefinitions === 'string' ? updateDefinitions : undefined,
+            typeof updateFileName === 'string' ? updateFileName : undefined,
             false,
         );
     }
@@ -683,9 +712,16 @@ class BaseModelManager {
             throw new Error('Model file does not exist');
         } else {
             // Mirrored first, so a mirror error leaves both unchanged. A
-            // stub file was never mirrored (`_isMirrored`).
+            // stub file was never mirrored (`_isMirrored`). `this.modelFiles[namespace]`
+            // above coerces `namespace` to a string key (matching v5.0.0,
+            // which deletes cleanly for a non-string whose string form is a
+            // loaded namespace), but `rustHandle.deleteModelFile` takes a
+            // WASM `&str`: a non-string reaching it traps the engine
+            // (accordproject/concerto-rust#294 follow-up). Only a genuine
+            // string is sent to Rust; the TS-side delete below still runs
+            // for any type, as v5.0.0 does.
             /* istanbul ignore next */
-            if (this._needsRustWrite(namespace) && this._isMirrored(this.modelFiles[namespace])) {
+            if (typeof namespace === 'string' && this._needsRustWrite(namespace) && this._isMirrored(this.modelFiles[namespace])) {
                 this.rustHandle.deleteModelFile(namespace);
             }
             delete this.modelFiles[namespace];
@@ -1229,8 +1265,11 @@ class BaseModelManager {
      * @returns {boolean} True if fqn is assignable to baseFqn
      */
     isAssignableTo(fqn: string, baseFqn: string): boolean {
+        // Non-string arguments take the TS body: the binding's `&str`
+        // parameters cannot take them (a JS non-string traps the engine;
+        // accordproject/concerto-rust#294, follow-up to #262).
         /* istanbul ignore next */
-        if (this._rustHandleMatchesModelFiles()) {
+        if (typeof fqn === 'string' && typeof baseFqn === 'string' && this._rustHandleMatchesModelFiles()) {
             return this.rustHandle.isAssignableTo(fqn, baseFqn);
         }
         let typeDeclaration;

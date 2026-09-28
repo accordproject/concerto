@@ -367,10 +367,18 @@ class ModelFile extends Decorated {
                 // registered from its stage) is validated without sending
                 // the AST again (engine/views.ts `validateLoaded`).
                 if (!loadEngine('../engine/views').validateLoaded(this, manager.rustHandle)) {
+                    // Falsy non-string `definitions`/`fileName` (`0`, `false`,
+                    // `NaN`) pass the constructor's truthy-only check and
+                    // reach here raw: only a genuine string is forwarded to
+                    // the wasm `Option<String>` params, matching the
+                    // `stageModelFile` guard above
+                    // (accordproject/concerto-rust#294 follow-up).
+                    const definitions = this.getDefinitions();
+                    const fileName = this.getName();
                     manager.rustHandle.modelFileValidateDetached(
                         JSON.stringify(this.getAst()),
-                        this.getDefinitions() ?? undefined,
-                        this.getName() ?? undefined,
+                        typeof definitions === 'string' ? definitions : undefined,
+                        typeof fileName === 'string' ? fileName : undefined,
                     );
                 }
                 return;
