@@ -298,11 +298,18 @@ without editing `packages/concerto-core/test/**`:
   ResourceValidator, `Serializer.fromJSON`/`toJSON`);
 * `stringvalidator-regexp.checks.js`: `StringValidator` with a custom
   `regExp` engine;
-* `collaborator.checks.js`: `ModelFile.validate()` and `ModelFile.filter()`
-  for a model file whose manager is not engine-backed, or that is detached
-  from its manager, and `BaseModelManager`'s reads (`derivesFrom`,
+* `collaborator.checks.js`: `ModelFile.filter()` for a model file that is
+  detached from its manager, and `BaseModelManager`'s reads (`derivesFrom`,
   `isAssignableTo`, `getModelFileByFileName`, `resolveType`) on a manager
-  holding a hand-built model file the engine mirror did not take;
+  holding a hand-built model file. Its `ModelFile.validate()` checks
+  (CO-VAL-001 to 032) drove a manager that is not engine-backed; P5-35
+  (BC-47) removed that support and deleted them;
+* `declaration-validate.checks.js` (task P5-35,
+  accordproject/concerto-rust#345): the per-declaration `validate()`
+  methods (kept until BC-49), called directly on declarations of a model
+  added with validation disabled, now that `ModelFile.validate()` has no TS
+  body to reach them through; and the BC-47 `TypeError` for a ModelFile
+  built without a BaseModelManager;
 * `public-api.checks.js`: small public members (`ModelUtil`'s engine memo,
   `ResourceId` guards, and so on);
 * `resourcevalidator-visitor.checks.js` (task P5-12c,
@@ -316,6 +323,13 @@ without editing `packages/concerto-core/test/**`:
   field with no validator, which `setPropertyValue` keeps on the visitor
   because it is cheaper there (`visitorIsCheaper`); `SET-006`/`SET-007`
   set one on a field with a `regex` validator, which goes to the engine.
+* `relationship-map-values.checks.js` (task P5-58,
+  accordproject/concerto-rust#379): BC-05 (R1; DV-007), relationship-typed
+  map values read, written and validated as relationship properties, with
+  the embedded-resource options on and off. The `RM-E-*` checks go through
+  the engine (a throw reduced to its class); the `RM-V-*` checks force the
+  TS visitors with a custom `regExp` engine. Each has v5.0.0's outcome as
+  its `reference`.
 * `metamodel-mirror.checks.js` (task P5-31, accordproject/concerto-rust#341):
   a metamodel file a user adds (`newMetaModelManager()`, `addModelFile`,
   `addMetamodel: true`) is mirrored into the engine, so its manager stays in

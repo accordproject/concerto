@@ -158,7 +158,7 @@ class Serializer {
             const merged = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
             return loadEngine('./engine/serializer').fastToJson(this.modelManager, resource, merged);
         } catch (err) {
-            if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+            if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
                 throw err;
             }
         }
@@ -228,7 +228,7 @@ class Serializer {
         try {
             return loadEngine('./engine/serializer').fastFromJson(this.modelManager, jsonObject, options);
         } catch (err) {
-            if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+            if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
                 throw err;
             }
         }
