@@ -20,8 +20,9 @@
  *
  * P5-02 made the Rust engine the only path. A few TS bodies stay as
  * fallbacks (PORTING.md 1.5 / D7): the visitor path behind
- * `EngineFastPathUnsupported` in the serializer, the caller-supplied custom
- * `regExp` in `StringValidator`, and the TS bodies for a model file
+ * `EngineFastPathUnsupported` in the serializer (the caller-supplied custom
+ * `regExp` in `StringValidator` was one until P5-52, BC-28, made the option
+ * ignored), and the TS bodies for a model file
  * detached from its manager (P5-35, BC-47, removed the collaborator
  * fallback for managers that are not engine-backed). The frozen unit suite
  * (packages/concerto-core/test/**, which is never edited) no longer reaches

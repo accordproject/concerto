@@ -147,6 +147,31 @@ const DEFAULT_DECORATOR_VALIDATION = {
 // and ignored by fromAst
 const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
 
+// P5-52 (BC-28, R1; accordproject/concerto-rust#373): the `regExp` option
+// (an alternative regular expression engine, such as XRegExp) is no longer
+// supported. Every `regex=` is compiled and evaluated by the Concerto
+// engine, which cannot call a JS constructor. The option is ignored, with
+// one warning per process, rather than rejected.
+let regExpOptionWarned = false;
+
+/**
+ * Warns, once per process, that the `regExp` option is ignored.
+ * @private
+ */
+function warnRegExpOptionIgnored() {
+    if (regExpOptionWarned) {
+        return;
+    }
+    regExpOptionWarned = true;
+    /* istanbul ignore else: process.emitWarning is Node's */
+    if (typeof process !== 'undefined' && typeof process.emitWarning === 'function') {
+        process.emitWarning(
+            'The ModelManager regExp option is ignored: regular expressions are evaluated by the Concerto engine (ECMAScript syntax and semantics)',
+            { type: 'Warning', code: 'concerto-regexp-option' }
+        );
+    }
+}
+
 // The system namespaces a new rustHandle loads itself (concerto-wasm
 // `ModelManagerHandle::new`), as `addDecoratorModel` and `addRootModel` then
 // register them in `modelFiles`.
@@ -251,7 +276,7 @@ class BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {Object} [options.regExp] - An alternative regular expression engine.
+     * @param {Object} [options.regExp] - Deprecated and ignored, with a warning: regular expressions are evaluated by the Concerto engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
     * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
@@ -270,6 +295,9 @@ class BaseModelManager {
         this.serializer = new Serializer(this.factory, this, options);
         this.decoratorFactories = [];
         this.options = options;
+        if (options?.regExp) {
+            warnRegExpOptionIgnored();
+        }
         this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
         this._mirrorPending = false;
         this._modelFileIds = new Map();

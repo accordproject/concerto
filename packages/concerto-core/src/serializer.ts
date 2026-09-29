@@ -150,9 +150,8 @@ class Serializer {
         // for the whole document, instead of one per field through
         // ResourceValidator/JSONGenerator's visitors. Falls back to the
         // visitor path below on anything the engine cannot cross
-        // (EngineFastPathUnsupported: a cycle or shared reference, a model
-        // manager with a custom `regExp` engine, a value the wire codec
-        // cannot carry), exactly as calling the visitors directly still
+        // (EngineFastPathUnsupported: a cycle or shared reference, a value
+        // the wire codec cannot carry), exactly as calling the visitors directly still
         // does for callers/tests that need them.
         try {
             const merged = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
