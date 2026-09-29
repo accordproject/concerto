@@ -69,7 +69,12 @@ declare class BaseModelManager {
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {Object} [options.regExp] - An alternative regular expression engine.
-     * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
+     * @param {boolean} [options.metamodelValidation] - Unless false, every ModelFile built for this
+     * manager has its AST checked against the Concerto metamodel when it is constructed (at model
+     * load: fromAst, addModel, addCTOModel, addModelFiles, updateModelFile), and a malformed AST is an
+     * IllegalModelException (BC-19, on by default since R1). When true, addModelFile also runs
+     * validateAst on each new file, as before. Set it to false to restore the lenient loading of
+     * earlier releases, for this major only.
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
     * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
@@ -4454,6 +4459,14 @@ import type Typed from './model/typed';
 import type { EmptyValueGenerator } from './serializer/valuegenerator';
 export interface ModelManagerOptions {
     regExp?: RegExp;
+    /**
+     * The strict AST shape check at model load (BC-19, with BC-17, BC-18
+     * and BC-20; on by default since R1): unless this is `false`, a
+     * ModelFile whose AST does not have the Concerto metamodel's shape is
+     * rejected with an IllegalModelException when it is constructed. `true`
+     * also runs `validateAst` in `addModelFile`, as before. `false` restores
+     * the lenient loading of earlier releases for this major.
+     */
     metamodelValidation?: boolean;
     addMetamodel?: boolean;
     dangerouslyAllowReservedSystemTypeNamesInUserModels?: boolean;

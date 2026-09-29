@@ -252,7 +252,12 @@ class BaseModelManager {
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {Object} [options.regExp] - An alternative regular expression engine.
-     * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
+     * @param {boolean} [options.metamodelValidation] - Unless false, every ModelFile built for this
+     * manager has its AST checked against the Concerto metamodel when it is constructed (at model
+     * load: fromAst, addModel, addCTOModel, addModelFiles, updateModelFile), and a malformed AST is an
+     * IllegalModelException (BC-19, on by default since R1). When true, addModelFile also runs
+     * validateAst on each new file, as before. Set it to false to restore the lenient loading of
+     * earlier releases, for this major only.
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
     * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
      * @param {object} [options.decoratorValidation] - the decorator validation configuration

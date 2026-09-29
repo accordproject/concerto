@@ -343,9 +343,9 @@ event Event {}`, { dangerouslyAllowReservedSystemTypeNamesInUserModels: true }),
     },
     {
         id: 'DECL-VAL-025',
-        covers: 'ClassDeclaration.process: properties that are not an array',
+        covers: 'ClassDeclaration.process: properties that are not an array (with the BC-19 opt-out, which v5.0.0 ignores; strict-ast.checks.js covers the default)',
         run: (core) => {
-            const mm = new core.ModelManager();
+            const mm = new core.ModelManager({ metamodelValidation: false });
             const ast = JSON.parse(JSON.stringify(new core.ModelManager().addCTOModel(`${T}\nconcept C { o String a }`, 'x.cto', true).getAst()));
             ast.declarations[0].properties = {};
             const mf = new core.ModelFile(mm, ast, undefined, 'x.cto');

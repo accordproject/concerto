@@ -42,6 +42,14 @@
  * construction does not throw, so an error deferred to the first read fails
  * them. `expect` is the frozen v5.0.0 reference's outcome. Run by
  * fallbacks.spec.js.
+ *
+ * P5-49 (BC-19, R1): by default a `ModelFile`'s AST is checked against the
+ * metamodel at construction, which rejects every malformed `$class` here
+ * before staging, so BC-25's guarantee is structural on that path
+ * (strict-ast.checks.js covers it). These checks build their managers with
+ * the opt-out, `metamodelValidation: false`, where the lazy path still
+ * relies on Rust's staging rejecting what TS construction rejects. v5.0.0
+ * ignores a false `metamodelValidation`, so `expect` is unchanged.
  */
 
 const MM = 'concerto.metamodel@1.0.0';
@@ -105,39 +113,41 @@ function prop($class, name, extra = {}) {
 const TYPE_T = { type: { $class: `${MM}.TypeIdentifier`, name: 'C' } };
 
 /**
- * Constructs a `ModelFile` from `ast` in a fresh `ModelManager`.
+ * Constructs a `ModelFile` from `ast` in a fresh `ModelManager` (with the
+ * BC-19 opt-out).
  * @param {object} core the core under test
  * @param {object} ast the model AST
  * @param {string} [fileName] the file name
  * @returns {string} 'constructed' (construction that fails throws)
  */
 function construct(core, ast, fileName) {
-    const mm = new core.ModelManager();
+    const mm = new core.ModelManager({ metamodelValidation: false });
     new core.ModelFile(mm, ast, undefined, fileName);
     return 'constructed';
 }
 
 /**
- * `ModelManager.addModelFile` of a `ModelFile` built from `ast`.
+ * `ModelManager.addModelFile` of a `ModelFile` built from `ast` (with the
+ * BC-19 opt-out).
  * @param {object} core the core under test
  * @param {object} ast the model AST
  * @param {string} fileName the file name
  * @returns {string} 'added'
  */
 function add(core, ast, fileName) {
-    const mm = new core.ModelManager();
+    const mm = new core.ModelManager({ metamodelValidation: false });
     mm.addModelFile(new core.ModelFile(mm, ast, undefined, fileName), undefined, fileName);
     return 'added';
 }
 
 /**
- * `ModelManager.fromAst` of `models`.
+ * `ModelManager.fromAst` of `models` (with the BC-19 opt-out).
  * @param {object} core the core under test
  * @param {object[]} models the model ASTs
  * @returns {string} 'loaded'
  */
 function fromAst(core, models) {
-    const mm = new core.ModelManager();
+    const mm = new core.ModelManager({ metamodelValidation: false });
     mm.fromAst({ $class: `${MM}.Models`, models });
     return 'loaded';
 }

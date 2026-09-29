@@ -26,6 +26,14 @@ import type { EmptyValueGenerator } from './serializer/valuegenerator';
 
 export interface ModelManagerOptions {
     regExp?: RegExp;
+    /**
+     * The strict AST shape check at model load (BC-19, with BC-17, BC-18
+     * and BC-20; on by default since R1): unless this is `false`, a
+     * ModelFile whose AST does not have the Concerto metamodel's shape is
+     * rejected with an IllegalModelException when it is constructed. `true`
+     * also runs `validateAst` in `addModelFile`, as before. `false` restores
+     * the lenient loading of earlier releases for this major.
+     */
     metamodelValidation?: boolean;
     addMetamodel?: boolean;
     // Transitional migration escape hatch for legacy models.
