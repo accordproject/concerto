@@ -162,11 +162,15 @@ class ModelUtil {
         version?: string | null;
         versionParsed?: unknown;
     } {
-        // P5-20 (F4): the engine checks the version the way semver.parse does
-        // and returns its result packed into one string (concerto-wasm
+        // P5-20 (F4): the engine checks the version and returns its result
+        // packed into one string (concerto-wasm
         // modelUtilParseNamespaceChecked), without calling back into JS.
-        // `versionParsed` is then built here, by the same semver.parse, which
-        // costs far less in JS than a callback across the boundary.
+        // `versionParsed` is then built here, by semver.parse, which costs
+        // far less in JS than a callback across the boundary. Since BC-41
+        // (P5-38) the engine takes strict SemVer 2.0.0, which semver.parse
+        // accepts too, except where node-semver's own limits reject it (a
+        // component above Number.MAX_SAFE_INTEGER, or more than 256
+        // characters): `versionParsed` is then null.
         const packed = rust.modelUtilParseNamespaceChecked(ns, options) as string;
         const parts = packed.slice(1).split('@');
         if (packed[0] === 'N') {
