@@ -143,15 +143,16 @@ class StringValidator extends Validator{
             this.minLength = lengthValidator?.minLength;
             this.maxLength = lengthValidator?.maxLength;
 
-            if(this.minLength === null && this.maxLength === null) {
-                // can't specify no upper and lower value
-                this.reportError(field.getName(), 'Invalid string length, minLength and-or maxLength must be specified.');
+            if(isNull(this.minLength) && isNull(this.maxLength)) {
+                // can't specify no upper and lower value: absent (length=[,])
+                // or null alike (BC-40; 5.0.0 rejected only two nulls)
+                this.reportModelError(field.getName(), 'Invalid string length, minLength and-or maxLength must be specified.');
             } else if ((this.minLength ?? 0) < 0 || (this.maxLength ?? 0) < 0) {
-                this.reportError(field.getName(), 'minLength and-or maxLength must be positive integers.');
+                this.reportModelError(field.getName(), 'minLength and-or maxLength must be positive integers.');
             } else if (this.minLength === null || this.maxLength === null) {
                 // this is fine and means that we don't need to check whether minLength > maxLength
             } else if(this.minLength !== undefined && this.maxLength !== undefined && this.minLength > this.maxLength) {
-                this.reportError(field.getName(), 'minLength must be less than or equal to maxLength.');
+                this.reportModelError(field.getName(), 'minLength must be less than or equal to maxLength.');
             }
         }
 
@@ -163,12 +164,13 @@ class StringValidator extends Validator{
                 this.regex = new CustomRegExp(validator.pattern, validator.flags);
             }
             catch (exception) {
-                this.reportError(field.getName(), (exception as Error).message, ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
+                this.reportModelError(field.getName(), (exception as Error).message, ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
             }
         }
 
         if(this.field?.ast?.defaultValue) {
-            this.validate(field.getName(), this.field.ast.defaultValue);
+            // A default outside the validator is a model error (BC-39).
+            checkValue(this, field.getName(), this.field.ast.defaultValue, true);
         }
     }
 
@@ -184,19 +186,7 @@ class StringValidator extends Validator{
             rust.stringValidatorValidate(this, identifier, value);
             return;
         }
-        if(value !== null) {
-            //Enforce string length rule first
-            if(this.minLength !== null && this.minLength !== undefined && value.length < this.minLength) {
-                this.reportError(identifier, `The string length of '${value}' should be at least ${this.minLength} characters.`);
-            }
-            if(this.maxLength !== null && this.maxLength !== undefined && value.length > this.maxLength) {
-                this.reportError(identifier, `The string length of '${value}' should not exceed ${this.maxLength} characters.`);
-            }
-
-            if (this.regex && !this.matchesRegex(value)) {
-                this.reportError(identifier, `Value '${value}' failed to match validation regex: ${this.regex}`);
-            }
-        }
+        checkValue(this, identifier, value, false);
     }
 
     /**
@@ -285,6 +275,33 @@ class StringValidator extends Validator{
             }
         }
         return true;
+    }
+}
+
+/**
+ * The TS checks of StringValidator.validate(), for the options.regExp path.
+ * @param {StringValidator} v the validator
+ * @param {string} identifier the identifier of the instance being validated
+ * @param {Object} value the value to validate
+ * @param {boolean} atLoad true for the constructor's default value check,
+ * which reports an IllegalModelException, false for an instance value,
+ * which reports a ValidationException (BC-39)
+ * @private
+ */
+function checkValue(v: StringValidator, identifier: string | null, value: string, atLoad: boolean): void {
+    const report = (msg: string): never => atLoad ? v.reportModelError(identifier, msg) : v.reportError(identifier, msg);
+    if(value !== null) {
+        //Enforce string length rule first
+        if(v.minLength !== null && v.minLength !== undefined && value.length < v.minLength) {
+            report(`The string length of '${value}' should be at least ${v.minLength} characters.`);
+        }
+        if(v.maxLength !== null && v.maxLength !== undefined && value.length > v.maxLength) {
+            report(`The string length of '${value}' should not exceed ${v.maxLength} characters.`);
+        }
+
+        if (v.regex && !v.matchesRegex(value)) {
+            report(`Value '${value}' failed to match validation regex: ${v.regex}`);
+        }
     }
 }
 

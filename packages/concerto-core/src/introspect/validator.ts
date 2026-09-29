@@ -12,7 +12,9 @@
  * limitations under the License.
  */
 
-import { BaseException, ErrorCodes } from '@accordproject/concerto-util';
+import { ErrorCodes } from '@accordproject/concerto-util';
+import IllegalModelException from './illegalmodelexception';
+import ValidationException from '../serializer/validationexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -51,6 +53,19 @@ export type ValidatorAst =
 export type ValidatedElement = Property | ScalarDeclaration;
 
 /**
+ * The message of a validator error: the instance or element identifier and
+ * the fully qualified name of the field or scalar, then the message.
+ * @param {Validator} validator the validator reporting the error
+ * @param {string} id the identifier of the instance or element
+ * @param {string} msg the exception message
+ * @return {string} the full message
+ * @private
+ */
+function errorMessage(validator: Validator, id: string | null, msg: string): string {
+    return 'Validator error for field `' + id + '`. ' + validator.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg;
+}
+
+/**
  * An Abstract field validator. Extend this class and override the
  * validate method.
  * @private
@@ -73,13 +88,33 @@ class Validator {
     }
 
     /**
+     * Reports an instance value that fails the validator (BC-39: a
+     * ValidationException, keeping the errorType; 5.0.0 threw a BaseException).
      * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
      * @param {string} errorType the type of error
-     * @throws {Error} throws an error to report the message
+     * @throws {ValidationException} throws an error to report the message
      */
     reportError(id: string | null, msg: string, errorType: string = ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION): never {
-        throw new BaseException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg, undefined, errorType);
+        const err = new ValidationException(errorMessage(this, id, msg));
+        err.errorType = errorType;
+        throw err;
+    }
+
+    /**
+     * Reports a validator that is not valid in its model: a bad bound or
+     * regex, or a default value outside the validator (BC-39: an
+     * IllegalModelException, keeping the errorType; 5.0.0 threw a
+     * BaseException).
+     * @param {string} id the identifier of the element
+     * @param {string} msg the exception message
+     * @param {string} errorType the type of error
+     * @throws {IllegalModelException} throws an error to report the message
+     */
+    reportModelError(id: string | null, msg: string, errorType: string = ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION): never {
+        const err = new IllegalModelException(errorMessage(this, id, msg));
+        err.errorType = errorType;
+        throw err;
     }
 
     /**

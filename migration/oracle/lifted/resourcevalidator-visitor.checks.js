@@ -37,8 +37,9 @@
  * SET-004 and SET-005).
  *
  * `expect` is the frozen v5.0.0 reference's outcome, except for the
- * P5-24 strict `DateTime` map checks (MAP-007 to MAP-009), whose v5.0.0
- * outcome is in REFERENCE. Run by fallbacks.spec.js.
+ * P5-24 strict `DateTime` map checks (MAP-007 to MAP-009) and the P5-53
+ * validator error class checks (SC-001, MAP-005, SET-006; BC-39), whose
+ * v5.0.0 outcome is in REFERENCE. Run by fallbacks.spec.js.
  */
 
 const NS = 'org.acme.lifted.p512c.validate@1.0.0';
@@ -253,8 +254,8 @@ const EXPECT = {
     'VE-CD-004': {'ok': {'threw': 'ValidationException'}},
     'VV-CD-005': {'throws': {'name': 'ValidationException', 'message': 'Model violation in the "org.acme.lifted.p512c.validate@1.0.0.C" instance. Class "org.acme.lifted.p512c.validate@1.0.0.Sub" has the value of "[object Object]". Expected a "Resource" or a "Concept".'}},
     'VE-CD-005': {'ok': {'threw': 'ValidationException'}},
-    'VV-SC-001': {'throws': {'name': 'BaseException', 'message': 'Validator error for field `undefined`. org.acme.lifted.p512c.validate@1.0.0.C.ss: The string length of \'abcd\' should not exceed 3 characters.'}},
-    'VE-SC-001': {'ok': {'threw': 'BaseException'}},
+    'VV-SC-001': {'throws': {'name': 'ValidationException', 'message': 'Validator error for field `undefined`. org.acme.lifted.p512c.validate@1.0.0.C.ss: The string length of \'abcd\' should not exceed 3 characters.'}},
+    'VE-SC-001': {'ok': {'threw': 'ValidationException'}},
     'VV-EN-001': {'throws': {'name': 'ValidationException', 'message': 'Model violation in the "org.acme.lifted.p512c.validate@1.0.0.C" instance. The field "ens" has a value of ""X"" (type of value: "string"). Expected type of value: "En[]".'}},
     'VE-EN-001': {'ok': {'threw': 'ValidationException'}},
     'VV-EN-002': {'throws': {'name': 'ValidationException', 'message': 'Model violation in the "org.acme.lifted.p512c.validate@1.0.0.C" instance. Invalid enum value of "Z" for the field "En".'}},
@@ -275,8 +276,8 @@ const EXPECT = {
     'VE-MAP-003': {'ok': {'threw': 'Error'}},
     'VV-MAP-004': {'throws': {'name': 'Error', 'message': 'Expected a Map, but found {"a":"b"}'}},
     'VE-MAP-004': {'ok': {'threw': 'Error'}},
-    'VV-MAP-005': {'throws': {'name': 'BaseException', 'message': 'Validator error for field `org.acme.lifted.p512c.validate@1.0.0.C`. org.acme.lifted.p512c.validate@1.0.0.C.msz: Collection must contain no more than 2 elements.'}},
-    'VE-MAP-005': {'ok': {'threw': 'BaseException'}},
+    'VV-MAP-005': {'throws': {'name': 'ValidationException', 'message': 'Validator error for field `org.acme.lifted.p512c.validate@1.0.0.C`. org.acme.lifted.p512c.validate@1.0.0.C.msz: Collection must contain no more than 2 elements.'}},
+    'VE-MAP-005': {'ok': {'threw': 'ValidationException'}},
     'VV-MAP-006': {'ok': 'valid'},
     'VE-MAP-006': {'ok': 'valid'},
     'VV-MAP-007': {'throws': {'name': 'Error', 'message': 'Model violation in org.acme.lifted.p512c.validate@1.0.0.MSD. Expected Type of DateTime but found \'2020-01-01\' instead.'}},
@@ -313,8 +314,8 @@ const EXPECT = {
     'VE-SET-004': {'ok': 5},
     'VV-SET-005': {'throws': {'name': 'ValidationException', 'message': 'Model violation in the "org.acme.lifted.p512c.validate@1.0.0.Box#b1" instance. The field "n" has a value of ""five"" (type of value: "string"). Expected type of value: "Integer".'}},
     'VE-SET-005': {'ok': {'threw': 'ValidationException'}},
-    'VV-SET-006': {'throws': {'name': 'BaseException', 'message': 'Validator error for field `undefined`. org.acme.lifted.p512c.validate@1.0.0.Box.code: Value \'A1\' failed to match validation regex: /^[a-z]+$/'}},
-    'VE-SET-006': {'ok': {'threw': 'BaseException'}},
+    'VV-SET-006': {'throws': {'name': 'ValidationException', 'message': 'Validator error for field `undefined`. org.acme.lifted.p512c.validate@1.0.0.Box.code: Value \'A1\' failed to match validation regex: /^[a-z]+$/'}},
+    'VE-SET-006': {'ok': {'threw': 'ValidationException'}},
     'VV-SET-007': {'ok': 'ab'},
     'VE-SET-007': {'ok': 'ab'},
     'VV-ADD-001': {'ok': ['a']},
@@ -325,8 +326,8 @@ const EXPECT = {
     'VE-ADD-003': {'ok': {'threw': 'ValidationException'}},
 };
 
-// P5-24: v5.0.0's outcome where it differs from EXPECT's (an intended
-// breaking change; fallbacks.spec.js `reference`).
+// P5-24 and P5-53: v5.0.0's outcome where it differs from EXPECT's (an
+// intended breaking change; fallbacks.spec.js `reference`).
 const REFERENCE = {
     'VV-MAP-007': {'ok': 'valid'},
     'VE-MAP-007': {'ok': 'valid'},
@@ -334,6 +335,14 @@ const REFERENCE = {
     'VE-MAP-008': {'ok': 'valid'},
     'VV-MAP-009': {'ok': 'valid'},
     'VE-MAP-009': {'ok': 'valid'},
+    // P5-53 (BC-39, R1): an instance value that fails a validator is a
+    // ValidationException (keeping its errorType); v5.0.0 threw a BaseException.
+    'VV-SC-001': {'throws': {'name': 'BaseException', 'message': 'Validator error for field `undefined`. org.acme.lifted.p512c.validate@1.0.0.C.ss: The string length of \'abcd\' should not exceed 3 characters.'}},
+    'VE-SC-001': {'ok': {'threw': 'BaseException'}},
+    'VV-MAP-005': {'throws': {'name': 'BaseException', 'message': 'Validator error for field `org.acme.lifted.p512c.validate@1.0.0.C`. org.acme.lifted.p512c.validate@1.0.0.C.msz: Collection must contain no more than 2 elements.'}},
+    'VE-MAP-005': {'ok': {'threw': 'BaseException'}},
+    'VV-SET-006': {'throws': {'name': 'BaseException', 'message': 'Validator error for field `undefined`. org.acme.lifted.p512c.validate@1.0.0.Box.code: Value \'A1\' failed to match validation regex: /^[a-z]+$/'}},
+    'VE-SET-006': {'ok': {'threw': 'BaseException'}},
 };
 
 module.exports = [];
