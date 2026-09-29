@@ -4,7 +4,9 @@ name: migration-guardrails
 # RUST_MIGRATION_PLAN.md §2.1 and §4 (task P0-02). Fails the build if a PR:
 #   - touches packages/concerto-core/test/**, except allow-listed hunks
 #     that relax an exact-message assertion to a class check (P5-09; see
-#     migration/guardrails/test-message-relaxations.tsv)
+#     migration/guardrails/test-message-relaxations.tsv), and lines inside
+#     the approved test-case rewrite scopes (P5-33; see
+#     migration/guardrails/test-case-rewrites.tsv)
 #   - changes the `nyc` coverage-threshold block in
 #     packages/concerto-core/package.json
 #   - changes the exported symbol list of packages/concerto-core/src/index.ts
@@ -52,8 +54,8 @@ jobs:
       - name: Build workspace packages
         run: npm run build
 
-      - name: Self-test the test-edit relaxation guard
-        run: node --test migration/guardrails/relaxations.test.mjs
+      - name: Self-test the test-edit relaxation and rewrite guards
+        run: node --test migration/guardrails/relaxations.test.mjs migration/guardrails/rewrites.test.mjs
 
       - name: Check the seam ledger against the source (members, engine calls)
         run: node migration/ledger/extract-members.js --check migration/ledger/SEAM_LEDGER.tsv
