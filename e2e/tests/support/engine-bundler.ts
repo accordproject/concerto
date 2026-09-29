@@ -44,7 +44,7 @@ const ENGINE_DIR = path.join(CORE_ESM_BROWSER_DIR, 'engine');
  *
  * @return {string[]} the specifiers, sorted
  */
-function engineRequires(): string[] {
+export function engineRequires(): string[] {
     const specifiers = new Set<string>();
     for (const file of fs.readdirSync(ENGINE_DIR)) {
         if (!file.endsWith('.mjs')) {
@@ -65,7 +65,7 @@ function engineRequires(): string[] {
  *
  * @return {string[]} the module names, without extension
  */
-function engineModules(): string[] {
+export function engineModules(): string[] {
     const names = fs.readdirSync(ENGINE_DIR)
         .filter((file) => file.endsWith('.mjs') && !file.startsWith('chunk-'))
         .map((file) => file.slice(0, -'.mjs'.length));
