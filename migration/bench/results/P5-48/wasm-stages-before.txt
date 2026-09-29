@@ -1,0 +1,120 @@
+before-add_cto_model-concerto-core-test-data.cpuprofile: 8042 ms sampled
+   38.5%  cto-parser
+   27.8%  core
+   23.3%  gc
+    6.4%  views
+    2.2%  other
+    1.5%  ts-core
+    0.3%  glue
+  top self frames:
+   23.3%  gc | (garbage collector) 
+     11%  core | dlmalloc::dlmalloc::Dlmalloc<A>::malloc::he97e96981fab807e wasm/concerto_wasm.wasm-00cc62ea
+    4.9%  cto-parser | peg$parse dist/parser.js
+before-add_cto_model-conformance.cpuprofile: 8043 ms sampled
+   33.5%  cto-parser
+   33.4%  core
+   19.1%  gc
+    9.1%  views
+    2.7%  other
+    1.6%  ts-core
+    0.6%  glue
+  top self frames:
+   19.1%  gc | (garbage collector) 
+   16.1%  core | dlmalloc::dlmalloc::Dlmalloc<A>::malloc::he97e96981fab807e wasm/concerto_wasm.wasm-00cc62ea
+    9.4%  cto-parser | peg$parse dist/parser.js
+before-add_cto_model-synthetic-large.cpuprofile: 8176 ms sampled
+   48.5%  cto-parser
+     26%  core
+   17.4%  gc
+    6.1%  views
+    1.6%  other
+    0.4%  ts-core
+      0%  glue
+  top self frames:
+   17.4%  gc | (garbage collector) 
+    9.1%  core | dlmalloc::dlmalloc::Dlmalloc<A>::malloc::he97e96981fab807e wasm/concerto_wasm.wasm-00cc62ea
+    6.5%  cto-parser | peg$computePosDetails dist/parser.js
+before-add_model_file-concerto-core-test-data.cpuprofile: 8028 ms sampled
+     60%  core
+     26%  gc
+    9.6%  views
+    3.4%  other
+    0.8%  ts-core
+    0.2%  glue
+  top self frames:
+   32.4%  core | dlmalloc::dlmalloc::Dlmalloc<A>::malloc::he97e96981fab807e wasm/concerto_wasm.wasm-00cc62ea
+     26%  gc | (garbage collector) 
+    5.2%  views | stageModelFile engine/views.js
+    2.3%  core | dlmalloc::dlmalloc::Dlmalloc<A>::free::ha98daa4c6dd8ad86 wasm/concerto_wasm.wasm-00cc62ea
+before-add_model_file-conformance.cpuprofile: 8029 ms sampled
+   57.8%  core
+   26.6%  gc
+   10.7%  views
+    3.7%  other
+    0.7%  ts-core
+    0.5%  glue
+  top self frames:
+   29.3%  core | dlmalloc::dlmalloc::Dlmalloc<A>::malloc::he97e96981fab807e wasm/concerto_wasm.wasm-00cc62ea
+   26.6%  gc | (garbage collector) 
+      6%  views | stageModelFile engine/views.js
+    2.5%  core | dlmalloc::dlmalloc::Dlmalloc<A>::free::ha98daa4c6dd8ad86 wasm/concerto_wasm.wasm-00cc62ea
+before-add_model_file-synthetic-large.cpuprofile: 8008 ms sampled
+   60.1%  core
+   27.4%  gc
+    8.7%  views
+    2.9%  other
+    0.6%  ts-core
+    0.2%  glue
+  top self frames:
+   29.4%  core | dlmalloc::dlmalloc::Dlmalloc<A>::malloc::he97e96981fab807e wasm/concerto_wasm.wasm-00cc62ea
+   27.4%  gc | (garbage collector) 
+    7.5%  views | stageModelFile engine/views.js
+    3.7%  core | concerto_core::introspect::model_file::ModelFile::load_text_with_imports::hed7e4c6dff36e154 wasm/concerto_wasm.wasm-00cc62ea
+before-mm_new-conformance.cpuprofile: 8025 ms sampled
+   38.6%  core
+   29.4%  views
+   22.8%  gc
+    4.8%  ts-core
+    3.9%  other
+    0.5%  glue
+  top self frames:
+     24%  core | dlmalloc::dlmalloc::Dlmalloc<A>::malloc::he97e96981fab807e wasm/concerto_wasm.wasm-00cc62ea
+   23.6%  views | stageModelFile engine/views.js
+   22.8%  gc | (garbage collector) 
+    2.1%  views | defineLazyFields engine/views.js
+before-modelfile_new-concerto-core-test-data.cpuprofile: 8021 ms sampled
+   61.8%  core
+   21.2%  views
+    9.8%  other
+    6.5%  gc
+    0.6%  glue
+      0%  ts-core
+  top self frames:
+   14.6%  views | stageModelFile engine/views.js
+    7.6%  core | dlmalloc::dlmalloc::Dlmalloc<A>::malloc::he97e96981fab807e wasm/concerto_wasm.wasm-00cc62ea
+    6.5%  gc | (garbage collector) 
+    6.3%  other | stageModelFileWithHeader node/concerto_wasm.js
+before-modelfile_new-conformance.cpuprofile: 8013 ms sampled
+   54.2%  core
+   24.8%  views
+     11%  gc
+    9.4%  other
+    0.7%  glue
+      0%  ts-core
+  top self frames:
+   16.4%  views | stageModelFile engine/views.js
+     11%  gc | (garbage collector) 
+    7.2%  core | dlmalloc::dlmalloc::Dlmalloc<A>::malloc::he97e96981fab807e wasm/concerto_wasm.wasm-00cc62ea
+    5.5%  other | stageModelFileWithHeader node/concerto_wasm.js
+before-modelfile_new-synthetic-large.cpuprofile: 8031 ms sampled
+   63.2%  core
+   15.4%  views
+   13.1%  gc
+    8.1%  other
+    0.2%  glue
+      0%  ts-core
+  top self frames:
+   17.4%  core | dlmalloc::dlmalloc::Dlmalloc<A>::malloc::he97e96981fab807e wasm/concerto_wasm.wasm-00cc62ea
+   14.6%  views | stageModelFile engine/views.js
+   13.1%  gc | (garbage collector) 
+    7.6%  other | passStringToWasm0 node/concerto_wasm.js
