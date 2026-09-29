@@ -27,7 +27,9 @@
  * take, and an input the serializer fast path cannot cross. P5-34 (BC-46)
  * removed P511-003 and P511-006, which drove a manager holding a duck-typed
  * model file: a manager now accepts only ModelFiles the ModelFile
- * constructor built. The frozen unit suite
+ * constructor built. P5-35 (BC-47) removed P511-009, which built a ModelFile
+ * against a manager wrapper with no `rustHandle`: a ModelFile needs a
+ * BaseModelManager. The frozen unit suite
  * reaches most of those only through sinon stubs, so these checks drive
  * them through the public API. `expect` is the frozen v5.0.0 reference's
  * outcome. Run by fallbacks.spec.js; a check marked `async` returns a
@@ -80,24 +82,6 @@ function manager(core, onlyA) {
  */
 function astOf(core, cto) {
     return JSON.parse(JSON.stringify(new core.ModelManager().addCTOModel(cto, 'scratch.cto', true).getAst()));
-}
-
-/**
- * A manager-like collaborator that is not engine-backed: it forwards every
- * member to `mm`, except that it has no `rustHandle` (as collaborator.checks.js).
- * @param {object} mm a real ModelManager
- * @returns {object} the collaborator
- */
-function collaborator(mm) {
-    return new Proxy(mm, {
-        get(target, prop) {
-            if (prop === 'rustHandle') {
-                return undefined;
-            }
-            const v = Reflect.get(target, prop, target);
-            return typeof v === 'function' ? v.bind(target) : v;
-        },
-    });
 }
 
 const TYPE_NAMES = ['String', 'Local', 'org.acme.p511.b@1.0.0.Local', 'Figure', 'Shape', 'Colour', 'Missing', 'Concept'];
@@ -291,54 +275,6 @@ module.exports = [
                 loneSurrogate: 15,
                 loneSurrogateBad: 'ValidationException: Unexpected properties for type concerto.metamodel@1.0.0.Models: extra',
                 namespaces: ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'concerto.metamodel@1.0.0'],
-            },
-        },
-    },
-    {
-        id: 'P511-009',
-        covers: 'the ModelFile header (Rust) built eagerly, with no declarations, against a manager that is not engine-backed; enforceImportVersioning and isCompatibleVersion called directly',
-        run: (core) => {
-            const mm = manager(core);
-            const ast = astOf(core, B_CTO);
-            delete ast.declarations;
-            ast.concertoVersion = '^3.0.0';
-            const mf = new core.ModelFile(collaborator(mm), ast, undefined, 'b.cto');
-            const unversioned = attempt(() => mf.enforceImportVersioning({ namespace: 'org.acme.p511.a' }));
-            const versioned = attempt(() => mf.enforceImportVersioning({ namespace: 'org.acme.p511.a@1.0.0' }));
-            mf.ast = Object.assign({}, mf.ast, { concertoVersion: 7 });
-            const badVersion = attempt(() => mf.isCompatibleVersion());
-            return {
-                namespace: mf.getNamespace(),
-                version: mf.getVersion(),
-                imports: mf.getImports(),
-                importShortNames: [...mf.importShortNames.entries()],
-                externalImports: mf.getExternalImports(),
-                concertoVersion: mf.getConcertoVersion(),
-                declarations: mf.getAllDeclarations().length,
-                unversioned,
-                versioned,
-                badVersion,
-            };
-        },
-        expect: {
-            ok: {
-                namespace: 'org.acme.p511.b@1.0.0',
-                version: '1.0.0',
-                imports: [
-                    'org.acme.p511.a@1.0.0.Shape', 'org.acme.p511.a@1.0.0.Colour',
-                    'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event',
-                ],
-                importShortNames: [
-                    ['Figure', 'org.acme.p511.a@1.0.0.Shape'], ['Colour', 'org.acme.p511.a@1.0.0.Colour'],
-                    ['Concept', 'concerto@1.0.0.Concept'], ['Asset', 'concerto@1.0.0.Asset'], ['Transaction', 'concerto@1.0.0.Transaction'],
-                    ['Participant', 'concerto@1.0.0.Participant'], ['Event', 'concerto@1.0.0.Event'],
-                ],
-                externalImports: { 'org.acme.p511.a@1.0.0.Shape': 'https://example.com/a.cto' },
-                concertoVersion: '^3.0.0',
-                declarations: 0,
-                unversioned: 'Error: Cannot use an unversioned import org.acme.p511.a.',
-                versioned: '<undefined>',
-                badVersion: 'Error: This version of Concerto supports a language version of v3.0.0 or greater, but this model is for 7',
             },
         },
     },

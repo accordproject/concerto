@@ -363,8 +363,10 @@ class ClassDeclaration extends Declaration {
     getIdentifierFieldName(): string | null {
         // P5-19: the whole super type walk runs in one engine call, and the
         // answer is memoised per view until the models change
-        // (engine/views.ts).
-        return loadEngine('../engine/views').classDeclarationGetIdentifierFieldName(this, identifierWalkMethods) as string | null;
+        // (engine/views.ts). P5-36 (BC-50): the walk always inlines the
+        // ClassDeclaration methods it reaches, so replacing them at runtime
+        // does not change the answer.
+        return loadEngine('../engine/views').classDeclarationGetIdentifierFieldName(this) as string | null;
     }
 
     /**
@@ -551,18 +553,6 @@ class ClassDeclaration extends Declaration {
         return true;
     }
 }
-
-// P5-19 (accordproject/concerto-rust#317): the unmodified methods
-// `getIdentifierFieldName` reaches, captured once at load. The engine runs
-// one of them itself, instead of calling back, only when the receiver's
-// method is still this one, so a stubbed or overridden method is called.
-const identifierWalkMethods = [
-    ClassDeclaration.prototype.getIdentifierFieldName,
-    ClassDeclaration.prototype.getSuperType,
-    ClassDeclaration.prototype.getSuperTypeDeclaration,
-    ClassDeclaration.prototype.getModelFile,
-    ClassDeclaration.prototype.getFullyQualifiedName,
-];
 
 export { ClassDeclaration };
 export default ClassDeclaration;

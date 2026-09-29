@@ -798,8 +798,7 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
 // validating it (`validateLoaded`) then reuse the loaded file instead of
 // sending the AST again.
 //
-// When Rust's load fails, or the manager is not a real BaseModelManager, or
-// it has decorator factories (user code `Decorated.process` runs, and may
+// When Rust's load fails, or the manager has decorator factories (user code `Decorated.process` runs, and may
 // throw from, during construction; running them on first read is BC-24,
 // not adopted), the ModelFile is built eagerly exactly as before, so a TS
 // error is thrown by the TS code, at the same point. A custom
@@ -891,6 +890,65 @@ interface StagedHeader {
 const stagedFileHeaders = new WeakMap<object, StagedHeader>();
 
 /**
+ * P5-32 (accordproject/concerto-rust#342): each ModelFile's `getImports()`
+ * names (every import's fully-qualified names, in order), recorded for the
+ * `imports` array they were computed from. A staged header records them when
+ * it is applied (`applyStagedFileHeader`, `applyStagedHeader`): its
+ * `importShortNames.set(key, fqn)` calls are one per imported name, in
+ * import order, so their `fqn`s are exactly those names, and no engine call
+ * is needed. Otherwise `ModelFile.getImports` records its first answer.
+ */
+const importNamesMemo = new WeakMap<object, { imports: any[]; length: number; names: string[] }>();
+
+/**
+ * P5-32: records `names` as `modelFile.getImports()` for its current
+ * `imports` array.
+ * @param {object} modelFile the ModelFile
+ * @param {string[]} names its imports' fully-qualified names, in order
+ */
+function recordImportNames(modelFile: any, names: string[]): void {
+    const imports = modelFile.imports;
+    importNamesMemo.set(modelFile, { imports, length: imports.length, names });
+}
+
+/**
+ * P5-32: `modelFile.getImports()` as recorded (`recordImportNames`), as a
+ * fresh array, or undefined when nothing is recorded for its current
+ * `imports` array.
+ * @param {object} modelFile the ModelFile
+ * @return {string[] | undefined} a copy of the recorded names, or undefined
+ */
+function recordedImportNames(modelFile: any): string[] | undefined {
+    const memo = importNamesMemo.get(modelFile);
+    const imports = modelFile.imports;
+    if (memo === undefined || memo.imports !== imports || memo.length !== imports.length) {
+        return undefined;
+    }
+    return memo.names.slice();
+}
+
+/**
+ * CONCERTO_LAZY_VIEWS_CHECK=1 (P5-32): reports on stderr when the import
+ * names a staged header recorded differ from each import's
+ * `importFullyQualifiedNames`, which is what `getImports` computes otherwise.
+ * @param {object} modelFile the ModelFile a staged header was just applied to
+ */
+function checkRecordedImportNames(modelFile: any): void {
+    let names: string[] = [];
+    try {
+        for (const imp of modelFile.imports) {
+            names = names.concat(rust!.modelUtilImportFullyQualifiedNames(imp));
+        }
+    } catch (e: any) {
+        process.stderr.write(`LAZY-CHECK import-names error: ${modelFile.namespace} ${e?.name}: ${e?.message}\n`);
+        return;
+    }
+    if (JSON.stringify(names) !== JSON.stringify(recordedImportNames(modelFile))) {
+        process.stderr.write(`LAZY-CHECK import-names mismatch: ${modelFile.namespace}\n`);
+    }
+}
+
+/**
  * P5-10b: the lazily built ModelFiles. Their manager had no decorator
  * factories when each was constructed (factories keep the eager path), so
  * none applies to their elements' decorators: a factory added after
@@ -904,8 +962,8 @@ const lazyFiles = new WeakSet<object>();
  * part of `fromAst` (P5-10b: before `process()`, so the file's own
  * decorators can be deferred too): loads the AST in the manager's
  * rustHandle staging slot, once. Returns true when the ModelFile may be
- * built lazily: the manager is a real BaseModelManager with a rustHandle
- * and no decorator factories, Rust loaded the AST without error, and, with
+ * built lazily: the manager (always a BaseModelManager, BC-47) has no
+ * decorator factories, Rust loaded the AST without error, and, with
  * a custom `options.regExp`, the Fields' StringValidators were built
  * without error (`probeCustomRegExp`). Never throws: on any
  * failure the caller builds the ModelFile eagerly, which throws the TS error
@@ -914,13 +972,10 @@ const lazyFiles = new WeakSet<object>();
  * @return {boolean} true if the declarations may be built lazily
  */
 function stageModelFile(modelFile: any): boolean {
+    // P5-35 (BC-47): the ModelFile constructor accepts only a
+    // BaseModelManager, which always has a rustHandle.
     const manager = modelFile.modelManager;
-    const handle = manager?.rustHandle;
-    if (!handle || typeof handle.stageModelFile !== 'function' ||
-        typeof manager._rustHandleMatchesModelFiles !== 'function' ||
-        typeof manager._needsRustWrite !== 'function') {
-        return false;
-    }
+    const handle = manager.rustHandle;
     try {
         // Decorator factories are user code `Decorated.process` runs (and
         // may throw from) during construction: they keep the eager path, so
@@ -1046,15 +1101,19 @@ function applyStagedFileHeader(modelFile: any, ast: any): boolean {
     }
     modelFile.imports = imports;
     const shortNames = modelFile.importShortNames;
+    const names: string[] = [];
     for (const [key, fqn] of header.shortNames) {
         shortNames.set(key, fqn);
+        names.push(fqn);
     }
     const uriMap = modelFile.importUriMap;
     for (const [key, uri] of header.uriMap) {
         uriMap[key] = uri;
     }
+    recordImportNames(modelFile, names);
     if (lazyViewsCheck) {
         checkStagedFileHeader(modelFile, ast);
+        checkRecordedImportNames(modelFile);
     }
     return true;
 }
@@ -1390,11 +1449,18 @@ function applyStagedHeader(modelFile: any, ast: any): boolean {
         types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event'],
     });
     modelFile.imports = imports;
+    const names: string[] = [];
     for (let i = 0; i < shortNames.length; i += 2) {
         modelFile.importShortNames.set(shortNames[i], shortNames[i + 1]);
+        names.push(shortNames[i + 1]);
     }
     for (let i = 0; i < uris.length; i += 2) {
         modelFile.importUriMap[uris[i]] = uris[i + 1];
+    }
+    // P5-32: one `set` per imported name, as for `applyStagedFileHeader`.
+    recordImportNames(modelFile, names);
+    if (lazyViewsCheck) {
+        checkRecordedImportNames(modelFile);
     }
     return true;
 }
@@ -2271,18 +2337,13 @@ const lookupFrames: LookupCall[][] = [];
 
 /**
  * Whether `view`'s property lookups may be cached: its model file was built
- * by the ModelFile constructor (`ModelFile._isConstructed`) for a real
- * BaseModelManager.
+ * by the ModelFile constructor (`ModelFile._isConstructed`), which accepts
+ * only a BaseModelManager (P5-35, BC-47).
  * @param {object} view the ClassDeclaration view
  * @return {boolean} true if cacheable
  */
 function lookupCacheable(view: any): boolean {
-    const modelFile = view?.modelFile;
-    if (!modelFileModule().default._isConstructed(modelFile)) {
-        return false;
-    }
-    const manager = modelFile.modelManager;
-    return !!manager && !!manager.rustHandle && typeof manager._needsRustWrite === 'function';
+    return modelFileModule().default._isConstructed(view?.modelFile);
 }
 
 /**
@@ -2490,22 +2551,21 @@ function classDeclarationGetProperty(view: any, name: any): any {
 //
 // A miss runs the `classDeclarationGetIdentifierFieldNameWalk` binding,
 // which walks the super types in one call and returns every declaration it
-// read, and whether every step ran the unmodified TS method (see the
-// binding's doc comment in concerto-wasm). Its answer is kept only when it
-// did, for views of model files built for a real BaseModelManager (as P5-14's
-// property lookups), and is reused only while:
+// read, and whether the walk ran without calling back (see the binding's doc
+// comment in concerto-wasm). Its answer is kept only when it did, for views
+// of model files built for a real BaseModelManager (as P5-14's property
+// lookups), and is reused only while:
 // - no model file was added, updated or deleted since (`propertyGeneration`,
 //   bumped by `invalidatePropertyLookups`), and each manager on the way still
 //   holds the same `modelFiles` map;
 // - every declaration in the chain still has the `idField`, `superType`,
-//   `superTypeDeclaration` and `modelFile` it had, its model file the same
-//   manager, and none of the methods the TS body reaches on the way
-//   (`getIdentifierFieldName`, `getSuperType`, `getSuperTypeDeclaration`,
-//   `_resolveSuperType`, `getModelFile`, the super type's
-//   `getFullyQualifiedName` and `fqn`, `getLocalType`, `getModelManager`
-//   and `getType`) was replaced, on the object or its prototype.
+//   `superTypeDeclaration` and `modelFile` it had, and its model file the
+//   same manager.
 // Anything else calls the binding every time. A call that throws keeps
-// nothing.
+// nothing. P5-36 (BC-50, accordproject/concerto-rust#346): the walk always
+// inlines the ClassDeclaration methods, and replacing a method the walk
+// reaches (on the object or its prototype) is not supported, so the cache no
+// longer compares them.
 // ---------------------------------------------------------------------------
 
 /** One declaration of a cached identifier walk, as it was read. */
@@ -2517,8 +2577,6 @@ interface IdentifierLevel {
     modelFile: any;
     manager: any;
     modelFiles: any;
-    /** `identifierMethods(view)` then. */
-    methods: any[];
 }
 
 /** One ClassDeclaration view's cached `getIdentifierFieldName()` answer. */
@@ -2531,30 +2589,6 @@ interface IdentifierEntry {
 }
 
 const identifierEntries = new WeakMap<object, IdentifierEntry>();
-
-/**
- * The methods (and the super type's `fqn`) the TS body of
- * `getIdentifierFieldName` reaches from `view`, in a fixed order.
- * @param {object} view the ClassDeclaration view
- * @return {any[]} the values
- */
-function identifierMethods(view: any): any[] {
-    const modelFile = view.modelFile;
-    const manager = modelFile?.modelManager;
-    const superTypeDeclaration = view.superTypeDeclaration;
-    return [
-        view.getIdentifierFieldName,
-        view.getSuperType,
-        view.getSuperTypeDeclaration,
-        view._resolveSuperType,
-        view.getModelFile,
-        modelFile?.getLocalType,
-        modelFile?.getModelManager,
-        manager?.getType,
-        superTypeDeclaration?.getFullyQualifiedName,
-        superTypeDeclaration?.fqn,
-    ];
-}
 
 /**
  * `view` as the walk read it, or undefined when it may not be cached.
@@ -2574,7 +2608,6 @@ function identifierLevel(view: any): IdentifierLevel | undefined {
         modelFile: view.modelFile,
         manager,
         modelFiles: manager.modelFiles,
-        methods: identifierMethods(view),
     };
 }
 
@@ -2594,12 +2627,6 @@ function identifierValid(entry: IdentifierEntry): boolean {
             level.modelFile.modelManager !== level.manager || level.manager.modelFiles !== level.modelFiles) {
             return false;
         }
-        const methods = identifierMethods(view);
-        for (let n = 0; n < methods.length; n++) {
-            if (methods[n] !== level.methods[n]) {
-                return false;
-            }
-        }
     }
     return true;
 }
@@ -2609,11 +2636,9 @@ function identifierValid(entry: IdentifierEntry): boolean {
  * the `classDeclarationGetIdentifierFieldNameWalk` binding's, cached when it
  * can be. Throws what the binding throws.
  * @param {object} view the ClassDeclaration view
- * @param {Function[]} originals the unmodified methods the binding may run
- * itself (classdeclaration.ts)
  * @return {string|null} the name of the identifying field, or null
  */
-function classDeclarationGetIdentifierFieldName(view: any, originals: any[]): any {
+function classDeclarationGetIdentifierFieldName(view: any): any {
     const cacheable = lookupCacheable(view);
     if (cacheable) {
         const entry = identifierEntries.get(view);
@@ -2625,7 +2650,7 @@ function classDeclarationGetIdentifierFieldName(view: any, originals: any[]): an
         }
     }
     const generation = propertyGeneration;
-    const result = rust!.classDeclarationGetIdentifierFieldNameWalk(view, originals);
+    const result = rust!.classDeclarationGetIdentifierFieldNameWalk(view);
     const value = result[0];
     if (cacheable && result[1] === true && generation === propertyGeneration) {
         const levels: IdentifierLevel[] = [];
@@ -2659,6 +2684,8 @@ export {
     stageModelFile,
     applyStagedHeader,
     applyStagedFileHeader,
+    recordImportNames,
+    recordedImportNames,
     deferDeclarations,
     commitStaged,
     validateAndCommitStaged,

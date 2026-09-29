@@ -261,6 +261,9 @@ class BaseModelManager {
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
     */
     constructor(options?: ModelManagerOptions, processFile?: (fileName: string | null, modelInput: string | unknown) => ModelFileSource) {
+        // P5-35 (BC-47): a ModelFile may be built only for a manager whose
+        // constructor ran; registered before this constructor builds any.
+        ModelFile._registerManager(this);
         this.processFile = processFile ? processFile : defaultProcessFile;
         this.modelFiles = {};
         this.factory = new Factory(this);
