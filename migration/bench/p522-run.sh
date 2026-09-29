@@ -14,6 +14,13 @@
 #   BEFORE_ENGINE              the pre-F1 concerto-wasm pkg/concerto-engine.cjs.
 #   P515_SELF                  a pattern naming this run's own processes,
 #                              which the quiet gate ignores.
+#   P522_OPS                   optional (P5-27): a comma-separated subset of
+#                              the sweep's ops, for both phases (default:
+#                              every op).
+#   P522_CRATE                 optional (P5-27): 0 skips the crate-direct
+#                              criterion rounds (for a change outside the
+#                              crates, where both sides run the same crate
+#                              code); NOW_BIN and BEFORE_BIN are then unused.
 #
 # Writes <out dir>/now/ and <out dir>/before/ in the layout p515-report.mjs
 # reads; both get the same TS 5.0.0 reference rounds, since TS 5.0.0 is the
@@ -36,6 +43,14 @@ NOW_BIN=$3
 BEFORE_BIN=$4
 REF=migration/oracle/reference/node_modules/@accordproject/concerto-core/dist
 SETS="concerto-core-test-data conformance synthetic-large"
+ALL_OPS="mm_new modelfile_new add_model_file add_cto_model from_json to_json new_resource validate set_property_value add_array_value dcs_decorate dcs_validate extract_decorators extract_vocabularies get_type resolve_type get_decorators get_namespaces derives_from is_assignable_to"
+if [ -n "${P522_OPS:-}" ]; then
+  OPS=$(echo "$P522_OPS" | tr ',' ' ')
+  OPS_ARG="--ops $P522_OPS"
+else
+  OPS=$ALL_OPS
+  OPS_ARG=""
+fi
 mkdir -p "$OUT/now" "$OUT/before"
 
 loads() {
@@ -57,7 +72,7 @@ if [ "$PHASE" = profiles ]; then
   for side in now before; do
     O="$OUT/$side"
     mkdir -p "$O/cpuprof" "$O/summary"
-    for op in mm_new modelfile_new add_model_file add_cto_model from_json to_json new_resource validate set_property_value add_array_value dcs_decorate dcs_validate extract_decorators extract_vocabularies get_type resolve_type get_decorators get_namespaces derives_from is_assignable_to; do
+    for op in $OPS; do
       for s in $SETS; do
         [ "$op" = mm_new ] && [ "$s" != conformance ] && continue
         d="$O/cpuprof/$op-$s"
@@ -73,9 +88,9 @@ if [ "$PHASE" = profiles ]; then
       done
     done
     if [ "$side" = before ]; then
-      CONCERTO_ENGINE_MODULE="$BEFORE_ENGINE" node migration/bench/p515-sweep.mjs --core-dist "$BEFORE_CORE_DIST" --mode count --samples 10 --warmup 2 --out "$O/summary/crossings.json" > "$O/crossings.log" 2>&1
+      CONCERTO_ENGINE_MODULE="$BEFORE_ENGINE" node migration/bench/p515-sweep.mjs --core-dist "$BEFORE_CORE_DIST" --mode count $OPS_ARG --samples 10 --warmup 2 --out "$O/summary/crossings.json" > "$O/crossings.log" 2>&1
     else
-      node migration/bench/p515-sweep.mjs --mode count --samples 10 --warmup 2 --out "$O/summary/crossings.json" > "$O/crossings.log" 2>&1
+      node migration/bench/p515-sweep.mjs --mode count $OPS_ARG --samples 10 --warmup 2 --out "$O/summary/crossings.json" > "$O/crossings.log" 2>&1
     fi
     echo "$side crossings done ($(loads))"
   done
@@ -113,7 +128,7 @@ if [ "$PHASE" = timed ]; then
   }
   for r in 1 2 3; do
     gate; echo "round $r ts-ref start load $(loads)"
-    node migration/bench/p515-sweep.mjs --core-dist "$REF" --samples 30 --warmup 5 --out "$OUT/now/ts-reference-5.0.0-$r.json" > "$OUT/now/ts-reference-5.0.0-$r.log" 2>&1
+    node migration/bench/p515-sweep.mjs --core-dist "$REF" $OPS_ARG --samples 30 --warmup 5 --out "$OUT/now/ts-reference-5.0.0-$r.json" > "$OUT/now/ts-reference-5.0.0-$r.log" 2>&1
     cp "$OUT/now/ts-reference-5.0.0-$r.json" "$OUT/before/ts-reference-5.0.0-$r.json"
     echo "round $r ts-ref end load $(loads)"
     # Alternate which side goes first, so drift within a round does not
@@ -121,9 +136,10 @@ if [ "$PHASE" = timed ]; then
     if [ $((r % 2)) = 1 ]; then ORDER="now before"; else ORDER="before now"; fi
     for side in $ORDER; do
       gate; echo "round $r rust-engine-$side start load $(loads)"
-      sweep "$side" --samples 30 --warmup 5 --out "$OUT/$side/rust-engine-$r.json" > "$OUT/$side/rust-engine-$r.log" 2>&1
+      sweep "$side" $OPS_ARG --samples 30 --warmup 5 --out "$OUT/$side/rust-engine-$r.json" > "$OUT/$side/rust-engine-$r.log" 2>&1
       echo "round $r rust-engine-$side end load $(loads)"
     done
+    [ "${P522_CRATE:-1}" = 0 ] && continue
     for side in $ORDER; do
       if [ "$side" = now ]; then crate now "$NOW_BIN" "$NOW_TARGET" "$r"; else crate before "$BEFORE_BIN" "$BEFORE_TARGET" "$r"; fi
     done
