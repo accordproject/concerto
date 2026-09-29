@@ -12,6 +12,8 @@
  * limitations under the License.
  */
 
+import semver from 'semver';
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ModelFile from './introspect/modelfile';
@@ -160,7 +162,23 @@ class ModelUtil {
         version?: string | null;
         versionParsed?: unknown;
     } {
-        return rust.modelUtilParseNamespace(ns, options) as ReturnType<typeof ModelUtil.parseNamespace>;
+        // P5-20 (F4): the engine checks the version the way semver.parse does
+        // and returns its result packed into one string (concerto-wasm
+        // modelUtilParseNamespaceChecked), without calling back into JS.
+        // `versionParsed` is then built here, by the same semver.parse, which
+        // costs far less in JS than a callback across the boundary.
+        const packed = rust.modelUtilParseNamespaceChecked(ns, options) as string;
+        const parts = packed.slice(1).split('@');
+        if (packed[0] === 'N') {
+            return { name: parts[0] };
+        }
+        const version = packed[0] === 'V' ? parts[2] : null;
+        return {
+            name: parts[0],
+            escapedNamespace: parts[1],
+            version,
+            versionParsed: version === null ? null : semver.parse(version),
+        };
     }
 
     /**
