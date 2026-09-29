@@ -1,0 +1,7 @@
+# DCO GitHub App settings (https://github.com/dcoapp/app#configuration).
+# Allow remediation commits so a missing sign-off can be fixed without
+# rewriting published history: an individual author can sign off their own
+# earlier commit, and a maintainer can sign off on behalf of another author.
+allowRemediationCommits:
+  individual: true
+  thirdParty: true
