@@ -84,16 +84,8 @@ function handleFor(modelManager: BaseModelManager): any {
  * @return {object} the cache entry
  */
 function cachedHandleFor(modelManager: BaseModelManager): CachedHandle {
-    // A model manager built with an alternative regular expression engine
-    // (`new ModelManager({ regExp })`, e.g. XRegExp) validates `regex=`
-    // string fields with that engine (introspect/stringvalidator.ts
-    // `regExpHook`), which the engine-side ModelManager cannot call: it
-    // would validate with its own ECMAScript dialect instead and could
-    // accept or reject different strings. Fall back to the visitor path,
-    // which honours the hook.
-    if ((modelManager as any).options?.regExp) {
-        throw new EngineFastPathUnsupported('model-manager-regExp-option');
-    }
+    // P5-52 (BC-28, R1): `options.regExp` is ignored, so a model manager
+    // built with one no longer leaves the fast path.
     const handle = (modelManager as any).rustHandle;
     if (!handle || typeof handle.serializerToJson !== 'function') {
         throw new EngineFastPathUnsupported('no-rust-handle');

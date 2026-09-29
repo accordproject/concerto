@@ -30,9 +30,16 @@
  * Each scenario runs twice: through the engine (`RM-E-*`, a plain model
  * manager), where a throw is reduced to its class (error parity is by class,
  * maintainer decision 2026-09-27, P5-09), and through the TS visitors
- * (`RM-V-*`), which a model manager with a custom `regExp` engine forces for
- * `fromJSON`, `toJSON` and `validate()` alike (serializer.ts and
- * validate-resource.ts fall back on `EngineFastPathUnsupported`).
+ * (`RM-V-*`). The visitor variant forces the TS visitors through the public
+ * API: `fromJSON` and `toJSON` carry a lone surrogate in the unrelated
+ * optional field `s`, which the wire codec cannot carry, so the whole call
+ * takes the visitor path (as in serializer-fallback.checks.js), and
+ * `validate()` runs with a `ResourceValidator` subclass that overrides
+ * nothing, which the engine does not take (as in
+ * resourcevalidator-visitor.checks.js). Both fall back on
+ * `EngineFastPathUnsupported` (serializer.ts, validate-resource.ts). (P5-58
+ * used a model manager with a custom `regExp` engine; P5-52, BC-28, R1, made
+ * that option ignored, so it no longer leaves the engine path.)
  *
  * `expect` is the workspace outcome and `reference` what v5.0.0 gives
  * (fallbacks.spec.js).
@@ -40,8 +47,9 @@
 
 const NS = 'org.acme.lifted.p558.relmap@1.0.0';
 
-/** A custom RegExp engine: plain ECMAScript semantics, but a distinct constructor. */
-class CustomRegExp extends RegExp {}
+// A lone surrogate: the wire codec cannot carry it (serializer-codec.ts
+// `checkString`), so a document holding one takes the visitor path.
+const L = '\uD800';
 
 const MODEL = `namespace ${NS}
 participant P identified by pid { o String pid o String n optional }
@@ -54,14 +62,12 @@ concept C {
 `;
 
 /**
- * A model manager, factory and serializer over MODEL; the model manager has
- * a custom `regExp` engine when `visitor` is set.
+ * A model manager, factory and serializer over MODEL.
  * @param {object} core the core under test
- * @param {boolean} visitor whether to force the TS visitors
  * @returns {object} `{ mm, factory, ser }`
  */
-function setup(core, visitor) {
-    const mm = visitor ? new core.ModelManager({ regExp: CustomRegExp }) : new core.ModelManager();
+function setup(core) {
+    const mm = new core.ModelManager();
     mm.addCTOModel(MODEL, 'relmap.cto');
     const factory = new core.Factory(mm);
     return { mm, factory, ser: new core.Serializer(factory, mm) };
@@ -107,8 +113,9 @@ function describeValue(v) {
  */
 function populate(visitor, pm, options = {}) {
     return (core) => classOnly(visitor, () => {
-        const { ser } = setup(core, visitor);
-        const r = ser.fromJSON({ $class: `${NS}.C`, pm }, options);
+        const { ser } = setup(core);
+        const json = visitor ? { $class: `${NS}.C`, s: L, pm } : { $class: `${NS}.C`, pm };
+        const r = ser.fromJSON(json, options);
         return [...r.pm.entries()].map(([k, v]) => [k, describeValue(v)]);
     });
 }
@@ -122,8 +129,11 @@ function populate(visitor, pm, options = {}) {
  */
 function generate(visitor, entries, options = {}) {
     return (core) => classOnly(visitor, () => {
-        const { factory, ser } = setup(core, visitor);
+        const { factory, ser } = setup(core);
         const r = factory.newConcept(NS, 'C');
+        if (visitor) {
+            r.s = L;
+        }
         r.pm = new Map(entries(core, factory));
         return ser.toJSON(r, options).pm;
     });
@@ -137,8 +147,12 @@ function generate(visitor, entries, options = {}) {
  */
 function validate(visitor, entries) {
     return (core) => classOnly(visitor, () => {
-        const { factory } = setup(core, visitor);
+        const { factory } = setup(core);
         const r = factory.newConcept(NS, 'C');
+        if (visitor) {
+            const VisitorOnly = class extends core.ResourceValidator {};
+            r.$validator = new VisitorOnly(r.$validator.options);
+        }
         r.pm = new Map(entries(core, factory));
         r.validate();
         return 'valid';

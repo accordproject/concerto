@@ -42,8 +42,8 @@
 // Both functions return `false` only in that last case, when the value
 // cannot cross (`EngineFastPathUnsupported`: a lone surrogate, a function,
 // a symbol, a BigInt, a class instance that is not a Resource or a dayjs, a
-// shared or cyclic reference, a `__proto__` or own `$class` key, a model
-// manager with a custom `regExp` engine) or the instance's validator is not
+// shared or cyclic reference, a `__proto__` or own `$class` key) or the
+// instance's validator is not
 // a plain `ResourceValidator` (a subclass or another object may override
 // the visitor, which the engine cannot run). Every other outcome is final:
 // a valid value returns `true`, an invalid one throws with the class TS
