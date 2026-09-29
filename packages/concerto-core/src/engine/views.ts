@@ -2080,6 +2080,15 @@ function invalidatePropertyLookups(): void {
     propertyGeneration++;
 }
 
+/**
+ * The model epoch `invalidatePropertyLookups` moves (P5-29): BaseModelManager
+ * keys its getNamespaces/getType/resolveType memo on it.
+ * @return {number} the current `propertyGeneration`
+ */
+function modelGeneration(): number {
+    return propertyGeneration;
+}
+
 /** One ClassDeclaration view's cached `getProperties()` list. */
 interface PropertyLookup {
     /** `propertyGeneration` when it was built. */
@@ -2489,6 +2498,7 @@ function classDeclarationGetIdentifierFieldName(view: any, originals: any[]): an
 export {
     classDeclarationGetIdentifierFieldName,
     invalidatePropertyLookups,
+    modelGeneration,
     classDeclarationGetProperties,
     classDeclarationGetProperty,
     localType,

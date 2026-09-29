@@ -1,0 +1,297 @@
+{
+  "tool": "p515-sweep",
+  "mode": "count",
+  "coreDist": "/home/user/wt/P5-29/concerto/packages/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "4522875be",
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "loadavgEnd": [
+    1.18,
+    1.65,
+    1.51
+  ],
+  "samples": 10,
+  "warmup": 2,
+  "results": [
+    {
+      "op": "get_namespaces",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 1.2939,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 0.7835,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 0.2507,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_type",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 1.0874766233766233,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_type",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 1.0640288461538463,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_type",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 0.7357033222591363,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 0.08270454545454545,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 0.09847115384615383,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 0.17727209302325583,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces_first",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 19.5795,
+      "crossings": 2,
+      "inEngineUs": 14.245099999999999,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getNamespaces",
+          "perItem": 1,
+          "usPerItem": 13.959
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 0.2861
+        }
+      ]
+    },
+    {
+      "op": "get_namespaces_first",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 19.606,
+      "crossings": 2,
+      "inEngineUs": 14.037399999999998,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getNamespaces",
+          "perItem": 1,
+          "usPerItem": 13.591299999999999
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 0.4461
+        }
+      ]
+    },
+    {
+      "op": "get_namespaces_first",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 2.8007,
+      "crossings": 2,
+      "inEngineUs": 1.4806,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getNamespaces",
+          "perItem": 1,
+          "usPerItem": 1.2101
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 0.2705
+        }
+      ]
+    },
+    {
+      "op": "get_type_first",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 4.8108870129870125,
+      "crossings": 2,
+      "inEngineUs": 1.4347396103896104,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getTypeName",
+          "perItem": 1,
+          "usPerItem": 1.274835064935065
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 0.15990454545454547
+        }
+      ]
+    },
+    {
+      "op": "get_type_first",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 5.779784615384615,
+      "crossings": 2,
+      "inEngineUs": 1.599405769230769,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getTypeName",
+          "perItem": 1,
+          "usPerItem": 1.4289019230769229
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 0.17050384615384614
+        }
+      ]
+    },
+    {
+      "op": "get_type_first",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 2.347127574750831,
+      "crossings": 2,
+      "inEngineUs": 1.3844687707641197,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 0.7524285714285714
+        },
+        {
+          "name": "ModelManagerHandle.getTypeName",
+          "perItem": 1,
+          "usPerItem": 0.6320401993355482
+        }
+      ]
+    },
+    {
+      "op": "resolve_type_first",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 2.7552915584415585,
+      "crossings": 2,
+      "inEngineUs": 1.2103006493506492,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.resolveType",
+          "perItem": 1,
+          "usPerItem": 1.1302967532467532
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 0.0800038961038961
+        }
+      ]
+    },
+    {
+      "op": "resolve_type_first",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 3.066305769230769,
+      "crossings": 2,
+      "inEngineUs": 1.3134576923076924,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.resolveType",
+          "perItem": 1,
+          "usPerItem": 1.2189826923076923
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 0.09447499999999999
+        }
+      ]
+    },
+    {
+      "op": "resolve_type_first",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 1.3627232558139535,
+      "crossings": 2,
+      "inEngineUs": 0.8311993355481727,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.resolveType",
+          "perItem": 1,
+          "usPerItem": 0.7525790697674418
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 0.0786202657807309
+        }
+      ]
+    }
+  ]
+}

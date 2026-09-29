@@ -104,6 +104,69 @@ function rustHandleReads(handle: { [binding: string]: (...args: any[]) => any })
     return reads;
 }
 
+/**
+ * The engine's answers to `getNamespaces`, `getType` and `resolveType` for
+ * one BaseModelManager (P5-29, accordproject/concerto-rust#334), valid while
+ * the model epoch P5-14 introduced (`modelGeneration`, moved by every
+ * `addModelFile`, `updateModelFile`, `deleteModelFile`, `addModelFiles` and
+ * `updateExternalModels`) is unchanged and the manager still holds the same
+ * `modelFiles` map and rustHandle (`clearModelFiles` and the roll-back of a
+ * failed `addModelFiles` or `updateExternalModels` replace one or both).
+ * Only an answer the engine gave while rustHandle mirrored `modelFiles`
+ * (`_rustHandleMatchesModelFiles`) is kept, so a manager holding stub model
+ * files keeps its current path; a call that throws keeps nothing.
+ */
+interface ManagerReadMemo {
+    generation: number;
+    modelFiles: object;
+    handle: object;
+    /** `rustHandle.getNamespaces()`. Never handed out: callers get a copy. */
+    namespaces?: string[];
+    /** `rustHandle.getTypeName(name)`, by name. */
+    typeNames: Map<string, string>;
+    /** `rustHandle.resolveType(context, type)`, by type (the context only words an error). */
+    resolvedTypes: Map<string, string>;
+}
+
+/* istanbul ignore next */
+const managerReadMemos = new WeakMap<object, ManagerReadMemo>();
+
+/**
+ * Whether `memo` is still `manager`'s (see `ManagerReadMemo`).
+ * @param {object} manager - the BaseModelManager
+ * @param {object} memo - its memo
+ * @return {boolean} true if it may be used
+ * @private
+ */
+/* istanbul ignore next */
+function managerReadMemoValid(manager: { modelFiles: object; rustHandle: object }, memo: ManagerReadMemo): boolean {
+    return memo.generation === engineViews().modelGeneration() && memo.modelFiles === manager.modelFiles &&
+        memo.handle === manager.rustHandle;
+}
+
+/**
+ * `manager`'s memo, started afresh when the model epoch, its `modelFiles`
+ * map or its rustHandle has changed.
+ * @param {object} manager - the BaseModelManager
+ * @return {ManagerReadMemo} its current memo
+ * @private
+ */
+/* istanbul ignore next */
+function managerReadMemo(manager: { modelFiles: object; rustHandle: object }): ManagerReadMemo {
+    let memo = managerReadMemos.get(manager);
+    if (!memo || !managerReadMemoValid(manager, memo)) {
+        memo = {
+            generation: engineViews().modelGeneration(),
+            modelFiles: manager.modelFiles,
+            handle: manager.rustHandle,
+            typeNames: new Map(),
+            resolvedTypes: new Map(),
+        };
+        managerReadMemos.set(manager, memo);
+    }
+    return memo;
+}
+
 // How to create a modelfile from the external content
 const defaultProcessFile = (name: string | null, data: unknown): ModelFileSource => {
     return {
@@ -1086,15 +1149,29 @@ class BaseModelManager {
      */
     resolveType(context, type) {
         /* istanbul ignore next */
-        if (typeof context === 'string' && typeof type === 'string' && this._rustHandleMatchesModelFiles()) {
-            // The mirror holds exactly TS's namespaces, so the engine's
-            // answer is final, including any error it throws
-            // (accordproject/concerto-rust#262). Only a rustHandle that does
-            // not match this.modelFiles (a W test's stub ModelFile never
-            // reached it: see _isMirrored) takes the TS body below, as do
-            // non-string arguments, which the binding's `&str` parameters
-            // cannot take (a JS non-string traps the engine).
-            return this.rustHandle.resolveType(context, type);
+        if (typeof context === 'string' && typeof type === 'string') {
+            // P5-29: a type the engine resolved since the last model change
+            // is answered from the memo (`ManagerReadMemo`), without
+            // crossing into the engine.
+            const memo = managerReadMemo(this);
+            const resolved = memo.resolvedTypes.get(type);
+            if (resolved !== undefined) {
+                return resolved;
+            }
+            if (this._rustHandleMatchesModelFiles()) {
+                // The mirror holds exactly TS's namespaces, so the engine's
+                // answer is final, including any error it throws
+                // (accordproject/concerto-rust#262). Only a rustHandle that
+                // does not match this.modelFiles (a W test's stub ModelFile
+                // never reached it: see _isMirrored) takes the TS body below,
+                // as do non-string arguments, which the binding's `&str`
+                // parameters cannot take (a JS non-string traps the engine).
+                const result: string = this.rustHandle.resolveType(context, type);
+                if (managerReadMemoValid(this, memo)) {
+                    memo.resolvedTypes.set(type, result);
+                }
+                return result;
+            }
         }
         // is the type a primitive?
         if (ModelUtil.isPrimitiveType(type)) {
@@ -1174,10 +1251,23 @@ class BaseModelManager {
      * @return {string[]} namespaces - the namespaces that have been registered.
      */
     getNamespaces(): string[] {
+        // P5-29: the engine's list is kept until the next model change
+        // (`ManagerReadMemo`); each call gets its own copy, so changing the
+        // returned array reaches neither the memo nor the engine.
+        /* istanbul ignore next */
+        const memo = managerReadMemo(this);
+        /* istanbul ignore next */
+        if (memo.namespaces) {
+            return memo.namespaces.slice();
+        }
         const namespaces = Object.keys(this.modelFiles);
         /* istanbul ignore next */
         if (this._rustHandleMatchesModelFiles()) {
-            return this.rustHandle.getNamespaces();
+            const result: string[] = this.rustHandle.getNamespaces();
+            if (managerReadMemoValid(this, memo)) {
+                memo.namespaces = result.slice();
+            }
+            return result;
         }
         return namespaces;
     }
@@ -1191,17 +1281,29 @@ class BaseModelManager {
      */
     getType(qualifiedName) {
         /* istanbul ignore next */
-        if (typeof qualifiedName === 'string' && this._rustHandleMatchesModelFiles()) {
-            // P5-11 (accordproject/concerto-rust#287): resolved in Rust
-            // (concerto-wasm `getTypeName`), which throws the
-            // TypeNotFoundException TS throws. Rust answers with the
-            // declaration's fully-qualified name, mapped here to its view in
-            // the model file of its namespace. A rustHandle that does not
-            // mirror this.modelFiles (a W test's stub ModelFile) and a
-            // non-string name, which the binding's `&str` parameter cannot
-            // take, keep the TS body below.
-            const fqn: string = this.rustHandle.getTypeName(qualifiedName);
-            return this.modelFiles[fqn.substring(0, fqn.lastIndexOf('.'))].getLocalType(fqn);
+        if (typeof qualifiedName === 'string') {
+            // P5-29: the fully-qualified name the engine answered since the
+            // last model change is kept (`ManagerReadMemo`); it is still
+            // mapped to its view below on every call.
+            const memo = managerReadMemo(this);
+            let fqn = memo.typeNames.get(qualifiedName);
+            if (fqn === undefined && this._rustHandleMatchesModelFiles()) {
+                // P5-11 (accordproject/concerto-rust#287): resolved in Rust
+                // (concerto-wasm `getTypeName`), which throws the
+                // TypeNotFoundException TS throws. Rust answers with the
+                // declaration's fully-qualified name, mapped here to its view
+                // in the model file of its namespace. A rustHandle that does
+                // not mirror this.modelFiles (a W test's stub ModelFile) and a
+                // non-string name, which the binding's `&str` parameter cannot
+                // take, keep the TS body below.
+                fqn = this.rustHandle.getTypeName(qualifiedName) as string;
+                if (managerReadMemoValid(this, memo)) {
+                    memo.typeNames.set(qualifiedName, fqn);
+                }
+            }
+            if (fqn !== undefined) {
+                return this.modelFiles[fqn.substring(0, fqn.lastIndexOf('.'))].getLocalType(fqn);
+            }
         }
 
         const namespace = ModelUtil.getNamespace(qualifiedName);
