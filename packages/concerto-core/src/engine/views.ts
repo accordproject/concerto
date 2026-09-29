@@ -522,6 +522,33 @@ function fieldGetScalarField(field: any): any {
 }
 
 /**
+ * DecoratorManager.validate's structural check (`serializer.fromJSON(
+ * decoratorCommandSet)`), once the TS body has built `validationModelManager`
+ * (the metamodel, `modelFiles` and the DCS model). P5-27 (F6): when that
+ * manager's rustHandle mirrors its model files, the command set is checked
+ * against the rustHandle's own resident manager (concerto-wasm
+ * `ModelManagerHandle.dcsValidate`), which already holds exactly the models
+ * the per-call binding would load, so the model files are neither sent again
+ * nor loaded into a second manager. Otherwise (a stub ModelFile in
+ * `modelFiles`, or an engine without the binding) the per-call
+ * `decoratorManagerValidate` rebuilds them, as before. Either throws the
+ * same errors: any error loading the models has already been thrown by the
+ * TS body while it built `validationModelManager`.
+ * @param {object} validationModelManager the validation ModelManager, built
+ * @param {*} decoratorCommandSet the DecoratorCommandSet object
+ * @param {object[]} [modelFiles] the model files validate was given
+ */
+function decoratorManagerValidate(validationModelManager: any, decoratorCommandSet: any, modelFiles?: any[]): void {
+    const handle = validationModelManager.rustHandle;
+    if (handle && typeof handle.dcsValidate === 'function' &&
+        validationModelManager._rustHandleMatchesModelFiles()) {
+        handle.dcsValidate(decoratorCommandSet);
+        return;
+    }
+    rust!.decoratorManagerValidate(decoratorCommandSet, modelFiles?.map((mf: any) => mf.getAst()));
+}
+
+/**
  * DecoratorManager.decorateModels in rust mode, after the TS body's
  * `skipValidationAndResolution` handling. Metamodel resolution itself is not
  * ported (concerto-rust src/dcs/mod.rs `decorate_models`'s doc comment), but
@@ -2489,6 +2516,7 @@ export {
     propertyProcess,
     fieldProcess,
     fieldGetScalarField,
+    decoratorManagerValidate,
     decoratorManagerDecorateModels,
     decoratorManagerExtractDecorators,
     decoratorManagerExtractVocabularies,
