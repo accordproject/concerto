@@ -2551,22 +2551,21 @@ function classDeclarationGetProperty(view: any, name: any): any {
 //
 // A miss runs the `classDeclarationGetIdentifierFieldNameWalk` binding,
 // which walks the super types in one call and returns every declaration it
-// read, and whether every step ran the unmodified TS method (see the
-// binding's doc comment in concerto-wasm). Its answer is kept only when it
-// did, for views of model files built for a real BaseModelManager (as P5-14's
-// property lookups), and is reused only while:
+// read, and whether the walk ran without calling back (see the binding's doc
+// comment in concerto-wasm). Its answer is kept only when it did, for views
+// of model files built for a real BaseModelManager (as P5-14's property
+// lookups), and is reused only while:
 // - no model file was added, updated or deleted since (`propertyGeneration`,
 //   bumped by `invalidatePropertyLookups`), and each manager on the way still
 //   holds the same `modelFiles` map;
 // - every declaration in the chain still has the `idField`, `superType`,
-//   `superTypeDeclaration` and `modelFile` it had, its model file the same
-//   manager, and none of the methods the TS body reaches on the way
-//   (`getIdentifierFieldName`, `getSuperType`, `getSuperTypeDeclaration`,
-//   `_resolveSuperType`, `getModelFile`, the super type's
-//   `getFullyQualifiedName` and `fqn`, `getLocalType`, `getModelManager`
-//   and `getType`) was replaced, on the object or its prototype.
+//   `superTypeDeclaration` and `modelFile` it had, and its model file the
+//   same manager.
 // Anything else calls the binding every time. A call that throws keeps
-// nothing.
+// nothing. P5-36 (BC-50, accordproject/concerto-rust#346): the walk always
+// inlines the ClassDeclaration methods, and replacing a method the walk
+// reaches (on the object or its prototype) is not supported, so the cache no
+// longer compares them.
 // ---------------------------------------------------------------------------
 
 /** One declaration of a cached identifier walk, as it was read. */
@@ -2578,8 +2577,6 @@ interface IdentifierLevel {
     modelFile: any;
     manager: any;
     modelFiles: any;
-    /** `identifierMethods(view)` then. */
-    methods: any[];
 }
 
 /** One ClassDeclaration view's cached `getIdentifierFieldName()` answer. */
@@ -2592,30 +2589,6 @@ interface IdentifierEntry {
 }
 
 const identifierEntries = new WeakMap<object, IdentifierEntry>();
-
-/**
- * The methods (and the super type's `fqn`) the TS body of
- * `getIdentifierFieldName` reaches from `view`, in a fixed order.
- * @param {object} view the ClassDeclaration view
- * @return {any[]} the values
- */
-function identifierMethods(view: any): any[] {
-    const modelFile = view.modelFile;
-    const manager = modelFile?.modelManager;
-    const superTypeDeclaration = view.superTypeDeclaration;
-    return [
-        view.getIdentifierFieldName,
-        view.getSuperType,
-        view.getSuperTypeDeclaration,
-        view._resolveSuperType,
-        view.getModelFile,
-        modelFile?.getLocalType,
-        modelFile?.getModelManager,
-        manager?.getType,
-        superTypeDeclaration?.getFullyQualifiedName,
-        superTypeDeclaration?.fqn,
-    ];
-}
 
 /**
  * `view` as the walk read it, or undefined when it may not be cached.
@@ -2635,7 +2608,6 @@ function identifierLevel(view: any): IdentifierLevel | undefined {
         modelFile: view.modelFile,
         manager,
         modelFiles: manager.modelFiles,
-        methods: identifierMethods(view),
     };
 }
 
@@ -2655,12 +2627,6 @@ function identifierValid(entry: IdentifierEntry): boolean {
             level.modelFile.modelManager !== level.manager || level.manager.modelFiles !== level.modelFiles) {
             return false;
         }
-        const methods = identifierMethods(view);
-        for (let n = 0; n < methods.length; n++) {
-            if (methods[n] !== level.methods[n]) {
-                return false;
-            }
-        }
     }
     return true;
 }
@@ -2670,11 +2636,9 @@ function identifierValid(entry: IdentifierEntry): boolean {
  * the `classDeclarationGetIdentifierFieldNameWalk` binding's, cached when it
  * can be. Throws what the binding throws.
  * @param {object} view the ClassDeclaration view
- * @param {Function[]} originals the unmodified methods the binding may run
- * itself (classdeclaration.ts)
  * @return {string|null} the name of the identifying field, or null
  */
-function classDeclarationGetIdentifierFieldName(view: any, originals: any[]): any {
+function classDeclarationGetIdentifierFieldName(view: any): any {
     const cacheable = lookupCacheable(view);
     if (cacheable) {
         const entry = identifierEntries.get(view);
@@ -2686,7 +2650,7 @@ function classDeclarationGetIdentifierFieldName(view: any, originals: any[]): an
         }
     }
     const generation = propertyGeneration;
-    const result = rust!.classDeclarationGetIdentifierFieldNameWalk(view, originals);
+    const result = rust!.classDeclarationGetIdentifierFieldNameWalk(view);
     const value = result[0];
     if (cacheable && result[1] === true && generation === propertyGeneration) {
         const levels: IdentifierLevel[] = [];
