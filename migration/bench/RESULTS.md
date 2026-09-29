@@ -7,8 +7,11 @@ decorateModels / extract_* call now stages the user model files of its result
 directly into the new manager's handle, with the header that
 `modelFileFromAstHeader` would compute, so the per-call `stageModelFile`,
 `modelFileFromAstHeader` and `validateModelFiles` rebuild of the user models
-is gone. `DecoratorManager.validate` is unchanged. The raw outputs are in
-`results/P5-27/`.
+is gone. `DecoratorManager.validate` now checks the command set against its
+validationModelManager's own engine handle (the new
+`ModelManagerHandle.dcsValidate` binding, calling `dcs::validate_against`),
+instead of reloading every model into a new engine manager on each call. The
+raw outputs are in `results/P5-27/` (validate: `results/P5-27/validate/`).
 
 | | |
 |---|---|
@@ -34,12 +37,19 @@ is gone. `DecoratorManager.validate` is unchanged. The raw outputs are in
 | extract_vocabularies | core-test-data | 5.12 | **4.77** | 35.5 -> 33.0 | 162 -> 93 |
 | extract_vocabularies | conformance | 8.26 | **5.52** | 20.6 -> 13.8 | 190 -> 107 |
 | extract_vocabularies | synthetic-large | 7.08 | **4.57** | 71.7 -> 46.4 | 30 -> 27 |
-| dcs_validate | core-test-data | 1.34 | 1.44 | (unchanged path) | 163 -> 163 |
-| dcs_validate | conformance | 1.63 | 1.71 | (unchanged path) | 191 -> 191 |
-| dcs_validate | synthetic-large | 1.14 | 1.16 | (unchanged path) | 31 -> 31 |
+| dcs_validate | core-test-data | 1.07 | **0.66** | 28.7 -> 17.6 | 163 -> 165 |
+| dcs_validate | conformance | 1.22 | **0.78** | 17.4 -> 11.2 | 191 -> 193 |
+| dcs_validate | synthetic-large | 1.12 | **0.80** | 47.3 -> 33.8 | 31 -> 33 |
 
 The full tables are `results/P5-27/compare.md`, `table-before.md` and
-`table-now.md`.
+`table-now.md`. The dcs_validate rows come from a second run of the same
+driver after the validate change (`P522_OPS=dcs_validate`, `concerto`
+`2afbb0e9d` with `concerto-rust` `c34ad92`, engine 2,981,992 bytes, against the
+same before heads), in `results/P5-27/validate/`: all 9 timed parts met the
+quiet gate (1-minute load 1.09 to 1.15, 5-minute 1.04, `validate/timed-loads.txt`).
+In the first run, before the validate change, dcs_validate read
+1.34/1.63/1.14× before and 1.44/1.71/1.16× now (core-test-data / conformance /
+synthetic-large), i.e. no change.
 
 ## F6 against its estimate
 
@@ -62,8 +72,17 @@ The full tables are `results/P5-27/compare.md`, `table-before.md` and
   the ±25% noise band. Crossings drop by the same amount as for extract_*, but
   decorateModels spends 77-81% of its time in WASM code (the decoration
   itself), so the removed rebuild is a small share of it.
-- **validate.** Out of this change's path (it rebuilds its validation manager
-  in TS and returns it to the caller); the +2% to +7% readings are noise.
+- **validate.** Not part of the F6 estimate. The validationModelManager is
+  still built in TS (it is the public return value, built as TS 5.0.0 builds
+  it), but the command set is now checked against that manager's resident
+  engine handle instead of a per-call rebuild of the metamodel, the model
+  files and the DCS model in Rust. Same-run, × TS drops by 28% to 38%
+  (1.07/1.22/1.12× to 0.66/0.78/0.80×; Rust time 28.7 -> 17.6, 17.4 -> 11.2,
+  47.3 -> 33.8 ms), beyond the ±25% noise band, and validate is now faster
+  than TS 5.0.0 on all three sets. Crossings rise by 2 per call:
+  `dcsValidate` replaces `decoratorManagerValidate` one for one, and the check
+  that the handle mirrors the manager's model files adds one `epoch` and one
+  `getNamespaces` call.
 
 # P5-22: re-measure after F1-F4, the P5-15 sweep repeated (2026-09-29)
 
