@@ -31,7 +31,10 @@
  * - `run(core)` uses only the public classes on `core` (see
  *   migration/oracle/lib/core.js `loadCore`) and returns plain data;
  * - `expect` is the outcome the frozen v5.0.0 reference gives, either
- *   `{ ok: <value> }` or `{ throws: { name, message } }`.
+ *   `{ ok: <value> }` or `{ throws: { name, message } }`;
+ * - `reference`, only on a check that covers an intended breaking change
+ *   (a BREAKING-CHANGES-PLAN.md row, e.g. P5-24's strict `DateTime`, BC-07),
+ *   is what v5.0.0 gives instead: `expect` is then the workspace outcome.
  *
  * Each check runs twice: against the workspace `src/` (this is what
  * counts towards concerto-core's nyc gate: packages/concerto-core's `test`
@@ -131,7 +134,7 @@ describe('lifted fallback checks (P5-02b)', function () {
                     if (!referenceInstalled) {
                         this.skip();
                     }
-                    assert.deepStrictEqual(await outcomeOf(check, getRefCore()), check.expect);
+                    assert.deepStrictEqual(await outcomeOf(check, getRefCore()), check.reference ?? check.expect);
                 });
             }
         });

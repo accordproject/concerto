@@ -55,6 +55,30 @@ const loadEngine = (specifier: string) =>
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
 
+// P5-24 (BC-07, R1; accordproject/concerto-rust#328): `DateTime` strings are
+// strict whatever `strictQualifiedDateTimes` says, so an explicit `false` no
+// longer opens a lenient path. It is ignored, with one warning per process.
+let lenientDateTimesWarned = false;
+
+/**
+ * Warns, once per process, that `strictQualifiedDateTimes: false` is
+ * ignored.
+ * @private
+ */
+function warnLenientDateTimesIgnored() {
+    if (lenientDateTimesWarned) {
+        return;
+    }
+    lenientDateTimesWarned = true;
+    /* istanbul ignore else: process.emitWarning is Node's */
+    if (typeof process !== 'undefined' && typeof process.emitWarning === 'function') {
+        process.emitWarning(
+            'strictQualifiedDateTimes: false is ignored: DateTime values must be ISO 8601 date-times with an offset (YYYY-MM-DDTHH:mm:ss[.SSS] then Z or \u00b1HH:mm)',
+            { type: 'Warning', code: 'concerto-strict-datetime' }
+        );
+    }
+}
+
 /**
  * Serialize Resources instances to/from various formats for long-term storage
  * (e.g. on the blockchain).
@@ -191,6 +215,9 @@ class Serializer {
     fromJSON(jsonObject, options?) {
         // set default options
         options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
+        if (options.strictQualifiedDateTimes === false) {
+            warnLenientDateTimesIgnored();
+        }
 
         // Fast path (P4-10; PORTING.md section 5 row 6, D7): one engine call
         // for the whole document, instead of one per field through
