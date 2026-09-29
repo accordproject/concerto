@@ -1,0 +1,19 @@
+round 1 ts-ref start load 1.15 1.04 1.42
+round 1 ts-ref end load 1.14 1.04 1.41
+round 1 rust-engine-now start load 1.14 1.04 1.41
+round 1 rust-engine-now end load 1.14 1.04 1.41
+round 1 rust-engine-before start load 1.14 1.04 1.41
+round 1 rust-engine-before end load 1.13 1.04 1.41
+round 2 ts-ref start load 1.13 1.04 1.41
+round 2 ts-ref end load 1.12 1.04 1.41
+round 2 rust-engine-before start load 1.12 1.04 1.41
+round 2 rust-engine-before end load 1.11 1.04 1.41
+round 2 rust-engine-now start load 1.11 1.04 1.41
+round 2 rust-engine-now end load 1.11 1.04 1.41
+round 3 ts-ref start load 1.11 1.04 1.41
+round 3 ts-ref end load 1.10 1.04 1.40
+round 3 rust-engine-now start load 1.10 1.04 1.40
+round 3 rust-engine-now end load 1.09 1.04 1.40
+round 3 rust-engine-before start load 1.09 1.04 1.40
+round 3 rust-engine-before end load 1.09 1.04 1.40
+timed done

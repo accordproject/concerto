@@ -1,0 +1,99 @@
+{
+  "rounds": [
+    1,
+    2,
+    3
+  ],
+  "rows": [
+    {
+      "op": "dcs_validate",
+      "set": "synthetic-large",
+      "family": "decorator",
+      "tsRefUs": 42057.8025,
+      "rustApiUs": 33843.14600000001,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 0.804681747221577,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 33,
+      "inEngineShare": 0.8980852475646663,
+      "topBindings": [
+        "ModelManagerHandle.dcsValidate x1.0",
+        "ModelManagerHandle.addModelWithDefinitions x2.0",
+        "ModelManagerHandle.validateAstValue x2.0"
+      ],
+      "stages": {
+        "core": 75.5,
+        "gc": 11.4,
+        "glue": 5.3,
+        "ts-core": 3.7,
+        "cto-parser": 2.6,
+        "views": 1.4,
+        "other": 0.1
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "dcs_validate",
+      "set": "conformance",
+      "family": "decorator",
+      "tsRefUs": 14233.286499999998,
+      "rustApiUs": 11171.0175,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 0.7848515871580328,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 193,
+      "inEngineShare": 0.8297424275229667,
+      "topBindings": [
+        "ModelManagerHandle.dcsValidate x1.0",
+        "ModelManagerHandle.validateAstValue x2.0",
+        "ModelManagerHandle.addModelWithDefinitions x42.0"
+      ],
+      "stages": {
+        "core": 65.4,
+        "gc": 16.7,
+        "ts-core": 4.9,
+        "cto-parser": 4.8,
+        "glue": 4.5,
+        "views": 3.3,
+        "other": 0.4
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "dcs_validate",
+      "set": "concerto-core-test-data",
+      "family": "decorator",
+      "tsRefUs": 26888.5165,
+      "rustApiUs": 17644.733500000002,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 0.6562181851869738,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 165,
+      "inEngineShare": 0.8645356486581068,
+      "topBindings": [
+        "ModelManagerHandle.dcsValidate x1.0",
+        "ModelManagerHandle.validateAstValue x2.0",
+        "ModelManagerHandle.addModelWithDefinitions x35.0"
+      ],
+      "stages": {
+        "core": 74.4,
+        "gc": 11.6,
+        "glue": 4.8,
+        "ts-core": 3.9,
+        "cto-parser": 3.2,
+        "views": 1.9,
+        "other": 0.3
+      },
+      "native": null,
+      "errors": []
+    }
+  ]
+}

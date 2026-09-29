@@ -1,0 +1,360 @@
+{
+  "rounds": [
+    1,
+    2,
+    3
+  ],
+  "rows": [
+    {
+      "op": "extract_vocabularies",
+      "set": "conformance",
+      "family": "decorator",
+      "tsRefUs": 2492.6265000000003,
+      "rustApiUs": 13754.373999999998,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 5.518024461346293,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 107,
+      "inEngineShare": 0.9199352446855371,
+      "topBindings": [
+        "DcsManagerHandle.extractVocabularies x1.0",
+        "modelFileFromAstHeader x5.0",
+        "ModelManagerHandle.stageModelFile x4.0"
+      ],
+      "stages": {
+        "core": 60.9,
+        "gc": 21.7,
+        "views": 7.5,
+        "glue": 6.6,
+        "other": 2.2,
+        "ts-core": 1.1
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "extract_decorators",
+      "set": "conformance",
+      "family": "decorator",
+      "tsRefUs": 2417.2105,
+      "rustApiUs": 13035.2865,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 5.3926981121420745,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 107,
+      "inEngineShare": 0.9132310002983667,
+      "topBindings": [
+        "DcsManagerHandle.extractDecorators x1.0",
+        "modelFileFromAstHeader x5.0",
+        "ModelManagerHandle.stageModelFile x4.0"
+      ],
+      "stages": {
+        "core": 62.5,
+        "gc": 20.5,
+        "views": 7.1,
+        "glue": 6.6,
+        "other": 2.3,
+        "ts-core": 1
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "extract_vocabularies",
+      "set": "concerto-core-test-data",
+      "family": "decorator",
+      "tsRefUs": 6930.0464999999995,
+      "rustApiUs": 33022.2365,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 4.765081518572783,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 93,
+      "inEngineShare": 0.9235371104673799,
+      "topBindings": [
+        "DcsManagerHandle.extractVocabularies x1.0",
+        "modelFileIsCompatibleVersion x39.0",
+        "modelFileFromAstHeader x5.0"
+      ],
+      "stages": {
+        "core": 67.5,
+        "gc": 22.3,
+        "glue": 4.6,
+        "views": 3.1,
+        "other": 1.7,
+        "ts-core": 0.8
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "extract_vocabularies",
+      "set": "synthetic-large",
+      "family": "decorator",
+      "tsRefUs": 10137.595000000001,
+      "rustApiUs": 46375.462,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 4.574601964272591,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 27,
+      "inEngineShare": 0.9783904247488304,
+      "topBindings": [
+        "DcsManagerHandle.extractVocabularies x1.0",
+        "modelFileFromAstHeader x5.0",
+        "ModelManagerHandle.stageModelFile x4.0"
+      ],
+      "stages": {
+        "core": 66.1,
+        "gc": 26.6,
+        "glue": 5,
+        "views": 1.3,
+        "other": 0.9,
+        "ts-core": 0.2
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "extract_decorators",
+      "set": "concerto-core-test-data",
+      "family": "decorator",
+      "tsRefUs": 7969.373,
+      "rustApiUs": 26553.045500000004,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 3.331886398089286,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 93,
+      "inEngineShare": 0.9388676149251772,
+      "topBindings": [
+        "DcsManagerHandle.extractDecorators x1.0",
+        "modelFileFromAstHeader x5.0",
+        "ModelManagerHandle.stageModelFile x4.0"
+      ],
+      "stages": {
+        "core": 64.7,
+        "gc": 18.8,
+        "glue": 9.2,
+        "views": 4.5,
+        "other": 2.3,
+        "ts-core": 0.7
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "extract_decorators",
+      "set": "synthetic-large",
+      "family": "decorator",
+      "tsRefUs": 10531.3665,
+      "rustApiUs": 34002.133,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 3.2286534705633883,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 27,
+      "inEngineShare": 0.9698946435083304,
+      "topBindings": [
+        "DcsManagerHandle.extractDecorators x1.0",
+        "modelFileFromAstHeader x5.0",
+        "ModelManagerHandle.stageModelFile x4.0"
+      ],
+      "stages": {
+        "core": 76.6,
+        "gc": 12.8,
+        "glue": 5.9,
+        "views": 2.5,
+        "other": 1.9,
+        "ts-core": 0.3
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "dcs_validate",
+      "set": "conformance",
+      "family": "decorator",
+      "tsRefUs": 14838.294999999998,
+      "rustApiUs": 25330.9075,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 1.707130603617195,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 191,
+      "inEngineShare": 0.826859522451921,
+      "topBindings": [
+        "decoratorManagerValidate x1.0",
+        "ModelManagerHandle.validateAstValue x2.0",
+        "ModelManagerHandle.addModelWithDefinitions x42.0"
+      ],
+      "stages": {
+        "core": 76.6,
+        "gc": 10.7,
+        "glue": 3.7,
+        "cto-parser": 3.5,
+        "ts-core": 3.1,
+        "views": 2.2,
+        "other": 0.3
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "dcs_decorate",
+      "set": "synthetic-large",
+      "family": "decorator",
+      "tsRefUs": 48033.189,
+      "rustApiUs": 69864.97099999999,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 1.4545145232809755,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 27,
+      "inEngineShare": 0.9872644800869754,
+      "topBindings": [
+        "DcsManagerHandle.decorateModels x1.0",
+        "modelFileFromAstHeader x5.0",
+        "ModelManagerHandle.stageModelFile x4.0"
+      ],
+      "stages": {
+        "core": 81,
+        "gc": 11.3,
+        "glue": 5.4,
+        "other": 1.2,
+        "views": 0.8,
+        "ts-core": 0.2
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "dcs_validate",
+      "set": "concerto-core-test-data",
+      "family": "decorator",
+      "tsRefUs": 25939.1705,
+      "rustApiUs": 37238.162000000004,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 1.4355957142114473,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 163,
+      "inEngineShare": 0.8641524163173192,
+      "topBindings": [
+        "decoratorManagerValidate x1.0",
+        "ModelManagerHandle.addModelWithDefinitions x35.0",
+        "ModelManagerHandle.validateAstValue x2.0"
+      ],
+      "stages": {
+        "core": 80.2,
+        "gc": 7.1,
+        "glue": 5.3,
+        "ts-core": 3,
+        "cto-parser": 2.5,
+        "views": 1.7,
+        "other": 0.2
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "dcs_decorate",
+      "set": "conformance",
+      "family": "decorator",
+      "tsRefUs": 16912.672000000002,
+      "rustApiUs": 20910.047499999997,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 1.2363538712274438,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 107,
+      "inEngineShare": 0.9289990504392847,
+      "topBindings": [
+        "DcsManagerHandle.decorateModels x1.0",
+        "modelFileFromAstHeader x5.0",
+        "ModelManagerHandle.stageModelFile x4.0"
+      ],
+      "stages": {
+        "core": 77.5,
+        "gc": 9.3,
+        "views": 5.5,
+        "glue": 5.1,
+        "other": 1.6,
+        "ts-core": 1
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "dcs_validate",
+      "set": "synthetic-large",
+      "family": "decorator",
+      "tsRefUs": 42846.5385,
+      "rustApiUs": 49742.6,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 1.160947925816691,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 31,
+      "inEngineShare": 0.9028240438748454,
+      "topBindings": [
+        "decoratorManagerValidate x1.0",
+        "ModelManagerHandle.addModelWithDefinitions x2.0",
+        "ModelManagerHandle.validateAstValue x2.0"
+      ],
+      "stages": {
+        "core": 81.1,
+        "glue": 7.4,
+        "gc": 6.7,
+        "cto-parser": 2.2,
+        "ts-core": 1.7,
+        "views": 0.9,
+        "other": 0.1
+      },
+      "native": null,
+      "errors": []
+    },
+    {
+      "op": "dcs_decorate",
+      "set": "concerto-core-test-data",
+      "family": "decorator",
+      "tsRefUs": 43474.97350000001,
+      "rustApiUs": 34616.5715,
+      "crateUs": null,
+      "crateRebuildUs": null,
+      "apiVsTs": 0.7962413479101946,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "crossingsPerItem": 93,
+      "inEngineShare": 0.9583843087964901,
+      "topBindings": [
+        "DcsManagerHandle.decorateModels x1.0",
+        "modelFileFromAstHeader x5.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "stages": {
+        "core": 78.3,
+        "gc": 10.5,
+        "glue": 7.3,
+        "views": 2.4,
+        "other": 1.2,
+        "ts-core": 0.4
+      },
+      "native": null,
+      "errors": []
+    }
+  ]
+}
