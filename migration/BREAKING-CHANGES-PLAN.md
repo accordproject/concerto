@@ -26,6 +26,23 @@ proposal for a later major. The mutation and identity semantics that changed
 are recorded in 1.4 (BC-23), with changelog wording in section 4. Heads
 checked for this update: concerto `d2be3f7be` and concerto-rust `e7c0163`.
 
+**Update, P5-24 (accordproject/concerto-rust#328, 2026-09-29).** The
+maintainer decided on P5-23 (#327) to make `DateTime` strict in **R1**, with
+no R2 deprecation step, and to parse it with the `chrono` crate. **BC-07 (b)
+and (c) move to R1**: only strict ISO 8601 / RFC 3339 `DateTime` values are
+accepted, on every path, and `strictQualifiedDateTimes: false` is ignored
+with a warning. Section 1.7 adds the rows from P5-23, with the IDs and
+releases the coordinator assigned on #328: BC-41 (strict namespace SemVer,
+R1 by maintainer decision 2026-09-29, implemented by P5-38, not P5-24),
+BC-42 (impossible dates, R1), BC-43 (map `DateTime` values, R1), BC-44 (the
+optional `utcOffset` change, R2/R3), BC-45 (`DateTime` default values
+checked when they are applied, R1) and BR-12/BR-13
+(native `DateTime` and `semver::Version` types, RB). These are intended
+breaking changes, not parity failures: each changes a throw scenario on
+purpose, with the class strict mode already used. The oracle records the
+affected fixtures as baselined failures (`baseline.tsv`). Heads:
+concerto `80bddbfc7` and concerto-rust `c0bb3a9`.
+
 ## 0. How to read this
 
 **IDs.** `BC-nn` rows affect JS users of concerto-core, and possibly Rust
@@ -82,7 +99,7 @@ Every row in the file is covered below.
 | **BC-04** | DV-006 (`ts-bug`), #186 | `checkMapType` unwraps the **value** slot using the **key's** scalar-ness. | Unwrap the value slot by the value type's own scalar-ness. | bug fix / validation | both | **0 fixtures** (ported by reading the TS source) | medium, and the direction is unknown: instances may flip either way | correctness | major until a fixture shows the direction is reject→accept only (Q6) | S, plus new fixtures M |
 | **BC-05** | DV-007 (`ts-bug`), #187 | A `RelationshipMapValueType` value must be an embedded `Resource`. A relationship URI string is rejected. | The value is a relationship reference, as for `RelationshipProperty`, in the validator, populator and generator. | bug fix / validation | both | `instance::validate::tests::a_map_with_a_relationship_typed_value_accepts_a_nested_resource` | **high:** stored data that holds embedded objects in such maps stops validating | spec alignment | major | M |
 | **BC-06** | DV-008 (`ts-bug`), #127 | `ResourceValidator` throws `TypeError` (`obj.getFullyQualifiedType is not a function`, or `…reading 'toString'`) for a non-Identifiable value or a `null` element. | Throw a `ValidationException` naming the field and the value's JS type. | error class | both | 1 fixture (`gaps/Resource.validate/d444ebcf0cf5a3c23e5ee6dd`) and 2 unit tests | low | clearer errors; callers can catch one class | minor | S |
-| **BC-07** | DV-009 (`engine`), #169 (closed) | TS's non-strict `DateTime` parsing falls back to V8's legacy date parser (`Nov 28 2022`, `"1"`, `"-0"`). Rust covers the ECMAScript format and the numeric-only legacy forms the corpus reaches, and rejects the other legacy forms. **After P5-02 this is JS-visible:** `"-0"` and `"1"` stop parsing. | **Maintainer decision (2026-09-27): the Rust engine will not support non-strict `DateTime` values.** (a) Put the forms that already stop parsing in the R1 changelog. (b) Deprecate non-strict (non-ISO, legacy-parser) date strings in R2, with a warning. (c) In R3, **remove the non-strict date path outright**: only strict ISO 8601 `DateTime` values are accepted (today's `strictQualifiedDateTimes: true` behaviour), the option no longer has a lenient mode, and the Rust legacy-form emulation is deleted. Q7 is answered. | validation strictness | JS (dates stay in dayjs, D7) | 47 legacy-format fixtures pass; fuzz T1d, 2 clusters and 8 cases in stage 2 (`"-0"`); DV-009's own `"1"` example | medium: lenient date inputs from users | predictable, engine-independent dates | major (both the engine switch and the default flip) | S |
+| **BC-07** | DV-009 (`maintainer-accepted`), #169 (closed); P5-23 (#327), P5-24 (#328) | TS's non-strict `DateTime` parsing (the `Serializer` default, `strictQualifiedDateTimes !== true`) goes through dayjs's `parseDate` and falls back to V8's `Date.parse` and legacy date parser (`2022-11-28`, `2022-11-28T01:02:03`, `Nov 28 2022`, `"1"`, `"-0"`, `--11-28`, a lower-case `t`/`z`, a space separator). | **Maintainer decisions (2026-09-27 and, moving (b) and (c) to R1, 2026-09-29 on #327): the Rust engine does not support non-strict `DateTime` values.** **Shipped in R1 by P5-24:** only strict ISO 8601 / RFC 3339 `DateTime` strings are accepted (`YYYY-MM-DDTHH:mm:ss`, an optional fraction, then `Z` or `±HH:mm`: the `strictQualifiedDateTimes` regex), in fields through `Serializer.fromJSON` and `JSONPopulator`, whatever the option says. `strictQualifiedDateTimes: false` is ignored with a warning (`concerto-strict-datetime`), not rejected; `true` still only stops `utcOffset` being applied. A rejected string throws the same `ValidationException` strict mode threw. The dayjs/V8 parser emulation in Rust (`parse_date_utc`, `date_parse`, `legacy_numeric_date`) is deleted: chrono parses behind the regex (BC-42). Q7 is answered. | validation strictness | JS and Rust | P5-24: 28 `Serializer.fromJSON` oracle fixtures (the `unit` "legacy datetime formats" set and the fuzz T1d `"-0"` cases) are recorded as intended failures; 27 concerto-core unit tests assert the lenient forms (3 `strictQualifiedDateTimes: false` cases in test/serializer/jsonpopulator.js, 24 "legacy datetime formats" cases in test/serializer.js): by maintainer decision 2026-09-29 on #328 (option 1) they are changed to assert the rejection and its `ValidationException` class, each listed in the P5-24 PR and the P5-09 guardrails allow-list | medium: lenient date inputs from users | predictable, engine-independent dates | major (R1) | S (done) |
 | **BC-08** | DV-010 (`ts-bug`), #136 | `'Unrecognised ' + JSON.stringify(thing)` hits a circular structure, so V8 throws `TypeError: Converting circular structure to JSON`. | Throw an `Error` naming the unrecognised element. | error class | both | 4 fixtures (`gaps/Serializer.fromJSON/85289b13…`, `f15994fd…`; `gaps/Serializer.toJSON/8dddc00b…`, `979f8755…`) | low | clearer errors | minor | S |
 | **BC-09** | DV-011 (`ts-bug`), #137 | `processMapType` passes the identifying field's **name** as the `$identifier` of an identified concept map value. | Use the value's own identifier. | bug fix (output) | both | `Serializer.fromJSON` map fixtures with identified concept values (count not recorded on the row) | low to medium: callers reading `$identifier` on map values | correctness | minor, unless `$identifier` is shown to be serialised (Q8) | S |
 | **BC-10** | DV-012 (`ts-bug`), #138 | The populator's Integer/Long check (`Math.trunc(n) !== n`) passes `±Infinity`. `ResourceValidator` rejects them later, but only when the instance is validated. | Reject non-finite values in the populator. | validation strictness | both | none (named in PORTING.md 7.3) | low: observable only with validation off, or through which message is reported | correctness | major (narrow: accept→reject when `validate: false`) | S |
@@ -169,6 +186,30 @@ after P5-06: load 13–40×, load+validate 17–21×, validateAst 1.7–2.5×,
 | **BC-39** | Maintainer decision Q-15 on accordproject/concerto-rust#249 (applied in P5-08c #257); CONFORMANCE-PROMOTION-PLAN Q-15 | Validator errors are `BaseException`, both at model load (bad bounds, a default value outside its validator) and at instance validation (regex, length, range, size): `Validator.reportError` in TS (introspect/validator.ts:81-82) and `ErrorKind::Validator` in Rust (error/mod.rs:104, `ts_class` `BaseException`). | Load-time validator errors become `IllegalModelException`, and instance violations become `ValidationException`, keeping their `errorType`. Afterwards the conformance suite's validator scenarios, which assert rejection plus `errorType` for now, are strengthened to assert the class. | error-class or message fix | JS and Rust | recorded `BaseException` outcomes (F:conformance/ModelFile.new validator negatives; F:conformance/Serializer.fromJSON/3fd7878b64ffd91a8fdaafd8) | medium: callers that catch `BaseException` by class keep working (both are subclasses), but code that checks `name === 'BaseException'` changes | one error class per phase, as for every other rule | major (a change between two concerto classes) | S–M |
 | **BC-40** | Maintainer decision D2 on accordproject/concerto-rust#249 (applied in P5-08c #257); concerto-conformance `scalars.feature` STRING_VALIDATOR_001 (`@skip`) | A string length validator with neither bound (`length=[,]`, or an AST whose `lengthValidator` has neither `minLength` nor `maxLength`) is accepted. TS `StringValidator` reads the bounds with `?.minLength` and tests `=== null`, so an absent (`undefined`) bound slips past the "must be specified" check. Rust copies this in introspect/validators.rs (`length_bound_field`). `NumberValidator` already rejects `range=[,]`. | Reject it, as `NumberValidator` does for `range=[,]`. Then un-skip STRING_VALIDATOR_001. A DIVERGENCES.md row is not needed while TS and Rust agree; the change is to both. | validation strictness | JS and Rust | the skipped conformance scenario; `stringvalidator.ts` bound handling | low: a model with an empty length validator has no effect today | consistent validator rules | major (rejects a model that used to load) | S |
 
+### 1.7 P5-23 dayjs and semver analysis (accordproject/concerto-rust#327; P5-24 #328)
+
+P5-23 inventoried the dayjs and node-semver behaviour the Rust engine
+reproduced, and proposed these rows (its provisional IDs BC-43/44/45 are
+renumbered here, contiguous from BC-41). The maintainer's decision of
+2026-09-29 on #327 moved the date rows to R1 (P5-24), and the decisions of
+2026-09-29 on #328 moved BC-41 to R1 (implemented by P5-38) and made BC-45 a
+check at the point a default is applied (option 2, lazy validation), not at
+model load. The semver crate swap itself is non-breaking (P5-25, #329) and
+has no row.
+
+| ID | Source | Current behaviour (TS 5.0.0 / Rust) | Proposed behaviour | Category | Affects | Evidence | Risk | Benefit | Semver | Size |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **BC-41** | P5-23 report on #327 (S1) | A namespace or import version given through a JSON AST, `ModelUtil.parseNamespace`, a `$class` or a DCS target is parsed by node-semver's `parse`: a leading `v`, surrounding whitespace, and numbers only up to 2^53−1 (and 256 characters). The CTO grammar already requires strict SemVer 2.0.0. | Strict SemVer 2.0.0 on every path: no leading `v`, no surrounding whitespace, numbers up to 2^64−1 (the `semver` crate without P5-25's node-compatibility wrapper). | validation strictness | JS and Rust | 0 corpus fixtures; 812 of the 3,944 node-semver differential inputs (`concerto-core/tests/semver/node-semver-7.6.3.json`) | low: only AST and API callers | one version grammar | major (R1, maintainer decision 2026-09-29 on #328; implemented by P5-38, not P5-24) | S |
+| **BC-42** | P5-23 report (D2, D3; the proposed BC-43); P5-24 | TS strict mode accepts a strict string that names an impossible calendar instant and rolls it over (`2024-02-30T00:00:00Z` becomes 03-01; `2023-02-29…`, `2024-04-31…`; `…T24:00:00Z` becomes the next midnight). | **Shipped in R1 by P5-24:** rejected, with the `ValidationException` (`Expected value … to be of type DateTime`) strict mode throws for an invalid date; a leap second (`:60`) stays rejected. chrono's RFC 3339 parser behind the strict regex, with a seconds ≤ 59 guard. | validation strictness | JS and Rust | P5-24 unit tests (`instance::dayjs::tests::impossible_instants_are_invalid`) and lifted checks SF-CO-020, SF-CO-021, VV/VE-MAP-008; no corpus fixture sends one | low | a `DateTime` names one real instant | major (R1) | S (done) |
+| **BC-43** | P5-23 report (D7; the proposed BC-45); P5-24 | A map's `DateTime` value is checked with `dayjs.utc(value).isValid()` in TS, and with an approximation in Rust (`parses_as_dayjs`: a four-digit year prefix, or any finite number) that differed from TS both ways. | **Shipped in R1 by P5-24:** the same strict rule as a `DateTime` field: a strict string naming a real instant. A number is rejected, as for a field; `undefined` (no value) still passes. The same plain `Error` (`Model violation in … Expected Type of DateTime …`). This replaces P5-23's follow-up 1 (a dayjs-parity fix for D7, dropped). DIVERGENCES.md DV-020. | validation strictness | JS and Rust | 0 corpus fixtures change (the 2 that reach the check keep their outcome); lifted VV/VE-MAP-007 to 011 | low: maps of `DateTime` are rare | fields and maps agree | major (R1) | S (done) |
+| **BC-44** | P5-23 report (D5; the proposed BC-44) | The `utcOffset` option follows dayjs: a number with \|n\| ≤ 16 is hours, otherwise minutes; a `±HH:mm` string; anything else (for example `"Z"`) is silently ignored. | Deprecate in R2 (warn on an hours value or an ignored string); in R3 accept minutes or `±HH:mm` only. **Unchanged by P5-24** (out of its scope). | API | JS and Rust | 1 corpus fixture uses `utcOffset: 5`, 7 use `"Z"` | low | one offset unit | major (R3) | S |
+| **BC-45** | P5-24 scope 3 (#328); maintainer decision 2026-09-29 on #328 (option 2, lazy validation) | A `DateTime` property's or `DateTime` scalar's `default` is never checked: `Typed.assignFieldDefaults` builds `dayjs.utc(default)` when an instance is created, so `default="2022-11-18"` gives a lenient date and `default="FOO"` an invalid one. | **Shipped in R1 by P5-24, in the Rust engine:** the default must be a strict `DateTime` string, checked when it is applied (instance creation or population: the engine's `Factory.newResource` and `Serializer.fromJSON`/`JSONPopulator`), not at model load, so a model with a lenient default still loads. A bad default throws a `ValidationException` (`typed-assignfielddefaults-datetime`), the class a strict `DateTime` field value's rejection has, after the defaults before it were applied. TS's own `Typed.assignFieldDefaults` (the TS `Factory`) is unchanged (#328 scope 3 is the Rust check). | validation strictness | Rust (and JS through the engine's `fromJSON`) | 2 corpus fixtures, recorded in `baseline.tsv` as intended `fail:unexpected-error`: unit `Factory.newResource` `af5730ac379eaaf6675b06eb` and `1cf6a6d9ff910fe56e3848a3` ("Model Tests #validation check property validation", `model-base.cto`'s `default="2008-09-15T15:53:00"`). No model-load fixture changes (the load-time check P5-24 first built failed 603 baselined fixtures and 54 concerto-core tests; option 2 removed it). concerto-core's own suite is unaffected: its `Factory` is TS, and the engine's `fromJSON` throws only when the default stays. Tests: `instance::from_json::tests::a_date_time_default_is_checked_when_it_is_applied`, `concerto_core_js::factory::tests::new_resource_rejects_a_non_strict_date_time_default`, `concerto_core_js::serializer::tests::from_json_applies_a_non_strict_date_time_default_only_when_it_stays` | medium: an instance of a class with a lenient date default can no longer be created or populated | defaults obey the field rule | major (R1) | S (done) |
+
+| ID | Source | Current behaviour | Proposed behaviour | Category | Evidence | Risk | Size |
+|---|---|---|---|---|---|---|---|
+| **BR-12** | P5-23 report (follow-up 6) | A `DateTime` is the dayjs-shaped `instance::dayjs::Dayjs` (a time value, an offset and dayjs's `utc` state), in the default public API (BR-03). | A native date-time type for Rust users (chrono's `DateTime<FixedOffset>`), with `Dayjs` behind the `binding` feature (BR-03). | API | `concerto-core/src/instance/dayjs.rs` | low (pre-1.0) | M |
+| **BR-13** | P5-23 report (S1, follow-up 6) | `model_util::SemVer` has `f64` fields (node-semver's number bound). | Expose `semver::Version` natively (after P5-25). | API | `concerto-core/src/model_util.rs` | low (pre-1.0) | S |
+
 **The other stays-ts rows**, excluded because nothing breaks:
 - constant-return, abstract-stub and `accept` dispatch members;
 - the `processFile` CTO parse seam, `ModelLoader` and `DcsConverter` (the yaml library);
@@ -181,6 +222,24 @@ rows cited in BC-28 and BC-34.
 **The api-snapshot constraint** (§0.5, byte-identical) is what keeps BC-33
 and BC-34 from happening during the migration. P4-08's `stripInternal` and
 `@internal` members are not public and are excluded.
+
+### 1.8 P5-26 test-support analysis (accordproject/concerto-rust#330; P5-34 #344)
+
+P5-26 audited the code kept mainly so white-box tests could pass (stub
+ModelFiles, spied call sites) and proposed BC rows for the public extension
+points involved. The maintainer chose option 1 on each of its three
+decisions (2026-09-29, on #330). The coordinator assigned these IDs on #344
+to avoid the P5-23 clash: BC-46 (duck-typed ModelFiles), BC-47 (a ModelFile
+needs a BaseModelManager, P5-35), BC-48 (`modelFiles` internal), BC-49
+(per-declaration `validate()`) and BC-50 (monkeypatched ClassDeclaration
+methods, P5-36). P5-34 adds BC-46, BC-48 and BC-49; BC-47 and BC-50 are
+added by their own tasks.
+
+| ID | Source | Current behaviour (TS 5.0.0 / Rust) | Proposed behaviour | Category | Affects | Evidence | Risk | Benefit | Semver | Size |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **BC-46** | P5-26 report on #330 (I-1, I-2; the proposed BC-41); maintainer decision D3 option 1 (2026-09-29) | `addModelFile`, `addModelFiles` and `updateModelFile` accept any object with the `ModelFile` methods they call (`getNamespace`, `getVersion`, `validate`, `getAst`, ...). Before P5-34 the engine manager kept such an object out of its mirror, and every read on that manager then switched to a TS body. | **Shipped in R1 by P5-34:** only a ModelFile built by the ModelFile constructor is accepted; anything else (a duck-typed object, `Object.create(ModelFile.prototype)`, a sinon stub instance) throws a `TypeError` (`<method> expects a ModelFile built by the ModelFile constructor`). v5.0.0 already threw a `TypeError` for almost every such value, from the first method it lacked. The mirror-skip (`_isMirrored`, engine/views.ts `constructedFiles`) and the TS read bodies behind it are deleted. | API | JS | lifted checks CO-MM-010 to 018, P511-003, P511-006 and BOUNDARY-ARG-043/044 (deleted with the support); the frozen suite's stub cases were rewritten to real ModelFiles by P5-33 (#343) | low: the parameters are typed `ModelFile` in the `.d.ts`, and only test stubs were found doing this | every read of a manager answers from the engine, without a per-call mirror check | major (R1) | S (done) |
+| **BC-48** | P5-26 report (I-1(iv); the proposed BC-43); maintainer decision D3 option 1 (2026-09-29) | `ModelManager.modelFiles` is a public field. Mutating it bypassed the engine mirror; before P5-34 a per-call namespace-set comparison then silently switched reads to TS. | **Shipped in R1 by P5-34:** `modelFiles` is `@internal` (removed from the published `.d.ts` by `stripInternal`) and documented as read-only; read it through `getModelFile`, `getModelFiles` and `getNamespaces`. The per-call parity check is replaced by a flag the manager's own mutators set (`_mirrorPending`), so a direct mutation is no longer detected. | API | JS | `migration/api-snapshot/full-api.d.ts` (the field's line goes); crossings per read halve (`migration/bench/RESULTS.md`, P5-34) | low: the tests only read it | about half the engine calls per manager read | major (types) (R1) | S (done) |
+| **BC-49** | P5-26 report (I-18; the proposed BC-44); maintainer decision D3 option 1 (2026-09-29) | Every declaration and element has a public `validate()` (`@protected` in the docs), which the library never calls: `ModelFile.validate()` and `ModelManager.validateModelFiles()` validate a whole file in one engine call. About 1k lines of per-element WASM bindings back the per-declaration path, which must be kept in parity with the whole-file one. | Deprecate in R2 (warn on a call; point to `ModelFile.validate()` / `ModelManager.validateModelFiles()`), remove in R3 with the per-element bindings. **No code change in R1.** | API | JS and Rust | I-18; 53 direct-call cases in 7 `test/introspect/*` files | medium: the methods are in the `.d.ts` | one validation path; about 1k WASM lines and 250 TS lines fewer | major (R3) | M |
 
 ### 1.6 Rust-crate-API-only (no JS impact; feeds P6-01 #83, `docs/public-api.md` §3.4)
 
@@ -203,9 +262,9 @@ and BC-34 from happening during the migration. P4-08's `stripInternal` and
 | Class | Rows |
 |---|---|
 | **Safe after the migration as minor or patch** | BC-01, BC-06, BC-08, BC-11, BC-12, BC-14 (crash to domain exception, or message text only); BC-38 (additive error codes, minor); BC-09 (subject to Q8); BC-21 as a faithful fix (patch); BC-29 (patch, non-breaking form); BC-26 additive form, BC-30 (minor, additive); BC-35 generation form (patch); BR-02 |
-| **Needs a major release** | BC-37 (already shipped in R1), BC-23 (shipped in R1 by P5-10a/b), BC-39, BC-40, BC-02, BC-04 (until Q6), BC-05, BC-07 (default flip), BC-10, BC-17, BC-19 (with BC-18 and BC-20 folded in), BC-21 extending DV-018, BC-24 factory-timing part (its non-breaking part shipped in R1), BC-26 Rust-owned form, BC-27, BC-28, BC-31, BC-32, BC-33, BC-34, BC-35 removal form |
+| **Needs a major release** | BC-37 (already shipped in R1), BC-23 (shipped in R1 by P5-10a/b), BC-07, BC-42, BC-43 and BC-45 (shipped in R1 by P5-24), BC-41 (R1, P5-38), BC-46 and BC-48 (shipped in R1 by P5-34), BC-49 (R2 deprecation, R3 removal), BC-39, BC-40, BC-44, BC-02, BC-04 (until Q6), BC-05, BC-10, BC-17, BC-19 (with BC-18 and BC-20 folded in), BC-21 extending DV-018, BC-24 factory-timing part (its non-breaking part shipped in R1), BC-26 Rust-owned form, BC-27, BC-28, BC-31, BC-32, BC-33, BC-34, BC-35 removal form |
 | **Changelog-only: already Rust behaviour, universal at P5-02** | BC-03 (DV-004), BC-07 part (a) (DV-009), BC-13 (DV-015), BC-15 (DV-017), BC-16 (DV-018) |
-| **Rust-crate-API-only** (feeds P6-01 #83) | BR-01 to BR-11 |
+| **Rust-crate-API-only** (feeds P6-01 #83) | BR-01 to BR-13 |
 | **No change proposed** | BR-01, BC-25 (a constraint on R1; not yet met, see its row), BC-36, BC-22 (pending #219) |
 
 ---
@@ -224,6 +283,9 @@ otherwise "same behaviour, new engine".
 - **Packaging:** BC-31 (the Node floor, or an ESM loader) and BC-32 (a browser init entry and bundler docs).
 - **Changelog for already-built divergences:** BC-03 (DV-004), BC-07(a) (DV-009), BC-13 (DV-015), BC-15 (DV-017) and BC-16 (DV-018).
 - **Changelog for P5-02's accepted API removals:** BC-37 (`DecoratorExtractor`, internal `DecoratorManager` statics, `MapKeyType`/`MapValueType.processType`).
+- **Strict `DateTime` (maintainer decision 2026-09-29 on #327; shipped by P5-24 #328):** BC-07 (b)+(c), BC-42, BC-43 and BC-45, with their changelog entries (section 4). No R2 deprecation step.
+- **Strict namespace SemVer (maintainer decision 2026-09-29 on #328; implemented by P5-38):** BC-41, with its changelog entry (section 4). No R2 deprecation step.
+- **ModelFile stub support removed (maintainer decision 2026-09-29 on #330; shipped by P5-34 #344):** BC-46 (only constructor-built ModelFiles) and BC-48 (`modelFiles` internal and read-only), with their changelog entries (section 4). No R2 deprecation step.
 - **Lazy views (maintainer decision 2026-09-27; shipped by P5-10a #269 and P5-10b #270; verified by P5-10c #271):** BC-23 as built, BC-24's non-breaking part (decorator factories stay eager, #270 option (b)), and BC-25 as the constraint they must meet. **P5-10c found one gap in BC-25** (a Rust under-rejection now surfaces at first read instead of at construction); it must be fixed, or accepted by the maintainer, before R1. Changelog entries for the mutation and object-shape changes in BC-23 (section 4).
 - **Optionally, the minor-class fixes, because after P5-02 they are one-place Rust changes:**
   - BC-06, BC-08, BC-11, BC-12 and BC-14: TS crash to domain exception, or message text;
@@ -246,6 +308,8 @@ otherwise "same behaviour, new engine".
 - BC-21 as a faithful fix (it is a port gap; it could go earlier, before P5-02, as ordinary migration work);
 - BC-35 generation form;
 - BC-38 (standard `errorType` codes equal to the conformance `@rule` IDs; it decides the public code format first);
+- BC-44's deprecation warning;
+- BC-49's deprecation warning (per-declaration `validate()`);
 - anything from the R1 optional list that was not shipped.
 
 **Dependencies:**
@@ -259,12 +323,15 @@ otherwise "same behaviour, new engine".
   - BC-19, with BC-17, BC-18 and BC-20 folded in, plus BC-21 extended if Q9 says so;
   - BC-02 (if Q5 says so);
   - BC-04, BC-05 and BC-10;
-  - BC-07(c), removing non-strict `DateTime` support (maintainer decision 2026-09-27; only strict ISO 8601 values accepted);
+  - ~~BC-07(c), removing non-strict `DateTime` support~~ moved to R1 (P5-24, maintainer decision 2026-09-29);
+  - ~~BC-41 (strict namespace SemVer)~~ moved to R1 (P5-38, maintainer decision 2026-09-29 on #328);
+  - BC-44 (the `utcOffset` units, deprecated in R2);
   - BC-39 (validator errors leave `BaseException`) and BC-40 (reject `length=[,]`), both maintainer decisions of 2026-09-27 (#249).
 - **Performance and API:**
   - BC-24's factory-timing part, if the maintainer adopts it (BC-23 and BC-25 moved to R1);
   - BC-27 and BC-28;
-  - BC-34 and BC-35 (removal form).
+  - BC-34 and BC-35 (removal form);
+  - BC-49 (per-declaration `validate()` and its per-element WASM bindings removed, deprecated in R2).
 
 **Dependencies and order inside R3:**
 1. **BC-19 first.** It makes BC-25's zero-under-rejection guarantee structural (Rust checks the full metamodel shape), rather than measured as in R1, and it lets BR-09 drop the `Value` fallback.
@@ -278,7 +345,7 @@ otherwise "same behaviour, new engine".
 
 ### RB: Rust crate 1.0 (P6-01 #83 onward)
 
-**Contents:** BR-02 to BR-10, in the order of public-api.md §7:
+**Contents:** BR-02 to BR-10, and BR-12 and BR-13 (native `DateTime` and `semver::Version`, P5-23), in the order of public-api.md §7:
 1. re-audit;
 2. the `binding` feature (BR-03, BR-04);
 3. errors (BR-07);
@@ -302,7 +369,15 @@ RB does not affect JS users and can run in parallel with R2.
 | BC-02 | Log a warning when an unversioned namespace is parsed, for one minor. | `ModelManager` option `allowUnversionedNamespaces` (defaults to true in R2, false in R3). | "`ModelUtil.parseNamespace` now rejects namespaces without a version, as Concerto v4 requires." |
 | BC-04 | – (fix). Record fixtures first, to show the direction. | none | "Map values of a scalar type are now validated against the value type, not the key type." |
 | BC-05 | Accept both embedded objects and relationship strings for one minor, with a warning on the embedded form. | `legacyRelationshipMapValues` | "Relationship-typed map values now hold relationship references, like relationship properties." |
-| BC-07 | R1: a changelog entry only. R2: warn whenever a non-strict date form is accepted. R3: remove non-strict parsing. | `strictQualifiedDateTimes` (existing); in R3 its lenient mode is removed and `false` is rejected or ignored with a warning | R1: "Date strings outside ISO 8601 and the simple numeric forms are no longer accepted when `strictQualifiedDateTimes` is false." R3: "Only strict ISO 8601 `DateTime` values are accepted. Non-strict date parsing, and the lenient mode of `strictQualifiedDateTimes`, are removed." |
+| BC-07 | None: removed in R1 (maintainer decision 2026-09-29). | `strictQualifiedDateTimes`: its lenient mode is removed; `false` is ignored with a warning (`concerto-strict-datetime`), and `true` only stops `utcOffset` being applied | R1: "Only strict ISO 8601 / RFC 3339 `DateTime` values are accepted: `YYYY-MM-DDTHH:mm:ss`, an optional fraction of a second, then `Z` or `±HH:mm` (for example `2022-11-28T01:02:03.987Z`). Date-only strings, date-times without an offset, a lower-case `t` or `z`, a space separator and the other forms JavaScript's `Date` used to accept are rejected with a `ValidationException`, whatever `strictQualifiedDateTimes` says. Setting it to `false` no longer enables lenient parsing and prints a warning." |
+| BC-41 | None (R1; maintainer decision 2026-09-29 on #328, implemented by P5-38). | none | R1: "Namespace versions given through the JSON AST, `ModelUtil.parseNamespace`, `$class` or a decorator command set must be strict SemVer 2.0.0, as the CTO parser already requires: `v1.0.0` and `' 1.0.0 '` are rejected." |
+| BC-42 | None (R1). | none | R1: "A `DateTime` must name a real instant: `2024-02-30T00:00:00Z`, `2023-02-29T00:00:00Z` and `…T24:00:00Z` are rejected instead of being rolled over to the next valid instant, and a leap second (`:60`) is rejected as before." |
+| BC-43 | None (R1). | none | R1: "Map values of type `DateTime` must be strict ISO 8601 date-times, as `DateTime` fields are. Numbers and lenient date strings are rejected." |
+| BC-44 | R2: warn when `utcOffset` is a number between −16 and 16 (read as hours) or a string that is not `±HH:mm`. | none | R3: "The `utcOffset` option takes minutes, or a `±HH:mm` string. Numbers from −16 to 16 are no longer read as hours, and other strings are rejected instead of ignored." |
+| BC-45 | None (R1). | none | R1: "A `DateTime` field's or scalar's default value must be a strict ISO 8601 date-time. A model with any other default (for example `default="2022-11-18"`) still loads, but creating or populating an instance that would get that default throws a `ValidationException`." |
+| BC-46 | None (R1; maintainer decision 2026-09-29 on #330). | none | R1: "`addModelFile`, `addModelFiles` and `updateModelFile` accept only a `ModelFile` built by its constructor. Any other object, including one with the same methods, throws a `TypeError`." |
+| BC-48 | None (R1). | none | R1: "`ModelManager.modelFiles` is internal and read-only, and is no longer in the type declarations. Use `getModelFile`, `getModelFiles` or `getNamespaces`; change models only through the `ModelManager` methods." |
+| BC-49 | R2: warn once per class when a declaration's or element's `validate()` is called, pointing to `ModelFile.validate()` and `ModelManager.validateModelFiles()`. | none | R3: "The per-declaration `validate()` methods are removed. Validate a whole model file with `ModelFile.validate()`, or every model file with `ModelManager.validateModelFiles()`." |
 | BC-10 | – | none | "`±Infinity` is rejected for Integer and Long fields during deserialisation, even when validation is off." |
 | BC-13 | – | none | "A non-string `$class` in an instance is rejected with `Error: a $class that is not a string: …`. It used to throw a `TypeError`, or, for an array, a `TypeNotFoundException`." |
 | BC-15 / BC-16 | – | none | "A relationship without a type, or a `null` decorator, is rejected with an `IllegalModelException` instead of a `TypeError`." |
@@ -330,7 +405,7 @@ baseline regenerated.
 
 **Proposed follow-up issues** (listed here, not filed, per the task rules):
 1. The R1 changelog and packaging items (BC-31, BC-32).
-2. A follow-up for DV-009's default flip (BC-07).
+2. ~~A follow-up for DV-009's default flip (BC-07)~~ done in R1 by P5-24 (#328).
 3. A DIVERGENCES row plus a follow-up for BC-17 (see 5.2).
 4. BC-19, the design of strict AST loading.
 5. ~~BC-23 and BC-24, handle-backed views~~ done as P5-10a/b/c (#269, #270, #271); only BC-24's factory-timing part remains, as a later-major proposal.

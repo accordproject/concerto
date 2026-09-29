@@ -20,6 +20,7 @@ const { Relationship } = require('../src/model/relationship');
 const { Resource } = require('../src/model/resource');
 const { Serializer } = require('../src/serializer');
 const { TypeNotFoundException } = require('../src/typenotfoundexception');
+const { ValidationException } = require('../src/serializer/validationexception');
 const Util = require('./composer/composermodelutility');
 
 const should = require('chai').should();
@@ -520,10 +521,10 @@ describe('Serializer', () => {
             // For a comparison of formats see the visualization at https://ijmacd.github.io/rfc3339-iso8601/
             const dateTests = [
                 // RFC 3339 & ISO 8601
-                ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
-                ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 'Z'],
-                ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 0],
-                ['2022-11-28', 'YYYY-MM-DD', '2022-11-27T19:00:00.000-05:00', '-05:00'],
+                ['2022-11-28', 'YYYY-MM-DD', ValidationException],
+                ['2022-11-28', 'YYYY-MM-DD', ValidationException, 'Z'],
+                ['2022-11-28', 'YYYY-MM-DD', ValidationException, 0],
+                ['2022-11-28', 'YYYY-MM-DD', ValidationException, '-05:00'],
                 ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z'],
                 ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z', 'Z'],
                 ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z', 0],
@@ -547,39 +548,44 @@ describe('Serializer', () => {
                 ['2022-11-28T01:02:03.98765Z', 'YYYY-MM-DDTHH:mm:ss.SSSSSS'],
 
                 // RFC 3339 && HTML Living Standard
-                ['2022-11-28 01:02:03.987Z', 'YYYY-MM-DD HH:mm:ss.SSSZ'],
+                ['2022-11-28 01:02:03.987Z', 'YYYY-MM-DD HH:mm:ss.SSSZ', ValidationException],
 
                 // RFC 3339
-                ['2022-11-28t01:02:03.987Z', 'Lowercase t'],
-                ['2022-11-28T01:02:03.987z', 'Lowercase z'],
+                ['2022-11-28t01:02:03.987Z', 'Lowercase t', ValidationException],
+                ['2022-11-28T01:02:03.987z', 'Lowercase z', ValidationException],
 
                 // ISO 8601
-                ['2022', 'YYYY', '2022-01-01T00:00:00.000Z'],
-                ['2022', 'YYYY', '2022-01-01T00:00:00.000Z', 0],
-                ['+002022-11-28', '+YYYYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
-                ['+002022-11-28', '+YYYYYY-MM-DD', '2022-11-28T00:00:00.000Z', 0],
+                ['2022', 'YYYY', ValidationException],
+                ['2022', 'YYYY', ValidationException, 0],
+                ['+002022-11-28', '+YYYYYY-MM-DD', ValidationException],
+                ['+002022-11-28', '+YYYYYY-MM-DD', ValidationException, 0],
 
                 // ISO 8601 & HTML Living Standard
-                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z'],
-                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z', 'Z'],
-                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z', 0],
-                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-27T20:02:03.000-05:00', '-05:00'],
-                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS'],
-                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS', DEFAULT_EXPECTED_VALUE, 0],
-                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS', '2022-11-27T20:02:03.987-05:00' ,'-05:00'],
-                ['2022-11', 'YYYY-MM', '2022-11-01T00:00:00.000Z'],
-                ['2022-11', 'YYYY-MM', '2022-10-31T19:00:00.000-05:00', '-05:00'],
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', ValidationException],
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', ValidationException, 'Z'],
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', ValidationException, 0],
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', ValidationException, '-05:00'],
+                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS', ValidationException],
+                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS', ValidationException, 0],
+                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS', ValidationException ,'-05:00'],
+                ['2022-11', 'YYYY-MM', ValidationException],
+                ['2022-11', 'YYYY-MM', ValidationException, '-05:00'],
 
                 // HTML Living Standard
-                ['2022-11-28 01:02:03.987', 'No separator, no offset information'],
-                ['2022-11-28 01:02:03.987', 'No separator, no offset information', '2022-11-27T20:02:03.987-05:00', '-05:00'],
-                ['--11-28', '--MM-DD', '2001-11-28T00:00:00.000Z'],
-                ['11-28', 'MM-DD', '2001-11-28T00:00:00.000Z'],
+                ['2022-11-28 01:02:03.987', 'No separator, no offset information', ValidationException],
+                ['2022-11-28 01:02:03.987', 'No separator, no offset information', ValidationException, '-05:00'],
+                ['--11-28', '--MM-DD', ValidationException],
+                ['11-28', 'MM-DD', ValidationException],
             ];
             dateTests.forEach(([dateValue, message, expected, utcOffset]) => {
-                it(`should accept date-time values with the format '${message}' and offset '${utcOffset}'`, () => {
+                const rejected = expected === ValidationException; // BC-07: rejected in R1 (#328)
+                it(`should ${rejected ? 'reject' : 'accept'} date-time values with the format '${message}' and offset '${utcOffset}'`, () => {
                     json.date = dateValue;
                     const options = utcOffset !== undefined ? { utcOffset } : {};
+                    if (rejected) {
+                        (() => serializer.toJSON(serializer.fromJSON(json, options), options)).should.throw(ValidationException);
+                        return;
+                    }
                     const result = serializer.toJSON(serializer.fromJSON(json, options), options);
                     result.date.should.equal(expected || DEFAULT_EXPECTED_VALUE);
                 });

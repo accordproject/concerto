@@ -37,12 +37,11 @@
  * the TS body for any other argument. `expect` is the frozen v5.0.0
  * reference's outcome. Run by fallbacks.spec.js.
  *
- * `deleteModelFile` and `_rustMirrorUpdate` are a different shape: the ODD
- * loop below never reaches their `rustHandle.deleteModelFile` call, because
- * that call only runs when `this.modelFiles[namespace]` (or
- * `modelFile.getNamespace()`) already resolved to a loaded namespace, and
+ * `deleteModelFile` is a different shape: the ODD loop below never reaches
+ * its `rustHandle.deleteModelFile` call, because that call only runs when
+ * `this.modelFiles[namespace]` already resolved to a loaded namespace, and
  * none of `undefined`/`null`/`123`/`{}`/`true` coerce (via the object-key
- * lookup both use) to one. v5.0.0 lets a non-string whose *string form* is a
+ * lookup it uses) to one. v5.0.0 lets a non-string whose *string form* is a
  * loaded namespace delete cleanly (plain-object coercion); the WASM mirror
  * traps on the same non-string. See the `COERCE_CALLS` block below.
  */
@@ -99,28 +98,9 @@ for (const [call, run] of Object.entries(CALLS)) {
     }
 }
 
-/**
- * A duck-typed "modelFile" for `updateModelFile`'s non-string API path:
- * `getNamespace()` is not a plain string but coerces (via `toString`) to an
- * existing namespace, the way an object-key lookup does. `getVersion()` is
- * truthy so it clears `updateModelFile`'s version guard.
- * @param {*} nsObj the non-string namespace value
- * @returns {object} a fake ModelFile
- */
-function fakeModelFile(nsObj) {
-    return {
-        getNamespace: () => nsObj,
-        getVersion: () => '1.0.1',
-        validate: () => {},
-        getAst: () => ({ $class: 'concerto.metamodel@1.0.0.Model', namespace: 'test@1.0.1', declarations: [] }),
-        getDefinitions: () => undefined,
-        getName: () => undefined,
-    };
-}
-
 // Non-ODD non-string values whose string form ('test@1.0.0') is a loaded
-// namespace, so the object-key lookups in deleteModelFile/_rustMirrorUpdate
-// find it and the rustHandle mirror call is reached.
+// namespace, so the object-key lookup in deleteModelFile finds it and the
+// rustHandle mirror call is reached.
 const COERCE = {
     'toString-object': { toString() { return 'test@1.0.0'; } },
     'single-element array': ['test@1.0.0'],
@@ -136,11 +116,6 @@ const COERCE_CALLS = {
             return `absent:${e.constructor.name}`;
         }
     },
-    'updateModelFile({getNamespace: () => x})': (core, x) => {
-        const mm = manager(core);
-        mm.updateModelFile(fakeModelFile(x));
-        return mm.getModelFile('test@1.0.0').getVersion();
-    },
 };
 
 for (const [call, run] of Object.entries(COERCE_CALLS)) {
@@ -155,6 +130,13 @@ for (const [call, run] of Object.entries(COERCE_CALLS)) {
         });
     }
 }
+
+// BOUNDARY-ARG-043 and 044 drove `updateModelFile` with a duck-typed
+// "modelFile" whose `getNamespace()` is a non-string. P5-34 (BC-46): a
+// manager accepts only ModelFiles the ModelFile constructor built, whose
+// namespace is always a string, so they are gone; the IDs after them keep
+// their numbers.
+n += 2;
 
 /**
  * #294 review follow-up: the `ModelFile` constructor only rejects a
