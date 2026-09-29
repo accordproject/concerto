@@ -1,0 +1,32 @@
+{
+  "tool": "p515-sweep",
+  "mode": "time",
+  "coreDist": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-18/concerto/packages/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "8d0d0bb14",
+  "node": "v24.21.0",
+  "cpu": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+  "loadavgEnd": [
+    1.48,
+    2.03,
+    3.17
+  ],
+  "samples": 40,
+  "warmup": 5,
+  "results": [
+    {
+      "op": "add_model_file",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "medianUs": 7382.0285,
+      "samples": 40,
+      "median_ms": 7.3820285000000005,
+      "mean_ms": 7.613834275,
+      "stddev_ms": 0.7614575851846446,
+      "min_ms": 6.594361,
+      "max_ms": 10.460928,
+      "cv": 0.10000973986062292
+    }
+  ]
+}

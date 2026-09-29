@@ -1,3 +1,119 @@
+# P5-18 (F2): validate detached model files without deep-cloning the manager (2026-09-29)
+
+Task P5-18 F2 (accordproject/concerto-rust#316) fixes finding F2 of the
+P5-15 profiling sweep (#309). `with_model_file_registered`, the scratch
+manager behind `validate_detached_model_file` (`addModelFile`'s
+validate-before-register and `new ModelFile(mm, ast).validate()`), rebuilt
+the whole manager on every call: it deep-cloned every registered model
+file and re-registered each one. The arena now holds each registered
+model file as `Arc<ModelFile>` and each declaration's fully-qualified name
+as `Arc<str>`. When the manager holds nothing under the file's namespace
+(the `addModelFile` case), the scratch copy is the arena as it stands,
+sharing every file, with the new file appended. When the namespace is
+registered, the new file still takes the old file's place in the order,
+and the other files are shared rather than cloned. The copy starts with
+empty caches and ends at the same generation as a file-by-file rebuild.
+Two unit tests pin it to that rebuild. The change is in
+`concerto-core/src/model_manager.rs` only. Results and errors are
+unchanged, and there is no TS, WASM binding or engine shim change.
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz, 4 cores / 8 logical CPUs, 16 GB, macOS 13.7.8 (a developer laptop) |
+| Toolchain | Node v24.21.0, rustc 1.98.1, wasm-bindgen 0.2.128, wasm-opt applied by `concerto-wasm/build.sh`. The P5-18 engine is 2,808,185 bytes, within the 4 MiB budget (before: 2,805,929). |
+| Quiet-check | Before every run, the driver waited until the 1-minute load average was below 2.5 and the 5-minute below 3, with no other benchmark, cargo or mocha process running. All 15 runs met it; the 1-minute load was 2.01 to 2.47 at each start. The laptop did not settle below 2 that night, so the gate is looser than P5-17's. |
+| Before | `concerto-rust` `876bd67` (the integration head when the task started, with P5-17), with `concerto` `8d0d0bb14` |
+| After | `concerto-rust` `3a8f3b4` (the P5-18 F2 commit on `876bd67`), with the same `concerto` `8d0d0bb14` and the same `concerto-core` dist. Only the engine module (`CONCERTO_ENGINE_MODULE`) differs between the two sides. |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0 (the oracle's reference), run with `--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist` |
+| Driver | P5-15's sweep (`p515-sweep.mjs` from `ad82d6b1c`, and the crate bench `benches/p515_sweep.rs` from `concerto-rust` `0a7edac`), ops `add_model_file,add_cto_model,modelfile_new`, 5 warm-up and 30 samples. Criterion: 1 s warm-up, 3 s measurement, `add_model_file` only. |
+| Runs | `results/P5-18-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`: three interleaved rounds (TS reference, then before and after through the TS API, then before and after in the crate). `results/P5-18-recheck-{before,after}-rust-engine-{1,2,3}.json`: a follow-up check of synthetic-large, below. |
+
+## Through the TS public API
+
+Medians are in µs per model file, for runs 1, 2 and 3. The ratios use the
+median of the three runs. `add_cto_model` and `modelfile_new` are
+controls: `addCTOModel` also parses the CTO text, and `new ModelFile`
+does not validate, so neither should move much.
+
+| Model set | Op | TS 5.0.0, runs 1 / 2 / 3 | Rust before, runs 1 / 2 / 3 | Rust P5-18, runs 1 / 2 / 3 | before / TS | **P5-18 / TS** | speed-up |
+|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | add_model_file | 69.0 / 68.6 / 68.3 | 436.5 / 388.2 / 389.1 | 306.6 / 284.2 / 258.4 | 5.67× | **4.14×** | 1.37× |
+| conformance | add_model_file | 27.7 / 28.5 / 28.7 | 233.3 / 229.5 / 230.1 | 182.2 / 208.7 / 164.2 | 8.07× | **6.39×** | 1.26× |
+| synthetic-large | add_model_file | 2455.2 / 2433.4 / 2430.2 | 7078.3 / 7027.6 / 7024.0 | 7724.4 / 7546.0 / 7935.0 | 2.89× | **3.17×** | 0.91× |
+| concerto-core-test-data | add_cto_model | 362.2 / 373.4 / 370.9 | 1180.9 / 1162.3 / 1167.0 | 1158.5 / 1120.8 / 1122.1 | 3.15× | **3.03×** | 1.04× |
+| conformance | add_cto_model | 109.7 / 112.3 / 105.4 | 598.6 / 545.5 / 573.2 | 497.0 / 536.8 / 555.8 | 5.23× | **4.89×** | 1.07× |
+| synthetic-large | add_cto_model | 23014.2 / 23687.6 / 23106.7 | 33466.9 / 34300.0 / 40913.2 | 35420.9 / 37799.4 / 40013.2 | 1.48× | **1.64×** | 0.91× |
+| concerto-core-test-data | modelfile_new | 19.4 / 20.2 / 19.8 | 141.7 / 140.8 / 139.4 | 143.6 / 139.4 / 142.9 | 7.11× | **7.22×** | 0.99× |
+| conformance | modelfile_new | 6.0 / 6.3 / 6.3 | 86.5 / 82.4 / 87.2 | 84.0 / 82.1 / 82.8 | 13.73× | **13.14×** | 1.04× |
+| synthetic-large | modelfile_new | 694.3 / 687.3 / 692.7 | 7811.3 / 7936.0 / 8047.0 | 8202.0 / 7769.5 / 8084.0 | 11.46× | **11.67×** | 0.98× |
+
+- **`add_model_file` is 1.3× to 1.4× faster on the two many-file sets**
+  (35 and 41 files). It goes from 5.7× and 8.1× TS to 4.1× and 6.4× TS.
+  The issue estimated about 3× to 5× TS, from P5-15's 10.5× and 13.6×;
+  the before side here is already lower than P5-15's figures, which this
+  task did not investigate. concerto-core-test-data is inside that range.
+  conformance is not.
+- **What is left is validation itself, not the copy.** A `sample` profile
+  of the crate's `add_model_file` on conformance puts the scratch copy at
+  about 6% after the change. Most of the rest is validation
+  (`check_imports`, the semver parse in `parse_namespace`, which is F4's
+  scope, and `class_info`) and reading the AST.
+- **synthetic-large (one large file) should not move.** With a single user
+  file there was almost nothing to clone. The timed rounds show the P5-18
+  side 9% slower (0.91×). A follow-up check run straight after, on a quieter
+  machine (1-minute load 1.6 to 1.8), alternated before and after three
+  times with 40 samples each. Before was 7526 / 7561 / 7475 µs and P5-18
+  7382 / 7584 / 7475 µs, the same. The crate row below also shows no
+  change. So the 0.91× is run-to-run noise, not a regression.
+  `add_cto_model` on synthetic-large (0.91×) is noisy on both sides
+  (33.5 to 40.9 ms).
+- The controls `add_cto_model` and `modelfile_new` are unchanged on the
+  many-file sets (0.98× to 1.07×).
+- CVs were up to 18% for `add_model_file` and up to 32% for
+  `modelfile_new`, on both sides and in the TS reference. The laptop was
+  not fully quiet (above). The ratios use medians of three runs.
+
+## The Rust crate directly (criterion)
+
+Criterion's median estimate, in ms per call over the whole model set
+(`add_model_file` of every file into a fresh manager), for runs 1, 2 and
+3. The speed-up uses the median of the three runs. The crate numbers are
+native, so only the before/after ratio is meaningful, not a comparison
+with the TS rows above.
+
+| Benchmark | Before (`876bd67`), runs 1 / 2 / 3 | P5-18 (`3a8f3b4`), runs 1 / 2 / 3 | Speed-up |
+|---|---|---|---|
+| `add_model_file`, concerto-core-test-data | 17.92 / 16.56 / 16.50 | 7.55 / 6.95 / 6.80 | 2.38× |
+| `add_model_file`, conformance | 11.98 / 10.92 / 10.82 | 4.91 / 4.69 / 4.70 | 2.32× |
+| `add_model_file`, synthetic-large | 9.10 / 7.97 / 8.08 | 8.06 / 8.04 / 8.01 | 1.00× |
+
+- **In the crate, `add_model_file` is 2.3× to 2.4× faster on the
+  many-file sets**, and unchanged on synthetic-large. The TS API gains are
+  smaller, because each call also pays the WASM boundary (the AST goes in
+  as JSON) and the TS wrapper's own work.
+- The criterion `estimates.json` files were not kept (the copy step looked
+  in the wrong directory). The figures above are the medians criterion
+  printed, from the run logs.
+
+## Correctness during the run
+
+The full tier ran on the P5-18 tree (`concerto-rust` `3a8f3b4`) before
+the benchmark. `cargo fmt --check` and `cargo clippy --workspace
+--all-targets --all-features -D warnings` were clean. `cargo test
+--workspace` passed 991 tests with 0 failures, with
+`CONCERTO_ORACLE_FIXTURES` set: the oracle covered 16,242 fixtures
+(14,132 pass, 2,110 unsupported, all stays-ts, 0 fail) with 0 load errors,
+0 harness errors and 0 regressions. The concerto-wasm leg passed: `cargo fmt
+--check`, wasm32 clippy in its CI form (`--target wasm32-unknown-unknown
+-D warnings`), `cargo check`, `build.sh` and `smoke:node`. concerto-wasm
+itself is unchanged. (With `--all-targets` added, clippy reports two
+`indexing_slicing` errors in existing concerto-wasm test code, which this
+task does not touch.) The concerto-core suite with nyc had 1,962 passing, 8 pending
+and 0 failing (statements 99.48%, branches 96.75%, functions 99.81%, lines
+99.51%). No fuzz run, per the milestone-only policy.
+
+---
+
 # P5-17 (F1): one resolve snapshot per `models_ast` call (2026-09-28)
 
 Task P5-17 F1 (accordproject/concerto-rust#315) fixes finding F1 of the
