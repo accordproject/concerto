@@ -1,0 +1,46 @@
+TS API ms (per-round medians -> median of 3)
+synthetic-large
+  ts 11.5/11.5/11.8 => 11.54
+  engine-base 44.4/40.9/37.4 => 40.95
+  engine-new 29.8/43.7/41.5 => 41.45
+  percall-base 71.4/69.2/53.5 => 69.22
+  percall-new 67.7/69.7/53.1 => 67.69
+  ratios vs TS: resident base 3.55x new 3.59x; percall base 6.00x new 5.86x
+conformance
+  ts 3.8/2.8/3.8 => 3.80
+  engine-base 11.8/8.7/10.1 => 10.08
+  engine-new 7.1/8.0/10.8 => 7.99
+  percall-base 14.5/13.6/20.3 => 14.46
+  percall-new 16.8/14.8/17.0 => 16.82
+  ratios vs TS: resident base 2.65x new 2.10x; percall base 3.81x new 4.43x
+concerto-core-test-data
+  ts 10.8/8.2/12.9 => 10.81
+  engine-base 26.2/18.6/20.2 => 20.24
+  engine-new 14.9/15.0/22.5 => 15.02
+  percall-base 41.2/39.5/33.2 => 39.45
+  percall-new 34.1/38.5/38.6 => 38.53
+  ratios vs TS: resident base 1.87x new 1.39x; percall base 3.65x new 3.56x
+
+binding (run-wasm) median ms of 3 rounds: engineBinding / engineJsonStringify
+  synthetic-large base: binding 48.5/52.8/41.0 => 48.50; stringify 1.51
+  synthetic-large new: binding 36.7/35.7/44.6 => 36.75; stringify 1.23
+  conformance base: binding 10.6/10.1/11.5 => 10.59; stringify 0.29
+  conformance new: binding 8.8/10.0/13.3 => 10.01; stringify 0.29
+  concerto-core-test-data base: binding 25.6/27.4/26.7 => 26.66; stringify 0.87
+  concerto-core-test-data new: binding 19.3/18.9/28.0 => 19.26; stringify 0.71
+
+native encode stage ms (median of 3 rounds)
+  glibc synthetic-large: encode old 11.36 direct 5.12; drop old 5.47 direct 4.61; total old 46.51 direct 37.65
+  glibc conformance: encode old 1.45 direct 0.48; drop old 1.45 direct 0.80; total old 8.27 direct 5.29
+  glibc concerto-core-test-data: encode old 4.07 direct 1.90; drop old 4.58 direct 3.25; total old 19.88 direct 16.51
+  dlmalloc synthetic-large: encode old 7.55 direct 3.47; drop old 3.09 direct 3.02; total old 34.13 direct 30.59
+  dlmalloc conformance: encode old 1.48 direct 0.56; drop old 0.63 direct 0.55; total old 6.80 direct 6.13
+  dlmalloc concerto-core-test-data: encode old 4.12 direct 1.83; drop old 1.76 direct 1.61; total old 18.03 direct 15.22
+
+count-alloc encode stage (r1)
+  synthetic-large old: allocs 60017 reallocs 13 bytes 6981165
+  synthetic-large direct: allocs 2 reallocs 13 bytes 2097030
+  conformance old: allocs 12784 reallocs 10 bytes 1334236
+  conformance direct: allocs 2 reallocs 10 bytes 262022
+  concerto-core-test-data old: allocs 31911 reallocs 12 bytes 3517190
+  concerto-core-test-data direct: allocs 2 reallocs 12 bytes 1048454
