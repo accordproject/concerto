@@ -69,6 +69,14 @@ const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engi
 const constructedModelFiles = new WeakSet<object>();
 
 /**
+ * Every BaseModelManager whose constructor ran (P5-35, BC-47): the only
+ * managers a ModelFile may be built for. Only such a manager has the
+ * engine mirror (`rustHandle`) the ModelFile reads and validates through;
+ * a stub, a duck-typed object or a Proxy wrapping a real manager is not one.
+ */
+const engineManagers = new WeakSet<object>();
+
+/**
  * Class representing a Model File. A Model File contains a single namespace
  * and a set of model elements: assets, transactions etc.
  *
@@ -98,10 +106,16 @@ class ModelFile extends Decorated {
      * @param {object} ast - The abstract syntax tree of the model as a JSON object.
      * @param {string} [definitions] - The optional CTO model as a string.
      * @param {string} [fileName] - The optional filename for this modelfile
+     * @throws {TypeError} if modelManager is not a BaseModelManager (BC-47)
      * @throws {IllegalModelException}
      */
     constructor(modelManager: BaseModelManager, ast: AstNode, definitions?: string | null, fileName?: string | null) {
         super(ast);
+        // P5-35 (BC-47): only a BaseModelManager has the engine mirror this
+        // ModelFile is loaded, read and validated through.
+        if (typeof modelManager !== 'object' || modelManager === null || !engineManagers.has(modelManager)) {
+            throw new TypeError('ModelFile expects a BaseModelManager built by its constructor');
+        }
         constructedModelFiles.add(this);
         this.modelManager = modelManager;
         this.external = false;
@@ -204,47 +218,67 @@ class ModelFile extends Decorated {
     }
 
     /**
+     * Records `manager` as a BaseModelManager whose constructor ran (P5-35,
+     * BC-47): the BaseModelManager constructor calls this before it builds
+     * any ModelFile of its own.
+     * @param {BaseModelManager} manager the manager being constructed
+     * @private
+     * @internal
+     */
+    static _registerManager(manager: BaseModelManager): void {
+        engineManagers.add(manager);
+    }
+
+    /**
      * The handle of this ModelFile's own namespace in `this.modelManager`'s
      * `rustHandle` (P4-08), when this ModelFile is the one registered for
      * its namespace and no write of the manager's is pending
      * (`BaseModelManager#_rustHandleMatchesModelFiles`). The handle is the
      * one the manager cached when it committed the file (P5-34), so a
      * registered file's read makes no extra engine call. `undefined`
-     * otherwise -- including for a `ModelFile` built by a white-box test on
-     * a stubbed `modelManager`, whose `_rustHandleMatchesModelFiles` is
-     * itself undefined and so falsy here.
+     * otherwise: a ModelFile detached from its manager's registration.
+     * The manager is always a BaseModelManager (P5-35, BC-47).
      * @return {number | undefined} the handle, or undefined to fall back to TS
      * @private
      * @internal
      */
     _rustHandleId(): number | undefined {
-        const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustHandleMatchesModelFiles?: () => boolean; _rustModelFileId?: (namespace: string) => number | undefined; modelFiles?: Record<string, unknown> };
         /* istanbul ignore next */
-        if (!manager || !manager.rustHandle || typeof manager._rustHandleMatchesModelFiles !== 'function') {
+        if (!this._isRegistered()) {
             return undefined;
         }
+        const manager = this.modelManager;
+        // P5-34: the handle the manager cached when it committed the file.
+        // An error reading rustHandle propagates
+        // (accordproject/concerto-rust#262).
+        return manager._rustModelFileId(this.namespace);
+    }
+
+    /**
+     * Whether this ModelFile is the one its manager's `rustHandle` mirrors
+     * for its namespace (P5-32, accordproject/concerto-rust#342): the
+     * checks `_rustHandleId` makes before it looks the handle up, none of
+     * which crosses into the engine. A registered file's field-backed
+     * getters (`getVersion`, `isSystemModelFile`, `getExternalImports`)
+     * answer exactly as the engine's own model file did.
+     * @return {boolean} true if registered and mirrored
+     * @private
+     * @internal
+     */
+    _isRegistered(): boolean {
+        // The manager is always a BaseModelManager (P5-35, BC-47).
+        const manager = this.modelManager;
         // A ModelFile detached from its manager's own registration -- most
         // notably `filter()`'s result before it is ever added -- must never
         // answer from a same-namespace mirror that belongs to a different
         // (unfiltered) ModelFile object (P5-10a: a ModelFile being
         // constructed or added is not registered yet, and needs no boundary
         // call to say so).
-        /* istanbul ignore next */
-        if (!manager.modelFiles || manager.modelFiles[this.namespace] !== this) {
-            return undefined;
+        if (manager.modelFiles[this.namespace] !== this) {
+            return false;
         }
         // P5-34: a flag read, not a boundary call (`_mirrorPending`).
-        /* istanbul ignore next */
-        if (!manager._rustHandleMatchesModelFiles()) {
-            return undefined;
-        }
-        // P5-34: the handle the manager cached when it committed the file.
-        // An error reading rustHandle propagates
-        // (accordproject/concerto-rust#262).
-        /* istanbul ignore next */
-        return typeof manager._rustModelFileId === 'function'
-            ? manager._rustModelFileId(this.namespace)
-            : manager.rustHandle.modelFileId(this.namespace);
+        return manager._rustHandleMatchesModelFiles();
     }
 
     /**
@@ -253,13 +287,13 @@ class ModelFile extends Decorated {
      * unversioned
      */
     getVersion(): string | null | undefined {
-        const id = this._rustHandleId();
-        /* istanbul ignore if */
-        if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-            return manager.rustHandle.modelFileGetVersion(id) ?? null;
-        }
-        return this.version;
+        // P5-32 (accordproject/concerto-rust#342): `this.version` is the
+        // field Rust itself wrote at construction (concerto-wasm
+        // `modelFileFromAstHeader`, or the staged header P5-28 applies), so
+        // no engine call is needed. A registered file answers as the
+        // engine's `modelFileGetVersion` did: `null`, never `undefined` or
+        // `''`, for a namespace with no version.
+        return this._isRegistered() ? this.version || null : this.version;
     }
 
     /**
@@ -267,13 +301,13 @@ class ModelFile extends Decorated {
      * @returns {Boolean} true if this is a system model file
      */
     isSystemModelFile(): boolean {
-        const id = this._rustHandleId();
-        /* istanbul ignore if */
-        if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-            return manager.rustHandle.modelFileIsSystemModelFile(id);
-        }
-        return this.namespace.startsWith('concerto@') || this.namespace === 'concerto';
+        // P5-32 (accordproject/concerto-rust#342): from `this.namespace`,
+        // which Rust wrote at construction. A registered file answers as the
+        // engine's `modelFileIsSystemModelFile` did (concerto-core
+        // `ModelFile::is_system_namespace`: a `concerto@` namespace only);
+        // otherwise the bare `concerto` namespace is a system one too, as the
+        // namespace check during construction takes it.
+        return this.namespace.startsWith('concerto@') || (this.namespace === 'concerto' && !this._isRegistered());
     }
 
     /**
@@ -306,13 +340,12 @@ class ModelFile extends Decorated {
      * @private
      */
     getExternalImports(): Record<string, string> {
-        const id = this._rustHandleId();
-        /* istanbul ignore if */
-        if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-            return manager.rustHandle.modelFileGetExternalImports(id);
-        }
-        return this.importUriMap;
+        // P5-32 (accordproject/concerto-rust#342): `this.importUriMap` is the
+        // field Rust itself wrote at construction, in import order (the
+        // order `modelFileGetExternalImports` kept, #263). A registered file
+        // returns a fresh copy, as the engine route did, so mutating the
+        // result never reaches the file.
+        return this._isRegistered() ? { ...this.importUriMap } : this.importUriMap;
     }
 
     /**
@@ -341,16 +374,31 @@ class ModelFile extends Decorated {
      * this ModelFile
      */
     getImports(): string[] {
+        // P5-32 (accordproject/concerto-rust#342): `this.imports` is the
+        // field Rust itself wrote at construction, so its fully-qualified
+        // names are recorded once (engine/views.ts `recordImportNames`):
+        // from the staged header when one was applied, with no engine call,
+        // or else on the first call, through the engine's own model file
+        // for a registered file, as before, and the TS body otherwise (the
+        // two agree). Every later call answers from that record, with no
+        // engine call, as a fresh array, as both routes did.
+        const views = loadEngine('../engine/views');
+        const recorded: string[] | undefined = views.recordedImportNames(this);
+        if (recorded !== undefined) {
+            return recorded;
+        }
+        let result: string[] = [];
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
             const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-            return manager.rustHandle.modelFileGetImports(id);
+            result = manager.rustHandle.modelFileGetImports(id);
+        } else {
+            this.imports.forEach( imp => {
+                result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
+            });
         }
-        let result: string[] = [];
-        this.imports.forEach( imp => {
-            result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
-        });
+        views.recordImportNames(this, result.slice());
         return result;
     }
 
@@ -363,7 +411,7 @@ class ModelFile extends Decorated {
      * ModelFile, so `IllegalModelException`'s own constructor already baked
      * a message and fileName without this file's name into `e`. Re-wrap
      * with `this` so the public exception carries the same "File '<name>': "
-     * prefix and `fileName` that the TS validate() body produces for the
+     * prefix and `fileName` that v5.0.0's TS validate() produced for the
      * identical failure -- delegating to Rust must not change the shape of
      * the exception callers see.
      *
@@ -413,107 +461,31 @@ class ModelFile extends Decorated {
         // BaseModelManager accepts only ModelFiles its constructor built
         // (P5-34, BC-46), and its `addModelFile` validates and registers a
         // staged file in one engine call without calling this method
-        // (`_rustValidateAndMirrorAdd`). The collaborator fallback below (no
-        // `rustHandle`, e.g. a stubbed manager, or a real-but-detached
-        // `ModelFile` built against a plain manager) runs the TS body; a
+        // (`_rustValidateAndMirrorAdd`). A ModelFile's manager is always a
+        // BaseModelManager (P5-35, BC-47), so there is no TS body: a
         // genuine validation failure throws the mapped
-        // `IllegalModelException` (src/engine/errors.ts) and propagates
-        // unchanged.
-        const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null };
-        /* istanbul ignore next */
-        if (manager && manager.rustHandle) {
-            try {
-                // P5-10a: the file Rust already loaded (staged, or
-                // registered from its stage) is validated without sending
-                // the AST again (engine/views.ts `validateLoaded`).
-                if (!loadEngine('../engine/views').validateLoaded(this, manager.rustHandle)) {
-                    // Falsy non-string `definitions`/`fileName` (`0`, `false`,
-                    // `NaN`) pass the constructor's truthy-only check and
-                    // reach here raw: only a genuine string is forwarded to
-                    // the wasm `Option<String>` params, matching the
-                    // `stageModelFile` guard above
-                    // (accordproject/concerto-rust#294 follow-up).
-                    const definitions = this.getDefinitions();
-                    const fileName = this.getName();
-                    manager.rustHandle.modelFileValidateDetached(
-                        JSON.stringify(this.getAst()),
-                        typeof definitions === 'string' ? definitions : undefined,
-                        typeof fileName === 'string' ? fileName : undefined,
-                    );
-                }
-                return;
-            } catch (e) {
-                throw this._engineValidationError(e);
+        // `IllegalModelException` (src/engine/errors.ts).
+        const manager = this.modelManager;
+        try {
+            // P5-10a: the file Rust already loaded (staged, or registered
+            // from its stage) is validated without sending the AST again
+            // (engine/views.ts `validateLoaded`).
+            if (!loadEngine('../engine/views').validateLoaded(this, manager.rustHandle)) {
+                // Falsy non-string `definitions`/`fileName` (`0`, `false`,
+                // `NaN`) pass the constructor's truthy-only check and reach
+                // here raw: only a genuine string is forwarded to the wasm
+                // `Option<String>` params, matching the `stageModelFile`
+                // guard (accordproject/concerto-rust#294 follow-up).
+                const definitions = this.getDefinitions();
+                const fileName = this.getName();
+                manager.rustHandle.modelFileValidateDetached(
+                    JSON.stringify(this.getAst()),
+                    typeof definitions === 'string' ? definitions : undefined,
+                    typeof fileName === 'string' ? fileName : undefined,
+                );
             }
-        }
-
-        super.validate();
-
-        // A dictionary of imports to versions to track unique namespaces
-        const importsMap = new Map();
-
-        // Validate all of the imports to check that they reference
-        // namespaces or types that actually exist.
-        this.getImports().forEach((importFqn) => {
-            const importNamespace = ModelUtil.getNamespace(importFqn);
-            const importShortName = ModelUtil.getShortName(importFqn);
-            const modelFile = this.getModelManager().getModelFile(importNamespace);
-            const { name, version: importVersion } = ModelUtil.parseNamespace(importNamespace);
-
-            if (!modelFile) {
-                let formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
-                throw new IllegalModelException(formatter({
-                    type: importFqn
-                }), this);
-            }
-
-            const existingNamespaceVersion = importsMap.get(name);
-            // undefined means we haven't seen this namespace before,
-            // null means we have seen it before but it didn't have a version
-            const unseenNamespace = existingNamespaceVersion === undefined;
-
-            const isGlobalModel = name === 'concerto';
-
-            const differentVersionsOfSameNamespace = !unseenNamespace && existingNamespaceVersion !== importVersion;
-            if (!isGlobalModel && differentVersionsOfSameNamespace){
-                let formatter = Globalize.messageFormatter('modelmanager-gettype-duplicatensimport');
-                throw new IllegalModelException(formatter({
-                    namespace: importNamespace,
-                    version1: existingNamespaceVersion,
-                    version2: importVersion
-                }), this);
-            }
-            importsMap.set(name, importVersion);
-
-            if (!modelFile.isLocalType(importShortName)) {
-                let formatter = Globalize.messageFormatter('modelmanager-gettype-notypeinns');
-                throw new IllegalModelException(formatter({
-                    type: importShortName,
-                    namespace: importNamespace
-                }), this);
-            }
-        });
-
-        // Validate all of the types in this model file.
-        // Check if names of the declarations are unique.
-        const uniqueNames = new Set();
-        this.declarations.forEach(
-            d => {
-                const fqn = d.getFullyQualifiedName();
-                if (!uniqueNames.has(fqn)) {
-                    uniqueNames.add(fqn);
-                } else {
-                    throw new IllegalModelException(
-                        `Duplicate class name ${fqn}`
-                    );
-                }
-            }
-        );
-
-        // Run validations on class declarations
-        for(let n=0; n < this.declarations.length; n++) {
-            let classDeclaration = this.declarations[n];
-            classDeclaration.validate();
+        } catch (e) {
+            throw this._engineValidationError(e);
         }
     }
 

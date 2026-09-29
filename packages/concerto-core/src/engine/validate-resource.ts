@@ -71,7 +71,7 @@
 // visitor never visits.
 
 import { rust } from './index';
-import { EngineFastPathUnsupported, checkString } from './serializer-codec';
+import { EngineFastPathUnsupported, checkString, typedCtorName, modelClasses } from './serializer-codec';
 import { handleFor } from './serializer';
 import ValidationException from '../serializer/validationexception';
 
@@ -126,19 +126,6 @@ function dayjsIso(d): string | null {
     }
     const ms = d.valueOf();
     return Math.abs(ms) <= 8.64e15 ? new Date(ms).toISOString() : null;
-}
-
-/**
- * @param {object} v an instance
- * @return {string} its class name, when it is one of the three the codec
- * carries
- */
-function typedCtor(v): string {
-    const ctorName = v.constructor && v.constructor.name;
-    if (ctorName !== 'Resource' && ctorName !== 'ValidatedResource' && ctorName !== 'Relationship') {
-        throw new EngineFastPathUnsupported(`typed-class:${ctorName}`);
-    }
-    return ctorName;
 }
 
 /**
@@ -383,7 +370,7 @@ function writeValue(v, seen: Set<object>): void {
  * @param {Set<object>} seen visited objects
  */
 function writeTyped(v, seen: Set<object>): void {
-    const ctor = typedCtor(v);
+    const ctor = typedCtorName(v);
     const fqn = v.getFullyQualifiedType();
     const countAt = beginObject();
     let count;
@@ -475,7 +462,7 @@ function modelIdentifierField(decl): string {
  * @return {number} the flags
  */
 function flagsOf(validator): number {
-    if (!validator || validator.constructor?.name !== 'ResourceValidator') {
+    if (!validator || validator.constructor !== modelClasses().ResourceValidator) {
         return -1;
     }
     const options: SerializerOptions = validator.options;
