@@ -1,3 +1,82 @@
+# P5-41 (F-C): DCS extract results encoded directly, no intermediate Value (2026-09-29)
+
+Task P5-41 (accordproject/concerto-rust#351, F-C from the P5-30 report on
+#335) changes only the encode step in concerto-wasm. The three
+`decoratorManagerExtract*` bindings and `DcsManagerHandle.extract` (the
+resident path the TS API takes by default since P5-27) now serialise the
+extract result straight to JSON text. They do this through a borrowed serde
+view of the result and of each model AST, so they no longer clone every AST
+into a `serde_json::Value` first. The old Value route is kept as the fallback.
+Binding names, signatures and output are unchanged: a host test checks that
+the text is byte-identical to the Value route, and 27 extract cases (3
+bindings × 3 option sets × the 3 dumped inputs) give identical
+`JSON.stringify` output on both engines. concerto needs no shim change. The
+raw outputs, the driver and the scratch patch to the P5-30 spike are in
+`results/P5-41/`.
+
+| | |
+|---|---|
+| Machine | Cloud container, Intel Xeon @ 2.10GHz, 4 vCPU, Linux 6.18 (the P5-22 machine type) |
+| Toolchain | Node v22.22.2, rustc 1.94.1, `concerto-wasm/build.sh` (engine 2,996,949 bytes now, 2,994,581 before) |
+| Now | `concerto` `aa2b8c523` (unchanged), `concerto-rust` `adf72f2` (the P5-41 commit on `840fe30`) |
+| Before | `concerto-rust` `840fe30` (the integration head) with its engine, timed in the same run against the same concerto dist |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, timed in each round |
+| Driver | `results/P5-41/scripts/run.sh`: three interleaved rounds (engine order alternated per round). In each round: (1) `p515-sweep.mjs --ops extract_decorators` through the TS API, on TS 5.0.0, on the Rust engine through the resident path, and on the per-call bindings (`percall.cjs` hides `DcsManagerHandle`), 5 warm-up and 30 samples each. (2) The P5-30 `run-wasm.mjs` binding timing on the dumped extract inputs. (3) The P5-30 native spike binary (glibc and dlmalloc builds) with the old encode and with the direct encode (`P530_ENCODE=direct`, from `scripts/p530-direct-encode.patch` on the spike at `b2bf98c`). Round 1 also runs the allocation-counting build. |
+| Quiet gate | Before each timed part: 1-minute load < 2, 5-minute < 3, and no other bench, cargo or mocha process. All 9 parts met it. At the start of each part, 1-minute load was 1.16 to 1.83 and 5-minute load 2.17 to 2.46 (`results/P5-41/loads.txt`). That is busier than P5-27/P5-29 (5-minute load about 1.5 to 1.9), so the noise below is wider. |
+| Noise | Round-to-round medians move by up to about ±35% on every engine (here the resident path on synthetic-large read 29.8/43.7/41.5 ms, and TS on core-test-data read 10.8/8.2/12.9 ms). Treat changes under about 25% as noise. The figures are the median over three rounds of each round's median. |
+
+## Where the saving lands: the encode stage (native spike, same code as the binding)
+
+| allocator | set | encode old -> direct (ms) | total old -> direct (ms) |
+|---|---|---:|---:|
+| dlmalloc (the WASM allocator) | synthetic-large | 7.55 -> **3.47** | 34.13 -> 30.59 |
+| dlmalloc | conformance | 1.48 -> **0.56** | 6.80 -> 6.13 |
+| dlmalloc | core-test-data | 4.12 -> **1.83** | 18.03 -> 15.22 |
+| glibc | synthetic-large | 11.36 -> **5.12** | 46.51 -> 37.65 |
+| glibc | conformance | 1.45 -> **0.48** | 8.27 -> 5.29 |
+| glibc | core-test-data | 4.07 -> **1.90** | 19.88 -> 16.51 |
+
+Allocations in the encode stage (count-alloc build, round 1):
+
+| set | allocs old -> direct | bytes old -> direct |
+|---|---:|---:|
+| synthetic-large | 60,017 -> **2** | 6.98 MB -> 2.10 MB |
+| conformance | 12,784 -> **2** | 1.33 MB -> 0.26 MB |
+| core-test-data | 31,911 -> **2** | 3.52 MB -> 1.05 MB |
+
+The direct encode removes 4.1 ms (dlmalloc) to 6.2 ms (glibc) from the
+synthetic-large encode stage, in line with the F-C estimate of -2 to -4 ms
+and a little above it. The only allocations left are the output string's two
+buffers.
+
+## The binding, from JS (run-wasm.mjs, `decoratorManagerExtractDecorators`)
+
+| set | before (ms) | now (ms) |
+|---|---:|---:|
+| synthetic-large | 48.50 (48.5/52.8/41.0) | **36.75** (36.7/35.7/44.6) |
+| conformance | 10.59 (10.6/10.1/11.5) | **10.01** (8.8/10.0/13.3) |
+| core-test-data | 26.66 (25.6/27.4/26.7) | **19.26** (19.3/18.9/28.0) |
+
+## Through the TS public API: `DecoratorManager.extractDecorators`, × TS 5.0.0
+
+| set | TS 5.0.0 (ms) | resident before -> now (ms) | **× TS resident** before -> now | per-call before -> now (ms) | × TS per-call before -> now |
+|---|---:|---:|---:|---:|---:|
+| synthetic-large | 11.54 | 40.95 -> 41.45 | 3.55 -> **3.59** | 69.22 -> 67.69 | 6.00 -> 5.86 |
+| conformance | 3.80 | 10.08 -> 7.99 | 2.65 -> **2.10** | 14.46 -> 16.82 | 3.81 -> 4.43 |
+| core-test-data | 10.81 | 20.24 -> 15.02 | 1.87 -> **1.39** | 39.45 -> 38.53 | 3.65 -> 3.56 |
+
+Through the TS API, the change stays inside the noise. The ms saved in the
+encode stage is under 10% of the synthetic-large resident time (about 41
+ms). At this machine's noise level (±35% between rounds), one run cannot
+resolve it. Round 1 alone read 44.4 -> 29.8 ms, but rounds 2 and 3 read
+slightly the other way. The conformance and core-test-data resident ratios
+moved 21% and 26% in the expected direction, which is also at the edge of
+the noise. F-C is therefore a confirmed stage-level saving (half the encode
+time, allocations down from tens of thousands to 2). It is not a measured
+end-to-end ratio change. The larger costs P5-30 found (extract itself and
+the rebuild) are outside this task's scope: F-B (P5-40, #350) and the F-A
+design task cover them.
+
 # P5-29 (F5, narrowed): epoch-keyed memo for getNamespaces/getType/resolveType (2026-09-29)
 
 Task P5-29 (accordproject/concerto-rust#334) keeps the engine's answers to
