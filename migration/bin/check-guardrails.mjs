@@ -9,6 +9,8 @@
  *      listed in migration/guardrails/test-message-relaxations.tsv (P5-09,
  *      maintainer decision 2026-09-27 on accordproject/concerto-rust#253;
  *      see migration/guardrails/relaxations.mjs for the accepted shapes),
+ *      or are approved rewrites pinned in that file under a maintainer
+ *      decision named in APPROVED_REWRITE_DECISIONS (P5-24, #328),
  *      and except lines inside the test-case scopes listed in
  *      migration/guardrails/test-case-rewrites.tsv (P5-33, maintainer
  *      decision 2026-09-29 on accordproject/concerto-rust#330 D1; see
@@ -86,7 +88,7 @@ const REWRITE_LIST = path.join(MIGRATION_ROOT, 'guardrails', 'test-case-rewrites
 const testViolations = checkTestTree({ repoRoot: REPO_ROOT, baseRef: BASE_REF, testPrefix, allowListPath: ALLOW_LIST, rewriteListPath: REWRITE_LIST });
 if (testViolations.length > 0) {
     failures.push([
-        `${testViolations.length} disallowed change(s) under ${testPrefix} relative to ${BASE_REF} (only allow-listed message-to-class assertion relaxations and approved test-case rewrites may change):`,
+        `${testViolations.length} disallowed change(s) under ${testPrefix} relative to ${BASE_REF} (only allow-listed message-to-class assertion relaxations, approved rewrites and approved test-case rewrites may change):`,
         ...testViolations.map((v) => `    ${v}`),
     ].join('\n'));
 }

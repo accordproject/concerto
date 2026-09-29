@@ -52,6 +52,21 @@ const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engi
 
 const debug = createDebug('concerto:JSONPopulator');
 
+/**
+ * Whether the date and time fields of a string that already has the strict
+ * `DateTime` format name a real instant (P5-24, BC-42, R1): `Date.parse`
+ * rolls `2024-02-30` and `T24:00:00` over and rejects a leap second, so
+ * reading the fields back out must give the same fields. The offset's own
+ * range (hours up to 23, minutes up to 59) is `Date.parse`'s check.
+ * @param {string} json a string matching the strict `DateTime` format
+ * @returns {boolean} true when the fields name a real instant
+ * @private
+ */
+function isRealInstant(json: string): boolean {
+    const fields = json.slice(0, 19);
+    return dayjs.utc(`${fields}Z`).format('YYYY-MM-DDTHH:mm:ss') === fields;
+}
+
 
 type Stack<T> = {
     push(value: T, expectedType?: unknown): void;
@@ -430,14 +445,18 @@ class JSONPopulator {
                 result = json;
             } else if (typeof json !== 'string') {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-            } else if (!this.strictQualifiedDateTimes){
+            } else if (!json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)) {
+                // P5-24 (BC-07, R1): the strict format only, whatever
+                // `strictQualifiedDateTimes` says; the flag now decides only
+                // whether `utcOffset` applies, as it did before.
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
+            } else if (!isRealInstant(json)) {
+                // BC-42 (R1): an impossible date is not rolled over.
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+            } else if (this.strictQualifiedDateTimes) {
+                result = dayjs.utc(json);
+            } else {
                 result = dayjs.utc(json).utcOffset(this.utcOffset);
-            } else if (this.strictQualifiedDateTimes){
-                if (json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)){
-                    result = dayjs.utc(json);
-                } else {
-                    throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
-                }
             }
             if (!result || !result.isValid()) {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);

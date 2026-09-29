@@ -36,8 +36,9 @@
  * manager, where it is cheaper than an engine call (`visitorIsCheaper`,
  * SET-004 and SET-005).
  *
- * `expect` is the frozen v5.0.0 reference's outcome. Run by
- * fallbacks.spec.js.
+ * `expect` is the frozen v5.0.0 reference's outcome, except for the
+ * P5-24 strict `DateTime` map checks (MAP-007 to MAP-009), whose v5.0.0
+ * outcome is in REFERENCE. Run by fallbacks.spec.js.
  */
 
 const NS = 'org.acme.lifted.p512c.validate@1.0.0';
@@ -213,6 +214,14 @@ const SCENARIOS = [
     { id: 'MAP-004', covers: 'visitMapDeclaration: a plain object instead of a Map', run: (v) => validate('C', { msst: { a: 'b' } }, v) },
     { id: 'MAP-005', covers: 'visitField: a map field with a size validator, too many entries', run: (v) => validate('C', { msz: new Map([['a', 'b'], ['c', 'd'], ['e', 'f']]) }, v) },
     { id: 'MAP-006', covers: 'visitField: a map field with a size validator, within bounds', run: (v) => validate('C', { msz: new Map([['a', 'b']]) }, v) },
+    // P5-24 (accordproject/concerto-rust#328; BC-42, BC-43, R1): a map's
+    // `DateTime` values follow the strict field rule. REFERENCE below holds
+    // what v5.0.0 gives where that differs.
+    { id: 'MAP-007', covers: 'checkMapType: a date-only DateTime value (BC-43)', run: (v) => validate('C', { msd: new Map([['a', '2020-01-01']]) }, v) },
+    { id: 'MAP-008', covers: 'checkMapType: an impossible DateTime value (BC-42, BC-43)', run: (v) => validate('C', { msd: new Map([['a', '2024-02-30T00:00:00Z']]) }, v) },
+    { id: 'MAP-009', covers: 'checkMapType: a number as a DateTime value (BC-43)', run: (v) => validate('C', { msd: new Map([['a', 1]]) }, v) },
+    { id: 'MAP-010', covers: 'checkMapType: a DateTime value with an out-of-range offset', run: (v) => validate('C', { msd: new Map([['a', '2020-01-01T00:00:00+24:00']]) }, v) },
+    { id: 'MAP-011', covers: 'checkMapType: an undefined DateTime value', run: (v) => validate('C', { msd: new Map([['a', undefined]]) }, v) },
     { id: 'REL-001', covers: 'checkRelationship: a relationship whose target type is not identified', run: (v) => validate('C', (core, factory, mm) => ({ ref: core.Relationship.fromURI(mm, `resource:${NS}.Sub#x`) }), v) },
     { id: 'REL-002', covers: 'checkRelationship: a Resource where a relationship is expected', run: (v) => validate('C', (core, factory) => ({ ref: factory.newResource(NS, 'A', 'a1') }), v) },
     { id: 'REL-003', covers: 'visitRelationshipDeclaration: a valid relationship array', run: (v) => validate('C', (core, factory) => ({ refs: [factory.newRelationship(NS, 'A', 'a1')] }), v) },
@@ -270,6 +279,16 @@ const EXPECT = {
     'VE-MAP-005': {'ok': {'threw': 'BaseException'}},
     'VV-MAP-006': {'ok': 'valid'},
     'VE-MAP-006': {'ok': 'valid'},
+    'VV-MAP-007': {'throws': {'name': 'Error', 'message': 'Model violation in org.acme.lifted.p512c.validate@1.0.0.MSD. Expected Type of DateTime but found \'2020-01-01\' instead.'}},
+    'VE-MAP-007': {'ok': {'threw': 'Error'}},
+    'VV-MAP-008': {'throws': {'name': 'Error', 'message': 'Model violation in org.acme.lifted.p512c.validate@1.0.0.MSD. Expected Type of DateTime but found \'2024-02-30T00:00:00Z\' instead.'}},
+    'VE-MAP-008': {'ok': {'threw': 'Error'}},
+    'VV-MAP-009': {'throws': {'name': 'Error', 'message': 'Model violation in org.acme.lifted.p512c.validate@1.0.0.MSD. Expected Type of DateTime but found \'1\' instead.'}},
+    'VE-MAP-009': {'ok': {'threw': 'Error'}},
+    'VV-MAP-010': {'throws': {'name': 'Error', 'message': 'Model violation in org.acme.lifted.p512c.validate@1.0.0.MSD. Expected Type of DateTime but found \'2020-01-01T00:00:00+24:00\' instead.'}},
+    'VE-MAP-010': {'ok': {'threw': 'Error'}},
+    'VV-MAP-011': {'ok': 'valid'},
+    'VE-MAP-011': {'ok': 'valid'},
     'VV-REL-001': {'throws': {'name': 'Error', 'message': 'Cannot have a relationship to a field that is not identifiable.'}},
     'VE-REL-001': {'ok': {'threw': 'Error'}},
     'VV-REL-002': {'throws': {'name': 'ValidationException', 'message': 'Model violation in the "org.acme.lifted.p512c.validate@1.0.0.C" instance. Class "org.acme.lifted.p512c.validate@1.0.0.A" has a value of "Resource {id=org.acme.lifted.p512c.validate@1.0.0.A#a1}". Expected a "Relationship".'}},
@@ -306,6 +325,17 @@ const EXPECT = {
     'VE-ADD-003': {'ok': {'threw': 'ValidationException'}},
 };
 
+// P5-24: v5.0.0's outcome where it differs from EXPECT's (an intended
+// breaking change; fallbacks.spec.js `reference`).
+const REFERENCE = {
+    'VV-MAP-007': {'ok': 'valid'},
+    'VE-MAP-007': {'ok': 'valid'},
+    'VV-MAP-008': {'ok': 'valid'},
+    'VE-MAP-008': {'ok': 'valid'},
+    'VV-MAP-009': {'ok': 'valid'},
+    'VE-MAP-009': {'ok': 'valid'},
+};
+
 module.exports = [];
 for (const s of SCENARIOS) {
     for (const [prefix, visitor] of [['VV', true], ['VE', false]]) {
@@ -315,6 +345,7 @@ for (const s of SCENARIOS) {
             covers: `${visitor ? 'the visitor fallback' : 'the one-call engine path'}: ${s.covers}`,
             run: s.run(visitor),
             expect: EXPECT[id],
+            ...(id in REFERENCE ? { reference: REFERENCE[id] } : {}),
         });
     }
 }

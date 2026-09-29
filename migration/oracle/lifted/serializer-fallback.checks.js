@@ -527,7 +527,15 @@ module.exports = [
         id: 'SF-CO-009',
         covers: 'convertToObject TS switch, DateTime: a lone surrogate, not strict',
         run: populate({ t: L }, 't', { strictQualifiedDateTimes: false }),
+        // P5-24 (BC-07, R1): the strict format check runs whatever the flag
+        // says, so the format message; the same class as v5.0.0.
         expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Expected value at path `$.t` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]'
+            }
+        },
+        reference: {
             throws: {
                 name: 'ValidationException',
                 message: 'Expected value at path `$.t` to be of type `DateTime`'
@@ -590,7 +598,9 @@ module.exports = [
     {
         id: 'SF-CO-015',
         covers: 'convertToObject: DateTime strings with utcOffset, not strict',
-        run: roundTrip({ t: '2020-01-01T10:00:00' }, { strictQualifiedDateTimes: false, utcOffset: 60 }, { utcOffset: 60 }),
+        // P5-24 (BC-07, R1): a strict string; the unqualified
+        // `2020-01-01T10:00:00` this used is rejected now (SF-CO-019).
+        run: roundTrip({ t: '2020-01-01T10:00:00Z' }, { strictQualifiedDateTimes: false, utcOffset: 60 }, { utcOffset: 60 }),
         expect: {
             ok: {
                 '$class': 'org.acme.lifted.p502b.serializer@1.0.0.C',
@@ -628,6 +638,62 @@ module.exports = [
         covers: 'convertToObject TS switch, DateTime: a qualified string, strict (boxed utcOffset)',
         run: populate({ t: '2020-01-01T10:00:00Z' }, 't', { strictQualifiedDateTimes: true, utcOffset: new Number(0) }),
         expect: { ok: '2020-01-01T10:00:00Z' },
+    },
+    // P5-24 (accordproject/concerto-rust#328): strict `DateTime` in R1 on the
+    // TS switch too. `expect` is the workspace outcome and `reference` what
+    // v5.0.0 gives (fallbacks.spec.js).
+    {
+        id: 'SF-CO-019',
+        covers: 'convertToObject TS switch, DateTime: a date-only string is rejected, not strict (boxed utcOffset; BC-07)',
+        run: populate({ t: '2020-01-01' }, 't', { utcOffset: new Number(0) }),
+        expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Expected value at path `$.t` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]'
+            }
+        },
+        reference: { ok: '2020-01-01T00:00:00+00:00' },
+    },
+    {
+        id: 'SF-CO-020',
+        covers: 'convertToObject TS switch, DateTime: an impossible date is rejected, strict (boxed utcOffset; BC-42)',
+        run: populate({ t: '2024-02-30T00:00:00Z' }, 't', { strictQualifiedDateTimes: true, utcOffset: new Number(0) }),
+        expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Expected value at path `$.t` to be of type `DateTime`'
+            }
+        },
+        reference: { ok: '2024-03-01T00:00:00Z' },
+    },
+    {
+        id: 'SF-CO-021',
+        covers: 'convertToObject TS switch, DateTime: 24:00 is rejected, not strict (boxed utcOffset; BC-42)',
+        run: populate({ t: '2024-01-02T24:00:00Z' }, 't', { utcOffset: new Number(0) }),
+        expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Expected value at path `$.t` to be of type `DateTime`'
+            }
+        },
+        reference: { ok: '2024-01-03T00:00:00+00:00' },
+    },
+    {
+        id: 'SF-CO-022',
+        covers: 'convertToObject TS switch, DateTime: a qualified string, not strict (boxed utcOffset)',
+        run: populate({ t: '2020-01-01T10:00:00+01:00' }, 't', { utcOffset: new Number(0) }),
+        expect: { ok: '2020-01-01T09:00:00+00:00' },
+    },
+    {
+        id: 'SF-CO-023',
+        covers: 'convertToObject TS switch, DateTime: an out-of-range offset is rejected (boxed utcOffset)',
+        run: populate({ t: '2020-01-01T10:00:00+24:00' }, 't', { strictQualifiedDateTimes: true, utcOffset: new Number(0) }),
+        expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Expected value at path `$.t` to be of type `DateTime`'
+            }
+        },
     },
     // ---- JSONGenerator ---------------------------------------------------
     {

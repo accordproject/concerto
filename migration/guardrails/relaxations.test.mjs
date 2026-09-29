@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { relaxationViolation, parseHunks, checkFileHunks, splitArgs, checkTestTree } from './relaxations.mjs';
+import { relaxationViolation, parseHunks, checkFileHunks, splitArgs, checkTestTree, readAllowList } from './relaxations.mjs';
 
 const ok = (o, n) => assert.equal(relaxationViolation(o, n), null, `${o} -> ${n}`);
 const bad = (o, n) => assert.notEqual(relaxationViolation(o, n), null, `${o} -> ${n}`);
@@ -116,4 +116,42 @@ test('tree: non-assertion edit, skipped test, deleted and new files fail', () =>
     dir = scratchRepo();
     fs.writeFileSync(path.join(dir, 'packages/concerto-core/test/new.js'), 'x\n');
     assert.match(TREE(dir, path.join(dir, 'none.tsv')).join('\n'), /new \(untracked\) test file/);
+});
+
+// P5-24 (#328 decision 1): pinned ok-to-throw rewrites.
+const RW = 'approved rewrite accordproject/concerto-rust#328: lenient DateTime is rejected in R1';
+const rwRow = (o, n, extra = {}) => ({ file: FILE, test: 'case', old: o, new: n, reason: RW, used: false, ...extra });
+
+test('approved rewrite: pinned hunk passes once, unpinned or unapproved fails', () => {
+    const o = 'value.should.equal(1);';
+    const n = '(() => f()).should.throw(ValidationException);';
+    const d = `diff\n@@ -4 +4 @@\n-            ${o}\n+            ${n}\n`;
+    const row = rwRow(o, n);
+    assert.deepEqual(checkFileHunks(FILE, parseHunks(d), LINES, [row]), []);
+    assert.equal(row.used, true);
+    // Consumed: the same change a second time is not covered by the same row.
+    assert.equal(checkFileHunks(FILE, parseHunks(d + d.replace('diff\n', '')), LINES, [rwRow(o, n)]).length, 1);
+    // Different text, or a reason without an approved decision, fails.
+    assert.equal(checkFileHunks(FILE, parseHunks(d), LINES, [rwRow(o, 'x;')]).length, 1);
+    assert.equal(checkFileHunks(FILE, parseHunks(d), LINES, [rwRow(o, n, { reason: 'approved rewrite nope#1: x' })]).length, 1);
+    assert.equal(checkFileHunks(FILE, parseHunks(d), LINES, [rwRow(o, n, { reason: 'some reason' })]).length, 1);
+});
+
+test('approved rewrite: pure addition needs (none); one-for-one lines; no test added, removed or skipped', () => {
+    const add = 'diff\n@@ -4,0 +5 @@\n+const { V } = require(\'v\');\n';
+    assert.deepEqual(checkFileHunks(FILE, parseHunks(add), LINES, [rwRow('(none)', 'const { V } = require(\'v\');')]), []);
+    const two = 'diff\n@@ -4,2 +4,2 @@\n-[1, 2],\n-[3, 4],\n+[1, V],\n+[3, V],\n';
+    assert.deepEqual(checkFileHunks(FILE, parseHunks(two), LINES, [rwRow('[1, 2],', '[1, V],'), rwRow('[3, 4],', '[3, V],')]), []);
+    assert.equal(checkFileHunks(FILE, parseHunks(two), LINES, [rwRow('[1, 2],', '[1, V],')]).length, 1);
+    const skip = 'diff\n@@ -2 +2 @@\n-it(\'a\', () => {\n+it.skip(\'a\', () => {\n';
+    assert.equal(checkFileHunks(FILE, parseHunks(skip), LINES, [rwRow("it('a', () => {", "it.skip('a', () => {")]).length, 1);
+    const drop = 'diff\n@@ -2 +2 @@\n-it(\'a\', () => {\n+const a = () => {\n';
+    assert.equal(checkFileHunks(FILE, parseHunks(drop), LINES, [rwRow("it('a', () => {", 'const a = () => {')]).length, 1);
+});
+
+test('allow-list rejects a rewrite row that cites an unapproved decision', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p524-allow-'));
+    const tsv = path.join(dir, 'a.tsv');
+    fs.writeFileSync(tsv, `${FILE}\tt\ta;\tb;\tapproved rewrite someone/else#1: x\n`);
+    assert.throws(() => readAllowList(tsv), /not in APPROVED_REWRITE_DECISIONS/);
 });

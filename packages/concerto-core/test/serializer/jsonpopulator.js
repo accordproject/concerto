@@ -182,28 +182,25 @@ describe('JSONPopulator', () => {
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
 
-        it('should convert unqualified date-time strings when strictQualifiedDateTimes is false', () => {
+        it('should reject unqualified date-time strings even when strictQualifiedDateTimes is false', () => {
             let jsonPopulatorNonStrict = new JSONPopulator(false, false, 0, false); // acceptResourcesForRelationships, utcOffset, strictQualifiedDateTimes
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519', {});
-            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal('2016-10-20T05:34:03.519Z');
+            (() => jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519', {})).should.throw(ValidationException);
         });
 
-        it('should convert date-only strings when strictQualifiedDateTimes is false', () => {
+        it('should reject date-only strings even when strictQualifiedDateTimes is false', () => {
             let jsonPopulatorNonStrict = new JSONPopulator(false, false, 0, false);
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulatorNonStrict.convertToObject(field, '2020-01-01', {});
-            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal('2020-01-01T00:00:00.000Z');
+            (() => jsonPopulatorNonStrict.convertToObject(field, '2020-01-01', {})).should.throw(ValidationException);
         });
 
-        it('should apply utcOffset to unqualified date-time strings when strictQualifiedDateTimes is false', () => {
+        it('should reject unqualified date-time strings with a utcOffset even when strictQualifiedDateTimes is false', () => {
             let jsonPopulatorNonStrict = new JSONPopulator(false, false, 120, false); // utcOffset=120 minutes (+2 hours)
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519', {});
-            value.format('YYYY-MM-DDTHH:mm:ss.SSSZ').should.equal('2016-10-20T07:34:03.519+02:00');
+            (() => jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519', {})).should.throw(ValidationException);
         });
 
         it('should not convert to integers from strings', () => {
