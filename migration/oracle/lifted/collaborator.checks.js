@@ -132,7 +132,7 @@ const HBNS = 'org.acme.p502b.hb@1.0.0';
  * the manager's reads (`derivesFrom`, `isAssignableTo`,
  * `getModelFileByFileName`, `resolveType`) answer from the engine.
  * @param {Function} read `(mm) => value`
- * @returns {Function} the check body; `read` is kept on it as `.read`
+ * @returns {Function} the check body
  */
 function readHandBuilt(read) {
     const body = (core) => {
@@ -147,31 +147,7 @@ function readHandBuilt(read) {
         mm.addModelFile(new core.ModelFile(mm, ast, undefined, 'hb.cto'), undefined, 'hb.cto', true);
         return read(mm);
     };
-    body.read = read;
     return body;
-}
-
-/**
- * The same read on a manager that holds a stub ModelFile: an object with
- * a real file's fields whose constructor never ran, the one case the
- * engine mirror does not hold (#262's 06:14 rule, engine/views.ts
- * `isEngineBuilt`). The manager's reads then answer from the TS body over
- * `modelFiles` (basemodelmanager.ts, `_rustHandleMatchesModelFiles()`
- * false).
- * @param {Function} read `(mm) => value`
- * @returns {Function} the check body
- */
-function readStub(read) {
-    return (core) => {
-        const mm = new core.ModelManager();
-        const scratch = new core.ModelManager();
-        const real = scratch.addCTOModel(
-            `${HB}\nabstract concept A {}\nconcept B extends A {}\nconcept Z {}`, 'hb.cto', true);
-        const stub = Object.assign(Object.create(core.ModelFile.prototype), real);
-        stub.modelManager = mm;
-        mm.addModelFile(stub, undefined, 'hb.cto', true);
-        return read(mm);
-    };
 }
 
 const checks = [
@@ -863,19 +839,8 @@ asset A2 extends IdA {}`, (d) => d.getName() !== 'D'),
     },
 ];
 
-// ---- the same reads over a stub ModelFile (the TS bodies) ----------
-// CO-MM-010 to 018 repeat CO-MM-001 to 009's reads on a manager whose
-// only file is a stub the engine mirror does not hold, so they cover the
-// TS bodies that CO-MM-001 to 009 reached before the engine accepted the
-// hand-built file (#262).
-for (let i = 1; i <= 9; i++) {
-    const base = checks.find((c) => c.id === `CO-MM-00${i}`);
-    checks.push({
-        id: `CO-MM-0${String(i + 9).padStart(2, '0')}`,
-        covers: `${base.covers}, on a stub ModelFile`,
-        run: readStub(base.run.read),
-        expect: base.expect,
-    });
-}
+// CO-MM-010 to 018 repeated CO-MM-001 to 009's reads on a manager holding
+// a stub ModelFile. P5-34 (BC-46) removed stub ModelFile support: a
+// manager accepts only ModelFiles the ModelFile constructor built.
 
 module.exports = checks;

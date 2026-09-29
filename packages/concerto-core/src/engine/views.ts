@@ -64,6 +64,16 @@ function fieldModule(): any {
     return fieldCache ?? (fieldCache = require('../introspect/field'));
 }
 
+let modelFileCache: any;
+
+/**
+ * The introspect/modelfile module, required once.
+ * @return {object} the module
+ */
+function modelFileModule(): any {
+    return modelFileCache ?? (modelFileCache = require('../introspect/modelfile'));
+}
+
 /**
  * ScalarDeclaration.process in rust mode, after super.process(): Rust
  * computes the type, the validator and the default value; this sets the same
@@ -524,24 +534,23 @@ function fieldGetScalarField(field: any): any {
 /**
  * DecoratorManager.validate's structural check (`serializer.fromJSON(
  * decoratorCommandSet)`), once the TS body has built `validationModelManager`
- * (the metamodel, `modelFiles` and the DCS model). P5-27 (F6): when that
- * manager's rustHandle mirrors its model files, the command set is checked
- * against the rustHandle's own resident manager (concerto-wasm
- * `ModelManagerHandle.dcsValidate`), which already holds exactly the models
- * the per-call binding would load, so the model files are neither sent again
- * nor loaded into a second manager. Otherwise (a stub ModelFile in
- * `modelFiles`, or an engine without the binding) the per-call
- * `decoratorManagerValidate` rebuilds them, as before. Either throws the
- * same errors: any error loading the models has already been thrown by the
- * TS body while it built `validationModelManager`.
+ * (the metamodel, `modelFiles` and the DCS model). P5-27 (F6): the command
+ * set is checked against the manager's rustHandle's own resident manager
+ * (concerto-wasm `ModelManagerHandle.dcsValidate`), which mirrors its model
+ * files (P5-34: a BaseModelManager holds only ModelFiles its constructor
+ * built, all mirrored) and so already holds exactly the models the per-call
+ * binding would load: the model files are neither sent again nor loaded into
+ * a second manager. Only an engine without the binding takes the per-call
+ * `decoratorManagerValidate`, which rebuilds them, as before. Either throws
+ * the same errors: any error loading the models has already been thrown by
+ * the TS body while it built `validationModelManager`.
  * @param {object} validationModelManager the validation ModelManager, built
  * @param {*} decoratorCommandSet the DecoratorCommandSet object
  * @param {object[]} [modelFiles] the model files validate was given
  */
 function decoratorManagerValidate(validationModelManager: any, decoratorCommandSet: any, modelFiles?: any[]): void {
     const handle = validationModelManager.rustHandle;
-    if (handle && typeof handle.dcsValidate === 'function' &&
-        validationModelManager._rustHandleMatchesModelFiles()) {
+    if (handle && typeof handle.dcsValidate === 'function') {
         handle.dcsValidate(decoratorCommandSet);
         return;
     }
@@ -905,7 +914,6 @@ const lazyFiles = new WeakSet<object>();
  * @return {boolean} true if the declarations may be built lazily
  */
 function stageModelFile(modelFile: any): boolean {
-    constructedFiles.add(modelFile);
     const manager = modelFile.modelManager;
     const handle = manager?.rustHandle;
     if (!handle || typeof handle.stageModelFile !== 'function' ||
@@ -1481,8 +1489,9 @@ function residentDcsAvailable(): boolean {
 /**
  * Whether the resident DCS input manager of `modelManager` may be kept:
  * `getAst` is BaseModelManager's own, over `getModelFiles` and
- * `resolveMetaModel` also its own, and every model file is mirrored in the
- * manager's rustHandle, whose epoch then moves on every model change.
+ * `resolveMetaModel` also its own, over the manager's rustHandle, which
+ * mirrors every model file (P5-34) and whose epoch moves on every model
+ * change.
  * @param {object} modelManager the source ModelManager
  * @return {boolean} true if it may be kept
  */
@@ -1493,9 +1502,7 @@ function dcsCacheable(modelManager: any): boolean {
     return !!handle && typeof handle.epoch === 'function' &&
         modelManager.getAst === proto.getAst &&
         modelManager.getModelFiles === proto.getModelFiles &&
-        modelManager.resolveMetaModel === proto.resolveMetaModel &&
-        typeof modelManager._rustHandleMatchesModelFiles === 'function' &&
-        modelManager._rustHandleMatchesModelFiles();
+        modelManager.resolveMetaModel === proto.resolveMetaModel;
 }
 
 /**
@@ -1542,28 +1549,6 @@ function dcsManagerFor(modelManager: any, resolve: boolean): any {
 }
 
 /**
- * Every ModelFile the ModelFile constructor ran for: the constructor always
- * calls `stageModelFile`, the start of the engine path. A stub ModelFile
- * (`sinon.createStubInstance(ModelFile)`, `Object.create`) never ran the
- * constructor, so it is not here (accordproject/concerto-rust#262).
- */
-const constructedFiles = new WeakSet<object>();
-
-/**
- * Whether `modelFile` was built through the engine path, that is, whether the
- * ModelFile constructor ran for it. False only for a stub ModelFile the
- * constructor never ran for, the one case a manager does not mirror into its
- * rustHandle (accordproject/concerto-rust#262). A constructor-built file
- * whose AST the engine refuses is still engine-built: its mirror write
- * throws the engine's error.
- * @param {object} modelFile the ModelFile
- * @return {boolean} true if the ModelFile was built through the engine path
- */
-function isEngineBuilt(modelFile: any): boolean {
-    return constructedFiles.has(modelFile);
-}
-
-/**
  * Forgets `modelFile`'s stage, returning it if it was staged in `handle`.
  * @param {object} modelFile the ModelFile
  * @param {object} handle the manager's rustHandle
@@ -1581,25 +1566,60 @@ function takeStage(modelFile: any, handle: any): Stage | undefined {
 
 /**
  * The rustHandle write for `modelFile` from its stage: registers the file
- * Rust loaded at construction. Returns false when there is no usable stage
- * (not staged, staged in another handle, or evicted); the caller then sends
- * the AST as before. A registration error propagates, as
+ * Rust loaded at construction. Returns undefined when there is no usable
+ * stage (not staged, staged in another handle, or evicted); the caller then
+ * sends the AST as before. A registration error propagates, as
  * `addModelWithDefinitions`'s would.
  * @param {object} modelFile the ModelFile being added
  * @param {object} handle the manager's rustHandle
- * @return {boolean} true if the file was registered from its stage
+ * @return {number|undefined} the registered file's handle (P5-34: the
+ * manager caches it), or undefined if the file was not registered
  */
-function commitStaged(modelFile: any, handle: any): boolean {
+function commitStaged(modelFile: any, handle: any): number | undefined {
     const stage = takeStage(modelFile, handle);
     if (!stage) {
-        return false;
+        return undefined;
     }
     const id = handle.commitStagedModelFile(stage.id);
     if (id === undefined) {
-        return false;
+        return undefined;
     }
     committed.set(modelFile, handle);
-    return true;
+    return id;
+}
+
+/**
+ * P5-34 (I-5): `BaseModelManager.addModelFile`'s validation and registration
+ * of a staged file in one engine call (concerto-wasm
+ * `validateAndCommitStagedModelFile`), in place of `ModelFile.validate()`'s
+ * `modelFileValidateStaged` followed by `commitStaged`. Returns undefined,
+ * having changed nothing, when there is no usable stage (not staged, staged
+ * in another handle, evicted, or an engine without the binding); the caller
+ * then validates and registers the file as before. A validation error is
+ * thrown as `ModelFile.validate()` throws it (`_engineValidationError`),
+ * and leaves the file staged, as that path does.
+ * @param {object} modelFile the ModelFile being added
+ * @param {object} handle the manager's rustHandle
+ * @return {number|undefined} the registered file's handle, or undefined if
+ * the file was not registered
+ */
+function validateAndCommitStaged(modelFile: any, handle: any): number | undefined {
+    const stage = stages.get(modelFile);
+    if (!stage || stage.handle !== handle || typeof handle.validateAndCommitStagedModelFile !== 'function') {
+        return undefined;
+    }
+    let id: number | undefined;
+    try {
+        id = handle.validateAndCommitStagedModelFile(stage.id);
+    } catch (e) {
+        throw modelFile._engineValidationError(e);
+    }
+    if (id === undefined) {
+        return undefined;
+    }
+    takeStage(modelFile, handle);
+    committed.set(modelFile, handle);
+    return id;
 }
 
 /**
@@ -2251,13 +2271,14 @@ const lookupFrames: LookupCall[][] = [];
 
 /**
  * Whether `view`'s property lookups may be cached: its model file was built
- * by the ModelFile constructor for a real BaseModelManager.
+ * by the ModelFile constructor (`ModelFile._isConstructed`) for a real
+ * BaseModelManager.
  * @param {object} view the ClassDeclaration view
  * @return {boolean} true if cacheable
  */
 function lookupCacheable(view: any): boolean {
     const modelFile = view?.modelFile;
-    if (!modelFile || typeof modelFile !== 'object' || !constructedFiles.has(modelFile)) {
+    if (!modelFileModule().default._isConstructed(modelFile)) {
         return false;
     }
     const manager = modelFile.modelManager;
@@ -2640,8 +2661,8 @@ export {
     applyStagedFileHeader,
     deferDeclarations,
     commitStaged,
+    validateAndCommitStaged,
     dropStaged,
-    isEngineBuilt,
     validateLoaded,
     beginModelFile,
     endModelFile,

@@ -23,10 +23,11 @@
  * `enforceImportVersioning`; `Declaration.validate` and
  * `isReservedSystemTypeImport`; `validateMetaModel`). Each keeps its TS body
  * only for what the engine cannot take: a model file its manager has not
- * mirrored into the engine (a detached file, or a manager holding a
- * duck-typed model file the ModelFile constructor never built), arguments a
- * binding cannot take, a namespace the engine is never written for, and an
- * input the serializer fast path cannot cross. The frozen unit suite
+ * mirrored into the engine (a detached file), arguments a binding cannot
+ * take, and an input the serializer fast path cannot cross. P5-34 (BC-46)
+ * removed P511-003 and P511-006, which drove a manager holding a duck-typed
+ * model file: a manager now accepts only ModelFiles the ModelFile
+ * constructor built. The frozen unit suite
  * reaches most of those only through sinon stubs, so these checks drive
  * them through the public API. `expect` is the frozen v5.0.0 reference's
  * outcome. Run by fallbacks.spec.js; a check marked `async` returns a
@@ -79,34 +80,6 @@ function manager(core, onlyA) {
  */
 function astOf(core, cto) {
     return JSON.parse(JSON.stringify(new core.ModelManager().addCTOModel(cto, 'scratch.cto', true).getAst()));
-}
-
-/**
- * A duck-typed model file: an object with the ModelFile methods a model
- * manager calls, which the ModelFile constructor never built (so the
- * engine never mirrors it). Records its `validate()` calls.
- * @param {string} namespace its namespace
- * @param {string} [name] its file name
- * @returns {object} the duck
- */
-function duck(namespace, name) {
-    const d = {
-        validated: 0,
-        getNamespace: () => namespace,
-        getVersion: () => '1.0.0',
-        getName: () => name,
-        isModelFile: () => true,
-        validate: () => { d.validated++; },
-        getType: (type) => (type === `${namespace}.Quack` ? 'quack' : null),
-        getModelFiles: () => [],
-        getAst: () => ({ $class: 'concerto.metamodel@1.0.0.Model', namespace, declarations: [] }),
-        getDefinitions: () => undefined,
-        isExternal: () => false,
-        isSystemModelFile: () => false,
-        getAllDeclarations: () => [],
-        getExternalImports: () => ({}),
-    };
-    return d;
 }
 
 /**
@@ -202,38 +175,6 @@ module.exports = [
         expect: { ok: EXPECT_RESOLUTIONS },
     },
     {
-        id: 'P511-003',
-        covers: 'ModelManager.getType, validateModelFiles and _throwAlreadyExists with a duck-typed model file the engine does not mirror (TS bodies)',
-        run: (core) => {
-            const mm = manager(core);
-            const d = duck('org.acme.p511.duck@1.0.0', 'duck.cto');
-            mm.addModelFile(d);
-            const found = {
-                quack: attempt(() => mm.getType('org.acme.p511.duck@1.0.0.Quack')),
-                shape: attempt(() => mm.getType('org.acme.p511.a@1.0.0.Shape')),
-                nowhere: attempt(() => mm.getType('org.acme.p511.nowhere@1.0.0.X')),
-                none: attempt(() => mm.getType('org.acme.p511.duck@1.0.0.None')),
-            };
-            mm.validateModelFiles();
-            const again = attempt(() => mm.addModelFile(duck('org.acme.p511.duck@1.0.0', 'again.cto')));
-            const unnamed = attempt(() => mm.addModelFile(duck('org.acme.p511.a@1.0.0')));
-            return { found, validated: d.validated, again, unnamed };
-        },
-        expect: {
-            ok: {
-                found: {
-                    quack: 'quack',
-                    shape: { declaration: 'org.acme.p511.a@1.0.0.Shape' },
-                    nowhere: 'TypeNotFoundException: Namespace is not defined for type "org.acme.p511.nowhere@1.0.0.X".',
-                    none: 'TypeNotFoundException: Type "None" is not defined in namespace "org.acme.p511.duck@1.0.0".',
-                },
-                validated: 2,
-                again: 'Error: Namespace org.acme.p511.duck@1.0.0 specified in file again.cto is already declared in file duck.cto',
-                unnamed: 'Error: Namespace org.acme.p511.a@1.0.0 is already declared in file a.cto',
-            },
-        },
-    },
-    {
         id: 'P511-004',
         covers: 'ModelManager.getType, validateModelFiles and _throwAlreadyExists of an engine-mirrored manager (Rust)',
         run: (core) => {
@@ -298,49 +239,6 @@ module.exports = [
                     ext: { declaration: 'org.acme.p511.ext@1.0.0.Ext' },
                 },
                 external: true,
-            },
-        },
-    },
-    {
-        id: 'P511-006',
-        async: true,
-        covers: 'updateExternalModels with a duck-typed model file the engine does not mirror (TS body): a file the constructor rejects, a failed validation undone (an update and an add), then an add and an update',
-        run: async (core) => {
-            const mm = manager(core);
-            const d = duck('org.acme.p511.duck@1.0.0', 'duck.cto');
-            mm.addModelFile(d);
-            const ext = { ast: astOf(core, EXT_CTO), definitions: EXT_CTO, fileName: '@example.com/ext.cto' };
-            const a2 = { ast: astOf(core, A2_CTO), definitions: A2_CTO, fileName: '@example.com/a.cto' };
-            const bad = { ast: astOf(core, EXT_BAD_CTO), definitions: EXT_BAD_CTO, fileName: '@example.com/bad.cto' };
-            const noNamespace = { ast: { $class: 'concerto.metamodel@1.0.0.Model', declarations: [] }, fileName: '@example.com/none.cto' };
-            const rejected = await update(mm, [ext, noNamespace]);
-            const invalid = await update(mm, [a2, bad]);
-            const afterInvalid = attempt(() => mm.getType('org.acme.p511.a@1.0.0.Added'));
-            const applied = await update(mm, [ext, a2]);
-            const reapplied = await update(mm, [ext]);
-            return { rejected, invalid, afterInvalid, applied, reapplied, validated: d.validated, added: attempt(() => mm.getType('org.acme.p511.a@1.0.0.Added')) };
-        },
-        expect: {
-            ok: {
-                rejected: {
-                    result: 'Error: Namespace is null or undefined.',
-                    namespaces: ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p511.a@1.0.0', 'org.acme.p511.b@1.0.0', 'org.acme.p511.duck@1.0.0'],
-                },
-                invalid: {
-                    result: 'IllegalModelException: Could not find super type Nowhere File \'@example.com/bad.cto\': ',
-                    namespaces: ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p511.a@1.0.0', 'org.acme.p511.b@1.0.0', 'org.acme.p511.duck@1.0.0'],
-                },
-                afterInvalid: 'TypeNotFoundException: Type "Added" is not defined in namespace "org.acme.p511.a@1.0.0".',
-                applied: {
-                    result: ['org.acme.p511.ext@1.0.0', 'org.acme.p511.a@1.0.0'],
-                    namespaces: ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p511.a@1.0.0', 'org.acme.p511.b@1.0.0', 'org.acme.p511.duck@1.0.0', 'org.acme.p511.ext@1.0.0'],
-                },
-                reapplied: {
-                    result: ['org.acme.p511.ext@1.0.0'],
-                    namespaces: ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p511.a@1.0.0', 'org.acme.p511.b@1.0.0', 'org.acme.p511.duck@1.0.0', 'org.acme.p511.ext@1.0.0'],
-                },
-                validated: 4,
-                added: { declaration: 'org.acme.p511.a@1.0.0.Added' },
             },
         },
     },
