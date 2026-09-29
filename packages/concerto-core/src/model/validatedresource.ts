@@ -20,6 +20,26 @@ import Resource from './resource';
 import type ResourceValidator from '../serializer/resourcevalidator';
 /* eslint-enable no-unused-vars */
 
+// P5-12c (accordproject/concerto-rust#293): `validate`, `setPropertyValue`
+// and `addArrayValue` validate in one Rust engine call each
+// (src/engine/validate-resource.ts). The `ResourceValidator` visitor below
+// runs only when the engine cannot take the value
+// (`EngineFastPathUnsupported`), or, in `setPropertyValue`, for a string,
+// number or boolean on a plain primitive field with no validator, where the
+// visitor is the cheaper path (validate-resource.ts, `visitorIsCheaper`). See serializer.ts's identical preamble for
+// why `loadEngine` takes a non-literal specifier.
+import { createRequire } from 'module';
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+// Memoised per specifier (P5-06), as in serializer.ts.
+/* istanbul ignore next */
+const engineModules: { [specifier: string]: any } = {};
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    engineModules[specifier] ??
+    (engineModules[specifier] =
+        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
+
 /**
  * ValidatedResource is a Resource that can validate that property
  * changes (or the whole instance) do not violate the structure of
@@ -72,11 +92,14 @@ class ValidatedResource extends Resource {
         //     this.log( 'Validating field ' + field + ' with data ' + value );
         // }
 
-        const parameters:any = {};
-        parameters.stack = new TypedStack(value);
-        parameters.modelManager = this.getModelManager();
-        parameters.rootResourceIdentifier = this.getFullyQualifiedIdentifier();
-        field.accept(this.$validator, parameters);
+        const rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        if (!loadEngine('../engine/validate-resource').validateProperty(this, propName, value, rootResourceIdentifier, field)) {
+            const parameters:any = {};
+            parameters.stack = new TypedStack(value);
+            parameters.modelManager = this.getModelManager();
+            parameters.rootResourceIdentifier = rootResourceIdentifier;
+            field.accept(this.$validator, parameters);
+        }
         super.setPropertyValue(propName,value);
     }
 
@@ -107,12 +130,15 @@ class ValidatedResource extends Resource {
             newArray = this[propName].slice(0);
         }
         newArray.push(value);
-        const parameters = {
-            stack: new TypedStack(newArray),
-            modelManager: this.getModelManager(),
-            rootResourceIdentifier: this.getFullyQualifiedIdentifier(),
-        };
-        field.accept(this.$validator, parameters);
+        const rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        if (!loadEngine('../engine/validate-resource').validateProperty(this, propName, newArray, rootResourceIdentifier)) {
+            const parameters = {
+                stack: new TypedStack(newArray),
+                modelManager: this.getModelManager(),
+                rootResourceIdentifier,
+            };
+            field.accept(this.$validator, parameters);
+        }
         super.addArrayValue(propName, value);
     }
 
@@ -123,10 +149,14 @@ class ValidatedResource extends Resource {
      */
     validate() {
         const classDeclaration = this.getClassDeclaration();
+        const rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        if (loadEngine('../engine/validate-resource').validateResource(this, rootResourceIdentifier)) {
+            return;
+        }
         const parameters:any = {};
         parameters.stack = new TypedStack(this);
         parameters.modelManager = this.getModelManager();
-        parameters.rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        parameters.rootResourceIdentifier = rootResourceIdentifier;
         classDeclaration.accept(this.$validator, parameters);
     }
 }
