@@ -855,7 +855,31 @@ const stageFinalizer: { register(target: object, held: Stage, token: object): vo
  * the verdict, not another load: `new ModelManager()` builds the metamodel's
  * ModelFile from the same constant AST every time.
  */
-const acceptedUnmirrored = new WeakMap<object, string>();
+const acceptedUnmirrored = new WeakMap<object, { key: string; header: StagedHeader | null }>();
+
+/**
+ * P5-28 (accordproject/concerto-rust#333): the header of a ModelFile's AST
+ * as `stageModelFileWithHeader` read it when staging, which is what
+ * `modelFileFromAstHeader` would set on the ModelFile (concerto-wasm
+ * `staged_header_from_parts`): the namespace, its version (or null),
+ * whether the file is a system model file, and the `importShortNames.set`
+ * and `importUriMap` assignments in order.
+ */
+interface StagedHeader {
+    namespace: string;
+    version: string | null;
+    system: boolean;
+    shortNames: Array<[string, string]>;
+    uriMap: Array<[string, string]>;
+}
+
+/**
+ * P5-28: the staged header of each lazily built ModelFile, from
+ * `stageModelFile` until its constructor applies it (`applyStagedFileHeader`).
+ * Never set for a ModelFile that took a P5-27 prestage (`takePrestaged`),
+ * whose header is in `stagedHeaders`.
+ */
+const stagedFileHeaders = new WeakMap<object, StagedHeader>();
 
 /**
  * P5-10b: the lazily built ModelFiles. Their manager had no decorator
@@ -924,26 +948,47 @@ function stageModelFile(modelFile: any): boolean {
         // construction: once Rust has accepted the AST, those validators
         // are built now (`probeCustomRegExp`), and only they.
         const customRegExp = !!manager.options?.regExp;
-        if (key !== null && acceptedUnmirrored.get(ast) === key) {
+        const accepted = key !== null ? acceptedUnmirrored.get(ast) : undefined;
+        if (accepted !== undefined && accepted.key === key) {
             if (customRegExp && !probeCustomRegExp(modelFile, ast)) {
                 return false;
+            }
+            if (accepted.header !== null) {
+                stagedFileHeaders.set(modelFile, accepted.header);
             }
             lazyFiles.add(modelFile);
             return true;
         }
-        const id: number = handle.stageModelFile(text, definitions, fileName);
+        // P5-28 (accordproject/concerto-rust#333): staged and its header
+        // read in one call, from one decode of the text, so the
+        // constructor's `_fromAstHeader` does not cross again
+        // (`applyStagedFileHeader`). An engine without that binding stages as
+        // before.
+        let id: number;
+        let header: StagedHeader | null = null;
+        if (typeof handle.stageModelFileWithHeader === 'function') {
+            const staged = JSON.parse(handle.stageModelFileWithHeader(text, definitions, fileName));
+            id = staged.id;
+            header = staged.header;
+        } else {
+            id = handle.stageModelFile(text, definitions, fileName);
+        }
         if (customRegExp && !probeCustomRegExp(modelFile, ast)) {
             handle.dropStagedModelFile(id);
             return false;
         }
         if (key !== null) {
-            // Never committed: keep the verdict, not the loaded file.
+            // Never committed: keep the verdict (and the header), not the
+            // loaded file.
             handle.dropStagedModelFile(id);
-            acceptedUnmirrored.set(ast, key);
+            acceptedUnmirrored.set(ast, { key, header });
         } else {
             const stage = { handle, id };
             stages.set(modelFile, stage);
             stageFinalizer?.register(modelFile, stage, stage);
+        }
+        if (header !== null) {
+            stagedFileHeaders.set(modelFile, header);
         }
         lazyFiles.add(modelFile);
         return true;
@@ -952,6 +997,86 @@ function stageModelFile(modelFile: any): boolean {
     }
 }
 
+
+/**
+ * P5-28 (accordproject/concerto-rust#333): `ModelFile._fromAstHeader(ast)`
+ * from the header `stageModelFile` read when it staged the file, without an
+ * engine call: sets `namespace`, `version` and `imports` (a copy of
+ * `ast.imports`, keeping its own import objects, plus the implicit import
+ * of the system types for a non-system file) and fills `importShortNames`
+ * and `importUriMap`, as `modelFileFromAstHeader` would. Returns false, having
+ * changed nothing, when there is no staged header for `modelFile` or `ast`
+ * is not the AST it was read from in the shape it was read (its namespace
+ * not that string, its imports neither nullish nor an array of as many
+ * imports); the caller then calls `modelFileFromAstHeader`, as before.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {object} ast the AST its header is read from
+ * @return {boolean} true if the header was set
+ */
+function applyStagedFileHeader(modelFile: any, ast: any): boolean {
+    const header = stagedFileHeaders.get(modelFile);
+    if (header === undefined) {
+        return false;
+    }
+    stagedFileHeaders.delete(modelFile);
+    if (ast !== modelFile.ast || ast.namespace !== header.namespace) {
+        return false;
+    }
+    const astImports = ast.imports;
+    if (astImports !== undefined && astImports !== null && !Array.isArray(astImports)) {
+        return false;
+    }
+    modelFile.namespace = ast.namespace;
+    modelFile.version = header.version;
+    const imports = astImports ? astImports.concat([]) : [];
+    if (!header.system) {
+        imports.push({
+            $class: 'concerto.metamodel@1.0.0.ImportTypes',
+            namespace: 'concerto@1.0.0',
+            types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event'],
+        });
+    }
+    modelFile.imports = imports;
+    const shortNames = modelFile.importShortNames;
+    for (const [key, fqn] of header.shortNames) {
+        shortNames.set(key, fqn);
+    }
+    const uriMap = modelFile.importUriMap;
+    for (const [key, uri] of header.uriMap) {
+        uriMap[key] = uri;
+    }
+    if (lazyViewsCheck) {
+        checkStagedFileHeader(modelFile, ast);
+    }
+    return true;
+}
+
+/**
+ * CONCERTO_LAZY_VIEWS_CHECK=1 (P5-28): runs `modelFileFromAstHeader` over
+ * the JS values, on a scratch object inheriting from `modelFile`, and
+ * reports on stderr any field `applyStagedFileHeader` set differently, or an
+ * error it threw.
+ * @param {object} modelFile the ModelFile `applyStagedFileHeader` just set
+ * @param {object} ast its AST
+ */
+function checkStagedFileHeader(modelFile: any, ast: any): void {
+    const scratch = Object.create(modelFile);
+    scratch.importShortNames = new Map();
+    scratch.importUriMap = {};
+    try {
+        rust!.modelFileFromAstHeader(scratch, ast);
+    } catch (e: any) {
+        process.stderr.write(`LAZY-CHECK header under-rejection: ${modelFile.namespace} ${e?.name}: ${e?.message}\n`);
+        return;
+    }
+    const fields = (view: any) => JSON.stringify([
+        view.namespace, view.version === undefined ? '<undefined>' : view.version, view.imports,
+        [...view.importShortNames], Object.entries(view.importUriMap),
+    ]);
+    if (fields(scratch) !== fields(modelFile)) {
+        process.stderr.write(`LAZY-CHECK header-mismatch: ${modelFile.namespace}\n`);
+    }
+}
 
 /**
  * P5-10b: the StringValidators built by `probeCustomRegExp` when a lazily
@@ -2512,6 +2637,7 @@ export {
     mapValueTypeProcess,
     stageModelFile,
     applyStagedHeader,
+    applyStagedFileHeader,
     deferDeclarations,
     commitStaged,
     dropStaged,
