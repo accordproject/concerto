@@ -1,3 +1,49 @@
+# P5-32 (T2): field-backed ModelFile getters, crossings before and after (2026-09-29)
+
+Task P5-32 (accordproject/concerto-rust#342, T2 of the P5-26 report on
+#330) makes `ModelFile.getVersion`, `isSystemModelFile`, `getImports` and
+`getExternalImports` read the fields Rust wrote at construction
+(`modelFileFromAstHeader`, or the P5-27/P5-28 staged header) instead of
+calling the engine. A registered file keeps the engine route's exact
+answers. `getImports` answers from the names a staged header recorded (its
+`importShortNames` fqns, one per imported name, in order), or else from its
+own first answer; `CONCERTO_LAZY_VIEWS_CHECK=1` checks the recorded names
+against `importFullyQualifiedNames`.
+
+**Counts only, no timings** (the issue asks for crossings, informational):
+TS->WASM boundary crossings per call, counted by
+`results/P5-32/count-getters.cjs` and by `p515-sweep.mjs --mode count`.
+Counts do not depend on machine load.
+
+| | |
+|---|---|
+| Machine | Cloud container (cloud-3), 4 vCPU, Linux 6.18; 1-minute/5-minute load 5.28/3.81 at the start (other workers' jobs); counts are exact |
+| Before | `concerto` `45d295d95` (integration head, P5-34 merged) concerto-core src, built to `dist`; `concerto-rust` `711be83` engine |
+| After | the P5-32 branch on those heads, same engine |
+| Raw data | `results/P5-32/{before,now}-getters.txt`, `results/P5-32/{before,now}-crossings.json` (sweep, `--samples 3 --warmup 1`; both JSONs record the branch commit, since the sweep reads `HEAD`; `coreDist` tells them apart) |
+
+## Getters (`count-getters.cjs`, crossings per call)
+
+| operation | before | after |
+|---|---:|---:|
+| `getVersion` / `isSystemModelFile` / `getExternalImports`, registered file (1st and repeat calls) | 1 (`modelFileGetVersion` / `modelFileIsSystemModelFile` / `modelFileGetExternalImports`) | 0 |
+| `getImports`, registered file (1st and repeat calls) | 1 (`modelFileGetImports`) | 0 |
+| `getImports`, detached file (1st and repeat calls) | 1 per import (`modelUtilImportFullyQualifiedNames`) | 0 |
+| `getVersion` / `isSystemModelFile` / `getExternalImports`, detached file | 0 | 0 |
+
+A file whose header was read by `modelFileFromAstHeader` rather than
+applied from a staged header (the eager path, for instance a manager with
+decorator factories) records its import names on its first `getImports`
+call: that call crosses as before, and later calls do not.
+
+## Through the sweep (crossings per item, before -> after)
+
+| op | concerto-core-test-data | conformance | synthetic-large |
+|---|---:|---:|---:|
+| `dcs_validate` | 87 -> 53 (`modelFileGetVersion` 34 -> 0) | 101 -> 60 (41 -> 0) | 21 -> 20 (1 -> 0) |
+
+Every other op x set is unchanged.
+
 # P5-34 (T4): ModelFile stub support removed from BaseModelManager, crossings before and after (2026-09-29)
 
 Task P5-34 (accordproject/concerto-rust#344, T4 of the P5-26 report on #330)

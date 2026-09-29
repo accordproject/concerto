@@ -1,0 +1,16 @@
+MF.getVersion (registered, 1st call)               1.00  ModelManagerHandle.modelFileGetVersion x1.00
+MF.getVersion (registered, repeat)                 1.00  ModelManagerHandle.modelFileGetVersion x1.00
+MF.isSystemModelFile (registered, 1st call)        1.00  ModelManagerHandle.modelFileIsSystemModelFile x1.00
+MF.isSystemModelFile (registered, repeat)          1.00  ModelManagerHandle.modelFileIsSystemModelFile x1.00
+MF.getImports (registered, 1st call)               1.00  ModelManagerHandle.modelFileGetImports x1.00
+MF.getImports (registered, repeat)                 1.00  ModelManagerHandle.modelFileGetImports x1.00
+MF.getExternalImports (registered, 1st call)       1.00  ModelManagerHandle.modelFileGetExternalImports x1.00
+MF.getExternalImports (registered, repeat)         1.00  ModelManagerHandle.modelFileGetExternalImports x1.00
+MF.getVersion (detached, 1st call)                 0.00  
+MF.getVersion (detached, repeat)                   0.00  
+MF.isSystemModelFile (detached, 1st call)          0.00  
+MF.isSystemModelFile (detached, repeat)            0.00  
+MF.getImports (detached, 1st call)                 1.00  modelUtilImportFullyQualifiedNames x1.00
+MF.getImports (detached, repeat)                   1.00  modelUtilImportFullyQualifiedNames x1.00
+MF.getExternalImports (detached, 1st call)         0.00  
+MF.getExternalImports (detached, repeat)           0.00  
