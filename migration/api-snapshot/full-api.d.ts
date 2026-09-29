@@ -4065,7 +4065,6 @@ export interface RelationshipMapValue {
     getNamespace(): string;
     getFullyQualifiedTypeName(): string;
     isArray(): boolean;
-    isOptional(): boolean;
     toString(): string;
 }
 /**

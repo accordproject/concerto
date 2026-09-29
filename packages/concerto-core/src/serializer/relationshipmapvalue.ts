@@ -33,7 +33,6 @@ export interface RelationshipMapValue {
     getNamespace(): string;
     getFullyQualifiedTypeName(): string;
     isArray(): boolean;
-    isOptional(): boolean;
     toString(): string;
 }
 
@@ -57,10 +56,9 @@ export function getRelationshipMapValue(mapDeclaration: MapDeclaration): Relatio
         typeName ?? (typeName = mapDeclaration.getModelFile().getFullyQualifiedTypeName(value.getType()) as string);
     return {
         getName: () => mapDeclaration.getName(),
-        getNamespace: () => mapDeclaration.getNamespace(),
+        getNamespace: mapDeclaration.getNamespace.bind(mapDeclaration),
         getFullyQualifiedTypeName,
         isArray: () => false,
-        isOptional: () => false,
         toString: () => `RelationshipMapValueType {map=${mapDeclaration.getFullyQualifiedName()}, type=${getFullyQualifiedTypeName()}}`,
     };
 }
