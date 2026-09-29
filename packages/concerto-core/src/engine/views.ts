@@ -1949,7 +1949,169 @@ function classDeclarationGetProperty(view: any, name: any): any {
     return rust!.classDeclarationGetProperty(view, name);
 }
 
+// ---------------------------------------------------------------------------
+// Identifier field names (P5-19, accordproject/concerto-rust#317): the
+// answer of `ClassDeclaration.getIdentifierFieldName()` is kept per view,
+// keyed on the model epoch P5-14 introduced (`propertyGeneration`), so the
+// repeated calls Factory, Serializer and ResourceValidator make
+// (`isIdentified()`, `isSystemIdentified()`, `getIdentifierFieldName()`) do
+// not cross into the engine again.
+//
+// A miss runs the `classDeclarationGetIdentifierFieldNameWalk` binding,
+// which walks the super types in one call and returns every declaration it
+// read, and whether every step ran the unmodified TS method (see the
+// binding's doc comment in concerto-wasm). Its answer is kept only when it
+// did, for views of model files built for a real BaseModelManager (as P5-14's
+// property lookups), and is reused only while:
+// - no model file was added, updated or deleted since (`propertyGeneration`,
+//   bumped by `invalidatePropertyLookups`), and each manager on the way still
+//   holds the same `modelFiles` map;
+// - every declaration in the chain still has the `idField`, `superType`,
+//   `superTypeDeclaration` and `modelFile` it had, its model file the same
+//   manager, and none of the methods the TS body reaches on the way
+//   (`getIdentifierFieldName`, `getSuperType`, `getSuperTypeDeclaration`,
+//   `_resolveSuperType`, `getModelFile`, the super type's
+//   `getFullyQualifiedName` and `fqn`, `getLocalType`, `getModelManager`
+//   and `getType`) was replaced, on the object or its prototype.
+// Anything else calls the binding every time. A call that throws keeps
+// nothing.
+// ---------------------------------------------------------------------------
+
+/** One declaration of a cached identifier walk, as it was read. */
+interface IdentifierLevel {
+    view: any;
+    idField: any;
+    superType: any;
+    superTypeDeclaration: any;
+    modelFile: any;
+    manager: any;
+    modelFiles: any;
+    /** `identifierMethods(view)` then. */
+    methods: any[];
+}
+
+/** One ClassDeclaration view's cached `getIdentifierFieldName()` answer. */
+interface IdentifierEntry {
+    /** `propertyGeneration` when it was built. */
+    generation: number;
+    /** The declarations the walk read, the view first. */
+    levels: IdentifierLevel[];
+    value: any;
+}
+
+const identifierEntries = new WeakMap<object, IdentifierEntry>();
+
+/**
+ * The methods (and the super type's `fqn`) the TS body of
+ * `getIdentifierFieldName` reaches from `view`, in a fixed order.
+ * @param {object} view the ClassDeclaration view
+ * @return {any[]} the values
+ */
+function identifierMethods(view: any): any[] {
+    const modelFile = view.modelFile;
+    const manager = modelFile?.modelManager;
+    const superTypeDeclaration = view.superTypeDeclaration;
+    return [
+        view.getIdentifierFieldName,
+        view.getSuperType,
+        view.getSuperTypeDeclaration,
+        view._resolveSuperType,
+        view.getModelFile,
+        modelFile?.getLocalType,
+        modelFile?.getModelManager,
+        manager?.getType,
+        superTypeDeclaration?.getFullyQualifiedName,
+        superTypeDeclaration?.fqn,
+    ];
+}
+
+/**
+ * `view` as the walk read it, or undefined when it may not be cached.
+ * @param {object} view a declaration of the chain
+ * @return {object|undefined} the level
+ */
+function identifierLevel(view: any): IdentifierLevel | undefined {
+    if (!lookupCacheable(view)) {
+        return undefined;
+    }
+    const manager = view.modelFile.modelManager;
+    return {
+        view,
+        idField: view.idField,
+        superType: view.superType,
+        superTypeDeclaration: view.superTypeDeclaration,
+        modelFile: view.modelFile,
+        manager,
+        modelFiles: manager.modelFiles,
+        methods: identifierMethods(view),
+    };
+}
+
+/**
+ * Whether `entry` is still its view's answer (see the section comment).
+ * @param {object} entry the cached entry
+ * @return {boolean} true if it may be reused
+ */
+function identifierValid(entry: IdentifierEntry): boolean {
+    if (entry.generation !== propertyGeneration) {
+        return false;
+    }
+    for (const level of entry.levels) {
+        const view = level.view;
+        if (view.idField !== level.idField || view.superType !== level.superType ||
+            view.superTypeDeclaration !== level.superTypeDeclaration || view.modelFile !== level.modelFile ||
+            level.modelFile.modelManager !== level.manager || level.manager.modelFiles !== level.modelFiles) {
+            return false;
+        }
+        const methods = identifierMethods(view);
+        for (let n = 0; n < methods.length; n++) {
+            if (methods[n] !== level.methods[n]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+/**
+ * `ClassDeclaration.getIdentifierFieldName` (P5-19): the cached answer, or
+ * the `classDeclarationGetIdentifierFieldNameWalk` binding's, cached when it
+ * can be. Throws what the binding throws.
+ * @param {object} view the ClassDeclaration view
+ * @param {Function[]} originals the unmodified methods the binding may run
+ * itself (classdeclaration.ts)
+ * @return {string|null} the name of the identifying field, or null
+ */
+function classDeclarationGetIdentifierFieldName(view: any, originals: any[]): any {
+    const cacheable = lookupCacheable(view);
+    if (cacheable) {
+        const entry = identifierEntries.get(view);
+        if (entry !== undefined) {
+            if (identifierValid(entry)) {
+                return entry.value;
+            }
+            identifierEntries.delete(view);
+        }
+    }
+    const generation = propertyGeneration;
+    const result = rust!.classDeclarationGetIdentifierFieldNameWalk(view, originals);
+    const value = result[0];
+    if (cacheable && result[1] === true && generation === propertyGeneration) {
+        const levels: IdentifierLevel[] = [];
+        for (let n = 2; n < result.length; n++) {
+            const level = identifierLevel(result[n]);
+            if (level === undefined) {
+                return value;
+            }
+            levels.push(level);
+        }
+        identifierEntries.set(view, { generation, levels, value });
+    }
+    return value;
+}
+
 export {
+    classDeclarationGetIdentifierFieldName,
     invalidatePropertyLookups,
     classDeclarationGetProperties,
     classDeclarationGetProperty,
