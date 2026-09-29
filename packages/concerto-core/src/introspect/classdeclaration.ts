@@ -361,7 +361,10 @@ class ClassDeclaration extends Declaration {
      * @return {string} the name of the id field for this class or null if it does not exist
      */
     getIdentifierFieldName(): string | null {
-        return rust.classDeclarationGetIdentifierFieldName(this) as string | null;
+        // P5-19: the whole super type walk runs in one engine call, and the
+        // answer is memoised per view until the models change
+        // (engine/views.ts).
+        return loadEngine('../engine/views').classDeclarationGetIdentifierFieldName(this, identifierWalkMethods) as string | null;
     }
 
     /**
@@ -548,6 +551,18 @@ class ClassDeclaration extends Declaration {
         return true;
     }
 }
+
+// P5-19 (accordproject/concerto-rust#317): the unmodified methods
+// `getIdentifierFieldName` reaches, captured once at load. The engine runs
+// one of them itself, instead of calling back, only when the receiver's
+// method is still this one, so a stubbed or overridden method is called.
+const identifierWalkMethods = [
+    ClassDeclaration.prototype.getIdentifierFieldName,
+    ClassDeclaration.prototype.getSuperType,
+    ClassDeclaration.prototype.getSuperTypeDeclaration,
+    ClassDeclaration.prototype.getModelFile,
+    ClassDeclaration.prototype.getFullyQualifiedName,
+];
 
 export { ClassDeclaration };
 export default ClassDeclaration;

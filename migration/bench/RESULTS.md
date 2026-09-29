@@ -1,3 +1,117 @@
+# P5-19 (F3): `getIdentifierFieldName` in one engine call, memoised per model epoch (2026-09-29)
+
+Task P5-19 (accordproject/concerto-rust#317) fixes finding F3 of the
+P5-15 profiling sweep (#309). `ClassDeclaration.getIdentifierFieldName()`
+crossed into the engine once per class in the super type chain, and each
+of those calls crossed back into JS for `getSuperType()`,
+`getSuperTypeDeclaration()`, `getFullyQualifiedName()` and
+`getModelFile()`. `Factory.newResource` calls it three times per resource
+(`isIdentified()`, `isSystemIdentified()`, `getIdentifierFieldName()`), so
+it was most of `newResource`'s cost.
+
+**Result: `Factory.newResource` goes from 11.1× to 3.6× TS 5.0.0 on the
+conformance set (36.6 µs to 11.8 µs, 3.10× faster), and is at or below
+3.6× TS on every set.** That meets the "about 4×" estimate. `fromJSON` and
+`toJSON` do not call it on their hot path (one crossing per item before and
+after), and are unchanged within noise.
+
+## What changed
+
+In `concerto-rust` (`concerto-wasm/src/lib.rs`, additive):
+
+- **A new binding, `classDeclarationGetIdentifierFieldNameWalk`.** It is
+  the TS method, super type walk included, in one call. It takes the
+  unmodified `ClassDeclaration.prototype` methods the TS body reaches
+  (`getIdentifierFieldName`, `getSuperType`, `getSuperTypeDeclaration`,
+  `getModelFile`, `getFullyQualifiedName`), captured when
+  classdeclaration.ts loads. It runs a call itself (field reads) only when
+  the receiver's method is still that original, so a stubbed or overridden
+  method is still called. `_resolveSuperType`, `getLocalType`,
+  `getModelManager` and `getType` are still called as TS calls them, so
+  every error comes from the same collaborator as before. A cycle in the
+  chain is not inlined, and recurses as TS does. It returns
+  `[answer, cacheable, ...chain]`: every declaration it read, and whether
+  every step was inlined. `classDeclarationGetIdentifierFieldName` is
+  unchanged.
+
+In `concerto` (`packages/concerto-core/src/engine/views.ts`,
+`introspect/classdeclaration.ts`):
+
+- `getIdentifierFieldName()` goes through
+  `views.classDeclarationGetIdentifierFieldName`, which keeps the binding's
+  answer per view in a WeakMap, keyed on the model epoch P5-14 introduced
+  (`propertyGeneration`, bumped whenever a model file is added, updated or
+  deleted). An answer is kept only when the binding says every step was
+  inlined, and only for views of model files built for a real
+  `BaseModelManager` (as P5-14's property lookups). It is reused only while
+  every declaration in the chain still has the same `idField`,
+  `superType`, `superTypeDeclaration` and `modelFile`, its manager still
+  holds the same `modelFiles` map, and none of the methods the TS body
+  reaches on the way was replaced. Anything else calls the binding again.
+  A call that throws keeps nothing.
+
+Results and errors are unchanged. The oracle replays 16,242 fixtures with
+0 regressions, and the API snapshot is unchanged.
+
+## Before and after, through the TS public API
+
+| | |
+|---|---|
+| Machine | Intel(R) Xeon(R) Processor @ 2.10GHz, 4 logical CPUs, 15 GB, Linux x64 (a cloud container) |
+| Toolchain | Node v22.22.2, wasm-bindgen 0.2.128, wasm-opt from `concerto-wasm/build.sh`. The P5-19 engine is 2,965,353 bytes (before: 2,962,743), within the 4 MiB budget. |
+| Quiet-check | Before every run, the driver waited until the 1-minute load average was below 1 and no cargo, rustc, mocha, nyc, wasm-opt or fuzz process was running. All 11 runs met it; the 1-minute load was 0.93 to 0.95 at each start. |
+| Before | The integration head after P5-16: `concerto` `49df04c05` with `concerto-rust` `c140846` (its dist and engine built separately and loaded with `--core-dist` and `CONCERTO_ENGINE_MODULE`) |
+| After | `concerto` `b1c4f536b` with `concerto-rust` `51fea38` (the P5-19 branches, merged with that head) |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, run with `--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist` |
+| Driver | P5-15's sweep (`p515-sweep.mjs` from `ad82d6b1c`, with its fixtures), ops `new_resource,from_json,to_json`, 5 warm-up and 30 samples. The crate bench is not relevant: the change is in the binding and the TS shim only. |
+| Runs | `results/P5-19-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`: three interleaved rounds (TS reference, before, after). `results/P5-19-count-{before,after}-rust-engine.json`: one crossing count each (`--mode count`). The `commit` field in each file is the checkout the driver ran from; the table above says what each side measured. |
+
+Medians of the three runs' medians, in µs per item:
+
+| op | set | TS 5.0.0 | before | after | speed-up | before ×TS | after ×TS |
+|---|---|---:|---:|---:|---:|---:|---:|
+| new_resource | concerto-core-test-data | 6.62 | 45.87 | 19.86 | 2.31× | 6.93× | 3.00× |
+| new_resource | conformance | 3.30 | 36.60 | 11.79 | 3.10× | 11.09× | 3.57× |
+| new_resource | synthetic-large | 2.56 | 9.31 | 5.92 | 1.57× | 3.63× | 2.31× |
+| from_json | concerto-core-test-data | 45.30 | 56.40 | 56.24 | 1.00× | 1.25× | 1.24× |
+| from_json | conformance | 13.17 | 11.44 | 12.46 | 0.92× | 0.87× | 0.95× |
+| from_json | synthetic-large | 11.59 | 20.46 | 20.46 | 1.00× | 1.77× | 1.77× |
+| to_json | concerto-core-test-data | 25.86 | 66.53 | 62.30 | 1.07× | 2.57× | 2.41× |
+| to_json | conformance | 5.80 | 20.05 | 16.88 | 1.19× | 3.46× | 2.91× |
+| to_json | synthetic-large | 7.01 | 31.65 | 29.47 | 1.07× | 4.51× | 4.20× |
+
+The per-run medians were, for `new_resource`, before 48.99 / 44.72 / 45.87,
+42.64 / 36.60 / 33.25 and 11.03 / 9.31 / 9.03, and after 20.11 / 19.86 /
+19.59, 11.46 / 11.84 / 11.79 and 6.05 / 5.87 / 5.92 (test-data,
+conformance, synthetic-large). `from_json` on concerto-core-test-data had
+one slow run on each side (81.08 before, 74.98 after); the `from_json` and
+`to_json` differences are within this machine's run-to-run noise.
+
+Crossings per `newResource` (count mode): 10.55 to 7.55 on conformance,
+14.41 to 11.41 on concerto-core-test-data and 10.00 to 7.00 on
+synthetic-large. The three `classDeclarationGetIdentifierFieldName` calls
+per resource (about 59 µs per item in count mode, with the counter's
+overhead) are gone: after warm-up every call is a memo hit. The largest
+remaining crossings are `classDeclarationIsKind` (2 per resource) and the
+manager's type-name lookups.
+
+## Correctness during the run
+
+- `cargo test --workspace` with `CONCERTO_ORACLE_FIXTURES` set: all 18 test
+  binaries pass; the oracle replays 16,242 fixtures (14,132 pass, 2,110
+  stays-ts unsupported, 0 fail, 0 harness errors, 0 regressions).
+  `cargo fmt --check` and `cargo clippy --workspace --all-targets -D
+  warnings` are clean.
+- concerto-wasm: `cargo fmt --check`, wasm32 `clippy -D warnings`,
+  `cargo check`, `build.sh` and `npm run smoke:node` pass.
+- concerto-core suite with nyc: 1,636 passing, 345 pending, 1 failing:
+  `ModelLoader #loadModelFromUrl`, which fetches
+  `models.accordproject.org` and got HTTP 403 from the container's egress
+  proxy (a direct `curl` to that host gets the same 403; the test does not
+  touch this change). Coverage 99.4%
+  statements, 96.75% branches, 99.62% functions, 99.43% lines, above the
+  thresholds. Guardrails OK against the integration head.
+
 # P5-18 (F2): validate detached model files without deep-cloning the manager (2026-09-29)
 
 Task P5-18 F2 (accordproject/concerto-rust#316) fixes finding F2 of the
