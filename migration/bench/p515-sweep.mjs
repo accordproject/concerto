@@ -63,6 +63,19 @@ const core = require(path.join(args.coreDist, 'index.js'));
 const { ModelManager, ModelFile, Factory, Serializer, DecoratorManager } = core;
 const coreVersion = require(path.join(args.coreDist, '..', 'package.json')).version;
 
+// P5-29 (accordproject/concerto-rust#334): the `*_first` ops time a read
+// just after a model change. They move the model epoch
+// (`engine/views` `invalidatePropertyLookups`, which every model change
+// through a ModelManager calls) before each pass, so every read in the pass
+// misses the getNamespaces/getType/resolveType memo, without timing a model
+// load. The views built by the first pass are kept, as after a real change
+// elsewhere. A dist without the module (TS 5.0.0) keeps nothing between
+// reads, so the step is a no-op there.
+const viewsPath = path.join(args.coreDist, 'engine', 'views.js');
+const bumpModelEpoch = fs.existsSync(viewsPath) && typeof require(viewsPath).invalidatePropertyLookups === 'function'
+    ? require(viewsPath).invalidatePropertyLookups
+    : () => {};
+
 function loadSet(set) {
     return JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'p515', `${set}.json`), 'utf8'));
 }
@@ -307,6 +320,37 @@ const OPS = {
         setup: (d) => ({ mm: managerOf(d.models) }),
         n: () => 1,
         run: (c) => c.mm.getNamespaces(),
+    },
+    get_type_first: {
+        family: 'introspect',
+        setup: (d) => ({ mm: managerOf(d.models), items: d.pairs.map((p) => p[0]) }),
+        n: (c) => c.items.length,
+        run: (c) => {
+            bumpModelEpoch();
+            for (const fqn of c.items) {
+                c.mm.getType(fqn);
+            }
+        },
+    },
+    resolve_type_first: {
+        family: 'introspect',
+        setup: (d) => ({ mm: managerOf(d.models), items: d.pairs.map((p) => p[0]) }),
+        n: (c) => c.items.length,
+        run: (c) => {
+            bumpModelEpoch();
+            for (const fqn of c.items) {
+                c.mm.resolveType('p515', fqn);
+            }
+        },
+    },
+    get_namespaces_first: {
+        family: 'introspect',
+        setup: (d) => ({ mm: managerOf(d.models) }),
+        n: () => 1,
+        run: (c) => {
+            bumpModelEpoch();
+            return c.mm.getNamespaces();
+        },
     },
     derives_from: {
         family: 'introspect',

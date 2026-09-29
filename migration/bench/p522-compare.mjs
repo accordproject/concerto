@@ -30,6 +30,7 @@ const FAMILY = {
     from_json: 'serializer', to_json: 'serializer', new_resource: 'serializer',
     dcs_decorate: 'decorator', dcs_validate: 'decorator', extract_decorators: 'decorator', extract_vocabularies: 'decorator',
     get_type: 'introspect', resolve_type: 'introspect', get_decorators: 'introspect', get_namespaces: 'introspect',
+    get_type_first: 'introspect', resolve_type_first: 'introspect', get_namespaces_first: 'introspect',
     derives_from: 'introspect', is_assignable_to: 'introspect',
     validate: 'instance', set_property_value: 'instance', add_array_value: 'instance',
 };
