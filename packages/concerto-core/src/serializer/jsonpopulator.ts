@@ -467,7 +467,9 @@ class JSONPopulator {
         case 'Long': {
             const num = json;
             if (typeof num === 'number') {
-                if (Math.trunc(num) !== num) {
+                // P5-51 (BC-10, R1; DV-012): `Math.trunc(n) !== n` alone
+                // passes `±Infinity`; a non-finite number is not an integer.
+                if (!Number.isFinite(num) || Math.trunc(num) !== num) {
                     throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
                 } else {
                     result = num;

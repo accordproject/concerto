@@ -574,7 +574,15 @@ module.exports = [
         id: 'SF-CO-013',
         covers: 'convertToObject: non-finite numbers through the per-field engine call',
         run: roundTrip({ i: Infinity, l: -Infinity, d: NaN }),
+        // P5-51 (BC-10, R1; DV-012): the populator rejects a non-finite
+        // Integer or Long even with validation off; v5.0.0 let it through.
         expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Expected value at path `$.i` to be of type `Integer`'
+            }
+        },
+        reference: {
             ok: {
                 '$class': 'org.acme.lifted.p502b.serializer@1.0.0.C',
                 s: '\ud800',
@@ -694,6 +702,34 @@ module.exports = [
                 message: 'Expected value at path `$.t` to be of type `DateTime`'
             }
         },
+    },
+    // P5-51 (accordproject/concerto-rust#372): BC-10 (R1; DV-012) on the TS
+    // switch. `expect` is the workspace outcome and `reference` what v5.0.0
+    // gives (fallbacks.spec.js).
+    {
+        id: 'SF-CO-024',
+        covers: 'convertToObject TS switch, Integer: Infinity is rejected (boxed utcOffset; BC-10)',
+        run: populate({ i: Infinity }, 'i', { utcOffset: new Number(0) }),
+        expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Expected value at path `$.i` to be of type `Integer`'
+            }
+        },
+        // `plain` (fallbacks.spec.js) writes a non-finite number as null.
+        reference: { ok: null },
+    },
+    {
+        id: 'SF-CO-025',
+        covers: 'convertToObject TS switch, Long: -Infinity is rejected (boxed utcOffset; BC-10)',
+        run: populate({ l: -Infinity }, 'l', { utcOffset: new Number(0) }),
+        expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Expected value at path `$.l` to be of type `Long`'
+            }
+        },
+        reference: { ok: null },
     },
     // ---- JSONGenerator ---------------------------------------------------
     {
