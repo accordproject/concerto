@@ -2085,6 +2085,7 @@ declare class ModelFile extends Decorated {
      * @param {object} ast - The abstract syntax tree of the model as a JSON object.
      * @param {string} [definitions] - The optional CTO model as a string.
      * @param {string} [fileName] - The optional filename for this modelfile
+     * @throws {TypeError} if modelManager is not a BaseModelManager (BC-47)
      * @throws {IllegalModelException}
      */
     constructor(modelManager: BaseModelManager, ast: AstNode, definitions?: string | null, fileName?: string | null);
