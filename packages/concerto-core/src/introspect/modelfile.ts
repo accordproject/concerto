@@ -984,7 +984,15 @@ class ModelFile extends Decorated {
         // `this.importUriMap` from each import, which must be versioned
         // (enforceImportVersioning), not a wildcard import, and not alias a
         // primitive type. Each error keeps TS's class.
-        rust.modelFileFromAstHeader(this, ast);
+        //
+        // P5-28 (accordproject/concerto-rust#333): a lazily built file's
+        // header was already read by the engine call that staged it
+        // (engine/views.ts `applyStagedHeader`), so that call's result is
+        // applied without crossing again; otherwise the engine reads it now.
+        const views = loadEngine('../engine/views');
+        if (!views.applyStagedHeader(this, ast)) {
+            rust.modelFileFromAstHeader(this, ast);
+        }
     }
 
     /**
