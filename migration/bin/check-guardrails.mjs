@@ -8,7 +8,9 @@
  *      hunks that relax an exact-message assertion to a class check and are
  *      listed in migration/guardrails/test-message-relaxations.tsv (P5-09,
  *      maintainer decision 2026-09-27 on accordproject/concerto-rust#253;
- *      see migration/guardrails/relaxations.mjs for the accepted shapes);
+ *      see migration/guardrails/relaxations.mjs for the accepted shapes),
+ *      or are approved rewrites pinned in that file under a maintainer
+ *      decision named in APPROVED_REWRITE_DECISIONS (P5-24, #328);
  *   2. the `nyc` block in packages/concerto-core/package.json changed;
  *   3. the export list of packages/concerto-core/src/index.ts changed;
  *   4. the generated API snapshot (migration/api-snapshot/) differs from
@@ -81,7 +83,7 @@ const ALLOW_LIST = path.join(MIGRATION_ROOT, 'guardrails', 'test-message-relaxat
 const testViolations = checkTestTree({ repoRoot: REPO_ROOT, baseRef: BASE_REF, testPrefix, allowListPath: ALLOW_LIST });
 if (testViolations.length > 0) {
     failures.push([
-        `${testViolations.length} disallowed change(s) under ${testPrefix} relative to ${BASE_REF} (only allow-listed message-to-class assertion relaxations may change):`,
+        `${testViolations.length} disallowed change(s) under ${testPrefix} relative to ${BASE_REF} (only allow-listed message-to-class assertion relaxations and approved rewrites may change):`,
         ...testViolations.map((v) => `    ${v}`),
     ].join('\n'));
 }

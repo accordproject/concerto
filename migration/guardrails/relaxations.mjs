@@ -23,6 +23,22 @@
  *                                        -> e.should.be.(an.)instanceOf(C)
  *   C. expect(e.message).to.<...>(<msg>) -> expect(e).to.be.(an.)instanceOf(C)
  *
+ * P5-24 (accordproject/concerto-rust#328, maintainer decision 1 of
+ * 2026-09-29): a second, narrower kind of row, the APPROVED REWRITE. It
+ * covers tests whose asserted behaviour an approved breaking change removes
+ * (for #328: lenient DateTime parsing, which R1 rejects), rewritten to assert
+ * the rejection and its exception class. A rewrite row is recognised by its
+ * reason, which must start with `approved rewrite <decision>:` where
+ * <decision> is listed in APPROVED_REWRITE_DECISIONS below (adding one is a
+ * reviewed code change). It is pinned, not shaped: it matches only a hunk (or
+ * one line of a one-for-one hunk) whose removed and added text equal its
+ * old/new columns exactly (whitespace collapsed); old may be `(none)` for a
+ * pure addition such as an import. A rewrite may not skip, focus, add or
+ * remove a test (the count of it(/describe( calls must not change), and each
+ * row matches at most one change. Its test column names the case(s) the hunk
+ * rewrites; it is not checked against the enclosing it(), because table rows
+ * of a data-driven test sit above the it() they feed.
+ *
  * Anything else (a new, deleted or renamed test file; an added or deleted
  * line without a partner; .skip/.only; a changed class; any non-assertion
  * change) is a violation. So is a valid relaxation that is not listed in the
@@ -39,6 +55,13 @@ const MESSAGE_ASSERT_RE = /^(.*?)\b([A-Za-z_$][\w$]*)\.message\.should\.(?:match
 const EXPECT_MESSAGE_RE = /^(.*?)\bexpect\(([A-Za-z_$][\w$]*)\.message\)\.to\.(?:match|equal|eql|deep\.equal|include|contain|have\.string)\((.*)\)(\s*;?)$/;
 const SHOULD_INSTANCE_RE = /^(.*?)\b([A-Za-z_$][\w$]*)\.should\.be\.(?:an?\.)?instanceOf\(([A-Z][A-Za-z0-9_]*)\)(\s*;?)$/;
 const EXPECT_INSTANCE_RE = /^(.*?)\bexpect\(([A-Za-z_$][\w$]*)\)\.to\.be\.(?:an?\.)?instanceOf\(([A-Z][A-Za-z0-9_]*)\)(\s*;?)$/;
+
+/** Maintainer decisions that approve ok-to-throw test rewrites (see above). */
+export const APPROVED_REWRITE_DECISIONS = new Set([
+    'accordproject/concerto-rust#328',
+]);
+const REWRITE_REASON_RE = /^approved rewrite (\S+):/;
+export const NO_OLD_TEXT = '(none)';
 
 export function collapse(s) {
     return s.replace(/\s+/g, ' ').trim();
@@ -130,6 +153,41 @@ export function relaxationViolation(oldText, newText) {
     return 'old text is not a message assertion';
 }
 
+/** Is this allow-list row an approved rewrite? */
+export function isRewriteRow(row) {
+    const m = row.reason.match(REWRITE_REASON_RE);
+    return m !== null && APPROVED_REWRITE_DECISIONS.has(m[1]);
+}
+
+const TEST_CALL_RE = /(?<![\w$.])(?:it|describe)\s*\(/g;
+
+/**
+ * Generic limits on an approved rewrite. Returns null when `oldText` ->
+ * `newText` may be a rewrite, or a reason string when it may not.
+ */
+export function rewriteViolation(oldText, newText) {
+    const o = collapse(oldText);
+    const n = collapse(newText);
+    if (/\.(skip|only)\(/.test(n) || /\bx(it|describe)\(/.test(n)) {
+        return 'the new text skips or focuses a test';
+    }
+    if ((o.match(TEST_CALL_RE) || []).length !== (n.match(TEST_CALL_RE) || []).length) {
+        return 'a rewrite must not add or remove a test';
+    }
+    return null;
+}
+
+/** Find (and consume) an unused approved-rewrite row for this change. */
+export function takeRewriteRow(allow, file, oldText, newText) {
+    const o = oldText === null ? NO_OLD_TEXT : collapse(oldText);
+    const n = collapse(newText);
+    if (rewriteViolation(oldText ?? '', newText) !== null) return null;
+    const row = allow.find((r) => !r.used && r.file === file && isRewriteRow(r) && r.old === o && r.new === n);
+    if (!row) return null;
+    row.used = true;
+    return row;
+}
+
 /** Parse `git diff -U0` output for one file into hunks. */
 export function parseHunks(diffText) {
     const hunks = [];
@@ -182,6 +240,10 @@ export function readAllowList(tsvPath) {
         if (cols.length !== 5 || cols.some((c) => c.trim() === '')) {
             throw new Error(`${tsvPath}:${i + 1}: expected 5 non-empty tab-separated columns (file, test, old_assertion, new_assertion, reason)`);
         }
+        const rw = cols[4].match(REWRITE_REASON_RE);
+        if (rw && !APPROVED_REWRITE_DECISIONS.has(rw[1])) {
+            throw new Error(`${tsvPath}:${i + 1}: approved rewrite cites ${rw[1]}, which is not in APPROVED_REWRITE_DECISIONS`);
+        }
         rows.push({ file: cols[0], test: cols[1], old: collapse(cols[2]), new: collapse(cols[3]), reason: cols[4], used: false });
     }
     return rows;
@@ -193,8 +255,24 @@ export function readAllowList(tsvPath) {
  */
 export function checkFileHunks(file, hunks, fileLines, allow) {
     const out = [];
+    const relaxRows = allow.filter((r) => !isRewriteRow(r));
     for (const h of hunks) {
         const where = `${file}:${h.newStart}`;
+        // Approved rewrite (P5-24): the whole hunk, a pure addition, or every
+        // line of a one-for-one hunk pinned by its own rewrite row.
+        if (h.added.length > 0 && takeRewriteRow(allow, file, h.removed.length ? h.removed.join('\n') : null, h.added.join('\n'))) {
+            continue;
+        }
+        if (h.removed.length > 0 && h.removed.length === h.added.length) {
+            const taken = [];
+            const all = h.removed.every((r, i) => {
+                const row = takeRewriteRow(allow, file, r, h.added[i]);
+                if (row) taken.push(row);
+                return row !== null;
+            });
+            if (all) continue;
+            for (const row of taken) row.used = false;
+        }
         const pairs = hunkPairs(h);
         if (!pairs) {
             out.push(`${where}: lines only ${h.removed.length ? 'deleted' : 'added'}; only message-to-class assertion replacements are allowed`);
@@ -207,7 +285,7 @@ export function checkFileHunks(file, hunks, fileLines, allow) {
                 continue;
             }
             const test = enclosingTest(fileLines, p.line);
-            const row = allow.find((r) => r.file === file && r.test === test && r.old === collapse(p.old) && r.new === collapse(p.new));
+            const row = relaxRows.find((r) => r.file === file && r.test === test && r.old === collapse(p.old) && r.new === collapse(p.new));
             if (!row) {
                 out.push(`${where}: relaxation in test ${JSON.stringify(test)} is not listed in the allow-list:\n      - ${collapse(p.old)}\n      + ${collapse(p.new)}`);
                 continue;
@@ -264,7 +342,8 @@ export function checkTestTree({ repoRoot, baseRef, testPrefix, allowListPath, lo
     }
     const used = allow.filter((r) => r.used).length;
     const unused = allow.length - used;
-    if (used > 0) log(`(info) ${used} allow-listed message-assertion relaxation(s) under ${testPrefix}.`);
+    const usedRewrites = allow.filter((r) => r.used && isRewriteRow(r)).length;
+    if (used > 0) log(`(info) ${used - usedRewrites} allow-listed message-assertion relaxation(s) and ${usedRewrites} approved rewrite(s) under ${testPrefix}.`);
     if (unused > 0) {
         // Rows already merged into the base ref no longer show in the diff.
         log(`(info) ${unused} allow-list row(s) have no matching change relative to ${baseRef}.`);
