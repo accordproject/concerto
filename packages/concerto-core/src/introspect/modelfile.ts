@@ -60,6 +60,12 @@ const loadEngine = (specifier: string) =>
 const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engine').rust;
 
 /**
+ * P5-32 (accordproject/concerto-rust#342): each ModelFile's `getImports()`
+ * names, computed once from its `imports` (kept off the object itself).
+ */
+const importNames = new WeakMap<object, { imports: AstNode[]; length: number; names: string[] }>();
+
+/**
  * Class representing a Model File. A Model File contains a single namespace
  * and a set of model elements: assets, transactions etc.
  *
@@ -227,13 +233,13 @@ class ModelFile extends Decorated {
      * unversioned
      */
     getVersion(): string | null | undefined {
-        const id = this._rustHandleId();
-        /* istanbul ignore if */
-        if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-            return manager.rustHandle.modelFileGetVersion(id) ?? null;
-        }
-        return this.version;
+        // P5-32 (accordproject/concerto-rust#342): `this.version` is the
+        // field Rust itself wrote at construction (concerto-wasm
+        // `modelFileFromAstHeader`, or the staged header P5-28 applies), so
+        // no engine call is needed. A registered file answers as the engine
+        // did (`modelFileGetVersion`): `null`, never `undefined`, for an
+        // unversioned namespace.
+        return this._isRegistered() ? this.version ?? null : this.version;
     }
 
     /**
@@ -241,13 +247,26 @@ class ModelFile extends Decorated {
      * @returns {Boolean} true if this is a system model file
      */
     isSystemModelFile(): boolean {
-        const id = this._rustHandleId();
-        /* istanbul ignore if */
-        if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-            return manager.rustHandle.modelFileIsSystemModelFile(id);
-        }
+        // P5-32: from `this.namespace`, which Rust wrote at construction; the
+        // engine's `modelFileIsSystemModelFile` gave the same answer.
         return this.namespace.startsWith('concerto@') || this.namespace === 'concerto';
+    }
+
+    /**
+     * Whether this ModelFile is the file its manager holds for its
+     * namespace, on a manager with an engine mirror (P5-32,
+     * accordproject/concerto-rust#342). A TS-only check: it never crosses
+     * into the engine. Registered files answer the field-backed getters
+     * (`getVersion`, `getExternalImports`) the way the engine route did.
+     * @return {boolean} true if registered with an engine-backed manager
+     * @private
+     * @internal
+     */
+    _isRegistered(): boolean {
+        const manager = this.modelManager as unknown as { rustHandle?: unknown; _rustHandleMatchesModelFiles?: unknown; modelFiles?: Record<string, unknown> } | null | undefined;
+        return !!manager && !!manager.rustHandle &&
+            typeof manager._rustHandleMatchesModelFiles === 'function' &&
+            !!manager.modelFiles && manager.modelFiles[this.namespace] === this;
     }
 
     /**
@@ -280,13 +299,12 @@ class ModelFile extends Decorated {
      * @private
      */
     getExternalImports(): Record<string, string> {
-        const id = this._rustHandleId();
-        /* istanbul ignore if */
-        if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-            return manager.rustHandle.modelFileGetExternalImports(id);
-        }
-        return this.importUriMap;
+        // P5-32 (accordproject/concerto-rust#342): `this.importUriMap` is the
+        // field Rust itself wrote at construction, in import order (the
+        // order `modelFileGetExternalImports` kept, #263). A registered file
+        // returns a fresh copy, as the engine route did, so mutating the
+        // result never reaches the file.
+        return this._isRegistered() ? { ...this.importUriMap } : this.importUriMap;
     }
 
     /**
@@ -315,16 +333,27 @@ class ModelFile extends Decorated {
      * this ModelFile
      */
     getImports(): string[] {
+        // P5-32 (accordproject/concerto-rust#342): `this.imports` is written
+        // once, at construction, so its fully-qualified names are computed
+        // once too (through the engine route for a registered file, as
+        // before, and the TS body otherwise) and every later call answers
+        // from that, with no engine call. Each call returns a fresh array.
+        const memo = importNames.get(this);
+        if (memo !== undefined && memo.imports === this.imports && memo.length === this.imports.length) {
+            return memo.names.slice();
+        }
+        let result: string[] = [];
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
             const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
-            return manager.rustHandle.modelFileGetImports(id);
+            result = manager.rustHandle.modelFileGetImports(id);
+        } else {
+            this.imports.forEach( imp => {
+                result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
+            });
         }
-        let result: string[] = [];
-        this.imports.forEach( imp => {
-            result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
-        });
+        importNames.set(this, { imports: this.imports, length: this.imports.length, names: result.slice() });
         return result;
     }
 
