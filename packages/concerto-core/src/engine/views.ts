@@ -798,8 +798,7 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
 // validating it (`validateLoaded`) then reuse the loaded file instead of
 // sending the AST again.
 //
-// When Rust's load fails, or the manager is not a real BaseModelManager, or
-// it has decorator factories (user code `Decorated.process` runs, and may
+// When Rust's load fails, or the manager has decorator factories (user code `Decorated.process` runs, and may
 // throw from, during construction; running them on first read is BC-24,
 // not adopted), the ModelFile is built eagerly exactly as before, so a TS
 // error is thrown by the TS code, at the same point. A custom
@@ -904,8 +903,8 @@ const lazyFiles = new WeakSet<object>();
  * part of `fromAst` (P5-10b: before `process()`, so the file's own
  * decorators can be deferred too): loads the AST in the manager's
  * rustHandle staging slot, once. Returns true when the ModelFile may be
- * built lazily: the manager is a real BaseModelManager with a rustHandle
- * and no decorator factories, Rust loaded the AST without error, and, with
+ * built lazily: the manager (always a BaseModelManager, BC-47) has no
+ * decorator factories, Rust loaded the AST without error, and, with
  * a custom `options.regExp`, the Fields' StringValidators were built
  * without error (`probeCustomRegExp`). Never throws: on any
  * failure the caller builds the ModelFile eagerly, which throws the TS error
@@ -914,13 +913,10 @@ const lazyFiles = new WeakSet<object>();
  * @return {boolean} true if the declarations may be built lazily
  */
 function stageModelFile(modelFile: any): boolean {
+    // P5-35 (BC-47): the ModelFile constructor accepts only a
+    // BaseModelManager, which always has a rustHandle.
     const manager = modelFile.modelManager;
-    const handle = manager?.rustHandle;
-    if (!handle || typeof handle.stageModelFile !== 'function' ||
-        typeof manager._rustHandleMatchesModelFiles !== 'function' ||
-        typeof manager._needsRustWrite !== 'function') {
-        return false;
-    }
+    const handle = manager.rustHandle;
     try {
         // Decorator factories are user code `Decorated.process` runs (and
         // may throw from) during construction: they keep the eager path, so
@@ -2271,18 +2267,13 @@ const lookupFrames: LookupCall[][] = [];
 
 /**
  * Whether `view`'s property lookups may be cached: its model file was built
- * by the ModelFile constructor (`ModelFile._isConstructed`) for a real
- * BaseModelManager.
+ * by the ModelFile constructor (`ModelFile._isConstructed`), which accepts
+ * only a BaseModelManager (P5-35, BC-47).
  * @param {object} view the ClassDeclaration view
  * @return {boolean} true if cacheable
  */
 function lookupCacheable(view: any): boolean {
-    const modelFile = view?.modelFile;
-    if (!modelFileModule().default._isConstructed(modelFile)) {
-        return false;
-    }
-    const manager = modelFile.modelManager;
-    return !!manager && !!manager.rustHandle && typeof manager._needsRustWrite === 'function';
+    return modelFileModule().default._isConstructed(view?.modelFile);
 }
 
 /**

@@ -298,11 +298,18 @@ without editing `packages/concerto-core/test/**`:
   ResourceValidator, `Serializer.fromJSON`/`toJSON`);
 * `stringvalidator-regexp.checks.js`: `StringValidator` with a custom
   `regExp` engine;
-* `collaborator.checks.js`: `ModelFile.validate()` and `ModelFile.filter()`
-  for a model file whose manager is not engine-backed, or that is detached
-  from its manager, and `BaseModelManager`'s reads (`derivesFrom`,
+* `collaborator.checks.js`: `ModelFile.filter()` for a model file that is
+  detached from its manager, and `BaseModelManager`'s reads (`derivesFrom`,
   `isAssignableTo`, `getModelFileByFileName`, `resolveType`) on a manager
-  holding a hand-built model file the engine mirror did not take;
+  holding a hand-built model file. Its `ModelFile.validate()` checks
+  (CO-VAL-001 to 032) drove a manager that is not engine-backed; P5-35
+  (BC-47) removed that support and deleted them;
+* `declaration-validate.checks.js` (task P5-35,
+  accordproject/concerto-rust#345): the per-declaration `validate()`
+  methods (kept until BC-49), called directly on declarations of a model
+  added with validation disabled, now that `ModelFile.validate()` has no TS
+  body to reach them through; and the BC-47 `TypeError` for a ModelFile
+  built without a BaseModelManager;
 * `public-api.checks.js`: small public members (`ModelUtil`'s engine memo,
   `ResourceId` guards, and so on);
 * `resourcevalidator-visitor.checks.js` (task P5-12c,
