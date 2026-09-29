@@ -8,7 +8,11 @@
  *      hunks that relax an exact-message assertion to a class check and are
  *      listed in migration/guardrails/test-message-relaxations.tsv (P5-09,
  *      maintainer decision 2026-09-27 on accordproject/concerto-rust#253;
- *      see migration/guardrails/relaxations.mjs for the accepted shapes);
+ *      see migration/guardrails/relaxations.mjs for the accepted shapes),
+ *      and except lines inside the test-case scopes listed in
+ *      migration/guardrails/test-case-rewrites.tsv (P5-33, maintainer
+ *      decision 2026-09-29 on accordproject/concerto-rust#330 D1; see
+ *      migration/guardrails/rewrites.mjs);
  *   2. the `nyc` block in packages/concerto-core/package.json changed;
  *   3. the export list of packages/concerto-core/src/index.ts changed;
  *   4. the generated API snapshot (migration/api-snapshot/) differs from
@@ -77,11 +81,12 @@ if (gitOrNull(['rev-parse', '--verify', BASE_REF]) === null) {
 // allow-listed message-to-class assertion relaxations (P5-09). ------------
 const testPrefix = `${CORE_REL}/test/`;
 const ALLOW_LIST = path.join(MIGRATION_ROOT, 'guardrails', 'test-message-relaxations.tsv');
+const REWRITE_LIST = path.join(MIGRATION_ROOT, 'guardrails', 'test-case-rewrites.tsv');
 
-const testViolations = checkTestTree({ repoRoot: REPO_ROOT, baseRef: BASE_REF, testPrefix, allowListPath: ALLOW_LIST });
+const testViolations = checkTestTree({ repoRoot: REPO_ROOT, baseRef: BASE_REF, testPrefix, allowListPath: ALLOW_LIST, rewriteListPath: REWRITE_LIST });
 if (testViolations.length > 0) {
     failures.push([
-        `${testViolations.length} disallowed change(s) under ${testPrefix} relative to ${BASE_REF} (only allow-listed message-to-class assertion relaxations may change):`,
+        `${testViolations.length} disallowed change(s) under ${testPrefix} relative to ${BASE_REF} (only allow-listed message-to-class assertion relaxations and approved test-case rewrites may change):`,
         ...testViolations.map((v) => `    ${v}`),
     ].join('\n'));
 }

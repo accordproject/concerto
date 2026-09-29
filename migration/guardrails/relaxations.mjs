@@ -31,6 +31,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { readRewriteList, checkRewriteHunks } from './rewrites.mjs';
 
 const MSG_LITERAL_RE = /^(?:'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`|\/(?:[^/\\\n]|\\.)+\/[a-z]*)$/;
 const CLASS_RE = /^[A-Z][A-Za-z0-9_]*$/;
@@ -221,10 +222,11 @@ export function checkFileHunks(file, hunks, fileLines, allow) {
 /**
  * Rule 1 of check-guardrails.mjs: every change under `testPrefix` in
  * `repoRoot`, relative to the merge base with `baseRef` (committed, staged
- * and unstaged, plus untracked files), must be an allow-listed relaxation.
- * Returns a list of violation strings.
+ * and unstaged, plus untracked files), must be an allow-listed relaxation,
+ * or (P5-33) lie inside a test-case scope listed in `rewriteListPath` (see
+ * rewrites.mjs). Returns a list of violation strings.
  */
-export function checkTestTree({ repoRoot, baseRef, testPrefix, allowListPath, log = console.log }) {
+export function checkTestTree({ repoRoot, baseRef, testPrefix, allowListPath, rewriteListPath, log = console.log }) {
     const git = (args) => {
         try {
             return execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
@@ -234,8 +236,10 @@ export function checkTestTree({ repoRoot, baseRef, testPrefix, allowListPath, lo
     };
     const out = [];
     let allow;
+    let rewrites;
     try {
         allow = readAllowList(allowListPath);
+        rewrites = readRewriteList(rewriteListPath);
     } catch (e) {
         return [e.message];
     }
@@ -259,8 +263,16 @@ export function checkTestTree({ repoRoot, baseRef, testPrefix, allowListPath, lo
     }
     for (const file of modified) {
         const diff = git(['diff', '-U0', '--no-color', '--no-ext-diff', mergeBase, '--', file]) || '';
-        const lines = fs.readFileSync(path.join(repoRoot, file), 'utf8').split('\n');
-        out.push(...checkFileHunks(file, parseHunks(diff), lines, allow));
+        const source = fs.readFileSync(path.join(repoRoot, file), 'utf8');
+        const lines = source.split('\n');
+        let hunks = parseHunks(diff);
+        if (rewrites.some((r) => r.file === file)) {
+            const base = git(['show', `${mergeBase}:${file}`]) ?? '';
+            const res = checkRewriteHunks(file, hunks, base, source, rewrites);
+            out.push(...res.violations);
+            hunks = res.uncovered;
+        }
+        out.push(...checkFileHunks(file, hunks, lines, allow));
     }
     const used = allow.filter((r) => r.used).length;
     const unused = allow.length - used;
@@ -268,6 +280,11 @@ export function checkTestTree({ repoRoot, baseRef, testPrefix, allowListPath, lo
     if (unused > 0) {
         // Rows already merged into the base ref no longer show in the diff.
         log(`(info) ${unused} allow-list row(s) have no matching change relative to ${baseRef}.`);
+    }
+    const rwUsed = rewrites.filter((r) => r.used).length;
+    if (rwUsed > 0) log(`(info) ${rwUsed} approved test-case rewrite scope(s) changed under ${testPrefix}.`);
+    if (rewrites.length - rwUsed > 0) {
+        log(`(info) ${rewrites.length - rwUsed} approved rewrite scope(s) have no matching change relative to ${baseRef}.`);
     }
     return out;
 }
