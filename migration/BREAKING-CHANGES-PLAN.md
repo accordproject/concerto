@@ -43,6 +43,19 @@ purpose, with the class strict mode already used. The oracle records the
 affected fixtures as baselined failures (`baseline.tsv`). Heads:
 concerto `80bddbfc7` and concerto-rust `c0bb3a9`.
 
+**Update, one major release (maintainer decisions 2026-09-29, confirmed to the coordinator directly).**
+- **Q2 is answered: one major.** R3 is folded into R1. There is no separate "strict models" major; R2 stays for additive minors after R1.
+- **Scheduled for R1** (tasks in accordproject/concerto-rust):
+  - BC-02, Q5 answered (enforce versioning): P5-50 #371;
+  - BC-10: P5-51 #372;
+  - BC-19 with BC-17, BC-18 and BC-20 folded in, on by default with an opt-out (Q10's option name is proposed in the PR): P5-49 #370;
+  - BC-28: P5-52 #373;
+  - BC-39, a bug fix in the maintainer's view, with BC-40: P5-53 #374.
+- **BC-34 is changelog-only:** v5 already restricts the public API to the package exports, so deep imports of visitor internals were never supported.
+- **BC-46 and BC-48** shipped in R1 (P5-34 #344). BC-47 (P5-35 #345) and BC-50 (P5-36 #346) are in progress.
+- **BC-25:** the lazy-views gap noted in R1 below was closed by P5-10d (accordproject/concerto-rust#285).
+- **Still to decide for the single major:** BC-04 (Q6), BC-05 (maintainer question pending), BC-21 (Q9), the BC-24 factory-timing part, BC-27, BC-33, the BC-35 removal form, and BC-44 and BC-49. The last two were planned as an R2 deprecation followed by an R3 removal, so with one major they are either removed in R1 or not removed at all.
+
 ## 0. How to read this
 
 **IDs.** `BC-nn` rows affect JS users of concerto-core, and possibly Rust
@@ -452,10 +465,10 @@ DV-019 row and a follow-up issue, done by a docs-only task, not by P5-07.
 ## 6. Open questions for the maintainer
 
 - **Q1. The semver policy (section 0).** Is replacing a V8 `TypeError` or `RangeError` with a concerto exception a minor change? Is a message-text change minor? About 320 unit-test assertions match exact message text (plan §1.1), so callers may do the same. The strict answer makes R1's optional fixes, and BC-13's array shape, major-only.
-- **Q2. One major or two?** Recommended: two. R1 is "same behaviour, new engine, plus packaging", and R3 is "strict models and fast views", to keep risk apart. The alternative is to fold R3 into R1, so users take one major, but a regression is then harder to attribute to the engine switch or to the new strictness.
+- **Q2 (answered 2026-09-29: one major; see the update at the top). One major or two?** Recommended: two. R1 is "same behaviour, new engine, plus packaging", and R3 is "strict models and fast views", to keep risk apart. The alternative is to fold R3 into R1, so users take one major, but a regression is then harder to attribute to the engine switch or to the new strictness.
 - **Q3 (answered 2026-09-29: raise the floor to `^20.19.0 || >=22.12.0`; see BC-31). BC-31: raise `engines.node` to 22.12, or build an asynchronous ESM loader** so Node 18/20 ESM consumers keep working? Node 18 and 20 are past end of life by 2026, which argues for raising the floor.
 - **Q4. Follow-up issues.** Should the follow-up issues in section 4 be filed now (P5-07 may not file them), and should they carry `mig:post-migration`?
-- **Q5. BC-02 (DV-003).** Should `parseNamespace` enforce v4 versioning, or is accepting an unversioned namespace intended (for `strict: false` users), in which case DV-003 closes as "keep"?
+- **Q5 (answered 2026-09-29: enforce versioning in R1, P5-50). BC-02 (DV-003).** Should `parseNamespace` enforce v4 versioning, or is accepting an unversioned namespace intended (for `strict: false` users), in which case DV-003 closes as "keep"?
 - **Q6. BC-04 (DV-006).** Record fixtures first, to show whether the fix only ever accepts more? If it does, it drops to minor.
 - **Q7. BC-07 (DV-009).** ~~Should the non-strict date path be kept in R3, with its default flipped, or removed outright?~~ **Answered 2026-09-27: removed outright; the Rust engine will not support non-strict `DateTime` values.**
 - **Q8. BC-09 (DV-011).** Is a map value's `$identifier` part of any serialised or public output? If it is, the fix is major.
