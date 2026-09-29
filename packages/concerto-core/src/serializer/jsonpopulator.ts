@@ -434,7 +434,7 @@ class JSONPopulator {
             }
             return codec.decodeValue(JSON.parse(resultText), parameters.modelManager);
         } catch (err) {
-            if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+            if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
                 throw err;
             }
         }

@@ -52,6 +52,15 @@ const TAG = '@@oracle';
 class EngineFastPathUnsupported extends Error {
 }
 
+// P5-43 (accordproject/concerto-rust#364): the brand the fast path's
+// callers test for (`err[Symbol.for(...)] === true`), instead of the
+// class's `constructor.name`, which a minifier renames (a production bundle
+// without `keepNames` would rethrow every EngineFastPathUnsupported instead
+// of falling back). A registered symbol, so a caller needs no reference to
+// this module (the public modules reach it only through `loadEngine`).
+Object.defineProperty(EngineFastPathUnsupported.prototype,
+    Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported'), { value: true });
+
 /**
  * @param {*} v value
  * @returns {boolean} duck-typed dayjs instance
@@ -157,10 +166,7 @@ const TYPED_SKIP = new Set(['$modelManager', '$classDeclaration', '$validator'])
  * @return {object} its wire encoding
  */
 function encodeTyped(v, seen: Set<object>) {
-    const ctorName = v.constructor && v.constructor.name;
-    if (ctorName !== 'Resource' && ctorName !== 'ValidatedResource' && ctorName !== 'Relationship') {
-        throw new EngineFastPathUnsupported(`typed-class:${ctorName}`);
-    }
+    const ctorName = typedCtorName(v);
     const fields = {};
     for (const key of Object.keys(v)) {
         if (TYPED_SKIP.has(key)) {
@@ -279,6 +285,31 @@ function modelClasses(): any {
         };
     }
     return modelClassesCache;
+}
+
+/**
+ * The wire name (`ctor`) of a Resource/ValidatedResource/Relationship, found
+ * by the identity of its constructor against the public model classes (the
+ * same module instances the public graph uses, build-esm.js), never by
+ * `constructor.name`, which a minifier renames (P5-43,
+ * accordproject/concerto-rust#364). Any other class, a subclass of the three
+ * included, throws `EngineFastPathUnsupported` (`typed-class:`), as before.
+ * @param {object} v a typed-like instance
+ * @return {string} `'Resource'`, `'ValidatedResource'` or `'Relationship'`
+ */
+function typedCtorName(v): string {
+    const ctor = v.constructor;
+    const { Resource, ValidatedResource, Relationship } = modelClasses();
+    if (ctor === Resource) {
+        return 'Resource';
+    }
+    if (ctor === ValidatedResource) {
+        return 'ValidatedResource';
+    }
+    if (ctor === Relationship) {
+        return 'Relationship';
+    }
+    throw new EngineFastPathUnsupported(`typed-class:${(ctor && ctor.name) || 'Object'}`);
 }
 
 /**
@@ -580,6 +611,6 @@ function decodeValue(v, modelManager: BaseModelManager) {
     }
 }
 
-export { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, checkString, checkJsonText };
+export { EngineFastPathUnsupported, typedCtorName, modelClasses, encodeValue, decodeValue, decodeParsed, materializeCompact, checkString, checkJsonText };
 export type { TypeCache };
 export { newTypeCache };

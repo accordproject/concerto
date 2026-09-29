@@ -66,7 +66,7 @@ function validateMetaModel(input) {
         loadEngine('../engine/serializer').validateMetaModel(input);
         return input;
     } catch (err) {
-        if (!(err && err.constructor && err.constructor.name === 'EngineFastPathUnsupported')) {
+        if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
             throw err;
         }
     }
