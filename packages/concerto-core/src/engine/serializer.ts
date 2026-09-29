@@ -22,21 +22,21 @@
 // its own body on `EngineFastPathUnsupported`, or on any error the engine
 // reports for a shape it cannot cross (`unsupportedValueError` below).
 //
-// `ModelFile`/`BaseModelManager` are still TS views (P4-08 is not done
-// yet), so there is no live Rust ModelManager mirroring the caller's model
-// manager to reuse. This module builds one itself, from the model
-// manager's own `getModelFiles()` ASTs, and caches it on the model manager
-// (a WeakMap) until the set of `ModelFile` *instances* it was built from
-// changes -- either because a namespace was added/removed, or because
-// `updateModelFile` (or a clear() plus re-add) replaced a `ModelFile`
-// object under the same namespace. This is the same cheap-to-check
-// invalidation the rest of the engine uses `generation()` for, here done
-// by hand since a plain `BaseModelManager` exposes no generation counter
-// of its own.
+// P5-37 (T7, accordproject/concerto-rust#347; I-16 of the P5-26 report on
+// #330): the engine calls go to the model manager's own `rustHandle`, the
+// live concerto-wasm ModelManagerHandle `BaseModelManager` keeps mirroring
+// its `modelFiles` (P4-08, P5-34). There is no second handle: a model
+// change costs this module no `addModel` crossing and no `JSON.stringify`
+// of any AST. While the manager's own mutators have written `modelFiles`
+// ahead of `rustHandle` (`_mirrorPending`, the batch `addModelFiles`), and
+// for a model manager without a rustHandle, the visitor path runs instead.
+// The class lookups the fast path's results need (`TypeCache`) are still
+// cached per model manager, until the set of `ModelFile` *instances* or
+// the rustHandle changes.
 
 import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 import { rust } from './index';
-import { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, newTypeCache, checkString, checkJsonText } from './serializer-codec';
+import { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, newTypeCache, checkJsonText } from './serializer-codec';
 import Factory from '../factory';
 import Serializer from '../serializer';
 
@@ -48,28 +48,29 @@ import type { TypeCache } from './serializer-codec';
 /* eslint-enable no-unused-vars */
 
 interface CachedHandle {
+    // The model manager's `rustHandle` when the entry was made: a
+    // `clearModelFiles` replaces it.
     handle: any;
     // The exact ModelFile *instances* (not just their namespaces) the
-    // handle was built from, in `getModelFiles()` order. `updateModelFile`
+    // entry was made for, in `getModelFiles()` order. `updateModelFile`
     // (and a clear() plus re-add under the same namespaces) replaces the
     // object in `BaseModelManager#modelFiles` in place, keeping the
     // namespace list identical -- so identity of the ModelFile instances,
-    // not just of the namespace strings, is what "declaration count [or
-    // content] changed" has to mean here. A plain reference-equality check
-    // over the array is as cheap as the namespace check it replaces.
+    // not just of the namespace strings, is what "the models changed"
+    // has to mean for the class lookups below.
     modelFiles: unknown[];
     // P5-16: the class lookups `materializeTyped` makes for the fast path's
     // results (`TypeCache` in serializer-codec.ts), valid exactly as long
-    // as the handle is, since both come from the same ModelFile instances.
+    // as the ModelFile instances they came from are registered.
     types: TypeCache;
 }
 
 const handles = new WeakMap<BaseModelManager, CachedHandle>();
 
 /**
- * A `ModelManagerHandle` (concerto-wasm) with every model `modelManager`
- * currently holds, reused across calls while the model set is unchanged.
- * @param {BaseModelManager} modelManager the model manager to mirror
+ * The model manager's `rustHandle` (concerto-wasm `ModelManagerHandle`),
+ * which mirrors every model it holds.
+ * @param {BaseModelManager} modelManager the model manager
  * @return {object} the handle
  */
 function handleFor(modelManager: BaseModelManager): any {
@@ -79,46 +80,34 @@ function handleFor(modelManager: BaseModelManager): any {
 /**
  * `handleFor`'s cache entry: the handle and the `TypeCache` that goes with
  * it (P5-16).
- * @param {BaseModelManager} modelManager the model manager to mirror
+ * @param {BaseModelManager} modelManager the model manager
  * @return {object} the cache entry
  */
 function cachedHandleFor(modelManager: BaseModelManager): CachedHandle {
     // A model manager built with an alternative regular expression engine
     // (`new ModelManager({ regExp })`, e.g. XRegExp) validates `regex=`
     // string fields with that engine (introspect/stringvalidator.ts
-    // `regExpHook`), which the engine-side ModelManager built below cannot
-    // call: it would validate with its own ECMAScript dialect instead and
-    // could accept or reject different strings. Fall back to the visitor
-    // path, which honours the hook.
+    // `regExpHook`), which the engine-side ModelManager cannot call: it
+    // would validate with its own ECMAScript dialect instead and could
+    // accept or reject different strings. Fall back to the visitor path,
+    // which honours the hook.
     if ((modelManager as any).options?.regExp) {
         throw new EngineFastPathUnsupported('model-manager-regExp-option');
     }
+    const handle = (modelManager as any).rustHandle;
+    if (!handle || typeof handle.serializerToJson !== 'function') {
+        throw new EngineFastPathUnsupported('no-rust-handle');
+    }
+    // The batch `addModelFiles` registers its files in `modelFiles` before
+    // it mirrors them (P5-34): until then rustHandle is behind.
+    if ((modelManager as any)._mirrorPending) {
+        throw new EngineFastPathUnsupported('mirror-pending');
+    }
     const modelFiles = modelManager.getModelFiles(false);
     const cached = handles.get(modelManager);
-    if (cached && cached.modelFiles.length === modelFiles.length && cached.modelFiles.every((mf, i) => mf === modelFiles[i])) {
+    if (cached && cached.handle === handle && cached.modelFiles.length === modelFiles.length &&
+        cached.modelFiles.every((mf, i) => mf === modelFiles[i])) {
         return cached;
-    }
-    const ModelManagerHandle = (rust as any).ModelManagerHandle;
-    const handle = new ModelManagerHandle();
-    for (const modelFile of modelFiles) {
-        // A lone surrogate in the AST (a string default, a regex) or in the
-        // file name cannot cross unchanged (serializer-codec.ts
-        // `checkJsonText`): fall back to the visitor path.
-        //
-        // `getName()` is not guaranteed to be a string: `ModelFile`'s
-        // constructor only rejects a *truthy* non-string `fileName`
-        // (introspect/modelfile.ts), so a falsy non-string -- `0`, `false`,
-        // `NaN` -- is stored and returned as-is (2ab40c9f7, #294). This
-        // `handle.addModel` call takes concerto-wasm's `file_name:
-        // Option<String>` the same as every other forward guarded there;
-        // send only a genuine string, `undefined` otherwise, matching
-        // v5.0.0 (which makes no wasm call for a falsy fileName at all).
-        const rawName = modelFile.getName();
-        const name = typeof rawName === 'string' ? rawName : undefined;
-        if (name !== undefined) {
-            checkString(name);
-        }
-        handle.addModel(checkJsonText(JSON.stringify(modelFile.getAst())), name);
     }
     const entry = { handle, modelFiles, types: newTypeCache() };
     handles.set(modelManager, entry);
@@ -295,5 +284,5 @@ function validateMetaModel(input: unknown): void {
 }
 
 // `handleFor` is also used by validate-resource.ts (P5-12c), so instance
-// validation shares the Serializer's cached handle.
+// validation uses the same rustHandle.
 export { fastFromJson, fastToJson, handleFor, validateMetaModel };

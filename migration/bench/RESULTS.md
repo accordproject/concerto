@@ -1,3 +1,50 @@
+# P5-37 (T7): Serializer fast path on the manager's rustHandle, crossings before and after (2026-09-29)
+
+Task P5-37 (accordproject/concerto-rust#347, T7 of the P5-26 report on #330,
+site I-16) points the Serializer fast path (`engine/serializer.ts`) and the
+instance-validation fast path that shares it (`engine/validate-resource.ts`)
+at the model manager's own `rustHandle`. The second `ModelManagerHandle` that
+module built per manager is gone, so a model change no longer costs one
+`addModel` crossing per model file, a `new ModelManagerHandle`, and a
+`JSON.stringify` of every AST on the next call. The per-manager `TypeCache`
+(P5-16) stays, keyed on the rustHandle and the registered ModelFile
+instances. A manager with the `regExp` option, a manager whose batch
+`addModelFiles` has not mirrored yet (`_mirrorPending`) and a manager without
+a rustHandle take the visitor path.
+
+**Counts only, no timings** (coordinator scoping on #347): TS->WASM boundary
+crossings per call, counted by `results/P5-37/count-first.cjs` (every
+concerto-wasm export and `ModelManagerHandle` method wrapped by
+`lib/p515-engine-counter.cjs`). The model is two files (`a.cto`, and `b.cto`
+importing it); "after a model change" is the first call after
+`updateModelFile` on a manager whose Serializer had already run.
+
+| | |
+|---|---|
+| Machine | Local macOS (Darwin 22.6), Node v22.23.2; counts do not depend on the machine |
+| Before | `concerto` `2ca6a08a3`, `concerto-rust` `cf42b88` (the integration head) |
+| After | the P5-37 branch on those heads, same engine |
+| Raw data | `results/P5-37/{before,now}-first.txt` |
+
+## Crossings per call (before -> after, ratio)
+
+| operation | before | after | ratio |
+|---|---:|---:|---:|
+| `Serializer.fromJSON`, first after a model change | 12 | 9 | 0.75 |
+| `Serializer.fromJSON`, first on a new manager | 12 | 9 | 0.75 |
+| `Serializer.toJSON`, first after a model change | 4 | 1 | 0.25 |
+| `Resource.validate`, first after a model change | 5.96 | 2.96 | 0.50 |
+| `fromJSON` / `toJSON` / `validate`, repeat call | 1 | 1 | 1.00 |
+
+The 3 crossings removed from each first call are exactly the second handle's
+(`new ModelManagerHandle` and `addModel` x2, one per user model file): **0
+extra crossings** remain for the handle. What is left on a first `fromJSON`
+(8 besides the call itself) is the `TypeCache` filling its class lookups
+(`getTypeName`, `modelFileGetTypeName`, the ModelFile view snapshot) and the
+identifier walk, and on a first `validate` the identifier walk (1.96); both
+are per-class lookups the repeat calls answer from their caches, not
+handle-building.
+
 # P5-32 (T2): field-backed ModelFile getters, crossings before and after (2026-09-29)
 
 Task P5-32 (accordproject/concerto-rust#342, T2 of the P5-26 report on
