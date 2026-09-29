@@ -36,7 +36,7 @@
 
 import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 import { rust } from './index';
-import { EngineFastPathUnsupported, encodeValue, decodeValue, checkString, checkJsonText } from './serializer-codec';
+import { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, newTypeCache, checkString, checkJsonText } from './serializer-codec';
 import Factory from '../factory';
 import Serializer from '../serializer';
 
@@ -44,6 +44,7 @@ import Serializer from '../serializer';
 /* eslint-disable no-unused-vars */
 import type BaseModelManager from '../basemodelmanager';
 import type { SerializerOptions } from '../types';
+import type { TypeCache } from './serializer-codec';
 /* eslint-enable no-unused-vars */
 
 interface CachedHandle {
@@ -57,6 +58,10 @@ interface CachedHandle {
     // content] changed" has to mean here. A plain reference-equality check
     // over the array is as cheap as the namespace check it replaces.
     modelFiles: unknown[];
+    // P5-16: the class lookups `materializeTyped` makes for the fast path's
+    // results (`TypeCache` in serializer-codec.ts), valid exactly as long
+    // as the handle is, since both come from the same ModelFile instances.
+    types: TypeCache;
 }
 
 const handles = new WeakMap<BaseModelManager, CachedHandle>();
@@ -68,6 +73,16 @@ const handles = new WeakMap<BaseModelManager, CachedHandle>();
  * @return {object} the handle
  */
 function handleFor(modelManager: BaseModelManager): any {
+    return cachedHandleFor(modelManager).handle;
+}
+
+/**
+ * `handleFor`'s cache entry: the handle and the `TypeCache` that goes with
+ * it (P5-16).
+ * @param {BaseModelManager} modelManager the model manager to mirror
+ * @return {object} the cache entry
+ */
+function cachedHandleFor(modelManager: BaseModelManager): CachedHandle {
     // A model manager built with an alternative regular expression engine
     // (`new ModelManager({ regExp })`, e.g. XRegExp) validates `regex=`
     // string fields with that engine (introspect/stringvalidator.ts
@@ -81,7 +96,7 @@ function handleFor(modelManager: BaseModelManager): any {
     const modelFiles = modelManager.getModelFiles(false);
     const cached = handles.get(modelManager);
     if (cached && cached.modelFiles.length === modelFiles.length && cached.modelFiles.every((mf, i) => mf === modelFiles[i])) {
-        return cached.handle;
+        return cached;
     }
     const ModelManagerHandle = (rust as any).ModelManagerHandle;
     const handle = new ModelManagerHandle();
@@ -105,8 +120,9 @@ function handleFor(modelManager: BaseModelManager): any {
         }
         handle.addModel(checkJsonText(JSON.stringify(modelFile.getAst())), name);
     }
-    handles.set(modelManager, { handle, modelFiles });
-    return handle;
+    const entry = { handle, modelFiles, types: newTypeCache() };
+    handles.set(modelManager, entry);
+    return entry;
 }
 
 /**
@@ -129,6 +145,55 @@ function asUnsupported(err) {
 }
 
 /**
+ * The `env` every `serializerFromJson` call gets (D7: the identifier and
+ * the clock stay with the caller, `Factory.newResource`'s own
+ * `uuid.v4()`/`dayjs.utc()`). It holds no per-call state, so one object
+ * serves every call (P5-16).
+ */
+const fromJsonEnv = {
+    newId: () => Factory.newId(),
+    nowMs: () => Date.now(),
+};
+
+/**
+ * The options objects `optionsText` has encoded: each one's own keys and
+ * values at the time, and its wire text (P5-16). A WeakMap, so it never
+ * keeps a caller's options object alive.
+ */
+const encodedOptions = new WeakMap<object, { keys: string[]; values: unknown[]; text: string }>();
+
+/**
+ * `JSON.stringify(encodeValue(options))`, reused while `options` is the
+ * same object with the same own keys and the same primitive values (P5-16):
+ * `Serializer.fromJSON` passes its `defaultOptions` object itself whenever
+ * a call gives no options of its own. An options object with a non-primitive
+ * value is encoded on every call, since what it holds can change unseen.
+ * @param {SerializerOptions} options the merged options
+ * @return {string} the options' wire text
+ */
+function optionsText(options: SerializerOptions): string {
+    const isObject = options !== null && typeof options === 'object';
+    const last = isObject ? encodedOptions.get(options) : undefined;
+    if (last) {
+        const keys = Object.keys(options);
+        if (keys.length === last.keys.length && keys.every((k, i) => k === last.keys[i] && Object.is(options[k], last.values[i]))) {
+            return last.text;
+        }
+    }
+    const text = JSON.stringify(encodeValue(options));
+    if (isObject) {
+        const keys = Object.keys(options);
+        const values = keys.map((k) => options[k]);
+        if (values.every((v) => v === null || (typeof v !== 'object' && typeof v !== 'function'))) {
+            encodedOptions.set(options, { keys, values, text });
+        } else {
+            encodedOptions.delete(options);
+        }
+    }
+    return text;
+}
+
+/**
  * `Serializer.fromJSON`'s fast path.
  * @param {BaseModelManager} modelManager the model manager
  * @param {object} jsonObject the JSON object to populate
@@ -136,25 +201,26 @@ function asUnsupported(err) {
  * @return {object} the populated resource
  */
 function fastFromJson(modelManager: BaseModelManager, jsonObject: unknown, options: SerializerOptions) {
-    const handle = handleFor(modelManager);
-    const env = {
-        // D7: the identifier and the clock stay with the caller
-        // (`Factory.newResource`'s own `uuid.v4()`/`dayjs.utc()`).
-        newId: () => Factory.newId(),
-        nowMs: () => Date.now(),
-    };
+    const cached = cachedHandleFor(modelManager);
+    const { handle } = cached;
+    // P5-16: the compact result shape where the engine has it (an engine
+    // built before it only has `serializerFromJson`).
+    const compact = typeof handle.serializerFromJsonCompact === 'function';
     let text;
     try {
-        text = handle.serializerFromJson(
-            JSON.stringify(encodeValue(jsonObject)),
-            JSON.stringify(encodeValue(options)),
-            env,
-        );
+        const jsonText = JSON.stringify(encodeValue(jsonObject));
+        text = compact
+            ? handle.serializerFromJsonCompact(jsonText, optionsText(options), fromJsonEnv)
+            : handle.serializerFromJson(jsonText, optionsText(options), fromJsonEnv);
     } catch (err) {
         throw asUnsupported(err);
     }
+    // P5-16: decoded in place (the parsed text is ours alone), with the
+    // class lookups kept next to the handle.
     const node = JSON.parse(text);
-    return decodeValue(node, modelManager);
+    return compact
+        ? materializeCompact(node, modelManager, cached.types)
+        : decodeParsed(node, modelManager, cached.types);
 }
 
 /**

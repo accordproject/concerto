@@ -81,6 +81,9 @@ function isTypedLike(v): boolean {
 // anyway (PORTING.md 3.1, DV-004).
 const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 
+/** Whether this runtime has `String.prototype.isWellFormed` (ES2024). */
+const hasIsWellFormed = typeof (String.prototype as any).isWellFormed === 'function';
+
 /**
  * Throws `EngineFastPathUnsupported` for a string the engine cannot receive
  * unchanged: one with a lone surrogate. The caller falls back to the TS
@@ -88,7 +91,10 @@ const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[
  * @param {string} s the string (a value, an object key or a map key)
  */
 function checkString(s: string): void {
-    if (LONE_SURROGATE.test(s)) {
+    // P5-16: `isWellFormed()` (Node 20+) is false exactly when the string
+    // holds a lone surrogate, and costs much less than the regular
+    // expression, which stays for older runtimes.
+    if (hasIsWellFormed ? !(s as any).isWellFormed() : LONE_SURROGATE.test(s)) {
         throw new EngineFastPathUnsupported('lone-surrogate');
     }
 }
@@ -276,43 +282,252 @@ function modelClasses(): any {
 }
 
 /**
+ * What `materializeTyped` needs to know about an instance's class, kept per
+ * class (and checked against the constructor, namespace and type it was
+ * learned for) by a caller that decodes many
+ * instances against the same, unchanged model files (P5-16,
+ * accordproject/concerto-rust#310): the class declaration
+ * `modelManager.getType(fqn)` answers, and the `$identifierFieldName` the
+ * instance constructor computes (`Identifiable`'s constructor looks the
+ * type up again, through `getModelFile(ns).getType(fqn)`, for every
+ * instance). The caller owns the map and drops it whenever the model files
+ * change (`engine/serializer.ts` keeps it next to its handle).
+ */
+interface TypeInfo {
+    ctor: string;
+    ns: unknown;
+    type: unknown;
+    classDeclaration: any;
+    identifierFieldName: string;
+}
+
+/**
+ * The `TypeInfo`s of each class, by fully-qualified name and then by TS
+ * class (`ctor`), and the entry found last: a run of instances of one
+ * class then compares the name with the last one's instead of hashing it
+ * again (P5-16).
+ */
+interface TypeCache {
+    byFqn: Map<string, Record<string, TypeInfo>>;
+    last: { fqn: string; entry: Record<string, TypeInfo> } | undefined;
+}
+
+/**
+ * A new, empty `TypeCache`.
+ * @return {object} the cache
+ */
+function newTypeCache(): TypeCache {
+    return { byFqn: new Map(), last: undefined };
+}
+
+/**
+ * `new Ctor(modelManager, classDeclaration, ns, type, id, timestamp[, validator])`,
+ * the instance's own properties set in the order the constructors set them
+ * (`Typed`, then `Identifiable`, then `Relationship`'s `$class` or
+ * `ValidatedResource`'s `$validator`), but with `$identifierFieldName`
+ * taken from `info`, which the real constructor computed for the first
+ * instance of this class (P5-16). Only `newInstance` calls it, with
+ * `info` from a `TypeCache`.
+ * @param {Function} Ctor Resource, ValidatedResource or Relationship
+ * @param {object} info the class's `TypeInfo`
+ * @param {BaseModelManager} modelManager the model manager
+ * @param {string} ns the namespace
+ * @param {string} type the short type name
+ * @param {*} id the identifier
+ * @param {*} timestamp the timestamp
+ * @param {boolean} isRelationship whether `Ctor` is Relationship
+ * @param {*} [validator] the ValidatedResource's validator
+ * @return {object} the instance
+ */
+function constructCached(Ctor, info: TypeInfo, modelManager: BaseModelManager, ns, type, id, timestamp, isRelationship: boolean, validator?) {
+    const resource = Object.create(Ctor.prototype);
+    // Typed's constructor.
+    resource.$modelManager = modelManager;
+    resource.$classDeclaration = info.classDeclaration;
+    resource.$namespace = ns;
+    resource.$type = type;
+    // Identifiable's constructor.
+    resource.$identifierFieldName = info.identifierFieldName;
+    resource.setIdentifier(id);
+    resource.$timestamp = timestamp;
+    if (validator !== undefined) {
+        // ValidatedResource's constructor.
+        resource.$validator = validator;
+    } else if (isRelationship) {
+        // Relationship's constructor.
+        resource.$class = 'Relationship';
+    }
+    return resource;
+}
+
+/**
  * A `"typed"` wire node (module doc) materialised into a real
  * Resource/ValidatedResource/Relationship, using the real TS classes so
  * that every getter and later mutation (`setPropertyValue`, `toJSON`, ...)
  * behaves exactly as the visitor path's result would.
+ *
+ * With `types` (P5-16), the class lookups are made once per class and kept
+ * there (`TypeCache`), and the node's fields are decoded in place
+ * (`decodeParsed`): the node must then be fresh `JSON.parse` output that
+ * nothing else holds.
  * @param {object} node the wire node
  * @param {BaseModelManager} modelManager the model manager to resolve its class in
+ * @param {Map} [types] the caller's `TypeCache`
  * @return {object} the materialised instance
  */
-function materializeTyped(node, modelManager: BaseModelManager) {
-    const { Resource, ValidatedResource, Relationship, ResourceValidator } = modelClasses();
-
-    const classDeclaration = modelManager.getType(node.fqn);
+function materializeTyped(node, modelManager: BaseModelManager, types?: TypeCache) {
+    const decode = types ? (v) => decodeParsed(v, modelManager, types) : (v) => decodeValue(v, modelManager);
     const fields = node.fields || {};
-    const ns = fields.$namespace;
-    const type = fields.$type;
     const identifierFieldName = fields.$identifierFieldName;
-    const id = decodeValue(fields.$identifier, modelManager);
-    const timestamp = decodeValue(fields.$timestamp, modelManager);
-
-    let resource;
-    if (node.ctor === 'ValidatedResource') {
-        const validator = new ResourceValidator({});
-        resource = new ValidatedResource(modelManager, classDeclaration, ns, type, id, timestamp, validator);
-    } else if (node.ctor === 'Relationship') {
-        resource = new Relationship(modelManager, classDeclaration, ns, type, id, timestamp);
-    } else {
-        resource = new Resource(modelManager, classDeclaration, ns, type, id, timestamp);
-    }
-
-    const skip = new Set(['$namespace', '$type', '$identifierFieldName', '$identifier', '$timestamp', '$class', identifierFieldName]);
+    const resource = newInstance(node.ctor, node.fqn, fields.$namespace, fields.$type,
+        decode(fields.$identifier), decode(fields.$timestamp), modelManager, types);
     for (const key of Object.keys(fields)) {
-        if (skip.has(key)) {
+        switch (key) {
+        case '$namespace': case '$type': case '$identifierFieldName': case '$identifier': case '$timestamp': case '$class':
             continue;
         }
-        setOwn(resource, key, decodeValue(fields[key], modelManager));
+        if (key === identifierFieldName) {
+            continue;
+        }
+        setField(resource, key, decode(fields[key]));
     }
     return resource;
+}
+
+/**
+ * `materializeTyped` for the compact result of `serializerFromJsonCompact`
+ * (concerto-wasm, P5-16): `[ctor, fqn, $namespace, $type,
+ * $identifierFieldName, $identifier, $timestamp, fields]`, each value in its
+ * wire encoding, where `fields` already leaves out what `materializeTyped`
+ * skips. Builds the same instance `materializeTyped` builds from the
+ * `"typed"` node of the same resource. `node` must be fresh `JSON.parse`
+ * output that nothing else holds (it is decoded in place).
+ * @param {Array} node the compact result
+ * @param {BaseModelManager} modelManager the model manager to resolve its class in
+ * @param {Map} types the caller's `TypeCache`
+ * @return {object} the materialised instance
+ */
+function materializeCompact(node, modelManager: BaseModelManager, types: TypeCache) {
+    if (!Array.isArray(node) || node.length !== 8) {
+        throw new EngineFastPathUnsupported('unrecognised-compact-result');
+    }
+    const decode = (v) => decodeParsed(v, modelManager, types);
+    const [ctor, fqn, ns, type, , id, timestamp, fields] = node;
+    const resource = newInstance(ctor, fqn, decodeValue(ns, modelManager), decodeValue(type, modelManager),
+        decode(id), decode(timestamp), modelManager, types);
+    for (const key of Object.keys(fields)) {
+        setField(resource, key, decode(fields[key]));
+    }
+    return resource;
+}
+
+/**
+ * The Resource/ValidatedResource/Relationship (by `ctor`) of class `fqn`
+ * that `materializeTyped` builds, before its fields are set: through its
+ * constructor, or, when `types` already has this class, `constructCached`.
+ * @param {string} ctor the TS class name
+ * @param {string} fqn the class's fully-qualified name
+ * @param {string} ns the namespace
+ * @param {string} type the short type name
+ * @param {*} id the identifier
+ * @param {*} timestamp the timestamp
+ * @param {BaseModelManager} modelManager the model manager to resolve the class in
+ * @param {Map} [types] the caller's `TypeCache`
+ * @return {object} the instance
+ */
+function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModelManager, types?: TypeCache) {
+    const { Resource, ValidatedResource, Relationship, ResourceValidator } = modelClasses();
+    const Ctor = ctor === 'ValidatedResource' ? ValidatedResource : ctor === 'Relationship' ? Relationship : Resource;
+    const validator = ctor === 'ValidatedResource' ? new ResourceValidator({}) : undefined;
+    // Looked up by the strings `JSON.parse` already made (no key is built),
+    // and checked against the namespace and type it was learned for.
+    const last = types?.last;
+    const entry = last && last.fqn === fqn ? last.entry : types?.byFqn.get(fqn);
+    const info = entry?.[ctor];
+    if (info && info.ns === ns && info.type === type) {
+        if (last?.entry !== entry) {
+            types!.last = { fqn, entry: entry! };
+        }
+        return constructCached(Ctor, info, modelManager, ns, type, id, timestamp, Ctor === Relationship, validator);
+    }
+    const classDeclaration = modelManager.getType(fqn);
+    const resource = validator !== undefined
+        ? new Ctor(modelManager, classDeclaration, ns, type, id, timestamp, validator)
+        : new Ctor(modelManager, classDeclaration, ns, type, id, timestamp);
+    if (!types) {
+        return resource;
+    }
+    const learned = { ctor, ns, type, classDeclaration, identifierFieldName: resource.$identifierFieldName };
+    let learnedEntry = types.byFqn.get(fqn);
+    if (!learnedEntry) {
+        learnedEntry = Object.create(null) as Record<string, TypeInfo>;
+        types.byFqn.set(fqn, learnedEntry);
+    }
+    learnedEntry[ctor] = learned;
+    types.last = { fqn, entry: learnedEntry };
+    // The first instance of a class is built again the way every later one
+    // is, so that all of them share one object layout (V8 map): the
+    // constructor's instance has a different one, and code that reads
+    // instances of both (validate, toJSON) would see two.
+    return constructCached(Ctor, learned, modelManager, ns, type, id, timestamp, Ctor === Relationship, validator);
+}
+
+/**
+ * `setOwn(resource, key, value)`: the model classes define methods only
+ * (no accessors), so a plain assignment makes the same own, enumerable,
+ * writable, configurable property, except for `__proto__`.
+ * @param {object} resource the instance
+ * @param {string} key the key
+ * @param {*} value the value
+ */
+function setField(resource, key: string, value: unknown): void {
+    if (key === '__proto__') {
+        setOwn(resource, key, value);
+    } else {
+        resource[key] = value;
+    }
+}
+
+/**
+ * `decodeValue` over fresh `JSON.parse` output that nothing else holds
+ * (P5-16): plain arrays and objects are kept and only their tagged members
+ * replaced, instead of being copied. `JSON.parse` already makes every key,
+ * `__proto__` included, an own data property, as `decodeValue`'s copies
+ * do. `types` is `materializeTyped`'s `TypeCache`.
+ * @param {*} v the parsed wire value
+ * @param {BaseModelManager} modelManager the model manager, for a `"typed"` value
+ * @param {Map} types the caller's `TypeCache`
+ * @return {*} the decoded value
+ */
+function decodeParsed(v, modelManager: BaseModelManager, types: TypeCache) {
+    if (v === null || typeof v !== 'object') {
+        return v;
+    }
+    if (Array.isArray(v)) {
+        for (let i = 0; i < v.length; i++) {
+            const item = v[i];
+            if (item !== null && typeof item === 'object') {
+                v[i] = decodeParsed(item, modelManager, types);
+            }
+        }
+        return v;
+    }
+    if (!Object.prototype.hasOwnProperty.call(v, TAG)) {
+        for (const key of Object.keys(v)) {
+            const item = v[key];
+            if (item !== null && typeof item === 'object') {
+                const decoded = decodeParsed(item, modelManager, types);
+                if (decoded !== item) {
+                    setOwn(v, key, decoded);
+                }
+            }
+        }
+        return v;
+    }
+    if (v[TAG] === 'typed') {
+        return materializeTyped(v, modelManager, types);
+    }
+    return decodeValue(v, modelManager);
 }
 
 /**
@@ -365,4 +580,6 @@ function decodeValue(v, modelManager: BaseModelManager) {
     }
 }
 
-export { EngineFastPathUnsupported, encodeValue, decodeValue, checkString, checkJsonText };
+export { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, checkString, checkJsonText };
+export type { TypeCache };
+export { newTypeCache };
