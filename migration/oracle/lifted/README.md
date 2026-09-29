@@ -333,8 +333,10 @@ without editing `packages/concerto-core/test/**`:
   map values read, written and validated as relationship properties, with
   the embedded-resource options on and off. The `RM-E-*` checks go through
   the engine (a throw reduced to its class); the `RM-V-*` checks force the
-  TS visitors with a custom `regExp` engine. Each has v5.0.0's outcome as
-  its `reference`.
+  TS visitors (a lone surrogate in an unrelated field for `fromJSON` and
+  `toJSON`, a `ResourceValidator` subclass for `validate()`; until P5-52,
+  BC-28, a custom `regExp` engine, which is now ignored). Each has v5.0.0's
+  outcome as its `reference`.
 * `metamodel-mirror.checks.js` (task P5-31, accordproject/concerto-rust#341):
   a metamodel file a user adds (`newMetaModelManager()`, `addModelFile`,
   `addMetamodel: true`) is mirrored into the engine, so its manager stays in
