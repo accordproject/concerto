@@ -13,6 +13,12 @@
 // (P5-02 removed the in-tree TS engine, so that is the TS comparison).
 // --workloads runs only the named workloads, comma-separated
 // (load_validate, validate_ast, instance_validate; default all three).
+// --concerto-commit and --concerto-rust-commit (task P5-16,
+// accordproject/concerto-rust#310) record the commits the measured dist/
+// and engine were built from, for a run whose --core-dist or
+// CONCERTO_ENGINE_MODULE is not this checkout's own build. Without them,
+// concerto_commit is this checkout's HEAD and concerto_rust_commit the HEAD
+// of the concerto-rust checkout next to it.
 //
 // Runs against the built `dist/` of packages/concerto-core (`npm run build
 // -w packages/concerto-core`, after `npm ci` at the repo root - see
@@ -47,6 +53,8 @@
 //      populate step is TS-only work even in rust mode - only the combined
 //      fromJSON number and validate_only are comparable to the ts-mode run
 //      of this same script, not to the Rust crate's own criterion number.
+//      Task P5-12c adds setPropertyValue() and addArrayValue() on the same
+//      500 validated resources.
 //
 // Prints a markdown table to stdout and writes the full JSON results to
 // `--out` (default: migration/bench/results/<timestamp>-ts.json).
@@ -69,7 +77,7 @@ const FIXTURES_DIR = path.join(__dirname, 'fixtures', 'model-sets');
 const RESULTS_DIR = path.join(__dirname, 'results');
 
 function parseArgs(argv) {
-    const args = { samples: 30, warmup: 5, out: null, coreDist: DEFAULT_CORE_DIST, workloads: WORKLOADS };
+    const args = { samples: 30, warmup: 5, out: null, coreDist: DEFAULT_CORE_DIST, workloads: WORKLOADS, concertoCommit: null, concertoRustCommit: null };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--samples') {
@@ -80,6 +88,10 @@ function parseArgs(argv) {
             args.out = argv[++i];
         } else if (a === '--core-dist') {
             args.coreDist = path.resolve(argv[++i]);
+        } else if (a === '--concerto-commit') {
+            args.concertoCommit = argv[++i];
+        } else if (a === '--concerto-rust-commit') {
+            args.concertoRustCommit = argv[++i];
         } else if (a === '--workloads') {
             args.workloads = argv[++i].split(',');
             const unknown = args.workloads.filter((w) => !WORKLOADS.includes(w));
@@ -296,6 +308,27 @@ function benchInstanceValidate(ModelManager, sampleOpts) {
         },
         { ...sampleOpts, n: LOOKUPS },
     );
+    // Task P5-12c (accordproject/concerto-rust#293): the two per-property
+    // validations of a ValidatedResource. `labels` is reset by plain
+    // assignment (no validation) before each `addArrayValue`, so every call
+    // checks a three-item array.
+    const setProperty = timeit(
+        () => {
+            for (let i = 0; i < resources.length; i++) {
+                resources[i].setPropertyValue('sequence', i);
+            }
+        },
+        { ...sampleOpts, n: resources.length },
+    );
+    const addArray = timeit(
+        () => {
+            for (const r of resources) {
+                r.labels = ['a', 'b'];
+                r.addArrayValue('labels', 'c');
+            }
+        },
+        { ...sampleOpts, n: resources.length },
+    );
 
     return {
         populate_and_validate: populate,
@@ -303,6 +336,8 @@ function benchInstanceValidate(ModelManager, sampleOpts) {
         to_json: toJson,
         get_properties: getProperties,
         get_property: getProperty,
+        set_property_value: setProperty,
+        add_array_value: addArray,
         n: instances.length,
     };
 }
@@ -337,7 +372,12 @@ function main() {
             total_mem_gb: Math.round(os.totalmem() / 1e9),
             node: process.version,
         },
-        concerto_commit: gitCommit(REPO_ROOT),
+        concerto_commit: args.concertoCommit || gitCommit(REPO_ROOT),
+        // task P5-16: the engine the run used (CONCERTO_ENGINE_MODULE, or
+        // the linked @accordproject/concerto-engine) and the concerto-rust
+        // commit it was built from (see --concerto-rust-commit above).
+        concerto_rust_commit: args.concertoRustCommit || gitCommit(path.join(REPO_ROOT, '..', 'concerto-rust')),
+        engine_module: process.env.CONCERTO_ENGINE_MODULE || '@accordproject/concerto-engine',
         // task P5-04 (accordproject/concerto-rust#75): which engine served
         // concerto-core's public API for this run - 'ts' (the default) or
         // 'rust' (CONCERTO_ENGINE=rust, the WASM-backed engine, see
@@ -415,6 +455,8 @@ function main() {
         lines.push(`| instance_validate | (synthetic) | ${iv.n} | toJSON | ${(iv.to_json.median_ms * 1000).toFixed(1)} µs | ${(iv.to_json.cv * 100).toFixed(1)}% |`);
         lines.push(`| instance_validate | Item | 1000 | getProperties() | ${(iv.get_properties.median_ms * 1000).toFixed(3)} µs | ${(iv.get_properties.cv * 100).toFixed(1)}% |`);
         lines.push(`| instance_validate | Item | 1000 | getProperty() | ${(iv.get_property.median_ms * 1000).toFixed(3)} µs | ${(iv.get_property.cv * 100).toFixed(1)}% |`);
+        lines.push(`| instance_validate | (synthetic) | ${iv.n} | setPropertyValue() | ${(iv.set_property_value.median_ms * 1000).toFixed(1)} µs | ${(iv.set_property_value.cv * 100).toFixed(1)}% |`);
+        lines.push(`| instance_validate | (synthetic) | ${iv.n} | addArrayValue() | ${(iv.add_array_value.median_ms * 1000).toFixed(1)} µs | ${(iv.add_array_value.cv * 100).toFixed(1)}% |`);
     }
 
     console.log(`# TS benchmark results (${results.recorded_at}), engine=${results.concerto_engine}\n`);
