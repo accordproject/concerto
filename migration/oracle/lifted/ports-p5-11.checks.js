@@ -347,7 +347,7 @@ module.exports = [
     {
         id: 'P511-007',
         async: true,
-        covers: 'updateExternalModels of the metamodel namespace, which the engine mirror is never written for (TS body): an add, then an update',
+        covers: 'updateExternalModels of the metamodel namespace, mirrored like any other namespace since P5-31 (Rust): an add, then an update',
         run: async (core) => {
             const mm = manager(core);
             const metamodel = core.metaModelModule.newMetaModelManager().getModelFile('concerto.metamodel@1.0.0');
