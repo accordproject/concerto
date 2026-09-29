@@ -323,6 +323,13 @@ without editing `packages/concerto-core/test/**`:
   field with no validator, which `setPropertyValue` keeps on the visitor
   because it is cheaper there (`visitorIsCheaper`); `SET-006`/`SET-007`
   set one on a field with a `regex` validator, which goes to the engine.
+* `relationship-map-values.checks.js` (task P5-58,
+  accordproject/concerto-rust#379): BC-05 (R1; DV-007), relationship-typed
+  map values read, written and validated as relationship properties, with
+  the embedded-resource options on and off. The `RM-E-*` checks go through
+  the engine (a throw reduced to its class); the `RM-V-*` checks force the
+  TS visitors with a custom `regExp` engine. Each has v5.0.0's outcome as
+  its `reference`.
 * `metamodel-mirror.checks.js` (task P5-31, accordproject/concerto-rust#341):
   a metamodel file a user adds (`newMetaModelManager()`, `addModelFile`,
   `addMetamodel: true`) is mirrored into the engine, so its manager stays in
