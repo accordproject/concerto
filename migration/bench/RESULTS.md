@@ -1,3 +1,85 @@
+# P5-22: re-measure after F1-F4, the P5-15 sweep repeated (2026-09-29)
+
+Task P5-22 (accordproject/concerto-rust#326) repeats the P5-15 sweep
+(#309) on the integration head after F1-F4 (P5-17 to P5-20) and P5-16,
+so the maintainer can decide on F5 and F6. Measure only: no engine or
+concerto-core change. The raw outputs are in `results/P5-22/`.
+
+| | |
+|---|---|
+| Machine | Cloud container, Intel Xeon @ 2.10GHz, 4 vCPU, 15 GB, Linux 6.18. Not the P5-15 laptop, so only same-run × TS ratios are compared. |
+| Toolchain | Node v22.22.2, rustc 1.94.1, `concerto-wasm/build.sh` (engine 2,965,455 bytes now, 2,918,997 pre-F1) |
+| Now | `concerto` `f90c7cad6`, `concerto-rust` `1b0555d` (integration head plus local-matt's P5-22 bench tooling) |
+| Before | The pre-F1 integration head, timed in the same run: `concerto` `e5988a033` with its concerto-core dist, `concerto-rust` `45ff6d5` with its engine and crate bench (P5-22's `p515_sweep.rs` copied in, not committed). The difference is P5-16, P5-17 (F1), P5-18 (F2), P5-19 (F3) and P5-20 (F4). |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, timed in each round; the same files serve both sides |
+| Driver | `p522-run.sh`: V8 CPU profiles (stage split) and crossing counts for both sides, no gate; then three interleaved rounds of TS 5.0.0, TS API on the Rust engine (now and before, order alternated per round) and criterion crate-direct (now and before; 1 s warm-up, 3 s measurement). `p515-sweep.mjs` used 5 warm-up and 30 samples. No native profiles (`sample` is macOS only). |
+| Quiet gate | Before each part: 1-minute load < 2, 5-minute < 3, and no other bench, cargo or mocha process. All 15 parts met it (the gate held some parts after the 1-minute load reached 2.0-2.5); at the start of each part, 1-minute load was 1.21 to 1.94 and 5-minute load was 1.45 to 1.72 (`results/P5-22/timed-loads.txt`). |
+| Noise | Per-run CVs were up to about 50%, and round-to-round medians of one op moved by up to about ±30% on every engine, including TS. Treat ratio changes under about 25% as noise. The figures are the median over three rounds of each round's median. |
+
+## Before (pre-F1, same run) vs now, × TS 5.0.0
+
+Selected rows. The full 59-row tables are `results/P5-22/compare.md`
+(pre-F1 in this run) and `compare-vs-p515.md` (P5-15's laptop ratios).
+
+| op | set | × TS API: P5-15 laptop | pre-F1 | **now** | × TS crate: pre-F1 | **now** |
+|---|---|---:|---:|---:|---:|---:|
+| extract_decorators | core-test-data | 14.83 | 13.66 | **5.83** | 19.27 | **1.62** |
+| extract_decorators | conformance | 19.96 | 14.53 | **6.84** | 17.47 | **1.31** |
+| extract_decorators | synthetic-large | 8.20 | 6.97 | **7.95** | 4.37 | **2.02** |
+| extract_vocabularies | core-test-data | 17.56 | 15.34 | **6.01** | 18.15 | **1.54** |
+| extract_vocabularies | conformance | 22.61 | 24.29 | **9.92** | 25.22 | **1.98** |
+| extract_vocabularies | synthetic-large | 10.98 | 10.89 | **8.64** | 4.69 | **2.58** |
+| dcs_decorate | core-test-data | 2.18 | 2.26 | **1.62** | 2.08 | **0.52** |
+| dcs_decorate | conformance | 2.33 | 2.00 | **1.32** | 1.78 | **0.39** |
+| dcs_decorate | synthetic-large | 1.40 | 1.49 | **1.82** | 0.86 | **0.66** |
+| add_model_file | core-test-data | 5.40 | 7.77 | **5.28** | 5.05 | **1.78** |
+| add_model_file | conformance | 13.64 | 20.24 | **14.15** | 6.81 | **2.06** |
+| add_model_file | synthetic-large | 4.03 | 5.65 | **5.52** | 2.12 | **1.91** |
+| new_resource | core-test-data | 10.77 | 9.76 | **2.97** | 0.23 | **0.22** |
+| new_resource | conformance | 12.72 | 14.05 | **4.10** | 0.33 | **0.29** |
+| new_resource | synthetic-large | 7.44 | 4.89 | **2.50** | 0.52 | **0.50** |
+| mm_new | (system models) | 2.37 | 1.25 | **1.97** | 0.02 | **0.02** |
+| from_json | core-test-data | 2.57 | 1.87 | **0.89** | 0.37 | **0.35** |
+| from_json | conformance | 3.44 | 2.24 | **0.92** | 0.19 | **0.15** |
+| get_namespaces | core-test-data | 15.92 | 13.10 | **13.28** | 1.55 | **1.67** |
+| get_namespaces | conformance | 14.90 | 12.75 | **13.03** | 1.38 | **1.33** |
+| resolve_type | core-test-data | 8.34 | 12.80 | **11.70** | 0.22 | **0.22** |
+| get_type | core-test-data | 5.39 | 8.47 | **9.42** | 0.28 | **0.20** |
+| modelfile_new | conformance | 8.90 | 10.11 | **9.11** | 1.78 | **1.61** |
+| add_cto_model | conformance | 4.65 | 6.93 | **5.84** | 1.09 | **0.33** |
+| validate | core-test-data | - | 1.28 | **1.26** | 0.45 | **0.45** |
+| set_property_value | conformance | - | 5.55 | **5.00** | 0.93 | **0.73** |
+| add_array_value | core-test-data | - | 5.83 | **3.71** | 0.74 | **0.67** |
+
+## F1-F4 against their estimates
+
+- **F1 (models_ast one snapshot).** Estimate: extract_* through the TS API from about 22× to 3-5× TS, and decorateModels to about 1×. **Met in the crate and missed through the TS API.** On the multi-file sets, crate-direct extract_* is 11-12× faster: 17-25× TS becomes 1.3-2.0×. Through the TS API, extract_* runs 2.2-2.6× faster and lands at 5.8-9.9× TS, not 3-5×. decorateModels lands at 1.3-1.6× (synthetic-large 1.8×, within noise of 1.5×), not 1×. synthetic-large is one file, so F1 barely moves it through the API (crate: about 2× faster). The residual is WASM execution time, not crossings. In the V8 profile, WASM code is 65-80% of each decorator op. `decoratorManagerExtractDecorators` alone takes 45 ms in WASM on synthetic-large against 18 ms for the whole op in native code.
+- **F2 (detached-file validation without a manager clone).** Estimate: addModelFile from 10.5×/13.6× to about 3-4×/5×. **Missed through the TS API.** The crate is 2.8-3.2× faster on the multi-file sets (5.1×/6.8× TS becomes 1.8×/2.1×), and flat on single-file synthetic-large, as P5-18 found. Through the TS API, the gain is about 1.4-1.5× on the multi-file sets: 7.8×/20.2× becomes 5.3×/14.2× (the P5-15 laptop measured 5.4×/13.6×). Per file, 5.3 crossings remain: `stageModelFile` (45-68 µs), `modelFileValidateStaged` (58-62 µs) and `modelFileFromAstHeader` (42-51 µs). Together they are about 160 µs in-engine, against about 40-94 µs per file for the whole crate path.
+- **F3 (getIdentifierFieldName in Rust plus memo).** Estimate: newResource from 12.7× to about 4×. **Met.** 14.1×/9.8×/4.9× becomes 4.1×/3.0×/2.5×, and crossings drop by 3 per resource.
+- **F4 (parseNamespace semver in Rust).** Estimate: new ModelManager about -200 µs, to about 1.5×. **Missed; no measurable gain, as P5-20 reported.** mm_new reads 1.25× before and 1.97× now, but its before rounds were 448/506/814 µs and its now rounds 798/896/714 µs, and the crate is flat (9.2 against 9.6 µs), so this is noise around about 2× TS rather than a regression. `new ModelManager()` does not call parseNamespace.
+- **P5-16 (fromJSON fast path, outside F1-F4).** fromJSON is now faster than TS 5.0.0: 1.9-2.3× becomes 0.89-0.93×, with 1 crossing per item, down from 7.5-14.4.
+
+## Remaining hotspots, ranked (× TS through the TS API, now)
+
+1. **addModelFile, conformance, 14.2×** (core-test-data 5.3×, synthetic-large 5.5×). The costs are the three per-file engine calls above, plus GC at 22%. The AST is decoded twice, once by `modelFileFromAstHeader` and once by `stageModelFile`.
+2. **getNamespaces, 13×** (9-10 µs against 0.7 µs). This is a pure read, so the F5 memo applies.
+3. **resolveType and getType, 5-12×** (2-3 µs against 0.2-0.4 µs). TS-side code accounts for 57-64% of the time (`ts-core`). The engine call is about 1 µs. The F5 memo applies.
+4. **extractVocabularies and extractDecorators, 6-10×** (21-71 ms). WASM execution dominates. Each call also rebuilds the DCS model manager (5-45 `stageModelFile` calls plus `modelFileFromAstHeader` and one `validateModelFiles`), which costs 4.9 ms (conformance) to 5.9 ms (synthetic-large) per call. F6 targets this.
+5. **ModelFile construction, 6-9×**, and **addCTOModel, 1.5-5.8×** (the cto-parser is 38-62% of the time, JS in both engines).
+6. **setPropertyValue, addArrayValue and toJSON, 2-5×** (a few µs each).
+7. **decorateModels, 1.3-1.8×.** The same DCS manager rebuild costs 5.7 ms (conformance), 7.0 ms (core-test-data) and 10.3 ms (synthetic-large) per call, against gaps to TS of 7, 24 and 44 ms.
+
+Below 2× TS: validate, dcsValidate, derivesFrom, isAssignableTo, getDecorators and fromJSON.
+
+## Recommendation on F5 and F6, and new items
+
+- **F6 (resident DCS manager with staged-handle results): do it.** Its target has not shrunk. The rebuild costs 5-10 ms per decorateModels, extractDecorators or extractVocabularies call through the TS API. Removing it would take decorateModels to about 1.1× (conformance), 1.4× (core-test-data) and 1.6× (synthetic-large), and extract_* on conformance from about 6.8× to about 5.3×.
+- **F5 (epoch-keyed TS memo for pure introspection reads): do it, narrowly and cheaply.** getNamespaces (13×) and resolveType/getType (5-12×) are the highest remaining ratios among cheap reads, but they are 1-10 µs in absolute terms. The memo pays off only for repeated reads, so scope it to getNamespaces, getType and resolveType, keyed on the existing `epoch` binding.
+- **New N1: stage and header in one engine call for addModelFile.** Decode the AST once and have `stageModelFile` return the header, dropping `modelFileFromAstHeader` from the per-file path (about 42-51 µs of about 160 µs in-engine per file; unmeasured estimate: addModelFile down about 25%).
+- **New N2: profile the WASM build of the DCS path.** In-WASM time is about 2.5× the native crate for the same work (45 ms against 18 ms on synthetic-large extract_decorators). A symbolised WASM profile would show whether allocator, `opt-level` or string-conversion choices explain it. This measure-only task did not investigate further.
+
+No fuzz, per the milestone-only policy. No code changed apart from the driver (`p522-run.sh`) and the results.
+
 # P5-20 (F4): parseNamespace checks the version in Rust, no semver.parse callback (2026-09-29)
 
 Task P5-20 F4 (accordproject/concerto-rust#318) fixes finding F4 of the
