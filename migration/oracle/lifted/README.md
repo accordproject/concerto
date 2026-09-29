@@ -316,6 +316,11 @@ without editing `packages/concerto-core/test/**`:
   field with no validator, which `setPropertyValue` keeps on the visitor
   because it is cheaper there (`visitorIsCheaper`); `SET-006`/`SET-007`
   set one on a field with a `regex` validator, which goes to the engine.
+* `metamodel-mirror.checks.js` (task P5-31, accordproject/concerto-rust#341):
+  a metamodel file a user adds (`newMetaModelManager()`, `addModelFile`,
+  `addMetamodel: true`) is mirrored into the engine, so its manager stays in
+  parity and its reads go to Rust. The `engine` field is true on the
+  engine-less reference and pins the Rust path against `src`.
 
 `serializer-fallback.checks.js` also passes a boxed `utcOffset`
 (`new Number(0)`) to `fromJSON`: the codec cannot carry it, so plain, valid

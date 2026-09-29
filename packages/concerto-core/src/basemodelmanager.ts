@@ -222,6 +222,17 @@ class BaseModelManager {
      */
      rustHandle: { [binding: string]: (...args: any[]) => any };
     /**
+     * (P5-31, accordproject/concerto-rust#341): true only while the
+     * constructor builds `metamodelModelFile`, the cached copy of the
+     * metamodel `validateAst` registers when rustHandle keeps its own copy
+     * after a failed check. `_needsRustWrite` answers false for the
+     * metamodel namespace while it is set, so engine/views.ts
+     * `stageModelFile` keeps no engine stage for that copy in every new
+     * manager. Every other metamodel file, a user's included, is mirrored.
+     * @internal
+     */
+     _buildingMetamodelCopy?: boolean;
+    /**
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
@@ -260,42 +271,19 @@ class BaseModelManager {
         this.addRootModel();
 
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
-        this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace);
+        this._buildingMetamodelCopy = true;
+        try {
+            this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace);
+        } finally {
+            this._buildingMetamodelCopy = false;
+        }
 
         if(options?.addMetamodel) {
+            // Mirrored into rustHandle by `addModelFile` like any other
+            // namespace (P5-31, accordproject/concerto-rust#341):
+            // rustHandle's own constructor loads only `concerto@1.0.0` and
+            // `concerto.decorator@1.0.0`.
             this.addModelFile(this.metamodelModelFile);
-            // P4-08 (accordproject/concerto-rust#67): `_needsRustWrite`
-            // excludes `MetaModelNamespace` on the assumption that
-            // rustHandle's own constructor already preloads it the way it
-            // preloads the decorator/root system models (`EXCLUDE_NS`) --
-            // it does not (concerto-wasm's `ModelManagerHandle::new`/
-            // `ModelManager::new` load only `concerto@1.0.0` and
-            // `concerto.decorator@1.0.0`). Since `ModelFile.validate()` now
-            // delegates fully to Rust (maintainer decision, 2026-09-26), a
-            // model that imports from `concerto.metamodel@1.0.0` (e.g.
-            // `DecoratorManager`'s own `DCS_MODEL`, via a manager built with
-            // `addMetamodel: true`) needs rustHandle's own manager to
-            // resolve that namespace too, not just `this.modelFiles`.
-            // Mirror it explicitly here, guarded against the case where
-            // `validateAst`'s own leak-tracking (above) already registered
-            // it in rustHandle.
-            /* istanbul ignore next */
-            if (this.rustHandle.modelFileId(MetaModelNamespace) === undefined) {
-                // Not reachable with a non-string in practice --
-                // `metamodelModelFile` is built above from fixed internal
-                // values (`undefined`, `MetaModelNamespace`) -- but guarded
-                // the same way as every other `getDefinitions()`/`getName()`
-                // forward for consistency (accordproject/concerto-rust#294
-                // follow-up).
-                const definitions = this.metamodelModelFile.getDefinitions();
-                const fileName = this.metamodelModelFile.getName();
-                this.rustHandle.addModelWithDefinitions(
-                    JSON.stringify(this.metamodelModelFile.getAst()),
-                    typeof definitions === 'string' ? definitions : undefined,
-                    typeof fileName === 'string' ? fileName : undefined,
-                    false,
-                );
-            }
         }
     }
 
@@ -386,10 +374,16 @@ class BaseModelManager {
 
     /**
      * Whether a namespace needs to be written into `rustHandle`: every
-     * namespace but the decorator/root system models -- already loaded by
-     * `rustHandle`'s own constructor -- and the transient metamodel file
-     * `validateAst` registers and removes around its own deserialisation
-     * check.
+     * namespace but the decorator/root system models, which `rustHandle`'s
+     * own constructor already loads. The metamodel namespace is written
+     * like any other (P5-31, accordproject/concerto-rust#341), so a manager
+     * a user adds the metamodel to (`newMetaModelManager`, or
+     * `addModelFile` of a metamodel ModelFile) keeps rustHandle in parity
+     * and answers its reads from Rust. The only metamodel copy that is
+     * never written is `validateAst`'s own (`metamodelModelFile`): it is
+     * not staged while the constructor builds it (`_buildingMetamodelCopy`),
+     * and `validateAst` registers it in `this.modelFiles` only when
+     * rustHandle already holds its own copy.
      * @param {string} namespace - the namespace being added, updated or removed
      * @return {boolean} true if `namespace` needs writing to `rustHandle`
      * @private
@@ -397,7 +391,10 @@ class BaseModelManager {
      */
     /* istanbul ignore next */
     _needsRustWrite(namespace) {
-        return !EXCLUDE_NS.includes(namespace) && namespace !== MetaModelNamespace;
+        if (EXCLUDE_NS.includes(namespace)) {
+            return false;
+        }
+        return !(namespace === MetaModelNamespace && this._buildingMetamodelCopy);
     }
 
     /**
@@ -709,11 +706,15 @@ class BaseModelManager {
             // Ask rustHandle for the ground truth instead of re-deriving
             // TS's own control flow: mirror into `this.modelFiles` only when
             // rustHandle's own handle now actually holds `MetaModelNamespace`.
-            // MetaModelNamespace is excluded from _needsRustWrite, so this
-            // only ever writes this.modelFiles, never rustHandle (which
-            // already holds its own copy in the case that reaches it).
+            // rustHandle already holds its own copy in the case that
+            // reaches it, so this writes only this.modelFiles, not
+            // rustHandle (P5-31, accordproject/concerto-rust#341): it is the
+            // one metamodel copy that is not mirrored through
+            // `_rustMirrorAdd`. `metamodelModelFile` was never staged
+            // (`_buildingMetamodelCopy`), so there is no stage to drop.
             if (!alreadyHasMetamodel && this.rustHandle.modelFileId(MetaModelNamespace) !== undefined) {
-                this.addModelFile(this.metamodelModelFile, undefined, MetaModelNamespace, true);
+                this.modelFiles[MetaModelNamespace] = this.metamodelModelFile;
+                engineViews().invalidatePropertyLookups();
             }
             throw err;
         }
