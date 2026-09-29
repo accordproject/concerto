@@ -4,7 +4,7 @@
   "description": "Object-centric serialization of Concerto models",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
-    "node": ">=18",
+    "node": "^20.19.0 || >=22.12.0",
     "npm": ">=10"
   },
   "main": "dist/index.js",

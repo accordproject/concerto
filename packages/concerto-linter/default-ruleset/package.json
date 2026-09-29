@@ -4,7 +4,7 @@
   "description": "Default ruleset for the Accord Project Concerto Linter",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
-    "node": ">=18",
+    "node": "^20.19.0 || >=22.12.0",
     "npm": ">=10"
   },
   "main": "dist/ruleset-main.js",
