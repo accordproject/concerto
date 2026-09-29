@@ -31,6 +31,7 @@ OUT=$1
 REF=migration/oracle/reference/node_modules/@accordproject/concerto-core/dist
 FIX=migration/bench/fixtures/p515
 OPS=mm_new,modelfile_new,add_model_file,add_cto_model
+[ -f "$REF/index.js" ] || { echo "missing $REF: run npm ci in migration/oracle/reference"; exit 2; }
 mkdir -p "$OUT"
 
 loads() {
@@ -43,7 +44,7 @@ waited=0
 gate() {
   while :; do
     set -- $(loads)
-    busy=$(pgrep -fl 'run-ts\.mjs|p5[0-9a-z]*-(sweep|rounds|profile)|--bench|criterion|wasm-instance|(^|/)cargo( |$)|mocha|replay\.js|load_profile' | grep -v "${P515_SELF:-P5-48}" | grep -v pgrep | wc -l | tr -d ' ')
+    busy=$(pgrep -fa 'run-ts\.mjs|p5[0-9a-z]*-(sweep|rounds|profile)|--bench|criterion|wasm-instance|(^|/)cargo( |$)|mocha|replay\.js|load_profile' | grep -v "${P515_SELF:-P5-48}" | grep -v pgrep | wc -l | tr -d ' ')
     if awk -v a="$1" -v b="$2" 'BEGIN{exit !(a<2 && b<3)}' && [ "$busy" = 0 ]; then
       return 0
     fi
