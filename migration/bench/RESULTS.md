@@ -1,3 +1,105 @@
+# P5-40 (F-B): DCS extract without clones, borrowed AST walk (2026-09-29)
+
+Task P5-40 (accordproject/concerto-rust#350, F-B from the P5-30 report on
+#335) changes `concerto-core`'s `DecoratorExtractor` and the extract
+bindings' model load in concerto-wasm:
+- The extractor walks a borrowed AST. It no longer clones each `decorators`
+  array twice or `to_string`s every declaration and property name.
+- The command sets and vocabularies are built from those borrows. A second
+  walk then strips the decorators in place.
+- The result models are moved into the result manager, not cloned.
+- The three `decoratorManagerExtract*` bindings and the `DcsManagerHandle`
+  constructor load the parsed models by value, dropping
+  `as_array().cloned()` and the per-model copy.
+
+Output is unchanged: 27 extract cases (3 bindings × 3 option sets × the 3
+inputs dumped from the TS API) give identical `JSON.stringify` output on
+both engines (`results/P5-40/eq.txt`). The oracle stays at 16242 fixtures
+with 0 regressions. concerto needs no shim change. The output is still
+`serde_json::Value`, as F-B's scope says. Encoding the command sets
+directly (P5-42's T3) is not part of this task. The raw outputs, the
+drivers and the scratch patch to the P5-30 spike are in `results/P5-40/`.
+
+| | |
+|---|---|
+| Machine | Cloud container, Intel Xeon @ 2.10GHz, 4 vCPU, Linux 6.18 (the P5-22 machine type) |
+| Toolchain | Node v22.22.2, rustc 1.94.1, `concerto-wasm/build.sh` with wasm-opt 132 (engine 2,991,800 bytes now, 2,990,499 before) |
+| Now | `concerto` `b0662a419` (unchanged), `concerto-rust` `9bb764a` (the P5-40 commit on `a52dad4`) |
+| Before | `concerto-rust` `a52dad4` (the integration head, P5-41 and P5-27 included) with its engine, timed in the same run against the same concerto dist |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, timed in each round |
+| Driver | `results/P5-40/scripts/run.sh`, P5-41's driver: three interleaved rounds, with the engine order alternated per round. Each round runs (1) `p515-sweep.mjs --ops extract_decorators` through the TS API on TS 5.0.0, on the Rust engine through the resident path, and on the per-call bindings (`percall.cjs`), with 5 warm-up and 30 samples each; (2) the P5-30 `run-wasm.mjs` binding timing on the dumped inputs; and (3) the native P5-30 spike, glibc and dlmalloc builds, both with P5-41's direct encode. Its rebuild stage is the old binding's (`P540_REBUILD=binding-old`: array clone plus per-model copy) on the before side and the new owned load (`P540_REBUILD=owned`) on the now side. Round 1 also runs the allocation-counting build. `run-wasm-stages.sh` then times the spike's stages inside WASM (shipped build settings), in three more gated rounds. |
+| Quiet gate | Before each timed part: 1-minute load < 2, 5-minute < 3, and no other bench, cargo, mocha or replay process. All 9 parts of `run.sh` met it, at 1-minute load 1.35 to 1.94 and 5-minute load 2.37 to 2.61 (`loads.txt`). The 3 WASM-stage rounds met it at 1-minute load 0.15 to 0.54 and 5-minute load 2.79 to 2.96 (`loads-wasm-stages.txt`). |
+| Noise | As in P5-41: round-to-round medians move by up to about ±15-35%. Treat changes under about 25% on the TS-API path as noise. Each figure is the median over three rounds of each round's median. |
+
+## Where the saving lands (P5-30 spike, same code as the binding)
+
+WASM, shipped settings. The rebuild stage is P5-30's original by-reference
+load on both sides, so the difference is in extract:
+
+| set | extract before -> now (ms) | stages total before -> now (ms) |
+|---|---:|---:|
+| synthetic-large | 15.03 -> **11.27** (rounds 15.2/14.7/15.0 -> 13.5/11.3/11.2) | 31.59 -> 28.53 |
+| conformance | 4.07 -> **3.40** | 7.99 -> 7.25 |
+| core-test-data | 9.85 -> **6.97** | 19.98 -> 17.86 |
+
+Native, before -> now (ms):
+
+| allocator | set | rebuild | extract | drop | total |
+|---|---|---:|---:|---:|---:|
+| dlmalloc (the WASM allocator) | synthetic-large | 5.95 -> 3.19 | 13.86 -> 11.29 | 2.69 -> 1.54 | 27.60 -> **20.59** |
+| dlmalloc | conformance | 1.72 -> 0.72 | 4.52 -> 2.44 | 0.71 -> 0.33 | 8.26 -> **4.34** |
+| dlmalloc | core-test-data | 3.86 -> 2.31 | 9.02 -> 8.41 | 1.75 -> 1.18 | 17.00 -> **15.49** |
+| glibc | synthetic-large | 6.06 -> 2.95 | 17.55 -> 10.73 | 4.00 -> 1.68 | 34.01 -> **20.04** |
+| glibc | conformance | 1.04 -> 0.62 | 2.86 -> 2.21 | 0.82 -> 0.48 | 5.69 -> **4.03** |
+| glibc | core-test-data | 3.13 -> 1.86 | 7.66 -> 5.75 | 3.30 -> 0.95 | 16.93 -> **11.05** |
+
+Allocations (count-alloc build, round 1), before -> now:
+
+| set | rebuild | extract |
+|---|---:|---:|
+| synthetic-large | 115,315 -> **48,644** (12.13 -> 6.40 MB) | 220,498 -> **151,131** (21.39 -> 15.36 MB) |
+| conformance | 23,207 -> **9,814** | 52,452 -> **38,591** |
+| core-test-data | 63,044 -> **26,837** | 123,621 -> **85,873** |
+
+## The binding, from JS (run-wasm.mjs, `decoratorManagerExtractDecorators`)
+
+| set | before (ms) | now (ms) |
+|---|---:|---:|
+| synthetic-large | 36.12 (33.2/36.1/37.2) | **29.23** (29.2/37.6/29.0) |
+| conformance | 9.29 (9.3/8.8/9.4) | **7.59** (6.4/8.1/7.6) |
+| core-test-data | 19.67 (19.7/21.1/18.7) | **16.99** (16.8/17.0/18.0) |
+
+## Through the TS public API: `DecoratorManager.extractDecorators`, × TS 5.0.0
+
+| set | TS 5.0.0 (ms) | resident before -> now (ms) | **× TS resident** before -> now | per-call before -> now (ms) | **× TS per-call** before -> now |
+|---|---:|---:|---:|---:|---:|
+| synthetic-large | 9.60 | 34.95 -> 34.92 | 3.64 -> **3.64** | 50.50 -> 40.68 | 5.26 -> **4.24** |
+| conformance | 2.88 | 8.42 -> 7.51 | 2.92 -> **2.61** | 13.71 -> 13.42 | 4.76 -> **4.66** |
+| core-test-data | 8.02 | 17.54 -> 17.78 | 2.19 -> **2.22** | 29.67 -> 27.48 | 3.70 -> **3.43** |
+
+## Against the F-B estimate (extract 14.6 -> 7-9 ms, -6 to -8 ms on synthetic-large)
+
+- **Extract stage in WASM: missed.** It went from 15.03 to 11.27 ms
+  (-3.8 ms), not to 7-9 ms. Allocations in extract fell by a third
+  (220k to 151k). What remains is mostly outside the walk: the resolved-AST
+  copy from `models_ast(true, true)` / `resolve_local_names`, and building
+  and validating the result `ModelFile`s. P5-42 put these at about 5.4 and
+  6.3 ms natively; F-B's scope does not cover them. Under glibc the extract
+  saving is larger (-6.8 ms) than under dlmalloc, WASM's allocator
+  (-2.6 ms natively).
+- **Rebuild and drop: met, and above the ~1 ms estimate.** Rebuild is
+  -2.8 ms (dlmalloc) to -3.1 ms (glibc) and drop -1.2 to -2.3 ms. Rebuild
+  allocations fell from 115k to 49k.
+- **End to end:**
+  - Per-call: **met.** The binding is -6.9 ms (36.1 -> 29.2), and the
+    per-call TS-API path is -9.8 ms (50.5 -> 40.7, × TS 5.26 -> 4.24),
+    inside or above the -6 to -8 ms estimate.
+  - Resident path (the TS API default since P5-27): **not visible.** It
+    only gets the extract-stage saving (about -3.8 ms, 11% of 35 ms), not
+    the rebuild saving, and read 34.95 -> 34.92 ms. That is within this
+    machine's noise band. conformance moved 2.92× -> 2.61× and
+    core-test-data 2.19× -> 2.22×, both noise.
+
 # P5-34 (T4): ModelFile stub support removed from BaseModelManager, crossings before and after (2026-09-29)
 
 Task P5-34 (accordproject/concerto-rust#344, T4 of the P5-26 report on #330)
