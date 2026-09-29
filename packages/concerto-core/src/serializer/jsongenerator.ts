@@ -16,6 +16,7 @@ import Resource from '../model/resource';
 import Typed from '../model/typed';
 import ModelUtil from '../modelutil';
 import { NullUtil as Util } from '@accordproject/concerto-util';
+import { getRelationshipMapValue } from './relationshipmapvalue';
 
 // The Rust engine (src/engine/index.ts) is the only path (P5-02: the
 // CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See jsonpopulator.ts's
@@ -112,6 +113,10 @@ class JSONGenerator {
         // initialise Map with $class property
         let map = new Map();
 
+        // P5-58 (BC-05, R1; DV-007): a relationship-typed value is written as
+        // a relationship property is, not as an embedded concept.
+        const relationship = getRelationshipMapValue(mapDeclaration);
+
         obj.forEach((value, key) => {
 
             // don't serialize System Properties, other than $class
@@ -119,8 +124,10 @@ class JSONGenerator {
                 return;
             }
 
-            // Key is always a string, but value might be a ValidatedResource.
-            if (typeof value === 'object') {
+            if (relationship) {
+                value = this.convertRelationship(relationship, value, parameters);
+            } else if (typeof value === 'object') {
+                // Key is always a string, but value might be a ValidatedResource.
                 // Resolve the declaration for the map value. Prefer the instance's
                 // own fully-qualified type so that polymorphic values (subclasses of
                 // the map's declared value type) are serialized using their actual
@@ -306,41 +313,40 @@ class JSONGenerator {
             // walk the object
             for (let index in obj) {
                 const item = obj[index];
-                if (this.permitResourcesForRelationships && item instanceof Resource) {
-                    let fqi = item.getFullyQualifiedIdentifier();
-                    if (parameters.seenResources.has(fqi)) {
-                        let relationshipText = this.getRelationshipText(relationshipDeclaration, item);
-                        array.push(relationshipText);
-                    } else {
-                        parameters.seenResources.add(fqi);
-                        parameters.stack.push(item, Resource);
-                        const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
-                        array.push(classDecl.accept(this, parameters));
-                        parameters.seenResources.delete(fqi);
-                    }
-                } else {
-                    let relationshipText = this.getRelationshipText(relationshipDeclaration, item);
-                    array.push(relationshipText);
-                }
+                array.push(this.convertRelationship(relationshipDeclaration, item, parameters));
             }
             result = array;
-        } else if (this.permitResourcesForRelationships && obj instanceof Resource) {
-            let fqi = obj.getFullyQualifiedIdentifier();
-            if (parameters.seenResources.has(fqi)) {
-                let relationshipText = this.getRelationshipText(relationshipDeclaration, obj);
-                result = relationshipText;
-            } else {
-                parameters.seenResources.add(fqi);
-                parameters.stack.push(obj, Resource);
-                const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
-                result = classDecl.accept(this, parameters);
-                parameters.seenResources.delete(fqi);
-            }
         } else {
-            let relationshipText = this.getRelationshipText(relationshipDeclaration, obj);
-            result = relationshipText;
+            result = this.convertRelationship(relationshipDeclaration, obj, parameters);
         }
         return result;
+    }
+
+    /**
+     * One relationship value: a resource written in full when
+     * `permitResourcesForRelationships` allows it and it is not already being
+     * written, otherwise its relationship text. A relationship-typed map value
+     * is written here too (P5-58, BC-05).
+     * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
+     * @param {Identifiable} obj - the relationship or the resource
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the relationship text, or the resource as JSON
+     * @private
+     */
+    convertRelationship(relationshipDeclaration, obj, parameters) {
+        if (this.permitResourcesForRelationships && obj instanceof Resource) {
+            let fqi = obj.getFullyQualifiedIdentifier();
+            if (parameters.seenResources.has(fqi)) {
+                return this.getRelationshipText(relationshipDeclaration, obj);
+            }
+            parameters.seenResources.add(fqi);
+            parameters.stack.push(obj, Resource);
+            const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
+            const result = classDecl.accept(this, parameters);
+            parameters.seenResources.delete(fqi);
+            return result;
+        }
+        return this.getRelationshipText(relationshipDeclaration, obj);
     }
 
     /**
