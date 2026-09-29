@@ -1,3 +1,66 @@
+# P5-34 (T4): ModelFile stub support removed from BaseModelManager, crossings before and after (2026-09-29)
+
+Task P5-34 (accordproject/concerto-rust#344, T4 of the P5-26 report on #330)
+removes the stub-ModelFile support in `BaseModelManager` (BC-46, BC-48). The
+per-call namespace-set parity check (`epoch()` plus, when the epoch moved,
+`getNamespaces()`, then an `Object.keys` + `Set` scan) becomes a flag the
+manager's own mutators set (`_mirrorPending`); a registered ModelFile's
+rustHandle handle is cached when it is committed; the TS read bodies behind
+the check become type guards with the v5 error classes; and `addModelFile`
+validates and registers a staged file in one engine call
+(`validateAndCommitStagedModelFile`, new in concerto-wasm).
+
+**Counts only, no timings:** the local machine was in use (coordinator
+scoping on #344), so these are TS->WASM boundary crossings per item,
+counted by `p515-sweep.mjs --mode count` (every concerto-wasm export and
+`ModelManagerHandle` method wrapped with a counter) and by
+`results/P5-34/count-extra.cjs` for the operations the sweep does not cover.
+Timing ratios can be taken later on cloud-3.
+
+| | |
+|---|---|
+| Machine | Local macOS (Darwin 22.6), Node v22.23.2; counts do not depend on the machine |
+| Before | `concerto` `6561368bb`, `concerto-rust` `369e6ea` (the integration head) |
+| After | the P5-34 branch on those heads |
+| Raw data | `results/P5-34/{before,now}-crossings.json` (sweep, `--samples 3 --warmup 1`), `results/P5-34/{before,now}-extra.txt` |
+
+## Through the sweep (crossings per item, before -> after, ratio)
+
+| op | concerto-core-test-data | conformance | synthetic-large |
+|---|---:|---:|---:|
+| `get_type_first` (`ModelManager.getType`, first read after a model change) | 2.00 -> 1.00 (0.50) | 2.00 -> 1.00 (0.50) | 2.00 -> 1.00 (0.50) |
+| `resolve_type_first` | 2.00 -> 1.00 (0.50) | 2.00 -> 1.00 (0.50) | 2.00 -> 1.00 (0.50) |
+| `get_namespaces_first` | 2.00 -> 1.00 (0.50) | 2.00 -> 1.00 (0.50) | 2.00 -> 1.00 (0.50) |
+| `derives_from` | 2.00 -> 1.00 (0.50) | 2.00 -> 1.00 (0.50) | 2.00 -> 1.00 (0.50) |
+| `is_assignable_to` | 2.00 -> 1.00 (0.50) | 2.00 -> 1.00 (0.50) | 2.00 -> 1.00 (0.50) |
+| `new_resource` (`Factory.newResource`) | 9.41 -> 4.56 (0.48) | 5.55 -> 3.18 (0.57) | 5.00 -> 3.00 (0.60) |
+| `add_array_value` | 24.36 -> 15.75 (0.65) | 1.00 -> 1.00 | 1.00 -> 1.00 |
+| `set_property_value` | 1.17 -> 1.08 (0.93) | 1.15 -> 1.05 (0.91) | 1.00 -> 1.00 |
+| `add_model_file` / `add_cto_model` (per file) | 4.29 -> 3.29 (0.77) | 4.24 -> 3.24 (0.76) | 14.00 -> 13.00 (0.93) |
+| `dcs_validate` | 160 -> 87 (0.54) | 188 -> 101 (0.54) | 28 -> 21 (0.75) |
+| `dcs_decorate`, `extract_decorators`, `extract_vocabularies` | 88 -> 87 (0.99) | 102 -> 101 (0.99) | 22 -> 21 (0.95) |
+
+Unchanged: `mm_new` (10), `modelfile_new` (2), `from_json`, `to_json` and
+`validate` (1 each), and the memo-hit reads `get_type`, `resolve_type`,
+`get_namespaces` and `get_decorators` (0 each).
+
+## Operations the sweep does not cover (`count-extra.cjs`, crossings per call)
+
+| operation | before | after | ratio |
+|---|---:|---:|---:|
+| `ModelFile.getType` / `isLocalType` / `getFullyQualifiedTypeName` (registered file) | 3 (`epoch` x2 + the call) | 1 | 0.33 |
+| `ModelFile.getVersion` / `getImports` (registered file; P5-32 makes these field reads) | 3 | 1 | 0.33 |
+| `ModelManager.getModelFileByFileName` | 2 | 1 | 0.50 |
+| `ModelManager.validateModelFiles` | 3 (`epoch`, `getNamespaces`, the call) | 1 | 0.33 |
+| `addCTOModel`, one file | 4 (stage+header, compat, `modelFileValidateStaged`, `commitStagedModelFile`) | 3 (`validateAndCommitStagedModelFile`) | 0.75 |
+| `addModelFile`, a validated file already built | 2 | 1 | 0.50 |
+| `addModelFiles`, two files | 9 | 7 | 0.78 |
+| `new ModelManager()`, `updateModelFile`, `deleteModelFile` | 10, 5, 1 | 10, 5, 1 | 1.00 |
+
+`updateModelFile` keeps its separate validate call: an update sends the AST
+to rustHandle again (`updateModelFile`), so its stage is dropped rather than
+committed, and there is no stage to validate and commit in one call.
+
 # P5-41 (F-C): DCS extract results encoded directly, no intermediate Value (2026-09-29)
 
 Task P5-41 (accordproject/concerto-rust#351, F-C from the P5-30 report on

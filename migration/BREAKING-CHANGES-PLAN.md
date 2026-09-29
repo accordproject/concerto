@@ -223,6 +223,24 @@ rows cited in BC-28 and BC-34.
 and BC-34 from happening during the migration. P4-08's `stripInternal` and
 `@internal` members are not public and are excluded.
 
+### 1.8 P5-26 test-support analysis (accordproject/concerto-rust#330; P5-34 #344)
+
+P5-26 audited the code kept mainly so white-box tests could pass (stub
+ModelFiles, spied call sites) and proposed BC rows for the public extension
+points involved. The maintainer chose option 1 on each of its three
+decisions (2026-09-29, on #330). The coordinator assigned these IDs on #344
+to avoid the P5-23 clash: BC-46 (duck-typed ModelFiles), BC-47 (a ModelFile
+needs a BaseModelManager, P5-35), BC-48 (`modelFiles` internal), BC-49
+(per-declaration `validate()`) and BC-50 (monkeypatched ClassDeclaration
+methods, P5-36). P5-34 adds BC-46, BC-48 and BC-49; BC-47 and BC-50 are
+added by their own tasks.
+
+| ID | Source | Current behaviour (TS 5.0.0 / Rust) | Proposed behaviour | Category | Affects | Evidence | Risk | Benefit | Semver | Size |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **BC-46** | P5-26 report on #330 (I-1, I-2; the proposed BC-41); maintainer decision D3 option 1 (2026-09-29) | `addModelFile`, `addModelFiles` and `updateModelFile` accept any object with the `ModelFile` methods they call (`getNamespace`, `getVersion`, `validate`, `getAst`, ...). Before P5-34 the engine manager kept such an object out of its mirror, and every read on that manager then switched to a TS body. | **Shipped in R1 by P5-34:** only a ModelFile built by the ModelFile constructor is accepted; anything else (a duck-typed object, `Object.create(ModelFile.prototype)`, a sinon stub instance) throws a `TypeError` (`<method> expects a ModelFile built by the ModelFile constructor`). v5.0.0 already threw a `TypeError` for almost every such value, from the first method it lacked. The mirror-skip (`_isMirrored`, engine/views.ts `constructedFiles`) and the TS read bodies behind it are deleted. | API | JS | lifted checks CO-MM-010 to 018, P511-003, P511-006 and BOUNDARY-ARG-043/044 (deleted with the support); the frozen suite's stub cases were rewritten to real ModelFiles by P5-33 (#343) | low: the parameters are typed `ModelFile` in the `.d.ts`, and only test stubs were found doing this | every read of a manager answers from the engine, without a per-call mirror check | major (R1) | S (done) |
+| **BC-48** | P5-26 report (I-1(iv); the proposed BC-43); maintainer decision D3 option 1 (2026-09-29) | `ModelManager.modelFiles` is a public field. Mutating it bypassed the engine mirror; before P5-34 a per-call namespace-set comparison then silently switched reads to TS. | **Shipped in R1 by P5-34:** `modelFiles` is `@internal` (removed from the published `.d.ts` by `stripInternal`) and documented as read-only; read it through `getModelFile`, `getModelFiles` and `getNamespaces`. The per-call parity check is replaced by a flag the manager's own mutators set (`_mirrorPending`), so a direct mutation is no longer detected. | API | JS | `migration/api-snapshot/full-api.d.ts` (the field's line goes); crossings per read halve (`migration/bench/RESULTS.md`, P5-34) | low: the tests only read it | about half the engine calls per manager read | major (types) (R1) | S (done) |
+| **BC-49** | P5-26 report (I-18; the proposed BC-44); maintainer decision D3 option 1 (2026-09-29) | Every declaration and element has a public `validate()` (`@protected` in the docs), which the library never calls: `ModelFile.validate()` and `ModelManager.validateModelFiles()` validate a whole file in one engine call. About 1k lines of per-element WASM bindings back the per-declaration path, which must be kept in parity with the whole-file one. | Deprecate in R2 (warn on a call; point to `ModelFile.validate()` / `ModelManager.validateModelFiles()`), remove in R3 with the per-element bindings. **No code change in R1.** | API | JS and Rust | I-18; 53 direct-call cases in 7 `test/introspect/*` files | medium: the methods are in the `.d.ts` | one validation path; about 1k WASM lines and 250 TS lines fewer | major (R3) | M |
+
 ### 1.6 Rust-crate-API-only (no JS impact; feeds P6-01 #83, `docs/public-api.md` §3.4)
 
 | ID | Source | Current behaviour | Proposed behaviour | Category | Evidence | Risk | Size |
@@ -244,7 +262,7 @@ and BC-34 from happening during the migration. P4-08's `stripInternal` and
 | Class | Rows |
 |---|---|
 | **Safe after the migration as minor or patch** | BC-01, BC-06, BC-08, BC-11, BC-12, BC-14 (crash to domain exception, or message text only); BC-38 (additive error codes, minor); BC-09 (subject to Q8); BC-21 as a faithful fix (patch); BC-29 (patch, non-breaking form); BC-26 additive form, BC-30 (minor, additive); BC-35 generation form (patch); BR-02 |
-| **Needs a major release** | BC-37 (already shipped in R1), BC-23 (shipped in R1 by P5-10a/b), BC-07, BC-42, BC-43 and BC-45 (shipped in R1 by P5-24), BC-41 (R1, P5-38), BC-39, BC-40, BC-44, BC-02, BC-04 (until Q6), BC-05, BC-10, BC-17, BC-19 (with BC-18 and BC-20 folded in), BC-21 extending DV-018, BC-24 factory-timing part (its non-breaking part shipped in R1), BC-26 Rust-owned form, BC-27, BC-28, BC-31, BC-32, BC-33, BC-34, BC-35 removal form |
+| **Needs a major release** | BC-37 (already shipped in R1), BC-23 (shipped in R1 by P5-10a/b), BC-07, BC-42, BC-43 and BC-45 (shipped in R1 by P5-24), BC-41 (R1, P5-38), BC-46 and BC-48 (shipped in R1 by P5-34), BC-49 (R2 deprecation, R3 removal), BC-39, BC-40, BC-44, BC-02, BC-04 (until Q6), BC-05, BC-10, BC-17, BC-19 (with BC-18 and BC-20 folded in), BC-21 extending DV-018, BC-24 factory-timing part (its non-breaking part shipped in R1), BC-26 Rust-owned form, BC-27, BC-28, BC-31, BC-32, BC-33, BC-34, BC-35 removal form |
 | **Changelog-only: already Rust behaviour, universal at P5-02** | BC-03 (DV-004), BC-07 part (a) (DV-009), BC-13 (DV-015), BC-15 (DV-017), BC-16 (DV-018) |
 | **Rust-crate-API-only** (feeds P6-01 #83) | BR-01 to BR-13 |
 | **No change proposed** | BR-01, BC-25 (a constraint on R1; not yet met, see its row), BC-36, BC-22 (pending #219) |
@@ -267,6 +285,7 @@ otherwise "same behaviour, new engine".
 - **Changelog for P5-02's accepted API removals:** BC-37 (`DecoratorExtractor`, internal `DecoratorManager` statics, `MapKeyType`/`MapValueType.processType`).
 - **Strict `DateTime` (maintainer decision 2026-09-29 on #327; shipped by P5-24 #328):** BC-07 (b)+(c), BC-42, BC-43 and BC-45, with their changelog entries (section 4). No R2 deprecation step.
 - **Strict namespace SemVer (maintainer decision 2026-09-29 on #328; implemented by P5-38):** BC-41, with its changelog entry (section 4). No R2 deprecation step.
+- **ModelFile stub support removed (maintainer decision 2026-09-29 on #330; shipped by P5-34 #344):** BC-46 (only constructor-built ModelFiles) and BC-48 (`modelFiles` internal and read-only), with their changelog entries (section 4). No R2 deprecation step.
 - **Lazy views (maintainer decision 2026-09-27; shipped by P5-10a #269 and P5-10b #270; verified by P5-10c #271):** BC-23 as built, BC-24's non-breaking part (decorator factories stay eager, #270 option (b)), and BC-25 as the constraint they must meet. **P5-10c found one gap in BC-25** (a Rust under-rejection now surfaces at first read instead of at construction); it must be fixed, or accepted by the maintainer, before R1. Changelog entries for the mutation and object-shape changes in BC-23 (section 4).
 - **Optionally, the minor-class fixes, because after P5-02 they are one-place Rust changes:**
   - BC-06, BC-08, BC-11, BC-12 and BC-14: TS crash to domain exception, or message text;
@@ -290,6 +309,7 @@ otherwise "same behaviour, new engine".
 - BC-35 generation form;
 - BC-38 (standard `errorType` codes equal to the conformance `@rule` IDs; it decides the public code format first);
 - BC-44's deprecation warning;
+- BC-49's deprecation warning (per-declaration `validate()`);
 - anything from the R1 optional list that was not shipped.
 
 **Dependencies:**
@@ -310,7 +330,8 @@ otherwise "same behaviour, new engine".
 - **Performance and API:**
   - BC-24's factory-timing part, if the maintainer adopts it (BC-23 and BC-25 moved to R1);
   - BC-27 and BC-28;
-  - BC-34 and BC-35 (removal form).
+  - BC-34 and BC-35 (removal form);
+  - BC-49 (per-declaration `validate()` and its per-element WASM bindings removed, deprecated in R2).
 
 **Dependencies and order inside R3:**
 1. **BC-19 first.** It makes BC-25's zero-under-rejection guarantee structural (Rust checks the full metamodel shape), rather than measured as in R1, and it lets BR-09 drop the `Value` fallback.
@@ -354,6 +375,9 @@ RB does not affect JS users and can run in parallel with R2.
 | BC-43 | None (R1). | none | R1: "Map values of type `DateTime` must be strict ISO 8601 date-times, as `DateTime` fields are. Numbers and lenient date strings are rejected." |
 | BC-44 | R2: warn when `utcOffset` is a number between −16 and 16 (read as hours) or a string that is not `±HH:mm`. | none | R3: "The `utcOffset` option takes minutes, or a `±HH:mm` string. Numbers from −16 to 16 are no longer read as hours, and other strings are rejected instead of ignored." |
 | BC-45 | None (R1). | none | R1: "A `DateTime` field's or scalar's default value must be a strict ISO 8601 date-time. A model with any other default (for example `default="2022-11-18"`) still loads, but creating or populating an instance that would get that default throws a `ValidationException`." |
+| BC-46 | None (R1; maintainer decision 2026-09-29 on #330). | none | R1: "`addModelFile`, `addModelFiles` and `updateModelFile` accept only a `ModelFile` built by its constructor. Any other object, including one with the same methods, throws a `TypeError`." |
+| BC-48 | None (R1). | none | R1: "`ModelManager.modelFiles` is internal and read-only, and is no longer in the type declarations. Use `getModelFile`, `getModelFiles` or `getNamespaces`; change models only through the `ModelManager` methods." |
+| BC-49 | R2: warn once per class when a declaration's or element's `validate()` is called, pointing to `ModelFile.validate()` and `ModelManager.validateModelFiles()`. | none | R3: "The per-declaration `validate()` methods are removed. Validate a whole model file with `ModelFile.validate()`, or every model file with `ModelManager.validateModelFiles()`." |
 | BC-10 | – | none | "`±Infinity` is rejected for Integer and Long fields during deserialisation, even when validation is off." |
 | BC-13 | – | none | "A non-string `$class` in an instance is rejected with `Error: a $class that is not a string: …`. It used to throw a `TypeError`, or, for an array, a `TypeNotFoundException`." |
 | BC-15 / BC-16 | – | none | "A relationship without a type, or a `null` decorator, is rejected with an `IllegalModelException` instead of a `TypeError`." |

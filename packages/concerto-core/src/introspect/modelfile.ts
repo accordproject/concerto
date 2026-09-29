@@ -60,6 +60,15 @@ const loadEngine = (specifier: string) =>
 const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engine').rust;
 
 /**
+ * Every ModelFile the ModelFile constructor ran for (P5-34, BC-46). A
+ * BaseModelManager accepts only these: an object the constructor never
+ * built (a duck-typed object, `Object.create(ModelFile.prototype)`, a sinon
+ * stub instance) was never loaded by the engine, so its manager could not
+ * mirror it.
+ */
+const constructedModelFiles = new WeakSet<object>();
+
+/**
  * Class representing a Model File. A Model File contains a single namespace
  * and a set of model elements: assets, transactions etc.
  *
@@ -93,6 +102,7 @@ class ModelFile extends Decorated {
      */
     constructor(modelManager: BaseModelManager, ast: AstNode, definitions?: string | null, fileName?: string | null) {
         super(ast);
+        constructedModelFiles.add(this);
         this.modelManager = modelManager;
         this.external = false;
         this.declarations = [];
@@ -181,12 +191,28 @@ class ModelFile extends Decorated {
     }
 
     /**
+     * Whether `value` is a ModelFile the ModelFile constructor built
+     * (P5-34, BC-46): the only kind of model file a BaseModelManager
+     * accepts.
+     * @param {*} value the value to check
+     * @return {boolean} true if the ModelFile constructor built `value`
+     * @private
+     * @internal
+     */
+    static _isConstructed(value: unknown): value is ModelFile {
+        return typeof value === 'object' && value !== null && constructedModelFiles.has(value);
+    }
+
+    /**
      * The handle of this ModelFile's own namespace in `this.modelManager`'s
-     * `rustHandle` (P4-08), when that mirror currently matches
-     * (`BaseModelManager#_rustHandleMatchesModelFiles`) and already holds
-     * this namespace. `undefined` otherwise -- including for a `ModelFile`
-     * built by a white-box test on a stubbed `modelManager`, whose
-     * `_rustHandleMatchesModelFiles` is itself undefined and so falsy here.
+     * `rustHandle` (P4-08), when this ModelFile is the one registered for
+     * its namespace and no write of the manager's is pending
+     * (`BaseModelManager#_rustHandleMatchesModelFiles`). The handle is the
+     * one the manager cached when it committed the file (P5-34), so a
+     * registered file's read makes no extra engine call. `undefined`
+     * otherwise -- including for a `ModelFile` built by a white-box test on
+     * a stubbed `modelManager`, whose `_rustHandleMatchesModelFiles` is
+     * itself undefined and so falsy here.
      * @return {number | undefined} the handle, or undefined to fall back to TS
      * @private
      * @internal
@@ -200,19 +226,19 @@ class ModelFile extends Decorated {
         // A ModelFile detached from its manager's own registration -- most
         // notably `filter()`'s result before it is ever added -- must never
         // answer from a same-namespace mirror that belongs to a different
-        // (unfiltered) ModelFile object. Checked before the mirror's own
-        // parity check, which reads rustHandle (P5-10a: a ModelFile being
+        // (unfiltered) ModelFile object (P5-10a: a ModelFile being
         // constructed or added is not registered yet, and needs no boundary
         // call to say so).
         /* istanbul ignore next */
         if (!manager.modelFiles || manager.modelFiles[this.namespace] !== this) {
             return undefined;
         }
+        // P5-34: a flag read, not a boundary call (`_mirrorPending`).
         /* istanbul ignore next */
         if (!manager._rustHandleMatchesModelFiles()) {
             return undefined;
         }
-        // P5-06: memoised per rustHandle epoch where the manager offers it.
+        // P5-34: the handle the manager cached when it committed the file.
         // An error reading rustHandle propagates
         // (accordproject/concerto-rust#262).
         /* istanbul ignore next */
@@ -329,6 +355,45 @@ class ModelFile extends Decorated {
     }
 
     /**
+     * The error to throw for an error the engine threw validating this
+     * ModelFile (`validate()`, and BaseModelManager's one-crossing add,
+     * P5-34).
+     *
+     * rustHandle's `modelFile` (errors.ts's ErrorPayload) is not this
+     * ModelFile, so `IllegalModelException`'s own constructor already baked
+     * a message and fileName without this file's name into `e`. Re-wrap
+     * with `this` so the public exception carries the same "File '<name>': "
+     * prefix and `fileName` that the TS validate() body produces for the
+     * identical failure -- delegating to Rust must not change the shape of
+     * the exception callers see.
+     *
+     * But that is only true for most of the checks Rust runs here -- TS
+     * itself never attaches a file to one check, the duplicate-class-name
+     * scan (`Duplicate class name ${fqn}`, thrown with no second argument at
+     * all). `needsModelFile` (errors.ts's ErrorPayload, set from the
+     * engine's own `err.model_file.is_some()`) is the contract's own record
+     * of which case this is: true for the general case (imports,
+     * per-declaration validation, ...), false for that one check. A filename
+     * mismatch alone cannot tell the two apart, since Rust never has a JS
+     * `ModelFile` to attach either way (`e.getFileName()` is always unset
+     * here) -- so `needsModelFile === false` is returned as-is, and only the
+     * general case re-wraps.
+     * @param {*} e the error the engine threw
+     * @return {*} the error to throw
+     * @private
+     * @internal
+     */
+    _engineValidationError(e: unknown): unknown {
+        if (e instanceof IllegalModelException) {
+            const needsModelFile = (e as unknown as { needsModelFile?: boolean }).needsModelFile;
+            if (needsModelFile !== false && e.getFileName() !== this.getName()) {
+                return new IllegalModelException(e.getShortMessage(), this, e.getFileLocation());
+            }
+        }
+        return e;
+    }
+
+    /**
      * Validates the ModelFile.
      *
      * @throws {IllegalModelException} if the model is invalid
@@ -345,18 +410,15 @@ class ModelFile extends Decorated {
         // an option-gated TS check the way step 4's narrower attempt still
         // could.
         //
-        // This is this real `ModelFile`'s own prototype method, so it is
-        // never what a white-box test's `sinon.createStubInstance(ModelFile)`
-        // collaborator runs: sinon replaces `validate` with its own stub
-        // function entirely for such an object, and `BaseModelManager`'s call
-        // sites (`addModelFile`/`addModelFiles`'s `validateModelFiles`) still
-        // call `modelFile.validate()` unchanged, so a stub's `validate` spy
-        // is invoked exactly as before. The collaborator fallback below (no
+        // BaseModelManager accepts only ModelFiles its constructor built
+        // (P5-34, BC-46), and its `addModelFile` validates and registers a
+        // staged file in one engine call without calling this method
+        // (`_rustValidateAndMirrorAdd`). The collaborator fallback below (no
         // `rustHandle`, e.g. a stubbed manager, or a real-but-detached
-        // `ModelFile` built against a plain manager) is not a way to keep such a spy
-        // "working" for a real instance; a genuine validation failure throws
-        // the mapped `IllegalModelException` (src/engine/errors.ts) and
-        // propagates unchanged.
+        // `ModelFile` built against a plain manager) runs the TS body; a
+        // genuine validation failure throws the mapped
+        // `IllegalModelException` (src/engine/errors.ts) and propagates
+        // unchanged.
         const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null };
         /* istanbul ignore next */
         if (manager && manager.rustHandle) {
@@ -381,38 +443,7 @@ class ModelFile extends Decorated {
                 }
                 return;
             } catch (e) {
-                if (e instanceof IllegalModelException) {
-                    // rustHandle's `modelFile` (errors.ts's ErrorPayload)
-                    // is not this ModelFile, so `IllegalModelException`'s own
-                    // constructor already baked a message and fileName
-                    // without this file's name into `e`. Re-wrap with `this`
-                    // so the public exception carries the same
-                    // "File '<name>': " prefix and `fileName` that the TS
-                    // validate() body (below) produces for the identical
-                    // failure -- delegating to Rust must not change the
-                    // shape of the exception callers see.
-                    //
-                    // But that is only true for most of the checks Rust runs
-                    // here -- TS itself never attaches a file to the one
-                    // check just below, the duplicate-class-name scan
-                    // (`Duplicate class name ${fqn}`, thrown with no second
-                    // argument at all). `needsModelFile` (errors.ts's
-                    // ErrorPayload, set from the engine's own
-                    // `err.model_file.is_some()`) is the contract's own
-                    // record of which case this is: true for the general
-                    // case above (imports, per-declaration validation, ...),
-                    // false for that one check. A filename mismatch alone
-                    // cannot tell the two apart, since Rust never has a JS
-                    // `ModelFile` to attach either way (`e.getFileName()` is
-                    // always unset here) -- so `needsModelFile === false`
-                    // is re-thrown as-is, and only the general case re-wraps.
-                    const needsModelFile = (e as unknown as { needsModelFile?: boolean }).needsModelFile;
-                    if (needsModelFile !== false && e.getFileName() !== this.getName()) {
-                        throw new IllegalModelException(e.getShortMessage(), this, e.getFileLocation());
-                    }
-                    throw e;
-                }
-                throw e;
+                throw this._engineValidationError(e);
             }
         }
 

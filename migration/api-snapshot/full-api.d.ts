@@ -57,7 +57,6 @@ import type TransactionDeclaration from './introspect/transactiondeclaration';
  * @memberof module:concerto-core
  */
 declare class BaseModelManager {
-    modelFiles: Record<string, ModelFileInstance>;
     processFile: (fileName: string | null, modelInput: string | unknown) => ModelFileSource;
     factory: Factory;
     serializer: Serializer;

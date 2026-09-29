@@ -18,12 +18,9 @@ import { MetaModelUtil, MetaModelNamespace } from '@accordproject/concerto-metam
 import type { IModel, IModels } from '@accordproject/concerto-metamodel';
 
 import Factory from './factory';
-import Globalize from './globalize';
-import IllegalModelException from './introspect/illegalmodelexception';
 import ModelFile from './introspect/modelfile';
 import ModelUtil from './modelutil';
 import Serializer from './serializer';
-import TypeNotFoundException from './typenotfoundexception';
 import rootModelModule from './rootmodelhelper';
 import decoratorModelModule from './decoratormodelhelper';
 import type { ModelFileSource, ModelManagerOptions } from './types';
@@ -71,50 +68,14 @@ let engineViewsModule: any;
 const engineViews = () => engineViewsModule ?? (engineViewsModule = loadEngine('./engine/views'));
 
 /**
- * What has been read from one rustHandle (P5-06), valid while its `epoch()`
- * is unchanged: every binding that can change a handle bumps its epoch
- * (concerto-wasm `ModelManagerHandle::epoch`), so a read taken at one epoch
- * is still the handle's answer at that epoch.
- */
-interface RustHandleReads {
-    epoch: number;
-    namespaces: Set<string>;
-    namespaceCount: number;
-    modelFileIds: Map<string, number | undefined>;
-}
-
-/* istanbul ignore next */
-const rustHandleReadCache = new WeakMap<object, RustHandleReads>();
-
-/**
- * The reads cached for a rustHandle, refreshed when its epoch has moved.
- * @param {object} handle - the rustHandle
- * @return {RustHandleReads} its current reads
- * @private
- */
-/* istanbul ignore next */
-function rustHandleReads(handle: { [binding: string]: (...args: any[]) => any }): RustHandleReads {
-    const epoch = handle.epoch();
-    let reads = rustHandleReadCache.get(handle);
-    if (!reads || reads.epoch !== epoch) {
-        const namespaces: string[] = handle.getNamespaces();
-        reads = { epoch, namespaces: new Set(namespaces), namespaceCount: namespaces.length, modelFileIds: new Map() };
-        rustHandleReadCache.set(handle, reads);
-    }
-    return reads;
-}
-
-/**
  * The engine's answers to `getNamespaces`, `getType` and `resolveType` for
  * one BaseModelManager (P5-29, accordproject/concerto-rust#334), valid while
  * the model epoch P5-14 introduced (`modelGeneration`, moved by every
  * `addModelFile`, `updateModelFile`, `deleteModelFile`, `addModelFiles` and
  * `updateExternalModels`) is unchanged and the manager still holds the same
  * `modelFiles` map and rustHandle (`clearModelFiles` and the roll-back of a
- * failed `addModelFiles` or `updateExternalModels` replace one or both).
- * Only an answer the engine gave while rustHandle mirrored `modelFiles`
- * (`_rustHandleMatchesModelFiles`) is kept, so a manager holding stub model
- * files keeps its current path; a call that throws keeps nothing.
+ * failed `addModelFiles` or `updateExternalModels` replace one or both). A
+ * call that throws keeps nothing.
  */
 interface ManagerReadMemo {
     generation: number;
@@ -186,6 +147,30 @@ const DEFAULT_DECORATOR_VALIDATION = {
 // and ignored by fromAst
 const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
 
+// The system namespaces a new rustHandle loads itself (concerto-wasm
+// `ModelManagerHandle::new`), as `addDecoratorModel` and `addRootModel` then
+// register them in `modelFiles`.
+const RUST_PRELOADED_NS = ['concerto.decorator@1.0.0', 'concerto@1.0.0'];
+
+/**
+ * A type name argument for an engine read, whose binding takes a `&str` (a
+ * JS non-string traps the engine). P5-34 (#330 §2(b)): a non-string gets
+ * the error the TS body threw first for it, from the same
+ * `ModelUtil.getNamespace` call: an `Error` for null or undefined (v5.0.0's
+ * `FQN is invalid.`), and a `TypeError` otherwise. Should that call ever
+ * accept a non-string, its string form is sent.
+ * @param {*} name the type name argument
+ * @return {string} the name as a string
+ * @private
+ */
+function typeNameArgument(name: unknown): string {
+    if (typeof name === 'string') {
+        return name;
+    }
+    ModelUtil.getNamespace(name);
+    return String(name);
+}
+
 /**
  * Manages the Concerto model files.
  *
@@ -202,6 +187,13 @@ const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
  * @memberof module:concerto-core
  */
 class BaseModelManager {
+    /**
+     * The registered model files, by namespace. Internal and read-only
+     * (P5-34, BC-48): every change goes through this manager's own methods,
+     * which keep `rustHandle` mirroring it. Use `getModelFile`,
+     * `getModelFiles` and `getNamespaces` to read it.
+     * @internal
+     */
      modelFiles: Record<string, ModelFileInstance>;
      processFile: (fileName: string | null, modelInput: string | unknown) => ModelFileSource;
      factory: Factory;
@@ -211,13 +203,11 @@ class BaseModelManager {
      decoratorValidation: NonNullable<ModelManagerOptions['decoratorValidation']>;
      metamodelModelFile: ModelFileInstance;
     /**
-     * (P4-08): a live concerto-wasm ModelManagerHandle, mirroring every
-     * addModelFile/updateModelFile/deleteModelFile call this manager makes
-     * for a namespace `needsRustMirror` allows (the decorator/root system
-     * models and the transient metamodel validation file are excluded,
-     * since rustHandle's own constructor already loads the first two, and
-     * the third is never meant to be permanent). Always set by the end of
-     * the constructor.
+     * (P4-08): a live concerto-wasm ModelManagerHandle, mirroring
+     * `modelFiles`: every addModelFile/updateModelFile/deleteModelFile call
+     * this manager makes is written to it, except the registration of the
+     * decorator/root system models, which its own constructor already loads
+     * (`_needsRustWrite`). Always set by the end of the constructor.
      * @internal
      */
      rustHandle: { [binding: string]: (...args: any[]) => any };
@@ -232,6 +222,31 @@ class BaseModelManager {
      * @internal
      */
      _buildingMetamodelCopy?: boolean;
+    /**
+     * (P5-34, accordproject/concerto-rust#344): true only while one of this
+     * manager's own mutators has written `modelFiles` ahead of `rustHandle`:
+     * the batch `addModelFiles` adds before it mirrors them. Reads never
+     * compare the two maps; this flag is the whole mirror check
+     * (`_rustHandleMatchesModelFiles`).
+     * @internal
+     */
+     _mirrorPending: boolean;
+    /**
+     * (P5-34): the rustHandle model file handle of each namespace, cached
+     * when the file is committed (or on first read), for `ModelFile`'s
+     * reads (`_rustModelFileId`). Cleared whenever the engine rebuilds its
+     * model file arena (an update or a delete) or rustHandle is replaced.
+     * @internal
+     */
+     _modelFileIds: Map<string, number>;
+    /**
+     * (P5-34): the system namespaces the current rustHandle loaded itself
+     * (`RUST_PRELOADED_NS`) that `modelFiles` does not hold yet. Registering
+     * one writes nothing to rustHandle; every other add, update and delete,
+     * a system namespace's included, is mirrored.
+     * @internal
+     */
+     _rustPreloaded: Set<string>;
     /**
      * Create the ModelManager.
      * @constructor
@@ -253,6 +268,9 @@ class BaseModelManager {
         this.decoratorFactories = [];
         this.options = options;
         this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
+        this._mirrorPending = false;
+        this._modelFileIds = new Map();
+        this._rustPreloaded = new Set(RUST_PRELOADED_NS);
         this.rustHandle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
         // P4-08 (accordproject/concerto-rust#67, maintainer decision
         // 2026-09-26): propagate both TS validation options rustHandle's
@@ -374,16 +392,17 @@ class BaseModelManager {
 
     /**
      * Whether a namespace needs to be written into `rustHandle`: every
-     * namespace but the decorator/root system models, which `rustHandle`'s
-     * own constructor already loads. The metamodel namespace is written
-     * like any other (P5-31, accordproject/concerto-rust#341), so a manager
-     * a user adds the metamodel to (`newMetaModelManager`, or
-     * `addModelFile` of a metamodel ModelFile) keeps rustHandle in parity
-     * and answers its reads from Rust. The only metamodel copy that is
-     * never written is `validateAst`'s own (`metamodelModelFile`): it is
-     * not staged while the constructor builds it (`_buildingMetamodelCopy`),
-     * and `validateAst` registers it in `this.modelFiles` only when
-     * rustHandle already holds its own copy.
+     * namespace but a system model the current `rustHandle` loaded itself
+     * and `modelFiles` does not hold yet (`_rustPreloaded`: the decorator
+     * and root models `addDecoratorModel`/`addRootModel` register). The
+     * metamodel namespace is written like any other (P5-31,
+     * accordproject/concerto-rust#341), so a manager a user adds the
+     * metamodel to (`newMetaModelManager`, or `addModelFile` of a metamodel
+     * ModelFile) keeps rustHandle in parity and answers its reads from Rust.
+     * The only metamodel copy that is never written is `validateAst`'s own
+     * (`metamodelModelFile`): it is not staged while the constructor builds
+     * it (`_buildingMetamodelCopy`), and `validateAst` registers it in
+     * `this.modelFiles` only when rustHandle already holds its own copy.
      * @param {string} namespace - the namespace being added, updated or removed
      * @return {boolean} true if `namespace` needs writing to `rustHandle`
      * @private
@@ -391,40 +410,39 @@ class BaseModelManager {
      */
     /* istanbul ignore next */
     _needsRustWrite(namespace) {
-        if (EXCLUDE_NS.includes(namespace)) {
+        if (this._rustPreloaded.has(namespace)) {
             return false;
         }
         return !(namespace === MetaModelNamespace && this._buildingMetamodelCopy);
     }
 
     /**
-     * Whether a model file is mirrored into `rustHandle`: every model file
-     * built by the ModelFile constructor, and so through the engine path
-     * (engine/views.ts `isEngineBuilt`). A stub `ModelFile` the constructor
-     * never ran for (a white-box test's `sinon.createStubInstance(ModelFile)`, whose
-     * `getAst()`/`getDefinitions()` answer whatever that test configured) is
-     * the one exception: it is never written to `rustHandle`, so its
-     * namespace is missing there and `_rustHandleMatchesModelFiles` sends
-     * reads to the TS body. That is the only case the TS body still serves.
-     * Every mirror write for an engine-built file runs unguarded: its error
-     * propagates with its exception class (accordproject/concerto-rust#262).
-     * @param {ModelFile} modelFile - the model file
-     * @return {boolean} true if `modelFile` is mirrored into rustHandle
+     * Throws the BC-46 `TypeError` (P5-34, accordproject/concerto-rust#344)
+     * unless `modelFile` is a ModelFile the ModelFile constructor built:
+     * only such a file was loaded by the engine, so only it can be mirrored
+     * into `rustHandle`. A duck-typed object, `Object.create(ModelFile
+     * .prototype)` or a sinon stub instance is rejected. v5.0.0 threw a
+     * `TypeError` for almost every such value too (calling a method it
+     * lacks), and accepted a duck-typed object.
+     * @param {*} modelFile - the argument
+     * @param {string} method - the method it was passed to
      * @private
      * @internal
      */
-    /* istanbul ignore next */
-    _isMirrored(modelFile) {
-        return engineViews().isEngineBuilt(modelFile);
+    _checkModelFile(modelFile: unknown, method: string) {
+        if (!ModelFile._isConstructed(modelFile)) {
+            throw new TypeError(`${method} expects a ModelFile built by the ModelFile constructor`);
+        }
     }
 
     /**
      * The rustHandle write for a model file being added: registers the file
      * Rust already loaded when the `ModelFile` was constructed (P5-10a lazy
      * views, engine/views.ts `commitStaged`), or else sends its AST, as
-     * before. A namespace `_needsRustWrite` excludes is never written; its
-     * stage, if any, is dropped. A stub `ModelFile` is not
-     * written at all (`_isMirrored`). Any error the write throws propagates.
+     * before, and caches the file's rustHandle handle (`_modelFileIds`). A
+     * namespace `_needsRustWrite` excludes is not written (rustHandle loaded
+     * it itself); its stage, if any, is dropped. Any error the write throws
+     * propagates.
      * @param {ModelFile} modelFile - the model file being added
      * @return {boolean} true if the namespace was written to rustHandle
      * @private
@@ -432,14 +450,14 @@ class BaseModelManager {
      */
     /* istanbul ignore next */
     _rustMirrorAdd(modelFile) {
-        if (!this._isMirrored(modelFile)) {
-            return false;
-        }
-        if (!this._needsRustWrite(modelFile.getNamespace())) {
+        const namespace = modelFile.getNamespace();
+        if (!this._needsRustWrite(namespace)) {
             engineViews().dropStaged(modelFile, this.rustHandle);
+            this._rustPreloaded.delete(namespace);
             return false;
         }
-        if (!engineViews().commitStaged(modelFile, this.rustHandle)) {
+        let id = engineViews().commitStaged(modelFile, this.rustHandle);
+        if (id === undefined) {
             // `ModelFile`'s constructor only rejects a *truthy* non-string
             // `definitions`/`fileName`: `0`, `false` and `NaN` are stored
             // as-is and reach here raw. Only a genuine string is forwarded
@@ -448,115 +466,98 @@ class BaseModelManager {
             // follow-up).
             const definitions = modelFile.getDefinitions();
             const fileName = modelFile.getName();
-            this.rustHandle.addModelWithDefinitions(
+            id = this.rustHandle.addModelWithDefinitions(
                 JSON.stringify(modelFile.getAst()),
                 typeof definitions === 'string' ? definitions : undefined,
                 typeof fileName === 'string' ? fileName : undefined,
                 false,
             );
         }
+        this._modelFileIds.set(namespace, id as number);
         return true;
     }
 
     /**
-     * The rustHandle write for a model file replacing `existing`: an update
-     * when both are mirrored, an add when only the new one is, and a delete
-     * when only `existing` is, so that rustHandle never keeps answering for
-     * a namespace whose TS file is now a stub (`_isMirrored`). Any error the
-     * write throws propagates.
-     * @param {ModelFile} existing - the model file being replaced
-     * @param {ModelFile} modelFile - the model file replacing it
+     * P5-34 (I-5): `addModelFile`'s validation and rustHandle write in one
+     * engine call, for a file staged in `rustHandle` whose `validate` is
+     * `ModelFile`'s own (engine/views.ts `validateAndCommitStaged`); caches
+     * the file's rustHandle handle. Returns false, having changed nothing,
+     * for any other file: the caller then calls `modelFile.validate()` and
+     * `_rustMirrorAdd`, as before. A validation error propagates as
+     * `modelFile.validate()` throws it.
+     * @param {ModelFile} modelFile - the model file being added
+     * @return {boolean} true if the file was validated and written
      * @private
      * @internal
      */
     /* istanbul ignore next */
-    _rustMirrorUpdate(existing, modelFile) {
+    _rustValidateAndMirrorAdd(modelFile) {
         const namespace = modelFile.getNamespace();
-        const wasMirrored = this._isMirrored(existing) && this._needsRustWrite(namespace);
-        if (!this._isMirrored(modelFile)) {
-            // `updateModelFile`'s public API accepts any object with a
-            // `getNamespace()` (not only a real `ModelFile`), so `namespace`
-            // is not guaranteed to be a string here the way it is for an
-            // engine-built file. `rustHandle.deleteModelFile` takes a WASM
-            // `&str`: guard it the same way the public `deleteModelFile`
-            // does (accordproject/concerto-rust#294 follow-up).
-            if (wasMirrored && typeof namespace === 'string') {
-                this.rustHandle.deleteModelFile(namespace);
-            }
-            return;
+        if (modelFile.validate !== ModelFile.prototype.validate || !this._needsRustWrite(namespace)) {
+            return false;
         }
+        const id = engineViews().validateAndCommitStaged(modelFile, this.rustHandle);
+        if (id === undefined) {
+            return false;
+        }
+        this._modelFileIds.set(namespace, id);
+        return true;
+    }
+
+    /**
+     * The rustHandle write for a model file replacing the one registered
+     * for its namespace: rustHandle holds every registered namespace
+     * (P5-34), so it is always an update, which rebuilds the engine's model
+     * file arena, so every cached handle is dropped (`_modelFileIds`). Any
+     * error the write throws propagates.
+     * @param {ModelFile} modelFile - the model file replacing the registered one
+     * @private
+     * @internal
+     */
+    /* istanbul ignore next */
+    _rustMirrorUpdate(modelFile) {
         // P5-10a: an update always sends the AST (updateModelFile), so a
         // lazily built file's stage is dropped rather than committed.
         engineViews().dropStaged(modelFile, this.rustHandle);
-        if (!this._needsRustWrite(namespace)) {
-            return;
-        }
-        if (!wasMirrored) {
-            // Same falsy-non-string forward as `_rustMirrorAdd`: only a
-            // genuine string reaches the wasm `Option<String>` params
-            // (accordproject/concerto-rust#294 follow-up).
-            const addDefinitions = modelFile.getDefinitions();
-            const addFileName = modelFile.getName();
-            this.rustHandle.addModelWithDefinitions(
-                JSON.stringify(modelFile.getAst()),
-                typeof addDefinitions === 'string' ? addDefinitions : undefined,
-                typeof addFileName === 'string' ? addFileName : undefined,
-                false,
-            );
-            return;
-        }
+        const namespace = modelFile.getNamespace();
         // TS has already validated (or was asked not to); the mirror call
         // only needs to keep rustHandle's state in sync, so it never
-        // re-validates itself.
+        // re-validates itself. Same falsy-non-string forward as
+        // `_rustMirrorAdd`: only a genuine string reaches the wasm
+        // `Option<String>` params (accordproject/concerto-rust#294
+        // follow-up).
         const updateDefinitions = modelFile.getDefinitions();
         const updateFileName = modelFile.getName();
-        this.rustHandle.updateModelFile(
+        const id = this.rustHandle.updateModelFile(
             JSON.stringify(modelFile.getAst()),
             typeof updateDefinitions === 'string' ? updateDefinitions : undefined,
             typeof updateFileName === 'string' ? updateFileName : undefined,
             false,
         );
+        this._modelFileIds.clear();
+        this._modelFileIds.set(namespace, id);
     }
 
     /**
-     * Whether `rustHandle`'s mirror currently matches `this.modelFiles`
-     * closely enough to answer a read: a content-based parity check
-     * against `this.modelFiles`, computed fresh on every call. It is false
-     * exactly when `this.modelFiles` holds a stub `ModelFile`
-     * that was never mirrored (`_isMirrored`), or was assigned directly. A read that trusted rustHandle without this could
-     * silently answer from an incomplete or differently-shaped model --
-     * wrong, not merely absent, for `isAssignableTo`/`derivesFrom`'s boolean
-     * results in particular, which do not otherwise surface a mismatch as a
-     * thrown error the caller would catch and fall back from. Comparing the
-     * namespace *sets*, not just their sizes, matters for exactly the case a
-     * white-box test creates by assigning `this.modelFiles` directly
-     * (bypassing `addModelFile` and the mirror entirely): a `rustHandle`
-     * that mirrors only the two system models could otherwise coincidentally
-     * match the count of a manager whose `modelFiles` was hand-populated
-     * with two unrelated stub namespaces, and a length-only check would
-     * wrongly call that trustworthy.
-     * @return {boolean} true if rustHandle mirrors exactly the namespaces TS has
+     * Whether `rustHandle` currently mirrors `this.modelFiles`: true except
+     * while one of this manager's own mutators has written `modelFiles`
+     * ahead of it (`_mirrorPending`, P5-34). `modelFiles` is internal and
+     * read-only (BC-48), and only ModelFiles the ModelFile constructor built
+     * are accepted (BC-46), so every mutator keeps the two in step; this is
+     * a flag read, not a comparison of the two maps.
+     * @return {boolean} true if rustHandle mirrors the namespaces TS has
      * @private
      * @internal
      */
-    /* istanbul ignore next */
     _rustHandleMatchesModelFiles() {
-        // P5-06: rustHandle's namespaces are read across the boundary only
-        // when its epoch has moved since the last read (`rustHandleReads`);
-        // the comparison against this.modelFiles, which can change without
-        // rustHandle knowing, still runs on every call. An error reading
-        // rustHandle propagates (accordproject/concerto-rust#262).
-        const reads = rustHandleReads(this.rustHandle);
-        const tsNamespaces = Object.keys(this.modelFiles);
-        if (reads.namespaceCount !== tsNamespaces.length) {
-            return false;
-        }
-        return tsNamespaces.every((ns) => reads.namespaces.has(ns));
+        return !this._mirrorPending;
     }
 
     /**
-     * `rustHandle.modelFileId(namespace)`, memoised for as long as
-     * rustHandle's epoch is unchanged (P5-06; see `rustHandleReads`).
+     * The rustHandle handle of the model file for `namespace`: the one
+     * cached when the file was committed (P5-34), or else
+     * `rustHandle.modelFileId(namespace)`, then cached until the engine
+     * rebuilds its arena (`_modelFileIds`).
      * @param {string} namespace - the namespace to look up
      * @return {number|undefined} its model file handle, or undefined
      * @private
@@ -564,12 +565,13 @@ class BaseModelManager {
      */
     /* istanbul ignore next */
     _rustModelFileId(namespace: string): number | undefined {
-        const reads = rustHandleReads(this.rustHandle);
-        if (reads.modelFileIds.has(namespace)) {
-            return reads.modelFileIds.get(namespace);
+        let id = this._modelFileIds.get(namespace);
+        if (id === undefined) {
+            id = this.rustHandle.modelFileId(namespace);
+            if (id !== undefined) {
+                this._modelFileIds.set(namespace, id);
+            }
         }
-        const id = this.rustHandle.modelFileId(namespace);
-        reads.modelFileIds.set(namespace, id);
         return id;
     }
 
@@ -582,15 +584,14 @@ class BaseModelManager {
         const namespace = modelFile.getNamespace();
         const fileName = modelFile.getName();
         /* istanbul ignore next */
-        if (typeof namespace === 'string' && (typeof fileName === 'string' || fileName === undefined || fileName === null) &&
-            this._rustHandleMatchesModelFiles()) {
+        if (!this._mirrorPending && typeof namespace === 'string' &&
+            (typeof fileName === 'string' || fileName === undefined || fileName === null)) {
             // P5-11 (accordproject/concerto-rust#287): the plain Error is
             // raised by Rust (concerto-wasm `throwAlreadyExists`), naming the
             // file rustHandle holds under the namespace, which mirrors
-            // this.modelFiles. A rustHandle that does not mirror
-            // this.modelFiles (a W test's stub ModelFile, or a batch of
-            // addModelFiles not yet mirrored) and arguments the binding
-            // cannot take keep the TS body below.
+            // this.modelFiles. A batch of addModelFiles not yet mirrored
+            // (`_mirrorPending`) and a file name the binding cannot take
+            // keep the TS message below.
             this.rustHandle.throwAlreadyExists(namespace, fileName ?? undefined);
         }
         const existingModelFileName = this.modelFiles[modelFile.getNamespace()].getName();
@@ -618,47 +619,35 @@ class BaseModelManager {
         addModelFile(modelFile: ModelFileInstance, cto?: string | null, fileName?: string | null, disableValidation?: boolean) {
             const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
+        this._checkModelFile(modelFile, 'addModelFile');
 
         if(!modelFile.getVersion()) {
             throw new Error(`Cannot add an unversioned namespace: ${modelFile.getNamespace()}`);
         }
 
         if (!this.modelFiles[modelFile.getNamespace()]) {
+            // Mirrored before `modelFiles` changes, so an error leaves both
+            // unchanged.
+            let mirrored = false;
             if (!disableValidation) {
                 // Structural validation against the Metamodel
                 if(this.options?.metamodelValidation){
                     this.validateAst(modelFile);
                 }
 
-                // Semantic validation of the model file.
-                //
-                // P4-08 steps 3-4 (accordproject/concerto-rust#67) tried
-                // replacing this call site's `modelFile.validate()` with a
-                // direct `rustHandle.addModelWithDefinitions(..., validate:
-                // true)`/`modelFileValidateDetached` call, and reverted both
-                // times: `rustHandle`'s validation didn't yet know about
-                // `ModelManagerOptions` (`decoratorValidation`,
-                // `dangerouslyAllowReservedSystemTypeNamesInUserModels`), and
-                // bypassing this call site entirely also skipped a
-                // `sinon.createStubInstance(ModelFile)` collaborator's
-                // stubbed `validate` outright, failing the several
-                // `test/modelmanager.js` cases that assert
-                // `sinon.assert.calledOnce(mf1.validate)`.
-                //
-                // Maintainer decision (2026-09-26), once P4-08e (#189) added
-                // the missing `setDecoratorValidation` binding (the reserved-
-                // system-type-names one already existed): keep calling
-                // `modelFile.validate()` here unchanged -- a stub's spy still
-                // sees exactly one call, since sinon replaces `validate`
-                // wholesale for such an object -- and instead delegate fully
-                // to Rust *inside* `ModelFile.prototype.validate()` itself
-                // (introspect/modelfile.ts), which only a real instance ever
-                // runs. `BaseModelManager`'s constructor now propagates both
-                // options to `rustHandle` before this call can be reached.
-                modelFile.validate();
+                // Semantic validation of the model file. P4-08 delegated
+                // `ModelFile.validate()` fully to Rust (maintainer decision
+                // 2026-09-26). P5-34 (I-5): a staged file is validated and
+                // written to rustHandle in one engine call; any other file
+                // is validated by its own `validate()`, then written.
+                mirrored = this._rustValidateAndMirrorAdd(modelFile);
+                if (!mirrored) {
+                    modelFile.validate();
+                }
             }
-            // Mirrored first, so a mirror error leaves both unchanged.
-            this._rustMirrorAdd(modelFile);
+            if (!mirrored) {
+                this._rustMirrorAdd(modelFile);
+            }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
             // P5-14: a model change drops the cached property lookups.
             engineViews().invalidatePropertyLookups();
@@ -701,8 +690,8 @@ class BaseModelManager {
             // inserted, so rustHandle never registers it. Mirroring the leak
             // unconditionally on every error would register the metamodel in
             // `this.modelFiles` on a version mismatch that rustHandle itself
-            // never registered, permanently diverging from
-            // `_rustHandleMatchesModelFiles()`'s parity check afterwards.
+            // never registered, and the two would no longer mirror each
+            // other.
             // Ask rustHandle for the ground truth instead of re-deriving
             // TS's own control flow: mirror into `this.modelFiles` only when
             // rustHandle's own handle now actually holds `MetaModelNamespace`.
@@ -767,6 +756,7 @@ class BaseModelManager {
             let m = new ModelFile(this, ast as AstNode, modelFile, fileName);
             return this.updateModelFile(m,fileName,disableValidation);
         }
+        this._checkModelFile(modelFile, 'updateModelFile');
         const existing = this.modelFiles[modelFile.getNamespace()];
         if (!existing) {
             throw new Error(`Model file for namespace ${modelFile.getNamespace()} not found`);
@@ -778,7 +768,7 @@ class BaseModelManager {
             modelFile.validate();
         }
         // Mirrored first, so a mirror error leaves both unchanged.
-        this._rustMirrorUpdate(existing, modelFile);
+        this._rustMirrorUpdate(modelFile);
         this.modelFiles[modelFile.getNamespace()] = modelFile;
         engineViews().invalidatePropertyLookups();
         return modelFile;
@@ -792,19 +782,18 @@ class BaseModelManager {
         if (!this.modelFiles[namespace]) {
             throw new Error('Model file does not exist');
         } else {
-            // Mirrored first, so a mirror error leaves both unchanged. A
-            // stub file was never mirrored (`_isMirrored`). `this.modelFiles[namespace]`
-            // above coerces `namespace` to a string key (matching v5.0.0,
-            // which deletes cleanly for a non-string whose string form is a
-            // loaded namespace), but `rustHandle.deleteModelFile` takes a
-            // WASM `&str`: a non-string reaching it traps the engine
-            // (accordproject/concerto-rust#294 follow-up). Only a genuine
-            // string is sent to Rust; the TS-side delete below still runs
-            // for any type, as v5.0.0 does.
-            /* istanbul ignore next */
-            if (typeof namespace === 'string' && this._needsRustWrite(namespace) && this._isMirrored(this.modelFiles[namespace])) {
-                this.rustHandle.deleteModelFile(namespace);
-            }
+            // Mirrored first, so a mirror error leaves both unchanged.
+            // rustHandle holds every registered namespace (P5-34), the
+            // system models included. `this.modelFiles[namespace]` above
+            // coerces `namespace` to a string key (matching v5.0.0, which
+            // deletes cleanly for a non-string whose string form is a loaded
+            // namespace), but `rustHandle.deleteModelFile` takes a WASM
+            // `&str`: a non-string reaching it traps the engine
+            // (accordproject/concerto-rust#294 follow-up), so its string form
+            // is sent. The delete rebuilds the engine's model file arena, so
+            // every cached handle is dropped.
+            this.rustHandle.deleteModelFile(typeof namespace === 'string' ? namespace : String(namespace));
+            this._modelFileIds.clear();
             delete this.modelFiles[namespace];
             engineViews().invalidatePropertyLookups();
         }
@@ -826,6 +815,9 @@ class BaseModelManager {
         const mirroredNamespaces = new Set<string>();
 
         try {
+            // Every file is added to `modelFiles` before any is mirrored
+            // (below): until then, rustHandle is behind (`_mirrorPending`).
+            this._mirrorPending = true;
             // create the model files
             for (let n = 0; n < modelFiles.length; n++) {
                 const modelFile = modelFiles[n];
@@ -840,6 +832,7 @@ class BaseModelManager {
                     const { ast } = this.processFile(fileName, modelFile);
                     m = new ModelFile(this, ast as AstNode, modelFile, fileName);
                 } else {
+                    this._checkModelFile(modelFile, 'addModelFiles');
                     m = modelFile;
                 }
                 if (!m.getVersion()) {
@@ -855,27 +848,21 @@ class BaseModelManager {
             }
 
             // Mirror the newly added files into rustHandle (P4-08,
-            // accordproject/concerto-rust#67) *before* validating: unlike
-            // addModelFile, addModelFile is never called here (this method
-            // adds every file to this.modelFiles directly, in whatever order
-            // the caller gave, precisely so cross-file dependency order does
-            // not matter -- see the method doc), so without this, rustHandle
-            // never learned about any namespace added through addModelFiles
-            // at all. Since `ModelFile.validate()` (introspect/modelfile.ts)
-            // now delegates fully to Rust (maintainer decision, 2026-09-26)
-            // and a file in this batch may import from *another* file in the
-            // very same batch, every one of them must already be visible to
-            // rustHandle's own manager before validateModelFiles() below
-            // validates any of them, the same way this.modelFiles is already
-            // fully populated above first. `addModelWithDefinitions`'s own
-            // `validate` flag stays false: this is a structural mirror write
-            // only, and TS's own validateModelFiles() below is still what
-            // decides pass/fail.
+            // accordproject/concerto-rust#67) *before* validating: this
+            // method adds every file to this.modelFiles directly, in
+            // whatever order the caller gave, precisely so cross-file
+            // dependency order does not matter (see the method doc), and a
+            // file in this batch may import from *another* file in the very
+            // same batch, so every one of them must already be visible to
+            // rustHandle before validateModelFiles() below validates any of
+            // them. Each write is a structural mirror write only (no
+            // validation); validateModelFiles() decides pass/fail.
             newModelFiles.forEach((m) => {
                 if (this._rustMirrorAdd(m)) {
                     mirroredNamespaces.add(m.getNamespace());
                 }
             });
+            this._mirrorPending = false;
 
             // re-validate all the model files
             if (!disableValidation) {
@@ -891,9 +878,9 @@ class BaseModelManager {
             // partially-mirrored or now-invalid batch must not leave
             // rustHandle out of sync with `this.modelFiles`, which the lines
             // above already rolled back. Only namespaces this batch actually
-            // attempted to mirror (`mirroredNamespaces`) are deleted here: the
-            // failure that landed us in this catch can happen before the
-            // mirror loop above ever runs (a duplicate namespace via
+            // mirrored (`mirroredNamespaces`) are deleted here: the failure
+            // that landed us in this catch can happen before the mirror loop
+            // above ever runs (a duplicate namespace via
             // `_throwAlreadyExists`, an unversioned namespace, or a parse
             // error on a later file in the batch), in which case
             // `newModelFiles` can contain namespaces that were never mirrored
@@ -907,9 +894,11 @@ class BaseModelManager {
                     return;
                 }
                 this.rustHandle.deleteModelFile(m.getNamespace());
+                this._modelFileIds.clear();
             });
             throw err;
         } finally {
+            this._mirrorPending = false;
             debug(NAME, newModelFiles);
         }
     }
@@ -918,27 +907,13 @@ class BaseModelManager {
      * Validates all models files in this model manager
      */
     validateModelFiles() {
-        /* istanbul ignore next */
-        if (this._rustHandleMatchesModelFiles()) {
-            // P5-11 (accordproject/concerto-rust#287): every model file is
-            // validated in one Rust call (concerto-wasm `validateModelFiles`)
-            // rather than one `modelFile.validate()` crossing per file; the
-            // first error found is thrown naming the ModelFile of this
-            // manager it was found in, as that file's own validate() does.
-            this.rustHandle.validateModelFiles(this.modelFiles);
-            return;
-        }
-        // P4-08 (accordproject/concerto-rust#67, maintainer decision
-        // 2026-09-26): a rustHandle that does not mirror this.modelFiles (a
-        // W test's stub ModelFile, whose stubbed `validate` spy must see its
-        // call) validates each file through its own `validate()`, which
-        // delegates fully to Rust for a real `ModelFile`, since `rustHandle`
-        // is told about `ModelManagerOptions` (`decoratorValidation`,
-        // `dangerouslyAllowReservedSystemTypeNamesInUserModels`) by
-        // `BaseModelManager`'s constructor.
-        for (let ns in this.modelFiles) {
-            this.modelFiles[ns].validate();
-        }
+        // P5-11 (accordproject/concerto-rust#287): every model file is
+        // validated in one Rust call (concerto-wasm `validateModelFiles`)
+        // rather than one `modelFile.validate()` crossing per file; the
+        // first error found is thrown naming the ModelFile of this manager
+        // it was found in, as that file's own validate() does. rustHandle
+        // mirrors every model file (P5-34).
+        this.rustHandle.validateModelFiles(this.modelFiles);
     }
 
     /**
@@ -970,85 +945,43 @@ class BaseModelManager {
             const views: ModelFileInstance[] = externalModels.map((file) =>
                 new ModelFile(this, file.ast as AstNode, file.definitions, file.fileName));
 
-            /* istanbul ignore next */
-            if (this._rustHandleMatchesModelFiles() &&
-                views.every((mf) => this._isMirrored(mf) && this._needsRustWrite(mf.getNamespace()))) {
-                // P5-11 (accordproject/concerto-rust#287): rustHandle adds
-                // each file (or replaces the file under its namespace) and
-                // validates every model file, in one call that leaves it
-                // unchanged when it fails (concerto-wasm
-                // `updateExternalModels`). Only then do the views replace
-                // this.modelFiles' entries, so a failure leaves both
-                // unchanged. A rustHandle that does not mirror
-                // this.modelFiles (a W test's stub ModelFile) and a
-                // namespace rustHandle is never written for
-                // (`_needsRustWrite`) keep the TS body below.
-                try {
-                    const next: Record<string, ModelFileInstance> = Object.assign({}, this.modelFiles);
-                    views.forEach((mf) => {
-                        next[mf.getNamespace()] = mf;
-                    });
-                    // Only a genuine string crosses for `definitions` and
-                    // `fileName` (accordproject/concerto-rust#294 follow-up),
-                    // as for every other mirror write.
-                    const sources = views.map((mf) => {
-                        const definitions = mf.getDefinitions();
-                        const fileName = mf.getName();
-                        return {
-                            ast: mf.getAst(),
-                            definitions: typeof definitions === 'string' ? definitions : undefined,
-                            fileName: typeof fileName === 'string' ? fileName : undefined,
-                        };
-                    });
-                    this.rustHandle.updateExternalModels(JSON.stringify(sources), next);
-                } finally {
-                    // rustHandle loaded each file from `sources`, not from
-                    // the stage its constructor made.
-                    views.forEach((mf) => engineViews().dropStaged(mf, this.rustHandle));
-                }
-                views.forEach((mf) => {
-                    this.modelFiles[mf.getNamespace()] = mf;
-                });
-                engineViews().invalidatePropertyLookups();
-                return views;
-            }
-
-            // Each file is added or replaces the file under its namespace
-            // without validation, and every file is then validated. Each
-            // add or update writes rustHandle too, so a failure undoes
-            // those writes, newest first, before this.modelFiles is
-            // restored below: an added file is deleted from rustHandle
-            // again, and a replaced one is replaced by the file it replaced
-            // (`_rustMirrorUpdate`). An error the undo raises propagates
-            // (accordproject/concerto-rust#262).
-            const externalModelFiles: ModelFileInstance[] = [];
-            const applied: [ModelFileInstance, ModelFileInstance | undefined][] = [];
+            // P5-11 (accordproject/concerto-rust#287): rustHandle adds each
+            // file (or replaces the file under its namespace) and validates
+            // every model file, in one call that leaves it unchanged when it
+            // fails (concerto-wasm `updateExternalModels`). Only then do the
+            // views replace this.modelFiles' entries, so a failure leaves
+            // both unchanged. P5-34: rustHandle mirrors every model file, so
+            // this is the only path.
             try {
+                const next: Record<string, ModelFileInstance> = Object.assign({}, this.modelFiles);
                 views.forEach((mf) => {
-                    const existing = this.modelFiles[mf.getNamespace()];
-
-                    if (existing) {
-                        externalModelFiles.push(this.updateModelFile(mf, mf.getName(), true)); // disable validation
-                    } else {
-                        externalModelFiles.push(this.addModelFile(mf, null, mf.getName(), true)); // disable validation
-                    }
-                    applied.push([mf, existing]);
+                    next[mf.getNamespace()] = mf;
                 });
-
-                // now everything is applied, we need to revalidate all models
-                this.validateModelFiles();
-                return externalModelFiles;
-            } catch (err) {
-                applied.reverse().forEach(([mf, existing]) => {
-                    const namespace = mf.getNamespace();
-                    if (existing) {
-                        this._rustMirrorUpdate(mf, existing);
-                    } else if (this._isMirrored(mf) && this._needsRustWrite(namespace)) {
-                        this.rustHandle.deleteModelFile(namespace);
-                    }
+                // Only a genuine string crosses for `definitions` and
+                // `fileName` (accordproject/concerto-rust#294 follow-up), as
+                // for every other mirror write.
+                const sources = views.map((mf) => {
+                    const definitions = mf.getDefinitions();
+                    const fileName = mf.getName();
+                    return {
+                        ast: mf.getAst(),
+                        definitions: typeof definitions === 'string' ? definitions : undefined,
+                        fileName: typeof fileName === 'string' ? fileName : undefined,
+                    };
                 });
-                throw err;
+                this.rustHandle.updateExternalModels(JSON.stringify(sources), next);
+            } finally {
+                // rustHandle loaded each file from `sources`, not from the
+                // stage its constructor made; an update rebuilds its model
+                // file arena.
+                views.forEach((mf) => engineViews().dropStaged(mf, this.rustHandle));
+                this._modelFileIds.clear();
             }
+            views.forEach((mf) => {
+                this.modelFiles[mf.getNamespace()] = mf;
+            });
+            engineViews().invalidatePropertyLookups();
+            return views;
         } catch (err) {
             // Restore original files
             this.modelFiles = {};
@@ -1148,57 +1081,30 @@ class BaseModelManager {
      * @throws {IllegalModelException} - if the type is not defined
      * @private
      */
-    resolveType(context, type) {
+    resolveType(context, type): any {
+        // P5-34 (#330 §2(b)): the engine answers every call. A non-string
+        // `type` throws the error v5.0.0 threw (`typeNameArgument`); a
+        // non-string `context` only words the error, so its string form is
+        // sent, as v5.0.0's message formatter used it.
+        const typeName = typeNameArgument(type);
+        // P5-29: a type the engine resolved since the last model change is
+        // answered from the memo (`ManagerReadMemo`), without crossing into
+        // the engine.
         /* istanbul ignore next */
-        if (typeof context === 'string' && typeof type === 'string') {
-            // P5-29: a type the engine resolved since the last model change
-            // is answered from the memo (`ManagerReadMemo`), without
-            // crossing into the engine.
-            const memo = managerReadMemo(this);
-            const resolved = memo.resolvedTypes.get(type);
-            if (resolved !== undefined) {
-                return resolved;
-            }
-            if (this._rustHandleMatchesModelFiles()) {
-                // The mirror holds exactly TS's namespaces, so the engine's
-                // answer is final, including any error it throws
-                // (accordproject/concerto-rust#262). Only a rustHandle that
-                // does not match this.modelFiles (a W test's stub ModelFile
-                // never reached it: see _isMirrored) takes the TS body below,
-                // as do non-string arguments, which the binding's `&str`
-                // parameters cannot take (a JS non-string traps the engine).
-                const result: string = this.rustHandle.resolveType(context, type);
-                if (managerReadMemoValid(this, memo)) {
-                    memo.resolvedTypes.set(type, result);
-                }
-                return result;
-            }
+        const memo = managerReadMemo(this);
+        const resolved = memo.resolvedTypes.get(typeName);
+        /* istanbul ignore next */
+        if (resolved !== undefined) {
+            return resolved;
         }
-        // is the type a primitive?
-        if (ModelUtil.isPrimitiveType(type)) {
-            return type;
+        // The engine's answer is final, including any error it throws
+        // (accordproject/concerto-rust#262).
+        const result: string = this.rustHandle.resolveType(typeof context === 'string' ? context : String(context), typeName);
+        /* istanbul ignore next */
+        if (managerReadMemoValid(this, memo)) {
+            memo.resolvedTypes.set(typeName, result);
         }
-
-        let ns = ModelUtil.getNamespace(type);
-        let modelFile = this.getModelFile(ns);
-        if (!modelFile) {
-            let formatter = Globalize.messageFormatter('modelmanager-resolvetype-nonsfortype');
-            throw new IllegalModelException(formatter({
-                type: type,
-                context: context
-            }));
-        }
-
-        if (modelFile.isLocalType(type)) {
-            return type;
-        }
-
-        let formatter = Globalize.messageFormatter('modelmanager-resolvetype-notypeinnsforcontext');
-        throw new IllegalModelException(formatter({
-            context: context,
-            type: type,
-            namespace: modelFile.getNamespace()
-        }));
+        return result;
     }
 
     /**
@@ -1213,6 +1119,8 @@ class BaseModelManager {
         // the fresh handle's own constructor already has them.
         /* istanbul ignore next */
         this.rustHandle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
+        this._modelFileIds = new Map();
+        this._rustPreloaded = new Set(RUST_PRELOADED_NS);
         this.addDecoratorModel();
         this.addRootModel();
     }
@@ -1240,7 +1148,7 @@ class BaseModelManager {
         // unnamed file, where TS's `=== null` does not), and a number or
         // object traps the engine. Any other argument takes the TS body.
         /* istanbul ignore next */
-        if ((typeof fileName === 'string' || fileName === undefined) && this._rustHandleMatchesModelFiles()) {
+        if (typeof fileName === 'string' || fileName === undefined) {
             const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
             return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
         }
@@ -1261,16 +1169,12 @@ class BaseModelManager {
         if (memo.namespaces) {
             return memo.namespaces.slice();
         }
-        const namespaces = Object.keys(this.modelFiles);
+        const result: string[] = this.rustHandle.getNamespaces();
         /* istanbul ignore next */
-        if (this._rustHandleMatchesModelFiles()) {
-            const result: string[] = this.rustHandle.getNamespaces();
-            if (managerReadMemoValid(this, memo)) {
-                memo.namespaces = result.slice();
-            }
-            return result;
+        if (managerReadMemoValid(this, memo)) {
+            memo.namespaces = result.slice();
         }
-        return namespaces;
+        return result;
     }
 
     /**
@@ -1280,53 +1184,29 @@ class BaseModelManager {
      * @return {ClassDeclaration} - the class declaration for the specified type.
      * @throws {TypeNotFoundException} - if the type cannot be found or is a primitive type.
      */
-    getType(qualifiedName) {
+    getType(qualifiedName): any {
+        // P5-34 (#330 §2(b)): a non-string name throws the error v5.0.0
+        // threw (`typeNameArgument`).
+        const name = typeNameArgument(qualifiedName);
+        // P5-29: the fully-qualified name the engine answered since the
+        // last model change is kept (`ManagerReadMemo`); it is still mapped
+        // to its view below on every call.
         /* istanbul ignore next */
-        if (typeof qualifiedName === 'string') {
-            // P5-29: the fully-qualified name the engine answered since the
-            // last model change is kept (`ManagerReadMemo`); it is still
-            // mapped to its view below on every call.
-            const memo = managerReadMemo(this);
-            let fqn = memo.typeNames.get(qualifiedName);
-            if (fqn === undefined && this._rustHandleMatchesModelFiles()) {
-                // P5-11 (accordproject/concerto-rust#287): resolved in Rust
-                // (concerto-wasm `getTypeName`), which throws the
-                // TypeNotFoundException TS throws. Rust answers with the
-                // declaration's fully-qualified name, mapped here to its view
-                // in the model file of its namespace. A rustHandle that does
-                // not mirror this.modelFiles (a W test's stub ModelFile) and a
-                // non-string name, which the binding's `&str` parameter cannot
-                // take, keep the TS body below.
-                fqn = this.rustHandle.getTypeName(qualifiedName) as string;
-                if (managerReadMemoValid(this, memo)) {
-                    memo.typeNames.set(qualifiedName, fqn);
-                }
-            }
-            if (fqn !== undefined) {
-                return this.modelFiles[fqn.substring(0, fqn.lastIndexOf('.'))].getLocalType(fqn);
+        const memo = managerReadMemo(this);
+        let fqn = memo.typeNames.get(name);
+        /* istanbul ignore next */
+        if (fqn === undefined) {
+            // P5-11 (accordproject/concerto-rust#287): resolved in Rust
+            // (concerto-wasm `getTypeName`), which throws the
+            // TypeNotFoundException TS throws. Rust answers with the
+            // declaration's fully-qualified name, mapped here to its view
+            // in the model file of its namespace.
+            fqn = this.rustHandle.getTypeName(name) as string;
+            if (managerReadMemoValid(this, memo)) {
+                memo.typeNames.set(name, fqn);
             }
         }
-
-        const namespace = ModelUtil.getNamespace(qualifiedName);
-
-        const modelFile = this.getModelFile(namespace);
-        if (!modelFile) {
-            const formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
-            throw new TypeNotFoundException(qualifiedName, formatter({
-                type: qualifiedName
-            }));
-        }
-
-        const classDecl = modelFile.getType(qualifiedName);
-        if (!classDecl) {
-            const formatter = Globalize.messageFormatter('modelmanager-gettype-notypeinns');
-            throw new TypeNotFoundException(qualifiedName, formatter({
-                type: ModelUtil.getShortName(qualifiedName),
-                namespace: namespace
-            }));
-        }
-
-        return classDecl;
+        return this.modelFiles[fqn.substring(0, fqn.lastIndexOf('.'))].getLocalType(fqn);
     }
 
     /**
@@ -1439,21 +1319,15 @@ class BaseModelManager {
      * qualified type name, false otherwise.
      */
     derivesFrom(fqt1, fqt2): boolean {
-        // Non-string arguments take the TS body: the binding's `&str`
-        // parameters cannot take them (a JS non-string traps the engine).
-        /* istanbul ignore next */
-        if (typeof fqt1 === 'string' && typeof fqt2 === 'string' && this._rustHandleMatchesModelFiles()) {
-            return this.rustHandle.derivesFrom(fqt1, fqt2);
+        // P5-34 (#330 §2(b)): the binding's `&str` parameters cannot take a
+        // non-string (a JS non-string traps the engine). A non-string
+        // `fqt1` throws what `getType` throws for it; a non-string `fqt2`
+        // is no type's name, so the answer is false once `fqt1` is found.
+        if (typeof fqt2 !== 'string') {
+            this.getType(fqt1);
+            return false;
         }
-        // Check to see if this is an exact instance of the specified type.
-        let typeDeclaration = this.getType(fqt1);
-        while (typeDeclaration) {
-            if (typeDeclaration.getFullyQualifiedName() === fqt2) {
-                return true;
-            }
-            typeDeclaration = typeDeclaration.getSuperTypeDeclaration();
-        }
-        return false;
+        return this.rustHandle.derivesFrom(typeNameArgument(fqt1), fqt2);
     }
 
     /**
@@ -1481,25 +1355,14 @@ class BaseModelManager {
      * @returns {boolean} True if fqn is assignable to baseFqn
      */
     isAssignableTo(fqn: string, baseFqn: string): boolean {
-        // Non-string arguments take the TS body: the binding's `&str`
-        // parameters cannot take them (a JS non-string traps the engine;
-        // accordproject/concerto-rust#294, follow-up to #262).
-        /* istanbul ignore next */
-        if (typeof fqn === 'string' && typeof baseFqn === 'string' && this._rustHandleMatchesModelFiles()) {
-            return this.rustHandle.isAssignableTo(fqn, baseFqn);
-        }
-        let typeDeclaration;
-        try {
-            typeDeclaration = this.getType(fqn);
-        } catch (e) {
+        // P5-34 (#330 §2(b)): the binding's `&str` parameters cannot take a
+        // non-string (a JS non-string traps the engine;
+        // accordproject/concerto-rust#294, follow-up to #262). v5.0.0
+        // answered false for any non-string argument.
+        if (typeof fqn !== 'string' || typeof baseFqn !== 'string') {
             return false;
         }
-
-        if (typeDeclaration.isAbstract()) {
-            return false;
-        }
-
-        return this.derivesFrom(fqn, baseFqn);
+        return this.rustHandle.isAssignableTo(fqn, baseFqn);
     }
 
     /**
