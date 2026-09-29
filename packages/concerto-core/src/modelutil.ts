@@ -170,7 +170,8 @@ class ModelUtil {
         // (P5-38) the engine takes strict SemVer 2.0.0, which semver.parse
         // accepts too, except where node-semver's own limits reject it (a
         // component above Number.MAX_SAFE_INTEGER, or more than 256
-        // characters): `versionParsed` is then null.
+        // characters): `versionParsed` is then null, as the engine's own
+        // is (P5-38).
         const packed = rust.modelUtilParseNamespaceChecked(ns, options) as string;
         const parts = packed.slice(1).split('@');
         if (packed[0] === 'N') {
