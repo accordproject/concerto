@@ -522,6 +522,33 @@ function fieldGetScalarField(field: any): any {
 }
 
 /**
+ * DecoratorManager.validate's structural check (`serializer.fromJSON(
+ * decoratorCommandSet)`), once the TS body has built `validationModelManager`
+ * (the metamodel, `modelFiles` and the DCS model). P5-27 (F6): when that
+ * manager's rustHandle mirrors its model files, the command set is checked
+ * against the rustHandle's own resident manager (concerto-wasm
+ * `ModelManagerHandle.dcsValidate`), which already holds exactly the models
+ * the per-call binding would load, so the model files are neither sent again
+ * nor loaded into a second manager. Otherwise (a stub ModelFile in
+ * `modelFiles`, or an engine without the binding) the per-call
+ * `decoratorManagerValidate` rebuilds them, as before. Either throws the
+ * same errors: any error loading the models has already been thrown by the
+ * TS body while it built `validationModelManager`.
+ * @param {object} validationModelManager the validation ModelManager, built
+ * @param {*} decoratorCommandSet the DecoratorCommandSet object
+ * @param {object[]} [modelFiles] the model files validate was given
+ */
+function decoratorManagerValidate(validationModelManager: any, decoratorCommandSet: any, modelFiles?: any[]): void {
+    const handle = validationModelManager.rustHandle;
+    if (handle && typeof handle.dcsValidate === 'function' &&
+        validationModelManager._rustHandleMatchesModelFiles()) {
+        handle.dcsValidate(decoratorCommandSet);
+        return;
+    }
+    rust!.decoratorManagerValidate(decoratorCommandSet, modelFiles?.map((mf: any) => mf.getAst()));
+}
+
+/**
  * DecoratorManager.decorateModels in rust mode, after the TS body's
  * `skipValidationAndResolution` handling. Metamodel resolution itself is not
  * ported (concerto-rust src/dcs/mod.rs `decorate_models`'s doc comment), but
@@ -540,6 +567,24 @@ function fieldGetScalarField(field: any): any {
  */
 function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets: any[], options?: any): any {
     const { default: ModelManager } = require('../modelmanager');
+    if (residentDcsAvailable()) {
+        // P5-27 (F6): the resident input manager, and the result staged
+        // into the new manager's rustHandle (see `adoptStagedModels`).
+        const { dcs, resident } = dcsManagerFor(modelManager, !options?.disableMetamodelResolution);
+        try {
+            const decoratedModelManager = new ModelManager({
+                decoratorValidation: modelManager.getDecoratorValidation()
+            });
+            decoratedModelManager.clearModelFiles();
+            const result = dcs.decorateModels(decoratedModelManager.rustHandle, decoratorCommandSets, options ?? {});
+            adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation);
+            return decoratedModelManager;
+        } finally {
+            if (!resident) {
+                dcs.free();
+            }
+        }
+    }
     const ast = modelManager.getAst(!options?.disableMetamodelResolution, false);
     const decoratedAst = rust!.decoratorManagerDecorateModels(ast.models, decoratorCommandSets, options ?? {});
     const newModelManager = new ModelManager({
@@ -586,6 +631,30 @@ function restoreUndefinedDecorators(sourceNode: any, resultNode: any): void {
 }
 
 /**
+ * `restoreUndefinedDecorators` over every result model and its
+ * declarations. `resultModels` also carries the Rust engine's own system
+ * namespaces (the Rust-side manager carries its own copy of them, see
+ * `decoratorManagerDecorateModels`), which `sourceModels` (system
+ * namespaces excluded, `getAst`'s second argument false) does not, so the
+ * two arrays line up by namespace, not by index.
+ * @param {object[]} sourceModels the pre-extraction models
+ * @param {object[]} resultModels the extracted models, re-shaped in place
+ */
+function restoreAllUndefinedDecorators(sourceModels: any[], resultModels: any[]): void {
+    const sourceByNamespace = new Map<string, any>(sourceModels.map((m: any) => [m.namespace, m]));
+    resultModels.forEach((resultModel: any) => {
+        const sourceModel = sourceByNamespace.get(resultModel.namespace);
+        // The model (namespace) itself can carry decorators
+        // (`decoratorextractor.ts` `processModels`), as well as its
+        // declarations.
+        restoreUndefinedDecorators(sourceModel, resultModel);
+        (resultModel.declarations || []).forEach((resultDecl: any, j: number) => {
+            restoreUndefinedDecorators(sourceModel?.declarations?.[j], resultDecl);
+        });
+    });
+}
+
+/**
  * The three DecoratorManager.extract* methods in rust mode, after the TS
  * body's option defaults. The AST is resolved here, on the TS side, as each
  * ts-mode body resolves its own `getAst(true, ...)`, with the system
@@ -602,30 +671,63 @@ function restoreUndefinedDecorators(sourceNode: any, resultNode: any): void {
  */
 function decoratorManagerExtract(binding: string, modelManager: any, options: any): any {
     const { default: ModelManager } = require('../modelmanager');
+    if (residentDcsAvailable()) {
+        return decoratorManagerExtractStaged(binding, modelManager, options);
+    }
     const sourceModels = modelManager.getAst(true, false).models;
     const result = rust![binding](sourceModels, options);
     if (options?.removeDecoratorsFromModel) {
-        // result.modelManager.models also carries the Rust engine's own
-        // system namespaces (its doc comment above: "the Rust-side manager
-        // carries its own copy of them"), which sourceModels (system
-        // namespaces excluded, `getAst`'s second argument false) does not,
-        // so the two arrays line up by namespace, not by index.
-        const sourceByNamespace = new Map<string, any>(sourceModels.map((m: any) => [m.namespace, m]));
-        result.modelManager.models.forEach((resultModel: any) => {
-            const sourceModel = sourceByNamespace.get(resultModel.namespace);
-            // The model (namespace) itself can carry decorators
-            // (`decoratorextractor.ts` `processModels`), as well as its
-            // declarations.
-            restoreUndefinedDecorators(sourceModel, resultModel);
-            (resultModel.declarations || []).forEach((resultDecl: any, j: number) => {
-                restoreUndefinedDecorators(sourceModel?.declarations?.[j], resultDecl);
-            });
-        });
+        restoreAllUndefinedDecorators(sourceModels, result.modelManager.models);
     }
     const updatedModelManager = new ModelManager();
     updatedModelManager.fromAst(result.modelManager);
     result.modelManager = updatedModelManager;
     return result;
+}
+
+/**
+ * The DcsManagerHandle method for each per-call extract binding.
+ */
+const STAGED_EXTRACT: { [binding: string]: string } = {
+    decoratorManagerExtractDecorators: 'extractDecorators',
+    decoratorManagerExtractVocabularies: 'extractVocabularies',
+    decoratorManagerExtractNonVocabDecorators: 'extractNonVocabDecorators',
+};
+
+/**
+ * `decoratorManagerExtract` on the resident DCS input manager, with the
+ * result staged into the new ModelManager's rustHandle (P5-27, F6; see
+ * `adoptStagedModels`). The same result, and the same errors at the same
+ * points: the input is `getAst(true, false)`'s models, and the result
+ * AST, re-shaped by `restoreUndefinedDecorators` when
+ * `options.removeDecoratorsFromModel` is set, is what the new ModelManager
+ * is built from.
+ * @param {string} binding the per-call concerto-wasm binding it replaces
+ * @param {object} modelManager the input ModelManager
+ * @param {object} options the extract options, defaults applied
+ * @return {object} the result, with `modelManager` materialised
+ */
+function decoratorManagerExtractStaged(binding: string, modelManager: any, options: any): any {
+    const { default: ModelManager } = require('../modelmanager');
+    const { dcs, resident, sourceModels } = dcsManagerFor(modelManager, true);
+    try {
+        const updatedModelManager = new ModelManager();
+        updatedModelManager.clearModelFiles();
+        const result = dcs[STAGED_EXTRACT[binding]](updatedModelManager.rustHandle, options);
+        const { staged, validated } = result;
+        delete result.staged;
+        delete result.validated;
+        if (options?.removeDecoratorsFromModel) {
+            restoreAllUndefinedDecorators(sourceModels, result.modelManager.models);
+        }
+        adoptStagedModels(updatedModelManager, result.modelManager, staged, validated);
+        result.modelManager = updatedModelManager;
+        return result;
+    } finally {
+        if (!resident) {
+            dcs.free();
+        }
+    }
 }
 
 /**
@@ -759,9 +861,9 @@ const acceptedUnmirrored = new WeakMap<object, { key: string; header: StagedHead
  * P5-28 (accordproject/concerto-rust#333): the header of a ModelFile's AST
  * as `stageModelFileWithHeader` read it when staging, which is what
  * `modelFileFromAstHeader` would set on the ModelFile (concerto-wasm
- * `staged_header`): the namespace, its version (or null), whether the file
- * is a system model file, and the `importShortNames.set` and
- * `importUriMap` assignments in order.
+ * `staged_header_from_parts`): the namespace, its version (or null),
+ * whether the file is a system model file, and the `importShortNames.set`
+ * and `importUriMap` assignments in order.
  */
 interface StagedHeader {
     namespace: string;
@@ -773,9 +875,11 @@ interface StagedHeader {
 
 /**
  * P5-28: the staged header of each lazily built ModelFile, from
- * `stageModelFile` until its constructor applies it (`applyStagedHeader`).
+ * `stageModelFile` until its constructor applies it (`applyStagedFileHeader`).
+ * Never set for a ModelFile that took a P5-27 prestage (`takePrestaged`),
+ * whose header is in `stagedHeaders`.
  */
-const stagedHeaders = new WeakMap<object, StagedHeader>();
+const stagedFileHeaders = new WeakMap<object, StagedHeader>();
 
 /**
  * P5-10b: the lazily built ModelFiles. Their manager had no decorator
@@ -819,6 +923,13 @@ function stageModelFile(modelFile: any): boolean {
             return false;
         }
         const ast = modelFile.ast;
+        // P5-27 (F6): a DecoratorManager result model Rust has already
+        // loaded, and staged in this handle (`adoptStagedModels`), is used
+        // as it is, without sending its AST again.
+        if (takePrestaged(modelFile, manager, handle, ast)) {
+            lazyFiles.add(modelFile);
+            return true;
+        }
         const text = JSON.stringify(ast);
         // `ModelFile`'s constructor only rejects a *truthy* non-string
         // `definitions`/`fileName` (introspect/modelfile.ts): `0`, `false`
@@ -843,7 +954,7 @@ function stageModelFile(modelFile: any): boolean {
                 return false;
             }
             if (accepted.header !== null) {
-                stagedHeaders.set(modelFile, accepted.header);
+                stagedFileHeaders.set(modelFile, accepted.header);
             }
             lazyFiles.add(modelFile);
             return true;
@@ -851,7 +962,7 @@ function stageModelFile(modelFile: any): boolean {
         // P5-28 (accordproject/concerto-rust#333): staged and its header
         // read in one call, from one decode of the text, so the
         // constructor's `_fromAstHeader` does not cross again
-        // (`applyStagedHeader`). An engine without that binding stages as
+        // (`applyStagedFileHeader`). An engine without that binding stages as
         // before.
         let id: number;
         let header: StagedHeader | null = null;
@@ -877,7 +988,7 @@ function stageModelFile(modelFile: any): boolean {
             stageFinalizer?.register(modelFile, stage, stage);
         }
         if (header !== null) {
-            stagedHeaders.set(modelFile, header);
+            stagedFileHeaders.set(modelFile, header);
         }
         lazyFiles.add(modelFile);
         return true;
@@ -902,12 +1013,12 @@ function stageModelFile(modelFile: any): boolean {
  * @param {object} ast the AST its header is read from
  * @return {boolean} true if the header was set
  */
-function applyStagedHeader(modelFile: any, ast: any): boolean {
-    const header = stagedHeaders.get(modelFile);
+function applyStagedFileHeader(modelFile: any, ast: any): boolean {
+    const header = stagedFileHeaders.get(modelFile);
     if (header === undefined) {
         return false;
     }
-    stagedHeaders.delete(modelFile);
+    stagedFileHeaders.delete(modelFile);
     if (ast !== modelFile.ast || ast.namespace !== header.namespace) {
         return false;
     }
@@ -935,7 +1046,7 @@ function applyStagedHeader(modelFile: any, ast: any): boolean {
         uriMap[key] = uri;
     }
     if (lazyViewsCheck) {
-        checkStagedHeader(modelFile, ast);
+        checkStagedFileHeader(modelFile, ast);
     }
     return true;
 }
@@ -943,12 +1054,12 @@ function applyStagedHeader(modelFile: any, ast: any): boolean {
 /**
  * CONCERTO_LAZY_VIEWS_CHECK=1 (P5-28): runs `modelFileFromAstHeader` over
  * the JS values, on a scratch object inheriting from `modelFile`, and
- * reports on stderr any field `applyStagedHeader` set differently, or an
+ * reports on stderr any field `applyStagedFileHeader` set differently, or an
  * error it threw.
- * @param {object} modelFile the ModelFile `applyStagedHeader` just set
+ * @param {object} modelFile the ModelFile `applyStagedFileHeader` just set
  * @param {object} ast its AST
  */
-function checkStagedHeader(modelFile: any, ast: any): void {
+function checkStagedFileHeader(modelFile: any, ast: any): void {
     const scratch = Object.create(modelFile);
     scratch.importShortNames = new Map();
     scratch.importUriMap = {};
@@ -1161,6 +1272,273 @@ function deferDeclarations(modelFile: any): void {
             process.stderr.write(`LAZY-CHECK ast-mutated: ${modelFile.namespace}\n`);
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+// P5-27 (F6, accordproject/concerto-rust#332): a resident DCS manager with
+// staged-handle results.
+//
+// `decorateModels` and the three `extract*` methods used to send the source
+// models' AST to Rust on every call, which rebuilt its input manager from
+// it, and to load the result's AST into a new ModelManager with `fromAst`,
+// which sent every result model back to Rust (`stageModelFile`), read each
+// header across the boundary (`modelFileFromAstHeader`) and validated the
+// set again (`validateModelFiles`).
+//
+// Now the input manager stays resident in Rust (concerto-wasm
+// `DcsManagerHandle`), one per source ModelManager and resolution flag,
+// rebuilt when the source manager's rustHandle epoch or model files change
+// (`dcsManagerFor`). Each operation stages the result's model files into
+// the new ModelManager's own rustHandle and returns their stage ids and
+// headers with the result AST. `adoptStagedModels` then does what `fromAst`
+// does, but each ModelFile takes its stage (`takePrestaged`) and header
+// (`applyStagedHeader`) instead of crossing again, and `validateModelFiles`
+// is skipped when Rust has validated exactly those files, under the same
+// (default) options the new manager's rustHandle has. Every error is still
+// thrown by the same Rust or TS code, at the same point of the call.
+// ---------------------------------------------------------------------------
+
+/**
+ * A result model's stage in a new ModelManager's rustHandle, and its header
+ * (concerto-wasm `staged_header`: `[version, shortNames, uris]`, or null).
+ */
+interface Prestage {
+    handle: any;
+    id: number;
+    header: any[] | null;
+}
+
+/**
+ * The stage of each DecoratorManager result model not yet built, by AST
+ * object: set by `adoptStagedModels` just before it constructs the
+ * ModelFile from that AST.
+ */
+const prestaged = new WeakMap<object, Prestage>();
+
+/**
+ * The header of each ModelFile that took a prestage with one, until its
+ * constructor applies it (`applyStagedHeader`).
+ */
+const stagedHeaders = new WeakMap<object, any[]>();
+
+/**
+ * Called by `stageModelFile`: when `ast` has a prestage in `handle`, and
+ * the ModelFile is being built the way `fromAst` builds it (no definitions,
+ * no file name, no custom `options.regExp`, a namespace the manager writes
+ * to its rustHandle), makes that stage the ModelFile's own, as if
+ * `stageModelFile` had just staged `JSON.stringify(ast)`. Otherwise drops
+ * the prestage, and the caller stages the AST as before.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {object} manager its model manager
+ * @param {object} handle the manager's rustHandle
+ * @param {object} ast the ModelFile's AST
+ * @return {boolean} true if the ModelFile took the prestage
+ */
+function takePrestaged(modelFile: any, manager: any, handle: any, ast: any): boolean {
+    const prestage = ast && typeof ast === 'object' ? prestaged.get(ast) : undefined;
+    if (prestage === undefined || prestage.handle !== handle) {
+        return false;
+    }
+    prestaged.delete(ast);
+    if (modelFile.definitions !== undefined || modelFile.fileName !== undefined ||
+        manager.options?.regExp || !manager._needsRustWrite(ast.namespace)) {
+        handle.dropStagedModelFile(prestage.id);
+        return false;
+    }
+    const stage = { handle, id: prestage.id };
+    stages.set(modelFile, stage);
+    stageFinalizer?.register(modelFile, stage, stage);
+    if (prestage.header) {
+        stagedHeaders.set(modelFile, prestage.header);
+    }
+    return true;
+}
+
+/**
+ * `ModelFile._fromAstHeader(ast)` from the header Rust computed when it
+ * staged the file (concerto-wasm `staged_header`): sets the same
+ * `namespace`, `version` and `imports` (a copy of `ast.imports` plus the
+ * implicit import of the system types), and the same `importShortNames`
+ * and `importUriMap` entries in the same order, as `modelFileFromAstHeader`
+ * would. Rust returns a header only when that binding would not throw.
+ * Returns false when there is none; the caller then calls the binding.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {object} ast its AST
+ * @return {boolean} true if the header was applied
+ */
+function applyStagedHeader(modelFile: any, ast: any): boolean {
+    const header = stagedHeaders.get(modelFile);
+    if (header === undefined || ast !== modelFile.ast) {
+        return false;
+    }
+    stagedHeaders.delete(modelFile);
+    const [version, shortNames, uris] = header;
+    modelFile.namespace = ast.namespace;
+    modelFile.version = version;
+    const imports = ast.imports ? ast.imports.concat([]) : [];
+    imports.push({
+        $class: 'concerto.metamodel@1.0.0.ImportTypes',
+        namespace: 'concerto@1.0.0',
+        types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event'],
+    });
+    modelFile.imports = imports;
+    for (let i = 0; i < shortNames.length; i += 2) {
+        modelFile.importShortNames.set(shortNames[i], shortNames[i + 1]);
+    }
+    for (let i = 0; i < uris.length; i += 2) {
+        modelFile.importUriMap[uris[i]] = uris[i + 1];
+    }
+    return true;
+}
+
+/**
+ * TS `EXCLUDE_NS` (basemodelmanager.ts): the system namespaces `fromAst`
+ * skips.
+ */
+const DCS_EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
+
+/**
+ * `newModelManager.fromAst(ast, { disableValidation })`, after its
+ * `clearModelFiles()` (which the caller has already run, so that Rust could
+ * stage the result into the new rustHandle), for a result Rust staged:
+ * `staged[i]` is `[stageId, header]` for `ast.models[i]`, or null. The same
+ * ModelFiles are constructed and added, in the same order, with the same
+ * errors. `validateModelFiles()` runs as `fromAst` runs it, unless Rust
+ * `validated` the result and every model file was registered from its
+ * stage: the rustHandle then holds exactly the files Rust validated, under
+ * the default options both managers have, so it would pass.
+ * @param {object} newModelManager the new ModelManager, cleared
+ * @param {object} ast the result's `{ $class, models }` AST
+ * @param {Array} staged the stage of each model, or null
+ * @param {boolean} validated whether Rust validated the result
+ * @param {boolean} [disableValidation] fromAst's `disableValidation` option
+ */
+function adoptStagedModels(newModelManager: any, ast: any, staged: any[], validated: boolean, disableValidation?: boolean): void {
+    const { default: ModelFile } = require('../introspect/modelfile');
+    const handle = newModelManager.rustHandle;
+    let allStaged = true;
+    const models: any[] = ast.models;
+    try {
+        models.forEach((model: any, i: number) => {
+            if (DCS_EXCLUDE_NS.includes(model.namespace)) {
+                return;
+            }
+            const entry = staged[i];
+            if (entry) {
+                prestaged.set(model, { handle, id: entry[0], header: entry[1] });
+            }
+            const modelFile = new ModelFile(newModelManager, model);
+            newModelManager.addModelFile(modelFile, null, null, true);
+            if (committed.get(modelFile) !== handle) {
+                allStaged = false;
+            }
+        });
+    } finally {
+        // A stage no ModelFile took (the loop threw first).
+        models.forEach((model: any) => {
+            const prestage = model && typeof model === 'object' ? prestaged.get(model) : undefined;
+            if (prestage !== undefined) {
+                prestaged.delete(model);
+                prestage.handle.dropStagedModelFile(prestage.id);
+            }
+        });
+    }
+    if (!disableValidation && !(validated && allStaged)) {
+        newModelManager.validateModelFiles();
+    }
+}
+
+/**
+ * The resident DCS input manager of one source ModelManager, for one
+ * resolution flag, and what it was built from.
+ */
+interface DcsResident {
+    handle: any;
+    epoch: number;
+    files: any[];
+    asts: any[];
+    /** `getAst(resolve, false).models`, as the manager was built from them. */
+    sourceModels: any[];
+    dcs: any;
+}
+
+/**
+ * The resident DCS input managers, by source ModelManager: index 0 for
+ * `getAst(false, false)`, 1 for `getAst(true, false)`.
+ */
+const dcsResidents = new WeakMap<object, Array<DcsResident | undefined>>();
+
+/**
+ * Whether the engine has the resident DCS manager (concerto-wasm
+ * `DcsManagerHandle`, P5-27); without it, the DecoratorManager views keep
+ * the per-call bindings.
+ * @return {boolean} true if it does
+ */
+function residentDcsAvailable(): boolean {
+    return typeof (rust as any).DcsManagerHandle === 'function';
+}
+
+/**
+ * Whether the resident DCS input manager of `modelManager` may be kept:
+ * `getAst` is BaseModelManager's own, over `getModelFiles` and
+ * `resolveMetaModel` also its own, and every model file is mirrored in the
+ * manager's rustHandle, whose epoch then moves on every model change.
+ * @param {object} modelManager the source ModelManager
+ * @return {boolean} true if it may be kept
+ */
+function dcsCacheable(modelManager: any): boolean {
+    const { default: BaseModelManager } = require('../basemodelmanager');
+    const proto = BaseModelManager.prototype;
+    const handle = modelManager?.rustHandle;
+    return !!handle && typeof handle.epoch === 'function' &&
+        modelManager.getAst === proto.getAst &&
+        modelManager.getModelFiles === proto.getModelFiles &&
+        modelManager.resolveMetaModel === proto.resolveMetaModel &&
+        typeof modelManager._rustHandleMatchesModelFiles === 'function' &&
+        modelManager._rustHandleMatchesModelFiles();
+}
+
+/**
+ * The DCS input manager for `modelManager.getAst(resolve, false).models`
+ * (concerto-wasm `DcsManagerHandle`): the resident one while the manager's
+ * rustHandle, its epoch, its model files and their ASTs are the ones it was
+ * built from, or else a new one, built from `getAst` as each per-call
+ * binding builds its own (the same errors, at the same point), and kept.
+ * @param {object} modelManager the source ModelManager
+ * @param {boolean} resolve getAst's `resolve` argument
+ * @return {object} `{dcs, resident, sourceModels}`: the DcsManagerHandle,
+ * whether it is kept (when not, the caller frees it once done), and the
+ * models it was built from (read only)
+ */
+function dcsManagerFor(modelManager: any, resolve: boolean): any {
+    const cacheable = dcsCacheable(modelManager);
+    const slot = resolve ? 1 : 0;
+    let handle: any;
+    let epoch = 0;
+    let files: any[] = [];
+    if (cacheable) {
+        handle = modelManager.rustHandle;
+        epoch = handle.epoch();
+        files = modelManager.getModelFiles(false);
+        const resident = dcsResidents.get(modelManager)?.[slot];
+        if (resident && resident.handle === handle && resident.epoch === epoch &&
+            resident.files.length === files.length &&
+            resident.files.every((f: any, i: number) => f === files[i] && resident.asts[i] === f.ast)) {
+            return { dcs: resident.dcs, resident: true, sourceModels: resident.sourceModels };
+        }
+    }
+    const models = modelManager.getAst(resolve, false).models;
+    const dcs = new (rust as any).DcsManagerHandle(models);
+    if (cacheable) {
+        let residents = dcsResidents.get(modelManager);
+        if (!residents) {
+            residents = [];
+            dcsResidents.set(modelManager, residents);
+        }
+        residents[slot]?.dcs.free();
+        residents[slot] = { handle, epoch, files, asts: files.map((f: any) => f.ast), sourceModels: models, dcs };
+    }
+    return { dcs, resident: cacheable, sourceModels: models };
 }
 
 /**
@@ -1827,6 +2205,15 @@ function invalidatePropertyLookups(): void {
     propertyGeneration++;
 }
 
+/**
+ * The model epoch `invalidatePropertyLookups` moves (P5-29): BaseModelManager
+ * keys its getNamespaces/getType/resolveType memo on it.
+ * @return {number} the current `propertyGeneration`
+ */
+function modelGeneration(): number {
+    return propertyGeneration;
+}
+
 /** One ClassDeclaration view's cached `getProperties()` list. */
 interface PropertyLookup {
     /** `propertyGeneration` when it was built. */
@@ -2236,6 +2623,7 @@ function classDeclarationGetIdentifierFieldName(view: any, originals: any[]): an
 export {
     classDeclarationGetIdentifierFieldName,
     invalidatePropertyLookups,
+    modelGeneration,
     classDeclarationGetProperties,
     classDeclarationGetProperty,
     localType,
@@ -2249,6 +2637,7 @@ export {
     mapValueTypeProcess,
     stageModelFile,
     applyStagedHeader,
+    applyStagedFileHeader,
     deferDeclarations,
     commitStaged,
     dropStaged,
@@ -2263,6 +2652,7 @@ export {
     propertyProcess,
     fieldProcess,
     fieldGetScalarField,
+    decoratorManagerValidate,
     decoratorManagerDecorateModels,
     decoratorManagerExtractDecorators,
     decoratorManagerExtractVocabularies,

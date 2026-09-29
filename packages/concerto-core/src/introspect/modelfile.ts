@@ -985,12 +985,15 @@ class ModelFile extends Decorated {
         // (enforceImportVersioning), not a wildcard import, and not alias a
         // primitive type. Each error keeps TS's class.
         //
-        // P5-28 (accordproject/concerto-rust#333): a lazily built file's
-        // header was already read by the engine call that staged it
-        // (engine/views.ts `applyStagedHeader`), so that call's result is
-        // applied without crossing again; otherwise the engine reads it now.
+        // The engine call that staged the file may have read its header
+        // already, and then it is applied without crossing again: P5-27 (F6)
+        // for a DecoratorManager result model (engine/views.ts
+        // `applyStagedHeader`), P5-28 (accordproject/concerto-rust#333) for
+        // a file `stageModelFile` staged (`applyStagedFileHeader`). At most
+        // one of them has a header for a file; otherwise the engine reads it
+        // now.
         const views = loadEngine('../engine/views');
-        if (!views.applyStagedHeader(this, ast)) {
+        if (!views.applyStagedHeader(this, ast) && !views.applyStagedFileHeader(this, ast)) {
             rust.modelFileFromAstHeader(this, ast);
         }
     }
