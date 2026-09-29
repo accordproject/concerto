@@ -26,6 +26,8 @@ import type RelationshipDeclaration from '../introspect/relationshipdeclaration'
 import type MapDeclaration from '../introspect/mapdeclaration';
 import type Resource from '../model/resource';
 import Field from '../introspect/field';
+import { getRelationshipMapValue } from './relationshipmapvalue';
+import type { RelationshipMapValue } from './relationshipmapvalue';
 
 // The Rust engine (src/engine/index.ts) is the only path (P5-02: the
 // CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). The visitor shell stays
@@ -242,6 +244,10 @@ class JSONPopulator {
 
         const objMap = new Map(Object.entries(jsonObj));
 
+        // P5-58 (BC-05, R1; DV-007): a relationship-typed value is read as a
+        // relationship property is, not as an embedded concept.
+        const relationship = getRelationshipMapValue(mapDeclaration);
+
         let map = new Map();
 
         objMap.forEach((value, key) => {
@@ -255,7 +261,9 @@ class JSONPopulator {
                 key = this.processMapType(mapDeclaration, parameters, key, mapDeclaration.getKey().getType());
             }
 
-            if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
+            if (relationship) {
+                value = this.convertRelationship(relationship, value, parameters);
+            } else if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
                 value = this.processMapType(mapDeclaration, parameters, value, mapDeclaration.getValue().getType());
             }
 
@@ -467,7 +475,9 @@ class JSONPopulator {
         case 'Long': {
             const num = json;
             if (typeof num === 'number') {
-                if (Math.trunc(num) !== num) {
+                // P5-51 (BC-10, R1; DV-012): `Math.trunc(n) !== n` alone
+                // passes `±Infinity`; a non-finite number is not an integer.
+                if (!Number.isFinite(num) || Math.trunc(num) !== num) {
                     throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
                 } else {
                     result = num;
@@ -520,14 +530,8 @@ class JSONPopulator {
         let jsonObj = parameters.jsonStack.pop();
         let result: any = null;
 
-        let typeFQN = relationshipDeclaration.getFullyQualifiedTypeName();
-        let defaultNamespace = ModelUtil.getNamespace(typeFQN);
-        if(!defaultNamespace) {
-            defaultNamespace = relationshipDeclaration.getNamespace();
-        }
-        let defaultType = ModelUtil.getShortName(typeFQN);
-
         if(relationshipDeclaration.isArray()) {
+            const { defaultNamespace, defaultType } = relationshipDefaults(relationshipDeclaration);
             if(!Array.isArray(jsonObj)) {
                 const path = parameters.path?.stack.join('');
                 throw new ValidationException(`Expected value at path \`${path}\` to be an array of type \`${relationshipDeclaration.getType()}\``);
@@ -561,33 +565,66 @@ class JSONPopulator {
             }
         }
         else {
-            if (typeof jsonObj === 'string') {
-                result = Relationship.fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );
-            } else if (typeof jsonObj === 'object' && jsonObj !== null) {
-                const jsonObjAsObject = jsonObj as { [key: string]: unknown, $class: string };
-                if (!this.acceptResourcesForRelationships) {
-                    throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
-                }
-
-                // this isn't a relationship, but it might be an object!
-                if(!jsonObjAsObject.$class) {
-                    throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonObj + ' for relationship ' + relationshipDeclaration );
-                }
-                const classDeclaration = parameters.modelManager.getType(jsonObjAsObject.$class);
-
-                // create a new instance, using the identifier field name as the ID.
-                let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
-                    classDeclaration.getName(), jsonObjAsObject[classDeclaration.getIdentifierFieldName()] );
-                parameters.jsonStack.push(jsonObjAsObject);
-                parameters.resourceStack.push(subResource);
-                classDeclaration.accept(this, parameters);
-                result = subResource;
-            } else {
-                throw new Error('Invalid JSON data. Found a value that is not a string or object: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
-            }
+            result = this.convertRelationship(relationshipDeclaration, jsonObj, parameters);
         }
         return result;
     }
+
+    /**
+     * One relationship value (visitRelationshipDeclaration's non-array
+     * branch): a URI string becomes a Relationship, and an object an embedded
+     * resource when `acceptResourcesForRelationships` allows it. A
+     * relationship-typed map value is read here too (P5-58, BC-05).
+     * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
+     * @param {Object} jsonObj - the JSON value
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the Relationship or the embedded resource
+     * @private
+     */
+    convertRelationship(relationshipDeclaration: RelationshipDeclaration | RelationshipMapValue, jsonObj: unknown, parameters: JsonPopulatorParameters) {
+        const { defaultNamespace, defaultType } = relationshipDefaults(relationshipDeclaration);
+        if (typeof jsonObj === 'string') {
+            return Relationship.fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );
+        } else if (typeof jsonObj === 'object' && jsonObj !== null) {
+            const jsonObjAsObject = jsonObj as { [key: string]: unknown, $class: string };
+            if (!this.acceptResourcesForRelationships) {
+                throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
+            }
+
+            // this isn't a relationship, but it might be an object!
+            if(!jsonObjAsObject.$class) {
+                throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonObj + ' for relationship ' + relationshipDeclaration );
+            }
+            const classDeclaration = parameters.modelManager.getType(jsonObjAsObject.$class);
+
+            // create a new instance, using the identifier field name as the ID.
+            let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
+                classDeclaration.getName(), jsonObjAsObject[classDeclaration.getIdentifierFieldName()] );
+            parameters.jsonStack.push(jsonObjAsObject);
+            parameters.resourceStack.push(subResource);
+            classDeclaration.accept(this, parameters);
+            return subResource;
+        } else {
+            throw new Error('Invalid JSON data. Found a value that is not a string or object: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
+        }
+    }
+}
+
+/**
+ * The namespace and type a relationship URI without them takes: the
+ * relationship's target type's (else the owner's namespace).
+ * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
+ * @return {Object} `{ defaultNamespace, defaultType }`
+ * @private
+ */
+function relationshipDefaults(relationshipDeclaration: RelationshipDeclaration | RelationshipMapValue) {
+    let typeFQN = relationshipDeclaration.getFullyQualifiedTypeName();
+    let defaultNamespace = ModelUtil.getNamespace(typeFQN);
+    if(!defaultNamespace) {
+        defaultNamespace = relationshipDeclaration.getNamespace();
+    }
+    let defaultType = ModelUtil.getShortName(typeFQN);
+    return { defaultNamespace, defaultType };
 }
 
 export { JSONPopulator };

@@ -214,7 +214,12 @@ class DecoratorManager {
      */
     static canMigrate(decoratorCommandSet, DCS_VERSION) {
         const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
-        return (semver.major(inputVersion!) === semver.major(DCS_VERSION) && (semver.minor(inputVersion!) < semver.minor(DCS_VERSION)));
+        // BC-41 (P5-38): a namespace version is strict SemVer 2.0.0, whose
+        // components go up to 2^64-1, beyond node-semver's
+        // Number.MAX_SAFE_INTEGER, so its major and minor (the first two
+        // dot-separated parts, always plain digits) are compared exactly.
+        const [major, minor] = inputVersion!.split('.', 2).map(BigInt);
+        return (major === BigInt(semver.major(DCS_VERSION)) && (minor < BigInt(semver.minor(DCS_VERSION))));
     }
 
     /**

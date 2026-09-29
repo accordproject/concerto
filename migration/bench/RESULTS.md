@@ -100,6 +100,204 @@ Allocations (count-alloc build, round 1), before -> now:
     machine's noise band. conformance moved 2.92× -> 2.61× and
     core-test-data 2.19× -> 2.22×, both noise.
 
+# P5-48: model loading, native allocation profile and the P5-13 treatment (2026-09-29)
+
+Task P5-48 (accordproject/concerto-rust#369) profiled model loading before
+changing it. The interim profile is on #369 (comment 5894264276). It then
+fixed the allocation sources at their origin, all in the engine
+(`concerto-rust` `339ff36`, concerto-core plus an additive concerto-wasm
+change). The five fixes:
+
+1. Lazy error context. Error `location`s and property FQN strings are now
+   built only on the error path.
+2. Borrowed property lists in validation, and a borrowed FxHash set in
+   `check_unique_field_names`.
+3. `ModelManager::validate_and_add_model_file`. This validates and registers
+   in place and rolls back on failure. It replaces the scratch manager and
+   the deep `ModelFile` clone.
+4. `ModelManager::new` shares the cached system model files through `Arc`.
+5. Decode once, with no temporaries. This covers `split_namespace`, a cached
+   built-in import, no clone of taken fields in the typed decoder, and an
+   in-place `normalize_class_fields`.
+
+concerto itself is unchanged apart from the bench tooling. The raw outputs are
+in `results/P5-48/`.
+
+| | |
+|---|---|
+| Machine | Cloud container, Intel Xeon @ 2.10GHz, 4 vCPU, Linux 6.18 (the P5-22 machine type) |
+| Toolchain | Node v22.22.2, rustc 1.94.1, `concerto-wasm/build.sh` (engine 2,999,238 bytes now, 2,990,578 before) |
+| Now | `concerto-rust` `339ff36` (P5-48 on `a52dad4`), `concerto` `6979fe40a` (the concerto-core dist is the same on both sides) |
+| Before | `concerto-rust` `a52dad4` (the integration head), with its engine and its `load_profile` build, timed in the same run |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, timed in each round |
+| Driver | `p548-run.sh`, then `p548-table.mjs results/P5-48/timed`. There are three interleaved rounds, and the side order is alternated per round. Each round runs `p515-sweep.mjs --mode time` (5 warm-up, 30 samples) on TS 5.0.0, before and now for the load ops. It also runs concerto-core's `load_profile` example crate-direct (`time` mode), built from each side. One `--mode count` run per side gives the crossings. |
+| Quiet gate | Before each of the 19 timed parts: 1-minute load < 2, 5-minute < 3, and no other bench, cargo, mocha or oracle process. All 19 parts passed the gate (none gave up). At the start of each part, the 1-minute load was 0.31 to 1.66 and the 5-minute load 2.81 to 2.87 (`results/P5-48/timed/timed-loads.txt`). |
+| Noise | Through the TS API, round-to-round medians move by up to about ±35%. For example, `now` addModelFile on core-test-data read 147/167/229 us, and TS `modelfile_new` on synthetic-large read 587/649/1297 us. Treat TS-API changes under about 25% as noise. The crate-direct rounds are tighter, mostly within about ±10%. One outlier is addModelFile conformance before: 70 us in round 1, 44-47 us in rounds 2 and 3. Each figure is the median over the three rounds of each round's median. |
+
+## Before and after, × TS 5.0.0 (same run)
+
+| op | set | TS 5.0.0 | TS API before -> now | **× TS (TS API)** before -> now | change | crate before -> now | crate change | **× TS (crate)** before -> now |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| `new ModelManager` | conformance | 391 us | 394 -> 313 us | 1.01 -> **0.80** | -20% | 13.6 -> 1.44 us | **-89%** | 0.03 -> 0.00 |
+| `new ModelFile` | core-test-data | 27.9 us | 160 -> 137 us | 5.74 -> **4.93** | -14% | 45.7 -> 34.1 us | -25% | 1.64 -> 1.22 |
+| `new ModelFile` | conformance | 8.35 us | 60.6 -> 67.7 us | 7.25 -> **8.10** | +12% (noise) | 13.4 -> 10.7 us | -20% | 1.60 -> 1.28 |
+| `new ModelFile` | synthetic-large | 649 us | 4.06 -> 3.52 ms | 6.25 -> **5.42** | -13% | 1.83 -> 1.39 ms | -24% | 2.83 -> 2.14 |
+| `addModelFile` | core-test-data | 58.3 us | 195 -> 167 us | 3.35 -> **2.86** | -15% | 99.8 -> 51.9 us | **-48%** | 1.71 -> **0.89** |
+| `addModelFile` | conformance | 20.7 us | 228 -> 156 us | 11.00 -> **7.52** | **-32%** | 47.1 -> 16.7 us | **-65%** | 2.28 -> **0.81** |
+| `addModelFile` | synthetic-large | 1.98 ms | 8.90 -> 7.71 ms | 4.49 -> **3.89** | -13% | 3.73 -> 2.16 ms | **-42%** | 1.88 -> 1.09 |
+| `addCTOModel` | core-test-data | 404 us | 1.10 -> 1.20 ms | 2.72 -> **2.97** | +9% (noise) | - | | - |
+| `addCTOModel` | conformance | 127 us | 477 -> 509 us | 3.77 -> **4.02** | +7% (noise) | - | | - |
+| `addCTOModel` | synthetic-large | 19.4 ms | 35.1 -> 33.7 ms | 1.81 -> **1.73** | -4% | - | | - |
+
+Crossings per item did not change (10, 2, 3.2-13 and 3.2-13). P5-48 is
+engine-only. addCTOModel has no crate row, because its CTO parse runs in TS on
+both engines. `p548-table.mjs` also prints an "in-engine us/item" column.
+That column comes from the single, counter-wrapped `--mode count` run, so it
+is not used here.
+
+The crate halves of `addModelFile` (crate-direct, median of rounds):
+
+| set | build before -> now | validate + register before -> now |
+|---|---:|---:|
+| core-test-data | 45.7 -> 35.7 us | 43.9 + reg -> **17.2 us** |
+| conformance | 16.1 -> 12.1 us | 27.3 + reg -> **3.75 us** |
+| synthetic-large | 1.80 -> 1.32 ms | 1.75 + reg -> **0.76 ms** |
+
+"Before" measured validate and register separately. Registering was cheap
+(9-931 allocations per file).
+
+**Summary:**
+
+- **Crate-direct.** addModelFile is now faster than TS 5.0.0 on
+  core-test-data (0.89×) and conformance (0.81×), and close to it on
+  synthetic-large (1.09×). Before, it was 1.7-2.3× slower. `new ModelManager`
+  is 9.4 times cheaper.
+- **Through the TS API.** The ratios improve by 13-32% on addModelFile and
+  new ModelManager, but the API stays well short of parity: addModelFile is
+  still 2.9-7.5× TS. The WASM after-profile shows why. dlmalloc is still
+  50-61% of WASM self time in addModelFile, and JS GC takes 19-24% of the op. The in-place validation is now only 6-11% of the whole op; the rest
+  is building the ModelFile from the AST and the allocator costs of that
+  build (`wasm-profile-after.md`).
+- **new ModelFile and addCTOModel through the TS API are flat, within the
+  noise.** In new ModelFile, WASM decode and build are 58-68% of the op, and
+  fix 5 trims that only by 20-25% crate-direct. addCTOModel is dominated by
+  the concerto-cto parser (41-62% after) and JS GC.
+
+## Each fix's measured share (native callgrind, `results/P5-48/native-per-fix.md`)
+
+The figures are inclusive instructions as a share of the before total, on the
+same `load_profile` loop. Totals for addModelFile: conformance -63.6%,
+core-test-data -40.3%, synthetic-large -40.6%. `new ModelManager`: -85.5%.
+
+| fix | what it removed (before -> after, % of before total) | estimate in the interim profile | met? |
+|---|---|---|---|
+| 1. Lazy error context | `location_value` 13.5 -> 0.0 (conformance). `format!` 9.0 -> 3.1 (conf), 19.5 -> 6.1 (ctd), 23.2 -> 6.6 (syn). `check_bound_validators` 3.4 -> 0.1 (ctd), 5.8 -> 0.1 (syn) | -13.5% conformance, -5-10% elsewhere | **met** (the elsewhere savings are larger than estimated) |
+| 2. Borrowed property lists | `ModelManager::properties` 13.4/7.6/8.3 -> 0. `check_unique_field_names` 12.0 -> 1.8 (conf), 9.2 -> 5.5 (ctd), 7.4 -> 3.3 (syn). Together that is -23.6 / -11.3 / -12.4 | -8-15% | **met** (conformance is above the range) |
+| 3. Validate and register in place | `with_model_file_registered` 7.3/9.1/7.0 -> 0, and `ModelFile` clone 4.4/6.8/5.6 -> 0. WASM: scratch manager 12.2/21.9/15.4% of the whole op -> 0 | -7-9% native, -12-22% WASM | **met** |
+| 4. Shared system model files | `new ModelManager`: `ModelFile` clone 60.6 -> 0, total -85.5%. Crate-timed 13.6 -> 1.44 us. Allocations 223 -> 34 per call | most of the 60% | **met** |
+| 5. Decode once, no temporaries | `check_imports` 9.4 -> 2.0 (conf), 5.0 -> 1.1 (ctd). `parse_namespace_with` 6.4 -> 1.1 (conf). `built_in_import` 0.9/0.5 -> 0. `normalize_class_fields` 1.0/2.2/4.7 -> 0.3/0.6/1.4. `typed_ast::parse` 19.5 -> 17.8, 35.4 -> 32.1, 37.5 -> 31.5 | no number given | measured shares as shown. The typed decode itself is still the largest single cost |
+
+Allocations per model file (`results/P5-48/native-alloc-{before,after}.tsv`):
+
+| op | set | allocs before -> after | bytes before -> after |
+|---|---|---:|---:|
+| `new ModelManager` | - | 223 -> 34 | 24.8 KB -> 2.4 KB |
+| `new ModelFile` | core-test-data | 411 -> 279 | 71.8 KB -> 65.0 KB |
+| `new ModelFile` | conformance | 135 -> 96 | 21.1 KB -> 18.9 KB |
+| `new ModelFile` | synthetic-large | 19,364 -> 7,927 | 4.29 MB -> 3.63 MB |
+| `addModelFile` | core-test-data | 899 -> 408 | 127 KB -> 72.7 KB |
+| `addModelFile` | conformance | 498 -> 129 | 60.7 KB -> 21.3 KB |
+| `addModelFile` | synthetic-large | 46,663 -> 15,509 | 6.94 MB -> 4.15 MB |
+
+## WASM size (`p548-wasmsize.mjs`, `results/P5-48/wasm-size-{before,after}.json`)
+
+| shipped engine | before (`a52dad4`) | after (`339ff36`) | change |
+|---|---:|---:|---:|
+| raw | 2,990,578 B | 2,999,238 B | +8,660 (+0.29%) |
+| gzip -9 | 940,367 B | 947,046 B | +6,679 (+0.71%) |
+| brotli q11 | 611,407 B | 613,438 B | +2,031 (+0.33%) |
+
+These figures come from the named `-O3 -g` builds. Serde deserialisation
+monomorphisations are unchanged at 745,758 B (29.4% of code). That matches
+P5-39's (#349) figure of about 29% / 736 KB, so the P5-39 figures stay valid.
+The +8.9 KB of code is all in `concerto_core` (650,870 -> 659,599 B): the
+new in-place validate-and-register path and the lazy error-context helpers.
+The engine is within the size budget.
+
+## Not done here (found by the profile)
+
+- dlmalloc is still about half of WASM self time on the load path. A faster
+  WASM global allocator, or a per-load arena, would be a separate decision.
+- JS GC takes 15-24% of addModelFile, addCTOModel and new ModelManager through the TS API (5-11% of new ModelFile).
+- The concerto-cto parser is 41-62% of addCTOModel. It is TS on both engines.
+- The typed-AST decode (`typed_ast::parse`) is now the largest single
+  in-engine cost of `new ModelFile` and `addModelFile`, at 18-32% of the
+  before total. A leaner decoder is the next candidate. It would also reduce
+  WASM size (serde is 29% of code).
+
+`validate_and_add_model_file` works on the engine's own `ModelManager`, in
+place. It is compatible with the F-A resident engine-manager design (P5-42,
+#352), and it makes that design easier: a resident manager can take the add
+path without a scratch copy.
+
+## Reproducing
+
+```
+# before/now engines: concerto-wasm build.sh at a52dad4 and at 339ff36;
+# load_profile: cargo build --release --example load_profile -p concerto-core
+BEFORE_ENGINE=.../before-pkg/concerto-engine.cjs NOW_ENGINE=.../now-pkg/concerto-engine.cjs \
+BEFORE_PROFILE=.../before-load_profile NOW_PROFILE=.../now-load_profile \
+  sh migration/bench/p548-run.sh migration/bench/results/P5-48/timed
+node migration/bench/p548-table.mjs migration/bench/results/P5-48/timed
+```
+
+# P5-37 (T7): Serializer fast path on the manager's rustHandle, crossings before and after (2026-09-29)
+
+Task P5-37 (accordproject/concerto-rust#347, T7 of the P5-26 report on #330,
+site I-16) points the Serializer fast path (`engine/serializer.ts`) and the
+instance-validation fast path that shares it (`engine/validate-resource.ts`)
+at the model manager's own `rustHandle`. The second `ModelManagerHandle` that
+module built per manager is gone, so a model change no longer costs one
+`addModel` crossing per model file, a `new ModelManagerHandle`, and a
+`JSON.stringify` of every AST on the next call. The per-manager `TypeCache`
+(P5-16) stays, keyed on the rustHandle and the registered ModelFile
+instances. A manager with the `regExp` option, a manager whose batch
+`addModelFiles` has not mirrored yet (`_mirrorPending`) and a manager without
+a rustHandle take the visitor path.
+
+**Counts only, no timings** (coordinator scoping on #347): TS->WASM boundary
+crossings per call, counted by `results/P5-37/count-first.cjs` (every
+concerto-wasm export and `ModelManagerHandle` method wrapped by
+`lib/p515-engine-counter.cjs`). The model is two files (`a.cto`, and `b.cto`
+importing it); "after a model change" is the first call after
+`updateModelFile` on a manager whose Serializer had already run.
+
+| | |
+|---|---|
+| Machine | Local macOS (Darwin 22.6), Node v22.23.2; counts do not depend on the machine |
+| Before | `concerto` `2ca6a08a3`, `concerto-rust` `cf42b88` (the integration head) |
+| After | the P5-37 branch on those heads, same engine |
+| Raw data | `results/P5-37/{before,now}-first.txt` |
+
+## Crossings per call (before -> after, ratio)
+
+| operation | before | after | ratio |
+|---|---:|---:|---:|
+| `Serializer.fromJSON`, first after a model change | 12 | 9 | 0.75 |
+| `Serializer.fromJSON`, first on a new manager | 12 | 9 | 0.75 |
+| `Serializer.toJSON`, first after a model change | 4 | 1 | 0.25 |
+| `Resource.validate`, first after a model change | 5.96 | 2.96 | 0.50 |
+| `fromJSON` / `toJSON` / `validate`, repeat call | 1 | 1 | 1.00 |
+
+The 3 crossings removed from each first call are exactly the second handle's
+(`new ModelManagerHandle` and `addModel` x2, one per user model file): **0
+extra crossings** remain for the handle. What is left on a first `fromJSON`
+(8 besides the call itself) is the `TypeCache` filling its class lookups
+(`getTypeName`, `modelFileGetTypeName`, the ModelFile view snapshot) and the
+identifier walk, and on a first `validate` the identifier walk (1.96); both
+are per-class lookups the repeat calls answer from their caches, not
+handle-building.
+
 # P5-32 (T2): field-backed ModelFile getters, crossings before and after (2026-09-29)
 
 Task P5-32 (accordproject/concerto-rust#342, T2 of the P5-26 report on

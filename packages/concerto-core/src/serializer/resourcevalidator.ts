@@ -20,6 +20,7 @@ import ModelUtil from '../modelutil';
 import ValidationException from './validationexception';
 import Globalize from '../globalize';
 import dayjs from '../dayjs-setup';
+import { getRelationshipMapValue } from './relationshipmapvalue';
 
 // The Rust engine (src/engine/index.ts) is the only path (P5-02: the
 // CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See jsonpopulator.ts's
@@ -225,12 +226,20 @@ class ResourceValidator {
             throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
         }
 
+        // P5-58 (BC-05, R1; DV-007): a relationship-typed value is checked
+        // as a relationship property is, not as an embedded object.
+        const relationship = getRelationshipMapValue(mapDeclaration);
+
         obj.forEach((value, key) => {
             if (!ModelUtil.isSystemProperty(key)) {
                 // Validate Key
                 this.checkMapType(mapDeclaration.getKey(), key, parameters, mapDeclaration);
                 // Validate Value
-                this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
+                if (relationship) {
+                    this.checkRelationship(parameters, relationship, value);
+                } else {
+                    this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
+                }
             }
         });
 

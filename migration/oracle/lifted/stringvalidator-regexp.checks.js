@@ -15,17 +15,22 @@
 'use strict';
 
 /**
- * P5-02b lifted checks: `StringValidator` with a caller-supplied custom
- * `regExp` engine (`new ModelManager({ regExp })`).
+ * P5-02b lifted checks: `StringValidator` in a model manager built with a
+ * caller-supplied custom `regExp` engine (`new ModelManager({ regExp })`).
  *
- * That option is a JS constructor, so it stays in TS (PORTING.md 3.2): the
- * view only calls the engine when no custom `regExp` is configured, and the
- * TS constructor, `validate` and `compatibleWith` bodies run otherwise
- * (packages/concerto-core/src/introspect/stringvalidator.ts). The recorded
- * corpus cannot reach them (a function-valued option cannot be encoded;
- * see README.md, "The 3 not-liftable tests"), so these checks drive them
- * directly through the public API, with `expect` taken from the frozen
- * v5.0.0 reference. Run by fallbacks.spec.js.
+ * P5-52 (BC-28, R1; accordproject/concerto-rust#373): the option is
+ * ignored, with one warning per process (`concerto-regexp-option`), and the
+ * TS constructor, `validate` and `compatibleWith` bodies that ran for it
+ * are deleted. Every `regex=` is compiled and evaluated by the engine, and
+ * `getRegex()` is a native RegExp built from the pattern and flags the
+ * engine validated. These checks now confirm that such a manager behaves
+ * as a plain one. `expect` is the workspace outcome; `reference`, where it
+ * differs, is v5.0.0's, which ran the custom engine (SVR-CTOR-001, -006,
+ * -009) or the TS visitor (SVR-VAL-008, whose message names the field
+ * `undefined` where the engine names it `null`: message text only, error
+ * parity is by class). The recorded corpus cannot reach them (a
+ * function-valued option cannot be encoded; see README.md, "The 3
+ * not-liftable tests"). Run by fallbacks.spec.js.
  */
 
 const NS = 'org.acme.lifted.p502b.stringvalidator';
@@ -114,7 +119,8 @@ module.exports = [
             const v = validatorOf(build(core, 'c1', BOX), 'c1', 's');
             return { min: v.getMinLength(), max: v.getMaxLength(), regex: String(v.getRegex()), custom: v.getRegex() instanceof CustomRegExp };
         },
-        expect: { ok: { min: 2, max: 4, regex: '/^a+$/', custom: true } },
+        expect: { ok: { min: 2, max: 4, regex: '/^a+$/', custom: false } },
+        reference: { ok: { min: 2, max: 4, regex: '/^a+$/', custom: true } },
     },
     {
         id: 'SVR-CTOR-002',
@@ -161,9 +167,10 @@ module.exports = [
     },
     {
         id: 'SVR-CTOR-006',
-        covers: 'constructor: the custom engine rejects the pattern',
+        covers: 'constructor: the custom engine would reject the pattern (BC-28: the engine accepts it)',
         run: (core) => build(core, 'c6', 'concept Box { o String s regex=/BAD/ optional }', PickyRegExp) && 'loaded',
-        expect: {
+        expect: { ok: 'loaded' },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `s`. org.acme.lifted.p502b.stringvalidator.c6@1.0.0.Box.s: PickyRegExp rejects BAD'
@@ -189,7 +196,7 @@ module.exports = [
     },
     {
         id: 'SVR-CTOR-009',
-        covers: 'constructor: two managers with different engines load one shared AST object; each Field gets a validator its own engine built, at load',
+        covers: 'constructor: two managers with different engines load one shared AST object; neither engine runs (BC-28: v5.0.0 gave each Field a validator its own engine built, at load)',
         run: (core) => {
             const ns = `${NS}.c9@1.0.0`;
             const source = new core.ModelManager();
@@ -227,7 +234,8 @@ module.exports = [
                 ranOnRead: calls.length > atLoad.length,
             };
         },
-        expect: { ok: { ranAtLoad: { A: true, B: true }, read: { B: ['B', 'B'], A: ['A', 'A'] }, ranOnRead: false } },
+        expect: { ok: { ranAtLoad: { A: false, B: false }, read: { B: ['<undefined>', '<undefined>'], A: ['<undefined>', '<undefined>'] }, ranOnRead: false } },
+        reference: { ok: { ranAtLoad: { A: true, B: true }, read: { B: ['B', 'B'], A: ['A', 'A'] }, ranOnRead: false } },
     },
     // ---- validate -----------------------------------------------------
     {
@@ -320,6 +328,12 @@ module.exports = [
             return ser.fromJSON({ $class: `${NS}.v8@1.0.0.Box`, s: 'bb' });
         },
         expect: {
+            throws: {
+                name: 'BaseException',
+                message: 'Validator error for field `null`. org.acme.lifted.p502b.stringvalidator.v8@1.0.0.Box.s: Value \'bb\' failed to match validation regex: /^a+$/'
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `undefined`. org.acme.lifted.p502b.stringvalidator.v8@1.0.0.Box.s: Value \'bb\' failed to match validation regex: /^a+$/'

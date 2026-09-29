@@ -210,7 +210,7 @@ describe('ModelManager', () => {
 
             modelManagerWithOptions.addCTOModel(`namespace org.acme@1.0.0
         concept Bar {
-            o String foo regex=/\\p{S}/
+            o String foo regex=/\\p{S}/u
         }`, 'internal.cto', true);
 
             const bar = {

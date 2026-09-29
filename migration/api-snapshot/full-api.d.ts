@@ -68,7 +68,7 @@ declare class BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {Object} [options.regExp] - An alternative regular expression engine.
+     * @param {Object} [options.regExp] - Deprecated and ignored, with a warning: regular expressions are evaluated by the Concerto engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
     * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
@@ -3439,7 +3439,7 @@ declare class ModelManager extends BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {Object} [options.regExp] - An alternative regular expression engine.
+     * @param {Object} [options.regExp] - Deprecated and ignored, with a warning: regular expressions are evaluated by the Concerto engine.
      * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
      */
     constructor(options?: ModelManagerOptions);
@@ -3885,6 +3885,18 @@ declare class JSONGenerator {
      */
     visitRelationshipDeclaration(relationshipDeclaration: any, parameters: any): any;
     /**
+     * One relationship value: a resource written in full when
+     * `permitResourcesForRelationships` allows it and it is not already being
+     * written, otherwise its relationship text. A relationship-typed map value
+     * is written here too (P5-58, BC-05).
+     * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
+     * @param {Identifiable} obj - the relationship or the resource
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the relationship text, or the resource as JSON
+     * @private
+     */
+    convertRelationship(relationshipDeclaration: any, obj: any, parameters: any): any;
+    /**
      * Returns the persistent format for a relationship.
      * @param {RelationshipDeclaration} relationshipDeclaration - the relationship being persisted
      * @param {Identifiable} relationshipOrResource - the relationship or the resource
@@ -3897,11 +3909,14 @@ export default JSONGenerator;
 
 // ==== serializer/jsonpopulator.d.ts ====
 import { TypedStack } from '@accordproject/concerto-util';
+import Relationship from '../model/relationship';
 import type Factory from '../factory';
 import type BaseModelManager from '../basemodelmanager';
 import type ClassDeclaration from '../introspect/classdeclaration';
+import type RelationshipDeclaration from '../introspect/relationshipdeclaration';
 import type MapDeclaration from '../introspect/mapdeclaration';
 import type Resource from '../model/resource';
+import type { RelationshipMapValue } from './relationshipmapvalue';
 type Stack<T> = {
     push(value: T, expectedType?: unknown): void;
     pop(expectedType?: unknown): T;
@@ -4016,9 +4031,50 @@ declare class JSONPopulator {
      * @private
      */
     visitRelationshipDeclaration(relationshipDeclaration: any, parameters: JsonPopulatorParameters): any;
+    /**
+     * One relationship value (visitRelationshipDeclaration's non-array
+     * branch): a URI string becomes a Relationship, and an object an embedded
+     * resource when `acceptResourcesForRelationships` allows it. A
+     * relationship-typed map value is read here too (P5-58, BC-05).
+     * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
+     * @param {Object} jsonObj - the JSON value
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the Relationship or the embedded resource
+     * @private
+     */
+    convertRelationship(relationshipDeclaration: RelationshipDeclaration | RelationshipMapValue, jsonObj: unknown, parameters: JsonPopulatorParameters): Relationship | Resource;
 }
 export { JSONPopulator };
 export default JSONPopulator;
+
+// ==== serializer/relationshipmapvalue.d.ts ====
+import type MapDeclaration from '../introspect/mapdeclaration';
+/**
+ * The relationship a map holds when its value type is a relationship
+ * (`map M { o String --> T }`), with the members of a
+ * RelationshipDeclaration that the serializer's relationship code reads
+ * (P5-58, BC-05, R1; DV-007). JSONPopulator, JSONGenerator and
+ * ResourceValidator hand it to their relationship-property code, so a map
+ * value is read, written and validated as a `--> T` property is, under the
+ * same `acceptResourcesForRelationships`, `convertResourcesToRelationships`
+ * and `permitResourcesForRelationships` options.
+ * @private
+ */
+export interface RelationshipMapValue {
+    getName(): string;
+    getNamespace(): string;
+    getFullyQualifiedTypeName(): string;
+    isArray(): boolean;
+    toString(): string;
+}
+/**
+ * The relationship a map's values hold, or `null` when the map's value type
+ * is not a relationship.
+ * @param {MapDeclaration} mapDeclaration - the map declaration
+ * @return {RelationshipMapValue|null} the relationship, or null
+ * @private
+ */
+export declare function getRelationshipMapValue(mapDeclaration: MapDeclaration): RelationshipMapValue | null;
 
 // ==== serializer/resourcevalidator.d.ts ====
 import type { SerializerOptions } from '../types';
@@ -4453,6 +4509,10 @@ import type Factory from './factory';
 import type Typed from './model/typed';
 import type { EmptyValueGenerator } from './serializer/valuegenerator';
 export interface ModelManagerOptions {
+    /**
+     * @deprecated Ignored, with a warning (BC-28): regular expressions are
+     * evaluated by the Concerto engine.
+     */
     regExp?: RegExp;
     metamodelValidation?: boolean;
     addMetamodel?: boolean;

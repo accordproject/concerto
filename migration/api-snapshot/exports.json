@@ -144,6 +144,7 @@
     "serializer/instancegenerator.d.ts",
     "serializer/jsongenerator.d.ts",
     "serializer/jsonpopulator.d.ts",
+    "serializer/relationshipmapvalue.d.ts",
     "serializer/resourcevalidator.d.ts",
     "serializer/validationexception.d.ts",
     "serializer/valuegenerator.d.ts",
