@@ -891,6 +891,65 @@ interface StagedHeader {
 const stagedFileHeaders = new WeakMap<object, StagedHeader>();
 
 /**
+ * P5-32 (accordproject/concerto-rust#342): each ModelFile's `getImports()`
+ * names (every import's fully-qualified names, in order), recorded for the
+ * `imports` array they were computed from. A staged header records them when
+ * it is applied (`applyStagedFileHeader`, `applyStagedHeader`): its
+ * `importShortNames.set(key, fqn)` calls are one per imported name, in
+ * import order, so their `fqn`s are exactly those names, and no engine call
+ * is needed. Otherwise `ModelFile.getImports` records its first answer.
+ */
+const importNamesMemo = new WeakMap<object, { imports: any[]; length: number; names: string[] }>();
+
+/**
+ * P5-32: records `names` as `modelFile.getImports()` for its current
+ * `imports` array.
+ * @param {object} modelFile the ModelFile
+ * @param {string[]} names its imports' fully-qualified names, in order
+ */
+function recordImportNames(modelFile: any, names: string[]): void {
+    const imports = modelFile.imports;
+    importNamesMemo.set(modelFile, { imports, length: imports.length, names });
+}
+
+/**
+ * P5-32: `modelFile.getImports()` as recorded (`recordImportNames`), as a
+ * fresh array, or undefined when nothing is recorded for its current
+ * `imports` array.
+ * @param {object} modelFile the ModelFile
+ * @return {string[] | undefined} a copy of the recorded names, or undefined
+ */
+function recordedImportNames(modelFile: any): string[] | undefined {
+    const memo = importNamesMemo.get(modelFile);
+    const imports = modelFile.imports;
+    if (memo === undefined || memo.imports !== imports || memo.length !== imports.length) {
+        return undefined;
+    }
+    return memo.names.slice();
+}
+
+/**
+ * CONCERTO_LAZY_VIEWS_CHECK=1 (P5-32): reports on stderr when the import
+ * names a staged header recorded differ from each import's
+ * `importFullyQualifiedNames`, which is what `getImports` computes otherwise.
+ * @param {object} modelFile the ModelFile a staged header was just applied to
+ */
+function checkRecordedImportNames(modelFile: any): void {
+    let names: string[] = [];
+    try {
+        for (const imp of modelFile.imports) {
+            names = names.concat(rust!.modelUtilImportFullyQualifiedNames(imp));
+        }
+    } catch (e: any) {
+        process.stderr.write(`LAZY-CHECK import-names error: ${modelFile.namespace} ${e?.name}: ${e?.message}\n`);
+        return;
+    }
+    if (JSON.stringify(names) !== JSON.stringify(recordedImportNames(modelFile))) {
+        process.stderr.write(`LAZY-CHECK import-names mismatch: ${modelFile.namespace}\n`);
+    }
+}
+
+/**
  * P5-10b: the lazily built ModelFiles. Their manager had no decorator
  * factories when each was constructed (factories keep the eager path), so
  * none applies to their elements' decorators: a factory added after
@@ -1046,15 +1105,19 @@ function applyStagedFileHeader(modelFile: any, ast: any): boolean {
     }
     modelFile.imports = imports;
     const shortNames = modelFile.importShortNames;
+    const names: string[] = [];
     for (const [key, fqn] of header.shortNames) {
         shortNames.set(key, fqn);
+        names.push(fqn);
     }
     const uriMap = modelFile.importUriMap;
     for (const [key, uri] of header.uriMap) {
         uriMap[key] = uri;
     }
+    recordImportNames(modelFile, names);
     if (lazyViewsCheck) {
         checkStagedFileHeader(modelFile, ast);
+        checkRecordedImportNames(modelFile);
     }
     return true;
 }
@@ -1390,11 +1453,18 @@ function applyStagedHeader(modelFile: any, ast: any): boolean {
         types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event'],
     });
     modelFile.imports = imports;
+    const names: string[] = [];
     for (let i = 0; i < shortNames.length; i += 2) {
         modelFile.importShortNames.set(shortNames[i], shortNames[i + 1]);
+        names.push(shortNames[i + 1]);
     }
     for (let i = 0; i < uris.length; i += 2) {
         modelFile.importUriMap[uris[i]] = uris[i + 1];
+    }
+    // P5-32: one `set` per imported name, as for `applyStagedFileHeader`.
+    recordImportNames(modelFile, names);
+    if (lazyViewsCheck) {
+        checkRecordedImportNames(modelFile);
     }
     return true;
 }
@@ -2659,6 +2729,8 @@ export {
     stageModelFile,
     applyStagedHeader,
     applyStagedFileHeader,
+    recordImportNames,
+    recordedImportNames,
     deferDeclarations,
     commitStaged,
     validateAndCommitStaged,

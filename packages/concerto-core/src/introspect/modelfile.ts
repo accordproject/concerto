@@ -60,12 +60,6 @@ const loadEngine = (specifier: string) =>
 const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engine').rust;
 
 /**
- * P5-32 (accordproject/concerto-rust#342): each ModelFile's `getImports()`
- * names, computed once from its `imports` (kept off the object itself).
- */
-const importNames = new WeakMap<object, { imports: AstNode[]; length: number; names: string[] }>();
-
-/**
  * Every ModelFile the ModelFile constructor ran for (P5-34, BC-46). A
  * BaseModelManager accepts only these: an object the constructor never
  * built (a duck-typed object, `Object.create(ModelFile.prototype)`, a sinon
@@ -224,10 +218,36 @@ class ModelFile extends Decorated {
      * @internal
      */
     _rustHandleId(): number | undefined {
-        const manager = this.modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } | null; _rustHandleMatchesModelFiles?: () => boolean; _rustModelFileId?: (namespace: string) => number | undefined; modelFiles?: Record<string, unknown> };
+        /* istanbul ignore next */
+        if (!this._isRegistered()) {
+            return undefined;
+        }
+        const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any }; _rustModelFileId?: (namespace: string) => number | undefined };
+        // P5-34: the handle the manager cached when it committed the file.
+        // An error reading rustHandle propagates
+        // (accordproject/concerto-rust#262).
+        /* istanbul ignore next */
+        return typeof manager._rustModelFileId === 'function'
+            ? manager._rustModelFileId(this.namespace)
+            : manager.rustHandle.modelFileId(this.namespace);
+    }
+
+    /**
+     * Whether this ModelFile is the one its manager's `rustHandle` mirrors
+     * for its namespace (P5-32, accordproject/concerto-rust#342): the
+     * checks `_rustHandleId` makes before it looks the handle up, none of
+     * which crosses into the engine. A registered file's field-backed
+     * getters (`getVersion`, `isSystemModelFile`, `getExternalImports`)
+     * answer exactly as the engine's own model file did.
+     * @return {boolean} true if registered and mirrored
+     * @private
+     * @internal
+     */
+    _isRegistered(): boolean {
+        const manager = this.modelManager as unknown as { rustHandle?: unknown; _rustHandleMatchesModelFiles?: () => boolean; modelFiles?: Record<string, unknown> } | null | undefined;
         /* istanbul ignore next */
         if (!manager || !manager.rustHandle || typeof manager._rustHandleMatchesModelFiles !== 'function') {
-            return undefined;
+            return false;
         }
         // A ModelFile detached from its manager's own registration -- most
         // notably `filter()`'s result before it is ever added -- must never
@@ -237,20 +257,10 @@ class ModelFile extends Decorated {
         // call to say so).
         /* istanbul ignore next */
         if (!manager.modelFiles || manager.modelFiles[this.namespace] !== this) {
-            return undefined;
+            return false;
         }
         // P5-34: a flag read, not a boundary call (`_mirrorPending`).
-        /* istanbul ignore next */
-        if (!manager._rustHandleMatchesModelFiles()) {
-            return undefined;
-        }
-        // P5-34: the handle the manager cached when it committed the file.
-        // An error reading rustHandle propagates
-        // (accordproject/concerto-rust#262).
-        /* istanbul ignore next */
-        return typeof manager._rustModelFileId === 'function'
-            ? manager._rustModelFileId(this.namespace)
-            : manager.rustHandle.modelFileId(this.namespace);
+        return manager._rustHandleMatchesModelFiles();
     }
 
     /**
@@ -262,10 +272,10 @@ class ModelFile extends Decorated {
         // P5-32 (accordproject/concerto-rust#342): `this.version` is the
         // field Rust itself wrote at construction (concerto-wasm
         // `modelFileFromAstHeader`, or the staged header P5-28 applies), so
-        // no engine call is needed. A registered file answers as the engine
-        // did (`modelFileGetVersion`): `null`, never `undefined`, for an
-        // unversioned namespace.
-        return this._isRegistered() ? this.version ?? null : this.version;
+        // no engine call is needed. A registered file answers as the
+        // engine's `modelFileGetVersion` did: `null`, never `undefined` or
+        // `''`, for a namespace with no version.
+        return this._isRegistered() ? this.version || null : this.version;
     }
 
     /**
@@ -273,26 +283,13 @@ class ModelFile extends Decorated {
      * @returns {Boolean} true if this is a system model file
      */
     isSystemModelFile(): boolean {
-        // P5-32: from `this.namespace`, which Rust wrote at construction; the
-        // engine's `modelFileIsSystemModelFile` gave the same answer.
-        return this.namespace.startsWith('concerto@') || this.namespace === 'concerto';
-    }
-
-    /**
-     * Whether this ModelFile is the file its manager holds for its
-     * namespace, on a manager with an engine mirror (P5-32,
-     * accordproject/concerto-rust#342). A TS-only check: it never crosses
-     * into the engine. Registered files answer the field-backed getters
-     * (`getVersion`, `getExternalImports`) the way the engine route did.
-     * @return {boolean} true if registered with an engine-backed manager
-     * @private
-     * @internal
-     */
-    _isRegistered(): boolean {
-        const manager = this.modelManager as unknown as { rustHandle?: unknown; _rustHandleMatchesModelFiles?: unknown; modelFiles?: Record<string, unknown> } | null | undefined;
-        return !!manager && !!manager.rustHandle &&
-            typeof manager._rustHandleMatchesModelFiles === 'function' &&
-            !!manager.modelFiles && manager.modelFiles[this.namespace] === this;
+        // P5-32 (accordproject/concerto-rust#342): from `this.namespace`,
+        // which Rust wrote at construction. A registered file answers as the
+        // engine's `modelFileIsSystemModelFile` did (concerto-core
+        // `ModelFile::is_system_namespace`: a `concerto@` namespace only);
+        // otherwise the bare `concerto` namespace is a system one too, as the
+        // namespace check during construction takes it.
+        return this.namespace.startsWith('concerto@') || (this.namespace === 'concerto' && !this._isRegistered());
     }
 
     /**
@@ -359,14 +356,18 @@ class ModelFile extends Decorated {
      * this ModelFile
      */
     getImports(): string[] {
-        // P5-32 (accordproject/concerto-rust#342): `this.imports` is written
-        // once, at construction, so its fully-qualified names are computed
-        // once too (through the engine route for a registered file, as
-        // before, and the TS body otherwise) and every later call answers
-        // from that, with no engine call. Each call returns a fresh array.
-        const memo = importNames.get(this);
-        if (memo !== undefined && memo.imports === this.imports && memo.length === this.imports.length) {
-            return memo.names.slice();
+        // P5-32 (accordproject/concerto-rust#342): `this.imports` is the
+        // field Rust itself wrote at construction, so its fully-qualified
+        // names are recorded once (engine/views.ts `recordImportNames`):
+        // from the staged header when one was applied, with no engine call,
+        // or else on the first call, through the engine's own model file
+        // for a registered file, as before, and the TS body otherwise (the
+        // two agree). Every later call answers from that record, with no
+        // engine call, as a fresh array, as both routes did.
+        const views = loadEngine('../engine/views');
+        const recorded: string[] | undefined = views.recordedImportNames(this);
+        if (recorded !== undefined) {
+            return recorded;
         }
         let result: string[] = [];
         const id = this._rustHandleId();
@@ -379,7 +380,7 @@ class ModelFile extends Decorated {
                 result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
             });
         }
-        importNames.set(this, { imports: this.imports, length: this.imports.length, names: result.slice() });
+        views.recordImportNames(this, result.slice());
         return result;
     }
 
