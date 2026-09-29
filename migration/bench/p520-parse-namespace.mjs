@@ -14,8 +14,7 @@
 // Ops, each over the namespaces or model files of fixtures/model-sets/<set>:
 // - parse_namespace: `ModelUtil.parseNamespace(ns)` for every namespace a
 //   model file declares or imports, without reading `versionParsed`;
-// - parse_namespace_read: the same, reading `versionParsed.major` (on the
-//   Rust engine after P5-20 this builds the SemVer on first read);
+// - parse_namespace_read: the same, reading `versionParsed.major`;
 // - mm_new: `new ModelManager()` (set-independent, run once);
 // - add_model_file: a fresh manager, then `addModelFile(new ModelFile(...))`
 //   for every model file of the set, in file-name order.

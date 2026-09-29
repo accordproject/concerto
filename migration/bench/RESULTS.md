@@ -1,3 +1,126 @@
+# P5-20 (F4): parseNamespace checks the version in Rust, no semver.parse callback (2026-09-29)
+
+Task P5-20 F4 (accordproject/concerto-rust#318) fixes finding F4 of the
+P5-15 profiling sweep (#309). `model_util::parse_namespace` checked a
+namespace's version with a `regress` regex, and the WASM binding called
+back into JS `semver.parse` for every namespace to build `versionParsed`.
+The regex is replaced by a hand-written scanner (`scan_full` in
+`concerto-core/src/model_util.rs`) that accepts and rejects what
+node-semver 7.6.3's `parse` does (the version TS 5.0.0 pins), and
+`SemVer.version` is sliced from the matched text. concerto-wasm adds
+`modelUtilParseNamespaceChecked` (additive; `modelUtilParseNamespace` and
+`setHost` are unchanged), which returns the result packed into one string
+with no host callback. `ModelUtil.parseNamespace` in
+`packages/concerto-core/src/modelutil.ts` unpacks it and builds
+`versionParsed` with the same `semver.parse` in JS, eagerly. Keys, order,
+values, the `SemVer` instance, errors and the .d.ts are unchanged.
+
+Differential tests (`concerto-core/tests/semver/`): 3,944 inputs recorded
+from node-semver 7.6.3 `parse` by `record.mjs` (prerelease, build metadata,
+leading zeros, whitespace, `v`/`=` prefixes, very long input; re-recording
+reproduces the JSON byte for byte), a check that the recorded
+`safeRe[t.FULL]` source equals the crate's pattern, and the scanner against
+the regex on about 2.4 million short strings and at the length limits.
+
+| | |
+|---|---|
+| Machine | Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz, 4 cores / 8 logical CPUs, 16 GB, macOS 13.7.8 (a developer laptop) |
+| Toolchain | Node v24.21.0, rustc 1.98.1, wasm-bindgen 0.2.128, wasm-opt applied by `concerto-wasm/build.sh`. The P5-20 engine is 2,846,875 bytes, within the 4 MiB budget (before: 2,846,654). |
+| Quiet-check | Before every run, the driver waited until the 1-minute load average was below 2.5 and the 5-minute below 3, with no other benchmark, cargo or mocha process running. All 21 runs met it; the 1-minute load was 1.65 to 2.44 at each start. |
+| Before | `concerto-rust` `c140846` (the integration head when the task started, with P5-16), with `concerto` `49df04c05` and its `concerto-core` dist |
+| After | `concerto-rust` `278d03b` (the two P5-20 commits on `c140846`), with `concerto` `7a91c9953` (the P5-20 `modelutil.ts` change on `49df04c05`) and its dist. Unlike P5-18, both the engine and the dist differ between the two sides, because the TS side calls the new binding. |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0 (the oracle's reference), run with `--core-dist migration/oracle/reference/node_modules/@accordproject/concerto-core/dist` |
+| Driver | `p520-parse-namespace.mjs` (this task), 5 warm-up and 30 samples. Criterion (1 s warm-up, 3 s measurement): a `p520_parse_namespace` bench over the same namespaces, and P5-15's `benches/p515_sweep.rs` filtered to `mm_new/conformance` and `add_model_file`. Both crate benches were copied into `benches/` for the run and not committed. |
+| Runs | `results/P5-20-{ts-reference-5.0.0,before-rust-engine,after-rust-engine}-{1,2,3}.json`: three interleaved rounds (TS reference, then before and after through the TS API, then before and after in the crate). |
+
+## Through the TS public API
+
+Medians are in µs per item (per namespace for `parse_namespace`, per
+model file for `add_model_file`, per call for `mm_new`), for runs 1, 2
+and 3. The ratios use the median of the three runs. `parse_namespace`
+runs `ModelUtil.parseNamespace` over every namespace the set's model files
+declare or import (36, 41 and 1); `parse_namespace_read` also reads
+`versionParsed.major`.
+
+| Model set | Op | TS 5.0.0, runs 1 / 2 / 3 | Rust before, runs 1 / 2 / 3 | Rust P5-20, runs 1 / 2 / 3 | before / TS | **P5-20 / TS** | speed-up |
+|---|---|---|---|---|---|---|---|
+| concerto-core-test-data | parse_namespace | 1.56 / 1.01 / 1.00 | 13.3 / 13.5 / 13.8 | 5.33 / 5.52 / 5.78 | 13.26× | **5.44×** | 2.44× |
+| conformance | parse_namespace | 1.16 / 0.76 / 0.72 | 4.97 / 5.87 / 5.03 | 2.04 / 2.01 / 1.94 | 6.63× | **2.65×** | 2.50× |
+| synthetic-large | parse_namespace | 0.95 / 0.90 / 0.84 | 7.74 / 6.06 / 7.19 | 2.34 / 2.45 / 2.33 | 8.01× | **2.61×** | 3.07× |
+| concerto-core-test-data | parse_namespace_read | 1.03 / 0.83 / 0.81 | 10.5 / 10.4 / 11.0 | 5.27 / 5.38 / 5.38 | 12.65× | **6.51×** | 1.94× |
+| conformance | parse_namespace_read | 0.95 / 0.75 / 0.72 | 5.10 / 5.42 / 5.01 | 2.11 / 2.14 / 2.02 | 6.81× | **2.81×** | 2.42× |
+| synthetic-large | parse_namespace_read | 0.95 / 0.87 / 0.89 | 7.99 / 6.64 / 7.95 | 2.76 / 2.81 / 2.75 | 8.95× | **3.11×** | 2.88× |
+| (none) | mm_new | 280.5 / 296.3 / 284.2 | 603.1 / 595.6 / 602.7 | 574.4 / 610.2 / 552.6 | 2.12× | **2.02×** | 1.05× |
+| concerto-core-test-data | add_model_file | 82.1 / 85.1 / 83.5 | 252.3 / 273.6 / 257.5 | 260.7 / 247.6 / 265.4 | 3.08× | **3.12×** | 0.99× |
+| conformance | add_model_file | 27.8 / 29.6 / 28.8 | 163.5 / 168.3 / 165.8 | 153.6 / 152.0 / 153.1 | 5.76× | **5.31×** | 1.08× |
+| synthetic-large | add_model_file | 2469.9 / 2441.7 / 2463.8 | 6856.7 / 7032.9 / 7515.4 | 7105.1 / 6981.9 / 7005.8 | 2.85× | **2.84×** | 1.00× |
+
+- **`ModelUtil.parseNamespace` is 1.9× to 3.1× faster** and goes from
+  6.6× to 13.3× TS to 2.6× to 6.5× TS. What is left is the WASM call
+  itself, the string unpacking and `semver.parse` in JS (about 0.26 µs),
+  which TS 5.0.0 also pays.
+- concerto-core-test-data costs about 2.6× conformance per namespace on
+  the Rust side (TS: about 1.4×), before and after alike. Timing single
+  namespaces in a hot loop gives 1.5 to 2.2 µs on both sets, so the gap
+  looks like a whole-set effect of the harness (GC, cache) rather than the
+  inputs. This task did not investigate it further.
+- **`new ModelManager()` does not move (1.05×, inside the noise)**. The
+  issue estimated about 200 µs off, to about 1.5× TS. `new ModelManager()`
+  does not call `parseNamespace`: its boundary crossings are
+  `modelFileFromAstHeader` (3) and `stageModelFile` (2), and P5-15's
+  native profile of it shows no regex time. It stays about 2× TS.
+- **`addModelFile` gains 8% on conformance** (5.8× to 5.3× TS) and is
+  unchanged on the other two sets. Validation parses each file's
+  namespace and imports in the crate, where the scanner saves a few µs per
+  file (see the crate table); that is small next to the rest of
+  validation, which P5-18 identified as most of the remaining cost.
+- CVs were up to 111% on single runs of `parse_namespace` (a few slow
+  samples), and up to 71% for `mm_new`, on both sides and in the TS
+  reference. The ratios use medians of three runs.
+
+## The Rust crate directly (criterion)
+
+Criterion's median estimate for runs 1, 2 and 3: µs per pass over every
+namespace of the set for `parse_namespace`, µs per call for `mm_new`, and
+ms per whole set for `add_model_file` (every file into a fresh manager).
+The speed-up uses the median of the three runs. The crate numbers are
+native, so only the before/after ratio is meaningful.
+
+| Benchmark | Before (`c140846`), runs 1 / 2 / 3 | P5-20 (`278d03b`), runs 1 / 2 / 3 | Speed-up |
+|---|---|---|---|
+| `parse_namespace`, concerto-core-test-data (36), µs | 84.62 / 84.19 / 84.23 | 31.15 / 31.33 / 31.26 | 2.69× |
+| `parse_namespace`, conformance (41), µs | 99.18 / 99.07 / 97.85 | 38.62 / 37.39 / 39.03 | 2.57× |
+| `mm_new`, µs | 31.04 / 31.19 / 31.27 | 30.52 / 30.64 / 31.23 | 1.02× |
+| `add_model_file`, concerto-core-test-data, ms | 6.76 / 6.82 / 6.86 | 6.33 / 6.31 / 6.50 | 1.08× |
+| `add_model_file`, conformance, ms | 4.67 / 4.67 / 4.66 | 4.15 / 4.10 / 4.24 | 1.12× |
+| `add_model_file`, synthetic-large, ms | 8.05 / 8.01 / 8.23 | 7.99 / 7.97 / 8.27 | 1.01× |
+
+- **The scanner makes the crate's `parse_namespace` 2.6× to 2.7× faster**
+  (about 2.3 µs to 0.9 µs per namespace, including the name split and the
+  `SemVer` fields).
+- `add_model_file` is 8% to 12% faster on the many-file sets and flat on
+  synthetic-large (one file); `mm_new` is flat.
+- The figures are the medians criterion printed, from the run logs; the
+  criterion output directories were not kept.
+
+## Correctness during the run
+
+The full tier ran on the final P5-20 tree (`concerto-rust` `278d03b`)
+after the benchmark. `cargo fmt --all --check` and `cargo clippy --workspace
+--all-targets --all-features -D warnings` were clean. `cargo test
+--workspace` passed 996 tests with 0 failures (1 ignored), with
+`CONCERTO_ORACLE_FIXTURES` set: the oracle covered 16,242 fixtures
+(14,132 pass, 2,110 unsupported, 0 fail) with 0 load errors, 0 harness
+errors, 0 unowned and 0 regressions. The concerto-wasm leg passed: `cargo fmt
+--check`, wasm32 clippy with `-D warnings`, `cargo check`, `build.sh` and
+`smoke:node`. The concerto-core build, the guardrails unit tests and the
+guardrails check against `origin/claude/tender-pascal-ocwf9q` passed. The
+concerto-core suite with nyc had 1,974 passing, 0 failing and 8 pending,
+with coverage at 99.48% statements, 96.6% branches, 99.81% functions and
+99.51% lines. No fuzz run, per the milestone-only policy.
+
+---
+
 # P5-18 (F2): validate detached model files without deep-cloning the manager (2026-09-29)
 
 Task P5-18 F2 (accordproject/concerto-rust#316) fixes finding F2 of the
