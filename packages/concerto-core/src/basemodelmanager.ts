@@ -147,6 +147,31 @@ const DEFAULT_DECORATOR_VALIDATION = {
 // and ignored by fromAst
 const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
 
+// P5-52 (BC-28, R1; accordproject/concerto-rust#373): the `regExp` option
+// (an alternative regular expression engine, such as XRegExp) is no longer
+// supported. Every `regex=` is compiled and evaluated by the Concerto
+// engine, which cannot call a JS constructor. The option is ignored, with
+// one warning per process, rather than rejected.
+let regExpOptionWarned = false;
+
+/**
+ * Warns, once per process, that the `regExp` option is ignored.
+ * @private
+ */
+function warnRegExpOptionIgnored() {
+    if (regExpOptionWarned) {
+        return;
+    }
+    regExpOptionWarned = true;
+    /* istanbul ignore else: process.emitWarning is Node's */
+    if (typeof process !== 'undefined' && typeof process.emitWarning === 'function') {
+        process.emitWarning(
+            'The ModelManager regExp option is ignored: regular expressions are evaluated by the Concerto engine (ECMAScript syntax and semantics)',
+            { type: 'Warning', code: 'concerto-regexp-option' }
+        );
+    }
+}
+
 // The system namespaces a new rustHandle loads itself (concerto-wasm
 // `ModelManagerHandle::new`), as `addDecoratorModel` and `addRootModel` then
 // register them in `modelFiles`.
@@ -251,7 +276,7 @@ class BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {Object} [options.regExp] - An alternative regular expression engine.
+     * @param {Object} [options.regExp] - Deprecated and ignored, with a warning: regular expressions are evaluated by the Concerto engine.
      * @param {boolean} [options.metamodelValidation] - Unless false, every ModelFile built for this
      * manager has its AST checked against the Concerto metamodel when it is constructed (at model
      * load: fromAst, addModel, addCTOModel, addModelFiles, updateModelFile), and a malformed AST is an
@@ -275,24 +300,14 @@ class BaseModelManager {
         this.serializer = new Serializer(this.factory, this, options);
         this.decoratorFactories = [];
         this.options = options;
+        if (options?.regExp) {
+            warnRegExpOptionIgnored();
+        }
         this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
         this._mirrorPending = false;
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
-        this.rustHandle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
-        // P4-08 (accordproject/concerto-rust#67, maintainer decision
-        // 2026-09-26): propagate both TS validation options rustHandle's
-        // own validation was previously blind to (P4-08e/#189 added the
-        // decorator-validation binding; the reserved-system-type-names
-        // one already existed) *before* addDecoratorModel/addRootModel
-        // below mirror anything into it, so `ModelFile.validate()`'s
-        // Rust delegation (introspect/modelfile.ts) and rustHandle's own
-        // add/validate paths see the same options TS's own validate()
-        // body reads from `this.options`/`this.decoratorValidation`.
-        this.rustHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels(
-            !!options?.dangerouslyAllowReservedSystemTypeNamesInUserModels
-        );
-        this.rustHandle.setDecoratorValidation(this.decoratorValidation);
+        this.rustHandle = this._newRustHandle();
         this.addDecoratorModel();
         this.addRootModel();
 
@@ -1116,6 +1131,31 @@ class BaseModelManager {
     }
 
     /**
+     * A new concerto-wasm ModelManagerHandle, told this manager's validation
+     * options. P4-08 (accordproject/concerto-rust#67, maintainer decision
+     * 2026-09-26): both TS validation options rustHandle's own validation
+     * was previously blind to (P4-08e/#189 added the decorator-validation
+     * binding; the reserved-system-type-names one already existed) are set
+     * *before* addDecoratorModel/addRootModel mirror anything into it, so
+     * `ModelFile.validate()`'s Rust delegation (introspect/modelfile.ts) and
+     * rustHandle's own add/validate paths see the same options TS's own
+     * validate() body reads from `this.options`/`this.decoratorValidation`.
+     * The constructor and `clearModelFiles` both build rustHandle here
+     * (P5-54, accordproject/concerto-rust#375).
+     * @return {object} the handle
+     * @private
+     * @internal
+     */
+    _newRustHandle(): { [binding: string]: (...args: any[]) => any } {
+        const handle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
+        handle.setDangerouslyAllowReservedSystemTypeNamesInUserModels(
+            !!this.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels
+        );
+        handle.setDecoratorValidation(this.decoratorValidation);
+        return handle;
+    }
+
+    /**
      * Remove all registered Concerto files
      */
     clearModelFiles() {
@@ -1125,8 +1165,11 @@ class BaseModelManager {
         // addDecoratorModel/addRootModel below re-populate TS's
         // this.modelFiles, and _needsRustWrite skips mirroring them since
         // the fresh handle's own constructor already has them.
-        /* istanbul ignore next */
-        this.rustHandle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
+        // P5-54 (accordproject/concerto-rust#375): the fresh handle gets
+        // this manager's validation options too (`_newRustHandle`), or
+        // `fromAst` (which clears first) and the DecoratorManager paths
+        // validate with the defaults, ignoring `decoratorValidation`.
+        this.rustHandle = this._newRustHandle();
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
         this.addDecoratorModel();

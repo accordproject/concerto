@@ -473,22 +473,10 @@ function fieldProcess(field: any): void {
         snapshot = rust!.fieldProcess(field);
     }
     const kind = snapshot.validator?.kind;
-    // P5-10b: with a custom `options.regExp` engine, a lazily built file's
-    // StringValidators were built at construction (`probeCustomRegExp`).
-    const custom = !!field.parent?.modelFile?.modelManager?.options?.regExp;
-    if (kind === 'StringValidator' && custom) {
-        const probed = takeProbedStringValidator(field);
-        if (probed !== undefined) {
-            field.validator = probed;
-            field.defaultValue = snapshot.defaultValue;
-            return;
-        }
-    }
     // P5-10b: in a lazily built file, a validator whose construction is
     // known to succeed is built on first read: a NumberValidator from its
-    // snapshot, a StringValidator (without a custom `options.regExp`) from
-    // its `stringValidatorNew` snapshot.
-    const sv = custom ? undefined : entry?.sv;
+    // snapshot, a StringValidator from its `stringValidatorNew` snapshot.
+    const sv = entry?.sv;
     if ((kind === 'NumberValidator' || (kind === 'StringValidator' && sv)) && inLazyFile(field)) {
         const numberSnapshot = snapshot.validator;
         const regexAst = field.ast.validator;
@@ -801,12 +789,9 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
 // When Rust's load fails, or the manager has decorator factories (user code `Decorated.process` runs, and may
 // throw from, during construction; running them on first read is BC-24,
 // not adopted), the ModelFile is built eagerly exactly as before, so a TS
-// error is thrown by the TS code, at the same point. A custom
-// `options.regExp` engine (user code the StringValidator constructor runs
-// during construction: the lifted fallback SVR-CTOR-006 expects its throw
-// at load) no longer forces the eager path (P5-10b): only the Fields'
-// StringValidators are built at construction (`probeCustomRegExp`), and
-// the file is built eagerly only when one of them throws.
+// error is thrown by the TS code, at the same point. (P5-52, BC-28, R1:
+// `options.regExp` is ignored, so no custom regex engine runs during
+// construction; every `regex=` is compiled and evaluated by the engine.)
 //
 // CONCERTO_LAZY_VIEWS_CHECK=1 is a migration diagnostic, not an option: it
 // keeps the lazy path but builds the declaration views, and every part
@@ -1009,9 +994,7 @@ function checkAstShape(modelFile: any): string | undefined {
  * decorators can be deferred too): loads the AST in the manager's
  * rustHandle staging slot, once. Returns true when the ModelFile may be
  * built lazily: the manager (always a BaseModelManager, BC-47) has no
- * decorator factories, Rust loaded the AST without error, and, with
- * a custom `options.regExp`, the Fields' StringValidators were built
- * without error (`probeCustomRegExp`). Never throws: on any
+ * decorator factories and Rust loaded the AST without error. Never throws: on any
  * failure the caller builds the ModelFile eagerly, which throws the TS error
  * itself.
  * @param {object} modelFile the ModelFile being constructed
@@ -1054,16 +1037,8 @@ function stageModelFile(modelFile: any, checkedText?: string): boolean {
         const fileName = typeof modelFile.fileName === 'string' ? modelFile.fileName : undefined;
         const unmirrored = !manager._needsRustWrite(ast.namespace);
         const key = unmirrored ? JSON.stringify([text, definitions ?? null, fileName ?? null]) : null;
-        // P5-10b: a custom `options.regExp` engine is user code the
-        // StringValidator constructor runs (and may throw from) during
-        // construction: once Rust has accepted the AST, those validators
-        // are built now (`probeCustomRegExp`), and only they.
-        const customRegExp = !!manager.options?.regExp;
         const accepted = key !== null ? acceptedUnmirrored.get(ast) : undefined;
         if (accepted !== undefined && accepted.key === key) {
-            if (customRegExp && !probeCustomRegExp(modelFile, ast)) {
-                return false;
-            }
             if (accepted.header !== null) {
                 stagedFileHeaders.set(modelFile, accepted.header);
             }
@@ -1083,10 +1058,6 @@ function stageModelFile(modelFile: any, checkedText?: string): boolean {
             header = staged.header;
         } else {
             id = handle.stageModelFile(text, definitions, fileName);
-        }
-        if (customRegExp && !probeCustomRegExp(modelFile, ast)) {
-            handle.dropStagedModelFile(id);
-            return false;
         }
         if (key !== null) {
             // Never committed: keep the verdict (and the header), not the
@@ -1191,113 +1162,6 @@ function checkStagedFileHeader(modelFile: any, ast: any): void {
     if (fields(scratch) !== fields(modelFile)) {
         process.stderr.write(`LAZY-CHECK header-mismatch: ${modelFile.namespace}\n`);
     }
-}
-
-/**
- * P5-10b: the StringValidators built by `probeCustomRegExp` when a lazily
- * built file was constructed, by that ModelFile and then by the property
- * AST node each was built from, until `fieldProcess` gives each to the
- * Field built from that node in that file. Keyed by file as well as node
- * because two files (in one manager or two) can share AST objects, and
- * each file's Fields must get the validators its own manager's engine built.
- */
-const probedStringValidators = new WeakMap<object, WeakMap<object, any>>();
-
-/**
- * Whether a property AST node is one `Field.process` builds a
- * StringValidator for: a String property (`propertyProcess` sets `type`
- * to 'String') with a truthy `validator` or `lengthValidator` (the
- * `fieldProcess` binding's selection).
- * @param {object} node the property AST node
- * @return {boolean} true if its Field gets a StringValidator
- */
-function hasStringValidator(node: any): boolean {
-    if (!node || typeof node !== 'object' || typeof node.$class !== 'string') {
-        return false;
-    }
-    const $class = node.$class;
-    if ($class !== 'StringProperty' && !$class.endsWith('.StringProperty')) {
-        return false;
-    }
-    return !!node.validator || !!node.lengthValidator;
-}
-
-/**
- * P5-10b: for a manager with a custom `options.regExp` engine, builds
- * every StringValidator the eager constructor would build for the file's
- * Fields, now, at construction, with the same arguments and the same
- * engine, so a throw from that user code happens at the same point. Each
- * is built against a stand-in for its Field (whose name, AST, parent file
- * and fully qualified name are all the constructor reads) and handed to
- * the Field when it is built. Returns false when one throws, or the AST
- * cannot be walked; the caller then builds the file eagerly, which throws
- * the TS error itself.
- * @param {object} modelFile the ModelFile being constructed
- * @param {object} ast its AST
- * @return {boolean} true if every validator was built
- */
-function probeCustomRegExp(modelFile: any, ast: any): boolean {
-    const declarations = ast?.declarations;
-    if (declarations === undefined || declarations === null) {
-        return true;
-    }
-    if (!Array.isArray(declarations)) {
-        return false;
-    }
-    const built: Array<[object, any]> = [];
-    try {
-        const { StringValidator } = stringValidatorModule();
-        const namespace = ast.namespace;
-        for (const declaration of declarations) {
-            const properties = declaration?.properties;
-            if (properties === undefined || properties === null) {
-                continue;
-            }
-            if (!Array.isArray(properties)) {
-                return false;
-            }
-            for (const node of properties) {
-                if (!hasStringValidator(node)) {
-                    continue;
-                }
-                const parent = { getModelFile: () => modelFile };
-                const standIn = {
-                    ast: node,
-                    getName: () => node.name,
-                    getParent: () => parent,
-                    getFullyQualifiedName: () => `${namespace}.${declaration.name}.${node.name}`,
-                };
-                built.push([node, new StringValidator(standIn, node.validator, node.lengthValidator)]);
-            }
-        }
-    } catch (e) {
-        return false;
-    }
-    const byNode = new WeakMap<object, any>();
-    for (const [node, validator] of built) {
-        byNode.set(node, validator);
-    }
-    probedStringValidators.set(modelFile, byNode);
-    return true;
-}
-
-/**
- * The StringValidator `probeCustomRegExp` built for `field`'s AST node,
- * now attached to `field`, once; undefined if there is none.
- * @param {object} field the Field being processed
- * @return {object|undefined} the StringValidator
- */
-function takeProbedStringValidator(field: any): any {
-    const node = field.ast;
-    const modelFile = field.parent?.modelFile;
-    const byNode = modelFile && typeof modelFile === 'object' ? probedStringValidators.get(modelFile) : undefined;
-    const validator = byNode && node && typeof node === 'object' ? byNode.get(node) : undefined;
-    if (validator === undefined) {
-        return undefined;
-    }
-    byNode!.delete(node);
-    validator.field = field;
-    return validator;
 }
 
 /**
@@ -1439,7 +1303,7 @@ const stagedHeaders = new WeakMap<object, any[]>();
 /**
  * Called by `stageModelFile`: when `ast` has a prestage in `handle`, and
  * the ModelFile is being built the way `fromAst` builds it (no definitions,
- * no file name, no custom `options.regExp`, a namespace the manager writes
+ * no file name, a namespace the manager writes
  * to its rustHandle), makes that stage the ModelFile's own, as if
  * `stageModelFile` had just staged `JSON.stringify(ast)`. Otherwise drops
  * the prestage, and the caller stages the AST as before.
@@ -1456,7 +1320,7 @@ function takePrestaged(modelFile: any, manager: any, handle: any, ast: any): boo
     }
     prestaged.delete(ast);
     if (modelFile.definitions !== undefined || modelFile.fileName !== undefined ||
-        manager.options?.regExp || !manager._needsRustWrite(ast.namespace)) {
+        !manager._needsRustWrite(ast.namespace)) {
         handle.dropStagedModelFile(prestage.id);
         return false;
     }
@@ -2181,8 +2045,7 @@ function numberValidatorFromSnapshot(element: any, snapshot: any): any {
 
 /**
  * A StringValidator rebuilt from its `stringValidatorNew` snapshot (P5-10b):
- * the fields its constructor sets when no custom `options.regExp` is
- * configured, in the same order.
+ * the fields its constructor sets, in the same order.
  * @param {object} element the field or scalar declaration
  * @param {object} regexAst the `validator` AST it was built from
  * @param {object} snapshot `{minLength, maxLength}`

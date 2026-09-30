@@ -24,6 +24,12 @@
  *   limit, and the map key/value predicates;
  * - `Identifiable.toURI()`'s `ResourceId` guards (src/model/resourceid.ts);
  * - `StringValidator.matchesRegex` with no regex;
+ * - `Validator.reportError` (src/introspect/validator.ts), called directly:
+ *   since P5-52 (BC-28) no TS body calls it (the engine builds validator
+ *   errors), but it stays public on the exported `Validator`;
+ * - `addModelFile`, `updateModelFile` and `addModelFiles` given an object
+ *   that is not a ModelFile (a TypeError; compared by class only, as the
+ *   v5.0.0 message differs);
  * - `BaseModelManager.isAliasedTypeEnabled` and
  *   `DecoratorManager.isNamespaceTargetEnabled`.
  */
@@ -163,10 +169,52 @@ module.exports = [
         expect: { ok: true },
     },
     {
+        id: 'PA-VA-001',
+        covers: 'validator.ts reportError: throws a BaseException naming the field, with the default and a given error type',
+        run: (core) => {
+            const v = setup(core).getType(`${NS}.C`).getProperty('s').getValidator();
+            const thrown = (...args) => {
+                try {
+                    v.reportError(...args);
+                    return 'no throw';
+                } catch (e) {
+                    return { name: e.constructor.name, message: e.message, errorType: e.errorType };
+                }
+            };
+            return { byDefault: thrown('id1', 'msg1'), given: thrown(null, 'msg2', 'CustomError') };
+        },
+        expect: {
+            ok: {
+                byDefault: { name: 'BaseException', message: `Validator error for field \`id1\`. ${NS}.C.s: msg1`, errorType: 'DefaultValidatorException' },
+                given: { name: 'BaseException', message: `Validator error for field \`null\`. ${NS}.C.s: msg2`, errorType: 'CustomError' },
+            },
+        },
+    },
+    {
         id: 'PA-MM-001',
         covers: 'basemodelmanager.ts isAliasedTypeEnabled',
         run: (core) => setup(core).isAliasedTypeEnabled(),
         expect: { ok: true },
+    },
+    {
+        id: 'PA-MM-002',
+        covers: 'basemodelmanager.ts _checkModelFile: addModelFile, updateModelFile and addModelFiles reject an object that is not a ModelFile',
+        run: (core) => {
+            const thrownClass = (fn) => {
+                try {
+                    fn(new core.ModelManager());
+                    return 'no throw';
+                } catch (e) {
+                    return e.constructor.name;
+                }
+            };
+            return {
+                addModelFile: thrownClass((mm) => mm.addModelFile({})),
+                updateModelFile: thrownClass((mm) => mm.updateModelFile({})),
+                addModelFiles: thrownClass((mm) => mm.addModelFiles([{}])),
+            };
+        },
+        expect: { ok: { addModelFile: 'TypeError', updateModelFile: 'TypeError', addModelFiles: 'TypeError' } },
     },
     {
         id: 'PA-DM-001',
