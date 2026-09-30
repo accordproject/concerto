@@ -1,14 +1,14 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-30T19:09:38.165Z",
+  "generated_at": "2026-09-30T19:22:59.209Z",
   "requested_at_sha": null,
   "fast": true,
-  "runtime_ms": 407999,
+  "runtime_ms": 413460,
   "repos": {
     "concerto": {
       "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-64/concerto",
-      "commit": "41036765973fc7294bcc04d854a41f82bd9f7a80",
-      "commit_used": "41036765973fc7294bcc04d854a41f82bd9f7a80"
+      "commit": "7533a5ef4d0d4ebb0de05ab2099e1e5e25b25b4d",
+      "commit_used": "7533a5ef4d0d4ebb0de05ab2099e1e5e25b25b4d"
     },
     "concerto-rust": {
       "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-64/concerto-rust",
@@ -60,7 +60,7 @@
         "passing": 2138,
         "failing": 0,
         "pending": 8,
-        "duration_ms": 14031
+        "duration_ms": 12687
       },
       "by_tag": {
         "available": true,
@@ -100,7 +100,7 @@
           "passing": 2138,
           "failing": 0,
           "pending": 8,
-          "duration_ms": 14031
+          "duration_ms": 12687
         },
         "rust": {
           "available": true,
@@ -116,7 +116,7 @@
           "passing": 1300,
           "failing": 0,
           "pending": 8,
-          "duration_ms": 10321,
+          "duration_ms": 10718,
           "by_tag": {
             "available": true,
             "tally": {
@@ -207,7 +207,7 @@
       },
       "native": {
         "available": true,
-        "generated_at": "2026-09-30T19:01:12.212Z",
+        "generated_at": "2026-09-30T19:15:03.320Z",
         "total_fixtures": 16242,
         "pass": 13881,
         "fail": 251,
@@ -330,18 +330,18 @@
         "total_weight": 7594,
         "weight_by_classification": {
           "RUST": 1438,
-          "HYBRID": 1569,
+          "HYBRID": 1545.5,
           "PARTIAL": 0,
-          "TS": 4587
+          "TS": 4610.5
         },
-        "weighted_pct_rust_plus_hybrid": 39.6
+        "weighted_pct_rust_plus_hybrid": 39.3
       },
       "d1_denominator_weight": 7513,
       "d1_excluded": {
         "members": 54,
         "weight": 81
       },
-      "weighted_pct_rust_plus_hybrid": 40,
+      "weighted_pct_rust_plus_hybrid": 39.7,
       "weighted_pct_rust_only": 19.1
     },
     "mutants": {
