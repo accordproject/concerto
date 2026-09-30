@@ -35,8 +35,11 @@ export interface ModelManagerOptions {
      * and BC-20; on by default since R1): unless this is `false`, a
      * ModelFile whose AST does not have the Concerto metamodel's shape is
      * rejected with an IllegalModelException when it is constructed. `true`
-     * also runs `validateAst` in `addModelFile`, as before. `false` restores
-     * the lenient loading of earlier releases for this major.
+     * also runs `validateAst` in `addModelFile`, as before. `false` is an
+     * escape hatch for trusted input only: the shape check is skipped, and a
+     * malformed AST then gets unspecified behaviour. Where loading fails it
+     * throws an error, never a WASM trap or a process crash, but the error's
+     * class and message are not guaranteed.
      */
     metamodelValidation?: boolean;
     addMetamodel?: boolean;
