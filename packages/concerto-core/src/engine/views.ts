@@ -564,6 +564,20 @@ function decoratorManagerValidate(validationModelManager: any, decoratorCommandS
  */
 function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets: any[], options?: any): any {
     const { default: ModelManager } = require('../modelmanager');
+    const source = sourceDcsHandle(modelManager, 'dcsDecorateModels');
+    if (source) {
+        // P5-55 (T1, F-A1): on the source manager's own rustHandle, which
+        // resolves its models itself; nothing is copied.
+        const decoratedModelManager = new ModelManager({
+            decoratorValidation: modelManager.getDecoratorValidation()
+        });
+        decoratedModelManager.clearModelFiles();
+        const target = decoratedModelManager.rustHandle;
+        assertDistinctHandles(source, target);
+        const result = source.dcsDecorateModels(target, decoratorCommandSets, options ?? {});
+        adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation);
+        return decoratedModelManager;
+    }
     if (residentDcsAvailable()) {
         // P5-27 (F6): the resident input manager, and the result staged
         // into the new manager's rustHandle (see `adoptStagedModels`).
@@ -668,6 +682,10 @@ function restoreAllUndefinedDecorators(sourceModels: any[], resultModels: any[])
  */
 function decoratorManagerExtract(binding: string, modelManager: any, options: any): any {
     const { default: ModelManager } = require('../modelmanager');
+    const source = sourceDcsHandle(modelManager, SOURCE_EXTRACT[binding]);
+    if (source) {
+        return decoratorManagerExtractOnSource(binding, source, modelManager, options);
+    }
     if (residentDcsAvailable()) {
         return decoratorManagerExtractStaged(binding, modelManager, options);
     }
@@ -690,6 +708,50 @@ const STAGED_EXTRACT: { [binding: string]: string } = {
     decoratorManagerExtractVocabularies: 'extractVocabularies',
     decoratorManagerExtractNonVocabDecorators: 'extractNonVocabDecorators',
 };
+
+/**
+ * The source-handle method for each per-call extract binding (P5-55).
+ */
+const SOURCE_EXTRACT: { [binding: string]: string } = {
+    decoratorManagerExtractDecorators: 'dcsExtractDecorators',
+    decoratorManagerExtractVocabularies: 'dcsExtractVocabularies',
+    decoratorManagerExtractNonVocabDecorators: 'dcsExtractNonVocabDecorators',
+};
+
+/**
+ * `decoratorManagerExtract` on the source ModelManager's own rustHandle
+ * (P5-55, T1, F-A1; concerto-wasm `ModelManagerHandle.dcsExtract*`), with
+ * the result staged into the new ModelManager's rustHandle as
+ * `decoratorManagerExtractStaged` stages it. Rust resolves the handle's
+ * models itself, as the per-call binding's input was resolved, so the
+ * source models are read only when `restoreUndefinedDecorators` needs them,
+ * and then unresolved (`getAst(false, false)`: the model files' own ASTs,
+ * not copied): it reads only which nodes have `decorators`, and their
+ * `declarations`, `properties`, `key` and `value`, which resolution never
+ * changes, so a per-call `resolveMetaModel` would only cost time.
+ * @param {string} binding the per-call concerto-wasm binding it replaces
+ * @param {object} source the source ModelManager's rustHandle
+ * @param {object} modelManager the input ModelManager
+ * @param {object} options the extract options, defaults applied
+ * @return {object} the result, with `modelManager` materialised
+ */
+function decoratorManagerExtractOnSource(binding: string, source: any, modelManager: any, options: any): any {
+    const { default: ModelManager } = require('../modelmanager');
+    const updatedModelManager = new ModelManager();
+    updatedModelManager.clearModelFiles();
+    const target = updatedModelManager.rustHandle;
+    assertDistinctHandles(source, target);
+    const result = source[SOURCE_EXTRACT[binding]](target, options);
+    const { staged, validated } = result;
+    delete result.staged;
+    delete result.validated;
+    if (options?.removeDecoratorsFromModel) {
+        restoreAllUndefinedDecorators(modelManager.getAst(false, false).models, result.modelManager.models);
+    }
+    adoptStagedModels(updatedModelManager, result.modelManager, staged, validated);
+    result.modelManager = updatedModelManager;
+    return result;
+}
 
 /**
  * `decoratorManagerExtract` on the resident DCS input manager, with the
@@ -1481,6 +1543,44 @@ function dcsCacheable(modelManager: any): boolean {
         modelManager.getAst === proto.getAst &&
         modelManager.getModelFiles === proto.getModelFiles &&
         modelManager.resolveMetaModel === proto.resolveMetaModel;
+}
+
+/**
+ * P5-55 (T1, F-A1, accordproject/concerto-rust#376): the source
+ * ModelManager's own rustHandle, when the DecoratorManager operation can run
+ * on it (concerto-wasm `ModelManagerHandle.dcsDecorateModels` and
+ * `dcsExtract*`) instead of on a `DcsManagerHandle` built from a copy of its
+ * models: the engine has `method`, `dcsCacheable` holds (the manager's
+ * `getAst`, `getModelFiles` and `resolveMetaModel` are BaseModelManager's
+ * own) and the handle mirrors the model files (`_mirrorPending`, P5-34).
+ * The handle then holds exactly the models `getAst(resolve, false)` reads,
+ * with the same system models, and resolves them itself, so no epoch or
+ * invalidation is needed. Otherwise undefined, and the caller keeps the
+ * `DcsManagerHandle` or the per-call binding, as before.
+ * @param {object} modelManager the source ModelManager
+ * @param {string} method the handle method the caller will call
+ * @return {object|undefined} the rustHandle, or undefined
+ */
+function sourceDcsHandle(modelManager: any, method: string): any {
+    if (!dcsCacheable(modelManager) || modelManager._mirrorPending) {
+        return undefined;
+    }
+    const handle = modelManager.rustHandle;
+    return typeof handle[method] === 'function' ? handle : undefined;
+}
+
+/**
+ * The operations on the source handle borrow it and the new manager's
+ * handle at once: the two must differ (the new manager is always built for
+ * the call, so they always do), or wasm-bindgen's borrow check would panic.
+ * @param {object} source the source ModelManager's rustHandle
+ * @param {object} target the new ModelManager's rustHandle
+ */
+function assertDistinctHandles(source: any, target: any): void {
+    /* istanbul ignore next */
+    if (source === target) {
+        throw new Error('DecoratorManager: the result ModelManager must not share the source ModelManager\'s engine handle');
+    }
 }
 
 /**

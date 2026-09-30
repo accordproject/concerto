@@ -1,0 +1,31 @@
+TS API ms, DecoratorManager.extractDecorators (removeDecoratorsFromModel, en), per-round medians -> median of 3
+synthetic-large
+  cold ts 14.79/11.90/19.45 => 14.79
+  cold before 147.35/151.50/197.21 => 151.50
+  cold new 47.33/36.81/43.54 => 43.54
+  cold: new - before -107.96 ms (new/before 0.287); vs TS before 10.24x new 2.94x
+  warm ts 20.68/10.82/12.95 => 12.95
+  warm before 34.68/29.22/36.43 => 34.68
+  warm new 39.80/40.55/29.17 => 39.80
+  warm: new - before 5.12 ms (new/before 1.148); vs TS before 2.68x new 3.07x
+  cold/warm: ts 1.14, before 4.37, new 1.09
+conformance
+  cold ts 4.66/4.79/5.73 => 4.79
+  cold before 41.29/39.08/27.14 => 39.08
+  cold new 15.57/16.33/19.98 => 16.33
+  cold: new - before -22.75 ms (new/before 0.418); vs TS before 8.16x new 3.41x
+  warm ts 8.27/4.00/5.09 => 5.09
+  warm before 9.11/7.08/11.61 => 9.11
+  warm new 10.46/8.74/8.42 => 8.74
+  warm: new - before -0.38 ms (new/before 0.959); vs TS before 1.79x new 1.72x
+  cold/warm: ts 0.94, before 4.29, new 1.87
+concerto-core-test-data
+  cold ts 15.65/10.04/7.50 => 10.04
+  cold before 94.81/70.59/76.02 => 76.02
+  cold new 27.61/29.22/24.05 => 27.61
+  cold: new - before -48.41 ms (new/before 0.363); vs TS before 7.57x new 2.75x
+  warm ts 18.77/13.55/16.27 => 16.27
+  warm before 20.08/15.31/20.73 => 20.08
+  warm new 19.48/20.32/18.07 => 19.48
+  warm: new - before -0.60 ms (new/before 0.970); vs TS before 1.23x new 1.20x
+  cold/warm: ts 0.62, before 3.79, new 1.42

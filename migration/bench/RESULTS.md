@@ -1,3 +1,81 @@
+# P5-55 (T1, F-A1): DCS operations on the source ModelManager's rustHandle (2026-09-30)
+
+Task P5-55 (accordproject/concerto-rust#376, T1/F-A1 from the P5-42 report
+on #352) runs `DecoratorManager.decorateModels` and the three `extract*`
+methods on the source ModelManager's own rustHandle (concerto-wasm
+`ModelManagerHandle.dcsDecorateModels`/`dcsExtract*`, additive), instead of
+on a `DcsManagerHandle` built from a copy of its models
+(`getAst(resolve, false)`, JsValue to `Value`, then a load). The view takes
+the new path when the `dcsCacheable` guard holds and the handle mirrors the
+model files (`_mirrorPending`); `DcsManagerHandle` and the per-call
+bindings stay as fallbacks. The result is unchanged: the DCS oracle ops
+replay 1301 + 59 + 55 + 69 fixtures at 100% on the src engine, both with
+the new methods and with them hidden, and the Rust oracle stays at 16242
+fixtures with 0 regressions.
+
+| | |
+|---|---|
+| Machine | Cloud container, Intel Xeon @ 2.10GHz, 4 vCPU, Linux 6.18 (the P5-22 machine type) |
+| Toolchain | Node v22.22.2, rustc 1.94.1, `concerto-wasm/build.sh` with wasm-opt 132 (engine `.cjs` 4,192,566 bytes) |
+| Now | `concerto-rust` `5869b43` (P5-55 on `fd6899b`), `concerto` P5-55 working tree on `8ab11ebac` |
+| Before | The same engine and dist with the four new handle methods hidden (`results/P5-55/scripts/before.cjs`), so the view takes the resident `DcsManagerHandle` path of the integration head, timed in the same run |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, timed in each round |
+| Driver | `results/P5-55/scripts/run.sh`: three rounds, the engine order alternated per round. Each round runs `p515-sweep.mjs --ops extract_decorators,extract_cold` (5 warm-up, 30 samples) on TS 5.0.0, before and now. `extract_decorators` is the warm call (the same manager every time); the new `extract_cold` op takes a manager nothing has extracted from yet on every call (built untimed in setup), so it is the first call after a model change. Both use `removeDecoratorsFromModel: true`. |
+| Quiet gate | Before each round: 1-minute load < 2, 5-minute < 3, and no other bench, cargo, mocha or replay process. All 3 rounds met it, at 1-minute load 1.23 to 1.82 and 5-minute 1.51 to 1.57 (`loads.txt`). |
+| Noise | Round-to-round medians move by up to about ±30%. Each figure is the median over three rounds of each round's median (`summary.txt`, from `scripts/agg.cjs`). |
+
+## Cold and warm, × TS 5.0.0 (TS API, ms)
+
+| set | call | TS 5.0.0 | before | now | now - before | before × TS | now × TS |
+|---|---|---:|---:|---:|---:|---:|---:|
+| synthetic-large | cold | 14.79 | 151.50 | **43.54** | **-107.96** | 10.24x | **2.94x** |
+| synthetic-large | warm | 12.95 | 34.68 | 39.80 | +5.12 (noise, see below) | 2.68x | 3.07x |
+| conformance | cold | 4.79 | 39.08 | **16.33** | **-22.75** | 8.16x | **3.41x** |
+| conformance | warm | 5.09 | 9.11 | 8.74 | -0.38 | 1.79x | 1.72x |
+| concerto-core-test-data | cold | 10.04 | 76.02 | **27.61** | **-48.41** | 7.57x | **2.75x** |
+| concerto-core-test-data | warm | 16.27 | 20.08 | 19.48 | -0.60 | 1.23x | 1.20x |
+
+Cold/warm ratios: TS 1.14 / 0.94 / 0.62, before 4.37 / 4.29 / 3.79, now
+**1.09 / 1.87 / 1.42** (synthetic-large / conformance / core-test-data).
+
+The synthetic-large warm figures spread over 29-36 ms (before) and 29-41 ms
+(now) across the rounds, so that pair was re-run alone right after, with 60
+samples, alternating three times (`warm-check.txt`): before 30.62 / 27.55 /
+25.74, now 28.06 / 28.43 / 26.01 ms. The warm call is unchanged, as the
+estimate says.
+
+## Against the estimate
+
+P5-42 estimated the cold call at -30 to -40 ms on synthetic-large, about -3
+ms on conformance and about -15 ms on core-test-data, and the warm call at
+about 0. The measured cold saving is larger on every set (-108, -23 and -48
+ms), and the warm call is unchanged. P5-42 attributed only part of the cold
+premium (26 to 34 ms for `new DcsManagerHandle`, 3 to 4 ms for the TS
+`getAst(true, false)`) and left 10 to 20 ms unattributed, most likely GC of
+the discarded input copy; this run's `before` cold figures are also higher
+than P5-42's (151.5 against 106.1 ms on synthetic-large). The setups
+differ (P5-42 timed a manager reloaded with `fromAst`; `extract_cold` takes
+one `decorateModels` has just built, as the warm op does), so only the
+figures within one run are compared here.
+The new path also stops reading `getAst` at all, except for
+`restoreUndefinedDecorators` when `removeDecoratorsFromModel` is set, which
+reads the model files' own ASTs unresolved (`getAst(false, false)`, not
+copied): it only looks at which nodes carry `decorators`, which resolution
+never changes. Memory: the source manager no longer keeps up to two
+`DcsManagerHandle` copies of its models.
+
+## Correctness
+
+- `migration/oracle/lifted/dcs-source-handle.checks.js` (6 checks, src and
+  the v5.0.0 reference): the resolution-error class on all four operations
+  (an unresolved import, an undeclared type), resolution and validation
+  disabled, model adds/updates/deletes between calls seen in the manager's
+  order, the source manager unchanged, and a `getAst` override still read
+  through the fallback.
+- concerto-wasm `scripts/checks.mjs`: each new method returns exactly what
+  its `DcsManagerHandle` counterpart returns, leaves the handle's epoch
+  unchanged, and throws the per-call binding's class on a resolution error.
+
 # P5-49 (BC-19): strict AST shape check at model load, crossings with the check on and off (2026-09-29)
 
 Task P5-49 (accordproject/concerto-rust#370) checks every `ModelFile`'s AST

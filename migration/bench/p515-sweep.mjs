@@ -273,6 +273,26 @@ const OPS = {
         n: () => 1,
         run: (c) => DecoratorManager.extractVocabularies(c.mm, { removeDecoratorsFromModel: true, locale: 'en' }),
     },
+    // P5-55 (T1, F-A1, accordproject/concerto-rust#376): the cold
+    // extract, the first call on a manager whose models have just changed.
+    // `extract_decorators` above times the warm call (the same manager every
+    // time). Each call here takes a manager it has not extracted from yet,
+    // built (untimed) in setup, one per call the harness makes; a call past
+    // the pool (--mode loop) builds its own, and that build is timed.
+    extract_cold: {
+        family: 'decorator',
+        setup: (d) => {
+            const build = () => DecoratorManager.decorateModels(
+                managerOf(d.models.filter((m) => d.dcsModels.includes(m.name))), d.dcs, { validate: true });
+            const pool = [];
+            for (let i = 0; i < args.samples + args.warmup + 1; i++) {
+                pool.push(build());
+            }
+            return { pool, build };
+        },
+        n: () => 1,
+        run: (c) => DecoratorManager.extractDecorators(c.pool.pop() || c.build(), { removeDecoratorsFromModel: true, locale: 'en' }),
+    },
     // ---- Introspection ------------------------------------------------------
     get_type: {
         family: 'introspect',
