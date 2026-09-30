@@ -700,6 +700,11 @@ const P5_64 = {
     },
     'src/engine/serializer.ts': {
         'optionsText': { c: 'TS', r: R.shim564 + ' (P5-16: encodes the serializer options once per options object for the fast-path call; no engine call of its own)' },
+        // The handle cache: since P5-34 it reads the manager's existing
+        // rustHandle instead of building a ModelManagerHandle, so no engine
+        // call is left (the scan counts the bare `rustHandle` property read).
+        'cachedHandleFor': { c: 'TS', r: R.shim564 + ' (P5-16/P5-34: the per-manager cache of the existing rustHandle and its TypeCache; reads rustHandle and the _mirrorPending flag, no engine call)' },
+        'handleFor': { c: 'TS', r: R.shim564 + ' (a one-line forward to cachedHandleFor; no engine call)' },
     },
     'src/engine/views.ts': {
         'modelFileModule': { c: 'TS', p: NONE, r: R.shim564 + ' (requires introspect/modelfile once)' },

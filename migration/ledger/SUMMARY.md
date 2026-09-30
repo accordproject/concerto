@@ -131,12 +131,12 @@ without a ledger rebuild fails the build.
 | | members | loc | weight | share of weight |
 |---|---|---|---|---|
 | RUST | 110 | 1233 | 1438 | 18.9% |
-| HYBRID | 48 | 1379 | 1569 | 20.7% |
+| HYBRID | 46 | 1354 | 1545.5 | 20.4% |
 | PARTIAL | 0 | 0 | 0 | 0.0% |
-| TS | 514 | 4802 | 4587 | 60.4% |
+| TS | 516 | 4827 | 4610.5 | 60.7% |
 | **total** | 672 | 7414 | 7594 | 100% |
 
-* **RUST+HYBRID weighted share (new D1 denominator): 40.0%**, HYBRID at full weight
+* **RUST+HYBRID weighted share (new D1 denominator): 39.7%**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. **NOT met.**
   PARTIAL rows (section 5b) are not in the numerator.
   Denominator excludes constant markers and `accept()` visitor entry points
@@ -144,11 +144,11 @@ without a ledger rebuild fails the build.
   decision on open question 2 below. New total weight: 7513 (was 7594).
   D1 stays as defined, with the 70% bar, by maintainer decision (accordproject/concerto-rust#276,
   2026-09-28): the proposed D1′ was not adopted, and the gate reports §0.4 as FAIL at this figure.
-* **Old figure (previous denominator, all 672 members): 39.6%.**
+* **Old figure (previous denominator, all 672 members): 39.3%.**
 * RUST only (new denominator): 19.1%.
 * For comparison only, not the D1 figure: counting PARTIAL *read* rows (0 members,
-  weight 0) as Rust gives 40.0%; counting every PARTIAL row (0 members,
-  weight 0) gives 40.0%. That is how the ledger counted them before
+  weight 0) as Rust gives 39.7%; counting every PARTIAL row (0 members,
+  weight 0) gives 39.7%. That is how the ledger counted them before
   accordproject/concerto-rust#261 (then 78.9%, which also counted three `rustHandle`
   plumbing helpers as RUST; they are now TS, engine shim). After #261 and before P5-11 the
   figure was 57.4% (61.5% at #261 itself): P5-11 reclassified TS 128 PARTIAL rows and 57 HYBRID
@@ -156,17 +156,18 @@ without a ledger rebuild fails the build.
 * P5-64 re-audit (accordproject/concerto-rust#401, integration head 2a6a71754): the figure was
   45.3% at the P5-12c rebuild (28 Sep). The R1 changes since then deleted or shortened TS bodies
   of RUST/HYBRID rows that already delegated (-301 weight in the numerator, most of it
-  ModelFile.validate, P5-34), added 46 TS members (+631, chiefly the engine shim and the fast-path
-  codec) and 6 HYBRID entry points (+123), and the re-audit moved 6 rows RUST -> TS (-78: the P5-32
-  field-backed ModelFile getters and rustHandle id/flag plumbing) and StringValidator.validate
-  HYBRID -> RUST. The rules are the P5-64 block of `classification.js`.
+  ModelFile.validate, P5-34), added 47 TS members (+653, chiefly the engine shim and the fast-path
+  codec) and 5 HYBRID entry points (+101), and the re-audit moved 6 rows RUST -> TS (-78: the P5-32
+  field-backed ModelFile getters and rustHandle id/flag plumbing), the serializer handle cache
+  (handleFor, cachedHandleFor) HYBRID -> TS (-1.5 for handleFor; cachedHandleFor is new; neither
+  calls the engine since P5-34) and StringValidator.validate HYBRID -> RUST. The rules are the P5-64 block of `classification.js`.
 
 By weight category:
 
 | category | members | loc | weight | RUST w | HYBRID w | PARTIAL w | TS w |
 |---|---|---|---|---|---|---|---|
-| glue (x0.5) | 354 | 1221 | 610.5 | 85.5 | 24 | 0 | 501 |
-| logic (x1) | 249 | 4612 | 4612 | 481 | 903 | 0 | 3228 |
+| glue (x0.5) | 354 | 1221 | 610.5 | 85.5 | 22.5 | 0 | 502.5 |
+| logic (x1) | 249 | 4612 | 4612 | 481 | 881 | 0 | 3250 |
 | validation (x1.5) | 69 | 1581 | 2371.5 | 871.5 | 642 | 0 | 858 |
 
 ## 2. By planned task
@@ -192,7 +193,7 @@ By weight category:
 | P4-07 | 104 | 928 | 24 |
 | P4-08 | 95 | 1622.5 | 6 |
 | P4-09 | 12 | 129 | 1 |
-| P4-10 | 49 | 1633.5 | 10 |
+| P4-10 | 49 | 1633.5 | 8 |
 | P5-10a | 9 | 203 | 0 |
 | P5-10b | 19 | 310 | 0 |
 | P5-12c | 3 | 73 | 3 |
@@ -218,7 +219,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/index.ts | 1 | 0 / 0 / 0 / 1 | 1.5 | 0 / 0 / 0 / 1.5 | 0.0% | - |
 | engine/rust.ts | 1 | 0 / 0 / 0 / 1 | 7 | 0 / 0 / 0 / 7 | 0.0% | - |
 | engine/serializer-codec.ts | 19 | 0 / 0 / 0 / 19 | 316 | 0 / 0 / 0 / 316 | 0.0% | - |
-| engine/serializer.ts | 7 | 0 / 5 / 0 / 2 | 125.5 | 0 / 95.5 / 0 / 30 | 76.1% | P4-10 |
+| engine/serializer.ts | 7 | 0 / 3 / 0 / 4 | 125.5 | 0 / 72 / 0 / 53.5 | 57.4% | P4-10 |
 | engine/validate-resource.ts | 20 | 0 / 2 / 0 / 18 | 356 | 0 / 63 / 0 / 293 | 17.7% | - |
 | engine/views.ts | 85 | 0 / 24 / 0 / 61 | 1352.5 | 0 / 402 / 0 / 950.5 | 29.7% | P4-06+P4-07, P5-10b, P5-10a, P5-14, P5-19 |
 | factory.ts | 9 | 0 / 0 / 0 / 9 | 143.5 | 0 / 0 / 0 / 143.5 | 0.0% | - |
@@ -275,7 +276,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 4. TS items (stay in TypeScript) with reasons
 
-514 members, weight 4587 (60.4%).
+516 members, weight 4610.5 (60.7%).
 
 ### 4a. Grouped by reason
 
@@ -318,6 +319,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | JS class wiring: a constructor that only calls super and/or process() (process runs in Rust and is counted there); kept because the override is in the BC-37 api-snapshot. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 13 | 23.5 | `introspect/assetdeclaration.ts` AssetDeclaration.constructor; `introspect/conceptdeclaration.ts` ConceptDeclaration.constructor; `introspect/enumdeclaration.ts` EnumDeclaration.constructor; `introspect/enumvaluedeclaration.ts` EnumValueDeclaration.constructor; `introspect/eventdeclaration.ts` EventDeclaration.constructor; `introspect/identifieddeclaration.ts` IdentifiedDeclaration.constructor; `introspect/introspector.ts` Introspector.constructor; `introspect/mapkeytype.ts` MapKeyType.constructor; `introspect/mapvaluetype.ts` MapValueType.constructor; `introspect/participantdeclaration.ts` ParticipantDeclaration.constructor; `introspect/relationshipdeclaration.ts` RelationshipDeclaration.constructor; `introspect/transactiondeclaration.ts` TransactionDeclaration.constructor; `introspect/validator.ts` Validator.constructor |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (the rustHandle write for a replaced model file: update, add or delete) | 1 | 22 | `basemodelmanager.ts` BaseModelManager._rustMirrorUpdate |
 | returns the CTO definitions text, which lives in JS (ModelFile.getDefinitions); a crossing would copy every CTO text back. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 1 | 22 | `basemodelmanager.ts` BaseModelManager.getModels |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-16/P5-34: the per-manager cache of the existing rustHandle and its TypeCache; reads rustHandle and the _mirrorPending flag, no engine call) | 1 | 22 | `engine/serializer.ts` cachedHandleFor |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-16: encodes the serializer options once per options object for the fast-path call; no engine call of its own) | 1 | 21 | `engine/serializer.ts` optionsText |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (migration check mode only: compares the recorded import names with a fresh Rust call and logs a mismatch) | 1 | 21 | `engine/views.ts` checkRecordedImportNames |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: validates the staged or registered file without sending the AST again) | 1 | 21 | `engine/views.ts` validateLoaded |
@@ -433,6 +435,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | trivial accessor or filter over lazily built views: the state it reads was computed by Rust at load; a crossing costs more than it saves. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (a map read) | 1 | 1.5 | `basemodelmanager.ts` BaseModelManager.getModelFile |
 | registers a user JS DecoratorFactory; factories are JS callbacks invoked while decorators are materialised | 1 | 1.5 | `basemodelmanager.ts` BaseModelManager.addDecoratorFactory |
 | engine loader entry point: requires rust.ts and re-exports the loaded engine; no model logic | 1 | 1.5 | `engine/index.ts` selectEngine |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (a one-line forward to cachedHandleFor; no engine call) | 1 | 1.5 | `engine/serializer.ts` handleFor |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (requires introspect/numbervalidator once) | 1 | 1.5 | `engine/views.ts` numberValidatorModule |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (requires introspect/stringvalidator once) | 1 | 1.5 | `engine/views.ts` stringValidatorModule |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (requires introspect/collectionsizevalidator once) | 1 | 1.5 | `engine/views.ts` collectionSizeValidatorModule |
@@ -555,6 +558,8 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/serializer-codec.ts | (function) | setField | function | 7 | 7 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
 | engine/serializer-codec.ts | (function) | decodeParsed | function | 30 | 30 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
 | engine/serializer-codec.ts | (function) | decodeValue | function | 43 | 43 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
+| engine/serializer.ts | (function) | handleFor | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (a one-line forward to cachedHandleFor; no engine call) |
+| engine/serializer.ts | (function) | cachedHandleFor | function | 22 | 22 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-16/P5-34: the per-manager cache of the existing rustHandle and its TypeCache; reads rustHandle and the _mirrorPending flag, no engine call) |
 | engine/serializer.ts | (function) | asUnsupported | function | 9 | 9 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (maps a codec wire error to EngineFastPathUnsupported) |
 | engine/serializer.ts | (function) | optionsText | function | 21 | 21 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-16: encodes the serializer options once per options object for the fast-path call; no engine call of its own) |
 | engine/validate-resource.ts | (function) | isDayjsLike | function | 6 | 6 | binary wire codec for one-call instance validation (P5-12c): writes a live JS value (numbers, strings, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) in the validator's value shape, and rejects shapes it cannot carry so the caller falls back to the TS visitor; pure transcoding, no validation logic of its own |
@@ -984,7 +989,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 5. HYBRID items with reasons
 
-48 members, weight 1569 (20.7%).
+46 members, weight 1545.5 (20.4%).
 
 | file | class | member | weight | what stays in JS |
 |---|---|---|---|---|
@@ -992,8 +997,6 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | basemodelmanager.ts | BaseModelManager | updateModelFile | 25 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
 | basemodelmanager.ts | BaseModelManager | addModelFiles | 96 | string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust |
 | decoratormanager.ts | DecoratorManager | validate | 30 | the DCS model is CTO text compiled by concerto-cto in JS (via addCTOModel); the command-set instance validation itself is Rust (Serializer fast path / validateCommand) |
-| engine/serializer.ts | (function) | handleFor | 1.5 | JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
-| engine/serializer.ts | (function) | cachedHandleFor | 22 | JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
 | engine/serializer.ts | (function) | fastFromJson | 22 | JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
 | engine/serializer.ts | (function) | fastToJson | 14 | JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
 | engine/serializer.ts | (function) | validateMetaModel | 36 | JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
@@ -1225,8 +1228,8 @@ fallback (plan section 3): `ModelFile`'s is HYBRID, and the others are TS view g
 
 Kept for history; every question below has a maintainer decision now, linked from each item.
 
-1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 40.0%
-   (old figure, previous denominator: 39.6%). See section 1.
+1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 39.7%
+   (old figure, previous denominator: 39.3%). See section 1.
 2. **Constant markers and `accept()` count as TS. Settled: excluded from the D1
    denominator.** They are not "logic". 54 members, weight 81,
    removed from the denominator (section 1).
