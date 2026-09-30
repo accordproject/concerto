@@ -724,8 +724,11 @@ const SOURCE_EXTRACT: { [binding: string]: string } = {
  * the result staged into the new ModelManager's rustHandle as
  * `decoratorManagerExtractStaged` stages it. Rust resolves the handle's
  * models itself, as the per-call binding's input was resolved, so the
- * source models are read (`getAst(true, false)`) only when
- * `restoreUndefinedDecorators` needs them.
+ * source models are read only when `restoreUndefinedDecorators` needs them,
+ * and then unresolved (`getAst(false, false)`: the model files' own ASTs,
+ * not copied): it reads only which nodes have `decorators`, and their
+ * `declarations`, `properties`, `key` and `value`, which resolution never
+ * changes, so a per-call `resolveMetaModel` would only cost time.
  * @param {string} binding the per-call concerto-wasm binding it replaces
  * @param {object} source the source ModelManager's rustHandle
  * @param {object} modelManager the input ModelManager
@@ -743,7 +746,7 @@ function decoratorManagerExtractOnSource(binding: string, source: any, modelMana
     delete result.staged;
     delete result.validated;
     if (options?.removeDecoratorsFromModel) {
-        restoreAllUndefinedDecorators(modelManager.getAst(true, false).models, result.modelManager.models);
+        restoreAllUndefinedDecorators(modelManager.getAst(false, false).models, result.modelManager.models);
     }
     adoptStagedModels(updatedModelManager, result.modelManager, staged, validated);
     result.modelManager = updatedModelManager;
