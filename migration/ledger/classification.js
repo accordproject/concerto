@@ -44,7 +44,6 @@ const NONE = '-';
 const R = {
     processFile: 'processFile callback is the pluggable parse seam: CTO text is parsed by concerto-cto in JS (tests stub Parser.parse); the resulting AST is what crosses into Rust',
     parseThenRust: 'string inputs go through the JS processFile callback (CTO parsing stays in concerto-cto); the add/validate/rollback logic runs in Rust',
-    ctorFallback: 'view constructor: attaches to the Rust node when the parent is Rust-backed; W tests construct it with sinon-stubbed parents, so it keeps the collaborator-context fallback (plan section 3)',
     exception: 'exception class must stay a JS Error subclass (instanceof / class checks in ~81 assertions, M tests construct it directly); Rust supplies kind/code/params/location and the P4-02 error mapper instantiates this class',
     d7Factory: 'D7: Factory stays TS (uuid/dayjs, constructs dynamic TS Resource objects); model queries it makes go through Rust-backed views',
     d7Instance: 'D7: Resource/Typed dynamic objects stay TS (user-visible JS objects with arbitrary properties and dayjs values)',
@@ -59,7 +58,6 @@ const R = {
     dcsCto: 'the DCS model is CTO text compiled by concerto-cto in JS (via addCTOModel); the command-set instance validation itself is Rust (Serializer fast path / validateCommand)',
     userDecoratorFactory: 'decorator objects may be produced by user DecoratorFactory subclasses (JS callbacks); Rust supplies the decorator ASTs and order',
     predicate: 'takes a JS predicate callback over Declaration views; Rust does the AST copy and import pruning',
-    regExp: 'pluggable options.regExp (a JS RegExp-compatible constructor) must stay in JS; default ECMAScript regex path uses the regress crate in Rust',
     loader: 'async file/URL loading orchestration (fs, FileLoader, concerto-cto Parser); all model work goes through the ledgered ModelManager methods it calls',
     fsWrite: 'writes files through concerto-util ModelWriter (Node fs); no model logic',
     tsLogger: 'Logger.dispatch is the JS logging sink; the error-vs-warn decision and message come from Rust',
@@ -77,7 +75,7 @@ R.lazyAccessor = 'trivial accessor or filter over lazily built views: the state 
 R.superCtor = 'JS class wiring: a constructor that only calls super and/or process() (process runs in Rust and is counted there); kept because the override is in the BC-37 api-snapshot. ' + R.p511;
 R.fixedData = 'fixed-data builder: returns or adds a fixed system model/field definition (rootmodel.json/decoratormodel.json are duplicated in concerto-rust src/); no model logic to port. ' + R.p511;
 R.viewGlue = 'view constructor glue: stores the parent and AST and calls process(), which is counted separately (the Rust snapshot or the collaborator-context fallback for W tests over stubbed parents, plan section 3); no engine call of its own. ' + R.p511;
-R.visitorFallback = 'visitor fallback path: runs only when Serializer.fromJSON/toJSON hit EngineFastPathUnsupported (a custom options.regExp, a lone surrogate, a cycle or a wire shape the codec rejects) or when a caller drives the visitor directly; the fast path runs the same work in Rust in one call. ' + R.p511;
+R.visitorFallback = 'visitor fallback path: runs only when Serializer.fromJSON/toJSON hit EngineFastPathUnsupported (a lone surrogate, a cycle or a wire shape the codec rejects) or when a caller drives the visitor directly; the fast path runs the same work in Rust in one call. ' + R.p511;
 R.rvShell = 'ResourceValidator visitor: the fallback path behind EngineFastPathUnsupported of ValidatedResource.validate/setPropertyValue/addArrayValue, which validate in one Rust call since P5-12c (accordproject/concerto-rust#293; the entry point moved by maintainer decision on #289), and the Serializer visitor fallback; W tests drive visitX directly. ' + R.p511;
 R.shimP511 = R.engineShim + ' (P5-11: reclassified from HYBRID; it makes no engine call of its own)';
 
@@ -92,7 +90,7 @@ module.exports = {
         c: 'RUST', t: MM, p: 'P2-08+P4-08',
         m: {
             'defaultProcessFile': { c: 'TS', t: NONE, p: NONE, r: R.processFile },
-            'BaseModelManager.constructor': { c: 'HYBRID', r: 'creates the Rust ModelManager handle; also builds the TS Factory/Serializer, keeps the JS processFile callback and the options object (options.regExp, decoratorValidation)' },
+            'BaseModelManager.constructor': { c: 'HYBRID', r: 'creates the Rust ModelManager handle; also builds the TS Factory/Serializer, keeps the JS processFile callback and the options object (decoratorValidation; options.regExp is ignored with a warning since P5-52)' },
             'BaseModelManager.validateModelFile': { c: 'TS', r: R.fwdParse + ' (then ModelFile.validate)' },
             'BaseModelManager.addModel': { c: 'TS', r: R.fwdParse + ' (then addModelFile)' },
             'BaseModelManager.updateModelFile': { c: 'HYBRID', r: R.parseThenRust },
@@ -110,13 +108,7 @@ module.exports = {
             'BaseModelManager.filter': { c: 'TS', r: R.predicate + '; this member only runs the JS predicate and forwards to ModelFile.filter, where the Rust work is counted. ' + R.p511 },
             'BaseModelManager.resolveType': { cat: 'validation' },
             'BaseModelManager.getType': { cat: 'validation' },
-            // rustHandle cache plumbing (accordproject/concerto-rust#261): not
-            // ported model logic, so engine shim like src/engine/*.
-            'rustHandleReads': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (caches a rustHandle\'s epoch/namespaces reads)' },
             'BaseModelManager._needsRustWrite': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (decides which namespaces are mirrored to rustHandle)' },
-            // accordproject/concerto-rust#262: mirror writes are unguarded;
-            // only a stub ModelFile the constructor never ran for is not mirrored.
-            'BaseModelManager._isMirrored': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (decides which model files are mirrored to rustHandle: every one but a stub the ModelFile constructor never ran for)' },
             'BaseModelManager._rustMirrorUpdate': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (the rustHandle write for a replaced model file: update, add or delete)' },
             // P5-10a lazy views (accordproject/concerto-rust#269).
             'engineViews': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (requires engine/views once, on first use)' },
@@ -161,7 +153,7 @@ module.exports = {
         },
     },
     'src/engine/serializer.ts': {
-        c: 'HYBRID', t: NONE, p: 'P4-10', r: 'JSON envelope building, the ModelManagerHandle cache and the options.regExp fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path)',
+        c: 'HYBRID', t: NONE, p: 'P4-10', r: 'JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path)',
     },
     'src/engine/views.ts': {
         c: 'HYBRID', t: NONE, p: 'P4-06+P4-07', r: 'per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration\'s type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust',
@@ -172,16 +164,12 @@ module.exports = {
         m: {
             'stageModelFile': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: sends a ModelFile\'s AST to Rust once and keeps the loaded file staged; decides lazy vs eager)' },
             'decoratorFactories': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: no decorator factory applies while a lazily built file\'s views are built; factories keep the eager path)' },
-            'probeCustomRegExp': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: with a custom options.regExp, builds the Fields\' StringValidators at construction so the user engine runs, and throws, at load)' },
-            'hasStringValidator': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: which property AST nodes the Rust fieldProcess selection gives a StringValidator)' },
-            'takeProbedStringValidator': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: hands a StringValidator built at construction to its Field)' },
             'materialise': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: builds a file\'s declaration views on first read through the ledgered view constructors, and caches them)' },
             'defineLazyFields': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: installs the declarations/localTypes accessors)' },
             'deferDeclarations': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: defers a file\'s declaration views; the migration check mode builds them at once)' },
             'takeStage': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: stage bookkeeping)' },
             'commitStaged': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: registers the staged file in rustHandle)' },
             'dropStaged': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: drops a stage that will not be registered)' },
-            'isEngineBuilt': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (whether a model file was built through the engine path; false only for a stub the ModelFile constructor never ran for, accordproject/concerto-rust#262)' },
             'validateLoaded': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: validates the staged or registered file without sending the AST again)' },
             // P5-10b lazy views, part 2 (accordproject/concerto-rust#270):
             // per-declaration building, and the decorators, validators and
@@ -282,7 +270,7 @@ module.exports = {
     'src/introspect/modelfile.ts': {
         c: 'RUST', t: MF, p: 'P2-08+P4-08',
         m: {
-            'ModelFile.constructor': { c: 'HYBRID', r: R.ctorFallback + ' (modelmanager.js/modelfile.js build ModelFile over stub ModelManagers)', cat: 'validation' },
+            'ModelFile.constructor': { c: 'HYBRID', r: 'argument checks and view-field set-up stay JS; the AST shape check (P5-49), staging and the header come from Rust (checkAstShape, stageModelFile, _fromAstHeader). P5-35 (BC-47) removed the collaborator-context fallback over stub ModelManagers: a manager the BaseModelManager constructor did not build is a TypeError. Reason updated at the P5-64 re-audit (accordproject/concerto-rust#401)', cat: 'validation' },
             'ModelFile.getModelFile': { c: 'TS', t: NONE, p: NONE, r: 'returns `this`; nothing to port' },
             'ModelFile.filter': { c: 'HYBRID', r: R.predicate },
             'ModelFile.getDeclarations': { c: 'TS', r: 'takes a JS class constructor and filters the lazily built declaration views with instanceof (a JS-only concern); no engine call. ' + R.p511 },
@@ -310,10 +298,11 @@ module.exports = {
     'src/introspect/stringvalidator.ts': {
         c: 'RUST', t: VAL, p: 'P2-02+P4-04',
         m: {
-            'StringValidator.constructor': { c: 'HYBRID', r: R.regExp, cat: 'validation' },
-            'StringValidator.validate': { c: 'HYBRID', r: 'length checks and messages in Rust; regex match must use the JS RegExp when options.regExp is supplied (see matchesRegex)' },
-            'StringValidator.matchesRegex': { c: 'TS', r: R.regExp + '; this member runs the JS RegExp (or the user\'s options.regExp) match itself. ' + R.p511 },
-            'StringValidator.getRegex': { c: 'TS', t: NONE, p: NONE, r: 'public API returns a JS RegExp object (possibly an options.regExp instance) that Factory/InstanceGenerator/randexp consume' },
+            'StringValidator.constructor': { c: 'HYBRID', r: 'Rust stringValidatorNew checks the pattern and length bounds (regular expressions run in the engine since P5-52, BC-28); JS builds the RegExp object getRegex returns. Reason updated at the P5-64 re-audit (accordproject/concerto-rust#401)', cat: 'validation' },
+            // P5-52 (BC-28): validate is a one-line delegation to
+            // stringValidatorValidate, so it is RUST by the file rule (P5-64).
+            'StringValidator.matchesRegex': { c: 'TS', r: 'JS RegExp test over the validator\'s pattern for Factory\'s identifier check (D7); value validation runs in Rust (stringValidatorValidate; options.regExp retired by P5-52). ' + R.p511 },
+            'StringValidator.getRegex': { c: 'TS', t: NONE, p: NONE, r: 'public API returns a JS RegExp object (built from the engine-checked pattern, P5-52) that Factory/InstanceGenerator/randexp consume' },
         },
     },
     'src/introspect/transactiondeclaration.ts': { c: 'RUST', t: DECL, p: 'P2-03+P4-06' },
@@ -395,6 +384,9 @@ module.exports = {
             'JSONPopulator.convertToObject': { r: 'type checks, integer/strict-datetime rules and messages in Rust; the dayjs value is created in TS (D7)', cat: 'validation' },
         },
     },
+    // P5-58 (BC-05, R1): the relationship a map's values hold, as the
+    // serializer visitors' relationship-property code reads it.
+    'src/serializer/relationshipmapvalue.ts': { c: 'TS', t: NONE, p: NONE, r: 'visitor-path adapter (P5-58): wraps a relationship map value type in the members JSONPopulator/JSONGenerator/ResourceValidator read from a RelationshipDeclaration, so the visitor fallback treats map values as relationship properties; no engine call. ' + 'Classified at the P5-64 re-audit (accordproject/concerto-rust#401)' },
     'src/serializer/resourcevalidator.ts': {
         c: 'HYBRID', t: INST, p: 'P3-01+P4-10', r: R.visitorShell,
         m: {
@@ -631,7 +623,6 @@ const P5_11 = {
         'ScalarDeclaration.getDefaultValue': { c: 'TS', r: R.fieldRead },
     },
     'src/introspect/stringvalidator.ts': {
-        'customRegExp': { c: 'TS', r: 'JS-side helper: looks up the user\'s options.regExp on the model manager. ' + R.p511 },
         'StringValidator.getMinLength': { c: 'TS', r: R.fieldRead },
         'StringValidator.getMaxLength': { c: 'TS', r: R.fieldRead },
     },
@@ -675,5 +666,107 @@ for (const [file, members] of Object.entries(P5_11)) {
         const prev = fr.m[k];
         if (prev && prev.c && ov.c) { throw new Error('P5-11 rule overrides an existing classification: ' + file + ' ' + k); }
         fr.m[k] = Object.assign({}, prev, ov);
+    }
+}
+
+// ---------------------------------------------------------------- P5-64
+// accordproject/concerto-rust#401: re-audit of the ledger against the
+// integration head after the R1 changes (P5-24 .. P5-61), by the
+// P5-03/#261 method: a RUST row must actually call the engine, and (as P5-11
+// applied it) a HYBRID row too. Members added since the P5-12c rebuild get a
+// rule here; rows whose TS body now delegates, or whose engine call was
+// removed, are re-decided in the per-file rules above. None of these rows is
+// a maintainer decision: each reason says what the body does.
+R.p564 = 'Classified at the P5-64 re-audit (accordproject/concerto-rust#401)';
+R.shim564 = R.engineShim + '. ' + R.p564;
+R.fb564 = R.visitorFallback.replace(' ' + R.p511, '') + ' ' + R.p564;
+const P5_64 = {
+    'src/basemodelmanager.ts': {
+        // P5-29 epoch-keyed memo for getNamespaces/getType/resolveType.
+        'managerReadMemoValid': { c: 'TS', t: NONE, p: NONE, r: R.shim564 + ' (P5-29 read memo: whether a manager\'s memo still holds for its rustHandle, model files and model generation)' },
+        'managerReadMemo': { c: 'TS', t: NONE, p: NONE, r: R.shim564 + ' (P5-29 read memo: the manager\'s memo of getType/resolveType answers, rebuilt when it no longer holds)' },
+        // P5-52 (BC-28, R1): options.regExp is retired.
+        'warnRegExpOptionIgnored': { c: 'TS', t: NONE, p: NONE, r: 'JS process warning (P5-52, BC-28): options.regExp is ignored, regular expressions run in the engine; no model logic. ' + R.p564 },
+        // P5-34 (BC-46, BC-48): argument guards.
+        'typeNameArgument': { c: 'TS', t: NONE, p: NONE, r: 'JS argument guard (P5-34): a non-string type name goes through ModelUtil.getNamespace for its TypeError; the lookup itself is counted in the RUST getType/resolveType. ' + R.p564 },
+        'BaseModelManager._checkModelFile': { c: 'TS', t: NONE, p: NONE, r: 'JS argument guard (P5-34, BC-46): rejects a model file the ModelFile constructor did not build (a JS object-identity check); no model logic. ' + R.p564 },
+        'BaseModelManager._rustValidateAndMirrorAdd': { c: 'TS', t: NONE, p: NONE, r: R.shim564 + ' (P5-28: validates and registers a staged model file in rustHandle in one call)' },
+        'BaseModelManager._newRustHandle': { c: 'TS', t: NONE, p: NONE, r: R.shim564 + ' (creates the Rust ModelManagerHandle and sets its two options)' },
+        // P5-34: the mirror check became a flag read.
+        // rustHandle arena-id plumbing, like _needsRustWrite/_rustMirror*
+        // (#261 moved such helpers to TS, engine shim).
+        'BaseModelManager._rustModelFileId': { c: 'TS', t: NONE, p: NONE, r: R.shim564 + ' (caches the rustHandle arena id of a namespace\'s model file)' },
+        'BaseModelManager._rustHandleMatchesModelFiles': { c: 'TS', t: NONE, p: NONE, r: R.shim564 + ' (P5-34: a read of the _mirrorPending flag, no engine call)' },
+    },
+    'src/engine/serializer.ts': {
+        'optionsText': { c: 'TS', r: R.shim564 + ' (P5-16: encodes the serializer options once per options object for the fast-path call; no engine call of its own)' },
+    },
+    'src/engine/views.ts': {
+        'modelFileModule': { c: 'TS', p: NONE, r: R.shim564 + ' (requires introspect/modelfile once)' },
+        // P5-27/P5-55 resident DCS manager: the handle cache around the
+        // Rust DCS calls; the DCS work itself is the HYBRID entry points.
+        'restoreAllUndefinedDecorators': { c: 'TS', r: R.shim564 + ' (restoreUndefinedDecorators over every model of an extract result)' },
+        'residentDcsAvailable': { c: 'TS', r: R.shim564 + ' (P5-27: whether the loaded engine has the DcsManagerHandle binding)' },
+        'dcsCacheable': { c: 'TS', r: R.shim564 + ' (P5-27: whether a manager\'s DCS handle may be kept resident)' },
+        'sourceDcsHandle': { c: 'TS', r: R.shim564 + ' (P5-55: the source manager\'s rustHandle when it can run a DCS operation itself)' },
+        'assertDistinctHandles': { c: 'TS', r: R.shim564 + ' (P5-55: a guard that the result manager does not share the source handle)' },
+        'dcsManagerFor': { c: 'TS', r: R.shim564 + ' (P5-27: the resident DcsManagerHandle cache, keyed by handle, epoch and model files)' },
+        // P5-28 staged headers and P5-10a staging.
+        'recordImportNames': { c: 'TS', r: R.shim564 + ' (lazy views: records the import names Rust computed at staging)' },
+        'recordedImportNames': { c: 'TS', r: R.shim564 + ' (lazy views: reads the recorded import names)' },
+        'checkRecordedImportNames': { c: 'TS', r: R.shim564 + ' (migration check mode only: compares the recorded import names with a fresh Rust call and logs a mismatch)' },
+        'readUnchecked': { c: 'TS', r: R.shim564 + ' (lazy views: reads a staged field without the check-mode comparison)' },
+        'applyStagedFileHeader': { c: 'TS', r: R.shim564 + ' (P5-28: applies the header Rust computed at staging to the ModelFile view)' },
+        'checkStagedFileHeader': { c: 'TS', r: R.shim564 + ' (P5-28, migration check mode: compares the staged header with the Rust getters)' },
+        'takePrestaged': { c: 'TS', r: R.shim564 + ' (P5-28: takes a stage made before the ModelFile view existed)' },
+        'applyStagedHeader': { c: 'TS', r: R.shim564 + ' (P5-28: applies a staged header, falling back to the header engine call)' },
+        'adoptStagedModels': { c: 'TS', r: R.shim564 + ' (P5-27: registers the model files Rust staged for a DCS result manager)' },
+        'validateAndCommitStaged': { c: 'TS', r: R.shim564 + ' (P5-28: validates and commits a staged file on its handle, mapping the error to the file)' },
+        'modelGeneration': { c: 'TS', r: R.shim564 + ' (the model generation counter the lookup memos key on)' },
+        // P5-19 getIdentifierFieldName walk and memo.
+        'identifierLevel': { c: 'TS', p: 'P5-19', r: R.shim564 + ' (P5-19 identifier memo: records one level of the walk the Rust binding reported)' },
+        'identifierValid': { c: 'TS', p: 'P5-19', r: R.shim564 + ' (P5-19 identifier memo: whether an entry still holds)' },
+        'classDeclarationGetIdentifierFieldName': { c: 'HYBRID', p: 'P5-19', r: R.engineShim + ' (P5-19 identifier memo: the cached answer, else the Rust classDeclarationGetIdentifierFieldNameWalk binding, whose answer it caches). ' + R.p564 },
+        // P5-49 (BC-19, R1): strict AST shape check at model load.
+        'checkAstShape': { c: 'HYBRID', p: 'P5-49', r: 'P5-49 (BC-19): the AST shape check runs in Rust (rustHandle.checkAstShape); JS keeps the metamodelValidation opt-out and a per-namespace memo for files that are not mirrored. ' + R.p564 },
+        // P5-27/P5-55 DCS entry points (like decoratorManagerExtract*).
+        'decoratorManagerValidate': { c: 'HYBRID', r: 'DecoratorManager.validate\'s Rust call: dcsValidate on the validation manager\'s handle (P5-55), else the stateless decoratorManagerValidate binding. ' + R.p564 },
+        'decoratorManagerExtractOnSource': { c: 'HYBRID', r: 'DecoratorManager.extract* on the source manager\'s rustHandle (P5-55): one Rust call extracts into a fresh result manager; JS restores `decorators: undefined` and adopts the staged files. ' + R.p564 },
+        'decoratorManagerExtractStaged': { c: 'HYBRID', r: 'DecoratorManager.extract* on a resident DcsManagerHandle (P5-27): one Rust call extracts into a fresh result manager; JS restores `decorators: undefined` and adopts the staged files. ' + R.p564 },
+    },
+    'src/introspect/modelfile.ts': {
+        'ModelFile._isConstructed': { c: 'TS', t: NONE, p: NONE, r: 'JS object-identity check (P5-34): whether the ModelFile constructor built this object; no model logic. ' + R.p564 },
+        'ModelFile._registerManager': { c: 'TS', t: NONE, p: NONE, r: 'JS bookkeeping (P5-35, BC-47): records a BaseModelManager as engine-backed; no model logic. ' + R.p564 },
+        // P5-32 (accordproject/concerto-rust#342): field-backed getters, no
+        // engine call (the fields are the ones Rust wrote at construction).
+        'ModelFile.getVersion': { c: 'TS', r: R.fieldRead.replace(' ' + R.p511, '') + ' P5-32 made it field-backed (`this.version`, written by Rust at construction). ' + R.p564 },
+        'ModelFile.isSystemModelFile': { c: 'TS', r: R.fieldRead.replace(' ' + R.p511, '') + ' P5-32 made it field-backed (a prefix test of `this.namespace`, written by Rust at construction). ' + R.p564 },
+        'ModelFile.getExternalImports': { c: 'TS', r: R.fieldRead.replace(' ' + R.p511, '') + ' P5-32 made it field-backed (`this.importUriMap`, written by Rust at construction; a copy for a registered file). ' + R.p564 },
+        'ModelFile._rustHandleId': { c: 'TS', t: NONE, p: NONE, r: R.shim564 + ' (the rustHandle arena id of this file when it is registered, through BaseModelManager._rustModelFileId; the callers that use the id are counted where they call the engine)' },
+        'ModelFile._isRegistered': { c: 'TS', r: R.shim564 + ' (whether this file is the one its manager has registered and mirrored; the scan counts `_rustHandleMatchesModelFiles` by name, but that is a flag read since P5-34, not an engine call)' },
+        'ModelFile._engineValidationError': { c: 'TS', r: 'JS error mapping: re-attaches an engine IllegalModelException to this model file (its file name and location); Rust decided the error. ' + R.p564 },
+    },
+    'src/serializer.ts': {
+        'warnLenientDateTimesIgnored': { c: 'TS', t: NONE, p: NONE, r: 'JS process warning (P5-24): strictQualifiedDateTimes: false is ignored; no model logic. ' + R.p564 },
+    },
+    'src/serializer/jsongenerator.ts': {
+        'JSONGenerator.convertRelationship': { c: 'TS', r: R.fb564 + ' (P5-58: the relationship property and relationship map value path)' },
+    },
+    'src/serializer/jsonpopulator.ts': {
+        'isRealInstant': { c: 'TS', r: R.fb564 + ' (P5-24: a dayjs round-trip check of a DateTime\'s fields; Rust uses chrono on the fast path)' },
+        'JSONPopulator.convertRelationship': { c: 'TS', r: R.fb564 + ' (P5-58: the relationship property and relationship map value path)' },
+        'relationshipDefaults': { c: 'TS', r: R.fb564 + ' (P5-58: the default namespace and type of a relationship)' },
+    },
+    'src/serializer/resourcevalidator.ts': {
+        'isStrictDateTime': { c: 'TS', r: R.rvShell.replace(' ' + R.p511, '') + ' (P5-24: the strict DateTime check on the visitor path; Rust uses chrono on the fast path). ' + R.p564 },
+    },
+};
+for (const [file, members] of Object.entries(P5_64)) {
+    const fr = module.exports[file];
+    if (!fr) { throw new Error('P5-64 rule for unknown file ' + file); }
+    fr.m = fr.m || {};
+    for (const [k, ov] of Object.entries(members)) {
+        if (fr.m[k]) { throw new Error('P5-64 rule for a member that already has one: ' + file + ' ' + k); }
+        fr.m[k] = ov;
     }
 }
