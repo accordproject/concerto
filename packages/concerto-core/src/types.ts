@@ -25,6 +25,10 @@ import type { EmptyValueGenerator } from './serializer/valuegenerator';
 /* eslint-enable no-unused-vars */
 
 export interface ModelManagerOptions {
+    /**
+     * @deprecated Ignored, with a warning (BC-28): regular expressions are
+     * evaluated by the Concerto engine.
+     */
     regExp?: RegExp;
     metamodelValidation?: boolean;
     addMetamodel?: boolean;

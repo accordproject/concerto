@@ -296,8 +296,11 @@ without editing `packages/concerto-core/test/**`:
 * `serializer-fallback.checks.js`: the serializer visitors behind
   `EngineFastPathUnsupported` (JSONPopulator, JSONGenerator,
   ResourceValidator, `Serializer.fromJSON`/`toJSON`);
-* `stringvalidator-regexp.checks.js`: `StringValidator` with a custom
-  `regExp` engine;
+* `stringvalidator-regexp.checks.js`: `StringValidator` in a model manager
+  built with a custom `regExp` engine. Since P5-52 (BC-28, R1) the option
+  is ignored and the TS bodies it reached are deleted; the checks confirm
+  that such a manager behaves as a plain one, with v5.0.0's custom-engine
+  outcome as `reference` where it differs;
 * `collaborator.checks.js`: `ModelFile.filter()` for a model file that is
   detached from its manager, and `BaseModelManager`'s reads (`derivesFrom`,
   `isAssignableTo`, `getModelFileByFileName`, `resolveType`) on a manager
@@ -316,8 +319,10 @@ without editing `packages/concerto-core/test/**`:
   accordproject/concerto-rust#293): `ValidatedResource.validate()`,
   `setPropertyValue` and `addArrayValue` now validate in one engine call,
   so the `ResourceValidator` visitor runs only behind
-  `EngineFastPathUnsupported`. The `VV-*` checks drive it through a model
-  manager with a custom `regExp` engine; the `VE-*` checks run the same
+  `EngineFastPathUnsupported`. The `VV-*` checks drive it by giving the
+  resource a `ResourceValidator` subclass that overrides nothing (until
+  P5-52, BC-28, through a model manager with a custom `regExp` engine,
+  which is now ignored); the `VE-*` checks run the same
   scenarios through the engine and compare only the thrown class.
   `SET-004`/`SET-005` set a string, number or boolean on a plain primitive
   field with no validator, which `setPropertyValue` keeps on the visitor
@@ -328,8 +333,10 @@ without editing `packages/concerto-core/test/**`:
   map values read, written and validated as relationship properties, with
   the embedded-resource options on and off. The `RM-E-*` checks go through
   the engine (a throw reduced to its class); the `RM-V-*` checks force the
-  TS visitors with a custom `regExp` engine. Each has v5.0.0's outcome as
-  its `reference`.
+  TS visitors (a lone surrogate in an unrelated field for `fromJSON` and
+  `toJSON`, a `ResourceValidator` subclass for `validate()`; until P5-52,
+  BC-28, a custom `regExp` engine, which is now ignored). Each has v5.0.0's
+  outcome as its `reference`.
 * `metamodel-mirror.checks.js` (task P5-31, accordproject/concerto-rust#341):
   a metamodel file a user adds (`newMetaModelManager()`, `addModelFile`,
   `addMetamodel: true`) is mirrored into the engine, so its manager stays in

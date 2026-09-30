@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-import { ErrorCodes, NullUtil } from '@accordproject/concerto-util';
-const { isNull } = NullUtil;
 import Validator from './validator';
 
 // Types needed for TypeScript generation.
@@ -90,20 +88,6 @@ const loadEngine = (specifier: string) =>
 const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
 
 /**
- * The `options.regExp` hook configured on the validator's model manager, if
- * any: a pluggable RegExp-compatible constructor that must stay in JS
- * (PORTING.md section 3), so the view only calls the Rust engine's default
- * ECMAScript regex path (the `regress` crate) when this is absent.
- * ScalarDeclarations have no parent, so this is only ever set for a Field.
- * @param {Object} field - the field or scalar declaration this validator is attached to
- * @returns {Function} the custom RegExp-compatible constructor, or undefined
- */
-function customRegExp(field: ValidatedElement): RegExp | undefined {
-    const parent = 'getParent' in field ? field.getParent() : undefined;
-    return parent?.getModelFile()?.getModelManager()?.options?.regExp;
-}
-
-/**
  * A Validator to enforce that a string matches a regex
  * @private
  * @class
@@ -113,9 +97,16 @@ class StringValidator extends Validator{
     declare validator: IStringRegexValidator | undefined;
     // The metamodel makes both bounds optional, so an AST can leave either
     // absent as well as explicitly null.
-    // Definitely assigned: by the TS body, or from the Rust snapshot.
+    // Definitely assigned from the Rust snapshot.
     minLength!: number | null | undefined;
     maxLength!: number | null | undefined;
+    // P5-52 (BC-28, R1): always a native RegExp built from the pattern and
+    // flags the engine has already compiled and validated (the
+    // `stringValidatorNew` call below throws first for a pattern it
+    // rejects). It is handed out by getRegex() for callers that want a JS
+    // object. `validate` never uses it: the engine evaluates the regex.
+    // (`matchesRegex`, which Factory's identifier check calls, still tests
+    // it, as before.)
     regex!: RegExp | null;
 
     /**
@@ -129,49 +120,12 @@ class StringValidator extends Validator{
     constructor(field: ValidatedElement, validator?: IStringRegexValidator, lengthValidator?: IStringLengthValidator) {
         super(field, validator);
 
-        if (!customRegExp(field)) {
-            Object.assign(this, rust.stringValidatorNew(this, validator, lengthValidator));
-            this.regex = validator ? new RegExp(validator.pattern, validator.flags) : null;
-            return;
-        }
-
-        this.minLength = null;
-        this.maxLength = null;
-        this.regex = null;
-
-        if (lengthValidator) {
-            this.minLength = lengthValidator?.minLength;
-            this.maxLength = lengthValidator?.maxLength;
-
-            if(isNull(this.minLength) && isNull(this.maxLength)) {
-                // can't specify no upper and lower value: absent (length=[,])
-                // or null alike (BC-40; 5.0.0 rejected only two nulls)
-                this.reportModelError(field.getName(), 'Invalid string length, minLength and-or maxLength must be specified.');
-            } else if ((this.minLength ?? 0) < 0 || (this.maxLength ?? 0) < 0) {
-                this.reportModelError(field.getName(), 'minLength and-or maxLength must be positive integers.');
-            } else if (this.minLength === null || this.maxLength === null) {
-                // this is fine and means that we don't need to check whether minLength > maxLength
-            } else if(this.minLength !== undefined && this.maxLength !== undefined && this.minLength > this.maxLength) {
-                this.reportModelError(field.getName(), 'minLength must be less than or equal to maxLength.');
-            }
-        }
-
-        if (validator) {
-            try {
-                // ScalarDeclarations have no parent, so the custom RegExp option
-                // is only picked up for properties
-                const CustomRegExp = (customRegExp(field) || RegExp) as typeof RegExp;
-                this.regex = new CustomRegExp(validator.pattern, validator.flags);
-            }
-            catch (exception) {
-                this.reportModelError(field.getName(), (exception as Error).message, ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
-            }
-        }
-
-        if(this.field?.ast?.defaultValue) {
-            // A default outside the validator is a model error (BC-39).
-            checkValue(this, field.getName(), this.field.ast.defaultValue, true);
-        }
+        // P5-52 (BC-28, R1): there is no custom regex engine any more
+        // (`options.regExp` is ignored by the model manager), so the engine
+        // compiles the pattern, checks the length bounds and the default
+        // value, whatever the model manager.
+        Object.assign(this, rust.stringValidatorNew(this, validator, lengthValidator));
+        this.regex = validator ? new RegExp(validator.pattern, validator.flags) : null;
     }
 
     /**
@@ -182,11 +136,7 @@ class StringValidator extends Validator{
      * @private
      */
     validate(identifier: string | null, value: string): void {
-        if (!customRegExp(this.field)) {
-            rust.stringValidatorValidate(this, identifier, value);
-            return;
-        }
-        checkValue(this, identifier, value, false);
+        rust.stringValidatorValidate(this, identifier, value);
     }
 
     /**
@@ -243,65 +193,7 @@ class StringValidator extends Validator{
      * validator, false otherwise.
      */
     compatibleWith(other: Validator | null): boolean {
-        if (!customRegExp(this.field) && !(other instanceof StringValidator && customRegExp(other.field))) {
-            return rust.stringValidatorCompatibleWith(this, other, StringValidator);
-        }
-        if (!(other instanceof StringValidator)) {
-            return false;
-        }
-
-        if (this.validator?.pattern !== other.validator?.pattern) {
-            return false;
-        } else if (this.validator?.flags !== other.validator?.flags) {
-            return false;
-        }
-
-        const thisMinLength = this.getMinLength();
-        const otherMinLength = other.getMinLength();
-        if (isNull(thisMinLength) && !isNull(otherMinLength)) {
-            return false;
-        } else if (!isNull(thisMinLength) && !isNull(otherMinLength)) {
-            if (thisMinLength < otherMinLength) {
-                return false;
-            }
-        }
-        const thisMaxLength = this.getMaxLength();
-        const otherMaxLength = other.getMaxLength();
-        if (isNull(thisMaxLength) && !isNull(otherMaxLength)) {
-            return false;
-        } else if (!isNull(thisMaxLength) && !isNull(otherMaxLength)) {
-            if (thisMaxLength > otherMaxLength) {
-                return false;
-            }
-        }
-        return true;
-    }
-}
-
-/**
- * The TS checks of StringValidator.validate(), for the options.regExp path.
- * @param {StringValidator} v the validator
- * @param {string} identifier the identifier of the instance being validated
- * @param {Object} value the value to validate
- * @param {boolean} atLoad true for the constructor's default value check,
- * which reports an IllegalModelException, false for an instance value,
- * which reports a ValidationException (BC-39)
- * @private
- */
-function checkValue(v: StringValidator, identifier: string | null, value: string, atLoad: boolean): void {
-    const report = (msg: string): never => atLoad ? v.reportModelError(identifier, msg) : v.reportError(identifier, msg);
-    if(value !== null) {
-        //Enforce string length rule first
-        if(v.minLength !== null && v.minLength !== undefined && value.length < v.minLength) {
-            report(`The string length of '${value}' should be at least ${v.minLength} characters.`);
-        }
-        if(v.maxLength !== null && v.maxLength !== undefined && value.length > v.maxLength) {
-            report(`The string length of '${value}' should not exceed ${v.maxLength} characters.`);
-        }
-
-        if (v.regex && !v.matchesRegex(value)) {
-            report(`Value '${value}' failed to match validation regex: ${v.regex}`);
-        }
+        return rust.stringValidatorCompatibleWith(this, other, StringValidator);
     }
 }
 

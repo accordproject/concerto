@@ -23,12 +23,14 @@
  * Since P5-12c, `ValidatedResource.validate()`, `setPropertyValue` and
  * `addArrayValue` validate in one Rust engine call
  * (src/engine/validate-resource.ts), and the TS visitor runs only when the
- * engine cannot take the value. A model manager built with a custom
- * `regExp` engine is one such case (its `regex=` checks must run that
- * engine, which Rust cannot call), so every `VV-*` check here builds its
- * model in one (`setup`) to drive the visitor through the public
- * API, as the `RV-*` checks in serializer-fallback.checks.js did before
- * P5-12c. The `VE-*` checks run the same scenarios in a plain model
+ * engine cannot take the value. A resource whose `$validator` is not a
+ * plain `ResourceValidator` (a subclass may override the visitor, which the
+ * engine cannot run) is one such case, so every `VV-*` check here gives its
+ * resource a subclass that overrides nothing (`forceVisitor`) to drive the
+ * visitor through the public API, as the `RV-*` checks in
+ * serializer-fallback.checks.js did before P5-12c. (Until P5-52 they used a
+ * model manager with a custom `regExp` engine instead; BC-28, R1, made that
+ * option ignored, so it no longer leaves the engine path.) The `VE-*` checks run the same scenarios in a plain model
  * manager, where the engine answers, and return only the class of what is
  * thrown: error parity is by class (maintainer decision 2026-09-27, P5-09).
  * `setPropertyValue` of a string, number or boolean on a plain primitive
@@ -44,8 +46,6 @@
 
 const NS = 'org.acme.lifted.p512c.validate@1.0.0';
 
-/** A custom RegExp engine: plain ECMAScript semantics, but a distinct constructor. */
-class CustomRegExp extends RegExp {}
 
 const MODEL = `namespace ${NS}
 scalar SS extends String length=[1,3]
@@ -93,16 +93,31 @@ asset Box identified by bid {
 `;
 
 /**
- * A model manager over MODEL, with a custom `regExp` engine when
- * `visitor` is set (which sends validation to the TS visitor).
+ * A model manager over MODEL.
  * @param {object} core the core under test
- * @param {boolean} visitor whether to force the visitor path
  * @returns {object} `{ mm, factory }`
  */
-function setup(core, visitor) {
-    const mm = visitor ? new core.ModelManager({ regExp: CustomRegExp }) : new core.ModelManager();
+function setup(core) {
+    const mm = new core.ModelManager();
     mm.addCTOModel(MODEL, 'validate.cto');
     return { mm, factory: new core.Factory(mm) };
+}
+
+/**
+ * When `visitor` is set, gives `r` a `ResourceValidator` subclass that
+ * overrides nothing, which sends its validation to the TS visitor (the
+ * engine takes only a plain `ResourceValidator`).
+ * @param {object} core the core under test
+ * @param {object} r the validated resource
+ * @param {boolean} visitor whether to force the visitor path
+ * @returns {object} r
+ */
+function forceVisitor(core, r, visitor) {
+    if (visitor) {
+        const VisitorOnly = class extends core.ResourceValidator {};
+        r.$validator = new VisitorOnly(r.$validator.options);
+    }
+    return r;
 }
 
 /**
@@ -132,8 +147,8 @@ function classOnly(visitor, body) {
  */
 function validate(type, fields, visitor) {
     return (core) => {
-        const { mm, factory } = setup(core, visitor);
-        const r = factory.newConcept(NS, type);
+        const { mm, factory } = setup(core);
+        const r = forceVisitor(core, factory.newConcept(NS, type), visitor);
         Object.assign(r, typeof fields === 'function' ? fields(core, factory, mm) : fields);
         return classOnly(visitor, () => {
             r.validate();
@@ -151,8 +166,8 @@ function validate(type, fields, visitor) {
  */
 function validateBox(fields, visitor) {
     return (core) => {
-        const { factory } = setup(core, visitor);
-        const r = factory.newResource(NS, 'Box', 'b1');
+        const { factory } = setup(core);
+        const r = forceVisitor(core, factory.newResource(NS, 'Box', 'b1'), visitor);
         Object.assign(r, fields);
         return classOnly(visitor, () => {
             r.validate();
@@ -172,8 +187,8 @@ function validateBox(fields, visitor) {
  */
 function assign(method, prop, value, visitor) {
     return (core) => {
-        const { factory } = setup(core, visitor);
-        const r = factory.newResource(NS, 'Box', 'b1');
+        const { factory } = setup(core);
+        const r = forceVisitor(core, factory.newResource(NS, 'Box', 'b1'), visitor);
         return classOnly(visitor, () => {
             r[method](prop, typeof value === 'function' ? value(core, factory) : value);
             const v = r[prop];

@@ -60,6 +60,9 @@ const EXPECT_INSTANCE_RE = /^(.*?)\bexpect\(([A-Za-z_$][\w$]*)\)\.to\.be\.(?:an?
 /** Maintainer decisions that approve ok-to-throw test rewrites (see above). */
 export const APPROVED_REWRITE_DECISIONS = new Set([
     'accordproject/concerto-rust#328',
+    // P5-52 (BC-28, R1): maintainer decision 2026-09-29, option 1, confirmed
+    // on accordproject/concerto-rust#373.
+    'accordproject/concerto-rust#373',
 ]);
 const REWRITE_REASON_RE = /^approved rewrite (\S+):/;
 export const NO_OLD_TEXT = '(none)';

@@ -1,0 +1,49 @@
+{
+  "shipped": {
+    "path": "../now-pkg/concerto_wasm.wasm",
+    "raw": 2999238,
+    "gzip": 947046,
+    "brotli": 613438
+  },
+  "named": {
+    "path": "../prof/pkg-after/node/concerto_wasm_bg.wasm",
+    "codeBytes": 2537185,
+    "dataBytes": 484161,
+    "functions": 1605,
+    "named": 1645,
+    "buckets": {
+      "serde deserialisation": {
+        "bytes": 745758,
+        "share": 29.4
+      },
+      "concerto_core": {
+        "bytes": 659599,
+        "share": 26
+      },
+      "other": {
+        "bytes": 593085,
+        "share": 23.4
+      },
+      "regress": {
+        "bytes": 222927,
+        "share": 8.8
+      },
+      "concerto_wasm": {
+        "bytes": 128482,
+        "share": 5.1
+      },
+      "concerto_core_js": {
+        "bytes": 84905,
+        "share": 3.3
+      },
+      "Debug/Display": {
+        "bytes": 79441,
+        "share": 3.1
+      },
+      "drop glue": {
+        "bytes": 22986,
+        "share": 0.9
+      }
+    }
+  }
+}

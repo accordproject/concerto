@@ -1,0 +1,35 @@
+now crossings start load 0.31 2.83 3.02
+now crossings done (0.31 2.83 3.02)
+before crossings start load 0.31 2.83 3.02
+before crossings done (0.31 2.83 3.02)
+round 1 ts-ref start load 0.31 2.83 3.02
+round 1 ts-ref end load 0.45 2.81 3.02
+round 1 now start load 0.45 2.81 3.02
+round 1 now end load 0.81 2.85 3.03
+round 1 crate-now start load 0.81 2.85 3.03
+round 1 crate-now end load 0.81 2.85 3.03
+round 1 before start load 0.81 2.85 3.03
+round 1 before end load 0.99 2.85 3.03
+round 1 crate-before start load 0.99 2.85 3.03
+round 1 crate-before end load 0.99 2.85 3.03
+round 2 ts-ref start load 0.99 2.85 3.03
+round 2 ts-ref end load 0.99 2.85 3.03
+round 2 before start load 0.99 2.85 3.03
+round 2 before end load 1.23 2.87 3.03
+round 2 crate-before start load 1.23 2.87 3.03
+round 2 crate-before end load 1.21 2.84 3.02
+round 2 now start load 1.21 2.84 3.02
+round 2 now end load 1.35 2.84 3.02
+round 2 crate-now start load 1.35 2.84 3.02
+round 2 crate-now end load 1.35 2.84 3.02
+round 3 ts-ref start load 1.35 2.84 3.02
+round 3 ts-ref end load 1.35 2.84 3.02
+round 3 now start load 1.35 2.84 3.02
+round 3 now end load 1.41 2.83 3.01
+round 3 crate-now start load 1.41 2.83 3.01
+round 3 crate-now end load 1.41 2.83 3.01
+round 3 before start load 1.41 2.83 3.01
+round 3 before end load 1.66 2.83 3.01
+round 3 crate-before start load 1.66 2.83 3.01
+round 3 crate-before end load 1.66 2.83 3.01
+timed done

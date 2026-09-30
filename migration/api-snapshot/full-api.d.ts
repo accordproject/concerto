@@ -68,7 +68,7 @@ declare class BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {Object} [options.regExp] - An alternative regular expression engine.
+     * @param {Object} [options.regExp] - Deprecated and ignored, with a warning: regular expressions are evaluated by the Concerto engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
     * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
@@ -2896,17 +2896,6 @@ declare class Validator {
      */
     reportError(id: string | null, msg: string, errorType?: string): never;
     /**
-     * Reports a validator that is not valid in its model: a bad bound or
-     * regex, or a default value outside the validator (BC-39: an
-     * IllegalModelException, keeping the errorType; 5.0.0 threw a
-     * BaseException).
-     * @param {string} id the identifier of the element
-     * @param {string} msg the exception message
-     * @param {string} errorType the type of error
-     * @throws {IllegalModelException} throws an error to report the message
-     */
-    reportModelError(id: string | null, msg: string, errorType?: string): never;
-    /**
      * Visitor design pattern
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
@@ -3452,7 +3441,7 @@ declare class ModelManager extends BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {Object} [options.regExp] - An alternative regular expression engine.
+     * @param {Object} [options.regExp] - Deprecated and ignored, with a warning: regular expressions are evaluated by the Concerto engine.
      * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
      */
     constructor(options?: ModelManagerOptions);
@@ -4522,6 +4511,10 @@ import type Factory from './factory';
 import type Typed from './model/typed';
 import type { EmptyValueGenerator } from './serializer/valuegenerator';
 export interface ModelManagerOptions {
+    /**
+     * @deprecated Ignored, with a warning (BC-28): regular expressions are
+     * evaluated by the Concerto engine.
+     */
     regExp?: RegExp;
     metamodelValidation?: boolean;
     addMetamodel?: boolean;
