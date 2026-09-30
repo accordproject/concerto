@@ -289,7 +289,15 @@ concept Hide extends Decorator { o Boolean hidden optional }
         id: 'DECL-VAL-019',
         covers: 'ScalarDeclaration.validate: an invalid default for the scalar',
         run: validateDeclarations(`${T}\nscalar S extends Integer default=5 range=[10,20]`),
+        // P5-53 (BC-39, R1): a validator error while the model loads is an IllegalModelException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: 'Validator error for field `null`. org.acme.p535.t@1.0.0.S: Value 5 is outside lower bound 10 '
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `null`. org.acme.p535.t@1.0.0.S: Value 5 is outside lower bound 10'

@@ -2887,10 +2887,12 @@ declare class Validator {
      */
     constructor(field: ValidatedElement, validator: ValidatorAst | undefined);
     /**
+     * Reports an instance value that fails the validator (BC-39: a
+     * ValidationException, keeping the errorType; 5.0.0 threw a BaseException).
      * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
      * @param {string} errorType the type of error
-     * @throws {Error} throws an error to report the message
+     * @throws {ValidationException} throws an error to report the message
      */
     reportError(id: string | null, msg: string, errorType?: string): never;
     /**
