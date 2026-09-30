@@ -114,6 +114,49 @@ function shape(message) {
 }
 
 /**
+ * P5-61: what running `fn` did: `'loaded'` when it returned, `'error'` when
+ * it threw an error, or `'trap'` when the error is a WebAssembly trap
+ * (`WebAssembly.RuntimeError`, such as `unreachable`). With the shape check
+ * off, the class and message of the error are unspecified
+ * (`metamodelValidation`'s docs), so only this is compared.
+ * @param {object} core the core under test
+ * @param {Function} fn the load
+ * @returns {string} `'loaded'`, `'error'` or `'trap'`
+ */
+function noTrap(core, fn) {
+    try {
+        fn();
+        return 'loaded';
+    } catch (e) {
+        return e instanceof WebAssembly.RuntimeError ? 'trap' : 'error';
+    }
+}
+
+/**
+ * Malformed model ASTs, each one the engine's typed read cannot read
+ * (P5-61), for the opt-out checks.
+ * @param {string} ns the namespace
+ * @returns {object[]} the ASTs
+ */
+function unreadable(ns) {
+    const decl = (extra) => model(ns, [GOOD], extra);
+    return [
+        Object.assign(model(ns, [GOOD]), { decorators: 5 }),
+        Object.assign(model(ns, [GOOD]), { decorators: 'x' }),
+        model(ns, [prop(`${MM}.StringProperty`, 'id', { decorators: [null] })]),
+        decl({ name: 7 }),
+        decl({ properties: 'x' }),
+        decl({ superType: { $class: `${MM}.TypeIdentifier`, name: null } }),
+        model(ns, [prop(`${MM}.RelationshipProperty`, 'r')]),
+        model(ns, [prop(`${MM}.IntegerProperty`, 'n', { validator: { $class: `${MM}.IntegerDomainValidator`, lower: '0' } })]),
+        Object.assign(model(ns, []), {
+            declarations: [{ $class: `${MM}.MapDeclaration`, name: 'M', key: 5, value: null }],
+        }),
+        Object.assign(model(ns, []), { declarations: 'x' }),
+    ];
+}
+
+/**
  * The namespaces a manager holds after loading `ns` (the system
  * namespaces are not listed).
  * @param {string} ns the namespace
@@ -254,9 +297,10 @@ module.exports = [
     // ---- the option ---------------------------------------------------
     {
         id: 'BC19-OPT-001',
-        covers: 'BC-19 opt-out: metamodelValidation false restores the lenient load (a number decorators value loads)',
-        run: (core) => add(core, Object.assign(model('org.acme.bc19.opt@1.0.0', [GOOD]), { decorators: 5 }), { metamodelValidation: false }),
-        expect: loaded('org.acme.bc19.opt@1.0.0'),
+        covers: 'BC-19 opt-out (P5-61): with metamodelValidation false, a number decorators value is still an error at load, not a trap (v5.0.0 loaded it)',
+        run: (core) => noTrap(core, () => add(core, Object.assign(model('org.acme.bc19.opt@1.0.0', [GOOD]), { decorators: 5 }), { metamodelValidation: false })),
+        expect: { ok: 'error' },
+        reference: { ok: 'loaded' },
     },
     {
         id: 'BC19-OPT-002',
@@ -290,6 +334,50 @@ module.exports = [
             return [mf.getType('Bar'), mf.getType('String')];
         },
         expect: { ok: [null, 'String'] },
+    },
+    // ---- P5-61: the opt-out never traps ----------------------------
+    {
+        id: 'P561-OPT-001',
+        covers: 'P5-61: with metamodelValidation false, new ModelFile of an AST the engine cannot read throws an error, never a WASM trap',
+        run: (core) => unreadable('org.acme.p561.a@1.0.0').map((ast) => noTrap(core, () => {
+            const mm = new core.ModelManager({ metamodelValidation: false });
+            new core.ModelFile(mm, ast, undefined, 'x.json');
+        })),
+        expect: { ok: ['error', 'error', 'error', 'error', 'error', 'error', 'error', 'error', 'error', 'error'] },
+        reference: { ok: ['loaded', 'loaded', 'error', 'error', 'error', 'loaded', 'error', 'loaded', 'error', 'error'] },
+    },
+    {
+        id: 'P561-OPT-002',
+        covers: 'P5-61: with metamodelValidation false, addModel and fromAst of an AST the engine cannot read throw an error, never a WASM trap, and the manager still loads a well-formed model afterwards',
+        run: (core) => {
+            const mm = new core.BaseModelManager({ metamodelValidation: false });
+            const results = unreadable('org.acme.p561.b@1.0.0').map((ast) => [
+                noTrap(core, () => mm.addModel(ast, undefined, 'x.json')),
+                noTrap(core, () => mm.fromAst({ $class: `${MM}.Models`, models: [ast] })),
+            ]);
+            mm.addModel(model('org.acme.p561.good@1.0.0', [GOOD]), undefined, 'good.json');
+            return [results, mm.getNamespaces()];
+        },
+        expect: { ok: [
+            Array(10).fill(['error', 'error']),
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p561.good@1.0.0'],
+        ] },
+        reference: { ok: [
+            [['loaded', 'loaded'], ['error', 'loaded'], ['error', 'error'], ['error', 'error'], ['error', 'error'],
+                ['loaded', 'loaded'], ['error', 'error'], ['loaded', 'loaded'], ['error', 'error'], ['error', 'error']],
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p561.good@1.0.0'],
+        ] },
+    },
+    {
+        id: 'P561-OPT-003',
+        covers: 'P5-61: with metamodelValidation false and a decorator factory (the eager walk), new ModelFile of an AST the engine cannot read still throws an error, never a WASM trap',
+        run: (core) => unreadable('org.acme.p561.c@1.0.0').map((ast) => noTrap(core, () => {
+            const mm = new core.ModelManager({ metamodelValidation: false });
+            mm.addDecoratorFactory({ newDecorator: () => null });
+            new core.ModelFile(mm, ast, undefined, 'x.json');
+        })),
+        expect: { ok: ['error', 'error', 'error', 'error', 'error', 'error', 'error', 'error', 'error', 'error'] },
+        reference: { ok: ['loaded', 'loaded', 'error', 'error', 'error', 'loaded', 'error', 'loaded', 'error', 'error'] },
     },
     {
         id: 'BC19-CTO-001',

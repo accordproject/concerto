@@ -1056,9 +1056,14 @@ function checkAstShape(modelFile: any): string | undefined {
  * decorators can be deferred too): loads the AST in the manager's
  * rustHandle staging slot, once. Returns true when the ModelFile may be
  * built lazily: the manager (always a BaseModelManager, BC-47) has no
- * decorator factories and Rust loaded the AST without error. Never throws: on any
+ * decorator factories and Rust loaded the AST without error. On any other
  * failure the caller builds the ModelFile eagerly, which throws the TS error
- * itself.
+ * itself. P5-61: when the shape check is off (no `checkedText`), an AST the
+ * engine cannot read at all is thrown here (`unreadableAst`, an
+ * IllegalModelException), so a malformed AST is an error at load, never
+ * left to the eager walk; the AST is read for that even for a manager with
+ * decorator factories. With the check on, the check has rejected any such
+ * AST already.
  * @param {object} modelFile the ModelFile being constructed
  * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
  * already computed it
@@ -1076,6 +1081,9 @@ function stageModelFile(modelFile: any, checkedText?: string): boolean {
         // first read is BC-24, a maintainer decision not taken here).
         const factories = manager.getDecoratorFactories();
         if (Array.isArray(factories) && factories.length > 0) {
+            if (checkedText === undefined) {
+                readUnchecked(modelFile, handle);
+            }
             return false;
         }
         const ast = modelFile.ast;
@@ -1137,8 +1145,24 @@ function stageModelFile(modelFile: any, checkedText?: string): boolean {
         lazyFiles.add(modelFile);
         return true;
     } catch (e) {
+        if (checkedText === undefined && (e as { unreadableAst?: boolean } | null)?.unreadableAst) {
+            throw e;
+        }
         return false;
     }
+}
+
+/**
+ * P5-61: reads the AST of a ModelFile whose manager has decorator factories
+ * and the shape check off, only to throw `stageModelFile`'s `unreadableAst`
+ * error for an AST the engine cannot read. The staged file is dropped.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {object} handle the manager's rustHandle
+ */
+function readUnchecked(modelFile: any, handle: any): void {
+    const definitions = typeof modelFile.definitions === 'string' ? modelFile.definitions : undefined;
+    const fileName = typeof modelFile.fileName === 'string' ? modelFile.fileName : undefined;
+    handle.dropStagedModelFile(handle.stageModelFile(JSON.stringify(modelFile.ast), definitions, fileName));
 }
 
 
