@@ -640,7 +640,9 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: classDeclaration.getFullyQualifiedName(),
-            invalidValue: value.toString()
+            // BC-06 (R1): String(), not value.toString(), which is a V8
+            // TypeError for null or undefined (DV-008).
+            invalidValue: String(value)
         }));
     }
 
@@ -656,7 +658,9 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: relationshipDeclaration.getFullyQualifiedTypeName(),
-            invalidValue: value.toString()
+            // BC-06 (R1): String(), not value.toString(), which is a V8
+            // TypeError for null or undefined (DV-008).
+            invalidValue: String(value)
         }));
     }
 
@@ -750,10 +754,19 @@ class ResourceValidator {
             typeName += '[]';
         }
 
+        // BC-06 (R1): a value that is not Identifiable is named by its JS
+        // type; calling its missing getFullyQualifiedType() was a V8
+        // TypeError (DV-008).
+        let objectType;
+        if (typeof obj?.getFullyQualifiedType === 'function') {
+            objectType = obj.getFullyQualifiedType();
+        } else {
+            objectType = obj === null ? 'null' : typeof obj;
+        }
         throw new ValidationException(formatter({
             resourceId: resourceId,
             propertyName: propName,
-            objectType: obj.getFullyQualifiedType(),
+            objectType,
             fieldType: typeName
         }));
     }

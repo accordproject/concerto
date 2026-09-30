@@ -1109,4 +1109,56 @@ module.exports = [
             }
         },
     },
+    {
+        id: 'RV-REL-002',
+        covers: 'visitRelationshipDeclaration: a string on a relationship array field is reported by its JS type (BC-06)',
+        run: validate('C', { refs: 'not-an-array' }),
+        expect: {
+            throws: {
+                name: 'ValidationException',
+                message: `Instance "${NS}.C" has a property "refs" with type "string" that is not derived from "${NS}.A[]".`
+            }
+        },
+        reference: { throws: { name: 'TypeError', message: 'obj.getFullyQualifiedType is not a function' } },
+    },
+    {
+        id: 'RV-REL-003',
+        covers: 'checkRelationship: a null relationship array element is reported as null (BC-06)',
+        run: validate('C', { refs: [null] }),
+        expect: {
+            throws: {
+                name: 'ValidationException',
+                message: `Model violation in the "${NS}.C" instance. Class "${NS}.A" has a value of "null". Expected a "Relationship".`
+            }
+        },
+        reference: { throws: { name: 'TypeError', message: 'Cannot read properties of null (reading \'toString\')' } },
+    },
+    {
+        id: 'RV-CD-003',
+        covers: 'visitClassDeclaration: a null element of a concept array is reported as null (BC-06)',
+        run: validate('C', { subs: [null] }),
+        expect: {
+            throws: {
+                name: 'ValidationException',
+                message: `Model violation in the "${NS}.C" instance. Class "${NS}.Sub" has the value of "null". Expected a "Resource" or a "Concept".`
+            }
+        },
+        reference: { throws: { name: 'TypeError', message: 'Cannot read properties of null (reading \'toString\')' } },
+    },
+    {
+        id: 'SF-FJ-010',
+        covers: 'jsonpopulator.ts visit: an enum value reached as a property is named (BC-08)',
+        run: populate({ sub: { $class: `${NS}.En`, X: 'x' } }, 'sub'),
+        expect: { throws: { name: 'Error', message: `Unrecognised element "${NS}.En.X"` } },
+        reference: {
+            throws: {
+                name: 'TypeError',
+                message: 'Converting circular structure to JSON\n' +
+                    "    --> starting at object with constructor 'ModelManager'\n" +
+                    "    |     property 'modelFiles' -> object with constructor 'Object'\n" +
+                    "    |     property 'concerto.decorator@1.0.0' -> object with constructor 'ModelFile'\n" +
+                    "    --- property 'modelManager' closes the circle"
+            }
+        },
+    },
 ];

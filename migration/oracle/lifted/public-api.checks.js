@@ -89,7 +89,7 @@ function uriWithout(core, prop) {
 module.exports = [
     {
         id: 'PA-MU-001',
-        covers: 'modelutil.ts: non-string arguments go straight to the engine (not memoised)',
+        covers: 'modelutil.ts: non-string arguments go straight to the engine (not memoised); isValidIdentifier(null) is false (BC-01)',
         run: (core) => [
             util(core, 'getShortName', [5]),
             util(core, 'getShortName', [undefined]),
@@ -101,6 +101,19 @@ module.exports = [
             util(core, 'isPrivateSystemProperty', [undefined]),
         ],
         expect: {
+            ok: [
+                'TypeError: fqn.lastIndexOf is not a function',
+                'TypeError: Cannot read properties of undefined (reading \'lastIndexOf\')',
+                'false',
+                'TypeError: string.charAt is not a function',
+                'false',
+                '5.X',
+                'TypeError: fqn.lastIndexOf is not a function',
+                'false'
+            ]
+        },
+        // v5.0.0 tested String(null), "null", a valid identifier (DV-002).
+        reference: {
             ok: [
                 'TypeError: fqn.lastIndexOf is not a function',
                 'TypeError: Cannot read properties of undefined (reading \'lastIndexOf\')',
