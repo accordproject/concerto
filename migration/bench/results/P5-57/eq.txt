@@ -1,0 +1,4 @@
+resident: 54 cases, identical (base engine vs P5-57 engine)
+percall: 54 cases, identical (base engine vs P5-57 engine)
+resident = percall (new)
+native: 12 byte-identity checks per set (3 actions x removeDecoratorsFromModel x locale en/fr), Value route vs direct encoding, all passed in every round
