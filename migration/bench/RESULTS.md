@@ -1,3 +1,283 @@
+# P5-60: consolidated R1-candidate re-measure (P5-15/P5-22 sweep, crate + TS API, BC-19 load cost, bundle size) (2026-09-30)
+
+Task P5-60 (accordproject/concerto-rust#392) repeats the P5-15/P5-22 sweep on
+the R1 candidate (the integration head after P5-49, P5-53, P5-55, P5-56,
+P5-57 and P5-61), with the pre-F1 head, TS 5.0.0 and BC-19's opt-out
+(`metamodelValidation: false`) timed in the same run. Measure only: no
+engine, shim or concerto-core change. The raw outputs are in
+`results/P5-60/` (`sweep/{now,before,now-mmvoff}`, `tables.md`,
+`tables.json`, `report-*.json`, `timed-loads.txt`, `bundle/`).
+
+| | |
+|---|---|
+| Machine | Cloud container (cloud-3), Intel Xeon @ 2.10GHz, 4 vCPU, 15 GB, Linux 6.18 (the P5-22 machine type) |
+| Toolchain | Node v22.22.2, rustc 1.94.1, wasm-bindgen 0.2.128, binaryen/wasm-opt 132 (concerto-wasm's npm pin), criterion 0.5.1, esbuild 0.27.7 |
+| Now | `concerto` `2a6a71754` (concerto-core dist), `concerto-rust` `299935e` (engine `concerto_wasm.wasm` 2,950,081 bytes). The crate bench is `p515_sweep` with P5-60's input fix (concerto-rust `dd1ff24`, below). |
+| Before | The pre-F1 head, timed in the same run: `concerto` `e5988a033` with its concerto-core dist, `concerto-rust` `45ff6d5` with its engine (2,918,997 bytes) and P5-22's `p515_sweep.rs` (`1b0555d`) copied in with the same input fix, not committed. |
+| now-mmvoff | The now dist and engine with `--mm-options '{"metamodelValidation":false}'` on every ModelManager the load ops build, timed in each round next to `now` |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, timed in each round; the same files serve every side |
+| Driver | `p560-run.sh` (P5-22's `p522-run.sh` plus the now-mmvoff side, every sweep op and a crate filter): V8 CPU profiles and crossing counts of every op on both sides, and crossing counts of now-mmvoff, no gate; then three interleaved rounds of TS 5.0.0, TS API on the Rust engine (now, now-mmvoff, before; order alternated per round) and criterion crate-direct (now, before; order alternated; 1 s warm-up, 3 s measurement). `p515-sweep.mjs` used 5 warm-up and 30 samples. |
+| Quiet gate | Before each part: 1-minute load < 2, 5-minute < 3, no other bench, cargo or mocha process. All 18 parts met it; at their starts the 1-minute load was 1.19-1.99 and the 5-minute 1.39-1.81 (`timed-loads.txt`). |
+| Noise | As P5-22: round-to-round medians move by up to about ±30%, so ratio changes under about 25% are noise. Each figure is the median over three rounds of each round's median. |
+| Crate rows left out | `new_resource/concerto-core-test-data` on both sides (`P560_CRATE_FILTER`): the head's crate `factory::new_resource` rejects that model's `default="2008-09-15T15:53:00"` (BC-45, intended since P5-24; the TS API's Factory is TS and still accepts it). The crate rows never include BC-19's check (`check_ast_shape` is called by the TS `ModelFile` constructor, not by `p515_sweep`). |
+
+Harness changes, all additive: `p515-sweep.mjs --mm-options` (every
+ModelManager the ops build takes it; without it, as before);
+`p560-run.sh`, `p560-table.mjs` (the tables below) and `p560-bundle.mjs`
+(the bundle sizes) are new; in concerto-rust, `p515_sweep.rs` drops the
+generated synthetic-large EnumDeclaration's undeclared `isAbstract` key
+before loading, as the TS sweep has done since P5-56, since the strict typed
+read (P5-49/P5-61) refuses it and the crate sweep aborted at
+`modelfile_new/synthetic-large`.
+
+## Headline
+
+- Through the TS API, **19 of 73 op/set rows are now at or below TS 5.0.0**
+  (pre-F1, same run: 5). Crate-direct: 46 of 57 (pre-F1: 35).
+- Geometric mean of × TS through the TS API, pre-F1 -> now, by category:
+  model loading **4.99 -> 8.31** (worse: BC-19), introspection including
+  DCS 4.39 -> 1.79, serialisation 3.45 -> 2.01, instance creation
+  10.5 -> 1.79, validation 4.14 -> 2.95. Crate-direct now: 0.31, 0.30, 0.56,
+  0.39 and 0.81.
+- **BC-19's shape check is now the largest single cost in the Rust engine
+  through the TS API.** It is 58-87% of `new ModelFile`/`addModelFile` wall
+  time, and, because the DCS result managers build their ModelFiles through
+  the same constructor, 28-35% of `decorateModels` and 36-83% of every
+  `extract*` call. Without it (`metamodelValidation: false`) load is
+  2.1-8.0× TS instead of 3.0-27.4×.
+- Web bundle: essentially unchanged since P5-39 (E1 4,483.7 KB raw / 1,482.6
+  KB gzip / 959.6 KB brotli, about 15.7× v5 gzip). `keepNames` is no longer
+  needed: the bundles without it run and match v5.
+
+## × TS 5.0.0 per operation, by category (median of 3 rounds)
+
+"crossings/item" and "in-engine" (share of the wall time spent inside engine
+calls, wasm-bindgen glue included) are from the count run. The crate
+columns time the same engine work natively, with no boundary.
+### Model loading
+
+| op | set | TS 5.0.0 | x TS crate: pre-F1 | **now** | x TS API: pre-F1 | **now** | TS API now | crossings/item | in-engine |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| mm_new | (system models) | 536.3 us | 0.02 | **0.00** | 1.36 | **1.46** | 783.8 us | 10.0 | 35% |
+| modelfile_new | core-test-data | 50.3 us | 1.51 | **0.86** | 4.35 | **14.21** | 715.3 us | 3.0 | 91% |
+| modelfile_new | conformance | 16.1 us | 2.30 | **1.37** | 9.02 | **21.71** | 350.6 us | 3.0 | 85% |
+| modelfile_new | synthetic-large | 1.15 ms | 2.36 | **1.42** | 6.92 | **27.42** | 31.54 ms | 3.0 | 97% |
+| add_model_file | core-test-data | 90.1 us | 3.79 | **0.76** | 7.17 | **8.86** | 797.6 us | 4.3 | 86% |
+| add_model_file | conformance | 27.0 us | 7.54 | **1.09** | 22.32 | **19.45** | 524.8 us | 4.2 | 84% |
+| add_model_file | synthetic-large | 2.97 ms | 1.81 | **0.98** | 4.40 | **14.24** | 42.26 ms | 14.0 | 94% |
+| add_cto_model | core-test-data | 591.7 us | 0.58 | **0.12** | 3.06 | **3.00** | 1.77 ms | 4.3 | 46% |
+| add_cto_model | conformance | 173.3 us | 1.17 | **0.17** | 5.20 | **4.56** | 790.2 us | 4.2 | 41% |
+| add_cto_model | synthetic-large | 26.20 ms | 0.20 | **0.11** | 2.32 | **3.81** | 99.79 ms | 14.0 | 53% |
+
+### Introspection (including decorators/DCS)
+
+| op | set | TS 5.0.0 | x TS crate: pre-F1 | **now** | x TS API: pre-F1 | **now** | TS API now | crossings/item | in-engine |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| get_type | core-test-data | 0.57 us | 0.22 | **0.17** | 7.52 | **0.97** | 0.56 us | 0.0 | 0% |
+| get_type | conformance | 0.64 us | 0.16 | **0.16** | 5.04 | **1.13** | 0.73 us | 0.0 | 0% |
+| get_type | synthetic-large | 0.67 us | 0.14 | **0.13** | 1.95 | **0.71** | 0.47 us | 0.0 | 0% |
+| get_type_first | core-test-data | 0.57 us | - | - | 7.44 | **2.54** | 1.44 us | 1.0 | 53% |
+| get_type_first | conformance | 0.91 us | - | - | 6.40 | **1.50** | 1.37 us | 1.0 | 47% |
+| get_type_first | synthetic-large | 0.69 us | - | - | 1.95 | **2.84** | 1.96 us | 1.0 | 44% |
+| resolve_type | core-test-data | 0.35 us | 0.21 | **0.28** | 7.32 | **0.39** | 0.13 us | 0.0 | 0% |
+| resolve_type | conformance | 0.39 us | 0.17 | **0.24** | 7.60 | **0.46** | 0.18 us | 0.0 | 0% |
+| resolve_type | synthetic-large | 0.47 us | 0.16 | **0.14** | 1.97 | **0.04** | 0.02 us | 0.0 | 0% |
+| resolve_type_first | core-test-data | 0.42 us | - | - | 6.65 | **3.04** | 1.29 us | 1.0 | 41% |
+| resolve_type_first | conformance | 0.69 us | - | - | 3.26 | **1.76** | 1.20 us | 1.0 | 67% |
+| resolve_type_first | synthetic-large | 0.57 us | - | - | 1.54 | **1.52** | 0.87 us | 1.0 | 70% |
+| get_namespaces | core-test-data | 1.42 us | 1.05 | **0.95** | 12.71 | **0.22** | 0.31 us | 0.0 | 0% |
+| get_namespaces | conformance | 1.27 us | 1.37 | **1.25** | 9.29 | **0.22** | 0.28 us | 0.0 | 0% |
+| get_namespaces | synthetic-large | 0.14 us | 0.58 | **0.54** | 12.91 | **2.02** | 0.28 us | 0.0 | 0% |
+| get_namespaces_first | core-test-data | 0.83 us | - | - | 18.15 | **20.53** | 17.0 us | 1.0 | 93% |
+| get_namespaces_first | conformance | 0.94 us | - | - | 13.86 | **28.18** | 26.4 us | 1.0 | 95% |
+| get_namespaces_first | synthetic-large | 0.15 us | - | - | 8.77 | **22.11** | 3.36 us | 1.0 | 59% |
+| derives_from | core-test-data | 1.08 us | 0.20 | **0.20** | 3.20 | **1.92** | 2.07 us | 1.0 | 73% |
+| derives_from | conformance | 0.96 us | 0.21 | **0.23** | 2.78 | **0.76** | 0.73 us | 1.0 | 77% |
+| derives_from | synthetic-large | 1.07 us | 0.31 | **0.27** | 0.93 | **0.97** | 1.03 us | 1.0 | 58% |
+| is_assignable_to | core-test-data | 1.97 us | 0.14 | **0.15** | 2.24 | **0.56** | 1.09 us | 1.0 | 80% |
+| is_assignable_to | conformance | 2.09 us | 0.16 | **0.17** | 1.91 | **0.43** | 0.89 us | 1.0 | 78% |
+| is_assignable_to | synthetic-large | 2.00 us | 0.18 | **0.16** | 0.59 | **0.62** | 1.25 us | 1.0 | 59% |
+| get_decorators | core-test-data | 0.19 us | 0.03 | **0.03** | 0.94 | **0.84** | 0.16 us | 0.0 | 0% |
+| get_decorators | conformance | 0.09 us | 0.05 | **0.05** | 1.14 | **0.83** | 0.07 us | 0.0 | 0% |
+| get_decorators | synthetic-large | 0.03 us | 0.17 | **0.17** | 0.95 | **1.14** | 0.03 us | 0.0 | 0% |
+| dcs_decorate | core-test-data | 50.30 ms | 2.21 (rebuild 2.04) | **0.45** (rebuild 0.70) | 2.18 | **1.72** | 86.42 ms | 122.0 | 93% |
+| dcs_decorate | conformance | 23.35 ms | 2.25 (rebuild 2.24) | **0.45** (rebuild 0.51) | 2.57 | **1.63** | 38.13 ms | 143.0 | 85% |
+| dcs_decorate | synthetic-large | 78.37 ms | 0.81 (rebuild 0.99) | **0.55** (rebuild 0.73) | 1.42 | **1.64** | 128.63 ms | 23.0 | 98% |
+| dcs_validate | core-test-data | 44.76 ms | 0.34 (rebuild 0.41) | **0.24** (rebuild 0.37) | 1.12 | **0.68** | 30.30 ms | 54.0 | 84% |
+| dcs_validate | conformance | 23.33 ms | 0.34 (rebuild 0.44) | **0.22** (rebuild 0.27) | 1.53 | **0.77** | 17.89 ms | 61.0 | 75% |
+| dcs_validate | synthetic-large | 79.80 ms | 0.28 (rebuild 0.48) | **0.22** (rebuild 0.34) | 0.87 | **0.65** | 52.19 ms | 21.0 | 88% |
+| extract_decorators | core-test-data | 9.84 ms | 15.95 (rebuild 20.28) | **0.88** (rebuild 1.82) | 12.00 | **3.88** | 38.21 ms | 122.0 | 82% |
+| extract_decorators | conformance | 3.20 ms | 21.85 (rebuild 23.24) | **1.19** (rebuild 2.18) | 18.72 | **6.64** | 21.28 ms | 143.0 | 74% |
+| extract_decorators | synthetic-large | 16.94 ms | 2.77 (rebuild 3.01) | **0.87** (rebuild 1.43) | 4.29 | **3.46** | 58.62 ms | 23.0 | 91% |
+| extract_vocabularies | core-test-data | 11.71 ms | 12.68 (rebuild 13.40) | **0.78** (rebuild 1.60) | 12.15 | **5.28** | 61.79 ms | 122.0 | 86% |
+| extract_vocabularies | conformance | 4.39 ms | 17.01 (rebuild 16.82) | **1.09** (rebuild 1.29) | 13.37 | **6.61** | 29.04 ms | 143.0 | 77% |
+| extract_vocabularies | synthetic-large | 12.19 ms | 3.69 (rebuild 4.50) | **1.22** (rebuild 2.07) | 7.95 | **9.18** | 111.96 ms | 23.0 | 96% |
+| extract_cold | core-test-data | 9.07 ms | - | - | 17.60 | **5.18** | 47.01 ms | 122.0 | 81% |
+| extract_cold | conformance | 4.26 ms | - | - | 17.87 | **6.21** | 26.46 ms | 143.0 | 78% |
+| extract_cold | synthetic-large | 14.72 ms | - | - | 7.49 | **5.37** | 79.06 ms | 23.0 | 94% |
+| extract_keep | core-test-data | 11.52 ms | - | - | 12.38 | **4.35** | 50.15 ms | 122.0 | 94% |
+| extract_keep | conformance | 4.55 ms | - | - | 13.87 | **5.64** | 25.63 ms | 143.0 | 80% |
+| extract_keep | synthetic-large | 14.79 ms | - | - | 8.13 | **12.14** | 179.52 ms | 23.0 | 98% |
+
+### Serialisation
+
+| op | set | TS 5.0.0 | x TS crate: pre-F1 | **now** | x TS API: pre-F1 | **now** | TS API now | crossings/item | in-engine |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| from_json | core-test-data | 85.8 us | 0.42 | **0.28** | 2.07 | **0.80** | 68.7 us | 1.0 | 58% |
+| from_json | conformance | 25.1 us | 0.24 | **0.19** | 2.20 | **0.70** | 17.6 us | 1.0 | 51% |
+| from_json | synthetic-large | 20.2 us | 0.64 | **0.63** | 4.39 | **1.71** | 34.6 us | 1.0 | 67% |
+| to_json | core-test-data | 33.6 us | 0.92 | **0.94** | 3.12 | **2.94** | 98.8 us | 1.0 | 65% |
+| to_json | conformance | 7.75 us | 0.75 | **0.76** | 4.75 | **3.69** | 28.6 us | 1.0 | 68% |
+| to_json | synthetic-large | 9.70 us | 1.32 | **1.26** | 5.72 | **6.37** | 61.8 us | 1.0 | 72% |
+
+### Instance creation
+
+| op | set | TS 5.0.0 | x TS crate: pre-F1 | **now** | x TS API: pre-F1 | **now** | TS API now | crossings/item | in-engine |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| new_resource | core-test-data | 6.91 us | - | - | 12.57 | **1.79** | 12.4 us | 4.6 | 32% |
+| new_resource | conformance | 5.37 us | 0.29 | **0.30** | 13.34 | **1.91** | 10.3 us | 3.2 | 32% |
+| new_resource | synthetic-large | 3.18 us | 0.59 | **0.52** | 6.90 | **1.69** | 5.38 us | 3.0 | 33% |
+
+### Validation
+
+| op | set | TS 5.0.0 | x TS crate: pre-F1 | **now** | x TS API: pre-F1 | **now** | TS API now | crossings/item | in-engine |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| validate | core-test-data | 19.0 us | 0.50 | **0.50** | 1.52 | **1.54** | 29.4 us | 1.0 | 45% |
+| validate | conformance | 4.02 us | 0.58 | **0.56** | 2.68 | **2.64** | 10.6 us | 1.0 | 40% |
+| validate | synthetic-large | 6.04 us | 0.95 | **0.61** | 1.92 | **1.27** | 7.68 us | 1.0 | 58% |
+| set_property_value | core-test-data | 2.38 us | 0.73 | **0.66** | 3.55 | **2.08** | 4.94 us | 1.1 | 34% |
+| set_property_value | conformance | 0.60 us | 1.09 | **0.94** | 9.72 | **9.73** | 5.87 us | 1.1 | 25% |
+| set_property_value | synthetic-large | 0.76 us | 1.38 | **1.35** | 4.20 | **3.14** | 2.38 us | 1.0 | 36% |
+| add_array_value | core-test-data | 17.1 us | 0.95 | **0.71** | 9.05 | **2.87** | 49.2 us | 15.7 | 34% |
+| add_array_value | conformance | 1.13 us | 1.15 | **1.17** | 6.93 | **4.50** | 5.09 us | 1.0 | 18% |
+| add_array_value | synthetic-large | 0.91 us | 1.81 | **1.22** | 4.98 | **3.95** | 3.61 us | 1.0 | 42% |
+
+
+## Remaining gaps, ranked (TS API slower than TS 5.0.0)
+
+Every op with a set above 1× TS through the TS API, ranked by its worst set.
+"Engine" is the time inside engine calls in the count run; "boundary/TS" is
+the rest (TS views and logic, encode/decode, GC). The per-set rows, with
+the top bindings and V8 stage splits, are `results/P5-60/tables.md`.
+
+| # | op | × TS API (ctd / conf / syn) | × TS crate | crossings/item | in-engine | dominant cost |
+|---:|---|---|---|---:|---:|---|
+| 1 | get_namespaces_first | 20.5 / 28.2 / 22.1 | - | 1 | 59-95% | engine: `getNamespaces` rebuilds the list after a model change (12 µs on 34-41 files); 3-26 µs once per change. The op also times the harness's epoch bump, which only the Rust side does |
+| 2 | modelfile_new | 14.2 / 21.7 / 27.4 | 0.86-1.42 | 3 | 85-97% | engine: `checkAstShape` is 60-87% of the wall (174 µs conf, 408 µs ctd, 30.7 ms syn per file); off: 3.2-5.0× |
+| 3 | add_model_file | 8.9 / 19.5 / 14.2 | 0.76-1.09 | 4.2-14 | 84-94% | engine: `checkAstShape` 58-81%; off: 2.8-8.0× |
+| 4 | extract_keep | 4.4 / 5.6 / 12.1 | - | 23-143 | 80-98% | engine: `checkAstShape` on the result manager's files, 41-83% (x34 / x41 / x1 per call), then `dcsExtractDecorators` |
+| 5 | set_property_value | 2.1 / 9.7 / 3.1 | 0.66-1.35 | 1.0-1.1 | 25-36% | boundary/TS: ts-core 32-39% (the TS wrapper around the check), glue 7-13%; the engine calls are 23-36%; 2-6 µs |
+| 6 | extract_vocabularies | 5.3 / 6.6 / 9.2 | 0.78-1.22 | 23-143 | 77-96% | engine: `checkAstShape` 41-64%, then `dcsExtractVocabularies` |
+| 7 | extract_decorators | 3.9 / 6.6 / 3.5 | 0.87-1.19 | 23-143 | 74-91% | engine: `checkAstShape` 36-50%, then `dcsExtractDecorators` |
+| 8 | to_json | 2.9 / 3.7 / 6.4 | 0.76-1.26 | 1 | 65-72% | engine: `serializerToJson` (65-72%; 1.9-3.6× its native crate time in WASM), plus encode 20-22% |
+| 9 | extract_cold | 5.2 / 6.2 / 5.4 | - | 23-143 | 78-94% | engine: `checkAstShape` 37-49%; GC 11-48% |
+| 10 | add_cto_model | 3.0 / 4.6 / 3.8 | 0.11-0.17 | 4.2-14 | 41-53% | the TS cto-parser (34-42%, TS on both engines) and `checkAstShape` (23-47%); off: 2.1-3.5× |
+| 11 | add_array_value | 2.9 / 4.5 / 4.0 | 0.71-1.22 | 1-15.7 | 18-42% | boundary/TS: ts-core 22-41%, encode 4-20%, glue 12-27% |
+| 12 | resolve_type_first | 3.0 / 1.8 / 1.5 | - | 1 | 41-70% | mixed, ≤ 1.3 µs: glue 31%, engine 27-30% |
+| 13 | get_type_first | 2.5 / 1.5 / 2.8 | - | 1 | 44-53% | mixed, ≤ 2 µs: views and ts-core 43-50% |
+| 14 | validate | 1.5 / 2.6 / 1.3 | 0.50-0.61 | 1 | 40-58% | boundary/TS: ts-core 34-43% around `validateResourceBinary` |
+| 15 | new_resource | 1.8 / 1.9 / 1.7 | 0.30-0.52 | 3-4.6 | 32-33% | boundary/TS: views 28-30%, ts-core 27-28%, glue 20-24% (`classDeclarationIsKind` x2, `modelFileGetTypeName`) |
+| 16 | dcs_decorate | 1.7 / 1.6 / 1.6 | 0.45-0.55 | 23-143 | 85-98% | engine: `dcsDecorateModels` 54-63%, `checkAstShape` 28-35% |
+| 17 | derives_from | 1.9 / 0.8 / 1.0 | 0.20-0.27 | 1 | 58-77% | engine call, ≤ 2 µs |
+| 18 | from_json | 0.8 / 0.7 / 1.7 | 0.19-0.63 | 1 | 51-67% | engine 62%, encode 26% (synthetic-large only) |
+| 19 | get_namespaces | 0.2 / 0.2 / 2.0 | 0.54-1.25 | 0 | 0% | the memo hit, 0.28 against 0.14 µs (synthetic-large only; noise-level) |
+| 20 | mm_new | 1.46 | 0.00 | 10 | 35% | boundary/TS: views 54%, of which `stageModelFile` 26% and BC-19's JS side 19% (`checkAstShape` in `engine/views.js` stringifies each system AST to compare it with its cached check); off 1.27× |
+| 21 | get_decorators, get_type | 1.14 (syn), 1.13 (conf) | ≤ 0.17 | 0 | 0% | sub-µs, within noise |
+
+At or below TS through the TS API on every set: `get_type` (ctd, syn),
+`resolve_type`, `is_assignable_to`, `get_decorators` (ctd, conf),
+`dcs_validate` (0.65-0.77×), `from_json` (ctd, conf).
+
+## BC-19: default on against `metamodelValidation: false` (TS API, same run)
+
+"checkAstShape" is the in-engine time of that binding per item (count run).
+`new ModelManager()` makes no `checkAstShape` call (the system models' check
+is cached by namespace), but still stringifies each system AST to compare it
+with the cached text: 19% of its V8 profile.
+
+| op | set | TS 5.0.0 | on (default) | off | on - off | on / off | x TS on | x TS off | crossings on / off | checkAstShape us/item |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| mm_new | (system models) | 536.3 us | 783.8 us | 680.0 us | 103.8 us | 1.15 | 1.46 | 1.27 | 10.0 / 10.0 | - |
+| modelfile_new | core-test-data | 50.3 us | 715.3 us | 161.6 us | 553.7 us | 4.43 | 14.21 | 3.21 | 3.0 / 2.0 | 407.8 us |
+| modelfile_new | conformance | 16.1 us | 350.6 us | 80.1 us | 270.4 us | 4.37 | 21.71 | 4.96 | 3.0 / 2.0 | 173.6 us |
+| modelfile_new | synthetic-large | 1.15 ms | 31.54 ms | 4.38 ms | 27.16 ms | 7.20 | 27.42 | 3.81 | 3.0 / 2.0 | 30.74 ms |
+| add_model_file | core-test-data | 90.1 us | 797.6 us | 248.3 us | 549.2 us | 3.21 | 8.86 | 2.76 | 4.3 / 3.3 | 382.1 us |
+| add_model_file | conformance | 27.0 us | 524.8 us | 215.0 us | 309.8 us | 2.44 | 19.45 | 7.97 | 4.2 / 3.2 | 171.0 us |
+| add_model_file | synthetic-large | 2.97 ms | 42.26 ms | 9.93 ms | 32.33 ms | 4.26 | 14.24 | 3.35 | 14.0 / 13.0 | 23.39 ms |
+| add_cto_model | core-test-data | 591.7 us | 1.77 ms | 1.41 ms | 363.7 us | 1.26 | 3.00 | 2.38 | 4.3 / 3.3 | 419.9 us |
+| add_cto_model | conformance | 173.3 us | 790.2 us | 604.5 us | 185.7 us | 1.31 | 4.56 | 3.49 | 4.2 / 3.2 | 118.1 us |
+| add_cto_model | synthetic-large | 26.20 ms | 99.79 ms | 54.34 ms | 45.45 ms | 1.84 | 3.81 | 2.07 | 14.0 / 13.0 | 37.95 ms |
+
+- **Load.** The check costs +270 µs per file on conformance, +554 µs on
+  core-test-data and +27 ms on the one synthetic-large file: `new ModelFile`
+  is 4.4-7.2× slower with it on, `addModelFile` 2.4-4.3×, `addCTOModel`
+  1.3-1.8× (the TS parser dominates there). In × TS, `new ModelFile` goes
+  from 3.2-5.0× (off) to 14-27× (on).
+- **Inside the engine** the check costs more than the rest of the load:
+  on synthetic-large 23-31 ms against 2.5-3.3 ms for `stageModelFileWithHeader`
+  and 1.3 ms for `validateAndCommitStagedModelFile`. It is the generic
+  metamodel instance check (`validate_ast`, strict preset) over a
+  `serde_json::Value` of the whole AST.
+- **Beyond load.** The DCS result managers (`adoptStagedModels` in
+  `engine/views.ts`) build their ModelFiles through the same constructor,
+  with default options, so every `decorateModels` and `extract*` call checks
+  every result file again (x34 on core-test-data, x41 on conformance), on
+  ASTs the engine has itself just written. That is 28-35% of `decorateModels`
+  and 36-83% of the `extract*` wall time; `metamodelValidation: false` on the
+  input manager does not reach it.
+
+## Web bundle size (P5-39 method, same head)
+
+`p560-bundle.mjs`: E1 introspect, E2 validate, E3 parse CTO and resolve,
+the same app code for both engines; esbuild bundle, esm, browser, minify,
+tree shaking, `NODE_ENV=production`, es2022; the engine build from
+`dist/esm-browser` with the bundler stand-in of
+`e2e/tests/support/engine-bundler.ts`. Every bundle was run in Node and its
+output matched v5's. KB = 1000 B; gzip -9, brotli q11 (`results/P5-60/bundle/`).
+
+| entry | v5.0.0 raw / gz / br | engine raw / gz / br | engine × v5 (raw / gz / br) |
+|---|---|---|---|
+| E1 introspect, `keepNames` | 387.9 / 94.3 / 67.7 | 4,483.7 / 1,482.6 / 959.6 | 11.6 / 15.7 / 14.2 |
+| E2 validate, `keepNames` | 388.0 / 94.4 / 67.7 | 4,483.8 / 1,482.6 / 959.7 | 11.6 / 15.7 / 14.2 |
+| E3 parse and resolve, `keepNames` | 386.2 / 94.2 / 67.5 | 4,482.0 / 1,482.4 / 959.1 | 11.6 / 15.7 / 14.2 |
+| E1, no `keepNames` | 371.7 / 89.5 / 63.9 | 4,456.4 / 1,474.9 / 953.5 | 12.0 / 16.5 / 14.9 |
+
+| part | raw | gzip | brotli |
+|---|---:|---:|---:|
+| `.wasm` (O3, `wasm-opt -O3`) | 2,950.1 | 945.1 | 611.9 |
+| the same as base64 | 3,933.4 | 1,353.9 | 870.4 |
+| `concerto-engine.mjs` (glue + base64) | 3,934.3 | 1,354.7 | 871.1 |
+| the engine bundle's JS without the engine package (E1, `keepNames`) | 491.4 | 118.9 | 79.3 |
+| `concerto-engine.cjs` (Node) | 4,124.0 | - | - |
+
+Against P5-39 (concerto-rust `840fe30`, esbuild 0.25.12): E1 was 4,551.6 /
+1,485.3 / 967.8, so -1.5% raw, -0.2% gzip, -0.8% brotli; the `.wasm` was
+2,994.7 / 941.5 / 611.4 (-44.6 KB raw, +3.6 KB gzip). P5-39's size wins
+(P5-44 to P5-47) are still held for the maintainer's decision, so nothing
+moved the size materially. New: `keepNames` is no longer required (P5-43):
+the bundles without it run and give v5's output, saving 27 KB raw / 8 KB
+gzip.
+
+## Reproducing
+
+```sh
+# concerto-rust worktrees (now and before), each with its own CARGO_TARGET_DIR:
+(cd concerto-wasm && npm ci && PATH=$PWD/node_modules/.bin:$PATH sh build.sh)
+(cd benches && CONCERTO_REPO=<concerto checkout> cargo bench --no-run --bench p515_sweep)
+# concerto worktrees: npm ci, build:level0, the concerto-cto and concerto-core
+# builds, build:level2; migration/oracle/reference: npm ci. Then, from the
+# now concerto checkout, with CONCERTO_ENGINE_MODULE, BEFORE_ENGINE,
+# BEFORE_CORE_DIST, NOW_TARGET, BEFORE_TARGET, CONCERTO_REPO and
+P560_CRATE_FILTER='^p515/([a-mo-z]|new_resource/(conformance|synthetic-large))'
+sh migration/bench/p560-run.sh profiles <out> <now bench bin> <before bench bin>
+sh migration/bench/p560-run.sh timed <out> <now bench bin> <before bench bin>
+node migration/bench/p560-table.mjs <out>
+node migration/bench/p560-bundle.mjs <bundle out dir>
+```
+
+No fuzz, per the milestone-only policy; no oracle run, since no engine code
+changed.
+
 # P5-61 (BR-09): the typed AST read as the only model loader, crossings and WASM size (2026-09-30)
 
 Task P5-61 (accordproject/concerto-rust#393) removes the structural checks
