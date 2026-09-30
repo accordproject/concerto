@@ -247,9 +247,16 @@ concept Sub extends C {}`),
     },
     {
         id: 'DECL-VAL-015',
-        covers: 'Decorator.validate/handleError: an undeclared decorator, missingDecorator=error',
+        covers: 'Decorator.validate/handleError: an undeclared decorator, missingDecorator=error (one file suffix, BC-14)',
         run: validateDeclarations(`${T}\n@Nope concept C {}`, { decoratorValidation: { missingDecorator: 'error', invalidDecorator: 'error' } }),
         expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: 'Undeclared type "Nope" in "org.acme.p535.t@1.0.0.C". File \'x.cto\': '
+            }
+        },
+        // v5.0.0 wrapped the caught exception again (DV-016).
+        reference: {
             throws: {
                 name: 'IllegalModelException',
                 message: 'IllegalModelException: Undeclared type "Nope" in "org.acme.p535.t@1.0.0.C". File \'x.cto\':  File \'x.cto\': '
@@ -258,12 +265,19 @@ concept Sub extends C {}`),
     },
     {
         id: 'DECL-VAL-016',
-        covers: 'Decorator.validate/handleError: a declared decorator with a bad argument, invalidDecorator=error',
+        covers: 'Decorator.validate/handleError: a declared decorator with a bad argument, invalidDecorator=error (one file suffix, BC-14)',
         run: validateDeclarations(`${T}
 import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator { o Boolean hidden optional }
 @Hide("yes") concept C {}`, { decoratorValidation: { missingDecorator: 'error', invalidDecorator: 'error' } }),
         expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: 'Decorator Hide has invalid decorator argument. Expected boolean. Found string, with value "yes" File \'x.cto\': '
+            }
+        },
+        // v5.0.0 wrapped the caught exception again (DV-016).
+        reference: {
             throws: {
                 name: 'IllegalModelException',
                 message: 'IllegalModelException: Decorator Hide has invalid decorator argument. Expected boolean. Found string, with value "yes" File \'x.cto\':  File \'x.cto\': '

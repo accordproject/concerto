@@ -118,7 +118,15 @@ class Decorator {
     handleError(level: string | undefined, err: string | Error): void {
         Logger.dispatch(level as string, err);
         if (level === 'error') {
-            throw new IllegalModelException(err, this.getParent().getModelFile(), this.ast.location);
+            // BC-14 (R1): a caught IllegalModelException already names its
+            // file, so it is thrown as it is, and a caught Error gives its
+            // message. TS 5.0.0 wrapped the Error itself, so the message
+            // embedded 'IllegalModelException: ' and the file suffix twice.
+            if (err instanceof IllegalModelException) {
+                throw err;
+            }
+            const message = err instanceof Error ? err.message : err;
+            throw new IllegalModelException(message, this.getParent().getModelFile(), this.ast.location);
         }
     }
 

@@ -368,7 +368,10 @@ function declarationIsValidIdentifier(view: any): boolean {
         entry.owner = view;
         return true;
     }
-    return rust!.modelUtilIsValidIdentifier(view.ast.name);
+    // BC-01 (R1) changed only `ModelUtil.isValidIdentifier`, which now answers
+    // false for a non-string. `Declaration.process` keeps testing
+    // `String(this.ast.name)`, as TS 5.0.0's `ID_REGEX.test` did.
+    return rust!.modelUtilIsValidIdentifier(String(view.ast.name));
 }
 
 /**
