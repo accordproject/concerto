@@ -114,6 +114,54 @@ function shape(message) {
 }
 
 /**
+ * P5-61: what running `fn` did: `'loaded'` when it returned, `'error'` when
+ * it threw an error, or `'trap'` when the error is a WebAssembly trap
+ * (`WebAssembly.RuntimeError`, such as `unreachable`). With the shape check
+ * off, the class and message of the error are unspecified
+ * (`metamodelValidation`'s docs), so only this is compared.
+ * @param {object} core the core under test
+ * @param {Function} fn the load
+ * @returns {string} `'loaded'`, `'error'` or `'trap'`
+ */
+function noTrap(core, fn) {
+    try {
+        fn();
+        return 'loaded';
+    } catch (e) {
+        return e instanceof WebAssembly.RuntimeError ? 'trap' : 'error';
+    }
+}
+
+/**
+ * Malformed model ASTs, each one the engine's typed read cannot read
+ * (P5-61), for the opt-out checks.
+ * @param {string} ns the namespace
+ * @returns {object[]} the ASTs
+ */
+function unreadable(ns) {
+    const decl = (extra) => model(ns, [GOOD], extra);
+    return [
+        Object.assign(model(ns, [GOOD]), { decorators: 5 }),
+        Object.assign(model(ns, [GOOD]), { decorators: 'x' }),
+        model(ns, [prop(`${MM}.StringProperty`, 'id', { decorators: [null] })]),
+        decl({ name: 7 }),
+        decl({ properties: 'x' }),
+        decl({ superType: { $class: `${MM}.TypeIdentifier`, name: null } }),
+        model(ns, [prop(`${MM}.RelationshipProperty`, 'r')]),
+        model(ns, [prop(`${MM}.IntegerProperty`, 'n', { validator: { $class: `${MM}.IntegerDomainValidator`, lower: '0' } })]),
+        Object.assign(model(ns, []), {
+            declarations: [{ $class: `${MM}.MapDeclaration`, name: 'M', key: 5, value: null }],
+        }),
+        Object.assign(model(ns, []), { declarations: 'x' }),
+        // Since P5-61's review: an unknown key, a keyless `identified` and a
+        // validator with no `$class`, which the loader used to read.
+        decl({ undeclared: 1 }),
+        decl({ identified: true }),
+        model(ns, [prop(`${MM}.StringProperty`, 'id', { validator: { pattern: 'a', flags: '' } })]),
+    ];
+}
+
+/**
  * The namespaces a manager holds after loading `ns` (the system
  * namespaces are not listed).
  * @param {string} ns the namespace
@@ -138,8 +186,43 @@ module.exports = [
         id: 'BC19-002',
         covers: 'BC-19: an `identified` of the wrong shape (T2a) is rejected at load',
         run: (core) => add(core, model('org.acme.bc19.b@1.0.0', [GOOD], { identified: 'yes' })),
-        expect: shape('Unexpected properties for type concerto.metamodel@1.0.0.Identified: 0, 1, 2'),
+        expect: rejected('Invalid identified. Expected an object with a $class. Found "yes" '),
         reference: loaded('org.acme.bc19.b@1.0.0'),
+    },
+    {
+        id: 'BC19-005',
+        covers: 'BC-19 (P5-61): a keyless `identified` or validator value, or a validator with no `$class`, which the metamodel check alone accepts, is rejected at load',
+        run: (core) => [
+            [{ identified: true }, []],
+            [{ identified: {} }, []],
+            [{}, [prop(`${MM}.StringProperty`, 'p', { validator: { pattern: 'a', flags: '' } })]],
+            [{}, [prop(`${MM}.StringProperty`, 'p', { lengthValidator: 0 })]],
+            [{}, [prop(`${MM}.StringProperty`, 'p', { isArray: true, sizeValidator: [] })]],
+        ].map(([extra, properties], i) => {
+            try {
+                return add(core, model(`org.acme.bc19.e${i}@1.0.0`, [GOOD, ...properties], extra));
+            } catch (e) {
+                return `${e.constructor.name}: ${e.message}`;
+            }
+        }),
+        expect: {
+            ok: [
+                'IllegalModelException: Invalid identified. Expected an object with a $class. Found true ',
+                'IllegalModelException: Invalid identified. Expected an object with a $class. Found {} ',
+                'IllegalModelException: Invalid validator. Expected an object with a $class. Found {"pattern":"a","flags":""} ',
+                'IllegalModelException: Invalid lengthValidator. Expected an object with a $class. Found 0 ',
+                'IllegalModelException: Invalid sizeValidator. Expected an object with a $class. Found [] ',
+            ],
+        },
+        reference: {
+            ok: [
+                loaded('org.acme.bc19.e0@1.0.0').ok,
+                loaded('org.acme.bc19.e1@1.0.0').ok,
+                loaded('org.acme.bc19.e2@1.0.0').ok,
+                loaded('org.acme.bc19.e3@1.0.0').ok,
+                'BaseException: Validator error for field `p`. org.acme.bc19.e4@1.0.0.C.p: Invalid collection size, minSize and/or maxSize must be specified.',
+            ],
+        },
     },
     {
         id: 'BC19-003',
@@ -254,9 +337,10 @@ module.exports = [
     // ---- the option ---------------------------------------------------
     {
         id: 'BC19-OPT-001',
-        covers: 'BC-19 opt-out: metamodelValidation false restores the lenient load (a number decorators value loads)',
-        run: (core) => add(core, Object.assign(model('org.acme.bc19.opt@1.0.0', [GOOD]), { decorators: 5 }), { metamodelValidation: false }),
-        expect: loaded('org.acme.bc19.opt@1.0.0'),
+        covers: 'BC-19 opt-out (P5-61): with metamodelValidation false, a number decorators value is still an error at load, not a trap (v5.0.0 loaded it)',
+        run: (core) => noTrap(core, () => add(core, Object.assign(model('org.acme.bc19.opt@1.0.0', [GOOD]), { decorators: 5 }), { metamodelValidation: false })),
+        expect: { ok: 'error' },
+        reference: { ok: 'loaded' },
     },
     {
         id: 'BC19-OPT-002',
@@ -290,6 +374,51 @@ module.exports = [
             return [mf.getType('Bar'), mf.getType('String')];
         },
         expect: { ok: [null, 'String'] },
+    },
+    // ---- P5-61: the opt-out never traps ----------------------------
+    {
+        id: 'P561-OPT-001',
+        covers: 'P5-61: with metamodelValidation false, new ModelFile of an AST the engine cannot read throws an error, never a WASM trap',
+        run: (core) => unreadable('org.acme.p561.a@1.0.0').map((ast) => noTrap(core, () => {
+            const mm = new core.ModelManager({ metamodelValidation: false });
+            new core.ModelFile(mm, ast, undefined, 'x.json');
+        })),
+        expect: { ok: Array(13).fill('error') },
+        reference: { ok: ['loaded', 'loaded', 'error', 'error', 'error', 'loaded', 'error', 'loaded', 'error', 'error', 'loaded', 'loaded', 'loaded'] },
+    },
+    {
+        id: 'P561-OPT-002',
+        covers: 'P5-61: with metamodelValidation false, addModel and fromAst of an AST the engine cannot read throw an error, never a WASM trap, and the manager still loads a well-formed model afterwards',
+        run: (core) => {
+            const mm = new core.BaseModelManager({ metamodelValidation: false });
+            const results = unreadable('org.acme.p561.b@1.0.0').map((ast) => [
+                noTrap(core, () => mm.addModel(ast, undefined, 'x.json')),
+                noTrap(core, () => mm.fromAst({ $class: `${MM}.Models`, models: [ast] })),
+            ]);
+            mm.addModel(model('org.acme.p561.good@1.0.0', [GOOD]), undefined, 'good.json');
+            return [results, mm.getNamespaces()];
+        },
+        expect: { ok: [
+            Array(13).fill(['error', 'error']),
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p561.good@1.0.0'],
+        ] },
+        reference: { ok: [
+            [['loaded', 'loaded'], ['error', 'loaded'], ['error', 'error'], ['error', 'error'], ['error', 'error'],
+                ['loaded', 'loaded'], ['error', 'error'], ['loaded', 'loaded'], ['error', 'error'], ['error', 'error'],
+                ['loaded', 'loaded'], ['error', 'loaded'], ['error', 'loaded']],
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p561.b@1.0.0', 'org.acme.p561.good@1.0.0'],
+        ] },
+    },
+    {
+        id: 'P561-OPT-003',
+        covers: 'P5-61: with metamodelValidation false and a decorator factory (the eager walk), new ModelFile of an AST the engine cannot read still throws an error, never a WASM trap',
+        run: (core) => unreadable('org.acme.p561.c@1.0.0').map((ast) => noTrap(core, () => {
+            const mm = new core.ModelManager({ metamodelValidation: false });
+            mm.addDecoratorFactory({ newDecorator: () => null });
+            new core.ModelFile(mm, ast, undefined, 'x.json');
+        })),
+        expect: { ok: Array(13).fill('error') },
+        reference: { ok: ['loaded', 'loaded', 'error', 'error', 'error', 'loaded', 'error', 'loaded', 'error', 'error', 'loaded', 'loaded', 'loaded'] },
     },
     {
         id: 'BC19-CTO-001',

@@ -74,9 +74,10 @@ declare class BaseModelManager {
      * load: fromAst, addModel, addCTOModel, addModelFiles, updateModelFile), and a malformed AST is an
      * IllegalModelException (BC-19, on by default since R1). When true, addModelFile also runs
      * validateAst on each new file, as before. false is an escape hatch for trusted input only: the
-     * shape check is skipped, and a malformed AST then gets unspecified behaviour. Where loading
-     * fails it throws an error, never a WASM trap or a process crash, but the error's class and
-     * message are not guaranteed, and code downstream of the load may assume a well-formed AST.
+     * shape check is skipped, and code downstream of the load may assume a well-formed AST. A
+     * malformed AST still throws an error when it is loaded, never a WASM trap or a process crash,
+     * unless the loader can read it all the same (a node's $class naming the wrong type, say); the
+     * error's class and message are unspecified.
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
     * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
@@ -4529,10 +4530,12 @@ export interface ModelManagerOptions {
      * ModelFile whose AST does not have the Concerto metamodel's shape is
      * rejected with an IllegalModelException when it is constructed. `true`
      * also runs `validateAst` in `addModelFile`, as before. `false` is an
-     * escape hatch for trusted input only: the shape check is skipped, and a
-     * malformed AST then gets unspecified behaviour. Where loading fails it
-     * throws an error, never a WASM trap or a process crash, but the error's
-     * class and message are not guaranteed.
+     * escape hatch for trusted input only: the shape check is skipped, and
+     * code downstream of the load may assume a well-formed AST. A malformed
+     * AST still throws an error when it is loaded, never a WASM trap or a
+     * process crash, unless the loader can read it all the same (a node's
+     * `$class` naming the wrong type, say); the error's class and message
+     * are unspecified.
      */
     metamodelValidation?: boolean;
     addMetamodel?: boolean;

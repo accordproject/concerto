@@ -65,6 +65,13 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
         if (p.errorType) {
             err.errorType = p.errorType;
         }
+        // P5-61: an AST the engine's typed read cannot read
+        // (`modelfile-load-unreadable`), which the ModelFile constructor
+        // throws when the shape check is off (engine/views.ts
+        // `stageModelFile`).
+        if (p.code === 'modelfile-load-unreadable') {
+            (err as unknown as { unreadableAst?: boolean }).unreadableAst = true;
+        }
         return err;
     },
     // `TypeNotFoundException(typeName, message)`: `typeName` travels in

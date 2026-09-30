@@ -146,6 +146,8 @@ test('an intended breaking change (DV-021, BC-19 at load) is expected whatever T
         'Invalid decorators. Expected array. Found "x"',
         'Invalid name. Expected a string. Found 1e308',
         'Invalid super type name. Expected a non-empty string. Found ""',
+        'Invalid identified. Expected an object with a $class. Found true',
+        'Invalid validator. Expected an object with a $class. Found {"pattern":"a","flags":""}',
     ];
     // (TS's own IllegalModelException agrees on the class: not a divergence.)
     const tsOutcomes = [OK, err('TypeError', "Cannot read properties of undefined (reading 'name')")];

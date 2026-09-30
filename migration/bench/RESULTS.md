@@ -1,3 +1,42 @@
+# P5-61 (BR-09): the typed AST read as the only model loader, crossings and WASM size (2026-09-30)
+
+Task P5-61 (accordproject/concerto-rust#393) removes the structural checks
+BC-19 made redundant: the engine's model loader is the strict typed read
+alone, with no `serde_json::Value` fallback (BR-09). With
+`metamodelValidation: false`, the `ModelFile` constructor now throws the
+engine's error for an AST the typed read cannot read, instead of handing it
+to the eager TS walk; for a manager with decorator factories (which never
+stages the file) that costs one read of the AST, so two more crossings
+(`stageModelFile` and `dropStagedModelFile`). Every other path makes the
+same calls as before.
+
+**Counts only, no timings** (local machine; the issue asks for timings on
+cloud-3 only, P5-60 #392). Counted by `results/P5-61/count-load.cjs` with
+the P5-15 counting engine (`lib/p515-engine-counter.cjs`); "off" is
+`metamodelValidation: false`, "on" the R1 default.
+
+| | |
+|---|---|
+| Machine | Local macOS (Darwin 22.6), Node v22.23.2; counts do not depend on the machine |
+| Before | the integration heads, concerto `dd006d621` and concerto-rust `3a4de23` |
+| After | the P5-61 branches |
+| Raw data | `results/P5-61/crossings.txt` |
+
+| operation | off, before | off, after | on, before | on, after |
+|---|---:|---:|---:|---:|
+| `new ModelManager()` | 10 | 10 | 10 | 10 |
+| `addCTOModel`, one file | 3 | 3 | 4 | 4 |
+| `new ModelFile` + `addModelFile`, one file | 3 | 3 | 4 | 4 |
+| `addModelFiles`, two files | 7 | 7 | 9 | 9 |
+| `updateModelFile` (string) | 5 | 5 | 6 | 6 |
+| `fromAst`, two models | 16 | 16 | 18 | 18 |
+| `new ModelFile` + `addModelFile`, one file, a decorator factory | 5 | 7 | 6 | 6 |
+
+The optimised engine (`concerto-wasm/build.sh`, wasm-opt 132) is 2,833,833
+bytes after and 2,893,582 before: 59,749 bytes (2.1%) smaller (after the
+review fixes: the strict read of `identified` and the validators, and the
+unknown-key refusal).
+
 # P5-55 (T1, F-A1): DCS operations on the source ModelManager's rustHandle (2026-09-30)
 
 Task P5-55 (accordproject/concerto-rust#376, T1/F-A1 from the P5-42 report

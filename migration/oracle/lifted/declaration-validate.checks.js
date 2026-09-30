@@ -351,21 +351,20 @@ event Event {}`, { dangerouslyAllowReservedSystemTypeNamesInUserModels: true }),
     },
     {
         id: 'DECL-VAL-025',
-        covers: 'ClassDeclaration.process: properties that are not an array (with the BC-19 opt-out, which v5.0.0 ignores; strict-ast.checks.js covers the default)',
+        covers: 'ClassDeclaration.process: properties that are not an array are an IllegalModelException at load (with the BC-19 opt-out, which v5.0.0 ignores; strict-ast.checks.js covers the default). P5-61: with the opt-out only the class is specified; the engine\'s typed read now rejects the AST at construction',
         run: (core) => {
             const mm = new core.ModelManager({ metamodelValidation: false });
             const ast = JSON.parse(JSON.stringify(new core.ModelManager().addCTOModel(`${T}\nconcept C { o String a }`, 'x.cto', true).getAst()));
             ast.declarations[0].properties = {};
-            const mf = new core.ModelFile(mm, ast, undefined, 'x.cto');
-            mf.getAllDeclarations().forEach((d) => d.validate());
-            return 'valid';
-        },
-        expect: {
-            throws: {
-                name: 'IllegalModelException',
-                message: 'Properties of Class "C" has to be defined. File \'x.cto\': '
+            try {
+                const mf = new core.ModelFile(mm, ast, undefined, 'x.cto');
+                mf.getAllDeclarations().forEach((d) => d.validate());
+                return 'valid';
+            } catch (e) {
+                return e.constructor.name;
             }
         },
+        expect: { ok: 'IllegalModelException' },
     },
     {
         id: 'BC47-001',

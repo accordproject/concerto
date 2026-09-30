@@ -50,6 +50,16 @@
  * the opt-out, `metamodelValidation: false`, where the lazy path still
  * relies on Rust's staging rejecting what TS construction rejects. v5.0.0
  * ignores a false `metamodelValidation`, so `expect` is unchanged.
+ *
+ * P5-61 (BR-09, maintainer decision 2026-09-30): with the opt-out, a
+ * malformed AST still throws at construction, but the error's class and
+ * message are unspecified; the engine's typed read, the only model loader,
+ * rejects each of these ASTs with its own `IllegalModelException`
+ * (`modelfile-load-unreadable`). So the checks compare what construction
+ * did — 'constructed', 'added' or 'loaded', or the class of the error it
+ * threw — not the message. BC-25's guarantee, a rejection at construction
+ * rather than at the first read, is unchanged, and v5.0.0 gives the same
+ * outcome.
  */
 
 const MM = 'concerto.metamodel@1.0.0';
@@ -113,17 +123,33 @@ function prop($class, name, extra = {}) {
 const TYPE_T = { type: { $class: `${MM}.TypeIdentifier`, name: 'C' } };
 
 /**
+ * What `fn` returned, or the class of the error it threw (P5-61: with the
+ * opt-out, only the class of a load error is specified).
+ * @param {Function} fn the load
+ * @returns {string} its result, or the error's class name
+ */
+function classOf(fn) {
+    try {
+        return fn();
+    } catch (e) {
+        return e.constructor.name;
+    }
+}
+
+/**
  * Constructs a `ModelFile` from `ast` in a fresh `ModelManager` (with the
  * BC-19 opt-out).
  * @param {object} core the core under test
  * @param {object} ast the model AST
  * @param {string} [fileName] the file name
- * @returns {string} 'constructed' (construction that fails throws)
+ * @returns {string} 'constructed', or the class of the error construction threw
  */
 function construct(core, ast, fileName) {
-    const mm = new core.ModelManager({ metamodelValidation: false });
-    new core.ModelFile(mm, ast, undefined, fileName);
-    return 'constructed';
+    return classOf(() => {
+        const mm = new core.ModelManager({ metamodelValidation: false });
+        new core.ModelFile(mm, ast, undefined, fileName);
+        return 'constructed';
+    });
 }
 
 /**
@@ -132,35 +158,36 @@ function construct(core, ast, fileName) {
  * @param {object} core the core under test
  * @param {object} ast the model AST
  * @param {string} fileName the file name
- * @returns {string} 'added'
+ * @returns {string} 'added', or the class of the error it threw
  */
 function add(core, ast, fileName) {
-    const mm = new core.ModelManager({ metamodelValidation: false });
-    mm.addModelFile(new core.ModelFile(mm, ast, undefined, fileName), undefined, fileName);
-    return 'added';
+    return classOf(() => {
+        const mm = new core.ModelManager({ metamodelValidation: false });
+        mm.addModelFile(new core.ModelFile(mm, ast, undefined, fileName), undefined, fileName);
+        return 'added';
+    });
 }
 
 /**
  * `ModelManager.fromAst` of `models` (with the BC-19 opt-out).
  * @param {object} core the core under test
  * @param {object[]} models the model ASTs
- * @returns {string} 'loaded'
+ * @returns {string} 'loaded', or the class of the error it threw
  */
 function fromAst(core, models) {
-    const mm = new core.ModelManager({ metamodelValidation: false });
-    mm.fromAst({ $class: `${MM}.Models`, models });
-    return 'loaded';
+    return classOf(() => {
+        const mm = new core.ModelManager({ metamodelValidation: false });
+        mm.fromAst({ $class: `${MM}.Models`, models });
+        return 'loaded';
+    });
 }
 
 /**
- * The reference's error for an unrecognised property `$class` in a model
- * file with no file name and a class with no location.
- * @param {string} $class the `$class`
- * @returns {object} the expected outcome
+ * The outcome for an unrecognised property `$class`: an
+ * IllegalModelException at construction (P5-61: its message is unspecified
+ * with the opt-out).
  */
-function unrecognised($class) {
-    return { throws: { name: 'IllegalModelException', message: `Unrecognised model element "${$class}". ` } };
-}
+const UNRECOGNISED = { ok: 'IllegalModelException' };
 
 const GOOD = prop(`${MM}.StringProperty`, 'id');
 
@@ -187,16 +214,10 @@ function mapModel(ns, keyClass, valueClass) {
  * @param {object} core the core under test
  * @param {string} ns the namespace
  * @param {Array<Array<string>>} pairs the key and value classes
- * @returns {string[]} 'constructed', or the error each construction threw
+ * @returns {string[]} 'constructed', or the class of the error each construction threw
  */
 function constructMaps(core, ns, pairs) {
-    return pairs.map(([keyClass, valueClass]) => {
-        try {
-            return construct(core, mapModel(ns, keyClass, valueClass), 'models/map.json');
-        } catch (e) {
-            return `${e.constructor.name}: ${e.message}`;
-        }
-    });
+    return pairs.map(([keyClass, valueClass]) => construct(core, mapModel(ns, keyClass, valueClass), 'models/map.json'));
 }
 
 const NOT_METAMODEL = (kind) => [kind, `foo.${kind}`, `${MM.replace('1.0.0', '1.0.1')}.${kind}`, doubled(kind)];
@@ -207,35 +228,25 @@ module.exports = [
         id: 'LAZY-STAGE-001',
         covers: 'cluster 1 (addModelFile, 121): a doubled IntegerProperty class, with the class location',
         run: (core) => add(core, model('org.acme.lazy.s1@1.0.0', [GOOD, prop(doubled('IntegerProperty'), 'age')], { location: range(3, 7) }), 'models/s1.json'),
-        expect: {
-            throws: {
-                name: 'IllegalModelException',
-                message: `Unrecognised model element "${doubled('IntegerProperty')}". File 'models/s1.json': line 3 column 1, to line 7 column 2. `,
-            },
-        },
+        expect: { ok: 'IllegalModelException' },
     },
     {
         id: 'LAZY-STAGE-002',
         covers: 'cluster 2 (fromAst, 100): a doubled StringProperty class',
         run: (core) => fromAst(core, [model('org.acme.lazy.s2@1.0.0', [prop(doubled('StringProperty'), 's')])]),
-        expect: unrecognised(doubled('StringProperty')),
+        expect: UNRECOGNISED,
     },
     {
         id: 'LAZY-STAGE-003',
         covers: 'cluster 3 (addModelFile, 3): a doubled EnumProperty class in a class with no location',
         run: (core) => add(core, model('org.acme.lazy.s3@1.0.0', [prop(doubled('EnumProperty'), 'e')]), 'models/s3.json'),
-        expect: {
-            throws: {
-                name: 'IllegalModelException',
-                message: `Unrecognised model element "${doubled('EnumProperty')}". File 'models/s3.json': `,
-            },
-        },
+        expect: { ok: 'IllegalModelException' },
     },
     {
         id: 'LAZY-STAGE-004',
         covers: 'cluster 10 (addModelFile, 1): a doubled RelationshipProperty class',
         run: (core) => construct(core, model('org.acme.lazy.s4@1.0.0', [GOOD, prop(doubled('RelationshipProperty'), 'r', TYPE_T)])),
-        expect: unrecognised(doubled('RelationshipProperty')),
+        expect: UNRECOGNISED,
     },
     {
         id: 'LAZY-STAGE-005',
@@ -244,12 +255,12 @@ module.exports = [
             try {
                 return construct(core, model('org.acme.lazy.s5@1.0.0', [prop(doubled(kind), 'p', kind === 'ObjectProperty' ? TYPE_T : {})]));
             } catch (e) {
-                return `${e.constructor.name}: ${e.message}`;
+                return e.constructor.name;
             }
         }),
         expect: {
             ok: ['BooleanProperty', 'LongProperty', 'DoubleProperty', 'DateTimeProperty', 'ObjectProperty']
-                .map((kind) => `IllegalModelException: Unrecognised model element "${doubled(kind)}". `),
+                .map(() => 'IllegalModelException'),
         },
     },
     {
@@ -259,12 +270,12 @@ module.exports = [
             try {
                 return construct(core, model('org.acme.lazy.s6@1.0.0', [prop($class, 's')]));
             } catch (e) {
-                return `${e.constructor.name}: ${e.message}`;
+                return e.constructor.name;
             }
         }),
         expect: {
             ok: ['StringProperty', 'foo.StringProperty', 'concerto.metamodel@1.0.1.StringProperty']
-                .map(($class) => `IllegalModelException: Unrecognised model element "${$class}". `),
+                .map(() => 'IllegalModelException'),
         },
     },
     {
@@ -274,14 +285,11 @@ module.exports = [
             try {
                 return construct(core, model('org.acme.lazy.s7@1.0.0', [prop(doubled('StringProperty'), 's', extra)]));
             } catch (e) {
-                return `${e.constructor.name}: ${e.message}`;
+                return e.constructor.name;
             }
         }),
         expect: {
-            ok: [
-                `IllegalModelException: Unrecognised model element "${doubled('StringProperty')}". `,
-                `IllegalModelException: Unrecognised model element "${doubled('StringProperty')}". `,
-            ],
+            ok: ['IllegalModelException', 'IllegalModelException'],
         },
     },
     {
@@ -292,12 +300,7 @@ module.exports = [
             location.end.line = -9007199254740985;
             return add(core, model('org.acme.lazy.s8@1.0.0', [prop(doubled('StringProperty'), 's')], { location }), 'models/s8.json');
         },
-        expect: {
-            throws: {
-                name: 'IllegalModelException',
-                message: `Unrecognised model element "${doubled('StringProperty')}". File 'models/s8.json': line 3 column 1, to line -9007199254740985 column 2. `,
-            },
-        },
+        expect: { ok: 'IllegalModelException' },
     },
     // ---- fromAst: the first model's error comes before the second's ---
     // The 14 lazy-only divergences where Rust threw too, but from a later
@@ -317,11 +320,11 @@ module.exports = [
                     Object.assign(model('org.acme.lazy.s9b@1.0.0', [GOOD]), { imports }),
                 ]);
             } catch (e) {
-                return `${e.constructor.name}: ${e.message}`;
+                return e.constructor.name;
             }
         }),
         expect: {
-            ok: [0, 1, 2].map(() => `IllegalModelException: Unrecognised model element "${doubled('StringProperty')}". `),
+            ok: [0, 1, 2].map(() => 'IllegalModelException'),
         },
     },
     {
@@ -331,13 +334,13 @@ module.exports = [
             model('org.acme.lazy.s10@1.0.0', [prop(doubled('DoubleProperty'), 'range')]),
             model('org.acme.lazy.s10@1.0.0', [GOOD]),
         ]),
-        expect: unrecognised(doubled('DoubleProperty')),
+        expect: UNRECOGNISED,
     },
     {
         id: 'LAZY-STAGE-011',
         covers: 'cluster 11 (fromAst, 1): a later model that is not an AST',
         run: (core) => fromAst(core, [model('org.acme.lazy.s11@1.0.0', [prop(doubled('StringProperty'), 's')]), false]),
-        expect: unrecognised(doubled('StringProperty')),
+        expect: UNRECOGNISED,
     },
     // ---- map key and value $class --------------------------------------
     {
@@ -347,7 +350,7 @@ module.exports = [
             NOT_METAMODEL('StringMapKeyType').map((keyClass) => [keyClass, `${MM}.StringMapValueType`])),
         expect: {
             ok: NOT_METAMODEL('StringMapKeyType')
-                .map(() => 'IllegalModelException: MapDeclaration must contain valid MapKeyType  M File \'models/map.json\': '),
+                .map(() => 'IllegalModelException'),
         },
     },
     {
@@ -357,7 +360,7 @@ module.exports = [
             NOT_METAMODEL('StringMapValueType').map((valueClass) => [`${MM}.StringMapKeyType`, valueClass])),
         expect: {
             ok: NOT_METAMODEL('StringMapValueType')
-                .map(() => 'IllegalModelException: MapDeclaration must contain valid MapValueType, for MapDeclaration M File \'models/map.json\': '),
+                .map(() => 'IllegalModelException'),
         },
     },
     {
