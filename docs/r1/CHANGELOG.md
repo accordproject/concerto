@@ -20,8 +20,9 @@ at concerto `09295b075` and concerto-rust `fa4ee0b` (2026-09-30). The
   classes, same exports, same type declarations, apart from the removals listed
   below.
 - **Clearer errors.** Several inputs that crashed the JavaScript runtime in 5.x
-  (`TypeError`, `RangeError`, out of memory) now throw a Concerto exception
-  that names the problem (BC-06, BC-08, BC-11, BC-12, BC-13, BC-15, BC-16).
+  (`TypeError`, `RangeError`, out of memory) now throw an error that names the
+  problem: `IllegalModelException` (BC-11, BC-12, BC-15, BC-16),
+  `ValidationException` (BC-06), or a plain `Error` (BC-08, BC-13).
 - **Stricter, more predictable input rules.** One `DateTime` grammar
   everywhere, strict SemVer namespaces, and a metamodel check on every model
   loaded from an AST. These are the main breaking changes; see below.
@@ -32,8 +33,9 @@ at concerto `09295b075` and concerto-rust `fa4ee0b` (2026-09-30). The
 ### Performance
 
 Figures are ratios to `@accordproject/concerto-core` 5.0.0 on the same machine
-in the same run, as recorded in `migration/bench/RESULTS.md`. Below 1× is faster
-than 5.0.0; above 1× is slower. Timings on a shared machine move by up to about
+in the same run, as recorded in `migration/bench/RESULTS.md`, or for P5-60 in
+its report on accordproject/concerto-rust#392 (not yet in `RESULTS.md`).
+Below 1× is faster than 5.0.0; above 1× is slower. Timings on a shared machine move by up to about
 ±25-35% between rounds, so treat small differences as noise.
 
 | Operation, through the JavaScript API | R1 vs 5.0.0 | Source |
@@ -43,8 +45,9 @@ than 5.0.0; above 1× is slower. Timings on a shared machine move by up to about
 | `DecoratorManager.validate` | 0.66-0.80× | P5-27 |
 | `DecoratorManager.decorateModels` | 0.80-1.45× | P5-27 |
 | Repeated `getNamespaces`, `getType`, `resolveType` | 0.11-2.46× | P5-29 |
+| First `getNamespaces`, `getType`, `resolveType` call after a model change | 2.6-17.9× (P5-29); `getNamespaces` 20.5-28.2× in P5-60, 3-26 µs once per change | P5-29, P5-60 |
 | `Factory.newResource` | 2.5-4.1× | P5-22 |
-| `DecoratorManager.extractDecorators` / `extractVocabularies` | 3.2-5.5× | P5-27 |
+| `DecoratorManager.extractDecorators` / `extractVocabularies` | `extractDecorators` 3.5-6.6×, `extractVocabularies` 5.3-9.2×; the first call after a model change 5.2-6.2× | P5-60 (cloud container, Intel Xeon @ 2.10GHz, 4 vCPU) |
 | `new ModelFile` | 4.9-8.1× | P5-48 |
 | `ModelManager.addModelFile` | 2.9-7.5× | P5-48 |
 | `ModelManager.addCTOModel` (the CTO parser is unchanged JavaScript) | 1.7-4.0× | P5-48 |

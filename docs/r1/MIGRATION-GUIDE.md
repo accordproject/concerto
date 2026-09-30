@@ -56,9 +56,10 @@ grep -rnE "length *= *\[ *, *\]" --include=*.cto .
 - **What to do:** use a bundler, which resolves the engine modules at build
   time. Without a bundler, the page must supply a synchronous `require` on
   `globalThis.module` before concerto-core is first imported. That `require`
-  must resolve `./engine`, `../engine` and `../engine/<subpath>` to the
-  matching `dist/esm-browser/engine/*.mjs` modules, and resolve the engine's
-  own imports to the same module instances the public graph uses.
+  must resolve `./engine`, `../engine`, `./engine/<subpath>` and
+  `../engine/<subpath>` (for example `./engine/views` and `../engine/views`)
+  to the matching `dist/esm-browser/engine/*.mjs` modules, and resolve the
+  engine's own imports to the same module instances the public graph uses.
   `e2e/tests/wasm-engine.spec.ts` shows the pattern. Allow for about 2.8 MB of
   WebAssembly before compression.
 - **Pending:** an asynchronous `await init()` entry for browsers and smaller
