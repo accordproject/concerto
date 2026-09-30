@@ -4,4 +4,4 @@ addCTOModel (one file)                       3.00   4.00  1.00
 new ModelFile + addModelFile (one file)      3.00   4.00  1.00
 addModelFiles (two files)                    7.00   9.00  2.00
 updateModelFile (string)                     5.00   6.00  1.00
-fromAst (two models)                        14.00  16.00  2.00
+fromAst (two models)                        16.00  18.00  2.00

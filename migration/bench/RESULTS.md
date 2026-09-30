@@ -18,7 +18,7 @@ check is the only change on that path); "on" is the R1 default.
 | | |
 |---|---|
 | Machine | Local macOS (Darwin 22.6), Node v22.23.2; counts do not depend on the machine |
-| Heads | the P5-49 branches, concerto `c871db316` and concerto-rust `a7c1a17` (merged with the integration heads `4f44cea0b` and `36180ad`) |
+| Heads | the P5-49 branches, merged with the integration heads concerto `e70c4960f` and concerto-rust `2bf5064` (after P5-48 and P5-40) |
 | Raw data | `results/P5-49/crossings.txt` |
 
 | operation | off (before) | on (R1 default) | of which `checkAstShape` |
@@ -28,7 +28,7 @@ check is the only change on that path); "on" is the R1 default.
 | `new ModelFile` + `addModelFile`, one file | 3 | 4 | 1 |
 | `addModelFiles`, two files | 7 | 9 | 2 |
 | `updateModelFile` (string) | 5 | 6 | 1 |
-| `fromAst`, two models | 14 | 16 | 2 |
+| `fromAst`, two models | 16 | 18 | 2 |
 
 The check itself runs `validateAst`'s strict check on the resident metamodel
 manager (P5-21), so its cost inside the engine grows with the size of the AST;
