@@ -456,6 +456,14 @@ ${cls.map(x => `| ${x.c} | ${x.n} | ${x.loc} | ${x.w} | ${pct(x.w, totW)} |`).jo
   plumbing helpers as RUST; they are now TS, engine shim). After #261 and before P5-11 the
   figure was 57.4% (61.5% at #261 itself): P5-11 reclassified TS 128 PARTIAL rows and 57 HYBRID
   rows that make no engine call (accordproject/concerto-rust#276).
+* P5-64 re-audit (accordproject/concerto-rust#401, integration head 2a6a71754): the figure was
+  45.3% at the P5-12c rebuild (28 Sep). The R1 changes since then deleted or shortened TS bodies
+  of RUST/HYBRID rows that already delegated (-301 weight in the numerator, most of it
+  ModelFile.validate, P5-34), added 47 TS members (+653, chiefly the engine shim and the fast-path
+  codec) and 5 HYBRID entry points (+101), and the re-audit moved 6 rows RUST -> TS (-78: the P5-32
+  field-backed ModelFile getters and rustHandle id/flag plumbing), the serializer handle cache
+  (handleFor, cachedHandleFor) HYBRID -> TS (-1.5 for handleFor; cachedHandleFor is new; neither
+  calls the engine since P5-34) and StringValidator.validate HYBRID -> RUST. The rules are the P5-64 block of \`classification.js\`.
 
 By weight category:
 
