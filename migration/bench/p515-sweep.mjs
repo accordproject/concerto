@@ -76,8 +76,26 @@ const bumpModelEpoch = fs.existsSync(viewsPath) && typeof require(viewsPath).inv
     ? require(viewsPath).invalidatePropertyLookups
     : () => {};
 
+// P5-56: the generated synthetic-large model gives its EnumDeclaration an
+// `isAbstract: false`, a key the metamodel does not declare for enums. TS
+// 5.0.0 ignores it, but the engine's strict AST shape at model load (P5-49,
+// accordproject/concerto-rust#384) rejects it, so no Rust op could load that
+// set. It is dropped here, for every engine alike.
+function withoutEnumIsAbstract(ast) {
+    for (const decl of ast.declarations || []) {
+        if (decl.$class === 'concerto.metamodel@1.0.0.EnumDeclaration') {
+            delete decl.isAbstract;
+        }
+    }
+    return ast;
+}
+
 function loadSet(set) {
-    return JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'p515', `${set}.json`), 'utf8'));
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'p515', `${set}.json`), 'utf8'));
+    for (const model of data.models || []) {
+        withoutEnumIsAbstract(model.ast);
+    }
+    return data;
 }
 
 function managerOf(models) {
@@ -292,6 +310,21 @@ const OPS = {
         },
         n: () => 1,
         run: (c) => DecoratorManager.extractDecorators(c.pool.pop() || c.build(), { removeDecoratorsFromModel: true, locale: 'en' }),
+    },
+    // P5-56 (T2, F-A2, accordproject/concerto-rust#377): the repeated
+    // extract with `removeDecoratorsFromModel: false`, the case the engine's
+    // per-epoch result memo serves (filled on the second call on the same
+    // unchanged manager, used from the third). The same manager every time,
+    // as `extract_decorators`, whose `removeDecoratorsFromModel: true` never
+    // reads the memo.
+    extract_keep: {
+        family: 'decorator',
+        setup: (d) => {
+            const mm = managerOf(d.models.filter((m) => d.dcsModels.includes(m.name)));
+            return { mm: DecoratorManager.decorateModels(mm, d.dcs, { validate: true }) };
+        },
+        n: () => 1,
+        run: (c) => DecoratorManager.extractDecorators(c.mm, { removeDecoratorsFromModel: false, locale: 'en' }),
     },
     // ---- Introspection ------------------------------------------------------
     get_type: {
