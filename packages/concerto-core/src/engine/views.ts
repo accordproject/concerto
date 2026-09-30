@@ -549,6 +549,20 @@ function decoratorManagerValidate(validationModelManager: any, decoratorCommandS
 }
 
 /**
+ * P5-68 (BC-19-a, R1): whether a `decorateModels` result may skip the AST
+ * shape check: every source model was checked (`dcsSourceShapeChecked`) and
+ * everything the commands add passes it (`dcsCommandsShapeChecked`).
+ * @param {object} modelManager the input ModelManager
+ * @param {object} handle an engine handle, for `checkAstShape`
+ * @param {object[]} decoratorCommandSets the decorator command sets
+ * @param {object} [options] the decorateModels options
+ * @return {boolean} true if the result models may skip the check
+ */
+function decorateResultTrusted(modelManager: any, handle: any, decoratorCommandSets: any[], options?: any): boolean {
+    return dcsSourceShapeChecked(modelManager) && dcsCommandsShapeChecked(handle, decoratorCommandSets, options);
+}
+
+/**
  * DecoratorManager.decorateModels in rust mode, after the TS body's
  * `skipValidationAndResolution` handling. Metamodel resolution itself is not
  * ported (concerto-rust src/dcs/mod.rs `decorate_models`'s doc comment), but
@@ -578,7 +592,8 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
         const target = decoratedModelManager.rustHandle;
         assertDistinctHandles(source, target);
         const result = source.dcsDecorateModels(target, decoratorCommandSets, options ?? {});
-        adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation);
+        adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation,
+            decorateResultTrusted(modelManager, target, decoratorCommandSets, options));
         return decoratedModelManager;
     }
     if (residentDcsAvailable()) {
@@ -591,7 +606,8 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
             });
             decoratedModelManager.clearModelFiles();
             const result = dcs.decorateModels(decoratedModelManager.rustHandle, decoratorCommandSets, options ?? {});
-            adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation);
+            adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation,
+                decorateResultTrusted(modelManager, decoratedModelManager.rustHandle, decoratorCommandSets, options));
             return decoratedModelManager;
         } finally {
             if (!resident) {
@@ -751,7 +767,7 @@ function decoratorManagerExtractOnSource(binding: string, source: any, modelMana
     if (options?.removeDecoratorsFromModel) {
         restoreAllUndefinedDecorators(modelManager.getAst(false, false).models, result.modelManager.models);
     }
-    adoptStagedModels(updatedModelManager, result.modelManager, staged, validated);
+    adoptStagedModels(updatedModelManager, result.modelManager, staged, validated, undefined, dcsSourceShapeChecked(modelManager));
     result.modelManager = updatedModelManager;
     return result;
 }
@@ -782,7 +798,7 @@ function decoratorManagerExtractStaged(binding: string, modelManager: any, optio
         if (options?.removeDecoratorsFromModel) {
             restoreAllUndefinedDecorators(sourceModels, result.modelManager.models);
         }
-        adoptStagedModels(updatedModelManager, result.modelManager, staged, validated);
+        adoptStagedModels(updatedModelManager, result.modelManager, staged, validated, undefined, dcsSourceShapeChecked(modelManager));
         result.modelManager = updatedModelManager;
         return result;
     } finally {
@@ -1019,6 +1035,26 @@ const lazyFiles = new WeakSet<object>();
 const shapeCheckedUnmirrored = new Map<string, string>();
 
 /**
+ * P5-68 (BC-19-a, R1): every ModelFile whose AST passed `checkAstShape`,
+ * or was let through it as engine-written (`trustedAst`), with that AST
+ * object. `dcsSourceShapeChecked` reads it: a DecoratorManager result is
+ * built from checked models only when every model file of the source
+ * manager is here, with the AST it still holds.
+ */
+const shapeChecked = new WeakMap<object, object>();
+
+/**
+ * P5-68 (BC-19-a, R1): the one AST the next `new ModelFile(manager, ast)`
+ * takes without `checkAstShape`. Set only by
+ * `adoptStagedModels`, for a DecoratorManager result AST the engine has
+ * just written from checked models, immediately before it constructs that
+ * ModelFile, and cleared as soon as the constructor returns or throws. It is
+ * private to this module, so a ModelFile user code constructs is always
+ * checked.
+ */
+let trustedAst: object | null = null;
+
+/**
  * P5-49 (BC-19 with BC-17 and BC-20, R1): the strict AST shape check at
  * model load. Called by the ModelFile constructor after its own argument
  * checks and before `stageModelFile`, unless the manager was built with
@@ -1029,27 +1065,38 @@ const shapeCheckedUnmirrored = new Map<string, string>();
  * shape: a non-array `decorators` (BC-17), a non-string name or an empty
  * super type name (BC-20), or anything else the metamodel check rejects
  * (BC-19). Returns the JSON text, which `stageModelFile` then reuses, or
- * undefined when the check is off.
+ * undefined when the check is off. P5-68 (BC-19-a): also undefined, without
+ * the check, for the one DecoratorManager result AST `adoptStagedModels`
+ * marks as engine-written from checked models (`trustedAst`).
  * @param {object} modelFile the ModelFile being constructed
  * @return {string | undefined} the AST's JSON text, when it was checked
  * @throws {IllegalModelException} if the AST does not have the metamodel's shape
  */
 function checkAstShape(modelFile: any): string | undefined {
     const manager = modelFile.modelManager;
+    const ast = modelFile.ast;
+    // P5-68 (BC-19-a): an AST the engine has just written, for a DCS result
+    // manager, from models that all passed this check (`adoptStagedModels`).
+    if (ast === trustedAst) {
+        trustedAst = null;
+        shapeChecked.set(modelFile, ast);
+        return undefined;
+    }
     if (manager.options?.metamodelValidation === false) {
         return undefined;
     }
-    const ast = modelFile.ast;
     const text = JSON.stringify(ast);
     const namespace = ast.namespace;
     const unmirrored = typeof namespace === 'string' && !manager._needsRustWrite(namespace);
     if (unmirrored && shapeCheckedUnmirrored.get(namespace) === text) {
+        shapeChecked.set(modelFile, ast);
         return text;
     }
     manager.rustHandle.checkAstShape(text);
     if (unmirrored) {
         shapeCheckedUnmirrored.set(namespace, text);
     }
+    shapeChecked.set(modelFile, ast);
     return text;
 }
 
@@ -1487,8 +1534,13 @@ const DCS_EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'
  * @param {Array} staged the stage of each model, or null
  * @param {boolean} validated whether Rust validated the result
  * @param {boolean} [disableValidation] fromAst's `disableValidation` option
+ * @param {boolean} [trusted] P5-68 (BC-19-a): true when every result model
+ * is an AST the engine has just written from nodes that all passed
+ * `checkAstShape` (`dcsSourceShapeChecked`, and for `decorateModels`
+ * `dcsCommandsShapeChecked`): each ModelFile then skips the check
+ * (`trustedAst`), which that AST would pass
  */
-function adoptStagedModels(newModelManager: any, ast: any, staged: any[], validated: boolean, disableValidation?: boolean): void {
+function adoptStagedModels(newModelManager: any, ast: any, staged: any[], validated: boolean, disableValidation?: boolean, trusted?: boolean): void {
     const { default: ModelFile } = require('../introspect/modelfile');
     const handle = newModelManager.rustHandle;
     let allStaged = true;
@@ -1502,7 +1554,15 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
             if (entry) {
                 prestaged.set(model, { handle, id: entry[0], header: entry[1] });
             }
-            const modelFile = new ModelFile(newModelManager, model);
+            let modelFile;
+            if (trusted) {
+                trustedAst = model;
+            }
+            try {
+                modelFile = new ModelFile(newModelManager, model);
+            } finally {
+                trustedAst = null;
+            }
             newModelManager.addModelFile(modelFile, null, null, true);
             if (committed.get(modelFile) !== handle) {
                 allStaged = false;
@@ -1570,6 +1630,83 @@ function dcsCacheable(modelManager: any): boolean {
         modelManager.getAst === proto.getAst &&
         modelManager.getModelFiles === proto.getModelFiles &&
         modelManager.resolveMetaModel === proto.resolveMetaModel;
+}
+
+/**
+ * P5-68 (BC-19-a, R1): whether every model a DecoratorManager operation
+ * reads from `modelManager` passed `checkAstShape`: `dcsCacheable` holds
+ * (the models are `getAst`'s own reading of the model files, as on the
+ * source handle), and every model file, as `getAst(…, false)` lists them,
+ * was checked with the AST object it holds now and reads it with
+ * ModelFile's own `getAst`. A manager built with `metamodelValidation:
+ * false`, or holding any file one built, never qualifies.
+ * @param {object} modelManager the source ModelManager
+ * @return {boolean} true if every source model was checked
+ */
+function dcsSourceShapeChecked(modelManager: any): boolean {
+    if (!dcsCacheable(modelManager)) {
+        return false;
+    }
+    const { default: ModelFile } = require('../introspect/modelfile');
+    const getAst = ModelFile.prototype.getAst;
+    return modelManager.getModelFiles(false).every((f: any) =>
+        shapeChecked.get(f) === f.ast && f.getAst === getAst);
+}
+
+/**
+ * P5-68 (BC-19-a, R1): whether everything `decorateModels` adds to the
+ * source models passes `checkAstShape`: each command's decorator, and the
+ * `ImportType` nodes the engine declares for it and for each of its
+ * type-reference arguments (concerto-rust `dcs::synthetic_decorator_imports`:
+ * the node's own namespace, else `options.defaultNamespace`, when truthy).
+ * They are checked once, together, as the decorators and imports of one
+ * synthetic model. This is a superset of what the engine can add (every
+ * command, applied or not, and every candidate import). It runs only after
+ * the engine has applied the commands, so each set, command, decorator and
+ * argument is an object; anything else fails the check or throws here, and
+ * either way the answer is false, so the caller then checks each result
+ * model as before.
+ * @param {object} handle an engine handle, for `checkAstShape`
+ * @param {object[]} decoratorCommandSets the decorator command sets
+ * @param {object} [options] the decorateModels options
+ * @return {boolean} true if the added nodes have the metamodel's shape
+ */
+function dcsCommandsShapeChecked(handle: any, decoratorCommandSets: any[], options?: any): boolean {
+    const defaultNamespace = options?.defaultNamespace;
+    const decorators: any[] = [];
+    const imports: any[] = [];
+    const importFor = (node: any) => {
+        const namespace = node.namespace || defaultNamespace;
+        if (namespace) {
+            imports.push({ $class: 'concerto.metamodel@1.0.0.ImportType', name: node.name, namespace });
+        }
+    };
+    try {
+        for (const commandSet of decoratorCommandSets) {
+            // `decoratorCommandSets.flatMap(commandSet => commandSet.commands)`.
+            const commands = commandSet.commands;
+            for (const command of Array.isArray(commands) ? commands : [commands]) {
+                const decorator = command.decorator;
+                decorators.push(decorator);
+                importFor(decorator);
+                for (const arg of Array.isArray(decorator.arguments) ? decorator.arguments : []) {
+                    if (arg.type) {
+                        importFor(arg.type);
+                    }
+                }
+            }
+        }
+        handle.checkAstShape(JSON.stringify({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'concerto.dcs.shapecheck@1.0.0',
+            imports,
+            declarations: [],
+            decorators,
+        }));
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 /**
