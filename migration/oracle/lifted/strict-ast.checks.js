@@ -153,6 +153,11 @@ function unreadable(ns) {
             declarations: [{ $class: `${MM}.MapDeclaration`, name: 'M', key: 5, value: null }],
         }),
         Object.assign(model(ns, []), { declarations: 'x' }),
+        // Since P5-61's review: an unknown key, a keyless `identified` and a
+        // validator with no `$class`, which the loader used to read.
+        decl({ undeclared: 1 }),
+        decl({ identified: true }),
+        model(ns, [prop(`${MM}.StringProperty`, 'id', { validator: { pattern: 'a', flags: '' } })]),
     ];
 }
 
@@ -181,8 +186,43 @@ module.exports = [
         id: 'BC19-002',
         covers: 'BC-19: an `identified` of the wrong shape (T2a) is rejected at load',
         run: (core) => add(core, model('org.acme.bc19.b@1.0.0', [GOOD], { identified: 'yes' })),
-        expect: shape('Unexpected properties for type concerto.metamodel@1.0.0.Identified: 0, 1, 2'),
+        expect: rejected('Invalid identified. Expected an object with a $class. Found "yes" '),
         reference: loaded('org.acme.bc19.b@1.0.0'),
+    },
+    {
+        id: 'BC19-005',
+        covers: 'BC-19 (P5-61): a keyless `identified` or validator value, or a validator with no `$class`, which the metamodel check alone accepts, is rejected at load',
+        run: (core) => [
+            [{ identified: true }, []],
+            [{ identified: {} }, []],
+            [{}, [prop(`${MM}.StringProperty`, 'p', { validator: { pattern: 'a', flags: '' } })]],
+            [{}, [prop(`${MM}.StringProperty`, 'p', { lengthValidator: 0 })]],
+            [{}, [prop(`${MM}.StringProperty`, 'p', { isArray: true, sizeValidator: [] })]],
+        ].map(([extra, properties], i) => {
+            try {
+                return add(core, model(`org.acme.bc19.e${i}@1.0.0`, [GOOD, ...properties], extra));
+            } catch (e) {
+                return `${e.constructor.name}: ${e.message}`;
+            }
+        }),
+        expect: {
+            ok: [
+                'IllegalModelException: Invalid identified. Expected an object with a $class. Found true ',
+                'IllegalModelException: Invalid identified. Expected an object with a $class. Found {} ',
+                'IllegalModelException: Invalid validator. Expected an object with a $class. Found {"pattern":"a","flags":""} ',
+                'IllegalModelException: Invalid lengthValidator. Expected an object with a $class. Found 0 ',
+                'IllegalModelException: Invalid sizeValidator. Expected an object with a $class. Found [] ',
+            ],
+        },
+        reference: {
+            ok: [
+                loaded('org.acme.bc19.e0@1.0.0').ok,
+                loaded('org.acme.bc19.e1@1.0.0').ok,
+                loaded('org.acme.bc19.e2@1.0.0').ok,
+                loaded('org.acme.bc19.e3@1.0.0').ok,
+                'BaseException: Validator error for field `p`. org.acme.bc19.e4@1.0.0.C.p: Invalid collection size, minSize and/or maxSize must be specified.',
+            ],
+        },
     },
     {
         id: 'BC19-003',
@@ -343,8 +383,8 @@ module.exports = [
             const mm = new core.ModelManager({ metamodelValidation: false });
             new core.ModelFile(mm, ast, undefined, 'x.json');
         })),
-        expect: { ok: ['error', 'error', 'error', 'error', 'error', 'error', 'error', 'error', 'error', 'error'] },
-        reference: { ok: ['loaded', 'loaded', 'error', 'error', 'error', 'loaded', 'error', 'loaded', 'error', 'error'] },
+        expect: { ok: Array(13).fill('error') },
+        reference: { ok: ['loaded', 'loaded', 'error', 'error', 'error', 'loaded', 'error', 'loaded', 'error', 'error', 'loaded', 'loaded', 'loaded'] },
     },
     {
         id: 'P561-OPT-002',
@@ -359,13 +399,14 @@ module.exports = [
             return [results, mm.getNamespaces()];
         },
         expect: { ok: [
-            Array(10).fill(['error', 'error']),
+            Array(13).fill(['error', 'error']),
             ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p561.good@1.0.0'],
         ] },
         reference: { ok: [
             [['loaded', 'loaded'], ['error', 'loaded'], ['error', 'error'], ['error', 'error'], ['error', 'error'],
-                ['loaded', 'loaded'], ['error', 'error'], ['loaded', 'loaded'], ['error', 'error'], ['error', 'error']],
-            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p561.good@1.0.0'],
+                ['loaded', 'loaded'], ['error', 'error'], ['loaded', 'loaded'], ['error', 'error'], ['error', 'error'],
+                ['loaded', 'loaded'], ['error', 'loaded'], ['error', 'loaded']],
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.acme.p561.b@1.0.0', 'org.acme.p561.good@1.0.0'],
         ] },
     },
     {
@@ -376,8 +417,8 @@ module.exports = [
             mm.addDecoratorFactory({ newDecorator: () => null });
             new core.ModelFile(mm, ast, undefined, 'x.json');
         })),
-        expect: { ok: ['error', 'error', 'error', 'error', 'error', 'error', 'error', 'error', 'error', 'error'] },
-        reference: { ok: ['loaded', 'loaded', 'error', 'error', 'error', 'loaded', 'error', 'loaded', 'error', 'error'] },
+        expect: { ok: Array(13).fill('error') },
+        reference: { ok: ['loaded', 'loaded', 'error', 'error', 'error', 'loaded', 'error', 'loaded', 'error', 'error', 'loaded', 'loaded', 'loaded'] },
     },
     {
         id: 'BC19-CTO-001',

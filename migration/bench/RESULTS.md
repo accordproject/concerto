@@ -32,8 +32,10 @@ the P5-15 counting engine (`lib/p515-engine-counter.cjs`); "off" is
 | `fromAst`, two models | 16 | 16 | 18 | 18 |
 | `new ModelFile` + `addModelFile`, one file, a decorator factory | 5 | 7 | 6 | 6 |
 
-The optimised engine (`concerto-wasm/build.sh`, wasm-opt 132) is 2,844,519
-bytes after and 2,893,582 before: 49,063 bytes (1.7%) smaller.
+The optimised engine (`concerto-wasm/build.sh`, wasm-opt 132) is 2,833,833
+bytes after and 2,893,582 before: 59,749 bytes (2.1%) smaller (after the
+review fixes: the strict read of `identified` and the validators, and the
+unknown-key refusal).
 
 # P5-55 (T1, F-A1): DCS operations on the source ModelManager's rustHandle (2026-09-30)
 

@@ -140,7 +140,7 @@ const EXPECTED = [
             if (typeof d.op !== 'string' || !/^(ModelManager|BaseModelManager|AstModelManager|ModelFile|MetaModel)\./.test(d.op)) { return false; }
             const r = d.rust && d.rust.error;
             if (!r || r.class !== 'IllegalModelException' || typeof r.message !== 'string') { return false; }
-            return /^(Model AST does not conform to the metamodel: |Invalid decorators\. Expected array\. Found |Invalid name\. Expected a string\. Found |Invalid super type name\. Expected a non-empty string\. Found )/.test(r.message);
+            return /^(Model AST does not conform to the metamodel: |Invalid decorators\. Expected array\. Found |Invalid name\. Expected a string\. Found |Invalid super type name\. Expected a non-empty string\. Found |Invalid (identified|sizeValidator|lengthValidator|validator)\. Expected an object with a \$class\. Found )/.test(r.message);
         },
     },
 ];

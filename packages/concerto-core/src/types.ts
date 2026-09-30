@@ -39,8 +39,9 @@ export interface ModelManagerOptions {
      * escape hatch for trusted input only: the shape check is skipped, and
      * code downstream of the load may assume a well-formed AST. A malformed
      * AST still throws an error when it is loaded, never a WASM trap or a
-     * process crash, unless the loader can read it all the same (an unknown
-     * key, say); the error's class and message are unspecified.
+     * process crash, unless the loader can read it all the same (a node's
+     * `$class` naming the wrong type, say); the error's class and message
+     * are unspecified.
      */
     metamodelValidation?: boolean;
     addMetamodel?: boolean;
