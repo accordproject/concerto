@@ -44,20 +44,20 @@ commands:
       name: DeclarationProperty
   - action: UPSERT
     target:
-      namespace: test
+      namespace: test@1.0.0
       declaration: Person
       property: country
     decorator:
       name: NamespaceDeclarationProperty
   - action: UPSERT
     target:
-      namespace: test
+      namespace: test@1.0.0
       property: country
     decorator:
       name: NamespaceProperty
   - action: UPSERT
     target:
-      namespace: test
+      namespace: test@1.0.0
       declaration: Person
       property: country
       type: concerto.metamodel@1.0.0.StringProperty
@@ -65,7 +65,7 @@ commands:
       name: NamespaceDeclarationPropertyType
   - action: UPSERT
     target:
-      namespace: test
+      namespace: test@1.0.0
       property: country
       type: concerto.metamodel@1.0.0.StringProperty
     decorator:
@@ -93,7 +93,7 @@ commands:
           value: Property
   - action: UPSERT
     target:
-      namespace: test
+      namespace: test@1.0.0
       declaration: Person
       type: concerto.metamodel@1.0.0.StringProperty
       properties:
@@ -118,7 +118,7 @@ commands:
       name: DeclarationProperties
   - action: UPSERT
     target:
-      namespace: test
+      namespace: test@1.0.0
       declaration: Person
       properties:
         - country
@@ -127,7 +127,7 @@ commands:
       name: NamespaceDeclarationProperties
   - action: UPSERT
     target:
-      namespace: test
+      namespace: test@1.0.0
       properties:
         - country
         - zip
@@ -135,7 +135,7 @@ commands:
       name: NamespaceProperties
   - action: UPSERT
     target:
-      namespace: test
+      namespace: test@1.0.0
       type: concerto.metamodel@1.0.0.StringProperty
       properties:
         - country

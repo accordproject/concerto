@@ -63,6 +63,9 @@ export const APPROVED_REWRITE_DECISIONS = new Set([
     // P5-52 (BC-28, R1): maintainer decision 2026-09-29, option 1, confirmed
     // on accordproject/concerto-rust#373.
     'accordproject/concerto-rust#373',
+    // P5-50 (BC-02, R1): maintainer decision 2026-09-30, option 1, confirmed
+    // on accordproject/concerto-rust#371 (versioned DCS targets in test data).
+    'accordproject/concerto-rust#371',
 ]);
 const REWRITE_REASON_RE = /^approved rewrite (\S+):/;
 export const NO_OLD_TEXT = '(none)';
