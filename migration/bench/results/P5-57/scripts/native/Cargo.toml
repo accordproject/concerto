@@ -1,0 +1,23 @@
+# P5-57 (accordproject/concerto-rust#378) scratch bench: the DCS extract call
+# on the P5-30 dumped inputs, the Value route (P5-40 F-B, plus P5-41's
+# encode of its command sets) against the direct encoding (P5-57 T3), in
+# one binary, interleaved. Measure only; not shipped.
+[package]
+name = "p557-native"
+version = "0.0.0"
+edition = "2024"
+publish = false
+license = "Apache-2.0"
+
+[workspace]
+
+[dependencies]
+accordproject-concerto-core = { path = "../../concerto-rust/concerto-core", features = ["js-compat"] }
+serde_json = { version = "1.0", features = ["float_roundtrip", "preserve_order"] }
+
+# The shipped concerto-wasm release profile, natively.
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
