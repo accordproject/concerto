@@ -1077,7 +1077,15 @@ module.exports = [
         id: 'RV-MAP-007',
         covers: 'visitField: a map field with a size validator, too many entries',
         run: validate('C', { msz: new Map([['a', 'b'], ['c', 'd'], ['e', 'f']]) }),
+        // P5-53 (BC-39, R1): a validator error for an instance value is a ValidationException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Validator error for field `org.acme.lifted.p502b.serializer@1.0.0.C`. org.acme.lifted.p502b.serializer@1.0.0.C.msz: Collection must contain no more than 2 elements.'
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `org.acme.lifted.p502b.serializer@1.0.0.C`. org.acme.lifted.p502b.serializer@1.0.0.C.msz: Collection must contain no more than 2 elements.'

@@ -60,6 +60,11 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
         // construct directly too, and does not itself need this internal
         // engine-to-caller signal.
         (err as unknown as { needsModelFile?: boolean }).needsModelFile = p.needsModelFile;
+        // A validator error found while the model loads (BC-39) keeps its
+        // errorType (`DefaultValidatorException`, `RegexValidatorException`).
+        if (p.errorType) {
+            err.errorType = p.errorType;
+        }
         return err;
     },
     // `TypeNotFoundException(typeName, message)`: `typeName` travels in
@@ -72,7 +77,16 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     // populator/generator/validator per-field delegation the P4-10 fast
     // path and views call into (concerto-core/src/instance/populator.rs
     // `validation()`).
-    Validation: (p) => new ValidationException(p.message),
+    // An instance value that fails a validator (BC-39) keeps its errorType.
+    Validation: (p) => {
+        const err = new ValidationException(p.message);
+        if (p.errorType) {
+            err.errorType = p.errorType;
+        }
+        return err;
+    },
+    // Not raised since BC-39 (concerto-rust error/mod.rs `ErrorKind::Validator`);
+    // kept for an engine that still sends it.
     Validator: (p) => new BaseException(p.message, undefined, p.errorType),
     Error: (p) => new Error(p.message),
     JsTypeError: (p) => new TypeError(p.message),

@@ -170,7 +170,7 @@ module.exports = [
     },
     {
         id: 'PA-VA-001',
-        covers: 'validator.ts reportError: throws a BaseException naming the field, with the default and a given error type',
+        covers: 'validator.ts reportError: throws a ValidationException (BC-39) naming the field, with the default and a given error type',
         run: (core) => {
             const v = setup(core).getType(`${NS}.C`).getProperty('s').getValidator();
             const thrown = (...args) => {
@@ -183,7 +183,15 @@ module.exports = [
             };
             return { byDefault: thrown('id1', 'msg1'), given: thrown(null, 'msg2', 'CustomError') };
         },
+        // P5-53 (BC-39, R1): a validator error for an instance value is a
+        // ValidationException, keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            ok: {
+                byDefault: { name: 'ValidationException', message: `Validator error for field \`id1\`. ${NS}.C.s: msg1`, errorType: 'DefaultValidatorException' },
+                given: { name: 'ValidationException', message: `Validator error for field \`null\`. ${NS}.C.s: msg2`, errorType: 'CustomError' },
+            },
+        },
+        reference: {
             ok: {
                 byDefault: { name: 'BaseException', message: `Validator error for field \`id1\`. ${NS}.C.s: msg1`, errorType: 'DefaultValidatorException' },
                 given: { name: 'BaseException', message: `Validator error for field \`null\`. ${NS}.C.s: msg2`, errorType: 'CustomError' },

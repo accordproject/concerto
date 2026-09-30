@@ -1,0 +1,60 @@
+{
+  "tool": "p515-sweep",
+  "mode": "time",
+  "coreDist": "/home/user/wt/P5-57/concerto/packages/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "e70c4960f",
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "loadavgEnd": [
+    1.28,
+    2.04,
+    2.59
+  ],
+  "samples": 30,
+  "warmup": 5,
+  "results": [
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "medianUs": 41232.99799999999,
+      "samples": 30,
+      "median_ms": 41.232997999999995,
+      "mean_ms": 39.77704476666667,
+      "stddev_ms": 7.21663960915689,
+      "min_ms": 28.196624,
+      "max_ms": 52.820278,
+      "cv": 0.1814272440672733
+    },
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "medianUs": 14997.5445,
+      "samples": 30,
+      "median_ms": 14.9975445,
+      "mean_ms": 15.465766233333332,
+      "stddev_ms": 4.809981902448782,
+      "min_ms": 9.259788,
+      "max_ms": 27.612954,
+      "cv": 0.31100831539027396
+    },
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "medianUs": 41411.93149999999,
+      "samples": 30,
+      "median_ms": 41.411931499999994,
+      "mean_ms": 42.19572349999999,
+      "stddev_ms": 5.389453858519917,
+      "min_ms": 34.414836,
+      "max_ms": 51.790349,
+      "cv": 0.1277251202605856
+    }
+  ]
+}
