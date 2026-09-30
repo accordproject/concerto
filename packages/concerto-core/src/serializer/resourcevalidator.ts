@@ -19,8 +19,8 @@ import { NullUtil as Util } from '@accordproject/concerto-util';
 import ModelUtil from '../modelutil';
 import ValidationException from './validationexception';
 import Globalize from '../globalize';
-import dayjs from '../dayjs-setup';
 import { getRelationshipMapValue } from './relationshipmapvalue';
+import { isStrictDateTime } from '../datetimeutil';
 
 // The Rust engine (src/engine/index.ts) is the only path (P5-02: the
 // CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See jsonpopulator.ts's
@@ -48,24 +48,6 @@ const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engi
 /* eslint-disable no-unused-vars */
 import type { SerializerOptions } from '../types';
 /* eslint-enable no-unused-vars */
-
-/**
- * Whether a value is a strict `DateTime` string (P5-24, BC-07/BC-42/BC-43,
- * R1): the `strictQualifiedDateTimes` format, whose date and time fields
- * name a real instant (`Date.parse` rolls `2024-02-30` and `T24:00:00` over
- * and rejects a leap second, so reading the fields back must give the same
- * fields).
- * @param {*} value the value
- * @returns {boolean} true for a strict `DateTime` string
- * @private
- */
-function isStrictDateTime(value): boolean {
-    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) {
-        return false;
-    }
-    const fields = value.slice(0, 19);
-    return dayjs.utc(value).isValid() && dayjs.utc(`${fields}Z`).format('YYYY-MM-DDTHH:mm:ss') === fields;
-}
 
 /**
  * <p>
