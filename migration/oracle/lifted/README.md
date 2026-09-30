@@ -358,6 +358,11 @@ without editing `packages/concerto-core/test/**`:
   generated regex value (`getRegexString`, `isLengthInRange`) are covered
   every run, not only when RandExp happens to generate an out-of-range
   value.
+* `datetimeutil-strict.checks.js` (task P5-67, accordproject/concerto-rust#404;
+  BC-51): `DateTimeUtil.setCurrentTime` and the engine's `DateTime` field
+  (`Serializer.fromJSON`) accept the same strings, at the same instant: the
+  strict format naming a real instant. `reference` holds v5.0.0's lenient
+  outcome.
 
 `serializer-fallback.checks.js` also passes a boxed `utcOffset`
 (`new Number(0)`) to `fromJSON`: the codec cannot carry it, so plain, valid

@@ -420,7 +420,14 @@ import dayjs from './dayjs-setup';
 /**
  * Ensures there is a proper current time
  *
- * @param {string} [currentTime] - the definition of 'now'
+ * P5-67 (BC-51, R1): a given `currentTime` must be a strict `DateTime`
+ * string (`YYYY-MM-DDTHH:mm:ss`, an optional fraction, then `Z` or
+ * `±HH:mm`, naming a real instant), as for every other `DateTime` string;
+ * the lenient dayjs and V8 forms are rejected with the same error an
+ * unparseable one throws. An omitted (falsy) `currentTime` still means now.
+ *
+ * @param {string} [currentTime] - the definition of 'now', a strict
+ * `DateTime` string
  * @param {number} [utcOffset] - UTC Offset for this execution
  * @returns {object} if valid, the dayjs object for the current time
  */
