@@ -126,7 +126,15 @@ module.exports = [
         id: 'SVR-CTOR-002',
         covers: 'constructor: both length bounds explicitly null',
         run: (core) => buildWithBounds(core, 'c2', { minLength: null, maxLength: null }) && 'loaded',
+        // P5-53 (BC-39, R1): a validator error while the model loads is an IllegalModelException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: 'Validator error for field `s`. org.acme.lifted.p502b.stringvalidator.c2@1.0.0.Box.s: Invalid string length, minLength and-or maxLength must be specified. '
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `s`. org.acme.lifted.p502b.stringvalidator.c2@1.0.0.Box.s: Invalid string length, minLength and-or maxLength must be specified.'
@@ -137,7 +145,15 @@ module.exports = [
         id: 'SVR-CTOR-003',
         covers: 'constructor: a negative length bound',
         run: (core) => buildWithBounds(core, 'c3', { minLength: -1, maxLength: 4 }) && 'loaded',
+        // P5-53 (BC-39, R1): a validator error while the model loads is an IllegalModelException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: 'Validator error for field `s`. org.acme.lifted.p502b.stringvalidator.c3@1.0.0.Box.s: minLength and-or maxLength must be positive integers. '
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `s`. org.acme.lifted.p502b.stringvalidator.c3@1.0.0.Box.s: minLength and-or maxLength must be positive integers.'
@@ -158,7 +174,15 @@ module.exports = [
         id: 'SVR-CTOR-005',
         covers: 'constructor: minLength greater than maxLength',
         run: (core) => buildWithBounds(core, 'c5', { minLength: 5, maxLength: 4 }) && 'loaded',
+        // P5-53 (BC-39, R1): a validator error while the model loads is an IllegalModelException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: 'Validator error for field `s`. org.acme.lifted.p502b.stringvalidator.c5@1.0.0.Box.s: minLength must be less than or equal to maxLength. '
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `s`. org.acme.lifted.p502b.stringvalidator.c5@1.0.0.Box.s: minLength must be less than or equal to maxLength.'
@@ -181,7 +205,15 @@ module.exports = [
         id: 'SVR-CTOR-007',
         covers: 'constructor: a default value that fails the regex',
         run: (core) => build(core, 'c7', 'concept Box { o String s default="bbb" regex=/^a+$/ }') && 'loaded',
+        // P5-53 (BC-39, R1): a validator error while the model loads is an IllegalModelException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: 'Validator error for field `s`. org.acme.lifted.p502b.stringvalidator.c7@1.0.0.Box.s: Value \'bbb\' failed to match validation regex: /^a+$/ '
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `s`. org.acme.lifted.p502b.stringvalidator.c7@1.0.0.Box.s: Value \'bbb\' failed to match validation regex: /^a+$/'
@@ -237,6 +269,58 @@ module.exports = [
         expect: { ok: { ranAtLoad: { A: false, B: false }, read: { B: ['<undefined>', '<undefined>'], A: ['<undefined>', '<undefined>'] }, ranOnRead: false } },
         reference: { ok: { ranAtLoad: { A: true, B: true }, read: { B: ['B', 'B'], A: ['A', 'A'] }, ranOnRead: false } },
     },
+    // P5-53 (BC-40, R1): a length validator with neither bound, both absent
+    // (`length=[,]`), is rejected as two null bounds are; v5.0.0 loaded it.
+    {
+        id: 'SVR-CTOR-010',
+        covers: 'constructor: both length bounds absent (BC-40)',
+        run: (core) => buildWithBounds(core, 'c10', {}) && 'loaded',
+        expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: 'Validator error for field `s`. org.acme.lifted.p502b.stringvalidator.c10@1.0.0.Box.s: Invalid string length, minLength and-or maxLength must be specified. '
+            }
+        },
+        reference: { ok: 'loaded' },
+    },
+    // P5-53 (BC-39, R1): each validator error keeps its errorType on its new
+    // class; v5.0.0's BaseException carried the same errorType. Under BC-28
+    // the engine compiles the pattern, so the rejected regex is one every
+    // ECMAScript engine rejects (quantifier bounds out of order), not one
+    // only PickyRegExp would.
+    {
+        id: 'SVR-ERR-001',
+        covers: 'the class and errorType of a load-time and an instance validator error',
+        run: (core) => {
+            const caught = (fn) => {
+                try {
+                    fn();
+                    return 'no error';
+                } catch (e) {
+                    return { name: e.constructor.name, errorType: e.errorType };
+                }
+            };
+            return {
+                regex: caught(() => build(core, 'e1', 'concept Box { o String s regex=/a{2,1}/ optional }')),
+                length: caught(() => buildWithBounds(core, 'e2', { minLength: 5, maxLength: 4 })),
+                instance: caught(() => check(validatorOf(build(core, 'e3', BOX), 'e3', 's'), 'abc')),
+            };
+        },
+        expect: {
+            ok: {
+                regex: { name: 'IllegalModelException', errorType: 'RegexValidatorException' },
+                length: { name: 'IllegalModelException', errorType: 'DefaultValidatorException' },
+                instance: { name: 'ValidationException', errorType: 'DefaultValidatorException' },
+            }
+        },
+        reference: {
+            ok: {
+                regex: { name: 'BaseException', errorType: 'RegexValidatorException' },
+                length: { name: 'BaseException', errorType: 'DefaultValidatorException' },
+                instance: { name: 'BaseException', errorType: 'DefaultValidatorException' },
+            }
+        },
+    },
     // ---- validate -----------------------------------------------------
     {
         id: 'SVR-VAL-001',
@@ -248,7 +332,15 @@ module.exports = [
         id: 'SVR-VAL-002',
         covers: 'validate: shorter than minLength',
         run: (core) => check(validatorOf(build(core, 'v2', BOX), 'v2', 's'), 'a'),
+        // P5-53 (BC-39, R1): a validator error for an instance value is a ValidationException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Validator error for field `id1`. org.acme.lifted.p502b.stringvalidator.v2@1.0.0.Box.s: The string length of \'a\' should be at least 2 characters.'
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `id1`. org.acme.lifted.p502b.stringvalidator.v2@1.0.0.Box.s: The string length of \'a\' should be at least 2 characters.'
@@ -259,7 +351,15 @@ module.exports = [
         id: 'SVR-VAL-003',
         covers: 'validate: longer than maxLength',
         run: (core) => check(validatorOf(build(core, 'v3', BOX), 'v3', 's'), 'aaaaa'),
+        // P5-53 (BC-39, R1): a validator error for an instance value is a ValidationException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Validator error for field `id1`. org.acme.lifted.p502b.stringvalidator.v3@1.0.0.Box.s: The string length of \'aaaaa\' should not exceed 4 characters.'
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `id1`. org.acme.lifted.p502b.stringvalidator.v3@1.0.0.Box.s: The string length of \'aaaaa\' should not exceed 4 characters.'
@@ -270,7 +370,15 @@ module.exports = [
         id: 'SVR-VAL-004',
         covers: 'validate: the regex does not match',
         run: (core) => check(validatorOf(build(core, 'v4', BOX), 'v4', 's'), 'abc'),
+        // P5-53 (BC-39, R1): a validator error for an instance value is a ValidationException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            throws: {
+                name: 'ValidationException',
+                message: 'Validator error for field `id1`. org.acme.lifted.p502b.stringvalidator.v4@1.0.0.Box.s: Value \'abc\' failed to match validation regex: /^a+$/'
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `id1`. org.acme.lifted.p502b.stringvalidator.v4@1.0.0.Box.s: Value \'abc\' failed to match validation regex: /^a+$/'
@@ -327,9 +435,11 @@ module.exports = [
             const ser = new core.Serializer(new core.Factory(mm), mm);
             return ser.fromJSON({ $class: `${NS}.v8@1.0.0.Box`, s: 'bb' });
         },
+        // P5-53 (BC-39, R1): a validator error for an instance value is a ValidationException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
             throws: {
-                name: 'BaseException',
+                name: 'ValidationException',
                 message: 'Validator error for field `null`. org.acme.lifted.p502b.stringvalidator.v8@1.0.0.Box.s: Value \'bb\' failed to match validation regex: /^a+$/'
             }
         },

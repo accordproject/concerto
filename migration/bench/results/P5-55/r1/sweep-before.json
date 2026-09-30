@@ -1,0 +1,102 @@
+{
+  "tool": "p515-sweep",
+  "mode": "time",
+  "coreDist": "/home/user/wt/P5-55/concerto/packages/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "58957307d",
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "loadavgEnd": [
+    2.13,
+    1.65,
+    1.59
+  ],
+  "samples": 30,
+  "warmup": 5,
+  "results": [
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "medianUs": 20080.171,
+      "samples": 30,
+      "median_ms": 20.080171,
+      "mean_ms": 21.837405133333327,
+      "stddev_ms": 7.185618693890826,
+      "min_ms": 14.025309,
+      "max_ms": 43.474493,
+      "cv": 0.32905094034833215
+    },
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "medianUs": 9114.302,
+      "samples": 30,
+      "median_ms": 9.114302,
+      "mean_ms": 9.359350799999996,
+      "stddev_ms": 2.7297629824411795,
+      "min_ms": 5.558934,
+      "max_ms": 15.954493,
+      "cv": 0.2916615736255105
+    },
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "medianUs": 34678.433999999994,
+      "samples": 30,
+      "median_ms": 34.678433999999996,
+      "mean_ms": 38.89164313333333,
+      "stddev_ms": 13.347451869189914,
+      "min_ms": 22.675736,
+      "max_ms": 68.083632,
+      "cv": 0.3431958846128065
+    },
+    {
+      "op": "extract_cold",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "medianUs": 94809.4485,
+      "samples": 30,
+      "median_ms": 94.8094485,
+      "mean_ms": 106.02036976666663,
+      "stddev_ms": 32.666976902716115,
+      "min_ms": 62.388006,
+      "max_ms": 198.945343,
+      "cv": 0.30811981673531935
+    },
+    {
+      "op": "extract_cold",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "medianUs": 41286.682,
+      "samples": 30,
+      "median_ms": 41.286682,
+      "mean_ms": 42.79559996666668,
+      "stddev_ms": 11.925068287893165,
+      "min_ms": 25.702188,
+      "max_ms": 81.410667,
+      "cv": 0.27865173749594707
+    },
+    {
+      "op": "extract_cold",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "medianUs": 147347.15399999998,
+      "samples": 30,
+      "median_ms": 147.347154,
+      "mean_ms": 166.37218446666665,
+      "stddev_ms": 50.15747839747849,
+      "min_ms": 91.159484,
+      "max_ms": 273.891422,
+      "cv": 0.30147754901618035
+    }
+  ]
+}

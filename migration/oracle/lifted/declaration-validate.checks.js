@@ -289,7 +289,15 @@ concept Hide extends Decorator { o Boolean hidden optional }
         id: 'DECL-VAL-019',
         covers: 'ScalarDeclaration.validate: an invalid default for the scalar',
         run: validateDeclarations(`${T}\nscalar S extends Integer default=5 range=[10,20]`),
+        // P5-53 (BC-39, R1): a validator error while the model loads is an IllegalModelException,
+        // keeping its errorType; v5.0.0 threw a BaseException.
         expect: {
+            throws: {
+                name: 'IllegalModelException',
+                message: 'Validator error for field `null`. org.acme.p535.t@1.0.0.S: Value 5 is outside lower bound 10 '
+            }
+        },
+        reference: {
             throws: {
                 name: 'BaseException',
                 message: 'Validator error for field `null`. org.acme.p535.t@1.0.0.S: Value 5 is outside lower bound 10'
@@ -343,9 +351,9 @@ event Event {}`, { dangerouslyAllowReservedSystemTypeNamesInUserModels: true }),
     },
     {
         id: 'DECL-VAL-025',
-        covers: 'ClassDeclaration.process: properties that are not an array',
+        covers: 'ClassDeclaration.process: properties that are not an array (with the BC-19 opt-out, which v5.0.0 ignores; strict-ast.checks.js covers the default)',
         run: (core) => {
-            const mm = new core.ModelManager();
+            const mm = new core.ModelManager({ metamodelValidation: false });
             const ast = JSON.parse(JSON.stringify(new core.ModelManager().addCTOModel(`${T}\nconcept C { o String a }`, 'x.cto', true).getAst()));
             ast.declarations[0].properties = {};
             const mf = new core.ModelFile(mm, ast, undefined, 'x.cto');

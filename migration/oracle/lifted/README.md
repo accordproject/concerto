@@ -343,6 +343,22 @@ without editing `packages/concerto-core/test/**`:
   parity and its reads go to Rust. The `engine` field is true on the
   engine-less reference and pins the Rust path against `src`.
 
+* `modelfile-header.checks.js` (task P5-59, accordproject/concerto-rust#390):
+  the ModelFile header routes that lost their coverage with P5-35's lifted
+  checks. The eager constructor (`fromAst`, for a manager with a decorator
+  factory) and the staged constructor without a staged header
+  (`_fromAstHeader`, for an import `uri` that is neither a string, `false`
+  nor null, which reaches the constructor only with `metamodelValidation:
+  false`), each for a ModelFile whose import names are not recorded, so
+  `getImports()` takes its TS body through
+  `ModelUtil.importFullyQualifiedNames`.
+* `valuegenerator-regex.checks.js` (task P5-59): `Factory.newConcept` with
+  `generate: 'empty'` and `'sample'` on a regex field with exactly one
+  match and pinned length bounds, so the padding and truncation of a
+  generated regex value (`getRegexString`, `isLengthInRange`) are covered
+  every run, not only when RandExp happens to generate an out-of-range
+  value.
+
 `serializer-fallback.checks.js` also passes a boxed `utcOffset`
 (`new Number(0)`) to `fromJSON`: the codec cannot carry it, so plain, valid
 primitive values take `convertToObject`'s TS switch too.

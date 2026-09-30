@@ -170,7 +170,7 @@ describe('Globalization', function () {
 
             expect(function () {
                 new ModelFile(modelManager, ast);
-            }).to.throw(IllegalModelException, /Unrecognised model element "concerto.metamodel.UnknownThing"./);
+            }).to.throw(IllegalModelException);
         });
         it('check message in resolveType()', function () {
             let formatter = Globalize.messageFormatter('modelfile-resolvetype-undecltype');

@@ -75,6 +75,17 @@
  * record carries no stack, so the decorator site is identified by Rust's
  * message, which only that check raises; the pair is required together, as
  * for DV-017, and any other Rust outcome stays unresolved.
+ *
+ * DV-021 (BREAKING-CHANGES-PLAN.md BC-19, with BC-17, BC-18 and BC-20;
+ * release R1 by maintainer decision 2026-09-29, task P5-49,
+ * accordproject/concerto-rust#370) is an intended breaking change, not a
+ * parity failure: `new ModelFile` checks the AST's shape against the
+ * metamodel at load, so an AST TS 5.0.0 loads (T2a's 17,229 cases), iterates
+ * (T2b's string `decorators`), coerces (T2c's non-string names) or crashes on
+ * with a `TypeError` (BC-18) is rejected with an `IllegalModelException`.
+ * The discriminator is Rust's side alone, on a model-loading op: the
+ * exception class and one of the four load-check message prefixes, which
+ * only that check raises. Whatever TS did, the case is expected.
  */
 const EXPECTED = [
     {
@@ -119,6 +130,17 @@ const EXPECTED = [
             if (t.class !== 'TypeError' || !/^Cannot read properties of (undefined|null) \(reading 'name'\)$/.test(t.message)) { return false; }
             return r.class === 'IllegalModelException' && typeof r.message === 'string' &&
                 /^Invalid decorator\. Expected object\. Found (null|undefined)( |$)/.test(r.message);
+        },
+    },
+    {
+        dv: 'DV-021',
+        issue: 'accordproject/concerto-rust#370',
+        description: 'Model loading (BC-19, with BC-17, BC-18 and BC-20; R1): the strict AST shape check `new ModelFile` runs rejects an AST that does not have the metamodel\'s shape with an IllegalModelException, where TS 5.0.0 loads it, iterates a string `decorators`, coerces a non-string name or throws a TypeError. An intended breaking change, not a parity failure.',
+        match(d) {
+            if (typeof d.op !== 'string' || !/^(ModelManager|BaseModelManager|AstModelManager|ModelFile|MetaModel)\./.test(d.op)) { return false; }
+            const r = d.rust && d.rust.error;
+            if (!r || r.class !== 'IllegalModelException' || typeof r.message !== 'string') { return false; }
+            return /^(Model AST does not conform to the metamodel: |Invalid decorators\. Expected array\. Found |Invalid name\. Expected a string\. Found |Invalid super type name\. Expected a non-empty string\. Found )/.test(r.message);
         },
     },
 ];
