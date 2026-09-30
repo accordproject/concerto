@@ -943,6 +943,52 @@ function checkRecordedImportNames(modelFile: any): void {
 const lazyFiles = new WeakSet<object>();
 
 /**
+ * P5-49 (BC-19 with BC-17 and BC-20, R1): for the namespaces a manager
+ * never writes into rustHandle (the system models and the metamodel copy
+ * every manager builds, `_needsRustWrite`), the JSON text that last passed
+ * `checkAstShape`, by namespace, so that `new ModelManager()` and
+ * `clearModelFiles()` do not check the same system ASTs again. Keyed by
+ * namespace rather than by AST object, because each manager builds its
+ * system models from fresh AST objects.
+ */
+const shapeCheckedUnmirrored = new Map<string, string>();
+
+/**
+ * P5-49 (BC-19 with BC-17 and BC-20, R1): the strict AST shape check at
+ * model load. Called by the ModelFile constructor after its own argument
+ * checks and before `stageModelFile`, unless the manager was built with
+ * `metamodelValidation: false` (the opt-out). The AST crosses into Rust as
+ * JSON text (`rustHandle.checkAstShape`, concerto-core
+ * `instance::metamodel::check_ast_shape`), which throws an
+ * `IllegalModelException` for an AST that does not have the metamodel's
+ * shape: a non-array `decorators` (BC-17), a non-string name or an empty
+ * super type name (BC-20), or anything else the metamodel check rejects
+ * (BC-19). Returns the JSON text, which `stageModelFile` then reuses, or
+ * undefined when the check is off.
+ * @param {object} modelFile the ModelFile being constructed
+ * @return {string | undefined} the AST's JSON text, when it was checked
+ * @throws {IllegalModelException} if the AST does not have the metamodel's shape
+ */
+function checkAstShape(modelFile: any): string | undefined {
+    const manager = modelFile.modelManager;
+    if (manager.options?.metamodelValidation === false) {
+        return undefined;
+    }
+    const ast = modelFile.ast;
+    const text = JSON.stringify(ast);
+    const namespace = ast.namespace;
+    const unmirrored = typeof namespace === 'string' && !manager._needsRustWrite(namespace);
+    if (unmirrored && shapeCheckedUnmirrored.get(namespace) === text) {
+        return text;
+    }
+    manager.rustHandle.checkAstShape(text);
+    if (unmirrored) {
+        shapeCheckedUnmirrored.set(namespace, text);
+    }
+    return text;
+}
+
+/**
  * Called by the ModelFile constructor, before `process()` and the header
  * part of `fromAst` (P5-10b: before `process()`, so the file's own
  * decorators can be deferred too): loads the AST in the manager's
@@ -952,9 +998,11 @@ const lazyFiles = new WeakSet<object>();
  * failure the caller builds the ModelFile eagerly, which throws the TS error
  * itself.
  * @param {object} modelFile the ModelFile being constructed
+ * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
+ * already computed it
  * @return {boolean} true if the declarations may be built lazily
  */
-function stageModelFile(modelFile: any): boolean {
+function stageModelFile(modelFile: any, checkedText?: string): boolean {
     // P5-35 (BC-47): the ModelFile constructor accepts only a
     // BaseModelManager, which always has a rustHandle.
     const manager = modelFile.modelManager;
@@ -976,7 +1024,7 @@ function stageModelFile(modelFile: any): boolean {
             lazyFiles.add(modelFile);
             return true;
         }
-        const text = JSON.stringify(ast);
+        const text = checkedText ?? JSON.stringify(ast);
         // `ModelFile`'s constructor only rejects a *truthy* non-string
         // `definitions`/`fileName` (introspect/modelfile.ts): `0`, `false`
         // and `NaN` are stored as-is, and `?? undefined` maps only
@@ -2544,6 +2592,7 @@ export {
     mapDeclarationProcess,
     mapKeyTypeProcess,
     mapValueTypeProcess,
+    checkAstShape,
     stageModelFile,
     applyStagedHeader,
     applyStagedFileHeader,

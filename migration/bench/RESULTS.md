@@ -1,3 +1,39 @@
+# P5-49 (BC-19): strict AST shape check at model load, crossings with the check on and off (2026-09-29)
+
+Task P5-49 (accordproject/concerto-rust#370) checks every `ModelFile`'s AST
+against the metamodel when it is constructed (BREAKING-CHANGES-PLAN.md BC-19,
+with BC-17, BC-18 and BC-20), unless the manager was built with
+`metamodelValidation: false`. The check is one engine call per model file
+(`checkAstShape`, which takes the JSON text the staging call then reuses); the
+system models' checks are cached by namespace, so `new ModelManager()` costs
+nothing more.
+
+**Counts only, no timings** (local machine; the issue asks for timings on
+cloud-3 only). TS->WASM boundary crossings per call, counted by
+`results/P5-49/count-load.cjs` with the P5-15 counting engine
+(`lib/p515-engine-counter.cjs`). "off" is `metamodelValidation: false`,
+which runs exactly the load path of the integration head before P5-49 (the
+check is the only change on that path); "on" is the R1 default.
+
+| | |
+|---|---|
+| Machine | Local macOS (Darwin 22.6), Node v22.23.2; counts do not depend on the machine |
+| Heads | the P5-49 branches, merged with the integration heads concerto `e70c4960f` and concerto-rust `2bf5064` (after P5-48 and P5-40) |
+| Raw data | `results/P5-49/crossings.txt` |
+
+| operation | off (before) | on (R1 default) | of which `checkAstShape` |
+|---|---:|---:|---:|
+| `new ModelManager()` | 10 | 10 | 0 |
+| `addCTOModel`, one file | 3 | 4 | 1 |
+| `new ModelFile` + `addModelFile`, one file | 3 | 4 | 1 |
+| `addModelFiles`, two files | 7 | 9 | 2 |
+| `updateModelFile` (string) | 5 | 6 | 1 |
+| `fromAst`, two models | 16 | 18 | 2 |
+
+The check itself runs `validateAst`'s strict check on the resident metamodel
+manager (P5-21), so its cost inside the engine grows with the size of the AST;
+timing it is left for cloud-3.
+
 # P5-40 (F-B): DCS extract without clones, borrowed AST walk (2026-09-29)
 
 Task P5-40 (accordproject/concerto-rust#350, F-B from the P5-30 report on

@@ -140,6 +140,34 @@ test('a maintainer-accepted signature (DV-018) is expected, not unresolved', () 
     }
 });
 
+test('an intended breaking change (DV-021, BC-19 at load) is expected whatever TS did', () => {
+    const shapes = [
+        'Model AST does not conform to the metamodel: Unexpected properties for type concerto.metamodel@1.0.0.Model: x',
+        'Invalid decorators. Expected array. Found "x"',
+        'Invalid name. Expected a string. Found 1e308',
+        'Invalid super type name. Expected a non-empty string. Found ""',
+    ];
+    // (TS's own IllegalModelException agrees on the class: not a divergence.)
+    const tsOutcomes = [OK, err('TypeError', "Cannot read properties of undefined (reading 'name')")];
+    for (const message of shapes) {
+        for (const ts of tsOutcomes) {
+            for (const op of ['ModelManager.fromAst', 'ModelManager.addModelFile', 'ModelFile.new']) {
+                const cls = classifyCase({ ...CASE, op }, verdict(ts), verdict(err('IllegalModelException', message)), expectedDivergence);
+                assert.equal(cls.kind, 'expected', `${op}: ${message}`);
+                assert.equal(cls.expected.dv, 'DV-021');
+            }
+        }
+    }
+    // Another class, another message or another op stays unresolved.
+    for (const [op, rust] of [
+        ['ModelManager.fromAst', err('TypeError', 'Invalid name. Expected a string. Found 1')],
+        ['ModelManager.fromAst', err('IllegalModelException', 'bad model')],
+        ['Serializer.fromJSON', err('IllegalModelException', 'Invalid name. Expected a string. Found 1')],
+    ]) {
+        assert.equal(classifyCase({ ...CASE, op }, verdict(OK), verdict(rust), expectedDivergence).kind, 'divergence', `${op}: ${rust.error.message}`);
+    }
+});
+
 test('DV-018 needs both sides: the decorator message with another TS outcome, or the TS crash with another Rust outcome, is unresolved', () => {
     const crash = err('TypeError', "Cannot read properties of null (reading 'name')");
     const rejected = err('IllegalModelException', "Invalid decorator. Expected object. Found null File 'x.cto': ");

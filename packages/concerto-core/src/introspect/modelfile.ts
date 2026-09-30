@@ -159,7 +159,12 @@ class ModelFile extends Decorated {
         // that a lazily built file's own decorators are built on first read
         // too (staging never throws, so every error keeps its point).
         const views = loadEngine('../engine/views');
-        const lazy: boolean = views.stageModelFile(this);
+        // P5-49 (BC-19 with BC-17 and BC-20, R1): the AST's shape is checked
+        // against the metamodel first, unless the manager opted out with
+        // `metamodelValidation: false`, so a malformed AST is an
+        // IllegalModelException here, before any part of it is walked.
+        const checkedText: string | undefined = views.checkAstShape(this);
+        const lazy: boolean = views.stageModelFile(this, checkedText);
         // Set up the decorators.
         this.process();
         // Populate from the AST.
