@@ -59,6 +59,24 @@ if [[ ${#FILES[@]} -eq 0 ]]; then
   # test/serializer/jsongenerator.js leaves a sinon stub on ModelUtil.isEnum
   # for the rest of the process.
   FILES=("../../migration/oracle/lifted/fallbacks.spec.js" "test/")
+
+  # The lifted checks also run each case against the published reference
+  # (migration/oracle/reference, concerto-core@5.0.0). Without its
+  # dependencies those halves are silently skipped (about 400 pending), so
+  # a gate run installs them first. Set CONCERTO_SKIP_REFERENCE_INSTALL=1 to
+  # opt out (the run then says so).
+  REF_DIR="$(cd "$SCRIPT_DIR/../oracle/reference" && pwd)"
+  if [[ ! -d "$REF_DIR/node_modules" ]]; then
+    if [[ "${CONCERTO_SKIP_REFERENCE_INSTALL:-}" == "1" ]]; then
+      echo "WARNING: $REF_DIR has no node_modules; the reference@5.0.0 lifted checks will be skipped (pending)" >&2
+    else
+      echo "run-core-tests: installing reference dependencies in $REF_DIR" >&2
+      (cd "$REF_DIR" && npm ci --no-audit --no-fund --silent) || {
+        echo "ERROR: npm ci failed in $REF_DIR; the reference@5.0.0 lifted checks cannot run" >&2
+        exit 2
+      }
+    fi
+  fi
 fi
 
 MOCHA_ARGS=(-r ts-node/register --recursive -t 10000)
