@@ -351,6 +351,9 @@ class BaseModelManager {
         }
 
         const {rootModelAst, rootModelCto, rootModelFile} = getRootModel();
+        // P5-73: the engine's precomputed verdict applies to this AST while
+        // it is exactly the fixed root model (engine/views.ts `systemModelAsts`).
+        engineViews().markSystemModelAst(rootModelAst);
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
 
         this.addModelFile(m, rootModelCto, rootModelFile, true);
@@ -411,6 +414,10 @@ class BaseModelManager {
         }
         const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
 
+        // P5-73: the engine's precomputed verdict applies to this AST while
+        // it is exactly the fixed decorator model (engine/views.ts
+        // `systemModelAsts`).
+        engineViews().markSystemModelAst(decoratorModelAst);
         const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
 
         this.addModelFile(m, decoratorModelCto, decoratorModelFile, true);

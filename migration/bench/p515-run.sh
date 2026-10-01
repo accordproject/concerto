@@ -25,6 +25,9 @@ BIN=$3
 REF=migration/oracle/reference/node_modules/@accordproject/concerto-core/dist
 SETS="concerto-core-test-data conformance synthetic-large"
 mkdir -p "$OUT"
+# Absolute, because the crate round copies the criterion estimates from inside the
+# target dir (a relative OUT there loses every crate round).
+OUT=$(cd "$OUT" && pwd)
 
 loads() { sysctl -n vm.loadavg | tr -d '{}' | awk '{print $1" "$2" "$3}'; }
 

@@ -29,7 +29,7 @@ JSON need only the Node.js upgrade. Check the following:
 grep -rnE "strictQualifiedDateTimes|regExp *:|metamodelValidation|setCurrentTime" .
 grep -rnE "\.modelFiles\b|DecoratorExtractor|processType|isValidIdentifier" .
 grep -rnE "name *=== *['\"]BaseException['\"]|instanceof +TypeError" .
-grep -rnE "@accordproject/concerto-[a-z-]+/(dist|src)/" .
+grep -rnE "@accordproject/concerto-core/(dist|src)/" .
 grep -rnE "length *= *\[ *, *\]" --include=*.cto .
 ```
 
@@ -65,6 +65,37 @@ grep -rnE "length *= *\[ *, *\]" --include=*.cto .
 - **Pending:** an asynchronous `await init()` entry for browsers and smaller
   engine builds are proposed in P5-39 (accordproject/concerto-rust#349). They
   wait on a maintainer decision and are **not in R1** as this guide is written.
+
+### Deep imports (BC-34)
+
+- **Why:** R1 removes the `./dist/*` entry from the `exports` map of
+  `@accordproject/concerto-core`. 5.0.0 exported `./dist/*`, so deep imports
+  resolved. In R1 the package exports only its root (`.`, with the `types`,
+  `browser`, `import` and `require` conditions) and `./package.json`. The
+  modules behind the root exports, such as the serializer visitors
+  (`JSONPopulator`, `JSONGenerator`, `ResourceValidator`, with their `visitX`
+  methods and `parameters.path` argument), are internal.
+- **Who:** code that imports or requires a path under
+  `@accordproject/concerto-core/dist/`. For example,
+  `require('@accordproject/concerto-core/dist/serializer/jsonpopulator')` now
+  fails with `ERR_PACKAGE_PATH_NOT_EXPORTED` in Node.js, and bundlers report
+  that the path is not exported. TypeScript type imports from
+  `.../dist/...` fail in the same way under `moduleResolution` `node16`,
+  `nodenext` or `bundler`. Only concerto-core changes: the other packages keep
+  their `./dist/*` export in R1.
+- **What to do:** import from the package root.
+
+  | 5.0.0 deep import (under `@accordproject/concerto-core/dist/`) | R1 |
+  |---|---|
+  | A module whose class is a root export: `modelmanager`, `factory`, `serializer`, `modelloader`, `modelutil`, `datetimeutil`, `decoratormanager`, `globalize`, `introspect/*` (for example `introspect/classdeclaration`, `introspect/modelfile`, `introspect/metamodel`), `model/*` (`resource`, `relationship`, `typed`, `identifiable`), and the exceptions `securityexception`, `typenotfoundexception`, `metamodelexception` and `introspect/illegalmodelexception` | The same class as a named root export, for example `const { ClassDeclaration } = require('@accordproject/concerto-core')` or `import { ClassDeclaration } from '@accordproject/concerto-core'`. |
+  | `serializer/jsonpopulator`, `serializer/jsongenerator` | `Serializer`: `serializer.fromJSON(json, options)` and `serializer.toJSON(resource, options)`. |
+  | `serializer/resourcevalidator` | `resource.validate()` on a resource from `Factory`, or the `validate` option of `Serializer.toJSON` and `fromJSON` (on by default). |
+  | `serializer/validationexception` | Check `err.name === 'ValidationException'`, or catch `BaseException` from `@accordproject/concerto-util`. |
+  | `basemodelmanager` | `ModelManager`, which extends `BaseModelManager`. |
+  | `types` (TypeScript only: `ModelManagerOptions`, `SerializerOptions` and the other option types) | Derive the type from a root export, for example `ConstructorParameters<typeof ModelManager>[0]` or `ConstructorParameters<typeof Serializer>[2]`. |
+
+  The visitor methods (`visitX`) and the `parameters.path` argument have no
+  public replacement.
 
 ---
 
@@ -378,15 +409,6 @@ cannot see into. No production use was found for any of them.
     with a decorator factory builds its files eagerly.
 - **What to do:** call the getters (`getDeclarations()`, `getDecorators()`,
   `getValidator()`), and change models only through the `ModelManager`.
-
-### Deep imports of visitor internals (BC-34)
-
-- **Who:** code that imports `JSONPopulator`, `JSONGenerator` or
-  `ResourceValidator` internals (`visitX` methods, the `parameters.path`
-  argument) through deep `src/...` or `dist/...` paths.
-- **What changes:** these internals are not supported. 5.x already restricted
-  the public API to the package exports, so they were never supported.
-- **What to do:** use the package root exports only.
 
 ---
 
