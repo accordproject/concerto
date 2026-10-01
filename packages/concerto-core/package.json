@@ -157,8 +157,7 @@
       "import": "./dist/esm/index.mjs",
       "require": "./dist/index.js"
     },
-    "./package.json": "./package.json",
-    "./dist/*": "./dist/*"
+    "./package.json": "./package.json"
   },
   "sideEffects": [
     "./dist/dayjs-setup.js",
