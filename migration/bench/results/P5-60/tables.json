@@ -1,0 +1,3822 @@
+{
+  "nowRounds": [
+    1,
+    2,
+    3
+  ],
+  "beforeRounds": [
+    1,
+    2,
+    3
+  ],
+  "rows": [
+    {
+      "category": "Model loading",
+      "op": "mm_new",
+      "set": "conformance",
+      "tsRefUs": 536.3354999999999,
+      "crateUs": 1.546752814256377,
+      "apiUs": 783.8190000000001,
+      "crateVsTs": 0.002883927717364182,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.4614341209932966,
+      "beforeCrateVsTs": 0.02389273328900641,
+      "beforeApiVsTs": 1.355126595200206,
+      "beforeApiUs": 726.8025,
+      "crossingsPerItem": 10,
+      "inEngineShare": 0.3458547892566081,
+      "stages": {
+        "views": 53.9,
+        "core": 23.3,
+        "ts-core": 7.3,
+        "gc": 6.8,
+        "glue": 6.5,
+        "other": 2.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.stageModelFileWithHeader x2.0",
+        "new ModelManagerHandle x1.0",
+        "modelFileIsCompatibleVersion x3.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "modelfile_new",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 50.32417142857143,
+      "crateUs": 43.14953067460318,
+      "apiUs": 715.3118285714286,
+      "crateVsTs": 0.8574315174935028,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 14.214080595181183,
+      "beforeCrateVsTs": 1.507929188892409,
+      "beforeApiVsTs": 4.352079318884535,
+      "beforeApiUs": 219.01478571428572,
+      "crossingsPerItem": 3,
+      "inEngineShare": 0.908002289469958,
+      "stages": {
+        "core": 84,
+        "views": 10.3,
+        "glue": 3.7,
+        "other": 1,
+        "gc": 0.9,
+        "ts-core": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.0",
+        "modelFileIsCompatibleVersion x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "modelfile_new",
+      "set": "conformance",
+      "tsRefUs": 16.149390243902438,
+      "crateUs": 22.103748732349167,
+      "apiUs": 350.5894512195122,
+      "crateVsTs": 1.3687048488220743,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 21.709144798942802,
+      "beforeCrateVsTs": 2.302952727343137,
+      "beforeApiVsTs": 9.023692656220504,
+      "beforeApiUs": 145.72713414634148,
+      "crossingsPerItem": 3,
+      "inEngineShare": 0.8480548874760045,
+      "stages": {
+        "core": 79.7,
+        "views": 13.4,
+        "glue": 4,
+        "gc": 1.7,
+        "other": 1.1,
+        "ts-core": 0
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.0",
+        "modelFileIsCompatibleVersion x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "modelfile_new",
+      "set": "synthetic-large",
+      "tsRefUs": 1150.4565,
+      "crateUs": 1639.10878125,
+      "apiUs": 31542.0425,
+      "crateVsTs": 1.424746421311888,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 27.416979694582107,
+      "beforeCrateVsTs": 2.3593619902186656,
+      "beforeApiVsTs": 6.915357947041022,
+      "beforeApiUs": 7955.818499999999,
+      "crossingsPerItem": 3,
+      "inEngineShare": 0.966936615694252,
+      "stages": {
+        "core": 83.6,
+        "gc": 9.6,
+        "glue": 4.2,
+        "views": 2.5,
+        "other": 0.1,
+        "ts-core": 0
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.0",
+        "modelFileIsCompatibleVersion x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_model_file",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 90.05868571428572,
+      "crateUs": 68.5179996031746,
+      "apiUs": 797.5547428571427,
+      "crateVsTs": 0.7608150070116537,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 8.855944726835261,
+      "beforeCrateVsTs": 3.7889669747954606,
+      "beforeApiVsTs": 7.17135604275815,
+      "beforeApiUs": 645.8429,
+      "crossingsPerItem": 4.285714285714285,
+      "inEngineShare": 0.8633088279974012,
+      "stages": {
+        "core": 75.9,
+        "views": 10,
+        "gc": 7.4,
+        "glue": 4.3,
+        "other": 1.3,
+        "ts-core": 1.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.1",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_model_file",
+      "set": "conformance",
+      "tsRefUs": 26.98309756097561,
+      "crateUs": 29.313680052905312,
+      "apiUs": 524.7590609756096,
+      "crateVsTs": 1.0863719403105265,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 19.447695350386457,
+      "beforeCrateVsTs": 7.539085481395912,
+      "beforeApiVsTs": 22.31843014642409,
+      "beforeApiUs": 602.2203780487805,
+      "crossingsPerItem": 4.2439024390243905,
+      "inEngineShare": 0.836652060873587,
+      "stages": {
+        "core": 72.9,
+        "views": 12.8,
+        "gc": 7.5,
+        "glue": 4.5,
+        "other": 1.3,
+        "ts-core": 1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.0",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_model_file",
+      "set": "synthetic-large",
+      "tsRefUs": 2967.2655,
+      "crateUs": 2900.845859126984,
+      "apiUs": 42262.40700000001,
+      "crateVsTs": 0.9776158753326873,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 14.242880187162223,
+      "beforeCrateVsTs": 1.8095773701409599,
+      "beforeApiVsTs": 4.396449020150033,
+      "beforeApiUs": 13045.431499999999,
+      "crossingsPerItem": 14,
+      "inEngineShare": 0.9381949084414809,
+      "stages": {
+        "core": 82.4,
+        "gc": 9.7,
+        "glue": 3.8,
+        "views": 3.6,
+        "ts-core": 0.4,
+        "other": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x3.0",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_cto_model",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 591.7344142857143,
+      "crateUs": 68.5179996031746,
+      "apiUs": 1773.7344857142857,
+      "crateVsTs": 0.11579181123998515,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.997517877771855,
+      "beforeCrateVsTs": 0.576659693482273,
+      "beforeApiVsTs": 3.060799959750283,
+      "beforeApiUs": 1811.1806714285715,
+      "crossingsPerItem": 4.285714285714285,
+      "inEngineShare": 0.4640656232410446,
+      "stages": {
+        "core": 44.7,
+        "cto-parser": 34.5,
+        "gc": 8.7,
+        "views": 6.7,
+        "glue": 3.5,
+        "ts-core": 1.2,
+        "other": 0.8
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.1",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_cto_model",
+      "set": "conformance",
+      "tsRefUs": 173.26037804878047,
+      "crateUs": 29.313680052905312,
+      "apiUs": 790.2182804878048,
+      "crateVsTs": 0.1691885957021992,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 4.560871270091096,
+      "beforeCrateVsTs": 1.1741165600352477,
+      "beforeApiVsTs": 5.202587941974547,
+      "beforeApiUs": 901.4023536585366,
+      "crossingsPerItem": 4.2439024390243905,
+      "inEngineShare": 0.40940465989875324,
+      "stages": {
+        "core": 40.5,
+        "cto-parser": 36.8,
+        "views": 12.1,
+        "gc": 4,
+        "glue": 3.4,
+        "ts-core": 1.8,
+        "other": 1.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.0",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_cto_model",
+      "set": "synthetic-large",
+      "tsRefUs": 26201.8845,
+      "crateUs": 2900.845859126984,
+      "apiUs": 99786.774,
+      "crateVsTs": 0.11071134441215418,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 3.808381568890589,
+      "beforeCrateVsTs": 0.20492787455803035,
+      "beforeApiVsTs": 2.3183794852618327,
+      "beforeApiUs": 60745.911499999995,
+      "crossingsPerItem": 14,
+      "inEngineShare": 0.5277169761169592,
+      "stages": {
+        "core": 45.4,
+        "cto-parser": 42.3,
+        "gc": 6.5,
+        "views": 3,
+        "glue": 2.5,
+        "ts-core": 0.2,
+        "other": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x3.0",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_type",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 0.5743603896103896,
+      "crateUs": 0.095450105441807,
+      "apiUs": 0.559133116883117,
+      "crateVsTs": 0.16618504194997574,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.9734882958457461,
+      "beforeCrateVsTs": 0.22089641149114758,
+      "beforeApiVsTs": 7.516639062084872,
+      "beforeApiUs": 4.317259740259741,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 44,
+        "ts-core": 38.2,
+        "views": 15.8,
+        "gc": 1.4,
+        "core": 0.4,
+        "glue": 0.1
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_type",
+      "set": "conformance",
+      "tsRefUs": 0.6406826923076924,
+      "crateUs": 0.10548046104115058,
+      "apiUs": 0.7270384615384615,
+      "crateVsTs": 0.164637600340377,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.1347871111044407,
+      "beforeCrateVsTs": 0.15569226490768354,
+      "beforeApiVsTs": 5.040611727274091,
+      "beforeApiUs": 3.229432692307692,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 49,
+        "ts-core": 38.8,
+        "views": 11.1,
+        "gc": 1,
+        "core": 0.1,
+        "glue": 0
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_type",
+      "set": "synthetic-large",
+      "tsRefUs": 0.6662159468438539,
+      "crateUs": 0.08803324019047921,
+      "apiUs": 0.4721196013289037,
+      "crateVsTs": 0.13213919691885165,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.7086585116515651,
+      "beforeCrateVsTs": 0.1438919830819604,
+      "beforeApiVsTs": 1.9466167325750134,
+      "beforeApiUs": 1.2968671096345517,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 50.4,
+        "ts-core": 35,
+        "views": 13.2,
+        "gc": 1.1,
+        "core": 0.3,
+        "glue": 0.1
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_type_first",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 0.5696266233766233,
+      "crateUs": null,
+      "apiUs": 1.4440551948051947,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.535090769186925,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 7.440650916241559,
+      "beforeApiUs": 4.238392857142857,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.5331369636484713,
+      "stages": {
+        "ts-core": 24.8,
+        "views": 23.6,
+        "core": 17.8,
+        "glue": 16.5,
+        "other": 15.7,
+        "gc": 1.5
+      },
+      "topBindings": [
+        "ModelManagerHandle.getTypeName x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_type_first",
+      "set": "conformance",
+      "tsRefUs": 0.9116538461538461,
+      "crateUs": null,
+      "apiUs": 1.3661634615384617,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.4985550352276085,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 6.39833565371472,
+      "beforeApiUs": 5.833067307692308,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.47173606549832864,
+      "stages": {
+        "views": 22.8,
+        "other": 20.7,
+        "ts-core": 20.1,
+        "core": 17.8,
+        "glue": 17.5,
+        "gc": 1
+      },
+      "topBindings": [
+        "ModelManagerHandle.getTypeName x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_type_first",
+      "set": "synthetic-large",
+      "tsRefUs": 0.6910099667774086,
+      "crateUs": null,
+      "apiUs": 1.9632392026578072,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.8411156091041088,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 1.9546429223919923,
+      "beforeApiUs": 1.3506777408637873,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.4379706928374093,
+      "stages": {
+        "views": 26.6,
+        "glue": 20.2,
+        "ts-core": 19.7,
+        "other": 16.3,
+        "core": 15.7,
+        "gc": 1.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.getTypeName x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "resolve_type",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 0.34920779220779224,
+      "crateUs": 0.09945829962584689,
+      "apiUs": 0.13475974025974025,
+      "crateVsTs": 0.28481122656812113,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.3859012979285209,
+      "beforeCrateVsTs": 0.205895939782633,
+      "beforeApiVsTs": 7.321348878723641,
+      "beforeApiUs": 2.556672077922078,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "ts-core": 61.2,
+        "other": 38.5,
+        "gc": 0.3,
+        "glue": 0,
+        "views": 0
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "resolve_type",
+      "set": "conformance",
+      "tsRefUs": 0.38952884615384614,
+      "crateUs": 0.09223403925855081,
+      "apiUs": 0.18,
+      "crateVsTs": 0.23678359168841265,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.46209671447261236,
+      "beforeCrateVsTs": 0.1670437094411264,
+      "beforeApiVsTs": 7.603268248130137,
+      "beforeApiUs": 2.9616923076923074,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "ts-core": 56.5,
+        "other": 43.2,
+        "gc": 0.3,
+        "glue": 0
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "resolve_type",
+      "set": "synthetic-large",
+      "tsRefUs": 0.4663737541528239,
+      "crateUs": 0.06649100718723715,
+      "apiUs": 0.019416943521594683,
+      "crateVsTs": 0.14257021668815653,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.04163386843426878,
+      "beforeCrateVsTs": 0.16403136162306792,
+      "beforeApiVsTs": 1.9678690112802175,
+      "beforeApiUs": 0.9177624584717607,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "ts-core": 67.2,
+        "other": 32.1,
+        "gc": 0.6
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "resolve_type_first",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 0.42341883116883117,
+      "crateUs": null,
+      "apiUs": 1.2859935064935064,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 3.0371665401455377,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 6.64708272948249,
+      "beforeApiUs": 2.8145,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.40575090465108354,
+      "stages": {
+        "glue": 30.7,
+        "core": 29.2,
+        "other": 28.4,
+        "ts-core": 10.1,
+        "gc": 1.6
+      },
+      "topBindings": [
+        "ModelManagerHandle.resolveType x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "resolve_type_first",
+      "set": "conformance",
+      "tsRefUs": 0.6862019230769231,
+      "crateUs": null,
+      "apiUs": 1.2049711538461538,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.756000840748266,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 3.2566944580676798,
+      "beforeApiUs": 2.2347499999999996,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.6737434939038363,
+      "stages": {
+        "glue": 30.7,
+        "other": 29.9,
+        "core": 29.8,
+        "ts-core": 8.4,
+        "gc": 1.3
+      },
+      "topBindings": [
+        "ModelManagerHandle.resolveType x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "resolve_type_first",
+      "set": "synthetic-large",
+      "tsRefUs": 0.5743338870431893,
+      "crateUs": null,
+      "apiUs": 0.8711345514950167,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.516773728918956,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 1.538743423697538,
+      "beforeApiUs": 0.8837524916943521,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.6982080938781636,
+      "stages": {
+        "glue": 30.9,
+        "other": 27.4,
+        "core": 26.9,
+        "ts-core": 13.1,
+        "gc": 1.8,
+        "views": 0
+      },
+      "topBindings": [
+        "ModelManagerHandle.resolveType x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_namespaces",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 1.419,
+      "crateUs": 1.346985683262186,
+      "apiUs": 0.313,
+      "crateVsTs": 0.9492499529684186,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.22057787174066243,
+      "beforeCrateVsTs": 1.0452408913987916,
+      "beforeApiVsTs": 12.708245243128964,
+      "beforeApiUs": 18.033,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 71.2,
+        "ts-core": 21.1,
+        "gc": 7.6,
+        "glue": 0
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_namespaces",
+      "set": "conformance",
+      "tsRefUs": 1.2730000000000001,
+      "crateUs": 1.587199913644214,
+      "apiUs": 0.2815,
+      "crateVsTs": 1.2468184710480863,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.22113118617439115,
+      "beforeCrateVsTs": 1.3734527738354865,
+      "beforeApiVsTs": 9.290652003142183,
+      "beforeApiUs": 11.827,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 70.9,
+        "ts-core": 20.8,
+        "gc": 8.3,
+        "glue": 0
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_namespaces",
+      "set": "synthetic-large",
+      "tsRefUs": 0.1405,
+      "crateUs": 0.07574915664017962,
+      "apiUs": 0.28400000000000003,
+      "crateVsTs": 0.5391399049123103,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.02135231316726,
+      "beforeCrateVsTs": 0.5752349247483598,
+      "beforeApiVsTs": 12.91103202846975,
+      "beforeApiUs": 1.814,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 82.9,
+        "ts-core": 13.5,
+        "gc": 3.5,
+        "glue": 0
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_namespaces_first",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 0.8294999999999999,
+      "crateUs": null,
+      "apiUs": 17.0275,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 20.527426160337555,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 18.14526823387583,
+      "beforeApiUs": 15.051499999999999,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.9342611830848203,
+      "stages": {
+        "other": 49.8,
+        "glue": 27.7,
+        "core": 18.8,
+        "gc": 2,
+        "ts-core": 1.7
+      },
+      "topBindings": [
+        "ModelManagerHandle.getNamespaces x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_namespaces_first",
+      "set": "conformance",
+      "tsRefUs": 0.9359999999999999,
+      "crateUs": null,
+      "apiUs": 26.373,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 28.176282051282055,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 13.855769230769232,
+      "beforeApiUs": 12.969,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.9508065187607392,
+      "stages": {
+        "other": 47.7,
+        "glue": 29,
+        "core": 19.9,
+        "gc": 2,
+        "ts-core": 1.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.getNamespaces x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_namespaces_first",
+      "set": "synthetic-large",
+      "tsRefUs": 0.152,
+      "crateUs": null,
+      "apiUs": 3.3604999999999996,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 22.108552631578945,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 8.766447368421053,
+      "beforeApiUs": 1.3325,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.5883446000064075,
+      "stages": {
+        "other": 51,
+        "glue": 24.4,
+        "core": 13.5,
+        "ts-core": 7.4,
+        "gc": 3.6,
+        "views": 0
+      },
+      "topBindings": [
+        "ModelManagerHandle.getNamespaces x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "derives_from",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 1.0809025974025974,
+      "crateUs": 0.21402212514757968,
+      "apiUs": 2.073818181818182,
+      "crateVsTs": 0.1980031555682016,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.9185985738229836,
+      "beforeCrateVsTs": 0.20196386781412912,
+      "beforeApiVsTs": 3.2001754185715403,
+      "beforeApiUs": 3.459077922077922,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.7266872735460892,
+      "stages": {
+        "core": 61.4,
+        "other": 19.2,
+        "glue": 19,
+        "gc": 0.3,
+        "ts-core": 0.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.derivesFrom x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "derives_from",
+      "set": "conformance",
+      "tsRefUs": 0.9583653846153846,
+      "crateUs": 0.21645470846233228,
+      "apiUs": 0.7329134615384615,
+      "crateVsTs": 0.22585822895638163,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.7647536871676532,
+      "beforeCrateVsTs": 0.21240384593493428,
+      "beforeApiVsTs": 2.7819103040032105,
+      "beforeApiUs": 2.6660865384615384,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.7658729458800013,
+      "stages": {
+        "core": 60,
+        "glue": 20.8,
+        "ts-core": 14.1,
+        "other": 4.8,
+        "gc": 0.3
+      },
+      "topBindings": [
+        "ModelManagerHandle.derivesFrom x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "derives_from",
+      "set": "synthetic-large",
+      "tsRefUs": 1.0689335548172756,
+      "crateUs": 0.28518416593144513,
+      "apiUs": 1.0338039867109634,
+      "crateVsTs": 0.26679316468851494,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.9671358729941664,
+      "beforeCrateVsTs": 0.30781057112306764,
+      "beforeApiVsTs": 0.9274714140525689,
+      "beforeApiUs": 0.9914053156146179,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.5802082916550994,
+      "stages": {
+        "core": 58.8,
+        "glue": 31,
+        "other": 9.6,
+        "gc": 0.5,
+        "ts-core": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.derivesFrom x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "is_assignable_to",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 1.9691525974025974,
+      "crateUs": 0.2977975958020852,
+      "apiUs": 1.0931623376623376,
+      "crateVsTs": 0.15123134499321886,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.555143536922567,
+      "beforeCrateVsTs": 0.14340487573846,
+      "beforeApiVsTs": 2.23599379388919,
+      "beforeApiUs": 4.403012987012986,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.7971724166082828,
+      "stages": {
+        "core": 70.9,
+        "other": 28,
+        "glue": 0.8,
+        "gc": 0.2,
+        "ts-core": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.isAssignableTo x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "is_assignable_to",
+      "set": "conformance",
+      "tsRefUs": 2.091826923076923,
+      "crateUs": 0.3463212298339958,
+      "apiUs": 0.8930961538461538,
+      "crateVsTs": 0.16555921812335356,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.42694552976327277,
+      "beforeCrateVsTs": 0.15801275014608523,
+      "beforeApiVsTs": 1.9067800505630892,
+      "beforeApiUs": 3.9886538461538468,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.7790518895428867,
+      "stages": {
+        "core": 70.8,
+        "other": 28.6,
+        "glue": 0.3,
+        "gc": 0.2,
+        "ts-core": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.isAssignableTo x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "is_assignable_to",
+      "set": "synthetic-large",
+      "tsRefUs": 2.0035398671096343,
+      "crateUs": 0.3293064213690372,
+      "apiUs": 1.2481843853820598,
+      "crateVsTs": 0.1643623003340105,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.6229895425952903,
+      "beforeCrateVsTs": 0.17926093157929504,
+      "beforeApiVsTs": 0.5874080012867592,
+      "beforeApiUs": 1.1768953488372094,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.5930313706071239,
+      "stages": {
+        "core": 68.6,
+        "other": 30.5,
+        "glue": 0.5,
+        "gc": 0.4,
+        "ts-core": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.isAssignableTo x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_decorators",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 0.19173926380368098,
+      "crateUs": 0.0055802274627878064,
+      "apiUs": 0.16062576687116564,
+      "crateVsTs": 0.029103206886729887,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.8377301742204873,
+      "beforeCrateVsTs": 0.026105517030974457,
+      "beforeApiVsTs": 0.9384228966355769,
+      "beforeApiUs": 0.17993251533742333,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 99.3,
+        "gc": 0.6,
+        "views": 0.1
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_decorators",
+      "set": "conformance",
+      "tsRefUs": 0.08733620689655172,
+      "crateUs": 0.00409942496260777,
+      "apiUs": 0.07276724137931034,
+      "crateVsTs": 0.046938436053943475,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.8331852729246866,
+      "beforeCrateVsTs": 0.046278181863650784,
+      "beforeApiVsTs": 1.1431250616918371,
+      "beforeApiUs": 0.09983620689655173,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 99.3,
+        "gc": 0.6,
+        "views": 0
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_decorators",
+      "set": "synthetic-large",
+      "tsRefUs": 0.030113861386138616,
+      "crateUs": 0.005108070377717256,
+      "apiUs": 0.03417986798679868,
+      "crateVsTs": 0.1696252204995702,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.1350210970464134,
+      "beforeCrateVsTs": 0.17415322651424253,
+      "beforeApiVsTs": 0.9479423530056441,
+      "beforeApiUs": 0.02854620462046205,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 99.4,
+        "gc": 0.5,
+        "views": 0.1
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "dcs_decorate",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 50299.2895,
+      "crateUs": 22738.5276,
+      "apiUs": 86417.31100000002,
+      "crateVsTs": 0.45206458830795215,
+      "crateRebuildVsTs": 0.7040394145792723,
+      "apiVsTs": 1.7180622601040918,
+      "beforeCrateVsTs": 2.21499769395351,
+      "beforeApiVsTs": 2.181601859405986,
+      "beforeApiUs": 109733.0235,
+      "crossingsPerItem": 122,
+      "inEngineShare": 0.9324999799278991,
+      "stages": {
+        "core": 86.2,
+        "glue": 4.6,
+        "gc": 4.1,
+        "views": 3.9,
+        "other": 0.8,
+        "ts-core": 0.5
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsDecorateModels x1.0",
+        "ModelManagerHandle.checkAstShape x34.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "dcs_decorate",
+      "set": "conformance",
+      "tsRefUs": 23345.762,
+      "crateUs": 10390.27232142857,
+      "apiUs": 38126.842,
+      "crateVsTs": 0.4450603206452876,
+      "crateRebuildVsTs": 0.5080284824060867,
+      "apiVsTs": 1.6331376118714822,
+      "beforeCrateVsTs": 2.250724014348586,
+      "beforeApiVsTs": 2.5674356227909803,
+      "beforeApiUs": 59938.741,
+      "crossingsPerItem": 143,
+      "inEngineShare": 0.8468034343155627,
+      "stages": {
+        "core": 81.4,
+        "views": 6.9,
+        "glue": 4.9,
+        "gc": 4.8,
+        "other": 1.2,
+        "ts-core": 0.9
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsDecorateModels x1.0",
+        "ModelManagerHandle.checkAstShape x41.0",
+        "modelFileIsCompatibleVersion x46.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "dcs_decorate",
+      "set": "synthetic-large",
+      "tsRefUs": 78365.36000000002,
+      "crateUs": 43428.00516666667,
+      "apiUs": 128626.666,
+      "crateVsTs": 0.554173491535886,
+      "crateRebuildVsTs": 0.7285151670755206,
+      "apiVsTs": 1.6413714682099332,
+      "beforeCrateVsTs": 0.812225778073373,
+      "beforeApiVsTs": 1.4169407439715709,
+      "beforeApiUs": 111039.0715,
+      "crossingsPerItem": 23,
+      "inEngineShare": 0.9772197166128089,
+      "stages": {
+        "core": 87.1,
+        "gc": 5.8,
+        "glue": 4.6,
+        "views": 1.7,
+        "other": 0.6,
+        "ts-core": 0.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsDecorateModels x1.0",
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x4.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "dcs_validate",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 44763.44,
+      "crateUs": 10863.454875,
+      "apiUs": 30303.5785,
+      "crateVsTs": 0.2426858810448884,
+      "crateRebuildVsTs": 0.36972490198846797,
+      "apiVsTs": 0.6769716201435814,
+      "beforeCrateVsTs": 0.33953840666022916,
+      "beforeApiVsTs": 1.1150208630078475,
+      "beforeApiUs": 49912.1695,
+      "crossingsPerItem": 54,
+      "inEngineShare": 0.8360408936582682,
+      "stages": {
+        "core": 75.1,
+        "gc": 10.4,
+        "glue": 5.2,
+        "cto-parser": 3.8,
+        "ts-core": 3,
+        "views": 2.2,
+        "other": 0.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsValidate x1.0",
+        "ModelManagerHandle.validateAstValue x2.0",
+        "ModelManagerHandle.addModelWithDefinitions x35.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "dcs_validate",
+      "set": "conformance",
+      "tsRefUs": 23328.421499999997,
+      "crateUs": 5034.719479166666,
+      "apiUs": 17889.060999999998,
+      "crateVsTs": 0.2158191234313332,
+      "crateRebuildVsTs": 0.27101479102552134,
+      "apiVsTs": 0.7668354672003848,
+      "beforeCrateVsTs": 0.3447651264145755,
+      "beforeApiVsTs": 1.5338495577165392,
+      "beforeApiUs": 35782.289,
+      "crossingsPerItem": 61,
+      "inEngineShare": 0.7507358827053323,
+      "stages": {
+        "core": 70.7,
+        "gc": 12.2,
+        "glue": 5.2,
+        "cto-parser": 4.7,
+        "ts-core": 3.8,
+        "views": 3.3,
+        "other": 0.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsValidate x1.0",
+        "ModelManagerHandle.validateAstValue x2.0",
+        "ModelManagerHandle.addModelWithDefinitions x42.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "dcs_validate",
+      "set": "synthetic-large",
+      "tsRefUs": 79798.4515,
+      "crateUs": 17724.96172857143,
+      "apiUs": 52194.273499999996,
+      "crateVsTs": 0.22212162511162803,
+      "crateRebuildVsTs": 0.34006155495385776,
+      "apiVsTs": 0.6540762698885203,
+      "beforeCrateVsTs": 0.2820515010409167,
+      "beforeApiVsTs": 0.8699572635190799,
+      "beforeApiUs": 69421.24250000001,
+      "crossingsPerItem": 21,
+      "inEngineShare": 0.8766245826815374,
+      "stages": {
+        "core": 73.6,
+        "gc": 12.3,
+        "glue": 6.6,
+        "ts-core": 3.5,
+        "cto-parser": 2.7,
+        "views": 1.3,
+        "other": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsValidate x1.0",
+        "ModelManagerHandle.validateAstValue x2.0",
+        "ModelManagerHandle.addModelWithDefinitions x2.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_decorators",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 9840.897500000001,
+      "crateUs": 8614.218073529411,
+      "apiUs": 38209.817,
+      "crateVsTs": 0.8753488260119985,
+      "crateRebuildVsTs": 1.8161798318361373,
+      "apiVsTs": 3.8827573399682294,
+      "beforeCrateVsTs": 15.945746005382128,
+      "beforeApiVsTs": 12.001739627915034,
+      "beforeApiUs": 118107.8895,
+      "crossingsPerItem": 122,
+      "inEngineShare": 0.8168897946266415,
+      "stages": {
+        "core": 76.9,
+        "glue": 7.8,
+        "views": 7.1,
+        "gc": 5.6,
+        "other": 1.7,
+        "ts-core": 0.9
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.checkAstShape x34.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_decorators",
+      "set": "conformance",
+      "tsRefUs": 3204.7815,
+      "crateUs": 3817.9060089285713,
+      "apiUs": 21284.379999999997,
+      "crateVsTs": 1.1913155417704986,
+      "crateRebuildVsTs": 2.1806121242413705,
+      "apiVsTs": 6.641444978386201,
+      "beforeCrateVsTs": 21.84986917204808,
+      "beforeApiVsTs": 18.71911283187325,
+      "beforeApiUs": 59990.66650000001,
+      "crossingsPerItem": 143,
+      "inEngineShare": 0.7413040199309098,
+      "stages": {
+        "core": 69.9,
+        "views": 10.4,
+        "gc": 9.9,
+        "glue": 6.5,
+        "other": 1.8,
+        "ts-core": 1.5
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x41.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "modelFileIsCompatibleVersion x46.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_decorators",
+      "set": "synthetic-large",
+      "tsRefUs": 16937.818499999998,
+      "crateUs": 14796.7466625,
+      "apiUs": 58615.351,
+      "crateVsTs": 0.8735922316383307,
+      "crateRebuildVsTs": 1.4288896267571565,
+      "apiVsTs": 3.4606198549122493,
+      "beforeCrateVsTs": 2.7669756094426607,
+      "beforeApiVsTs": 4.289463014378151,
+      "beforeApiUs": 72654.146,
+      "crossingsPerItem": 23,
+      "inEngineShare": 0.9106785883486143,
+      "stages": {
+        "core": 79.4,
+        "glue": 8.1,
+        "gc": 6.6,
+        "views": 3.9,
+        "other": 1.6,
+        "ts-core": 0.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x4.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_vocabularies",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 11706.4705,
+      "crateUs": 9114.9429375,
+      "apiUs": 61788.594000000005,
+      "crateVsTs": 0.778624346040081,
+      "crateRebuildVsTs": 1.5976899036306462,
+      "apiVsTs": 5.278157408759541,
+      "beforeCrateVsTs": 12.682537917812205,
+      "beforeApiVsTs": 12.145993149685896,
+      "beforeApiUs": 142186.71050000002,
+      "crossingsPerItem": 122,
+      "inEngineShare": 0.862874344870283,
+      "stages": {
+        "core": 77.7,
+        "gc": 8.7,
+        "views": 6.2,
+        "glue": 5.5,
+        "other": 1.2,
+        "ts-core": 0.7
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x34.0",
+        "ModelManagerHandle.dcsExtractVocabularies x1.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_vocabularies",
+      "set": "conformance",
+      "tsRefUs": 4391.4785,
+      "crateUs": 4765.052170868347,
+      "apiUs": 29038.639,
+      "crateVsTs": 1.0850678583234206,
+      "crateRebuildVsTs": 1.2853517230542673,
+      "apiVsTs": 6.612497135076489,
+      "beforeCrateVsTs": 17.009621417934756,
+      "beforeApiVsTs": 13.368034706306771,
+      "beforeApiUs": 58705.437000000005,
+      "crossingsPerItem": 143,
+      "inEngineShare": 0.7682742663503426,
+      "stages": {
+        "core": 72.3,
+        "gc": 12.1,
+        "views": 9.7,
+        "glue": 3.7,
+        "other": 1.1,
+        "ts-core": 1.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x41.0",
+        "ModelManagerHandle.dcsExtractVocabularies x1.0",
+        "modelFileIsCompatibleVersion x46.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_vocabularies",
+      "set": "synthetic-large",
+      "tsRefUs": 12193.9645,
+      "crateUs": 14843.429175000001,
+      "apiUs": 111958.75200000001,
+      "crateVsTs": 1.217276725301275,
+      "crateRebuildVsTs": 2.0697135654629997,
+      "apiVsTs": 9.181489088310862,
+      "beforeCrateVsTs": 3.6853454530722964,
+      "beforeApiVsTs": 7.954558380090412,
+      "beforeApiUs": 96997.6025,
+      "crossingsPerItem": 23,
+      "inEngineShare": 0.9583727589882008,
+      "stages": {
+        "core": 78.5,
+        "gc": 13.7,
+        "glue": 4.7,
+        "views": 2.4,
+        "other": 0.5,
+        "ts-core": 0.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.dcsExtractVocabularies x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x4.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_cold",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 9071.3625,
+      "crateUs": null,
+      "apiUs": 47008.6585,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 5.182094586121986,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 17.600727123406216,
+      "beforeApiUs": 159662.576,
+      "crossingsPerItem": 122,
+      "inEngineShare": 0.8121763949186971,
+      "stages": {
+        "core": 57,
+        "gc": 33.4,
+        "views": 4.8,
+        "glue": 3.5,
+        "other": 0.9,
+        "ts-core": 0.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x34.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_cold",
+      "set": "conformance",
+      "tsRefUs": 4261.35,
+      "crateUs": null,
+      "apiUs": 26455.7325,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 6.208298426554964,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 17.87496415455196,
+      "beforeApiUs": 76171.47850000001,
+      "crossingsPerItem": 143,
+      "inEngineShare": 0.7816499561849843,
+      "stages": {
+        "core": 73.9,
+        "gc": 11.2,
+        "views": 7.7,
+        "glue": 5.2,
+        "other": 1.2,
+        "ts-core": 0.8
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.checkAstShape x41.0",
+        "modelFileIsCompatibleVersion x46.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_cold",
+      "set": "synthetic-large",
+      "tsRefUs": 14721.790500000001,
+      "crateUs": null,
+      "apiUs": 79055.8285,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 5.369987332722878,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 7.49250816332429,
+      "beforeApiUs": 110303.13549999999,
+      "crossingsPerItem": 23,
+      "inEngineShare": 0.9355669487774355,
+      "stages": {
+        "gc": 47.5,
+        "core": 46.5,
+        "glue": 3.5,
+        "views": 1.7,
+        "other": 0.6,
+        "ts-core": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x4.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_keep",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 11515.648500000001,
+      "crateUs": null,
+      "apiUs": 50149.310999999994,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 4.3548837913904705,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 12.378434614429226,
+      "beforeApiUs": 142545.70200000002,
+      "crossingsPerItem": 122,
+      "inEngineShare": 0.9403001516223907,
+      "stages": {
+        "core": 72,
+        "glue": 12,
+        "gc": 8.1,
+        "views": 5.8,
+        "other": 1.4,
+        "ts-core": 0.6
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.checkAstShape x34.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_keep",
+      "set": "conformance",
+      "tsRefUs": 4545.693,
+      "crateUs": null,
+      "apiUs": 25626.161,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 5.6374596788652465,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 13.874244917111646,
+      "beforeApiUs": 63068.058,
+      "crossingsPerItem": 143,
+      "inEngineShare": 0.7970082760441748,
+      "stages": {
+        "core": 68.5,
+        "gc": 10.3,
+        "views": 10,
+        "glue": 8,
+        "other": 2.2,
+        "ts-core": 0.9
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x41.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "modelFileIsCompatibleVersion x46.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_keep",
+      "set": "synthetic-large",
+      "tsRefUs": 14785.0355,
+      "crateUs": null,
+      "apiUs": 179515.1655,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 12.141679707160662,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 8.132430659365005,
+      "beforeApiUs": 120238.276,
+      "crossingsPerItem": 23,
+      "inEngineShare": 0.9846772729237597,
+      "stages": {
+        "core": 66,
+        "gc": 24.6,
+        "glue": 6,
+        "views": 2.2,
+        "other": 1,
+        "ts-core": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x4.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Serialisation",
+      "op": "from_json",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 85.77245,
+      "crateUs": 23.67748666666667,
+      "apiUs": 68.70375000000001,
+      "crateVsTs": 0.2760500215006878,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.8010002046111544,
+      "beforeCrateVsTs": 0.4229535345451508,
+      "beforeApiVsTs": 2.0659534325998616,
+      "beforeApiUs": 177.2018875,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.5842194738544877,
+      "stages": {
+        "core": 58,
+        "encode": 27.4,
+        "glue": 4.7,
+        "ts-core": 3.3,
+        "decode": 2.9,
+        "other": 2.4,
+        "gc": 1.1,
+        "views": 0.3
+      },
+      "topBindings": [
+        "ModelManagerHandle.serializerFromJsonCompact x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Serialisation",
+      "op": "from_json",
+      "set": "conformance",
+      "tsRefUs": 25.070159090909087,
+      "crateUs": 4.86012590320219,
+      "apiUs": 17.64394318181818,
+      "crateVsTs": 0.19386099169049803,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 0.7037826572156141,
+      "beforeCrateVsTs": 0.2369783273655091,
+      "beforeApiVsTs": 2.203103653655605,
+      "beforeApiUs": 55.232159090909086,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.5098023760585115,
+      "stages": {
+        "core": 50.6,
+        "encode": 28.1,
+        "ts-core": 8.5,
+        "glue": 5.5,
+        "other": 3.2,
+        "decode": 2.8,
+        "gc": 1.1,
+        "views": 0.3
+      },
+      "topBindings": [
+        "ModelManagerHandle.serializerFromJsonCompact x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Serialisation",
+      "op": "from_json",
+      "set": "synthetic-large",
+      "tsRefUs": 20.24698666666667,
+      "crateUs": 12.720915208333334,
+      "apiUs": 34.60949333333334,
+      "crateVsTs": 0.628286836839589,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.7093651466819098,
+      "beforeCrateVsTs": 0.6361312462518428,
+      "beforeApiVsTs": 4.38999424770369,
+      "beforeApiUs": 88.88415499999999,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.6707756090244186,
+      "stages": {
+        "core": 62.3,
+        "encode": 26,
+        "glue": 4.9,
+        "decode": 2.3,
+        "other": 2.3,
+        "gc": 1.2,
+        "ts-core": 0.6,
+        "views": 0.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.serializerFromJsonCompact x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Serialisation",
+      "op": "to_json",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 33.61123333333334,
+      "crateUs": 31.561261805555556,
+      "apiUs": 98.76577916666668,
+      "crateVsTs": 0.9390093333544902,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.9384753063707865,
+      "beforeCrateVsTs": 0.9198278393509501,
+      "beforeApiVsTs": 3.121874184920319,
+      "beforeApiUs": 104.93004166666667,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.6527332627699484,
+      "stages": {
+        "core": 62.3,
+        "encode": 21.9,
+        "decode": 6.6,
+        "glue": 3.8,
+        "other": 2.7,
+        "ts-core": 1.9,
+        "gc": 0.7
+      },
+      "topBindings": [
+        "ModelManagerHandle.serializerToJson x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Serialisation",
+      "op": "to_json",
+      "set": "conformance",
+      "tsRefUs": 7.749954545454546,
+      "crateUs": 5.871613566251457,
+      "apiUs": 28.62915909090909,
+      "crateVsTs": 0.7576320005251177,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 3.694106710303286,
+      "beforeCrateVsTs": 0.7521359240426276,
+      "beforeApiVsTs": 4.753156910011202,
+      "beforeApiUs": 36.83675,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.6752885854245557,
+      "stages": {
+        "core": 58.1,
+        "encode": 20.7,
+        "ts-core": 7.6,
+        "glue": 5.7,
+        "decode": 4.5,
+        "other": 2.4,
+        "gc": 0.9
+      },
+      "topBindings": [
+        "ModelManagerHandle.serializerToJson x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Serialisation",
+      "op": "to_json",
+      "set": "synthetic-large",
+      "tsRefUs": 9.703983333333333,
+      "crateUs": 12.240838794117648,
+      "apiUs": 61.81745500000001,
+      "crateVsTs": 1.261424136217359,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 6.370317515659378,
+      "beforeCrateVsTs": 1.3244669658442503,
+      "beforeApiVsTs": 5.721662410109937,
+      "beforeApiUs": 55.52291666666667,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.7218838434649941,
+      "stages": {
+        "core": 64.7,
+        "encode": 20.3,
+        "decode": 5.7,
+        "glue": 5.4,
+        "other": 2.2,
+        "gc": 1.2,
+        "ts-core": 0.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.serializerToJson x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Instance creation",
+      "op": "new_resource",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 6.913395833333334,
+      "crateUs": null,
+      "apiUs": 12.3608875,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.7879617771054381,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 12.56841397889966,
+      "beforeApiUs": 86.89042083333334,
+      "crossingsPerItem": 4.558333333333333,
+      "inEngineShare": 0.31815366978964266,
+      "stages": {
+        "views": 29,
+        "ts-core": 26.7,
+        "glue": 19.7,
+        "core": 12.1,
+        "other": 10.6,
+        "gc": 1,
+        "encode": 0.8
+      },
+      "topBindings": [
+        "ModelManagerHandle.modelFileGetTypeName x1.7",
+        "classDeclarationIsKind x1.9",
+        "ModelManagerHandle.modelFileResolveType x0.7"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Instance creation",
+      "op": "new_resource",
+      "set": "conformance",
+      "tsRefUs": 5.370568181818181,
+      "crateUs": 1.595245600575224,
+      "apiUs": 10.265761363636365,
+      "crateVsTs": 0.2970347915842232,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.9114851568946916,
+      "beforeCrateVsTs": 0.2933387735062865,
+      "beforeApiVsTs": 13.339315714860032,
+      "beforeApiUs": 71.63970454545453,
+      "crossingsPerItem": 3.1818181818181817,
+      "inEngineShare": 0.3182769138816336,
+      "stages": {
+        "views": 28.4,
+        "ts-core": 27.5,
+        "glue": 23.6,
+        "core": 10.2,
+        "other": 9.3,
+        "gc": 1
+      },
+      "topBindings": [
+        "classDeclarationIsKind x2.0",
+        "ModelManagerHandle.modelFileGetTypeName x1.1",
+        "ModelManagerHandle.modelFileResolveType x0.1"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Instance creation",
+      "op": "new_resource",
+      "set": "synthetic-large",
+      "tsRefUs": 3.17672,
+      "crateUs": 1.6524071527777777,
+      "apiUs": 5.3755733333333335,
+      "crateVsTs": 0.5201614094971473,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.6921772562055621,
+      "beforeCrateVsTs": 0.5938398026196132,
+      "beforeApiVsTs": 6.89612294022346,
+      "beforeApiUs": 21.90705166666667,
+      "crossingsPerItem": 3,
+      "inEngineShare": 0.3280635995159847,
+      "stages": {
+        "views": 30,
+        "ts-core": 27.8,
+        "glue": 23.9,
+        "core": 9.4,
+        "other": 7.6,
+        "gc": 1.4
+      },
+      "topBindings": [
+        "classDeclarationIsKind x2.0",
+        "ModelManagerHandle.modelFileGetTypeName x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "validate",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 19.01885,
+      "crateUs": 9.593255694444444,
+      "apiUs": 29.371741666666665,
+      "crateVsTs": 0.5044077688421984,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.5443489835960988,
+      "beforeCrateVsTs": 0.49687156864549303,
+      "beforeApiVsTs": 1.515009889311569,
+      "beforeApiUs": 28.813745833333336,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.4469373123709378,
+      "stages": {
+        "core": 53.2,
+        "ts-core": 36.1,
+        "other": 4.5,
+        "encode": 4.2,
+        "glue": 1,
+        "gc": 0.9,
+        "views": 0
+      },
+      "topBindings": [
+        "ModelManagerHandle.validateResourceBinary x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "validate",
+      "set": "conformance",
+      "tsRefUs": 4.019511363636364,
+      "crateUs": 2.241426831958985,
+      "apiUs": 10.616636363636363,
+      "crateVsTs": 0.5576366451496271,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.6412753698578237,
+      "beforeCrateVsTs": 0.5831557694816066,
+      "beforeApiVsTs": 2.6807730473796845,
+      "beforeApiUs": 10.775397727272727,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.4004652230975386,
+      "stages": {
+        "ts-core": 43.3,
+        "core": 39.4,
+        "encode": 12.7,
+        "glue": 1.6,
+        "gc": 1.5,
+        "other": 1.5
+      },
+      "topBindings": [
+        "ModelManagerHandle.validateResourceBinary x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "validate",
+      "set": "synthetic-large",
+      "tsRefUs": 6.04387,
+      "crateUs": 3.6802757783882787,
+      "apiUs": 7.683066666666667,
+      "crateVsTs": 0.6089270249671616,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.2712164005292415,
+      "beforeCrateVsTs": 0.9489138948105389,
+      "beforeApiVsTs": 1.9230418589413736,
+      "beforeApiUs": 11.622615,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.580650246672408,
+      "stages": {
+        "core": 59.8,
+        "ts-core": 33.6,
+        "glue": 2.2,
+        "other": 2,
+        "encode": 1.3,
+        "gc": 1.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.validateResourceBinary x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "set_property_value",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 2.375266323024055,
+      "crateUs": 1.5563041101055808,
+      "apiUs": 4.943137457044673,
+      "crateVsTs": 0.655212468185118,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.0810876696771206,
+      "beforeCrateVsTs": 0.7303483157241856,
+      "beforeApiVsTs": 3.553792846524716,
+      "beforeApiUs": 8.441204467353952,
+      "crossingsPerItem": 1.0807560137457046,
+      "inEngineShare": 0.34411717352321075,
+      "stages": {
+        "core": 31.6,
+        "ts-core": 31.5,
+        "views": 12.8,
+        "other": 10.7,
+        "glue": 7.3,
+        "encode": 4.6,
+        "gc": 1.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.validatePropertyBinary x0.2",
+        "resourceValidatorPrimitiveValid x0.8",
+        "ModelManagerHandle.modelFileGetTypeName x0.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "set_property_value",
+      "set": "conformance",
+      "tsRefUs": 0.6029833333333333,
+      "crateUs": 0.5652885431291412,
+      "apiUs": 5.8681,
+      "crateVsTs": 0.9374861822534751,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 9.731778103319606,
+      "beforeCrateVsTs": 1.091723820907856,
+      "beforeApiVsTs": 9.722338925896237,
+      "beforeApiUs": 5.862408333333333,
+      "crossingsPerItem": 1.05,
+      "inEngineShare": 0.2505206910455195,
+      "stages": {
+        "ts-core": 38.8,
+        "core": 23.7,
+        "glue": 10.6,
+        "views": 9.8,
+        "encode": 8.9,
+        "other": 6.6,
+        "gc": 1.5
+      },
+      "topBindings": [
+        "ModelManagerHandle.validatePropertyBinary x0.2",
+        "resourceValidatorPrimitiveValid x0.8",
+        "ModelManagerHandle.modelFileResolveType x0.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "set_property_value",
+      "set": "synthetic-large",
+      "tsRefUs": 0.7590803869246163,
+      "crateUs": 1.0230303674672006,
+      "apiUs": 2.3803188792528354,
+      "crateVsTs": 1.3477233572217127,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 3.1357928886775768,
+      "beforeCrateVsTs": 1.3836831314426348,
+      "beforeApiVsTs": 4.198344877649872,
+      "beforeApiUs": 3.1868812541694465,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.3561327863181131,
+      "stages": {
+        "ts-core": 34.8,
+        "core": 31.6,
+        "glue": 13,
+        "views": 10,
+        "other": 5.7,
+        "encode": 3,
+        "gc": 2
+      },
+      "topBindings": [
+        "ModelManagerHandle.validatePropertyBinary x0.2",
+        "resourceValidatorPrimitiveValid x0.8"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "add_array_value",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 17.115854545454546,
+      "crateUs": 12.142888715829624,
+      "apiUs": 49.190981818181825,
+      "crateVsTs": 0.7094526705389892,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.87400092630756,
+      "beforeCrateVsTs": 0.9543440989936972,
+      "beforeApiVsTs": 9.053471422561962,
+      "beforeApiUs": 154.9579,
+      "crossingsPerItem": 15.745454545454546,
+      "inEngineShare": 0.33893661178230017,
+      "stages": {
+        "ts-core": 32.4,
+        "views": 17.1,
+        "glue": 16.1,
+        "encode": 13.7,
+        "core": 13.6,
+        "other": 6,
+        "gc": 1.2
+      },
+      "topBindings": [
+        "modelUtilIsAssignableTo x1.5",
+        "resourceValidatorPrimitiveValid x7.2",
+        "ModelManagerHandle.modelFileGetTypeName x2.1"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "add_array_value",
+      "set": "conformance",
+      "tsRefUs": 1.1315000000000002,
+      "crateUs": 1.3291990174672488,
+      "apiUs": 5.0920000000000005,
+      "crateVsTs": 1.1747229495954472,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 4.500220945647371,
+      "beforeCrateVsTs": 1.1514982412063255,
+      "beforeApiVsTs": 6.932832523199293,
+      "beforeApiUs": 7.844500000000001,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.17593569948204701,
+      "stages": {
+        "ts-core": 40.9,
+        "encode": 19.5,
+        "core": 17.2,
+        "glue": 12.4,
+        "other": 5.2,
+        "views": 2.9,
+        "gc": 1.9
+      },
+      "topBindings": [
+        "ModelManagerHandle.validatePropertyBinary x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "add_array_value",
+      "set": "synthetic-large",
+      "tsRefUs": 0.9135733333333333,
+      "crateUs": 1.1131613852813853,
+      "apiUs": 3.6082433333333337,
+      "crateVsTs": 1.2184696560918868,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 3.949593537464608,
+      "beforeCrateVsTs": 1.814645603555087,
+      "beforeApiVsTs": 4.982289325432732,
+      "beforeApiUs": 4.551686666666666,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.4168273816140008,
+      "stages": {
+        "core": 32.6,
+        "glue": 27.4,
+        "ts-core": 22.4,
+        "views": 9.3,
+        "encode": 3.7,
+        "other": 2.4,
+        "gc": 2.2,
+        "decode": 0.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.validatePropertyBinary x1.0"
+      ],
+      "errors": []
+    }
+  ],
+  "gaps": [
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_namespaces_first",
+      "set": "conformance",
+      "tsRefUs": 0.9359999999999999,
+      "crateUs": null,
+      "apiUs": 26.373,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 28.176282051282055,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 13.855769230769232,
+      "beforeApiUs": 12.969,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.9508065187607392,
+      "stages": {
+        "other": 47.7,
+        "glue": 29,
+        "core": 19.9,
+        "gc": 2,
+        "ts-core": 1.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.getNamespaces x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "modelfile_new",
+      "set": "synthetic-large",
+      "tsRefUs": 1150.4565,
+      "crateUs": 1639.10878125,
+      "apiUs": 31542.0425,
+      "crateVsTs": 1.424746421311888,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 27.416979694582107,
+      "beforeCrateVsTs": 2.3593619902186656,
+      "beforeApiVsTs": 6.915357947041022,
+      "beforeApiUs": 7955.818499999999,
+      "crossingsPerItem": 3,
+      "inEngineShare": 0.966936615694252,
+      "stages": {
+        "core": 83.6,
+        "gc": 9.6,
+        "glue": 4.2,
+        "views": 2.5,
+        "other": 0.1,
+        "ts-core": 0
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.0",
+        "modelFileIsCompatibleVersion x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_namespaces_first",
+      "set": "synthetic-large",
+      "tsRefUs": 0.152,
+      "crateUs": null,
+      "apiUs": 3.3604999999999996,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 22.108552631578945,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 8.766447368421053,
+      "beforeApiUs": 1.3325,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.5883446000064075,
+      "stages": {
+        "other": 51,
+        "glue": 24.4,
+        "core": 13.5,
+        "ts-core": 7.4,
+        "gc": 3.6,
+        "views": 0
+      },
+      "topBindings": [
+        "ModelManagerHandle.getNamespaces x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "modelfile_new",
+      "set": "conformance",
+      "tsRefUs": 16.149390243902438,
+      "crateUs": 22.103748732349167,
+      "apiUs": 350.5894512195122,
+      "crateVsTs": 1.3687048488220743,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 21.709144798942802,
+      "beforeCrateVsTs": 2.302952727343137,
+      "beforeApiVsTs": 9.023692656220504,
+      "beforeApiUs": 145.72713414634148,
+      "crossingsPerItem": 3,
+      "inEngineShare": 0.8480548874760045,
+      "stages": {
+        "core": 79.7,
+        "views": 13.4,
+        "glue": 4,
+        "gc": 1.7,
+        "other": 1.1,
+        "ts-core": 0
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.0",
+        "modelFileIsCompatibleVersion x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_namespaces_first",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 0.8294999999999999,
+      "crateUs": null,
+      "apiUs": 17.0275,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 20.527426160337555,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 18.14526823387583,
+      "beforeApiUs": 15.051499999999999,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.9342611830848203,
+      "stages": {
+        "other": 49.8,
+        "glue": 27.7,
+        "core": 18.8,
+        "gc": 2,
+        "ts-core": 1.7
+      },
+      "topBindings": [
+        "ModelManagerHandle.getNamespaces x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_model_file",
+      "set": "conformance",
+      "tsRefUs": 26.98309756097561,
+      "crateUs": 29.313680052905312,
+      "apiUs": 524.7590609756096,
+      "crateVsTs": 1.0863719403105265,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 19.447695350386457,
+      "beforeCrateVsTs": 7.539085481395912,
+      "beforeApiVsTs": 22.31843014642409,
+      "beforeApiUs": 602.2203780487805,
+      "crossingsPerItem": 4.2439024390243905,
+      "inEngineShare": 0.836652060873587,
+      "stages": {
+        "core": 72.9,
+        "views": 12.8,
+        "gc": 7.5,
+        "glue": 4.5,
+        "other": 1.3,
+        "ts-core": 1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.0",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_model_file",
+      "set": "synthetic-large",
+      "tsRefUs": 2967.2655,
+      "crateUs": 2900.845859126984,
+      "apiUs": 42262.40700000001,
+      "crateVsTs": 0.9776158753326873,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 14.242880187162223,
+      "beforeCrateVsTs": 1.8095773701409599,
+      "beforeApiVsTs": 4.396449020150033,
+      "beforeApiUs": 13045.431499999999,
+      "crossingsPerItem": 14,
+      "inEngineShare": 0.9381949084414809,
+      "stages": {
+        "core": 82.4,
+        "gc": 9.7,
+        "glue": 3.8,
+        "views": 3.6,
+        "ts-core": 0.4,
+        "other": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x3.0",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "modelfile_new",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 50.32417142857143,
+      "crateUs": 43.14953067460318,
+      "apiUs": 715.3118285714286,
+      "crateVsTs": 0.8574315174935028,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 14.214080595181183,
+      "beforeCrateVsTs": 1.507929188892409,
+      "beforeApiVsTs": 4.352079318884535,
+      "beforeApiUs": 219.01478571428572,
+      "crossingsPerItem": 3,
+      "inEngineShare": 0.908002289469958,
+      "stages": {
+        "core": 84,
+        "views": 10.3,
+        "glue": 3.7,
+        "other": 1,
+        "gc": 0.9,
+        "ts-core": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.0",
+        "modelFileIsCompatibleVersion x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_keep",
+      "set": "synthetic-large",
+      "tsRefUs": 14785.0355,
+      "crateUs": null,
+      "apiUs": 179515.1655,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 12.141679707160662,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 8.132430659365005,
+      "beforeApiUs": 120238.276,
+      "crossingsPerItem": 23,
+      "inEngineShare": 0.9846772729237597,
+      "stages": {
+        "core": 66,
+        "gc": 24.6,
+        "glue": 6,
+        "views": 2.2,
+        "other": 1,
+        "ts-core": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x4.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "set_property_value",
+      "set": "conformance",
+      "tsRefUs": 0.6029833333333333,
+      "crateUs": 0.5652885431291412,
+      "apiUs": 5.8681,
+      "crateVsTs": 0.9374861822534751,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 9.731778103319606,
+      "beforeCrateVsTs": 1.091723820907856,
+      "beforeApiVsTs": 9.722338925896237,
+      "beforeApiUs": 5.862408333333333,
+      "crossingsPerItem": 1.05,
+      "inEngineShare": 0.2505206910455195,
+      "stages": {
+        "ts-core": 38.8,
+        "core": 23.7,
+        "glue": 10.6,
+        "views": 9.8,
+        "encode": 8.9,
+        "other": 6.6,
+        "gc": 1.5
+      },
+      "topBindings": [
+        "ModelManagerHandle.validatePropertyBinary x0.2",
+        "resourceValidatorPrimitiveValid x0.8",
+        "ModelManagerHandle.modelFileResolveType x0.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_vocabularies",
+      "set": "synthetic-large",
+      "tsRefUs": 12193.9645,
+      "crateUs": 14843.429175000001,
+      "apiUs": 111958.75200000001,
+      "crateVsTs": 1.217276725301275,
+      "crateRebuildVsTs": 2.0697135654629997,
+      "apiVsTs": 9.181489088310862,
+      "beforeCrateVsTs": 3.6853454530722964,
+      "beforeApiVsTs": 7.954558380090412,
+      "beforeApiUs": 96997.6025,
+      "crossingsPerItem": 23,
+      "inEngineShare": 0.9583727589882008,
+      "stages": {
+        "core": 78.5,
+        "gc": 13.7,
+        "glue": 4.7,
+        "views": 2.4,
+        "other": 0.5,
+        "ts-core": 0.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.dcsExtractVocabularies x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x4.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_model_file",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 90.05868571428572,
+      "crateUs": 68.5179996031746,
+      "apiUs": 797.5547428571427,
+      "crateVsTs": 0.7608150070116537,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 8.855944726835261,
+      "beforeCrateVsTs": 3.7889669747954606,
+      "beforeApiVsTs": 7.17135604275815,
+      "beforeApiUs": 645.8429,
+      "crossingsPerItem": 4.285714285714285,
+      "inEngineShare": 0.8633088279974012,
+      "stages": {
+        "core": 75.9,
+        "views": 10,
+        "gc": 7.4,
+        "glue": 4.3,
+        "other": 1.3,
+        "ts-core": 1.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.1",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_decorators",
+      "set": "conformance",
+      "tsRefUs": 3204.7815,
+      "crateUs": 3817.9060089285713,
+      "apiUs": 21284.379999999997,
+      "crateVsTs": 1.1913155417704986,
+      "crateRebuildVsTs": 2.1806121242413705,
+      "apiVsTs": 6.641444978386201,
+      "beforeCrateVsTs": 21.84986917204808,
+      "beforeApiVsTs": 18.71911283187325,
+      "beforeApiUs": 59990.66650000001,
+      "crossingsPerItem": 143,
+      "inEngineShare": 0.7413040199309098,
+      "stages": {
+        "core": 69.9,
+        "views": 10.4,
+        "gc": 9.9,
+        "glue": 6.5,
+        "other": 1.8,
+        "ts-core": 1.5
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x41.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "modelFileIsCompatibleVersion x46.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_vocabularies",
+      "set": "conformance",
+      "tsRefUs": 4391.4785,
+      "crateUs": 4765.052170868347,
+      "apiUs": 29038.639,
+      "crateVsTs": 1.0850678583234206,
+      "crateRebuildVsTs": 1.2853517230542673,
+      "apiVsTs": 6.612497135076489,
+      "beforeCrateVsTs": 17.009621417934756,
+      "beforeApiVsTs": 13.368034706306771,
+      "beforeApiUs": 58705.437000000005,
+      "crossingsPerItem": 143,
+      "inEngineShare": 0.7682742663503426,
+      "stages": {
+        "core": 72.3,
+        "gc": 12.1,
+        "views": 9.7,
+        "glue": 3.7,
+        "other": 1.1,
+        "ts-core": 1.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x41.0",
+        "ModelManagerHandle.dcsExtractVocabularies x1.0",
+        "modelFileIsCompatibleVersion x46.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Serialisation",
+      "op": "to_json",
+      "set": "synthetic-large",
+      "tsRefUs": 9.703983333333333,
+      "crateUs": 12.240838794117648,
+      "apiUs": 61.81745500000001,
+      "crateVsTs": 1.261424136217359,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 6.370317515659378,
+      "beforeCrateVsTs": 1.3244669658442503,
+      "beforeApiVsTs": 5.721662410109937,
+      "beforeApiUs": 55.52291666666667,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.7218838434649941,
+      "stages": {
+        "core": 64.7,
+        "encode": 20.3,
+        "decode": 5.7,
+        "glue": 5.4,
+        "other": 2.2,
+        "gc": 1.2,
+        "ts-core": 0.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.serializerToJson x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_cold",
+      "set": "conformance",
+      "tsRefUs": 4261.35,
+      "crateUs": null,
+      "apiUs": 26455.7325,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 6.208298426554964,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 17.87496415455196,
+      "beforeApiUs": 76171.47850000001,
+      "crossingsPerItem": 143,
+      "inEngineShare": 0.7816499561849843,
+      "stages": {
+        "core": 73.9,
+        "gc": 11.2,
+        "views": 7.7,
+        "glue": 5.2,
+        "other": 1.2,
+        "ts-core": 0.8
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.checkAstShape x41.0",
+        "modelFileIsCompatibleVersion x46.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_keep",
+      "set": "conformance",
+      "tsRefUs": 4545.693,
+      "crateUs": null,
+      "apiUs": 25626.161,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 5.6374596788652465,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 13.874244917111646,
+      "beforeApiUs": 63068.058,
+      "crossingsPerItem": 143,
+      "inEngineShare": 0.7970082760441748,
+      "stages": {
+        "core": 68.5,
+        "gc": 10.3,
+        "views": 10,
+        "glue": 8,
+        "other": 2.2,
+        "ts-core": 0.9
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x41.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "modelFileIsCompatibleVersion x46.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_cold",
+      "set": "synthetic-large",
+      "tsRefUs": 14721.790500000001,
+      "crateUs": null,
+      "apiUs": 79055.8285,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 5.369987332722878,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 7.49250816332429,
+      "beforeApiUs": 110303.13549999999,
+      "crossingsPerItem": 23,
+      "inEngineShare": 0.9355669487774355,
+      "stages": {
+        "gc": 47.5,
+        "core": 46.5,
+        "glue": 3.5,
+        "views": 1.7,
+        "other": 0.6,
+        "ts-core": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x4.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_vocabularies",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 11706.4705,
+      "crateUs": 9114.9429375,
+      "apiUs": 61788.594000000005,
+      "crateVsTs": 0.778624346040081,
+      "crateRebuildVsTs": 1.5976899036306462,
+      "apiVsTs": 5.278157408759541,
+      "beforeCrateVsTs": 12.682537917812205,
+      "beforeApiVsTs": 12.145993149685896,
+      "beforeApiUs": 142186.71050000002,
+      "crossingsPerItem": 122,
+      "inEngineShare": 0.862874344870283,
+      "stages": {
+        "core": 77.7,
+        "gc": 8.7,
+        "views": 6.2,
+        "glue": 5.5,
+        "other": 1.2,
+        "ts-core": 0.7
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x34.0",
+        "ModelManagerHandle.dcsExtractVocabularies x1.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_cold",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 9071.3625,
+      "crateUs": null,
+      "apiUs": 47008.6585,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 5.182094586121986,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 17.600727123406216,
+      "beforeApiUs": 159662.576,
+      "crossingsPerItem": 122,
+      "inEngineShare": 0.8121763949186971,
+      "stages": {
+        "core": 57,
+        "gc": 33.4,
+        "views": 4.8,
+        "glue": 3.5,
+        "other": 0.9,
+        "ts-core": 0.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x34.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_cto_model",
+      "set": "conformance",
+      "tsRefUs": 173.26037804878047,
+      "crateUs": 29.313680052905312,
+      "apiUs": 790.2182804878048,
+      "crateVsTs": 0.1691885957021992,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 4.560871270091096,
+      "beforeCrateVsTs": 1.1741165600352477,
+      "beforeApiVsTs": 5.202587941974547,
+      "beforeApiUs": 901.4023536585366,
+      "crossingsPerItem": 4.2439024390243905,
+      "inEngineShare": 0.40940465989875324,
+      "stages": {
+        "core": 40.5,
+        "cto-parser": 36.8,
+        "views": 12.1,
+        "gc": 4,
+        "glue": 3.4,
+        "ts-core": 1.8,
+        "other": 1.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.0",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "add_array_value",
+      "set": "conformance",
+      "tsRefUs": 1.1315000000000002,
+      "crateUs": 1.3291990174672488,
+      "apiUs": 5.0920000000000005,
+      "crateVsTs": 1.1747229495954472,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 4.500220945647371,
+      "beforeCrateVsTs": 1.1514982412063255,
+      "beforeApiVsTs": 6.932832523199293,
+      "beforeApiUs": 7.844500000000001,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.17593569948204701,
+      "stages": {
+        "ts-core": 40.9,
+        "encode": 19.5,
+        "core": 17.2,
+        "glue": 12.4,
+        "other": 5.2,
+        "views": 2.9,
+        "gc": 1.9
+      },
+      "topBindings": [
+        "ModelManagerHandle.validatePropertyBinary x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_keep",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 11515.648500000001,
+      "crateUs": null,
+      "apiUs": 50149.310999999994,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 4.3548837913904705,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 12.378434614429226,
+      "beforeApiUs": 142545.70200000002,
+      "crossingsPerItem": 122,
+      "inEngineShare": 0.9403001516223907,
+      "stages": {
+        "core": 72,
+        "glue": 12,
+        "gc": 8.1,
+        "views": 5.8,
+        "other": 1.4,
+        "ts-core": 0.6
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.checkAstShape x34.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "add_array_value",
+      "set": "synthetic-large",
+      "tsRefUs": 0.9135733333333333,
+      "crateUs": 1.1131613852813853,
+      "apiUs": 3.6082433333333337,
+      "crateVsTs": 1.2184696560918868,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 3.949593537464608,
+      "beforeCrateVsTs": 1.814645603555087,
+      "beforeApiVsTs": 4.982289325432732,
+      "beforeApiUs": 4.551686666666666,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.4168273816140008,
+      "stages": {
+        "core": 32.6,
+        "glue": 27.4,
+        "ts-core": 22.4,
+        "views": 9.3,
+        "encode": 3.7,
+        "other": 2.4,
+        "gc": 2.2,
+        "decode": 0.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.validatePropertyBinary x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_decorators",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 9840.897500000001,
+      "crateUs": 8614.218073529411,
+      "apiUs": 38209.817,
+      "crateVsTs": 0.8753488260119985,
+      "crateRebuildVsTs": 1.8161798318361373,
+      "apiVsTs": 3.8827573399682294,
+      "beforeCrateVsTs": 15.945746005382128,
+      "beforeApiVsTs": 12.001739627915034,
+      "beforeApiUs": 118107.8895,
+      "crossingsPerItem": 122,
+      "inEngineShare": 0.8168897946266415,
+      "stages": {
+        "core": 76.9,
+        "glue": 7.8,
+        "views": 7.1,
+        "gc": 5.6,
+        "other": 1.7,
+        "ts-core": 0.9
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.checkAstShape x34.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_cto_model",
+      "set": "synthetic-large",
+      "tsRefUs": 26201.8845,
+      "crateUs": 2900.845859126984,
+      "apiUs": 99786.774,
+      "crateVsTs": 0.11071134441215418,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 3.808381568890589,
+      "beforeCrateVsTs": 0.20492787455803035,
+      "beforeApiVsTs": 2.3183794852618327,
+      "beforeApiUs": 60745.911499999995,
+      "crossingsPerItem": 14,
+      "inEngineShare": 0.5277169761169592,
+      "stages": {
+        "core": 45.4,
+        "cto-parser": 42.3,
+        "gc": 6.5,
+        "views": 3,
+        "glue": 2.5,
+        "ts-core": 0.2,
+        "other": 0.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x3.0",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Serialisation",
+      "op": "to_json",
+      "set": "conformance",
+      "tsRefUs": 7.749954545454546,
+      "crateUs": 5.871613566251457,
+      "apiUs": 28.62915909090909,
+      "crateVsTs": 0.7576320005251177,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 3.694106710303286,
+      "beforeCrateVsTs": 0.7521359240426276,
+      "beforeApiVsTs": 4.753156910011202,
+      "beforeApiUs": 36.83675,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.6752885854245557,
+      "stages": {
+        "core": 58.1,
+        "encode": 20.7,
+        "ts-core": 7.6,
+        "glue": 5.7,
+        "decode": 4.5,
+        "other": 2.4,
+        "gc": 0.9
+      },
+      "topBindings": [
+        "ModelManagerHandle.serializerToJson x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "extract_decorators",
+      "set": "synthetic-large",
+      "tsRefUs": 16937.818499999998,
+      "crateUs": 14796.7466625,
+      "apiUs": 58615.351,
+      "crateVsTs": 0.8735922316383307,
+      "crateRebuildVsTs": 1.4288896267571565,
+      "apiVsTs": 3.4606198549122493,
+      "beforeCrateVsTs": 2.7669756094426607,
+      "beforeApiVsTs": 4.289463014378151,
+      "beforeApiUs": 72654.146,
+      "crossingsPerItem": 23,
+      "inEngineShare": 0.9106785883486143,
+      "stages": {
+        "core": 79.4,
+        "glue": 8.1,
+        "gc": 6.6,
+        "views": 3.9,
+        "other": 1.6,
+        "ts-core": 0.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.dcsExtractDecorators x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x4.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "set_property_value",
+      "set": "synthetic-large",
+      "tsRefUs": 0.7590803869246163,
+      "crateUs": 1.0230303674672006,
+      "apiUs": 2.3803188792528354,
+      "crateVsTs": 1.3477233572217127,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 3.1357928886775768,
+      "beforeCrateVsTs": 1.3836831314426348,
+      "beforeApiVsTs": 4.198344877649872,
+      "beforeApiUs": 3.1868812541694465,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.3561327863181131,
+      "stages": {
+        "ts-core": 34.8,
+        "core": 31.6,
+        "glue": 13,
+        "views": 10,
+        "other": 5.7,
+        "encode": 3,
+        "gc": 2
+      },
+      "topBindings": [
+        "ModelManagerHandle.validatePropertyBinary x0.2",
+        "resourceValidatorPrimitiveValid x0.8"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "resolve_type_first",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 0.42341883116883117,
+      "crateUs": null,
+      "apiUs": 1.2859935064935064,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 3.0371665401455377,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 6.64708272948249,
+      "beforeApiUs": 2.8145,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.40575090465108354,
+      "stages": {
+        "glue": 30.7,
+        "core": 29.2,
+        "other": 28.4,
+        "ts-core": 10.1,
+        "gc": 1.6
+      },
+      "topBindings": [
+        "ModelManagerHandle.resolveType x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "add_cto_model",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 591.7344142857143,
+      "crateUs": 68.5179996031746,
+      "apiUs": 1773.7344857142857,
+      "crateVsTs": 0.11579181123998515,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.997517877771855,
+      "beforeCrateVsTs": 0.576659693482273,
+      "beforeApiVsTs": 3.060799959750283,
+      "beforeApiUs": 1811.1806714285715,
+      "crossingsPerItem": 4.285714285714285,
+      "inEngineShare": 0.4640656232410446,
+      "stages": {
+        "core": 44.7,
+        "cto-parser": 34.5,
+        "gc": 8.7,
+        "views": 6.7,
+        "glue": 3.5,
+        "ts-core": 1.2,
+        "other": 0.8
+      },
+      "topBindings": [
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x1.1",
+        "ModelManagerHandle.validateAndCommitStagedModelFile x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Serialisation",
+      "op": "to_json",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 33.61123333333334,
+      "crateUs": 31.561261805555556,
+      "apiUs": 98.76577916666668,
+      "crateVsTs": 0.9390093333544902,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.9384753063707865,
+      "beforeCrateVsTs": 0.9198278393509501,
+      "beforeApiVsTs": 3.121874184920319,
+      "beforeApiUs": 104.93004166666667,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.6527332627699484,
+      "stages": {
+        "core": 62.3,
+        "encode": 21.9,
+        "decode": 6.6,
+        "glue": 3.8,
+        "other": 2.7,
+        "ts-core": 1.9,
+        "gc": 0.7
+      },
+      "topBindings": [
+        "ModelManagerHandle.serializerToJson x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "add_array_value",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 17.115854545454546,
+      "crateUs": 12.142888715829624,
+      "apiUs": 49.190981818181825,
+      "crateVsTs": 0.7094526705389892,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.87400092630756,
+      "beforeCrateVsTs": 0.9543440989936972,
+      "beforeApiVsTs": 9.053471422561962,
+      "beforeApiUs": 154.9579,
+      "crossingsPerItem": 15.745454545454546,
+      "inEngineShare": 0.33893661178230017,
+      "stages": {
+        "ts-core": 32.4,
+        "views": 17.1,
+        "glue": 16.1,
+        "encode": 13.7,
+        "core": 13.6,
+        "other": 6,
+        "gc": 1.2
+      },
+      "topBindings": [
+        "modelUtilIsAssignableTo x1.5",
+        "resourceValidatorPrimitiveValid x7.2",
+        "ModelManagerHandle.modelFileGetTypeName x2.1"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_type_first",
+      "set": "synthetic-large",
+      "tsRefUs": 0.6910099667774086,
+      "crateUs": null,
+      "apiUs": 1.9632392026578072,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.8411156091041088,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 1.9546429223919923,
+      "beforeApiUs": 1.3506777408637873,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.4379706928374093,
+      "stages": {
+        "views": 26.6,
+        "glue": 20.2,
+        "ts-core": 19.7,
+        "other": 16.3,
+        "core": 15.7,
+        "gc": 1.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.getTypeName x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "validate",
+      "set": "conformance",
+      "tsRefUs": 4.019511363636364,
+      "crateUs": 2.241426831958985,
+      "apiUs": 10.616636363636363,
+      "crateVsTs": 0.5576366451496271,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.6412753698578237,
+      "beforeCrateVsTs": 0.5831557694816066,
+      "beforeApiVsTs": 2.6807730473796845,
+      "beforeApiUs": 10.775397727272727,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.4004652230975386,
+      "stages": {
+        "ts-core": 43.3,
+        "core": 39.4,
+        "encode": 12.7,
+        "glue": 1.6,
+        "gc": 1.5,
+        "other": 1.5
+      },
+      "topBindings": [
+        "ModelManagerHandle.validateResourceBinary x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_type_first",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 0.5696266233766233,
+      "crateUs": null,
+      "apiUs": 1.4440551948051947,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.535090769186925,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 7.440650916241559,
+      "beforeApiUs": 4.238392857142857,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.5331369636484713,
+      "stages": {
+        "ts-core": 24.8,
+        "views": 23.6,
+        "core": 17.8,
+        "glue": 16.5,
+        "other": 15.7,
+        "gc": 1.5
+      },
+      "topBindings": [
+        "ModelManagerHandle.getTypeName x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "set_property_value",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 2.375266323024055,
+      "crateUs": 1.5563041101055808,
+      "apiUs": 4.943137457044673,
+      "crateVsTs": 0.655212468185118,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.0810876696771206,
+      "beforeCrateVsTs": 0.7303483157241856,
+      "beforeApiVsTs": 3.553792846524716,
+      "beforeApiUs": 8.441204467353952,
+      "crossingsPerItem": 1.0807560137457046,
+      "inEngineShare": 0.34411717352321075,
+      "stages": {
+        "core": 31.6,
+        "ts-core": 31.5,
+        "views": 12.8,
+        "other": 10.7,
+        "glue": 7.3,
+        "encode": 4.6,
+        "gc": 1.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.validatePropertyBinary x0.2",
+        "resourceValidatorPrimitiveValid x0.8",
+        "ModelManagerHandle.modelFileGetTypeName x0.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_namespaces",
+      "set": "synthetic-large",
+      "tsRefUs": 0.1405,
+      "crateUs": 0.07574915664017962,
+      "apiUs": 0.28400000000000003,
+      "crateVsTs": 0.5391399049123103,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 2.02135231316726,
+      "beforeCrateVsTs": 0.5752349247483598,
+      "beforeApiVsTs": 12.91103202846975,
+      "beforeApiUs": 1.814,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 82.9,
+        "ts-core": 13.5,
+        "gc": 3.5,
+        "glue": 0
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "derives_from",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 1.0809025974025974,
+      "crateUs": 0.21402212514757968,
+      "apiUs": 2.073818181818182,
+      "crateVsTs": 0.1980031555682016,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.9185985738229836,
+      "beforeCrateVsTs": 0.20196386781412912,
+      "beforeApiVsTs": 3.2001754185715403,
+      "beforeApiUs": 3.459077922077922,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.7266872735460892,
+      "stages": {
+        "core": 61.4,
+        "other": 19.2,
+        "glue": 19,
+        "gc": 0.3,
+        "ts-core": 0.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.derivesFrom x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Instance creation",
+      "op": "new_resource",
+      "set": "conformance",
+      "tsRefUs": 5.370568181818181,
+      "crateUs": 1.595245600575224,
+      "apiUs": 10.265761363636365,
+      "crateVsTs": 0.2970347915842232,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.9114851568946916,
+      "beforeCrateVsTs": 0.2933387735062865,
+      "beforeApiVsTs": 13.339315714860032,
+      "beforeApiUs": 71.63970454545453,
+      "crossingsPerItem": 3.1818181818181817,
+      "inEngineShare": 0.3182769138816336,
+      "stages": {
+        "views": 28.4,
+        "ts-core": 27.5,
+        "glue": 23.6,
+        "core": 10.2,
+        "other": 9.3,
+        "gc": 1
+      },
+      "topBindings": [
+        "classDeclarationIsKind x2.0",
+        "ModelManagerHandle.modelFileGetTypeName x1.1",
+        "ModelManagerHandle.modelFileResolveType x0.1"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Instance creation",
+      "op": "new_resource",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 6.913395833333334,
+      "crateUs": null,
+      "apiUs": 12.3608875,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.7879617771054381,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 12.56841397889966,
+      "beforeApiUs": 86.89042083333334,
+      "crossingsPerItem": 4.558333333333333,
+      "inEngineShare": 0.31815366978964266,
+      "stages": {
+        "views": 29,
+        "ts-core": 26.7,
+        "glue": 19.7,
+        "core": 12.1,
+        "other": 10.6,
+        "gc": 1,
+        "encode": 0.8
+      },
+      "topBindings": [
+        "ModelManagerHandle.modelFileGetTypeName x1.7",
+        "classDeclarationIsKind x1.9",
+        "ModelManagerHandle.modelFileResolveType x0.7"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "resolve_type_first",
+      "set": "conformance",
+      "tsRefUs": 0.6862019230769231,
+      "crateUs": null,
+      "apiUs": 1.2049711538461538,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.756000840748266,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 3.2566944580676798,
+      "beforeApiUs": 2.2347499999999996,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.6737434939038363,
+      "stages": {
+        "glue": 30.7,
+        "other": 29.9,
+        "core": 29.8,
+        "ts-core": 8.4,
+        "gc": 1.3
+      },
+      "topBindings": [
+        "ModelManagerHandle.resolveType x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "dcs_decorate",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 50299.2895,
+      "crateUs": 22738.5276,
+      "apiUs": 86417.31100000002,
+      "crateVsTs": 0.45206458830795215,
+      "crateRebuildVsTs": 0.7040394145792723,
+      "apiVsTs": 1.7180622601040918,
+      "beforeCrateVsTs": 2.21499769395351,
+      "beforeApiVsTs": 2.181601859405986,
+      "beforeApiUs": 109733.0235,
+      "crossingsPerItem": 122,
+      "inEngineShare": 0.9324999799278991,
+      "stages": {
+        "core": 86.2,
+        "glue": 4.6,
+        "gc": 4.1,
+        "views": 3.9,
+        "other": 0.8,
+        "ts-core": 0.5
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsDecorateModels x1.0",
+        "ModelManagerHandle.checkAstShape x34.0",
+        "modelFileIsCompatibleVersion x39.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Serialisation",
+      "op": "from_json",
+      "set": "synthetic-large",
+      "tsRefUs": 20.24698666666667,
+      "crateUs": 12.720915208333334,
+      "apiUs": 34.60949333333334,
+      "crateVsTs": 0.628286836839589,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.7093651466819098,
+      "beforeCrateVsTs": 0.6361312462518428,
+      "beforeApiVsTs": 4.38999424770369,
+      "beforeApiUs": 88.88415499999999,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.6707756090244186,
+      "stages": {
+        "core": 62.3,
+        "encode": 26,
+        "glue": 4.9,
+        "decode": 2.3,
+        "other": 2.3,
+        "gc": 1.2,
+        "ts-core": 0.6,
+        "views": 0.4
+      },
+      "topBindings": [
+        "ModelManagerHandle.serializerFromJsonCompact x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Instance creation",
+      "op": "new_resource",
+      "set": "synthetic-large",
+      "tsRefUs": 3.17672,
+      "crateUs": 1.6524071527777777,
+      "apiUs": 5.3755733333333335,
+      "crateVsTs": 0.5201614094971473,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.6921772562055621,
+      "beforeCrateVsTs": 0.5938398026196132,
+      "beforeApiVsTs": 6.89612294022346,
+      "beforeApiUs": 21.90705166666667,
+      "crossingsPerItem": 3,
+      "inEngineShare": 0.3280635995159847,
+      "stages": {
+        "views": 30,
+        "ts-core": 27.8,
+        "glue": 23.9,
+        "core": 9.4,
+        "other": 7.6,
+        "gc": 1.4
+      },
+      "topBindings": [
+        "classDeclarationIsKind x2.0",
+        "ModelManagerHandle.modelFileGetTypeName x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "dcs_decorate",
+      "set": "synthetic-large",
+      "tsRefUs": 78365.36000000002,
+      "crateUs": 43428.00516666667,
+      "apiUs": 128626.666,
+      "crateVsTs": 0.554173491535886,
+      "crateRebuildVsTs": 0.7285151670755206,
+      "apiVsTs": 1.6413714682099332,
+      "beforeCrateVsTs": 0.812225778073373,
+      "beforeApiVsTs": 1.4169407439715709,
+      "beforeApiUs": 111039.0715,
+      "crossingsPerItem": 23,
+      "inEngineShare": 0.9772197166128089,
+      "stages": {
+        "core": 87.1,
+        "gc": 5.8,
+        "glue": 4.6,
+        "views": 1.7,
+        "other": 0.6,
+        "ts-core": 0.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsDecorateModels x1.0",
+        "ModelManagerHandle.checkAstShape x1.0",
+        "ModelManagerHandle.stageModelFileWithHeader x4.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "dcs_decorate",
+      "set": "conformance",
+      "tsRefUs": 23345.762,
+      "crateUs": 10390.27232142857,
+      "apiUs": 38126.842,
+      "crateVsTs": 0.4450603206452876,
+      "crateRebuildVsTs": 0.5080284824060867,
+      "apiVsTs": 1.6331376118714822,
+      "beforeCrateVsTs": 2.250724014348586,
+      "beforeApiVsTs": 2.5674356227909803,
+      "beforeApiUs": 59938.741,
+      "crossingsPerItem": 143,
+      "inEngineShare": 0.8468034343155627,
+      "stages": {
+        "core": 81.4,
+        "views": 6.9,
+        "glue": 4.9,
+        "gc": 4.8,
+        "other": 1.2,
+        "ts-core": 0.9
+      },
+      "topBindings": [
+        "ModelManagerHandle.dcsDecorateModels x1.0",
+        "ModelManagerHandle.checkAstShape x41.0",
+        "modelFileIsCompatibleVersion x46.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "validate",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 19.01885,
+      "crateUs": 9.593255694444444,
+      "apiUs": 29.371741666666665,
+      "crateVsTs": 0.5044077688421984,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.5443489835960988,
+      "beforeCrateVsTs": 0.49687156864549303,
+      "beforeApiVsTs": 1.515009889311569,
+      "beforeApiUs": 28.813745833333336,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.4469373123709378,
+      "stages": {
+        "core": 53.2,
+        "ts-core": 36.1,
+        "other": 4.5,
+        "encode": 4.2,
+        "glue": 1,
+        "gc": 0.9,
+        "views": 0
+      },
+      "topBindings": [
+        "ModelManagerHandle.validateResourceBinary x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "resolve_type_first",
+      "set": "synthetic-large",
+      "tsRefUs": 0.5743338870431893,
+      "crateUs": null,
+      "apiUs": 0.8711345514950167,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.516773728918956,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 1.538743423697538,
+      "beforeApiUs": 0.8837524916943521,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.6982080938781636,
+      "stages": {
+        "glue": 30.9,
+        "other": 27.4,
+        "core": 26.9,
+        "ts-core": 13.1,
+        "gc": 1.8,
+        "views": 0
+      },
+      "topBindings": [
+        "ModelManagerHandle.resolveType x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_type_first",
+      "set": "conformance",
+      "tsRefUs": 0.9116538461538461,
+      "crateUs": null,
+      "apiUs": 1.3661634615384617,
+      "crateVsTs": null,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.4985550352276085,
+      "beforeCrateVsTs": null,
+      "beforeApiVsTs": 6.39833565371472,
+      "beforeApiUs": 5.833067307692308,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.47173606549832864,
+      "stages": {
+        "views": 22.8,
+        "other": 20.7,
+        "ts-core": 20.1,
+        "core": 17.8,
+        "glue": 17.5,
+        "gc": 1
+      },
+      "topBindings": [
+        "ModelManagerHandle.getTypeName x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Model loading",
+      "op": "mm_new",
+      "set": "conformance",
+      "tsRefUs": 536.3354999999999,
+      "crateUs": 1.546752814256377,
+      "apiUs": 783.8190000000001,
+      "crateVsTs": 0.002883927717364182,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.4614341209932966,
+      "beforeCrateVsTs": 0.02389273328900641,
+      "beforeApiVsTs": 1.355126595200206,
+      "beforeApiUs": 726.8025,
+      "crossingsPerItem": 10,
+      "inEngineShare": 0.3458547892566081,
+      "stages": {
+        "views": 53.9,
+        "core": 23.3,
+        "ts-core": 7.3,
+        "gc": 6.8,
+        "glue": 6.5,
+        "other": 2.2
+      },
+      "topBindings": [
+        "ModelManagerHandle.stageModelFileWithHeader x2.0",
+        "new ModelManagerHandle x1.0",
+        "modelFileIsCompatibleVersion x3.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Validation",
+      "op": "validate",
+      "set": "synthetic-large",
+      "tsRefUs": 6.04387,
+      "crateUs": 3.6802757783882787,
+      "apiUs": 7.683066666666667,
+      "crateVsTs": 0.6089270249671616,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.2712164005292415,
+      "beforeCrateVsTs": 0.9489138948105389,
+      "beforeApiVsTs": 1.9230418589413736,
+      "beforeApiUs": 11.622615,
+      "crossingsPerItem": 1,
+      "inEngineShare": 0.580650246672408,
+      "stages": {
+        "core": 59.8,
+        "ts-core": 33.6,
+        "glue": 2.2,
+        "other": 2,
+        "encode": 1.3,
+        "gc": 1.1
+      },
+      "topBindings": [
+        "ModelManagerHandle.validateResourceBinary x1.0"
+      ],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_decorators",
+      "set": "synthetic-large",
+      "tsRefUs": 0.030113861386138616,
+      "crateUs": 0.005108070377717256,
+      "apiUs": 0.03417986798679868,
+      "crateVsTs": 0.1696252204995702,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.1350210970464134,
+      "beforeCrateVsTs": 0.17415322651424253,
+      "beforeApiVsTs": 0.9479423530056441,
+      "beforeApiUs": 0.02854620462046205,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 99.4,
+        "gc": 0.5,
+        "views": 0.1
+      },
+      "topBindings": [],
+      "errors": []
+    },
+    {
+      "category": "Introspection (including decorators/DCS)",
+      "op": "get_type",
+      "set": "conformance",
+      "tsRefUs": 0.6406826923076924,
+      "crateUs": 0.10548046104115058,
+      "apiUs": 0.7270384615384615,
+      "crateVsTs": 0.164637600340377,
+      "crateRebuildVsTs": null,
+      "apiVsTs": 1.1347871111044407,
+      "beforeCrateVsTs": 0.15569226490768354,
+      "beforeApiVsTs": 5.040611727274091,
+      "beforeApiUs": 3.229432692307692,
+      "crossingsPerItem": 0,
+      "inEngineShare": 0,
+      "stages": {
+        "other": 49,
+        "ts-core": 38.8,
+        "views": 11.1,
+        "gc": 1,
+        "core": 0.1,
+        "glue": 0
+      },
+      "topBindings": [],
+      "errors": []
+    }
+  ],
+  "bc19": [
+    {
+      "op": "mm_new",
+      "set": "conformance",
+      "tsRefUs": 536.3354999999999,
+      "onUs": 783.8190000000001,
+      "offUs": 679.999,
+      "deltaUs": 103.82000000000005,
+      "ratio": 1.152676695112787,
+      "onVsTs": 1.4614341209932966,
+      "offVsTs": 1.2678612547556523,
+      "crossingsOn": 10,
+      "crossingsOff": 10
+    },
+    {
+      "op": "modelfile_new",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 50.32417142857143,
+      "onUs": 715.3118285714286,
+      "offUs": 161.64445714285714,
+      "deltaUs": 553.6673714285714,
+      "ratio": 4.425217178583827,
+      "onVsTs": 14.214080595181183,
+      "offVsTs": 3.2120639556339294,
+      "crossingsOn": 3,
+      "crossingsOff": 2,
+      "checkAstShapeUs": 407.7622028571428,
+      "checkAstShapeCalls": 1
+    },
+    {
+      "op": "modelfile_new",
+      "set": "conformance",
+      "tsRefUs": 16.149390243902438,
+      "onUs": 350.5894512195122,
+      "offUs": 80.1449268292683,
+      "deltaUs": 270.44452439024394,
+      "ratio": 4.374443462483513,
+      "onVsTs": 21.709144798942802,
+      "offVsTs": 4.96272154049462,
+      "crossingsOn": 3,
+      "crossingsOff": 2,
+      "checkAstShapeUs": 173.61569756097558,
+      "checkAstShapeCalls": 1
+    },
+    {
+      "op": "modelfile_new",
+      "set": "synthetic-large",
+      "tsRefUs": 1150.4565,
+      "onUs": 31542.0425,
+      "offUs": 4381.165,
+      "deltaUs": 27160.8775,
+      "ratio": 7.199464640112847,
+      "onVsTs": 27.416979694582107,
+      "offVsTs": 3.808197007014172,
+      "crossingsOn": 3,
+      "crossingsOff": 2,
+      "checkAstShapeUs": 30742.6662,
+      "checkAstShapeCalls": 1
+    },
+    {
+      "op": "add_model_file",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 90.05868571428572,
+      "onUs": 797.5547428571427,
+      "offUs": 248.30967142857142,
+      "deltaUs": 549.2450714285714,
+      "ratio": 3.2119358793745847,
+      "onVsTs": 8.855944726835261,
+      "offVsTs": 2.7571984807366876,
+      "crossingsOn": 4.285714285714285,
+      "crossingsOff": 3.2857142857142847,
+      "checkAstShapeUs": 382.05522571428577,
+      "checkAstShapeCalls": 1
+    },
+    {
+      "op": "add_model_file",
+      "set": "conformance",
+      "tsRefUs": 26.98309756097561,
+      "onUs": 524.7590609756096,
+      "offUs": 214.99384146341467,
+      "deltaUs": 309.7652195121949,
+      "ratio": 2.4408097339146684,
+      "onVsTs": 19.447695350386457,
+      "offVsTs": 7.967722793040269,
+      "crossingsOn": 4.2439024390243905,
+      "crossingsOff": 3.2439024390243905,
+      "checkAstShapeUs": 171.0003780487805,
+      "checkAstShapeCalls": 1
+    },
+    {
+      "op": "add_model_file",
+      "set": "synthetic-large",
+      "tsRefUs": 2967.2655,
+      "onUs": 42262.40700000001,
+      "offUs": 9931.129500000001,
+      "deltaUs": 32331.277500000004,
+      "ratio": 4.255548877899538,
+      "onVsTs": 14.242880187162223,
+      "offVsTs": 3.3468961574217073,
+      "crossingsOn": 14,
+      "crossingsOff": 13,
+      "checkAstShapeUs": 23394.2019,
+      "checkAstShapeCalls": 1
+    },
+    {
+      "op": "add_cto_model",
+      "set": "concerto-core-test-data",
+      "tsRefUs": 591.7344142857143,
+      "onUs": 1773.7344857142857,
+      "offUs": 1410.0532857142855,
+      "deltaUs": 363.6812000000002,
+      "ratio": 1.2579201819424657,
+      "onVsTs": 2.997517877771855,
+      "offVsTs": 2.3829158008603715,
+      "crossingsOn": 4.285714285714285,
+      "crossingsOff": 3.2857142857142847,
+      "checkAstShapeUs": 419.85060285714286,
+      "checkAstShapeCalls": 1
+    },
+    {
+      "op": "add_cto_model",
+      "set": "conformance",
+      "tsRefUs": 173.26037804878047,
+      "onUs": 790.2182804878048,
+      "offUs": 604.5318170731707,
+      "deltaUs": 185.6864634146341,
+      "ratio": 1.3071574699138775,
+      "onVsTs": 4.560871270091096,
+      "offVsTs": 3.4891521297671892,
+      "crossingsOn": 4.2439024390243905,
+      "crossingsOff": 3.2439024390243905,
+      "checkAstShapeUs": 118.0547243902439,
+      "checkAstShapeCalls": 1
+    },
+    {
+      "op": "add_cto_model",
+      "set": "synthetic-large",
+      "tsRefUs": 26201.8845,
+      "onUs": 99786.774,
+      "offUs": 54338.0405,
+      "deltaUs": 45448.7335,
+      "ratio": 1.8364072955483184,
+      "onVsTs": 3.808381568890589,
+      "offVsTs": 2.073821846669082,
+      "crossingsOn": 14,
+      "crossingsOff": 13,
+      "checkAstShapeUs": 37946.6831,
+      "checkAstShapeCalls": 1
+    }
+  ]
+}

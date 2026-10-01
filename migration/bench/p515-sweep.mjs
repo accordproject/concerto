@@ -12,6 +12,9 @@
 // --mode count TS->WASM crossings per item, by binding, with the time
 //              spent inside them (loads lib/p515-engine-counter.cjs as
 //              CONCERTO_ENGINE_MODULE; Rust engine only).
+// --mm-options JSON  (P5-60) options for every ModelManager the ops build,
+//              e.g. '{"metamodelValidation":false}' for BC-19's opt-out
+//              (default: none, i.e. `new ModelManager()`).
 // --mode loop  runs one op (--ops X --sets Y) in a loop for --seconds, for
 //              `node --cpu-prof` (see p515-cpuprof.mjs for the stage split).
 //
@@ -33,7 +36,7 @@ const SETS = ['concerto-core-test-data', 'conformance', 'synthetic-large'];
 function parseArgs(argv) {
     const a = {
         coreDist: path.join(REPO_ROOT, 'packages', 'concerto-core', 'dist'),
-        mode: 'time', ops: null, sets: SETS, samples: 30, warmup: 5, seconds: 20, out: null,
+        mode: 'time', ops: null, sets: SETS, samples: 30, warmup: 5, seconds: 20, out: null, mmOptions: undefined,
     };
     for (let i = 0; i < argv.length; i++) {
         const k = argv[i];
@@ -46,6 +49,7 @@ function parseArgs(argv) {
         else if (k === '--warmup') { a.warmup = Number(v()); }
         else if (k === '--seconds') { a.seconds = Number(v()); }
         else if (k === '--out') { a.out = v(); }
+        else if (k === '--mm-options') { a.mmOptions = JSON.parse(v()); }
         else { throw new Error(`unknown argument: ${k}`); }
     }
     return a;
@@ -98,8 +102,14 @@ function loadSet(set) {
     return data;
 }
 
+// P5-60 (accordproject/concerto-rust#392): every manager the ops build takes
+// --mm-options; without it this is `new ModelManager()`, as before.
+function newManager() {
+    return args.mmOptions === undefined ? new ModelManager() : new ModelManager(args.mmOptions);
+}
+
 function managerOf(models) {
-    const mm = new ModelManager();
+    const mm = newManager();
     for (const { name, ast } of models) {
         mm.addModelFile(new ModelFile(mm, ast, undefined, name));
     }
@@ -112,11 +122,11 @@ const OPS = {
     mm_new: {
         family: 'load', setOnly: 'conformance',
         setup: () => ({}), n: () => 1,
-        run: () => new ModelManager(),
+        run: () => newManager(),
     },
     modelfile_new: {
         family: 'load',
-        setup: (d) => ({ mm: new ModelManager(), models: d.models }),
+        setup: (d) => ({ mm: newManager(), models: d.models }),
         n: (c) => c.models.length,
         run: (c) => {
             for (const { name, ast } of c.models) {
@@ -135,7 +145,7 @@ const OPS = {
         setup: (d) => ({ models: d.models }),
         n: (c) => c.models.length,
         run: (c) => {
-            const mm = new ModelManager();
+            const mm = newManager();
             for (const { name, cto } of c.models) {
                 mm.addCTOModel(cto, name);
             }
@@ -527,6 +537,7 @@ for (const [op, set] of selected()) {
 
 const out = {
     tool: 'p515-sweep', mode: args.mode, coreDist: args.coreDist, coreVersion, commit: commit(),
+    ...(args.mmOptions === undefined ? {} : { mmOptions: args.mmOptions }),
     node: process.version, cpu: os.cpus()[0].model, loadavgEnd: loadavg(), samples: args.samples, warmup: args.warmup,
     results,
 };
