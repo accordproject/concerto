@@ -1281,6 +1281,43 @@ function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | u
 }
 
 /**
+ * P5-76 (accordproject/concerto-rust#418): the engine's string parameters
+ * cross into WASM one UTF-16 code unit at a time (wasm-bindgen's ASCII
+ * loop), which made passing a large AST's JSON text a sizeable part of a
+ * `ModelFile`'s construction. The `...Utf8` staging bindings take the same
+ * text as the UTF-8 bytes a `TextEncoder` writes, copied in one go.
+ */
+const utf8Encoder = new TextEncoder();
+
+/**
+ * The buffer `utf8Text` encodes into, reused across calls (a fresh
+ * `TextEncoder.encode` array per call is an external allocation, which
+ * made the garbage collector run more often), and the largest it is kept.
+ */
+let utf8Buffer = new Uint8Array(0);
+const UTF8_BUFFER_KEPT = 4 * 1024 * 1024;
+
+/**
+ * The UTF-8 bytes of `text`, for the engine's `...Utf8` bindings: a view
+ * of a reused buffer, valid until the next call (the binding copies it
+ * into the engine's memory before it returns).
+ * @param {string} text the text
+ * @return {Uint8Array} its UTF-8 bytes
+ */
+function utf8Text(text: string): Uint8Array {
+    // At most three bytes per UTF-16 code unit.
+    const most = text.length * 3;
+    if (most > UTF8_BUFFER_KEPT) {
+        return utf8Encoder.encode(text);
+    }
+    if (utf8Buffer.length < most) {
+        utf8Buffer = new Uint8Array(Math.max(most, 2 * utf8Buffer.length, 64 * 1024));
+    }
+    const { written } = utf8Encoder.encodeInto(text, utf8Buffer);
+    return utf8Buffer.subarray(0, written);
+}
+
+/**
  * Called by the ModelFile constructor, before `process()` and the header
  * part of `fromAst` (P5-10b: before `process()`, so the file's own
  * decorators can be deferred too): loads the AST in the manager's
@@ -1372,14 +1409,19 @@ function stageLoadedModelFile(modelFile: any, checkedText?: string): boolean {
         const checked = shapePending.has(modelFile);
         if (checked && typeof handle.stageModelFileChecked === 'function') {
             // P5-69 (BC-19-b): the shape check and the load, from one
-            // parse of the text.
-            const staged = JSON.parse(handle.stageModelFileChecked(text, definitions, fileName));
+            // parse of the text. P5-76: the text crosses as UTF-8 bytes
+            // where the engine takes them (`utf8Text`).
+            const staged = JSON.parse(typeof handle.stageModelFileCheckedUtf8 === 'function'
+                ? handle.stageModelFileCheckedUtf8(utf8Text(text), definitions, fileName)
+                : handle.stageModelFileChecked(text, definitions, fileName));
             id = staged.id;
             header = staged.header;
             shapeCheckPassed(modelFile, text);
         } else if (typeof handle.stageModelFileWithHeader === 'function') {
             completeShapeCheck(modelFile, handle, text);
-            const staged = JSON.parse(handle.stageModelFileWithHeader(text, definitions, fileName));
+            const staged = JSON.parse(typeof handle.stageModelFileWithHeaderUtf8 === 'function'
+                ? handle.stageModelFileWithHeaderUtf8(utf8Text(text), definitions, fileName)
+                : handle.stageModelFileWithHeader(text, definitions, fileName));
             id = staged.id;
             header = staged.header;
         } else {

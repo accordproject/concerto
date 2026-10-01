@@ -115,7 +115,11 @@ function countCalls(handle, names) {
     return counts;
 }
 
-const LOADS = ['systemModelFileHeader', 'stageModelFileChecked', 'stageModelFileWithHeader', 'stageModelFile', 'checkAstShape'];
+// P5-76: `stageModelFileCheckedUtf8` and `stageModelFileWithHeaderUtf8` are
+// the same loads as `stageModelFileChecked` and `stageModelFileWithHeader`,
+// for the AST's text as UTF-8 bytes (the views call them where the engine
+// has them).
+const LOADS = ['systemModelFileHeader', 'stageModelFileChecked', 'stageModelFileCheckedUtf8', 'stageModelFileWithHeader', 'stageModelFileWithHeaderUtf8', 'stageModelFile', 'checkAstShape'];
 
 module.exports = [
     {
@@ -224,7 +228,7 @@ module.exports = [
                 const outcome = probe(() => {
                     new core.ModelFile(mm, copyOf(mm, ns), undefined, 'x.json');
                 });
-                return [outcome, counts.systemModelFileHeader, counts.stageModelFileChecked];
+                return [outcome, counts.systemModelFileHeader, counts.stageModelFileChecked + counts.stageModelFileCheckedUtf8];
             });
         },
         expect: { ok: [['ok', 0, 1], ['ok', 0, 1]] },
@@ -268,7 +272,7 @@ module.exports = [
             return [counts, mm.getNamespaces()];
         }),
         expect: { ok: Array(2).fill([
-            { systemModelFileHeader: 2, stageModelFileChecked: 0, stageModelFileWithHeader: 0, stageModelFile: 0, checkAstShape: 0 },
+            { systemModelFileHeader: 2, stageModelFileChecked: 0, stageModelFileCheckedUtf8: 0, stageModelFileWithHeader: 0, stageModelFileWithHeaderUtf8: 0, stageModelFile: 0, checkAstShape: 0 },
             ['concerto.decorator@1.0.0', 'concerto@1.0.0'],
         ]) },
         reference: { ok: ['no engine', 'no engine'] },
