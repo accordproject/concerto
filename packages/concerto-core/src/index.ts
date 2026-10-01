@@ -104,3 +104,7 @@ export {
     DateTimeUtil, 
     MetaModel 
 };
+export {
+  DeserializeOptions,
+  STRICT_VALIDATE_OPTIONS,
+} from './types';
