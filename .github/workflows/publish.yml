@@ -31,17 +31,28 @@ jobs:
       - run: npm install -g npm@latest
 
       - run: npm ci
-      - run: npm run build --if-present
 
       - name: tag
         id: tag
         run: |
           node ./scripts/tag.js ${{ github.event.release.tag_name }}
 
-      - name: build and publish
+      - name: bump version
         run: |
           node ./scripts/bump_version.js ${{ github.event.release.tag_name }}
           npm version --workspaces --include-workspace-root --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
+
+      # Build only after the version bump. The ESM build (esbuild) inlines each
+      # package's package.json at build time, so building first shipped an ESM
+      # build that reported the previous version (#1462).
+      - run: npm run build --if-present
+
+      - name: publish
+        run: |
+          # Gate the publish on the ESM output matching the version being
+          # published, so a reordering of the steps above cannot ship a stale
+          # build again.
+          npm run test:esm
           npm publish --workspaces --access public ${{ steps.tag.outputs.tag }} 2>&1
 
       - name: Create PR to increment version
