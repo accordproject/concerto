@@ -1,0 +1,19 @@
+23:00:25 round 1 ts start load 1.70 2.48 3.10
+23:00:26 round 1 ts end load 1.70 2.48 3.10
+23:00:26 round 1 now start load 1.70 2.48 3.10
+23:00:27 round 1 now end load 1.73 2.47 3.09
+23:00:27 round 1 before start load 1.73 2.47 3.09
+23:00:28 round 1 before end load 1.73 2.47 3.09
+23:00:28 round 2 ts start load 1.73 2.47 3.09
+23:00:29 round 2 ts end load 1.73 2.47 3.09
+23:00:29 round 2 before start load 1.73 2.47 3.09
+23:00:31 round 2 before end load 1.73 2.47 3.09
+23:00:31 round 2 now start load 1.73 2.47 3.09
+23:00:32 round 2 now end load 1.67 2.44 3.08
+23:00:32 round 3 ts start load 1.67 2.44 3.08
+23:00:33 round 3 ts end load 1.67 2.44 3.08
+23:00:33 round 3 now start load 1.67 2.44 3.08
+23:00:34 round 3 now end load 1.67 2.44 3.08
+23:00:34 round 3 before start load 1.67 2.44 3.08
+23:00:35 round 3 before end load 1.67 2.44 3.08
+23:00:35 timed done
