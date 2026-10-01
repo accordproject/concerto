@@ -1,3 +1,67 @@
+# P5-73: `new ModelManager()` with the system models' precomputed verdict (2026-10-01)
+
+Task P5-73 (accordproject/concerto-rust#414), follow-up 1 of P5-72
+(#413): `new ModelManager()` and `clearModelFiles()` no longer load the two
+fixed system models (`concerto.decorator@1.0.0`, `concerto@1.0.0`) in the
+engine on every call. Their ModelFiles take a precomputed verdict
+(concerto-wasm `systemModelFileHeader`), which the engine gives only for
+exactly the fixed system model texts, and the JS-side stringify-compare
+memo no longer answers for those namespaces. Targeted before/after only:
+`mm_new`, with `modelfile_new` and `add_model_file` as controls. Raw
+outputs in `results/P5-73/` (`sweep/{now,before,now-mmvoff}`, `tables.md`,
+`tables.json`, `sweep/timed-loads.txt`).
+
+| | |
+|---|---|
+| Machine | Cloud container (cloud-3), Intel Xeon @ 2.10GHz, 4 vCPU, 15 GB, Linux 6.18 |
+| Toolchain | Node v22.22.2, rustc 1.94.1, wasm-bindgen 0.2.128, binaryen/wasm-opt 132 |
+| Before | The integration head: `concerto` `520ef43a6` (concerto-core dist), `concerto-rust` `05a0c0a` (engine 3,052,163 bytes) |
+| Now | The P5-73 change on that head (engine 3,055,810 bytes) |
+| now-mmvoff | The now dist and engine with `metamodelValidation: false` on every ModelManager the ops build |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, timed in each round |
+| Driver | `p573-run.sh`: P5-72's TS-API timed phase cut to the three ops, three rounds of TS 5.0.0 then now, now-mmvoff and before (order alternated per round), each op in its own process, `p515-sweep.mjs` with 30 warm-up and 300 samples; crossing counts (count mode) once per side. |
+| Quiet gate | Before each of the 36 parts: 1-minute load < 2, 5-minute < 3, no other bench, cargo or mocha process. All met it with no wait; at their starts the 1-minute load was 1.25-1.99 and the 5-minute 1.77-2.12. |
+| Noise | Each figure is the median over three rounds of each round's median. |
+
+| op | set | TS 5.0.0 | before | **now** | now (mmv off) | × TS before | **× TS now** | now / before |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| mm_new | (system models) | 110.4 µs | 314.1 µs | **193.3 µs** | 199.8 µs | 2.85 | **1.75** | **0.62** |
+| modelfile_new | core-test-data | 17.3 µs | 104.0 µs | 105.1 µs | 95.3 µs | 6.02 | 6.08 | 1.01 |
+| modelfile_new | conformance | 5.1 µs | 57.2 µs | 54.9 µs | 60.9 µs | 11.23 | 10.79 | 0.96 |
+| modelfile_new | synthetic-large | 564.3 µs | 7.82 ms | 7.75 ms | 7.52 ms | 13.86 | 13.74 | 0.99 |
+| add_model_file | core-test-data | 56.2 µs | 312.4 µs | 306.5 µs | 302.0 µs | 5.56 | 5.46 | 0.98 |
+| add_model_file | conformance | 20.8 µs | 158.7 µs | 162.0 µs | 170.5 µs | 7.63 | 7.79 | 1.02 |
+| add_model_file | synthetic-large | 2.19 ms | 8.95 ms | 9.14 ms | 8.97 ms | 4.09 | 4.17 | 1.02 |
+
+- **`mm_new` is 0.62× the before side** (314 -> 193 µs, all three rounds:
+  311-352 against 187-267 µs), and the opt-out now costs the same as the
+  default (200 µs). In the count run the engine time per manager went from
+  188 to 65 µs and the crossings from 10 to 8: the two
+  `stageModelFileWithHeader` loads (about 68 µs each) and their
+  `dropStagedModelFile` calls are replaced by two `systemModelFileHeader`
+  calls.
+- **The controls do not move** (0.96-1.02×, within noise).
+- **Measured first, as the brief asked:** at the before head the system
+  models were *not* shape-checked again in a warm process. The JS memo
+  answered for them, and each manager staged them with the unchecked
+  `stageModelFileWithHeader` (count run: 2 calls, 136 µs, no
+  `stageModelFileChecked`). So the time P5-72 put on the folded check was
+  the staging load itself. The precomputed verdict removes that load too,
+  not only the check, since an unmirrored system ModelFile is never
+  committed and only its verdict and header are used.
+- **TS 5.0.0's own `mm_new` depends on the sample count**: 110 µs here
+  with 300 samples, 366 µs in a 30-sample run of the same driver on this
+  machine and 449 µs in P5-72, so × TS for `mm_new` is not comparable with
+  P5-72's 1.26×. Same run, before against now, is the comparison that
+  holds. The 30-sample run (all three ops in one process, discarded for
+  the reason below) gave mm_new 349 -> 262 µs (0.75×).
+- **One process per op**: with all three ops in one process, the ops after
+  `mm_new` and `modelfile_new` can hit a V8 WeakMap stall in
+  `engine/views.ts` `stages` (about 120 µs per `stages.set`, measured by
+  wrapping `WeakMap.prototype.set`), which made `add_model_file` 1.8-2.2×
+  slower. It depends on the GC's timing, not on this change: the before
+  side shows it too with 600 samples. It is not fixed here.
+
 # P5-60: consolidated R1-candidate re-measure (P5-15/P5-22 sweep, crate + TS API, BC-19 load cost, bundle size) (2026-09-30)
 
 Task P5-60 (accordproject/concerto-rust#392) repeats the P5-15/P5-22 sweep on

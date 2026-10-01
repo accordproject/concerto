@@ -1,0 +1,32 @@
+{
+  "tool": "p515-sweep",
+  "mode": "time",
+  "coreDist": "/home/user/wt/P5-73/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "520ef43a6",
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "loadavgEnd": [
+    1.58,
+    1.95,
+    1.53
+  ],
+  "samples": 300,
+  "warmup": 30,
+  "results": [
+    {
+      "op": "mm_new",
+      "family": "load",
+      "set": "conformance",
+      "n": 1,
+      "medianUs": 103.128,
+      "samples": 300,
+      "median_ms": 0.103128,
+      "mean_ms": 0.1275587566666667,
+      "stddev_ms": 0.07529350767881243,
+      "min_ms": 0.058931,
+      "max_ms": 0.521666,
+      "cv": 0.5902652992735538
+    }
+  ]
+}
