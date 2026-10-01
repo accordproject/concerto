@@ -52,6 +52,19 @@ interface ErrorPayload {
     needsModelFile?: boolean;
 }
 
+/**
+ * P5-69 (BC-19-b): the codes of BC-19's AST shape check (concerto-rust
+ * `instance::check_ast_shape`, with BC-17 and BC-20), all
+ * `IllegalModelException`s.
+ */
+const AST_SHAPE_CODES = new Set([
+    'modelfile-load-astshape',
+    'modelfile-load-decoratorsnotarray',
+    'modelfile-load-supertypename',
+    'modelfile-load-namenotstring',
+    'modelfile-load-nodenotobject',
+]);
+
 const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     IllegalModel: (p) => {
         const err = new IllegalModelException(p.message, p.modelFile, p.location);
@@ -71,6 +84,13 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
         // `stageModelFile`).
         if (p.code === 'modelfile-load-unreadable') {
             (err as unknown as { unreadableAst?: boolean }).unreadableAst = true;
+        }
+        // P5-69 (BC-19-b): an error of BC-19's AST shape check, which the
+        // engine's folded load (`stageModelFileChecked`) throws before any
+        // other, and the ModelFile constructor throws as the check's
+        // (engine/views.ts `stageModelFile`).
+        if (AST_SHAPE_CODES.has(p.code)) {
+            (err as unknown as { astShape?: boolean }).astShape = true;
         }
         return err;
     },

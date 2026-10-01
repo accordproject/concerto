@@ -924,12 +924,13 @@ const stageFinalizer: { register(target: object, held: Stage, token: object): vo
 /**
  * For ASTs of namespaces the manager never writes into rustHandle (the
  * system models, the metamodel), the JSON text (with the definitions and
- * file name) Rust last loaded without error, by AST object. Such a file is
+ * file name) Rust last loaded without error, by AST object, and whether that
+ * load ran BC-19's shape check (P5-69). Such a file is
  * never committed from its stage, so a repeat of the same text needs only
  * the verdict, not another load: `new ModelManager()` builds the metamodel's
  * ModelFile from the same constant AST every time.
  */
-const acceptedUnmirrored = new WeakMap<object, { key: string; header: StagedHeader | null }>();
+const acceptedUnmirrored = new WeakMap<object, { key: string; header: StagedHeader | null; checked: boolean }>();
 
 /**
  * P5-28 (accordproject/concerto-rust#333): the header of a ModelFile's AST
@@ -1055,6 +1056,14 @@ const shapeChecked = new WeakMap<object, object>();
 let trustedAst: object | null = null;
 
 /**
+ * P5-69 (BC-19-b, R1): every ModelFile whose AST `checkAstShape` has left
+ * for `stageModelFile` to check, folded into the engine's one load of the
+ * AST (`stageModelFileChecked`). `stageModelFile` completes the check on
+ * every path, and removes the file.
+ */
+const shapePending = new WeakSet<object>();
+
+/**
  * P5-49 (BC-19 with BC-17 and BC-20, R1): the strict AST shape check at
  * model load. Called by the ModelFile constructor after its own argument
  * checks and before `stageModelFile`, unless the manager was built with
@@ -1068,9 +1077,16 @@ let trustedAst: object | null = null;
  * undefined when the check is off. P5-68 (BC-19-a): also undefined, without
  * the check, for the one DecoratorManager result AST `adoptStagedModels`
  * marks as engine-written from checked models (`trustedAst`).
+ *
+ * P5-69 (BC-19-b, R1): the check itself is folded into the engine's load
+ * of the AST, which `stageModelFile` runs next, so that the text is parsed
+ * once (concerto-rust `ModelFile::from_json_text_checked_with_imports`).
+ * This marks the file as pending (`shapePending`) instead of calling the
+ * engine; `stageModelFile` then checks it, on every path, before any other
+ * error and with the same error. A namespace the manager never writes,
+ * whose same text has already passed, is not checked again, as before.
  * @param {object} modelFile the ModelFile being constructed
- * @return {string | undefined} the AST's JSON text, when it was checked
- * @throws {IllegalModelException} if the AST does not have the metamodel's shape
+ * @return {string | undefined} the AST's JSON text, when it is checked
  */
 function checkAstShape(modelFile: any): string | undefined {
     const manager = modelFile.modelManager;
@@ -1092,12 +1108,46 @@ function checkAstShape(modelFile: any): string | undefined {
         shapeChecked.set(modelFile, ast);
         return text;
     }
-    manager.rustHandle.checkAstShape(text);
-    if (unmirrored) {
+    shapePending.add(modelFile);
+    return text;
+}
+
+/**
+ * P5-69 (BC-19-b, R1): records that a pending ModelFile's AST, as `text`,
+ * has passed the shape check, as `checkAstShape` recorded it before.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {string} text the AST's JSON text
+ */
+function shapeCheckPassed(modelFile: any, text: string): void {
+    if (!shapePending.has(modelFile)) {
+        return;
+    }
+    shapePending.delete(modelFile);
+    const manager = modelFile.modelManager;
+    const ast = modelFile.ast;
+    const namespace = ast.namespace;
+    if (typeof namespace === 'string' && !manager._needsRustWrite(namespace)) {
         shapeCheckedUnmirrored.set(namespace, text);
     }
     shapeChecked.set(modelFile, ast);
-    return text;
+}
+
+/**
+ * P5-69 (BC-19-b, R1): the shape check of a pending ModelFile on its own,
+ * for a path that does not load the AST with the check
+ * (`rustHandle.checkAstShape`, which runs the same fold over its own parse
+ * of the text). Nothing when the file is not pending.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {object} handle the manager's rustHandle
+ * @param {string} text the AST's JSON text
+ * @throws {IllegalModelException} if the AST does not have the metamodel's shape
+ */
+function completeShapeCheck(modelFile: any, handle: any, text: string): void {
+    if (!shapePending.has(modelFile)) {
+        return;
+    }
+    handle.checkAstShape(text);
+    shapeCheckPassed(modelFile, text);
 }
 
 /**
@@ -1113,7 +1163,10 @@ function checkAstShape(modelFile: any): string | undefined {
  * IllegalModelException), so a malformed AST is an error at load, never
  * left to the eager walk; the AST is read for that even for a manager with
  * decorator factories. With the check on, the check has rejected any such
- * AST already.
+ * AST already. P5-69 (BC-19-b): with the check pending (`shapePending`),
+ * it runs here first, folded into the load (`stageModelFileChecked`) or on
+ * its own (`completeShapeCheck`) where nothing is loaded, and its error is
+ * thrown; any other error is handled as before.
  * @param {object} modelFile the ModelFile being constructed
  * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
  * already computed it
@@ -1133,10 +1186,17 @@ function stageModelFile(modelFile: any, checkedText?: string): boolean {
         if (Array.isArray(factories) && factories.length > 0) {
             if (checkedText === undefined) {
                 readUnchecked(modelFile, handle);
+            } else {
+                completeShapeCheck(modelFile, handle, checkedText);
             }
             return false;
         }
         const ast = modelFile.ast;
+        // P5-69: a prestaged AST is not loaded again, so it is checked on
+        // its own first.
+        if (checkedText !== undefined && ast && typeof ast === 'object' && prestaged.has(ast)) {
+            completeShapeCheck(modelFile, handle, checkedText);
+        }
         // P5-27 (F6): a DecoratorManager result model Rust has already
         // loaded, and staged in this handle (`adoptStagedModels`), is used
         // as it is, without sending its AST again.
@@ -1159,6 +1219,13 @@ function stageModelFile(modelFile: any, checkedText?: string): boolean {
         const key = unmirrored ? JSON.stringify([text, definitions ?? null, fileName ?? null]) : null;
         const accepted = key !== null ? acceptedUnmirrored.get(ast) : undefined;
         if (accepted !== undefined && accepted.key === key) {
+            // P5-69: a verdict from a load without the check does not
+            // vouch for the shape.
+            if (accepted.checked) {
+                shapeCheckPassed(modelFile, text);
+            } else {
+                completeShapeCheck(modelFile, handle, text);
+            }
             if (accepted.header !== null) {
                 stagedFileHeaders.set(modelFile, accepted.header);
             }
@@ -1172,18 +1239,28 @@ function stageModelFile(modelFile: any, checkedText?: string): boolean {
         // before.
         let id: number;
         let header: StagedHeader | null = null;
-        if (typeof handle.stageModelFileWithHeader === 'function') {
+        const checked = shapePending.has(modelFile);
+        if (checked && typeof handle.stageModelFileChecked === 'function') {
+            // P5-69 (BC-19-b): the shape check and the load, from one
+            // parse of the text.
+            const staged = JSON.parse(handle.stageModelFileChecked(text, definitions, fileName));
+            id = staged.id;
+            header = staged.header;
+            shapeCheckPassed(modelFile, text);
+        } else if (typeof handle.stageModelFileWithHeader === 'function') {
+            completeShapeCheck(modelFile, handle, text);
             const staged = JSON.parse(handle.stageModelFileWithHeader(text, definitions, fileName));
             id = staged.id;
             header = staged.header;
         } else {
+            completeShapeCheck(modelFile, handle, text);
             id = handle.stageModelFile(text, definitions, fileName);
         }
         if (key !== null) {
             // Never committed: keep the verdict (and the header), not the
             // loaded file.
             handle.dropStagedModelFile(id);
-            acceptedUnmirrored.set(ast, { key, header });
+            acceptedUnmirrored.set(ast, { key, header, checked });
         } else {
             const stage = { handle, id };
             stages.set(modelFile, stage);
@@ -1197,6 +1274,17 @@ function stageModelFile(modelFile: any, checkedText?: string): boolean {
     } catch (e) {
         if (checkedText === undefined && (e as { unreadableAst?: boolean } | null)?.unreadableAst) {
             throw e;
+        }
+        if (checkedText !== undefined && shapePending.has(modelFile)) {
+            // P5-69: the shape check's own error, from the folded load
+            // (`astShape`, engine/errors.ts), is thrown, as `checkAstShape`
+            // threw it before. Any other error is the load's, after the
+            // check passed, or one thrown before the check ran, which then
+            // runs now.
+            if ((e as { astShape?: boolean } | null)?.astShape) {
+                throw e;
+            }
+            completeShapeCheck(modelFile, handle, checkedText);
         }
         return false;
     }
