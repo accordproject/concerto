@@ -79,6 +79,12 @@ reason, who is affected and the upgrade step for each one.
   by itself, and the engine adds about 2.8 MB before compression. The async
   `init()` entry and the size reductions are pending a maintainer decision
   (P5-39) and are not in R1 as written. (BC-32)
+- **The `./dist/*` export of `@accordproject/concerto-core` is removed.**
+  5.0.0 exported it. In R1, deep imports such as
+  `@accordproject/concerto-core/dist/serializer/jsonpopulator` fail with
+  `ERR_PACKAGE_PATH_NOT_EXPORTED`. The package exports only its root (`.`) and
+  `./package.json`. Use the root exports; the migration guide lists the
+  replacements. (BC-34)
 
 ### Dates
 
@@ -154,8 +160,6 @@ reason, who is affected and the upgrade step for each one.
 
 - **Model views are built lazily.** A model file's AST is read-only once the
   `ModelFile` is built. Some view fields are accessors until first read. (BC-23)
-- **Deep imports of the serializer visitor internals are not supported.** Only the
-  package root exports are public. (BC-34)
 
 ### Removed APIs
 
