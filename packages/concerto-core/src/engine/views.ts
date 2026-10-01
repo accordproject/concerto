@@ -1031,9 +1031,55 @@ const lazyFiles = new WeakSet<object>();
  * `checkAstShape`, by namespace, so that `new ModelManager()` and
  * `clearModelFiles()` do not check the same system ASTs again. Keyed by
  * namespace rather than by AST object, because each manager builds its
- * system models from fresh AST objects.
+ * system models from fresh AST objects. P5-73: since then only the
+ * metamodel copy is remembered here; the fixed system models take the
+ * engine's precomputed verdict instead (`systemModelAsts`), and are never
+ * looked up here (`shapeMemoised`).
  */
 const shapeCheckedUnmirrored = new Map<string, string>();
+
+/**
+ * P5-73 (accordproject/concerto-rust#414): the namespaces of the two fixed
+ * system models. `shapeCheckedUnmirrored` never answers for them: their own
+ * ModelFiles take the engine's precomputed verdict (`systemModelAsts`), and
+ * any other AST of these namespaces, a user's included, is always checked.
+ */
+const FIXED_SYSTEM_NAMESPACES = new Set(['concerto@1.0.0', 'concerto.decorator@1.0.0']);
+
+/**
+ * P5-73 (accordproject/concerto-rust#414): the AST objects of the fixed
+ * system models, which `BaseModelManager` builds a ModelFile for on every
+ * `new ModelManager()` and `clearModelFiles()` (`addDecoratorModel`,
+ * `addRootModel`), marked by `markSystemModelAst` just before. For such a
+ * file `stageModelFile` asks the engine for its precomputed verdict
+ * (`rustHandle.systemModelFileHeader`), which it gives only when the AST's
+ * text is exactly one of the fixed system models, whose load and shape
+ * check it ran once; for any other text the file is loaded and checked as
+ * every other. So a mark lets no AST skip the check, and an unmarked AST of
+ * a system namespace is always checked.
+ */
+const systemModelAsts = new WeakSet<object>();
+
+/**
+ * P5-73: marks `ast` as a fixed system model's AST, built by
+ * `BaseModelManager` from its own constant copy (`systemModelAsts`).
+ * @param {object} ast the AST the system model's ModelFile is built from
+ */
+function markSystemModelAst(ast: object): void {
+    systemModelAsts.add(ast);
+}
+
+/**
+ * Whether the shape check of `namespace` is remembered by namespace
+ * (`shapeCheckedUnmirrored`): a namespace `manager` never writes into
+ * rustHandle, but for the fixed system models' (P5-73).
+ * @param {object} manager the ModelFile's manager
+ * @param {*} namespace the AST's namespace
+ * @return {boolean} true if the check is remembered by namespace
+ */
+function shapeMemoised(manager: any, namespace: unknown): namespace is string {
+    return typeof namespace === 'string' && !FIXED_SYSTEM_NAMESPACES.has(namespace) && !manager._needsRustWrite(namespace);
+}
 
 /**
  * P5-68 (BC-19-a, R1): every ModelFile whose AST passed `checkAstShape`,
@@ -1084,7 +1130,10 @@ const shapePending = new WeakSet<object>();
  * This marks the file as pending (`shapePending`) instead of calling the
  * engine; `stageModelFile` then checks it, on every path, before any other
  * error and with the same error. A namespace the manager never writes,
- * whose same text has already passed, is not checked again, as before.
+ * whose same text has already passed, is not checked again, as before,
+ * but for the fixed system models' namespaces (P5-73, `shapeMemoised`):
+ * their own ModelFiles take the engine's precomputed verdict in
+ * `stageModelFile`, and any other AST of them is checked.
  * @param {object} modelFile the ModelFile being constructed
  * @return {string | undefined} the AST's JSON text, when it is checked
  */
@@ -1103,8 +1152,7 @@ function checkAstShape(modelFile: any): string | undefined {
     }
     const text = JSON.stringify(ast);
     const namespace = ast.namespace;
-    const unmirrored = typeof namespace === 'string' && !manager._needsRustWrite(namespace);
-    if (unmirrored && shapeCheckedUnmirrored.get(namespace) === text) {
+    if (shapeMemoised(manager, namespace) && shapeCheckedUnmirrored.get(namespace) === text) {
         shapeChecked.set(modelFile, ast);
         return text;
     }
@@ -1126,10 +1174,41 @@ function shapeCheckPassed(modelFile: any, text: string): void {
     const manager = modelFile.modelManager;
     const ast = modelFile.ast;
     const namespace = ast.namespace;
-    if (typeof namespace === 'string' && !manager._needsRustWrite(namespace)) {
+    if (shapeMemoised(manager, namespace)) {
         shapeCheckedUnmirrored.set(namespace, text);
     }
     shapeChecked.set(modelFile, ast);
+}
+
+/**
+ * P5-73 (accordproject/concerto-rust#414): the engine's precomputed verdict
+ * for a fixed system model's ModelFile (`systemModelAsts`): the header text
+ * `rustHandle.systemModelFileHeader` returns when the AST's text is exactly
+ * one of the fixed system models, whose load and shape check the engine ran
+ * once. A pending shape check is then complete, as `shapeCheckPassed` would
+ * record it, but not remembered by namespace. Undefined, with nothing
+ * recorded, for any other file or text, which is then loaded and checked
+ * as before.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {object} handle the manager's rustHandle
+ * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
+ * already computed it
+ * @return {string | undefined} the header's JSON text, or undefined
+ */
+function systemModelVerdict(modelFile: any, handle: any, checkedText?: string): string | undefined {
+    const ast = modelFile.ast;
+    if (!systemModelAsts.has(ast) || typeof handle.systemModelFileHeader !== 'function') {
+        return undefined;
+    }
+    const header = handle.systemModelFileHeader(checkedText ?? JSON.stringify(ast));
+    if (typeof header !== 'string') {
+        return undefined;
+    }
+    if (shapePending.has(modelFile)) {
+        shapePending.delete(modelFile);
+        shapeChecked.set(modelFile, ast);
+    }
+    return header;
 }
 
 /**
@@ -1148,6 +1227,57 @@ function completeShapeCheck(modelFile: any, handle: any, text: string): void {
     }
     handle.checkAstShape(text);
     shapeCheckPassed(modelFile, text);
+}
+
+/**
+ * The ModelFile constructor's staging step, `stageLoadedModelFile`, but for
+ * a fixed system model the engine gives its precomputed verdict for
+ * (P5-73, `stageSystemModelFile`). Kept apart so the body the user files go
+ * through is not trained on the system models every `new ModelManager()`
+ * builds.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
+ * already computed it
+ * @return {boolean} true if the declarations may be built lazily
+ */
+function stageModelFile(modelFile: any, checkedText?: string): boolean {
+    return stageSystemModelFile(modelFile, checkedText) ?? stageLoadedModelFile(modelFile, checkedText);
+}
+
+/**
+ * P5-73 (accordproject/concerto-rust#414): `stageModelFile` for a fixed
+ * system model's ModelFile (`systemModelAsts`) whose text the engine gives
+ * its precomputed verdict for (`systemModelVerdict`): it is neither loaded
+ * nor checked again, and never committed (rustHandle holds its own copy),
+ * so only the verdict and the header are needed. With decorator factories
+ * the file is built eagerly, as `stageLoadedModelFile` builds it, without
+ * the check. Undefined for any other file or text, which
+ * `stageLoadedModelFile` then loads and checks.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
+ * already computed it
+ * @return {boolean | undefined} true if the declarations may be built
+ * lazily, false for the eager path, undefined if there is no verdict
+ */
+function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | undefined {
+    if (!systemModelAsts.has(modelFile.ast)) {
+        return undefined;
+    }
+    const manager = modelFile.modelManager;
+    const systemHeader = systemModelVerdict(modelFile, manager.rustHandle, checkedText);
+    if (systemHeader === undefined) {
+        return undefined;
+    }
+    const factories = manager.getDecoratorFactories();
+    if (Array.isArray(factories) && factories.length > 0) {
+        return false;
+    }
+    const header = JSON.parse(systemHeader) as StagedHeader | null;
+    if (header !== null) {
+        stagedFileHeaders.set(modelFile, header);
+    }
+    lazyFiles.add(modelFile);
+    return true;
 }
 
 /**
@@ -1172,7 +1302,7 @@ function completeShapeCheck(modelFile: any, handle: any, text: string): void {
  * already computed it
  * @return {boolean} true if the declarations may be built lazily
  */
-function stageModelFile(modelFile: any, checkedText?: string): boolean {
+function stageLoadedModelFile(modelFile: any, checkedText?: string): boolean {
     // P5-35 (BC-47): the ModelFile constructor accepts only a
     // BaseModelManager, which always has a rustHandle.
     const manager = modelFile.modelManager;
@@ -2945,6 +3075,7 @@ export {
     mapKeyTypeProcess,
     mapValueTypeProcess,
     checkAstShape,
+    markSystemModelAst,
     stageModelFile,
     applyStagedHeader,
     applyStagedFileHeader,
