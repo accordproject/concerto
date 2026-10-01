@@ -68,7 +68,7 @@ let engineViewsModule: any;
 const engineViews = () => engineViewsModule ?? (engineViewsModule = loadEngine('./engine/views'));
 
 /**
- * The engine's answers to `getNamespaces`, `getType` and `resolveType` for
+ * The engine's answers to `getType` and `resolveType` for
  * one BaseModelManager (P5-29, accordproject/concerto-rust#334), valid while
  * the model epoch P5-14 introduced (`modelGeneration`, moved by every
  * `addModelFile`, `updateModelFile`, `deleteModelFile`, `addModelFiles` and
@@ -81,8 +81,6 @@ interface ManagerReadMemo {
     generation: number;
     modelFiles: object;
     handle: object;
-    /** `rustHandle.getNamespaces()`. Never handed out: callers get a copy. */
-    namespaces?: string[];
     /** `rustHandle.getTypeName(name)`, by name. */
     typeNames: Map<string, string>;
     /** `rustHandle.resolveType(context, type)`, by type (the context only words an error). */
@@ -126,6 +124,94 @@ function managerReadMemo(manager: { modelFiles: object; rustHandle: object }): M
         managerReadMemos.set(manager, memo);
     }
     return memo;
+}
+
+/**
+ * One BaseModelManager's namespaces, in `getNamespaces()` order (P5-75,
+ * accordproject/concerto-rust#417): `Object.keys(modelFiles)`, which the
+ * engine's `rustHandle.getNamespaces()` mirrors. Unlike `ManagerReadMemo`,
+ * a model change does not drop it: every mutator of this manager updates it
+ * in place once the change has succeeded (`noteNamespaceAdded`,
+ * `noteNamespaceRemoved`; a replacement keeps its key's place, as in TS),
+ * so the first `getNamespaces()` after a change does not cross into the
+ * engine. It is valid while the manager holds the same `modelFiles` map
+ * and rustHandle: `clearModelFiles` and the constructor start a new list
+ * for the new map, the roll-back of a failed `addModelFiles` keeps the list
+ * it had before the batch, and anything else that replaces the map (the
+ * roll-back of a failed `updateExternalModels`) drops it, so the next call
+ * asks the engine again.
+ */
+interface NamespaceList {
+    modelFiles: object;
+    handle: object;
+    /** Never handed out: callers get a copy. */
+    list: string[];
+}
+
+/* istanbul ignore next */
+const namespaceLists = new WeakMap<object, NamespaceList>();
+
+/**
+ * `manager`'s namespace list, or undefined when it has none for its current
+ * `modelFiles` map and rustHandle, or while a batch is being added
+ * (`_mirrorPending`, when `modelFiles` is ahead of rustHandle).
+ * @param {object} manager - the BaseModelManager
+ * @return {NamespaceList|undefined} its list
+ * @private
+ */
+/* istanbul ignore next */
+function namespaceListOf(manager: { modelFiles: object; rustHandle: object; _mirrorPending: boolean }): NamespaceList | undefined {
+    const entry = namespaceLists.get(manager);
+    return entry && !manager._mirrorPending && entry.modelFiles === manager.modelFiles &&
+        entry.handle === manager.rustHandle ? entry : undefined;
+}
+
+/**
+ * Starts `manager`'s namespace list afresh, for its current `modelFiles`
+ * map and rustHandle, as `list`.
+ * @param {object} manager - the BaseModelManager
+ * @param {string[]} list - its namespaces, in order (kept, not copied)
+ * @private
+ */
+/* istanbul ignore next */
+function startNamespaceList(manager: { modelFiles: object; rustHandle: object }, list: string[]): void {
+    namespaceLists.set(manager, { modelFiles: manager.modelFiles, handle: manager.rustHandle, list });
+}
+
+/**
+ * Appends `namespace`, just registered as a new key of `manager`'s
+ * `modelFiles`, to its namespace list, if it has one. A change made while a
+ * batch is being added (`_mirrorPending`) drops the list instead.
+ * @param {object} manager - the BaseModelManager
+ * @param {string} namespace - the namespace added
+ * @private
+ */
+/* istanbul ignore next */
+function noteNamespaceAdded(manager: { modelFiles: object; rustHandle: object; _mirrorPending: boolean }, namespace: string): void {
+    const entry = namespaceListOf(manager);
+    if (entry) {
+        entry.list.push(namespace);
+    } else {
+        namespaceLists.delete(manager);
+    }
+}
+
+/**
+ * Removes `namespace`, just deleted from `manager`'s `modelFiles`, from its
+ * namespace list, if it has one (and drops the list if `namespace` is
+ * missing from it, or while a batch is being added).
+ * @param {object} manager - the BaseModelManager
+ * @param {string} namespace - the namespace (key) removed
+ * @private
+ */
+/* istanbul ignore next */
+function noteNamespaceRemoved(manager: { modelFiles: object; rustHandle: object; _mirrorPending: boolean }, namespace: string): void {
+    const at = namespaceListOf(manager)?.list.indexOf(namespace) ?? -1;
+    if (at < 0) {
+        namespaceLists.delete(manager);
+    } else {
+        namespaceLists.get(manager)!.list.splice(at, 1);
+    }
 }
 
 // How to create a modelfile from the external content
@@ -311,6 +397,9 @@ class BaseModelManager {
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
         this.rustHandle = this._newRustHandle();
+        // P5-75: the namespace list starts empty with the map; the system
+        // models below are appended as they are registered.
+        startNamespaceList(this, []);
         this.addDecoratorModel();
         this.addRootModel();
 
@@ -682,6 +771,8 @@ class BaseModelManager {
                 this._rustMirrorAdd(modelFile);
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
+            // P5-75: a new key, appended to the namespace list.
+            noteNamespaceAdded(this, modelFile.getNamespace());
             // P5-14: a model change drops the cached property lookups.
             engineViews().invalidatePropertyLookups();
         } else {
@@ -736,6 +827,7 @@ class BaseModelManager {
             // (`_buildingMetamodelCopy`), so there is no stage to drop.
             if (!alreadyHasMetamodel && this.rustHandle.modelFileId(MetaModelNamespace) !== undefined) {
                 this.modelFiles[MetaModelNamespace] = this.metamodelModelFile;
+                noteNamespaceAdded(this, MetaModelNamespace);
                 engineViews().invalidatePropertyLookups();
             }
             throw err;
@@ -828,6 +920,8 @@ class BaseModelManager {
             this.rustHandle.deleteModelFile(typeof namespace === 'string' ? namespace : String(namespace));
             this._modelFileIds.clear();
             delete this.modelFiles[namespace];
+            // P5-75: the key TS deletes is `namespace`'s string form.
+            noteNamespaceRemoved(this, String(namespace));
             engineViews().invalidatePropertyLookups();
         }
     }
@@ -846,6 +940,9 @@ class BaseModelManager {
         Object.assign(originalModelFiles, this.modelFiles);
         let newModelFiles: ModelFileInstance[] = [];
         const mirroredNamespaces = new Set<string>();
+        // P5-75: the namespace list before the batch, appended to once the
+        // batch has succeeded, or kept for the restored map if it fails.
+        const namespaces = namespaceListOf(this);
 
         try {
             // Every file is added to `modelFiles` before any is mirrored
@@ -902,6 +999,13 @@ class BaseModelManager {
                 this.validateModelFiles();
             }
 
+            // P5-75: the batch's namespaces, in the order `modelFiles` took
+            // them.
+            /* istanbul ignore next */
+            if (namespaces && namespaceListOf(this) === namespaces) {
+                newModelFiles.forEach((m) => namespaces.list.push(m.getNamespace()));
+            }
+
             // return the model files.
             return newModelFiles;
         } catch (err) {
@@ -929,6 +1033,13 @@ class BaseModelManager {
                 this.rustHandle.deleteModelFile(m.getNamespace());
                 this._modelFileIds.clear();
             });
+            // P5-75: both are back as they were before the batch (a failed
+            // delete above propagates first, dropping the list), so the
+            // list from before the batch holds for the restored map.
+            /* istanbul ignore next */
+            if (namespaces && namespaceLists.get(this) === namespaces && namespaces.handle === this.rustHandle) {
+                startNamespaceList(this, namespaces.list);
+            }
             throw err;
         } finally {
             this._mirrorPending = false;
@@ -1011,7 +1122,13 @@ class BaseModelManager {
                 this._modelFileIds.clear();
             }
             views.forEach((mf) => {
+                // P5-75: a namespace new to `modelFiles` is appended to the
+                // namespace list; a replaced one keeps its place.
+                const isNew = !Object.prototype.hasOwnProperty.call(this.modelFiles, mf.getNamespace());
                 this.modelFiles[mf.getNamespace()] = mf;
+                if (isNew) {
+                    noteNamespaceAdded(this, mf.getNamespace());
+                }
             });
             engineViews().invalidatePropertyLookups();
             return views;
@@ -1182,6 +1299,9 @@ class BaseModelManager {
         this.rustHandle = this._newRustHandle();
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
+        // P5-75: a new, empty namespace list for the new map, appended to
+        // as the system models are registered again.
+        startNamespaceList(this, []);
         this.addDecoratorModel();
         this.addRootModel();
     }
@@ -1221,19 +1341,21 @@ class BaseModelManager {
      * @return {string[]} namespaces - the namespaces that have been registered.
      */
     getNamespaces(): string[] {
-        // P5-29: the engine's list is kept until the next model change
-        // (`ManagerReadMemo`); each call gets its own copy, so changing the
-        // returned array reaches neither the memo nor the engine.
+        // P5-75: answered from this manager's namespace list, which every
+        // model change updates in place (`NamespaceList`), so only a
+        // manager without one asks the engine, and then keeps its answer.
+        // Each call gets its own copy, so changing the returned array
+        // reaches neither the list nor the engine.
         /* istanbul ignore next */
-        const memo = managerReadMemo(this);
+        const entry = namespaceListOf(this);
         /* istanbul ignore next */
-        if (memo.namespaces) {
-            return memo.namespaces.slice();
+        if (entry) {
+            return entry.list.slice();
         }
         const result: string[] = this.rustHandle.getNamespaces();
         /* istanbul ignore next */
-        if (managerReadMemoValid(this, memo)) {
-            memo.namespaces = result.slice();
+        if (!this._mirrorPending) {
+            startNamespaceList(this, result.slice());
         }
         return result;
     }
