@@ -94,7 +94,11 @@ concept Unicode {
 }`,
 ];
 
-/** The outcome of `fn`: its value, or the class of the error it threw. */
+/**
+ * The outcome of `fn`: its value, or the class of the error it threw.
+ * @param {Function} fn the step
+ * @returns {object} `{ ok }` or `{ throws }`
+ */
 function probe(fn) {
     try {
         return { ok: fn() };
@@ -122,6 +126,9 @@ function random(seed) {
 
 /** A class whose instances `JSON.stringify` writes as plain objects. */
 class Point {
+    /**
+     * A type identifier node, as a class instance.
+     */
     constructor() {
         this.$class = 'concerto.metamodel@1.0.0.TypeIdentifier';
         this.name = 'Thing';
