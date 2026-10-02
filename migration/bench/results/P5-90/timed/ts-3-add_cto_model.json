@@ -1,0 +1,60 @@
+{
+  "tool": "p515-sweep",
+  "mode": "time",
+  "coreDist": "/home/user/wt/P5-90/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "2f7e8fd38",
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "loadavgEnd": [
+    1.53,
+    1.68,
+    1.87
+  ],
+  "samples": 300,
+  "warmup": 30,
+  "results": [
+    {
+      "op": "add_cto_model",
+      "family": "load",
+      "set": "concerto-core-test-data",
+      "n": 35,
+      "medianUs": 433.73351428571425,
+      "samples": 300,
+      "median_ms": 0.43373351428571427,
+      "mean_ms": 0.4664198358095242,
+      "stddev_ms": 0.09585094449328666,
+      "min_ms": 0.34765311428571427,
+      "max_ms": 0.7885608857142857,
+      "cv": 0.20550357667985228
+    },
+    {
+      "op": "add_cto_model",
+      "family": "load",
+      "set": "conformance",
+      "n": 41,
+      "medianUs": 141.65358536585364,
+      "samples": 300,
+      "median_ms": 0.14165358536585365,
+      "mean_ms": 0.15107978739837394,
+      "stddev_ms": 0.03544451931138646,
+      "min_ms": 0.11497248780487805,
+      "max_ms": 0.34530770731707316,
+      "cv": 0.23460795068452647
+    },
+    {
+      "op": "add_cto_model",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "medianUs": 24618.523000000005,
+      "samples": 300,
+      "median_ms": 24.618523000000003,
+      "mean_ms": 25.805742963333323,
+      "stddev_ms": 3.867122443360867,
+      "min_ms": 21.717823,
+      "max_ms": 41.830815,
+      "cv": 0.149855109727147
+    }
+  ]
+}

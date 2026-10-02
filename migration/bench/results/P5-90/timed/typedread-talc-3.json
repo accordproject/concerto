@@ -1,0 +1,37 @@
+{
+  "tool": "p590-typedread",
+  "engine": "/home/user/wt/P5-90/engines/talc-shipped/pkg/concerto-engine.cjs",
+  "engineBytes": 2872668,
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "loadavgEnd": [
+    1.99,
+    1.83,
+    1.91
+  ],
+  "samples": 300,
+  "warmup": 30,
+  "results": [
+    {
+      "set": "concerto-core-test-data",
+      "files": 35,
+      "bytesPerFile": 3259,
+      "stageUs": 42.55705714285633,
+      "dropUs": 3.445228571428873
+    },
+    {
+      "set": "conformance",
+      "files": 41,
+      "bytesPerFile": 1300,
+      "stageUs": 18.10399999999945,
+      "dropUs": 1.1838048780490924
+    },
+    {
+      "set": "synthetic-large",
+      "files": 1,
+      "bytesPerFile": 229584,
+      "stageUs": 1711.334000000079,
+      "dropUs": 80.04800000003343
+    }
+  ]
+}

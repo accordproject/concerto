@@ -1,0 +1,55 @@
+dhat/synthetic-large.json: 7181.7 allocations, 2801153 bytes per load
+  by kind: allocs/load (share) bytes/load (share)
+        2348 (32.7%)     27934 (   1%)  owned Strings decoded from the JSON text
+      1750.3 (24.4%)    607248 (21.7%)  Box::new (boxed nodes)
+        1230 (17.1%)   1513680 (  54%)  Vec/String growth (realloc, grow_one, reserve)
+        1205 (16.8%)    133273 ( 4.8%)  Kept nodes (P5-76 JSON tree)
+         560 ( 7.8%)      5832 ( 0.2%)  string copies (to_owned, to_string, format!)
+        63.3 ( 0.9%)    234844 ( 8.4%)  serde_json::Value nodes (and their maps/strings)
+          12 ( 0.2%)       959 (   0%)  other
+           9 ( 0.1%)     33968 ( 1.2%)  hash/index tables (IndexMap, HashMap, HashSet)
+         2.3 (   0%)    243280 ( 8.7%)  Vec collect / with_capacity (sized once)
+           1 (   0%)       120 (   0%)  clones (Clone::clone of other types)
+         0.7 (   0%)        16 (   0%)  Arc/Rc
+  by origin: allocs/load (share) bytes/load (share)
+        2348 (32.7%)     27934 (   1%)  typed_ast.rs:825 deserialize_string
+        1446 (20.1%)    501144 (17.9%)  decorator.rs:699 new
+         733 (10.2%)   1495136 (53.4%)  typed_ast.rs:253 visit_seq
+         482 ( 6.7%)      9399 ( 0.3%)  kept.rs:115 deserialize
+         482 ( 6.7%)     17352 ( 0.6%)  declaration.rs:548 finish
+         311 ( 4.3%)     37605 ( 1.3%)  model_file.rs:342 load
+         300 ( 4.2%)    105600 ( 3.8%)  typed_ast.rs:388 ErrorBridge>
+         243 ( 3.4%)     30976 ( 1.1%)  typed_ast.rs:936 UnknownInlinedFun
+         241 ( 3.4%)     92544 ( 3.3%)  kept.rs:215 visit_map
+         241 ( 3.4%)       482 (   0%)  concerto_metamodel_1_0_0.rs:118 visit_map
+         241 ( 3.4%)      1687 ( 0.1%)  declaration.rs:549 finish
+          17 ( 0.2%)      1282 (   0%)  typed_ast.rs:765 next_value_seed
+          10 ( 0.1%)       360 (   0%)  scalar.rs:138 {closure#0}
+           7 ( 0.1%)       442 (   0%)  scalar.rs:186 process
+           6 ( 0.1%)      1249 (   0%)  typed_ast.rs:222 visit_map
+           6 ( 0.1%)      1544 ( 0.1%)  typed_ast.rs:347 ErrorBridge>
+           6 ( 0.1%)       159 (   0%)  concerto_metamodel_1_0_0.rs:737 clone
+           5 ( 0.1%)        44 (   0%)  typed_ast.rs:214 visit_map
+           5 ( 0.1%)        25 (   0%)  typed_ast.rs:761 UnknownInlinedFun
+         4.3 ( 0.1%)       278 (   0%)  model_file.rs:1052 built_in_import
+           4 ( 0.1%)       148 (   0%)  typed_ast.rs:744 PhantomData>
+           4 ( 0.1%)       864 (   0%)  decorator.rs:699 UnknownInlinedFun
+           4 ( 0.1%)       148 (   0%)  concerto_metamodel_1_0_0.rs:330 clone
+           4 ( 0.1%)        27 (   0%)  concerto_metamodel_1_0_0.rs:332 clone
+           4 ( 0.1%)        76 (   0%)  typed_ast.rs:880 visit_borrowed_str
+  top allocation points:
+         723   1231992  [Vec/String growth (realloc, grow_one, reserve)] <concerto_core::introspect::typed_ast::SeqOf<S> as serde_core::de::Visitor>::visit_seq @typed_ast.rs:253 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer>::deserialize_seq @src/de.rs:1752 < deserialize<concerto_core::introspect::typed_as
+         482      1928  [owned Strings decoded from the JSON text] deserialize_str<serde_json::read::StrRead, concerto_core::introspect::typed_ast::Strict<serde_core::de::impls::StringVisitor>> @src/lib.rs:0 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer>::deserialize_string @src/de.rs:1557 < deserial
+         482    196656  [Box::new (boxed nodes)] concerto_core::introspect::decorator::WithDecorators<T>::new @decorator.rs:699 < concerto_core::introspect::typed_ast::read_property @typed_ast.rs:541 < UnknownInlinedFun @typed_ast.rs:491 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer
+         482      9399  [Kept nodes (P5-76 JSON tree)] deserialize_any<serde_json::read::StrRead, concerto_core::introspect::kept::KeptSeed> @src/de.rs:0 < <concerto_core::introspect::kept::KeptSeed as serde_core::de::DeserializeSeed>::deserialize @kept.rs:115 < UnknownInlinedFun @src/de.rs:2033 < concerto_core::i
+         482     17352  [Vec/String growth (realloc, grow_one, reserve)] alloc @alloc.rs:95 < alloc_impl_runtime @alloc.rs:190 < alloc_impl @alloc.rs:312 < allocate @alloc.rs:429
+         303      3817  [string copies (to_owned, to_string, format!)] concerto_core::introspect::model_file::ModelFile::load @model_file.rs:342 < concerto_core::introspect::model_file::ModelFile::load_text @model_file.rs:216 < concerto_core::introspect::model_file::ModelFile::from_json_text_checked_with_imports @model_file.rs:16
+         300      3790  [owned Strings decoded from the JSON text] deserialize_str<serde_json::read::StrRead, concerto_core::introspect::typed_ast::Strict<serde_core::de::impls::StringVisitor>> @src/lib.rs:0 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer>::deserialize_string @src/de.rs:1557 < deserial
+         300    105600  [Box::new (boxed nodes)] read_declaration<concerto_core::introspect::typed_ast::ErrorBridge<serde_json::de::MapAccess<serde_json::read::StrRead>>> @typed_ast.rs:388 < <concerto_core::introspect::typed_ast::DeclarationSeed as serde_core::de::Visitor>::visit_map @typed_ast.rs:318 < <&mu
+         241      1928  [owned Strings decoded from the JSON text] deserialize_str<serde_json::read::StrRead, concerto_core::introspect::typed_ast::Strict<serde_core::de::impls::StringVisitor>> @src/lib.rs:0 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer>::deserialize_string @src/de.rs:1557 < deserial
+         241     79048  [Box::new (boxed nodes)] concerto_core::introspect::decorator::WithDecorators<T>::new @decorator.rs:699 < concerto_core::introspect::typed_ast::read_property @typed_ast.rs:541 < UnknownInlinedFun @typed_ast.rs:491 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer
+         241      1446  [owned Strings decoded from the JSON text] deserialize_str<serde_json::read::StrRead, concerto_core::introspect::typed_ast::Strict<serde_core::de::impls::StringVisitor>> @src/lib.rs:0 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer>::deserialize_string @src/de.rs:1557 < deserial
+         241     79048  [Box::new (boxed nodes)] concerto_core::introspect::decorator::WithDecorators<T>::new @decorator.rs:699 < concerto_core::introspect::typed_ast::read_property @typed_ast.rs:541 < UnknownInlinedFun @typed_ast.rs:491 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer
+         241      1446  [owned Strings decoded from the JSON text] deserialize_str<serde_json::read::StrRead, concerto_core::introspect::typed_ast::Strict<serde_core::de::impls::StringVisitor>> @src/lib.rs:0 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer>::deserialize_string @src/de.rs:1557 < deserial
+         241     61696  [Box::new (boxed nodes)] concerto_core::introspect::decorator::WithDecorators<T>::new @decorator.rs:699 < concerto_core::introspect::typed_ast::read_property @typed_ast.rs:541 < UnknownInlinedFun @typed_ast.rs:491 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer
+         241     92544  [Kept nodes (P5-76 JSON tree)] visit_map<serde_json::de::MapAccess<serde_json::read::StrRead>> @kept.rs:215 < deserialize_any<serde_json::read::StrRead, concerto_core::introspect::kept::KeptSeed> @src/de.rs:1447 < <concerto_core::introspect::kept::KeptSeed as serde_core::de::DeserializeSeed

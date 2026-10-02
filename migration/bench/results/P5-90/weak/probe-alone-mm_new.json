@@ -1,0 +1,138 @@
+[
+  {
+    "key": "engine/views.js:820 fileStates get",
+    "calls": 22719,
+    "totalUs": 2376.017000003531,
+    "maxUs": 77.07399999998188,
+    "over20us": 5,
+    "over100us": 0
+  },
+  {
+    "key": "introspect/modelfile.js:55 constructedModelFiles add",
+    "calls": 1893,
+    "totalUs": 1327.3070000011005,
+    "maxUs": 116.12700000000586,
+    "over20us": 6,
+    "over100us": 1
+  },
+  {
+    "key": "engine/views.js:1027 systemModelAsts add",
+    "calls": 1262,
+    "totalUs": 1038.4260000005272,
+    "maxUs": 193.4720000000425,
+    "over20us": 4,
+    "over100us": 1
+  },
+  {
+    "key": "engine/views.js:2218 pendingFields set",
+    "calls": 1262,
+    "totalUs": 954.8740000009285,
+    "maxUs": 297.52800000005664,
+    "over20us": 4,
+    "over100us": 1
+  },
+  {
+    "key": "engine/views.js:820 fileStates set",
+    "calls": 1893,
+    "totalUs": 826.3689999986352,
+    "maxUs": 53.80999999999858,
+    "over20us": 4,
+    "over100us": 0
+  },
+  {
+    "key": "introspect/modelfile.js:62 engineManagers add",
+    "calls": 631,
+    "totalUs": 721.3050000002569,
+    "maxUs": 146.87200000003034,
+    "over20us": 4,
+    "over100us": 1
+  },
+  {
+    "key": "dist/basemodelmanager.js:85 namespaceLists set",
+    "calls": 631,
+    "totalUs": 440.72499999975895,
+    "maxUs": 95.79599999995027,
+    "over20us": 1,
+    "over100us": 0
+  },
+  {
+    "key": "engine/views.js:1027 systemModelAsts has",
+    "calls": 3155,
+    "totalUs": 400.1009999992108,
+    "maxUs": 39.294999999981435,
+    "over20us": 2,
+    "over100us": 0
+  },
+  {
+    "key": "engine/views.js:2218 pendingFields get",
+    "calls": 1893,
+    "totalUs": 396.8539999997912,
+    "maxUs": 2.345999999988635,
+    "over20us": 0,
+    "over100us": 0
+  },
+  {
+    "key": "introspect/modelfile.js:62 engineManagers has",
+    "calls": 1893,
+    "totalUs": 274.6910000008143,
+    "maxUs": 63.07500000002619,
+    "over20us": 1,
+    "over100us": 0
+  },
+  {
+    "key": "introspect/modelfile.js:55 constructedModelFiles has",
+    "calls": 1262,
+    "totalUs": 167.87700000048778,
+    "maxUs": 5.938000000014654,
+    "over20us": 0,
+    "over100us": 0
+  },
+  {
+    "key": "engine/views.js:1650 stagedHeaders get",
+    "calls": 1893,
+    "totalUs": 155.96099999925167,
+    "maxUs": 2.553999999918233,
+    "over20us": 0,
+    "over100us": 0
+  },
+  {
+    "key": "dist/basemodelmanager.js:85 namespaceLists get",
+    "calls": 1262,
+    "totalUs": 147.27799999889152,
+    "maxUs": 15.6549999999811,
+    "over20us": 0,
+    "over100us": 0
+  },
+  {
+    "key": "engine/views.js:923 acceptedUnmirrored get",
+    "calls": 631,
+    "totalUs": 95.29399999934186,
+    "maxUs": 1.9699999999716056,
+    "over20us": 0,
+    "over100us": 0
+  },
+  {
+    "key": "engine/views.js:1645 prestaged has",
+    "calls": 631,
+    "totalUs": 78.89400000061644,
+    "maxUs": 0.7599999999570173,
+    "over20us": 0,
+    "over100us": 0
+  },
+  {
+    "key": "engine/views.js:1645 prestaged get",
+    "calls": 631,
+    "totalUs": 49.60999999980231,
+    "maxUs": 0.5499999999756255,
+    "over20us": 0,
+    "over100us": 0
+  },
+  {
+    "key": "engine/views.js:923 acceptedUnmirrored set",
+    "calls": 1,
+    "totalUs": 4.183000000011816,
+    "maxUs": 4.183000000011816,
+    "over20us": 0,
+    "over100us": 0
+  }
+]
