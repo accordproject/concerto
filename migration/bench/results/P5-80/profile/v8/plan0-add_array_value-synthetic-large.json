@@ -1,0 +1,12 @@
+[
+  {
+    "file": "/home/user/wt/P5-80/prof/v8/plan0-add_array_value-synthetic-large/CPU.20261002.071556.7838.0.001.cpuprofile",
+    "samples": 7960,
+    "wasmShare": 0.33467336683417087,
+    "graphShare": 0.15665829145728644,
+    "buckets": {
+      "property lookup": 604,
+      "declaration lookup / type resolution": 643
+    }
+  }
+]

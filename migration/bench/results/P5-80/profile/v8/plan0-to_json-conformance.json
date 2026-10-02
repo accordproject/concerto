@@ -1,0 +1,16 @@
+[
+  {
+    "file": "/home/user/wt/P5-80/prof/v8/plan0-to_json-conformance/CPU.20261002.071046.2160.0.001.cpuprofile",
+    "samples": 10248,
+    "wasmShare": 0.5922131147540983,
+    "graphShare": 0.05562060889929742,
+    "buckets": {
+      "identifier field": 211,
+      "declaration lookup / type resolution": 263,
+      "regex / validator build": 38,
+      "property lookup": 48,
+      "super types / assignability": 6,
+      "validation plan (prototype)": 4
+    }
+  }
+]

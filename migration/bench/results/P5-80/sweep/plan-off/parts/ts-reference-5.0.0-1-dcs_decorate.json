@@ -1,0 +1,60 @@
+{
+  "tool": "p515-sweep",
+  "mode": "time",
+  "coreDist": "/home/user/wt/P5-80/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "4578718b2",
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "loadavgEnd": [
+    1.38,
+    2.21,
+    3.65
+  ],
+  "samples": 30,
+  "warmup": 5,
+  "results": [
+    {
+      "op": "dcs_decorate",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "medianUs": 39371.623999999996,
+      "samples": 30,
+      "median_ms": 39.371624,
+      "mean_ms": 40.21026353333333,
+      "stddev_ms": 2.718517994334397,
+      "min_ms": 36.800007,
+      "max_ms": 46.663863,
+      "cv": 0.0676075647223951
+    },
+    {
+      "op": "dcs_decorate",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "medianUs": 21982.619,
+      "samples": 30,
+      "median_ms": 21.982619,
+      "mean_ms": 23.291068133333336,
+      "stddev_ms": 3.8900051721904507,
+      "min_ms": 19.273909,
+      "max_ms": 32.898316,
+      "cv": 0.16701703631286946
+    },
+    {
+      "op": "dcs_decorate",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "medianUs": 61706.007,
+      "samples": 30,
+      "median_ms": 61.706007,
+      "mean_ms": 65.39529803333335,
+      "stddev_ms": 12.162918510995366,
+      "min_ms": 56.490953,
+      "max_ms": 106.971029,
+      "cv": 0.18599071916142462
+    }
+  ]
+}

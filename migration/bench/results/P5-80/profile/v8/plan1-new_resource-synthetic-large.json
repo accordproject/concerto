@@ -1,0 +1,9 @@
+[
+  {
+    "file": "/home/user/wt/P5-80/prof/v8/plan1-new_resource-synthetic-large/CPU.20261002.071247.4361.0.001.cpuprofile",
+    "samples": 10008,
+    "wasmShare": 0.13139488409272582,
+    "graphShare": 0,
+    "buckets": {}
+  }
+]

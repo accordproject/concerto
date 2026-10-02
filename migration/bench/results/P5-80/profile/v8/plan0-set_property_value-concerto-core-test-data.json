@@ -1,0 +1,15 @@
+[
+  {
+    "file": "/home/user/wt/P5-80/prof/v8/plan0-set_property_value-concerto-core-test-data/CPU.20261002.071530.7676.0.001.cpuprofile",
+    "samples": 8529,
+    "wasmShare": 0.31973267674991207,
+    "graphShare": 0.09110094970102005,
+    "buckets": {
+      "declaration lookup / type resolution": 433,
+      "identifier field": 93,
+      "property lookup": 241,
+      "super types / assignability": 9,
+      "validation plan (prototype)": 1
+    }
+  }
+]
