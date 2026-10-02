@@ -84,7 +84,94 @@ export interface SerializerOptions {
     utcOffset?: number;
     /** only allow fully-qualified date-times with offsets. */
     strictQualifiedDateTimes?: boolean;
+    /** accordproject/concerto#1273, `fromJSON`: a key the type does not declare is an error, whatever its value. */
+    rejectUnknownKeys?: boolean;
+    /** accordproject/concerto#1273, `fromJSON`: a required property set to `null` is an error. */
+    rejectRequiredNull?: boolean;
 }
+
+/**
+ * The stable code of a validation diagnostic (accordproject/concerto#1239).
+ */
+export type ValidationDiagnosticCode =
+    | 'MISSING_REQUIRED_PROPERTY'
+    | 'UNDECLARED_FIELD'
+    | 'TYPE_VIOLATION'
+    | 'INVALID_ENUM_VALUE'
+    | 'EMPTY_IDENTIFIER'
+    | 'ABSTRACT_CLASS'
+    | 'NOT_ASSIGNABLE'
+    | 'NOT_RESOURCE'
+    | 'NOT_RELATIONSHIP'
+    | 'VALIDATOR_FAILURE'
+    | 'TYPE_NOT_FOUND';
+
+/**
+ * One violation found by `validateInstance` (accordproject/concerto#1239),
+ * also attached to the exception `validateInstanceOrThrow` and
+ * `Serializer.fromJSON` throw, as its `details`.
+ *
+ * `code`, `path`, `expected` and `severity` never carry a value from the
+ * instance (accordproject/concerto#1325), so they are safe to log or return
+ * to a caller. `message` may quote the offending value; pass
+ * `redactMessages: true` to get a message built from the value-free fields
+ * only. `actual` is the offending value itself, present only with
+ * `includeActual: true`.
+ */
+export interface ValidationDiagnostic {
+    /** What kind of violation this is. */
+    code: ValidationDiagnosticCode;
+    /** A JSON Pointer (RFC 6901) to the offending location, e.g. `/parties/0/email`; `''` for the instance itself. */
+    path: string;
+    /** The type the model declares at `path` (`String`, `String[]`, `org.acme@1.0.0.Address`, `--> org.acme@1.0.0.Person`), when it declares one. */
+    expected?: string;
+    /** The value at `path` in the instance (opt-in: `includeActual`). */
+    actual?: unknown;
+    /** How serious the violation is: an `error` makes the instance invalid. */
+    severity: 'error' | 'warning';
+    /** A human-readable description. */
+    message: string;
+}
+
+/**
+ * Options of `validateInstance` and `validateInstanceOrThrow`
+ * (accordproject/concerto#1239), with the instance side of
+ * accordproject/concerto#1273. Every option is off by default except
+ * `collectAll` and `hydrate`, which keeps today's `Serializer.fromJSON`
+ * behaviour.
+ */
+export interface ValidateInstanceOptions {
+    /** Report every violation found, not only the first. Defaults to true. */
+    collectAll?: boolean;
+    /** Make the valid instance's `resource` available (built when it is first read). Defaults to true; `false` validates only. */
+    hydrate?: boolean;
+    /** accordproject/concerto#1273: a key the type does not declare is an error, whatever its value. */
+    rejectUnknownKeys?: boolean;
+    /** accordproject/concerto#1273: a required property set to `null` is an error. */
+    rejectRequiredNull?: boolean;
+    /** Add each diagnostic's `actual` value from the instance (accordproject/concerto#1325: off by default). */
+    includeActual?: boolean;
+    /** Build each diagnostic's `message` from its value-free fields only (accordproject/concerto#1325). */
+    redactMessages?: boolean;
+    /** UTC offset, in minutes, for DateTime values, as `Serializer.fromJSON` takes it. */
+    utcOffset?: number;
+    /** Accept a JSON object in the place of a relationship, as `Serializer.fromJSON` does. */
+    acceptResourcesForRelationships?: boolean;
+    /** The same as `acceptResourcesForRelationships`. */
+    permitResourcesForRelationships?: boolean;
+    /** @deprecated Ignored, as in `Serializer.fromJSON` (BC-07): DateTime values are always strict. */
+    strictQualifiedDateTimes?: boolean;
+}
+
+/**
+ * What `validateInstance` returns (accordproject/concerto#1239): a valid
+ * instance with its `resource` (built when first read, or `null` with
+ * `hydrate: false`), or an invalid one with its `errors`, the first being
+ * the error `validateInstanceOrThrow` throws.
+ */
+export type ValidationResult<R = unknown> =
+    | { valid: true; readonly resource: R | null; warnings: ValidationDiagnostic[] }
+    | { valid: false; resource: null; errors: ValidationDiagnostic[]; warnings: ValidationDiagnostic[] };
 
 /** Whether to upsert or append the decorator. */
 export type DecoratorCommandType = 'UPSERT' | 'APPEND';

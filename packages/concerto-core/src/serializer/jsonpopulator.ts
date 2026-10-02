@@ -586,7 +586,10 @@ class JSONPopulator {
      * @return {Object} the Relationship or the embedded resource
      * @private
      */
-    convertRelationship(relationshipDeclaration: RelationshipDeclaration | RelationshipMapValue, jsonObj: unknown, parameters: JsonPopulatorParameters) {
+    // The return type is written out (P5-89) so the declaration keeps the
+    // `Relationship | Resource` order it was inferred with: a public member
+    // that names `Resource` earlier in the build reorders an inferred union.
+    convertRelationship(relationshipDeclaration: RelationshipDeclaration | RelationshipMapValue, jsonObj: unknown, parameters: JsonPopulatorParameters): Relationship | Resource {
         const { defaultNamespace, defaultType } = relationshipDefaults(relationshipDeclaration);
         if (typeof jsonObj === 'string') {
             return Relationship.fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );

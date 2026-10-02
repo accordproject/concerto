@@ -30,7 +30,8 @@ import type { IModel, IModels } from '@accordproject/concerto-metamodel';
 import Factory from './factory';
 import ModelFile from './introspect/modelfile';
 import Serializer from './serializer';
-import type { ModelFileSource, ModelManagerOptions } from './types';
+import type { ModelFileSource, ModelManagerOptions, ValidateInstanceOptions, ValidationResult } from './types';
+import type Resource from './model/resource';
 type ModelFileInstance = InstanceType<typeof ModelFile>;
 type ModelFileInput = string | ModelFileInstance;
 import type AssetDeclaration from './introspect/assetdeclaration';
@@ -339,6 +340,31 @@ declare class BaseModelManager {
      * @return {Serializer} A serializer for serializing instances of types defined in this model manager.
      */
     getSerializer(): Serializer;
+    /**
+     * Validates an instance against the models in this model manager, as
+     * its own `$class` (accordproject/concerto#1239), without building a
+     * Resource: the instance is valid exactly when
+     * {@link Serializer#fromJSON} (with the same options) would accept it.
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {ValidationResult} `{ valid: true, resource, warnings }`, the
+     * resource being built when first read (or `null` with `hydrate: false`),
+     * or `{ valid: false, resource: null, errors, warnings }`, the first
+     * error being the one {@link BaseModelManager#validateInstanceOrThrow}
+     * throws
+     */
+    validateInstance(json: object | string, options?: ValidateInstanceOptions): ValidationResult<Resource>;
+    /**
+     * Validates an instance as {@link BaseModelManager#validateInstance}
+     * does, and returns it as a Resource (accordproject/concerto#1239).
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {Resource|null} the resource, or `null` with `hydrate: false`
+     * @throws {ValidationException|TypeNotFoundException|Error} what
+     * {@link Serializer#fromJSON} throws for the instance, with its
+     * diagnostics as `details`
+     */
+    validateInstanceOrThrow(json: object | string, options?: ValidateInstanceOptions): Resource | null;
     /**
      * Get the decorator factories for this model manager.
      * @return {DecoratorFactory[]} The decorator factories for this model manager.
@@ -870,6 +896,8 @@ export default AssetDeclaration;
 // ==== introspect/classdeclaration.d.ts ====
 import Declaration from './declaration';
 import type Property from './property';
+import type Resource from '../model/resource';
+import type { ValidateInstanceOptions, ValidationResult } from '../types';
 /**
  * ClassDeclaration defines the structure (model/schema) of composite data.
  * It is composed of a set of Properties, may have an identifying field, and may
@@ -1009,6 +1037,33 @@ declare class ClassDeclaration extends Declaration {
      * @return {Property} the field, or null if it does not exist
      */
     getProperty(name: string): Property | null;
+    /**
+     * Validates an instance as this type (accordproject/concerto#1239),
+     * without building a Resource: its own `$class` must be this type or a
+     * subtype of it, and an instance with no `$class` is read as this type.
+     * The instance is valid exactly when {@link Serializer#fromJSON} (with the
+     * same options) would accept it.
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {ValidationResult} `{ valid: true, resource, warnings }`, the
+     * resource being built when first read (or `null` with `hydrate: false`),
+     * or `{ valid: false, resource: null, errors, warnings }`, the first
+     * error being the one {@link ClassDeclaration#validateInstanceOrThrow}
+     * throws
+     */
+    validateInstance(json: object | string, options?: ValidateInstanceOptions): ValidationResult<Resource>;
+    /**
+     * Validates an instance as {@link ClassDeclaration#validateInstance}
+     * does, and returns it as a Resource (accordproject/concerto#1239).
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {Resource|null} the resource, or `null` with `hydrate: false`
+     * @throws {ValidationException|TypeNotFoundException|Error} what
+     * {@link Serializer#fromJSON} throws for the instance, with its
+     * diagnostics as `details`; a ValidationException when its `$class` is
+     * not this type or a subtype of it
+     */
+    validateInstanceOrThrow(json: object | string, options?: ValidateInstanceOptions): Resource | null;
     /**
      * Returns the properties defined in this class and all super classes.
      *
@@ -4308,6 +4363,7 @@ export default ResourceValidator;
 
 // ==== serializer/validationexception.d.ts ====
 import { BaseException } from '@accordproject/concerto-util';
+import type { ValidationDiagnostic } from '../types';
 /**
  * Exception thrown when a resource fails to model against the model
  * @extends BaseException
@@ -4317,6 +4373,13 @@ import { BaseException } from '@accordproject/concerto-util';
  * @private
  */
 declare class ValidationException extends BaseException {
+    /**
+     * The structured violations behind the exception, when it is about an
+     * instance (accordproject/concerto#1325): the same diagnostics
+     * `validateInstance` reports for it, whose `code`, `path`, `expected`
+     * and `severity` carry no value from the instance. Not enumerable.
+     */
+    details?: ValidationDiagnostic[];
     /**
      * Create a ValidationException
      * @param {string} message - the message for the exception
@@ -4591,7 +4654,86 @@ export interface SerializerOptions {
     utcOffset?: number;
     /** only allow fully-qualified date-times with offsets. */
     strictQualifiedDateTimes?: boolean;
+    /** accordproject/concerto#1273, `fromJSON`: a key the type does not declare is an error, whatever its value. */
+    rejectUnknownKeys?: boolean;
+    /** accordproject/concerto#1273, `fromJSON`: a required property set to `null` is an error. */
+    rejectRequiredNull?: boolean;
 }
+/**
+ * The stable code of a validation diagnostic (accordproject/concerto#1239).
+ */
+export type ValidationDiagnosticCode = 'MISSING_REQUIRED_PROPERTY' | 'UNDECLARED_FIELD' | 'TYPE_VIOLATION' | 'INVALID_ENUM_VALUE' | 'EMPTY_IDENTIFIER' | 'ABSTRACT_CLASS' | 'NOT_ASSIGNABLE' | 'NOT_RESOURCE' | 'NOT_RELATIONSHIP' | 'VALIDATOR_FAILURE' | 'TYPE_NOT_FOUND';
+/**
+ * One violation found by `validateInstance` (accordproject/concerto#1239),
+ * also attached to the exception `validateInstanceOrThrow` and
+ * `Serializer.fromJSON` throw, as its `details`.
+ *
+ * `code`, `path`, `expected` and `severity` never carry a value from the
+ * instance (accordproject/concerto#1325), so they are safe to log or return
+ * to a caller. `message` may quote the offending value; pass
+ * `redactMessages: true` to get a message built from the value-free fields
+ * only. `actual` is the offending value itself, present only with
+ * `includeActual: true`.
+ */
+export interface ValidationDiagnostic {
+    /** What kind of violation this is. */
+    code: ValidationDiagnosticCode;
+    /** A JSON Pointer (RFC 6901) to the offending location, e.g. `/parties/0/email`; `''` for the instance itself. */
+    path: string;
+    /** The type the model declares at `path` (`String`, `String[]`, `org.acme@1.0.0.Address`, `--> org.acme@1.0.0.Person`), when it declares one. */
+    expected?: string;
+    /** The value at `path` in the instance (opt-in: `includeActual`). */
+    actual?: unknown;
+    /** How serious the violation is: an `error` makes the instance invalid. */
+    severity: 'error' | 'warning';
+    /** A human-readable description. */
+    message: string;
+}
+/**
+ * Options of `validateInstance` and `validateInstanceOrThrow`
+ * (accordproject/concerto#1239), with the instance side of
+ * accordproject/concerto#1273. Every option is off by default except
+ * `collectAll` and `hydrate`, which keeps today's `Serializer.fromJSON`
+ * behaviour.
+ */
+export interface ValidateInstanceOptions {
+    /** Report every violation found, not only the first. Defaults to true. */
+    collectAll?: boolean;
+    /** Make the valid instance's `resource` available (built when it is first read). Defaults to true; `false` validates only. */
+    hydrate?: boolean;
+    /** accordproject/concerto#1273: a key the type does not declare is an error, whatever its value. */
+    rejectUnknownKeys?: boolean;
+    /** accordproject/concerto#1273: a required property set to `null` is an error. */
+    rejectRequiredNull?: boolean;
+    /** Add each diagnostic's `actual` value from the instance (accordproject/concerto#1325: off by default). */
+    includeActual?: boolean;
+    /** Build each diagnostic's `message` from its value-free fields only (accordproject/concerto#1325). */
+    redactMessages?: boolean;
+    /** UTC offset, in minutes, for DateTime values, as `Serializer.fromJSON` takes it. */
+    utcOffset?: number;
+    /** Accept a JSON object in the place of a relationship, as `Serializer.fromJSON` does. */
+    acceptResourcesForRelationships?: boolean;
+    /** The same as `acceptResourcesForRelationships`. */
+    permitResourcesForRelationships?: boolean;
+    /** @deprecated Ignored, as in `Serializer.fromJSON` (BC-07): DateTime values are always strict. */
+    strictQualifiedDateTimes?: boolean;
+}
+/**
+ * What `validateInstance` returns (accordproject/concerto#1239): a valid
+ * instance with its `resource` (built when first read, or `null` with
+ * `hydrate: false`), or an invalid one with its `errors`, the first being
+ * the error `validateInstanceOrThrow` throws.
+ */
+export type ValidationResult<R = unknown> = {
+    valid: true;
+    readonly resource: R | null;
+    warnings: ValidationDiagnostic[];
+} | {
+    valid: false;
+    resource: null;
+    errors: ValidationDiagnostic[];
+    warnings: ValidationDiagnostic[];
+};
 /** Whether to upsert or append the decorator. */
 export type DecoratorCommandType = 'UPSERT' | 'APPEND';
 /** Map declaration elements that can be targeted by a decorator command. */
