@@ -1,0 +1,37 @@
+{
+  "tool": "p590-typedread",
+  "engine": "/home/user/wt/P5-93/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+  "engineBytes": 3268439,
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "loadavgEnd": [
+    1.6,
+    1.93,
+    1.72
+  ],
+  "samples": 300,
+  "warmup": 30,
+  "results": [
+    {
+      "set": "concerto-core-test-data",
+      "files": 35,
+      "bytesPerFile": 3259,
+      "stageUs": 31.103857142857446,
+      "dropUs": 2.9562285714275407
+    },
+    {
+      "set": "conformance",
+      "files": 41,
+      "bytesPerFile": 1300,
+      "stageUs": 13.563853658538614,
+      "dropUs": 0.9293170731702625
+    },
+    {
+      "set": "synthetic-large",
+      "files": 1,
+      "bytesPerFile": 229584,
+      "stageUs": 1367.7439999999024,
+      "dropUs": 65.43799999985822
+    }
+  ]
+}
