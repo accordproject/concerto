@@ -18,7 +18,13 @@
  *   2. the `nyc` block in packages/concerto-core/package.json changed;
  *   3. the export list of packages/concerto-core/src/index.ts changed;
  *   4. the generated API snapshot (migration/api-snapshot/) differs from
- *      what concerto-core's current .d.ts actually is.
+ *      what concerto-core's current .d.ts actually is;
+ *   5. a public member type in concerto-core's .d.ts became `never`, or
+ *      became `any` where the published 5.0.0 had a concrete type, without
+ *      an allow-list row naming a BC row, or the strict consumer
+ *      (migration/api-snapshot/consumer/strict-consumer.ts) no longer
+ *      compiles with `tsc --strict` against the live .d.ts (P5-84,
+ *      accordproject/concerto-rust#430; see migration/api-snapshot/v5-types.mjs).
  *
  * "Changed relative to base ref" covers both committed history (base..HEAD)
  * and anything not yet committed (staged + working tree), so this also
@@ -31,13 +37,17 @@
  * just diffs the previously-generated migration/api-snapshot/ against git's
  * base-ref copy of it (fast path for callers that already regenerated the
  * snapshot themselves, e.g. after intentionally changing the public API).
+ * Rule 5 then checks the committed full-api.d.ts, and compiles the strict
+ * consumer against packages/concerto-core/dist/ when it has been built.
  */
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { buildSnapshot } from '../api-snapshot/generate-snapshot.mjs';
 import { checkTestTree } from '../guardrails/relaxations.mjs';
+import { checkAgainstV5, compileConsumer } from '../api-snapshot/v5-types.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATION_ROOT = path.resolve(__dirname, '..');
@@ -156,6 +166,9 @@ if (baseIndexTs !== null) {
 }
 
 // -- Rule 4: the generated API (.d.ts) snapshot is unchanged. ----------------
+// The live .d.ts build, kept for rule 5.
+let liveDtsDir = null;
+let liveFullApiDts = null;
 const snapshotDir = path.join(MIGRATION_ROOT, 'api-snapshot');
 const storedIndexDts = fs.existsSync(path.join(snapshotDir, 'index.d.ts'))
     ? fs.readFileSync(path.join(snapshotDir, 'index.d.ts'), 'utf8')
@@ -183,7 +196,9 @@ if (storedIndexDts === null || storedFullApiDts === null || storedExportsJson ==
     // signature change; it is the file this rule treats as authoritative.
     let current;
     try {
-        current = buildSnapshot();
+        liveDtsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'concerto-core-dts-'));
+        current = buildSnapshot(liveDtsDir);
+        liveFullApiDts = current.fullApiDts;
     } catch (e) {
         failures.push(`Failed to build concerto-core's .d.ts to check the API snapshot: ${e.message}`);
         current = null;
@@ -221,6 +236,32 @@ if (storedIndexDts === null || storedFullApiDts === null || storedExportsJson ==
         if (baseText !== null && baseText !== curText) {
             failures.push(`${snapRel(name)} differs from ${BASE_REF} (checked without rebuilding; pass without --skip-dts-build for a full check against the live .d.ts).`);
         }
+    }
+}
+
+// -- Rule 5: no public type became `never` (or `any`) against v5.0.0, and the
+// strict consumer of the P5-84 methods compiles. ------------------------------
+{
+    const snapshotText = liveFullApiDts ?? (storedFullApiDts || null);
+    if (snapshotText !== null) {
+        const v5 = checkAgainstV5(snapshotText);
+        v5.info.forEach((l) => console.log(l));
+        failures.push(...v5.failures);
+    }
+    const distDts = path.join(CORE_ROOT, 'dist');
+    const consumerDir = liveFullApiDts !== null ? liveDtsDir : (fs.existsSync(path.join(distDts, 'index.d.ts')) ? distDts : null);
+    if (consumerDir === null) {
+        console.warn('(warning) no live .d.ts build and no packages/concerto-core/dist/index.d.ts; skipping the strict consumer compile');
+    } else {
+        const res = compileConsumer(consumerDir);
+        if (!res.ok) {
+            failures.push(`The strict consumer (migration/api-snapshot/consumer/strict-consumer.ts) does not compile with tsc --strict against concerto-core's .d.ts:\n${res.output.trim().split('\n').map((l) => `    ${l}`).join('\n')}`);
+        } else {
+            console.log('(info) strict consumer compiles (tsc --strict) against concerto-core\'s .d.ts.');
+        }
+    }
+    if (liveDtsDir) {
+        fs.rmSync(liveDtsDir, { recursive: true, force: true });
     }
 }
 

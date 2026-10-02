@@ -29,6 +29,7 @@ import { isStrictDateTime } from '../datetimeutil';
 // (and its own `reportFieldTypeViolation`, which needs the `Field` and
 // `rootResourceIdentifier` -- neither crosses this call) stays here.
 import { createRequire } from 'module';
+import type { EngineBindings } from '../engine/bindings';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 // P5-06: memoised per specifier, so a call site on a per-element or
@@ -42,7 +43,7 @@ const loadEngine = (specifier: string) =>
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => any } = loadEngine('../engine').rust;
+const rust: EngineBindings = loadEngine('../engine').rust;
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */

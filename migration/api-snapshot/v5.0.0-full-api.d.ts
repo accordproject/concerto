@@ -57,6 +57,7 @@ import type TransactionDeclaration from './introspect/transactiondeclaration';
  * @memberof module:concerto-core
  */
 declare class BaseModelManager {
+    modelFiles: Record<string, ModelFileInstance>;
     processFile: (fileName: string | null, modelInput: string | unknown) => ModelFileSource;
     factory: Factory;
     serializer: Serializer;
@@ -68,16 +69,8 @@ declare class BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {Object} [options.regExp] - Deprecated and ignored, with a warning: regular expressions are evaluated by the Concerto engine.
-     * @param {boolean} [options.metamodelValidation] - Unless false, every ModelFile built for this
-     * manager has its AST checked against the Concerto metamodel when it is constructed (at model
-     * load: fromAst, addModel, addCTOModel, addModelFiles, updateModelFile), and a malformed AST is an
-     * IllegalModelException (BC-19, on by default since R1). When true, addModelFile also runs
-     * validateAst on each new file, as before. false is an escape hatch for trusted input only: the
-     * shape check is skipped, and code downstream of the load may assume a well-formed AST. A
-     * malformed AST still throws an error when it is loaded, never a WASM trap or a process crash,
-     * unless the loader can read it all the same (a node's $class naming the wrong type, say); the
-     * error's class and message are unspecified.
+     * @param {Object} [options.regExp] - An alternative regular expression engine.
+     * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
     * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
@@ -420,14 +413,7 @@ import dayjs from './dayjs-setup';
 /**
  * Ensures there is a proper current time
  *
- * P5-67 (BC-51, R1): a given `currentTime` must be a strict `DateTime`
- * string (`YYYY-MM-DDTHH:mm:ss`, an optional fraction, then `Z` or
- * `±HH:mm`, naming a real instant), as for every other `DateTime` string;
- * the lenient dayjs and V8 forms are rejected with the same error an
- * unparseable one throws. An omitted (falsy) `currentTime` still means now.
- *
- * @param {string} [currentTime] - the definition of 'now', a strict
- * `DateTime` string
+ * @param {string} [currentTime] - the definition of 'now'
  * @param {number} [utcOffset] - UTC Offset for this execution
  * @returns {object} if valid, the dayjs object for the current time
  */
@@ -459,7 +445,7 @@ declare function jsonToYaml(dcsJson: any): string;
  * @returns {object} the DCS JSON
  */
 declare function yamlToJson(yamlString: any): {
-    $class: string;
+    $class: any;
     name: any;
     version: any;
     commands: any;
@@ -470,6 +456,196 @@ declare const _default: {
     yamlToJson: typeof yamlToJson;
 };
 export default _default;
+
+// ==== decoratorextractor.d.ts ====
+import ModelManager from './modelmanager';
+import type { IModels } from '@accordproject/concerto-metamodel';
+import type { DecoratorCommandTarget } from './types';
+/**
+ * Utility functions to work with
+ * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
+ * @memberof module:concerto-core
+ * @private
+ */
+/**
+ * A decorator collected from a model, keyed in the extraction dictionary by
+ * the namespace it was found in.
+ */
+interface ExtractedDecorator {
+    declaration: string;
+    property: string;
+    mapElement: string;
+    dcs: string;
+}
+declare class DecoratorExtractor {
+    extractionDictionary: Record<string, ExtractedDecorator[]>;
+    removeDecoratorsFromModel: boolean;
+    locale: string;
+    dcs_version: string;
+    sourceModelAst: IModels;
+    updatedModelAst: IModels;
+    action: number;
+    /**
+     * The action to be performed to extract all, only vocab or only non-vocab decorators
+     */
+    static Action: {
+        EXTRACT_ALL: number;
+        EXTRACT_VOCAB: number;
+        EXTRACT_NON_VOCAB: number;
+    };
+    /**
+     * Create the DecoratorExtractor.
+     * @constructor
+     * @param {boolean} removeDecoratorsFromModel - flag to determine whether to remove decorators from source model
+     * @param {string} locale - locale for extracted vocabularies
+     * @param {string} dcs_version - version string
+     * @param {Object} sourceModelAst - the ast of source models
+     * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
+     * @param {object} [options] - decorator extractor options
+     */
+    constructor(removeDecoratorsFromModel: boolean, locale: string, dcs_version: string, sourceModelAst: IModels, action?: number, options?: Record<string, unknown>);
+    /**
+     * Returns if the decorator is vocab or not
+     * @param {string} decoractorName - the name of decorator
+     * @returns {boolean} - returns true if the decorator is a vocabulary decorator else false
+     * @private
+     */
+    isVocabDecorator(decoractorName: any): any;
+    /**
+     * Returns a value safe for embedding in a YAML scalar.
+     * String values containing YAML-special characters are wrapped in double quotes.
+     * Non-string decorator types (Number, Boolean) are returned as-is.
+     * @param {any} value - the value to emit
+     * @param {string} [type] - the $class of the decorator argument
+     * @returns {string|number|boolean|null} - double-quoted string for string args, raw value for non-string args
+     * @private
+     */
+    quoteStringValue(value: any, type?: string): string | number | boolean | null;
+    /**
+    * Adds a key-value pair to a dictionary (object) if the key exists,
+    * or creates a new key with the provided value.
+    *
+    * @param {string} key - The key to add or update.
+    * @param {any} value - The value to add or update.
+    * @param {Object} options - options containing target
+    * @param {string} options.declaration - Target declaration
+    * @param {string} options.property - Target property
+    * @param {string} options.mapElement - Target map element
+    * @private
+    */
+    constructDCSDictionary(key: any, value: any, options: any): void;
+    /**
+     * Transforms the collected decorators into proper decorator command sets
+     * @param {Array<Object>} dcsObjects - the collection of collected decorators
+     * @param {string} namespace - the current namespace
+     * @param {Array<Object>} decoratorData - the collection of existing decorator command sets
+     * @returns {Array<Object>} - the collection of decorator command sets
+     * @private
+     */
+    transformNonVocabularyDecorators(dcsObjects: any, namespace: any, decoratorData: any): any;
+    /**
+     * Transforms the collected vocabularies into proper vocabulary command sets
+     * @param {Array<Object>} vocabObject - the collection of collected vocabularies
+     * @param {string} namespace - the current namespace
+     * @param {Array<Object>} vocabData - the collection of existing vocabularies command sets
+     * @returns {Array<Object>} - the collection of vocabularies command sets
+     * @private
+     */
+    transformVocabularyDecorators(vocabObject: any, namespace: any, vocabData: any): any;
+    /**
+     * Constructs Target object for a given model
+     * @param {string} namespace - the current namespace
+     * @param {Object} obj - the ast of the model
+     * @returns {Object} - the target object
+     * @private
+     */
+    constructTarget(namespace: any, obj: any): DecoratorCommandTarget & {
+        $class: string;
+    };
+    /**
+     * Parses the dict data into an array of decorator jsons
+     * @param {Array<Object>} dcsObjects - the array of collected dcs objects
+     * @param {Object} dcs - the current dcs json to be parsed
+     * @param {String} DCS_VERSION - the version string
+     * @param {Object} target - target object for the command
+     * @returns {Array<Object>} - the array of collected dcs objects with the current dcs
+     * @private
+     */
+    parseNonVocabularyDecorators(dcsObjects: any, dcs: any, DCS_VERSION: any, target: any): any;
+    /**
+     * @param {Object} vocabObject - the collection of collected vocabularies
+     * @param {Object} vocabTarget - the declaration object
+     * @param {Object} dcs - the current dcs json to be parsed
+     * @returns {Object} - the collection of collected vocabularies with current dcs
+     * @private
+     */
+    parseVocabularies(vocabObject: any, vocabTarget: any, dcs: any): any;
+    /**
+    * parses the extracted decorators and generates arrays of decorator command set and vocabularies
+    *
+    * @returns {Object} - constructed DCS Dict and processed models ast
+    * @private
+    */
+    transformDecoratorsAndVocabularies(): {
+        decoratorCommandSet: never[];
+        vocabularies: never[];
+    };
+    /**
+     * Filter vocab or non-vocab decorators
+     * @param {Object} decorators - the collection of decorators
+     * @returns {Object} - the collection of filtered decorators
+     * @private
+     */
+    filterOutDecorators(decorators: any): any;
+    /**
+    * Process the map declarations to extract the decorators.
+    *
+    * @param {Object} declaration - The source AST of the model
+    * @param {string} namespace - namespace of the model
+    * @returns {Object} - processed map declarations ast
+    * @private
+    */
+    processMapDeclaration(declaration: any, namespace: any): any;
+    /**
+    * Process the properties to extract the decorators.
+    *
+    * @param {Object} sourceProperties - The source AST of the property
+    * @param {string} declarationName - The name of source declaration
+    * @param {string} namespace - namespace of the model
+    * @returns {Object} - processed properties ast
+    * @private
+    */
+    processProperties(sourceProperties: any, declarationName: any, namespace: any): any;
+    /**
+    * Process the declarations to extract the decorators.
+    *
+    * @param {Object} sourceDecl - The source AST of the model
+    * @param {string} namespace - namespace of the model
+    * @returns {Object} - processed declarations ast
+    * @private
+    */
+    processDeclarations(sourceDecl: any, namespace: any): any;
+    /**
+    * Process the models to extract the decorators.
+    *
+    * @private
+    */
+    processModels(): void;
+    /**
+    * Collects the decorators and vocabularies and updates the modelManager depending
+    * on the options.
+    *
+    * @returns {Object} - constructed DCS Dict and processed models ast
+    * @private
+    */
+    extract(): {
+        updatedModelManager: ModelManager;
+        decoratorCommandSet: never[];
+        vocabularies: never[];
+    };
+}
+export { DecoratorExtractor };
+export default DecoratorExtractor;
 
 // ==== decoratormanager.d.ts ====
 import ModelManager from './modelmanager';
@@ -508,6 +684,47 @@ declare class DecoratorManager {
      * @returns {boolean} returns true if major versions are equal
      */
     static canMigrate(decoratorCommandSet: any, DCS_VERSION: any): boolean;
+    /**
+     * Add decorator commands set with index object to the coresponding target map
+     * @param {*} targetMap the target map to add the command to
+     * @param {targetKey} targetKey the target key to add the command to
+     * @param {DcsIndexWrapper} dcsWithIndex the command to add
+     * @private
+     */
+    static addDcsWithIndexToMap(targetMap: any, targetKey: any, dcsWithIndex: any): void;
+    /**
+     * Creates five different maps to index decorator command sets by target type and returns them
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @returns {Object} object with all the decorator command maps based on the target
+     * @private
+     */
+    static getDecoratorMaps(decoratorCommandSet: any): {
+        namespaceCommandsMap: Map<any, any>;
+        declarationCommandsMap: Map<any, any>;
+        propertyCommandsMap: Map<any, any>;
+        mapElementCommandsMap: Map<any, any>;
+        typeCommandsMap: Map<any, any>;
+    };
+    /**
+     * Migrate or validate the DecoratorCommandSet object if the options are set as true
+     * @param {ModelManager} modelManager the input model manager
+     * @param {*} decoratorCommandSet a DecoratorCommandSet object, or an array of DecoratorCommandSet objects
+     * @param {boolean} shouldMigrate migrate the decoratorCommandSet $class to match the dcs model version
+     * @param {boolean} shouldValidate validate that decorator command set is valid
+     * with respect to to decorator command set model
+     * @param {boolean} shouldValidateCommands validate the decorator command set targets. Note that
+     * the validate option must also be true
+     * @private
+     */
+    static migrateAndValidate(modelManager: any, decoratorCommandSet: any, shouldMigrate: any, shouldValidate: any, shouldValidateCommands: any): void;
+    /**
+     * Adds decorator commands with index to the array passed
+     * @param {DcsIndexWrapper[]} array the array to add the command to
+     * @param {*} map the target map to add the command to
+     * @param {key} key the target key to add the command to
+     * @private
+     */
+    static pushMapValues(array: any, map: any, key: any): void;
     /**
      * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager
      * @param {ModelManager} modelManager the input model manager
@@ -570,6 +787,22 @@ declare class DecoratorManager {
         decoratorCommandSet: never[];
     };
     /**
+     * Throws an error if the decoractor command is invalid
+     * @param {ModelManager} validationModelManager the validation model manager
+     * @param {*} command the decorator command
+     */
+    static validateCommand(validationModelManager: any, command: any): void;
+    /**
+     * Applies a new decorator to the Map element
+     * @private
+     * @param {string} element the element to apply the decorator to
+     * @param {string} target the command target
+     * @param {*} declaration the map declaration
+     * @param {string} type the command type
+     * @param {*} newDecorator the decorator to add
+     */
+    static applyDecoratorForMapElement(element: any, target: any, declaration: any, type: any, newDecorator: any): void;
+    /**
      * Compares two arrays. If the first argument is falsy
      * the function returns true.
      * @param {string | string[] | null} test the value to test
@@ -579,6 +812,38 @@ declare class DecoratorManager {
      */
     static falsyOrEqual(test: any, values: any): any;
     /**
+     * Applies a decorator to a decorated model element.
+     * @param {*} decorated the type to apply the decorator to
+     * @param {string} type the command type
+     * @param {*} newDecorator the decorator to add
+     */
+    static applyDecorator(decorated: any, type: any, newDecorator: any): void;
+    /**
+     * Checks for duplicate decorators added to a decorated model element.
+     * @param {*} decoratedAst ast of the property or the declaration to apply the decorator to
+     * @throws {IllegalModelException} if the decoratedAst has duplicate decorators
+     * @private
+     */
+    static checkForDuplicateDecorators(decoratedAst: any): void;
+    /**
+     * Executes a Command against a Model Namespace, adding
+     * decorators to the Namespace.
+     * @private
+     * @param {*} model the model
+     * @param {*} command the Command object from the dcs
+     */
+    static executeNamespaceCommand(model: any, command: any): void;
+    /**
+     * Executes a Command against a Declaration, adding
+     * decorators to the Declaration, or its properties, as required.
+     * @param {string} namespace the namespace for the declaration
+     * @param {*} declaration the class declaration
+     * @param {*} command the Command object from the dcs
+     * @param {*} [property] the property of a declaration, optional, to be passed if the command is for a property
+     * @param {object} [options] - execute command options
+     */
+    static executeCommand(namespace: any, declaration: any, command: any, property?: any, options?: any): void;
+    /**
      * Executes a Command against a Property, adding
      * decorators to the Property as required.
      * @param {*} property the property
@@ -586,6 +851,16 @@ declare class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property: any, command: any): void;
+    /**
+     * Applies the decorator on top of the namespace or else on all declarations
+     * within the namespace.
+     * @private
+     * @param {*} declaration the type to apply the decorator to
+     * @param {string} type the command type
+     * @param {*} decorator the decorator to add
+     * @param {*} target the target object for the decorator
+     */
+    static checkForNamespaceTargetAndApplyDecorator(declaration: any, type: any, decorator: any, target: any): void;
     /**
      * Legacy method. Kept for compatibility. Returns true.
      *  @returns {Boolean} true
@@ -605,7 +880,7 @@ declare class DecoratorManager {
      * @return {object} the corresponding JSON object
      */
     static yamlToJson(yamlInput: any): {
-        $class: string;
+        $class: any;
         name: any;
         version: any;
         commands: any;
@@ -1450,6 +1725,13 @@ declare class Decorator {
      */
     constructor(parent: Decorated, ast: AstNode);
     /**
+    * Handles a validation error, logging and throwing as required
+    * @param {string} level the log level
+    * @param {string | Error} err the message to log, or the error that was caught
+    * @private
+    */
+    handleError(level: string | undefined, err: string | Error): void;
+    /**
      * Visitor design pattern
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
@@ -1461,16 +1743,6 @@ declare class Decorator {
      * @return {ClassDeclaration|Property} the parent class or property declaration
      */
     getParent(): Decorated;
-    /**
-    * Handles a validation error, logging and throwing as required. Called
-    * back by the Rust engine's decoratorValidate binding (concerto-wasm
-    * src/lib.rs `handle_error`) for every non-fatal-or-fatal validation
-    * outcome, so this is a live collaborator, not TS-only fallback logic.
-    * @param {string} level the log level
-    * @param {string | Error} err the message to log, or the error that was caught
-    * @private
-    */
-    handleError(level: string | undefined, err: string | Error): void;
     /**
      * Process the AST and build the model
      * @throws {IllegalModelException}
@@ -1905,6 +2177,13 @@ declare class MapKeyType extends Decorated {
      */
     validate(): void;
     /**
+     * Sets the Type name for the Map Key
+     *
+     * @param {Object} ast - The AST created by the parser
+     * @private
+     */
+    processType(ast: AstNode): void;
+    /**
      * Returns the ModelFile that defines this class.
      *
      * @public
@@ -1988,6 +2267,13 @@ declare class MapValueType extends Decorated {
      * @protected
      */
     validate(): void;
+    /**
+     * Sets the Type name for the Map Value
+     *
+     * @param {Object} ast - The AST created by the parser
+     * @private
+     */
+    processType(ast: AstNode): void;
     /**
      * Returns the ModelFile that defines this class.
      *
@@ -2110,7 +2396,6 @@ declare class ModelFile extends Decorated {
      * @param {object} ast - The abstract syntax tree of the model as a JSON object.
      * @param {string} [definitions] - The optional CTO model as a string.
      * @param {string} [fileName] - The optional filename for this modelfile
-     * @throws {TypeError} if modelManager is not a BaseModelManager (BC-47)
      * @throws {IllegalModelException}
      */
     constructor(modelManager: BaseModelManager, ast: AstNode, definitions?: string | null, fileName?: string | null);
@@ -2488,10 +2773,10 @@ export default ParticipantDeclaration;
 
 // ==== introspect/property.d.ts ====
 import Decorated from './decorated';
+import CollectionSizeValidator from './collectionsizevalidator';
 import type ClassDeclaration from './classdeclaration';
 import type ModelFile from './modelfile';
 import type { AstNode } from './decorated';
-import type CollectionSizeValidator from './collectionsizevalidator';
 /**
  * Property representing an attribute of a class declaration,
  * either a Field or a Relationship.
@@ -2912,12 +3197,10 @@ declare class Validator {
      */
     constructor(field: ValidatedElement, validator: ValidatorAst | undefined);
     /**
-     * Reports an instance value that fails the validator (BC-39: a
-     * ValidationException, keeping the errorType; 5.0.0 threw a BaseException).
      * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
      * @param {string} errorType the type of error
-     * @throws {ValidationException} throws an error to report the message
+     * @throws {Error} throws an error to report the message
      */
     reportError(id: string | null, msg: string, errorType?: string): never;
     /**
@@ -3466,7 +3749,7 @@ declare class ModelManager extends BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {Object} [options.regExp] - Deprecated and ignored, with a warning: regular expressions are evaluated by the Concerto engine.
+     * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
      */
     constructor(options?: ModelManagerOptions);
@@ -3485,6 +3768,7 @@ export { ModelManager };
 export default ModelManager;
 
 // ==== modelutil.d.ts ====
+import semver from 'semver';
 /**
  * Internal Model Utility Class
  * <p><a href="./diagrams-private/modelutil.svg"><img src="./diagrams-private/modelutil.svg" style="height:100%;"/></a></p>
@@ -3498,7 +3782,7 @@ declare class ModelUtil {
      * @param {string} fqn - the source string
      * @return {string} - the string after the last dot
      */
-    static getShortName(fqn: any): string;
+    static getShortName(fqn: any): any;
     /**
      * Returns the namespace for the fully qualified name of a type
      * @param {string} fqn - the fully qualified identifier of a type
@@ -3526,9 +3810,14 @@ declare class ModelUtil {
         disableVersionParsing?: boolean;
     }): {
         name: string;
-        escapedNamespace?: string;
-        version?: string | null;
-        versionParsed?: unknown;
+        escapedNamespace?: undefined;
+        version?: undefined;
+        versionParsed?: undefined;
+    } | {
+        name: string;
+        escapedNamespace: string;
+        version: string | null;
+        versionParsed: string | semver.SemVer | null;
     };
     /**
      * Return the fully qualified name for an import
@@ -3561,7 +3850,7 @@ declare class ModelUtil {
      * @return {string} the string with the first letter capitalized
      * @private
      */
-    static capitalizeFirstLetter(string: any): string;
+    static capitalizeFirstLetter(string: any): any;
     /**
      * Returns true if the given field is an enumerated type
      * @param {Field} field - the string
@@ -3595,14 +3884,14 @@ declare class ModelUtil {
      * @param {string} type - short name of the type.
      * @returns {string} the fully qualified type name.
      */
-    static getFullyQualifiedName(namespace: any, type: any): string;
+    static getFullyQualifiedName(namespace: any, type: any): any;
     /**
      * Converts a fully qualified type name to a FQN without a namespace version.
      * If the FQN is a primitive type it is returned unchanged.
      * @param {string} fqn fully qualified name of a type
      * @returns {string} the fully qualified name minus the namespace version
      */
-    static removeNamespaceVersionFromFullyQualifiedName(fqn: any): string;
+    static removeNamespaceVersionFromFullyQualifiedName(fqn: any): any;
     /**
      * Returns true if the property is a system property.
      * System properties are not declared in the model.
@@ -3912,18 +4201,6 @@ declare class JSONGenerator {
      */
     visitRelationshipDeclaration(relationshipDeclaration: any, parameters: any): any;
     /**
-     * One relationship value: a resource written in full when
-     * `permitResourcesForRelationships` allows it and it is not already being
-     * written, otherwise its relationship text. A relationship-typed map value
-     * is written here too (P5-58, BC-05).
-     * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
-     * @param {Identifiable} obj - the relationship or the resource
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the relationship text, or the resource as JSON
-     * @private
-     */
-    convertRelationship(relationshipDeclaration: any, obj: any, parameters: any): any;
-    /**
      * Returns the persistent format for a relationship.
      * @param {RelationshipDeclaration} relationshipDeclaration - the relationship being persisted
      * @param {Identifiable} relationshipOrResource - the relationship or the resource
@@ -3936,14 +4213,11 @@ export default JSONGenerator;
 
 // ==== serializer/jsonpopulator.d.ts ====
 import { TypedStack } from '@accordproject/concerto-util';
-import Relationship from '../model/relationship';
 import type Factory from '../factory';
 import type BaseModelManager from '../basemodelmanager';
 import type ClassDeclaration from '../introspect/classdeclaration';
-import type RelationshipDeclaration from '../introspect/relationshipdeclaration';
 import type MapDeclaration from '../introspect/mapdeclaration';
 import type Resource from '../model/resource';
-import type { RelationshipMapValue } from './relationshipmapvalue';
 type Stack<T> = {
     push(value: T, expectedType?: unknown): void;
     pop(expectedType?: unknown): T;
@@ -4058,50 +4332,9 @@ declare class JSONPopulator {
      * @private
      */
     visitRelationshipDeclaration(relationshipDeclaration: any, parameters: JsonPopulatorParameters): any;
-    /**
-     * One relationship value (visitRelationshipDeclaration's non-array
-     * branch): a URI string becomes a Relationship, and an object an embedded
-     * resource when `acceptResourcesForRelationships` allows it. A
-     * relationship-typed map value is read here too (P5-58, BC-05).
-     * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
-     * @param {Object} jsonObj - the JSON value
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the Relationship or the embedded resource
-     * @private
-     */
-    convertRelationship(relationshipDeclaration: RelationshipDeclaration | RelationshipMapValue, jsonObj: unknown, parameters: JsonPopulatorParameters): Relationship | Resource;
 }
 export { JSONPopulator };
 export default JSONPopulator;
-
-// ==== serializer/relationshipmapvalue.d.ts ====
-import type MapDeclaration from '../introspect/mapdeclaration';
-/**
- * The relationship a map holds when its value type is a relationship
- * (`map M { o String --> T }`), with the members of a
- * RelationshipDeclaration that the serializer's relationship code reads
- * (P5-58, BC-05, R1; DV-007). JSONPopulator, JSONGenerator and
- * ResourceValidator hand it to their relationship-property code, so a map
- * value is read, written and validated as a `--> T` property is, under the
- * same `acceptResourcesForRelationships`, `convertResourcesToRelationships`
- * and `permitResourcesForRelationships` options.
- * @private
- */
-export interface RelationshipMapValue {
-    getName(): string;
-    getNamespace(): string;
-    getFullyQualifiedTypeName(): string;
-    isArray(): boolean;
-    toString(): string;
-}
-/**
- * The relationship a map's values hold, or `null` when the map's value type
- * is not a relationship.
- * @param {MapDeclaration} mapDeclaration - the map declaration
- * @return {RelationshipMapValue|null} the relationship, or null
- * @private
- */
-export declare function getRelationshipMapValue(mapDeclaration: MapDeclaration): RelationshipMapValue | null;
 
 // ==== serializer/resourcevalidator.d.ts ====
 import type { SerializerOptions } from '../types';
@@ -4536,24 +4769,7 @@ import type Factory from './factory';
 import type Typed from './model/typed';
 import type { EmptyValueGenerator } from './serializer/valuegenerator';
 export interface ModelManagerOptions {
-    /**
-     * @deprecated Ignored, with a warning (BC-28): regular expressions are
-     * evaluated by the Concerto engine.
-     */
     regExp?: RegExp;
-    /**
-     * The strict AST shape check at model load (BC-19, with BC-17, BC-18
-     * and BC-20; on by default since R1): unless this is `false`, a
-     * ModelFile whose AST does not have the Concerto metamodel's shape is
-     * rejected with an IllegalModelException when it is constructed. `true`
-     * also runs `validateAst` in `addModelFile`, as before. `false` is an
-     * escape hatch for trusted input only: the shape check is skipped, and
-     * code downstream of the load may assume a well-formed AST. A malformed
-     * AST still throws an error when it is loaded, never a WASM trap or a
-     * process crash, unless the loader can read it all the same (a node's
-     * `$class` naming the wrong type, say); the error's class and message
-     * are unspecified.
-     */
     metamodelValidation?: boolean;
     addMetamodel?: boolean;
     dangerouslyAllowReservedSystemTypeNamesInUserModels?: boolean;

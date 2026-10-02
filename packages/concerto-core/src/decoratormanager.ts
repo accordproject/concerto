@@ -30,6 +30,7 @@ import type ModelFile from './introspect/modelfile';
 // See src/modelutil.ts for why this is loaded this way (dist/, bundler and
 // CJS/ESM notes); the same considerations apply here unchanged.
 import { createRequire } from 'module';
+import type { EngineBindings, EngineViews } from './engine/bindings';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 // P5-06: memoised per specifier, so a call site on a per-element or
@@ -42,11 +43,9 @@ const loadEngine = (specifier: string) =>
     engineModules[specifier] ??
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
-const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('./engine').rust;
-// The rust-mode view functions (src/engine/views.ts), typed `never` for the
-// same reason as `rust` above (PORTING.md 1.5, "Why never"): the return types
-// the declaration build infers stay exactly those of the TS bodies.
-type EngineViews = { [view: string]: (...args: any[]) => never };
+const rust: EngineBindings = loadEngine('./engine').rust;
+// The engine bindings (`rust`) and the rust-mode view functions
+// (src/engine/views.ts) are typed by src/engine/bindings.d.ts (P5-84).
 
 const DCS_VERSION = '0.4.0';
 
@@ -283,7 +282,7 @@ class DecoratorManager {
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {ExtractDecoratorsResult} - a new model manager with the decorations removed and a list of extracted decorator jsons and vocab yamls
      */
-    static extractDecorators(modelManager,options) {
+    static extractDecorators(modelManager,options): { modelManager: ModelManager; decoratorCommandSet: never[]; vocabularies: never[]; } {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
@@ -299,7 +298,7 @@ class DecoratorManager {
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
      */
-    static extractVocabularies(modelManager,options) {
+    static extractVocabularies(modelManager,options): { modelManager: ModelManager; vocabularies: never[]; } {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
@@ -315,7 +314,7 @@ class DecoratorManager {
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
      */
-    static extractNonVocabDecorators(modelManager,options) {
+    static extractNonVocabDecorators(modelManager,options): { modelManager: ModelManager; decoratorCommandSet: never[]; } {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
@@ -331,7 +330,7 @@ class DecoratorManager {
      * @returns {Boolean} true if the test is falsy or the intersection of
      * the test and values arrays is not empty (i.e. they have values in common)
      */
-    static falsyOrEqual(test, values) {
+    static falsyOrEqual(test, values): any {
         return rust.decoratorManagerFalsyOrEqual(test, values);
     }
 
