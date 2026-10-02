@@ -22,6 +22,7 @@
 // ...) read it unchanged, without a boundary call per getter.
 
 import { rust } from './index';
+import { encodeAst, encodeAstGeneration } from './ast-codec';
 
 // P5-06: the introspect modules the per-element views below construct
 // objects from, required once on first use (they cannot be imported at
@@ -1234,10 +1235,19 @@ const shapePending = new FileSlot('shapePending');
  * but for the fixed system models' namespaces (P5-73, `shapeMemoised`):
  * their own ModelFiles take the engine's precomputed verdict in
  * `stageModelFile`, and any other AST of them is checked.
+ *
+ * P5-92 (accordproject/concerto-rust#438): an AST the engine is to load
+ * into a manager it writes (`compactStageable`) is written straight from
+ * the object into the compact binary layout (`encodeAst`) instead of being
+ * `JSON.stringify`d, and is checked, as pending, by the same fold
+ * (`stageModelFileCheckedCompact`); its JSON text is computed only where a
+ * path still needs it (`astText`). An AST `encodeAst` leaves to the text
+ * path is checked as before.
  * @param {object} modelFile the ModelFile being constructed
- * @return {string | undefined} the AST's JSON text, when it is checked
+ * @return {string | object | undefined} the AST's JSON text, or the AST in
+ * the compact layout (`CompactAst`), when it is checked
  */
-function checkAstShape(modelFile: any): string | undefined {
+function checkAstShape(modelFile: any): CheckedAst | undefined {
     const manager = modelFile.modelManager;
     const ast = modelFile.ast;
     // P5-68 (BC-19-a): an AST the engine has just written, for a DCS result
@@ -1250,6 +1260,13 @@ function checkAstShape(modelFile: any): string | undefined {
     if (manager.options?.metamodelValidation === false) {
         return undefined;
     }
+    if (compactStageable(manager, ast, 'stageModelFileCheckedCompact')) {
+        const bytes = encodeAst(ast);
+        if (bytes !== undefined) {
+            shapePending.add(modelFile);
+            return { bytes, generation: encodeAstGeneration(), text: undefined };
+        }
+    }
     const text = JSON.stringify(ast);
     const namespace = ast.namespace;
     if (shapeMemoised(manager, namespace) && shapeCheckedUnmirrored.get(namespace) === text) {
@@ -1261,12 +1278,80 @@ function checkAstShape(modelFile: any): string | undefined {
 }
 
 /**
+ * P5-92 (accordproject/concerto-rust#438): an AST `checkAstShape` wrote in
+ * the compact binary layout (`encodeAst`) for the engine to load without
+ * its JSON text: the bytes (a view of `encodeAst`'s reused buffer, valid
+ * while `encodeAst` has not run again, `generation`), and the JSON text,
+ * once a path needs it (`astText`).
+ */
+interface CompactAst {
+    bytes: Uint8Array;
+    generation: number;
+    text: string | undefined;
+}
+
+/**
+ * What `checkAstShape` hands `stageModelFile` for a checked AST: its JSON
+ * text, or the AST in the compact layout (P5-92).
+ */
+type CheckedAst = string | CompactAst;
+
+/**
+ * P5-92: whether a ModelFile's AST may cross into the engine in the
+ * compact binary layout (`encodeAst`) through the staging binding
+ * `binding`: the engine has that binding, and the AST is loaded into a
+ * manager that writes its namespace into rustHandle and is neither a fixed
+ * system model's (`systemModelAsts`, whose verdict is looked up by its
+ * text) nor a staged DecoratorManager result (`prestaged`, never sent
+ * again). Every other AST crosses as JSON text, as before: an unmirrored
+ * namespace's verdict is remembered by its text (`acceptedUnmirrored`,
+ * `shapeCheckedUnmirrored`).
+ * @param {object} manager the ModelFile's manager
+ * @param {object} ast the AST
+ * @param {string} binding the compact staging binding
+ * @return {boolean} true if the AST may cross in the compact layout
+ */
+function compactStageable(manager: any, ast: any, binding: string): boolean {
+    return typeof manager.rustHandle?.[binding] === 'function' && !systemModelAsts.has(ast) &&
+        !prestaged.has(ast) && manager._needsRustWrite(ast.namespace);
+}
+
+/**
+ * P5-92: the bytes of an AST `checkAstShape` wrote in the compact layout,
+ * while they are still `encodeAst`'s current output; otherwise undefined,
+ * and the caller sends the AST's JSON text.
+ * @param {string | object | undefined} checked what `checkAstShape` returned
+ * @return {Uint8Array | undefined} the bytes
+ */
+function compactBytes(checked: CheckedAst | undefined): Uint8Array | undefined {
+    return typeof checked === 'object' && checked.generation === encodeAstGeneration() ? checked.bytes : undefined;
+}
+
+/**
+ * P5-92: the JSON text of a checked AST: the text `checkAstShape` computed,
+ * or, for an AST it wrote in the compact layout, `JSON.stringify(ast)`,
+ * computed once, on the paths that still need it.
+ * @param {object} ast the AST
+ * @param {string | object} checked what `checkAstShape` returned
+ * @return {string} the AST's JSON text
+ */
+function astText(ast: any, checked: CheckedAst): string {
+    if (typeof checked === 'string') {
+        return checked;
+    }
+    return checked.text ?? (checked.text = JSON.stringify(ast));
+}
+
+/**
  * P5-69 (BC-19-b, R1): records that a pending ModelFile's AST, as `text`,
  * has passed the shape check, as `checkAstShape` recorded it before.
+ * P5-92: `text` is undefined for an AST the engine read in the compact
+ * layout; it is computed only for a namespace remembered by its text
+ * (`shapeMemoised`), which such an AST never has.
  * @param {object} modelFile the ModelFile being constructed
- * @param {string} text the AST's JSON text
+ * @param {string} [text] the AST's JSON text
  */
-function shapeCheckPassed(modelFile: any, text: string): void {
+function shapeCheckPassed(modelFile: any, text: string | undefined): void {
     if (!shapePending.has(modelFile)) {
         return;
     }
@@ -1275,7 +1360,7 @@ function shapeCheckPassed(modelFile: any, text: string): void {
     const ast = modelFile.ast;
     const namespace = ast.namespace;
     if (shapeMemoised(manager, namespace)) {
-        shapeCheckedUnmirrored.set(namespace, text);
+        shapeCheckedUnmirrored.set(namespace, text ?? JSON.stringify(ast));
     }
     shapeChecked.set(modelFile, ast);
 }
@@ -1336,12 +1421,15 @@ function completeShapeCheck(modelFile: any, handle: any, text: string): void {
  * through is not trained on the system models every `new ModelManager()`
  * builds.
  * @param {object} modelFile the ModelFile being constructed
- * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
- * already computed it
+ * @param {string | object} [checkedText] the AST's JSON text, or the AST in
+ * the compact layout (P5-92), when `checkAstShape` checks it
  * @return {boolean} true if the declarations may be built lazily
  */
-function stageModelFile(modelFile: any, checkedText?: string): boolean {
-    return stageSystemModelFile(modelFile, checkedText) ?? stageLoadedModelFile(modelFile, checkedText);
+function stageModelFile(modelFile: any, checkedText?: CheckedAst): boolean {
+    // P5-92: a fixed system model's AST is never written in the compact
+    // layout (`compactStageable`).
+    return stageSystemModelFile(modelFile, typeof checkedText === 'object' ? undefined : checkedText) ??
+        stageLoadedModelFile(modelFile, checkedText);
 }
 
 /**
@@ -1434,12 +1522,21 @@ function utf8Text(text: string): Uint8Array {
  * it runs here first, folded into the load (`stageModelFileChecked`) or on
  * its own (`completeShapeCheck`) where nothing is loaded, and its error is
  * thrown; any other error is handled as before.
+ *
+ * P5-92 (accordproject/concerto-rust#438): an AST `checkAstShape` wrote in
+ * the compact binary layout is loaded, and checked, from those bytes
+ * (`stageModelFileCheckedCompact`); with the check off, an AST loaded into a
+ * manager that writes its namespace is written in that layout here
+ * (`stageModelFileWithHeaderCompact`). Either way the engine's verdict and
+ * error are those of the AST's JSON text, which is computed only on the
+ * paths that still need it (`astText`), and sent instead for an AST
+ * `encodeAst` leaves to the text path.
  * @param {object} modelFile the ModelFile being constructed
- * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
- * already computed it
+ * @param {string | object} [checkedText] the AST's JSON text, or the AST in
+ * the compact layout, when `checkAstShape` checks it
  * @return {boolean} true if the declarations may be built lazily
  */
-function stageLoadedModelFile(modelFile: any, checkedText?: string): boolean {
+function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean {
     // P5-35 (BC-47): the ModelFile constructor accepts only a
     // BaseModelManager, which always has a rustHandle.
     const manager = modelFile.modelManager;
@@ -1454,7 +1551,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: string): boolean {
             if (checkedText === undefined) {
                 readUnchecked(modelFile, handle);
             } else {
-                completeShapeCheck(modelFile, handle, checkedText);
+                completeShapeCheck(modelFile, handle, astText(modelFile.ast, checkedText));
             }
             return false;
         }
@@ -1462,7 +1559,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: string): boolean {
         // P5-69: a prestaged AST is not loaded again, so it is checked on
         // its own first.
         if (checkedText !== undefined && ast && typeof ast === 'object' && prestaged.has(ast)) {
-            completeShapeCheck(modelFile, handle, checkedText);
+            completeShapeCheck(modelFile, handle, astText(ast, checkedText));
         }
         // P5-27 (F6): a DecoratorManager result model Rust has already
         // loaded, and staged in this handle (`adoptStagedModels`), is used
@@ -1471,7 +1568,15 @@ function stageLoadedModelFile(modelFile: any, checkedText?: string): boolean {
             lazyFiles.add(modelFile);
             return true;
         }
-        const text = checkedText ?? JSON.stringify(ast);
+        // P5-92: the AST in the compact layout, when `checkAstShape` wrote
+        // it so, or, with the check off, when it may cross so; otherwise its
+        // JSON text, as before.
+        let compact = compactBytes(checkedText);
+        if (checkedText === undefined && compactStageable(manager, ast, 'stageModelFileWithHeaderCompact')) {
+            compact = encodeAst(ast);
+        }
+        let text: string | undefined = compact !== undefined ? undefined
+            : checkedText === undefined ? JSON.stringify(ast) : astText(ast, checkedText);
         // `ModelFile`'s constructor only rejects a *truthy* non-string
         // `definitions`/`fileName` (introspect/modelfile.ts): `0`, `false`
         // and `NaN` are stored as-is, and `?? undefined` maps only
@@ -1483,6 +1588,12 @@ function stageLoadedModelFile(modelFile: any, checkedText?: string): boolean {
         const definitions = typeof modelFile.definitions === 'string' ? modelFile.definitions : undefined;
         const fileName = typeof modelFile.fileName === 'string' ? modelFile.fileName : undefined;
         const unmirrored = !manager._needsRustWrite(ast.namespace);
+        if (unmirrored && text === undefined) {
+            // P5-92: never the case for an AST `compactStageable` let
+            // through, unless its namespace changed since.
+            compact = undefined;
+            text = checkedText === undefined ? JSON.stringify(ast) : astText(ast, checkedText);
+        }
         const key = unmirrored ? JSON.stringify([text, definitions ?? null, fileName ?? null]) : null;
         const accepted = key !== null ? acceptedUnmirrored.get(ast) : undefined;
         if (accepted !== undefined && accepted.key === key) {
@@ -1491,7 +1602,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: string): boolean {
             if (accepted.checked) {
                 shapeCheckPassed(modelFile, text);
             } else {
-                completeShapeCheck(modelFile, handle, text);
+                completeShapeCheck(modelFile, handle, text as string);
             }
             if (accepted.header !== null) {
                 stagedFileHeaders.set(modelFile, accepted.header);
@@ -1507,26 +1618,38 @@ function stageLoadedModelFile(modelFile: any, checkedText?: string): boolean {
         let id: number;
         let header: StagedHeader | null = null;
         const checked = shapePending.has(modelFile);
-        if (checked && typeof handle.stageModelFileChecked === 'function') {
+        // P5-92: there is text whenever there are no bytes.
+        const jsonText = text as string;
+        if (compact !== undefined) {
+            // P5-92: the shape check (when pending) and the load, from the
+            // compact layout, with the verdict and the error of the text
+            // (`ModelFile::from_compact_checked_with_imports`).
+            const staged = JSON.parse(checked
+                ? handle.stageModelFileCheckedCompact(compact, definitions, fileName)
+                : handle.stageModelFileWithHeaderCompact(compact, definitions, fileName));
+            id = staged.id;
+            header = staged.header;
+            shapeCheckPassed(modelFile, undefined);
+        } else if (checked && typeof handle.stageModelFileChecked === 'function') {
             // P5-69 (BC-19-b): the shape check and the load, from one
             // parse of the text. P5-76: the text crosses as UTF-8 bytes
             // where the engine takes them (`utf8Text`).
             const staged = JSON.parse(typeof handle.stageModelFileCheckedUtf8 === 'function'
-                ? handle.stageModelFileCheckedUtf8(utf8Text(text), definitions, fileName)
-                : handle.stageModelFileChecked(text, definitions, fileName));
+                ? handle.stageModelFileCheckedUtf8(utf8Text(jsonText), definitions, fileName)
+                : handle.stageModelFileChecked(jsonText, definitions, fileName));
             id = staged.id;
             header = staged.header;
-            shapeCheckPassed(modelFile, text);
+            shapeCheckPassed(modelFile, jsonText);
         } else if (typeof handle.stageModelFileWithHeader === 'function') {
-            completeShapeCheck(modelFile, handle, text);
+            completeShapeCheck(modelFile, handle, jsonText);
             const staged = JSON.parse(typeof handle.stageModelFileWithHeaderUtf8 === 'function'
-                ? handle.stageModelFileWithHeaderUtf8(utf8Text(text), definitions, fileName)
-                : handle.stageModelFileWithHeader(text, definitions, fileName));
+                ? handle.stageModelFileWithHeaderUtf8(utf8Text(jsonText), definitions, fileName)
+                : handle.stageModelFileWithHeader(jsonText, definitions, fileName));
             id = staged.id;
             header = staged.header;
         } else {
-            completeShapeCheck(modelFile, handle, text);
-            id = handle.stageModelFile(text, definitions, fileName);
+            completeShapeCheck(modelFile, handle, jsonText);
+            id = handle.stageModelFile(jsonText, definitions, fileName);
         }
         if (key !== null) {
             // Never committed: keep the verdict (and the header), not the
@@ -1556,7 +1679,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: string): boolean {
             if ((e as { astShape?: boolean } | null)?.astShape) {
                 throw e;
             }
-            completeShapeCheck(modelFile, handle, checkedText);
+            completeShapeCheck(modelFile, handle, astText(modelFile.ast, checkedText));
         }
         return false;
     }
