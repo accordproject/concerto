@@ -48,6 +48,7 @@ participant Person identified by email {
   o Address address
   o String[] tags optional
   o Integer age optional
+  o DateTime born optional
   o Colour colour optional
   --> Person friend optional
   o Shape shape optional
@@ -135,6 +136,33 @@ function conformance(input, type) {
             orThrow[1] === first.code && orThrow[2] === first.path &&
             (fromJson === null || JSON.stringify(fromJson) === JSON.stringify(orThrow));
         return { valid: result.valid, errors: result.valid ? [] : result.errors.map(triple), orThrow, fromJson, consistent };
+    };
+}
+
+/**
+ * The consistency rule for a JS object that is not plain JSON (a Date,
+ * `NaN`, an object with `toJSON`): `validateInstance`'s first error, what
+ * `validateInstanceOrThrow` throws (with and without `hydrate: false`) and
+ * what `Serializer.fromJSON` throws all agree, as for any other input.
+ * @param {Function} input the instance
+ * @returns {Function} the check body
+ */
+function jsValue(input) {
+    return (core) => {
+        const mm = manager(core);
+        if (!mm) {
+            return NO_API;
+        }
+        const result = mm.validateInstance(input());
+        const dry = mm.validateInstance(input(), { hydrate: false });
+        const first = result.valid ? null : result.errors[0];
+        return {
+            valid: [result.valid, dry.valid],
+            first: first ? [first.code, first.path] : null,
+            orThrow: thrown(() => mm.validateInstanceOrThrow(input())),
+            orThrowDry: thrown(() => mm.validateInstanceOrThrow(input(), { hydrate: false })),
+            fromJson: thrown(() => mm.getSerializer().fromJSON(input())),
+        };
     };
 }
 
@@ -390,6 +418,30 @@ const checks = [
                 sameAsErrors: JSON.stringify(fromJson.details) === JSON.stringify(errors.slice(0, fromJson.details.length)),
             };
         },
+    },
+    {
+        id: 'VI-JSVALUE-001',
+        covers: 'a Date for a DateTime: the verdict is fromJSON\'s (it throws), not that of the Date\'s JSON.stringify text',
+        expect: {ok: {valid: [false, false], first: ['TYPE_VIOLATION', '/born'], orThrow: ['ValidationException', 'TYPE_VIOLATION', '/born'], orThrowDry: ['ValidationException', 'TYPE_VIOLATION', '/born'], fromJson: ['ValidationException', null, null]}},
+        run: jsValue(() => person({ born: new Date(0) })),
+    },
+    {
+        id: 'VI-JSVALUE-002',
+        covers: 'NaN for an Integer: the verdict is fromJSON\'s (it throws), not that of JSON.stringify\'s null',
+        expect: {ok: {valid: [false, false], first: ['TYPE_VIOLATION', '/age'], orThrow: ['ValidationException', 'TYPE_VIOLATION', '/age'], orThrowDry: ['ValidationException', 'TYPE_VIOLATION', '/age'], fromJson: ['ValidationException', null, null]}},
+        run: jsValue(() => person({ age: NaN })),
+    },
+    {
+        id: 'VI-JSVALUE-003',
+        covers: 'an object with toJSON for a nested String: the verdict is fromJSON\'s (it throws), not that of what toJSON returns',
+        expect: {ok: {valid: [false, false], first: ['TYPE_VIOLATION', '/address/city'], orThrow: ['ValidationException', 'TYPE_VIOLATION', '/address/city'], orThrowDry: ['ValidationException', 'TYPE_VIOLATION', '/address/city'], fromJson: ['ValidationException', null, null]}},
+        run: jsValue(() => person({ address: { $class: `${NS}.Address`, city: { toJSON: () => 'Paris' } } })),
+    },
+    {
+        id: 'VI-JSVALUE-004',
+        covers: 'values fromJSON accepts that JSON.stringify changes or rejects (a lone surrogate, undefined, -0) are valid, as fromJSON has them',
+        expect: {ok: {valid: [true, true], first: null, orThrow: 'ok', orThrowDry: 'ok', fromJson: 'ok'}},
+        run: jsValue(() => person({ address: { $class: `${NS}.Address`, city: 'Par\ud800is', zip: undefined }, age: -0 })),
     },
 ];
 
