@@ -5,9 +5,9 @@
   "node": "v22.22.2",
   "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
   "loadavgEnd": [
-    1.48,
-    1.79,
-    1.72
+    1.98,
+    1.75,
+    1.57
   ],
   "samples": 300,
   "warmup": 30,
@@ -16,22 +16,22 @@
       "set": "concerto-core-test-data",
       "files": 35,
       "bytesPerFile": 3259,
-      "stageUs": 43.703600000000215,
-      "dropUs": 5.17737142857056
+      "stageUs": 40.43282857142977,
+      "dropUs": 4.74520000000049
     },
     {
       "set": "conformance",
       "files": 41,
       "bytesPerFile": 1300,
-      "stageUs": 16.40658536585739,
-      "dropUs": 1.0365365853664206
+      "stageUs": 21.90343902438832,
+      "dropUs": 1.599731707318181
     },
     {
       "set": "synthetic-large",
       "files": 1,
       "bytesPerFile": 229584,
-      "stageUs": 1723.752000000104,
-      "dropUs": 118.54999999991378
+      "stageUs": 1882.0479999999407,
+      "dropUs": 128.8609999999153
     }
   ]
 }

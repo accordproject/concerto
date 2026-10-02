@@ -109,6 +109,19 @@ for (const op of OPS) {
     }
 }
 p();
+p('## Target');
+p();
+p('The issue\'s target: halve the allocations, and bring the native typed read under TS 5.0.0\'s `new ModelFile` (`modelfile_new` on TS 5.0.0, the same run, median of three round medians).');
+p();
+p('| set | allocs before | allocs after | after / before | native typed read after | TS 5.0.0 new ModelFile | native after / TS |');
+p('|---|---:|---:|---:|---:|---:|---:|');
+for (const set of SETS) {
+    const na = med([1, 2, 3].map((r) => Number(tsv(`timed/native-after-${r}.tsv`).find((l) => l[1] === set)[2])));
+    const t = timed('ts', 'modelfile_new', set);
+    const ts = t.length ? med(t) : NaN;
+    p(`| ${set} | ${ab[set].allocs} | ${aa[set].allocs} | ${(aa[set].allocs / ab[set].allocs).toFixed(2)} | ${us(na)} | ${us(ts)} | ${(na / ts).toFixed(2)} |`);
+}
+p();
 p('## Quiet gate');
 p();
 const gate = fs.readFileSync(path.join(R, 'timed-loads.txt'), 'utf8').split('\n').filter((l) => / gate: /.test(l));
