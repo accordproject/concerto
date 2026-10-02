@@ -11,7 +11,7 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
-    "prebuild": "npm-run-all clean generate-types",
+    "prebuild": "npm-run-all clean generate-types generate-validator",
     "build": "tsc -p tsconfig.build.json && npm run build:esm",
     "postbuild": "cpx \"src/spec/*.json\" dist/spec/",
     "pretest": "npm-run-all lint",
@@ -19,6 +19,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "generate-types": "cross-env ENABLE_MAP_TYPE=true node scripts/generateTypes.js",
+    "generate-validator": "node scripts/generateSchemaValidator.js",
     "build:esm": "node ../../scripts/build-esm.js"
   },
   "repository": {
@@ -34,19 +35,19 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "dependencies": {
-    "@accordproject/concerto-core": "5.0.0",
     "@accordproject/concerto-metamodel": "^3.17.0",
-    "ajv": "^8.17.1",
     "semver": "7.6.3"
   },
   "devDependencies": {
     "@accordproject/concerto-codegen": "^4.0.0",
+    "@accordproject/concerto-core": "5.0.0",
     "@accordproject/concerto-cto": "5.0.0",
     "@accordproject/concerto-util": "5.0.0",
     "@types/semver": "7.5.8",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "@vitest/coverage-v8": "^3.2.4",
+    "ajv": "^8.17.1",
     "cpx": "^1.5.0",
     "cross-env": "^7.0.3",
     "eslint": "8.57.1",
@@ -61,6 +62,12 @@
       "browser": "./dist/esm-browser/index.mjs",
       "import": "./dist/esm/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "browser": "./dist/esm-browser/schema.mjs",
+      "import": "./dist/esm/schema.mjs",
+      "require": "./dist/schema.js"
     },
     "./package.json": "./package.json",
     "./dist/*": "./dist/*"
