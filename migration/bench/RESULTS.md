@@ -1,3 +1,133 @@
+# P5-76: load path, profile-driven engine work on `stageModelFileChecked` (2026-10-02)
+
+Task P5-76 (accordproject/concerto-rust#418), follow-up 3 of P5-72
+(#413). It makes the engine's typed AST read and the staging load cheaper,
+with no change in behaviour: the same ASTs accepted and rejected, and the
+same exception classes. Raw outputs are in `results/P5-76/`
+(`sweep/{now,p560,before,now-mmvoff}`, `tables.md`, `tables.json`,
+`sweep/timed-loads.txt`).
+
+| | |
+|---|---|
+| Machine | Cloud container (cloud-3), Intel Xeon @ 2.10GHz, 4 vCPU, 15 GB, Linux 6.18 |
+| Toolchain | Node v22.22.2, rustc 1.94.1, wasm-bindgen 0.2.128, binaryen/wasm-opt 132, criterion 0.5.1 |
+| Before | The integration head: `concerto` `d1ab2619a` (concerto-core dist), `concerto-rust` `64b2566` (engine 3,055,804 bytes) |
+| Now | The P5-76 change on that head (engine 3,048,959 bytes) |
+| "P5-60" column | `p572-run.sh` needs a second before-side. Here it is **a second copy of the before side** (same dist, same engine, same crate), timed separately in each round. The gap between the two shows the noise. |
+| now-mmvoff | The now dist and engine with `metamodelValidation: false` on every ModelManager the load ops build |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, timed in each round |
+| Driver | P5-72's `p572-run.sh` with an absolute OUT: a profiles phase, then a timed phase of three rounds covering TS 5.0.0, the four TS-API sides and the three crate sides, with the order reversed every other round. `P560_CRATE_FILTER` drops `new_resource/concerto-core-test-data` as before. |
+| Quiet gate | Before each of the 24 timed parts: 1-minute load < 2, 5-minute < 3, and no other bench, cargo or mocha process. All 24 parts passed. At their starts the 1-minute load was 0.00-1.91 and the 5-minute load 0.00-2.45 (`timed-loads.txt`). |
+| Noise | Each figure is the median over three rounds of each round's median. As in P5-22, P5-60 and P5-72, a ratio change under about 25% is noise. |
+
+## Target
+
+The target was `modelfile_new` at about 3-4x TS or better through the TS
+API, and at or below 1x TS crate-direct. **It is not met.** The table
+gives x TS, with the median of three rounds:
+
+| op | set | TS 5.0.0 | crate before | before repeat | **crate now** | API before | before repeat | **API now** | API now (mmv off) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| modelfile_new | core-test-data | 27.5 µs | 1.19 | 1.20 | **1.01** | 5.47 | 5.57 | **4.95** | 4.54 |
+| modelfile_new | conformance | 9.78 µs | 1.59 | 1.58 | **0.92** | 7.59 | 7.55 | **7.25** | 5.47 |
+| modelfile_new | synthetic-large | 733.5 µs | 1.95 | 2.04 | **1.92** | 5.39 | 5.87 | **4.48** | 4.02 |
+| add_model_file | core-test-data | 72.7 µs | 0.75 | 0.76 | **0.67** | 4.46 | 4.61 | **2.11** | 1.92 |
+| add_model_file | conformance | 27.4 µs | 0.81 | 0.81 | **0.56** | 6.92 | 7.78 | **3.62** | 2.96 |
+| add_model_file | synthetic-large | 2.42 ms | 1.00 | 0.98 | **0.96** | 4.09 | 4.34 | **3.84** | 3.73 |
+| add_cto_model | core-test-data | 473.1 µs | 0.11 | 0.12 | **0.10** | 2.55 | 2.71 | **2.60** | 2.41 |
+| add_cto_model | conformance | 169.4 µs | 0.13 | 0.13 | **0.09** | 2.87 | 3.12 | **3.07** | 2.98 |
+| add_cto_model | synthetic-large | 23.45 ms | 0.10 | 0.10 | **0.10** | 1.69 | 1.63 | **1.78** | 1.29 |
+| mm_new (control) | (system models) | 536.8 µs | - | - | - | 0.50 | 0.52 | **0.56** | 0.62 |
+| dcs_decorate (control) | core-test-data | 42.62 ms | 0.49 | 0.49 | **0.48** | 1.08 | 1.13 | **1.14** | - |
+| dcs_decorate (control) | conformance | 21.81 ms | 0.38 | 0.39 | **0.35** | 1.00 | 1.02 | **1.04** | - |
+| dcs_decorate (control) | synthetic-large | 67.23 ms | 0.55 | 0.53 | **0.56** | 1.15 | 1.12 | **1.11** | - |
+
+- **Crate-direct:** conformance is now below TS (1.59 → 0.92) and
+  core-test-data is at TS (1.19 → 1.01). synthetic-large is
+  unchanged (1.95 → 1.92), even though callgrind shows 12% fewer
+  instructions per load.
+- **TS API, `modelfile_new`:** only core-test-data reaches 3-4x, and only
+  with an edge (4.95x). conformance is 7.25x and synthetic-large is
+  4.48x. The medians moved 0.86-0.95x against before, which is inside the
+  noise. The now side's round 1 had a stall on both conformance
+  (126 µs; the other rounds were 59 and 71 µs) and synthetic-large
+  (10.4 ms; the other rounds were 3.1 and 3.3 ms). This is the same kind of
+  in-process GC stall that P5-73 saw, with all ops in one process.
+- **TS API, `add_model_file`** moved the most, to 0.47x and 0.47x of the
+  before side on core-test-data and conformance (4.61 → 2.11 and
+  7.78 → 3.62 x TS). Per round, the before side was 299-399 µs and
+  184-227 µs and the now side 152-317 µs and 81-146 µs, so the gain is
+  real even though the size is noisy. synthetic-large moved 0.89x.
+- **Controls:** `mm_new`, `dcs_decorate` and `add_cto_model` (whose cost
+  is the CTO parser) stay within noise.
+
+### Why `modelfile_new` misses through the TS API
+
+On conformance, TS 5.0.0 builds a ModelFile in 9.8 µs. The now side
+takes 70.9 µs, and the count run splits that as follows:
+
+- **Engine (WASM): 48.6 µs.** The native crate does the same work in
+  9.0 µs, so the WASM build runs this code about 5x slower than native.
+- **Boundary and TS: 30.4 µs.** This is the view build, GC and glue. It
+  is already 3.1x TS on its own.
+
+So even a free engine call would leave conformance at about 3x TS, and
+the current WASM-to-native ratio leaves it near 7x. Reaching 3-4x needs
+two things: less view-side work per ModelFile and a cheaper WASM run of
+the typed read. The view-side work is the WeakMap/WeakSet inserts, the
+FinalizationRegistry and the `defineProperty` calls, about 6-8% of the
+conformance profile. The cheaper WASM run might come from an allocator
+change, which needs a dependency decision. Neither was done here: the
+first is a risky change to the TS view lifecycle and the second is a new
+dependency, so both are follow-up candidates.
+
+synthetic-large is 80% engine time (2.82 ms against 1.41 ms native) and
+its crate-direct row is still 1.9x TS. That set's remaining native cost is
+the typed read of the large model's many declarations.
+
+## What was changed, and what each change bought
+
+These are native callgrind instruction counts (Ir) per load of each set,
+on the checked path.
+
+| set | before | now | change |
+|---|---:|---:|---:|
+| core-test-data | 7.94M | 6.36M | −20% |
+| conformance | 5.30M | 2.98M | −44% |
+| synthetic-large | 11.83M | 10.40M | −12% |
+
+| change | measured on | Ir before → after |
+|---|---|---|
+| `Location` read field by field from the Range (no `serde_json::Value`) | conformance | 4.55M → 3.05M |
+| decorators decoded once instead of decoding a cloned copy again, and kept as `Kept` (a cheap JSON tree with the Value's key order, repeated keys and numbers) | core-test-data | 7.49M → 6.53M |
+| node inside `WithDecorators` boxed | synthetic-large | 11.48M → 10.63M |
+| `identified` kept as `Kept` | synthetic-large | 10.63M → 10.06M |
+| scalar and map variants read in place, not from a cloned object; node inside `TypedDeclaration` boxed | all three | small |
+
+The WASM and TS side:
+
+- **concerto-wasm** has two new bindings, `stageModelFileCheckedUtf8` and
+  `stageModelFileWithHeaderUtf8`. They are additive. In the WASM profile,
+  the JS string crossing was 16% of synthetic-large.
+- **`views.ts`** encodes into one reused buffer with `encodeInto`.
+- **The staged header** is now serialized without a `Value`. It went from
+  11% to 3% of the conformance WASM profile.
+- **Equivalence:** `kept.rs` tests that `Location` and `Kept` give the same
+  results as the Value path for to_value, strict decode, decorator
+  processing and BC-19 shape verdicts. A concerto-wasm smoke check tests
+  that the Utf8 bindings give the same results and errors as the string
+  ones. The oracle replay shows 0 regressions with no baseline change.
+
+Dead ends:
+
+- A generic `Kept` for location gained less than the field-by-field
+  reader that replaced it.
+- A fresh `TextEncoder.encode` on each call raised the `add_model_file` GC
+  share from 25% to 40%. The reused buffer fixed that.
+- serde_json's `raw_value` feature was rejected because it changes how
+  `Value` parses a magic key.
+- A faster WASM allocator was not tried, because it is a new dependency.
+
 # P5-73: `new ModelManager()` with the system models' precomputed verdict (2026-10-01)
 
 Task P5-73 (accordproject/concerto-rust#414), follow-up 1 of P5-72
