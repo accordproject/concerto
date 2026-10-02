@@ -31,6 +31,7 @@ Requirements: python3 (standard library only), git, and `gh` signed in for the f
 | `LOG_BRANCH` | `origin/claude/tender-pascal-ocwf9q` | integration ref in both clones |
 | `LOG_TRANSCRIPT_EVENTS` | `<out>/raw/transcript_events.json` if present | optional curated transcript events |
 | `LOG_TRANSCRIPT_SESSIONS` | unset | optional directory of curated coordinator/local-matt session logs to copy in |
+| `LOG_TRANSCRIPT_TIMELINE` | unset | optional JSON list of curated transcript-derived page timeline rows (same shape as `timeline_extra` in `page/page_text.json`) |
 | `LOG_GH_WORKERS` | `cloud-main,cloud-2,cloud-3` | workers whose session logs are rebuilt from GitHub |
 
 ## Steps and outputs
@@ -76,7 +77,8 @@ GitHub URL, `repo@sha:path`, or `transcript:<session>:<line>`), and some have `m
 
 Transcripts are local to the machine that ran a session, so they are not an input of a
 clean rebuild. Without them, the transcript-dependent part (the curated
-`origin: "transcript"` events and the coordinator and local-matt session logs) is absent.
+`origin: "transcript"` events, the coordinator and local-matt session logs, and the
+page timeline rows sourced from those logs) is absent.
 To include it:
 
 1. Extract the text turns: `python3 migration/log/transcripts.py
@@ -86,8 +88,11 @@ To include it:
 2. Curate events from the turns into a JSON list (same shape as `events.json` entries,
    `source: "transcript:<session>:<line>"`; decisions only from the maintainer's own words),
    and curated per-day session logs as `<day>-<session>.md`.
-3. Build with `LOG_TRANSCRIPT_EVENTS=<events file>` and
-   `LOG_TRANSCRIPT_SESSIONS=<session dir>`.
+3. Curate any page timeline rows sourced from the session logs into a JSON list (same shape
+   as `timeline_extra` in `page/page_text.json`).
+4. Build with `LOG_TRANSCRIPT_EVENTS=<events file>`,
+   `LOG_TRANSCRIPT_SESSIONS=<session dir>` and, for the page,
+   `LOG_TRANSCRIPT_TIMELINE=<timeline rows file>`.
 
 Never commit transcripts or files derived from them here.
 
@@ -96,7 +101,8 @@ Never commit transcripts or files derived from them here.
 `page/template.html` is a template only: `gen_page.py` injects the built data at
 `/*__DATA__*/null`. The rendered page is not committed; publishing it to the Artifact is a
 coordinator step. `page/page_text.json` holds the page prose (lede, tiles, notes), which the
-coordinator updates with each publish.
+coordinator updates with each publish. Its `timeline_extra` rows cite only GitHub or git
+sources; rows sourced from transcripts or session logs go in `LOG_TRANSCRIPT_TIMELINE`.
 
 ## Checking a rebuild
 

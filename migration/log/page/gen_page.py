@@ -80,6 +80,12 @@ for e in evs:
         TL.append({'ts': e['ts'], 'k': 'plan', 'cat': e['metrics']['kind'], 'task': (e.get('task') or {}).get('id'), 'issue': (e.get('task') or {}).get('issue'), 's': e['summary'], 'u': u, 'src': None if u else e['source']})
 for x in extra.get('timeline_extra', []):
     TL.append(x)
+# Optional transcript-derived timeline rows (same shape as timeline_extra), never committed.
+tx_tl = os.environ.get('LOG_TRANSCRIPT_TIMELINE')
+if tx_tl:
+    TL.extend(json.load(open(tx_tl)))
+else:
+    print('LOG_TRANSCRIPT_TIMELINE unset: no transcript-derived timeline rows', file=sys.stderr)
 TL.sort(key=lambda x: x['ts'])
 data['timeline'] = TL
 data['text'] = extra
