@@ -116,6 +116,50 @@ function managerOf(models) {
     return mm;
 }
 
+// P5-96 (accordproject/concerto-rust#446): P5-89's
+// `ModelManager.validateInstance` / `validateInstanceOrThrow`, over the
+// plain JSON documents of the same instances as `validate` (what fromJSON
+// reads). Every document of the fixtures is valid; setup checks that. A dist
+// without the method is timed on TS 5.0.0's path for the same check,
+// `Serializer.fromJSON` and then `validate()` on the resource, but only when
+// it is the TS reference (no engine views): an earlier Rust-engine head
+// without the API has no row.
+const isEngineDist = fs.existsSync(viewsPath);
+/**
+ * The op for one of P5-89's instance checks.
+ * @param {string} method 'validateInstance' or 'validateInstanceOrThrow'
+ * @return {object} the op: family, setup, n and run
+ */
+function instanceCheck(method) {
+    return {
+        family: 'instance',
+        setup: (d) => {
+            const mm = managerOf(d.models);
+            const items = d.instances.map((i) => i.json);
+            if (typeof mm[method] === 'function') {
+                for (const json of items) {
+                    const r = mm[method](json);
+                    if (method === 'validateInstance' && !r.valid) {
+                        throw new Error(`${json.$class}: ${JSON.stringify(r.errors).slice(0, 200)}`);
+                    }
+                }
+                return { items, check: (json) => mm[method](json) };
+            }
+            if (isEngineDist) {
+                throw new Error(`ModelManager.${method} is not in this dist`);
+            }
+            const serializer = new Serializer(new Factory(mm), mm);
+            return { items, check: (json) => serializer.fromJSON(json).validate() };
+        },
+        n: (c) => c.items.length,
+        run: (c) => {
+            for (const json of c.items) {
+                c.check(json);
+            }
+        },
+    };
+}
+
 // Each op: setup(data) -> ctx, then run(ctx) does `n(ctx)` items.
 const OPS = {
     // ---- Model load ------------------------------------------------------
@@ -267,6 +311,8 @@ const OPS = {
             }
         },
     },
+    validate_instance: instanceCheck('validateInstance'),
+    validate_instance_or_throw: instanceCheck('validateInstanceOrThrow'),
     // ---- DecoratorManager ---------------------------------------------------
     dcs_decorate: {
         family: 'decorator',
