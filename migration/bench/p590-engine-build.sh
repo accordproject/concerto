@@ -8,6 +8,9 @@
 # named:   function names kept (wasm-bindgen --keep-debug, wasm-opt -O3 -g),
 #          so a V8 CPU profile shows the Rust frames (as P5-48/P5-76).
 # shipped: exactly build.sh's optimisation (wasm-opt -O3, names stripped).
+# The throwaway talc tree (never merged, no branch) is concerto-rust at
+# bfa4a55 with migration/bench/results/P5-90/talc-allocator.patch applied
+# (git apply); build it here like any other tree.
 # Environment: CARGO_TARGET_DIR (required: one per tree and kind),
 # WASM_OPT (default: the tree's concerto-wasm/node_modules/.bin/wasm-opt).
 set -eu

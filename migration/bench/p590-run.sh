@@ -12,7 +12,14 @@
 #   NAMED_ENGINE      concerto-engine.cjs of a named build of the same tree
 #                     (p590-engine-build.sh ... named), for the profiles
 #   TALC_ENGINE       concerto-engine.cjs of the throwaway talc build
-#                     (shipped optimisation), for the typed-read timing
+#                     (shipped optimisation), for the typed-read timing.
+#                     The talc tree is never merged and has no branch: it is
+#                     concerto-rust at bfa4a55 plus
+#                     migration/bench/results/P5-90/talc-allocator.patch:
+#                       git -C <concerto-rust> worktree add <talc-src> bfa4a55
+#                       git -C <talc-src> apply \
+#                         "$PWD/migration/bench/results/P5-90/talc-allocator.patch"
+#                     then p590-engine-build.sh <talc-src> <out> shipped|named
 #   TALC_NAMED_ENGINE the same, named, for its profile
 #   SHIPPED_ENGINE    the shipped engine's concerto-engine.cjs (default: the
 #                     sibling concerto-rust checkout's concerto-wasm/pkg)
