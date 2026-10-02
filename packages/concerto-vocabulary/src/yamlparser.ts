@@ -73,6 +73,10 @@ function validatePropertyEntries(seq: YAML.YAMLSeq, declIndex: number, errors: V
             return;
         }
         const propPairs = (item as YAML.YAMLMap).items as YAML.Pair[];
+        if (propPairs.length === 0) {
+            errors.push({ path, message: `${path} must not be an empty mapping` });
+            return;
+        }
         for (const pair of propPairs) {
             const key = YAML.isScalar(pair.key) ? (pair.key as YAML.Scalar).value as string : null;
             if (!key) continue;
@@ -93,6 +97,10 @@ function validateDeclarationEntries(seq: YAML.YAMLSeq, errors: VocabularyValidat
             return;
         }
         const declPairs = (item as YAML.YAMLMap).items as YAML.Pair[];
+        if (declPairs.length === 0) {
+            errors.push({ path: `declarations[${i}]`, message: `declarations[${i}] must not be an empty mapping` });
+            return;
+        }
         const primaryPair = declPairs[0];
         if (primaryPair) {
             const key = YAML.isScalar(primaryPair.key) ? (primaryPair.key as YAML.Scalar).value as string : null;

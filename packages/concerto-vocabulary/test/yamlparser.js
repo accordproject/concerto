@@ -286,6 +286,12 @@ describe('validateVocabularyYaml', () => {
             errors.some(e => e.path === 'declarations[0]').should.be.true;
         });
 
+        it('reports an error when a declaration entry is an empty mapping', () => {
+            const yaml = loadFixture(INVALID, 'declaration_entry_empty_mapping.voc');
+            const { errors } = validateVocabularyYaml(yaml);
+            errors.some(e => e.path === 'declarations[0]').should.be.true;
+        });
+
         it('accepts declaration entries that are mappings', () => {
             const yaml = loadFixture(VALID, 'org.acme@1.0.0_en.voc');
             const { errors } = validateVocabularyYaml(yaml);
@@ -412,6 +418,12 @@ describe('validateVocabularyYaml', () => {
 
         it('reports an error when a property entry is a sequence', () => {
             const yaml = loadFixture(INVALID, 'property_entry_sequence.voc');
+            const { errors } = validateVocabularyYaml(yaml);
+            errors.some(e => e.path === 'declarations[0].properties[0]').should.be.true;
+        });
+
+        it('reports an error when a property entry is an empty mapping', () => {
+            const yaml = loadFixture(INVALID, 'property_entry_empty_mapping.voc');
             const { errors } = validateVocabularyYaml(yaml);
             errors.some(e => e.path === 'declarations[0].properties[0]').should.be.true;
         });
