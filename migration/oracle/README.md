@@ -612,9 +612,11 @@ so those three files have a different branch map in `src/` (1,860 branches in al
 reference's 1,835). `coverage.sh` compares branches by id, so in those three files its cross-check reports
 58 layout mismatches and 18 hit disagreements, and a unit suite run over `src/` cannot be compared with
 the reference branch by branch (it reported one spurious "unexplained" gap,
-`scalardeclaration.ts:134:12[0]`). The test files are unchanged since v5.0.0. So the unit-suite figures
+`scalardeclaration.ts:134:12[0]`). So the unit-suite figures
 below, and the `covered_by_suite` marks in `coverage-gaps.json`, come from the same suite command run over
-a copy of `packages/concerto-core` whose `src/` is `git archive v5.0.0 packages/concerto-core/src`
+a copy of `packages/concerto-core` whose `src/` and `test/` are `git archive v5.0.0
+packages/concerto-core/{src,test}` (since P5-86, #432: the workspace `test/` now carries R1's approved test
+changes, which assert R1 behaviour and fail against v5.0.0 `src/`, so the suite leg runs the v5.0.0 suite)
 (`TZ=UTC`, `nyc … mocha -r ts-node/register --recursive -t 10000 test/`), passed to `coverage-gaps.js` as
 `--suite`/`--suite-summary`. That run gives exactly the P2-11 suite figures: 1300 passing, branches 95.80%
 (1758/1835).
