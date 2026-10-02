@@ -8,7 +8,7 @@ repository. How to upgrade is covered in the [R1 migration guide](./MIGRATION-GU
 **Status: draft for maintainer review.** Written from
 `migration/BREAKING-CHANGES-PLAN.md` (the one-major-release update, section 3
 R1 and section 4), concerto-rust `DIVERGENCES.md` and the merged task records,
-at concerto `09295b075` and concerto-rust `fa4ee0b` (2026-09-30). The
+at concerto `574faa716` and concerto-rust `bfa4a55` (2026-10-02). The
 `BC-nn` IDs refer to rows in `migration/BREAKING-CHANGES-PLAN.md`.
 
 ## What's new
@@ -18,12 +18,14 @@ at concerto `09295b075` and concerto-rust `fa4ee0b` (2026-09-30). The
   in the Concerto Rust engine (`concerto-core` crate), shipped to JavaScript
   as a WebAssembly module. The TypeScript API is the same one 5.x has: same
   classes, same exports, same type declarations, apart from the removals listed
-  below, and a few return types: `ModelUtil.getShortName`,
-  `getFullyQualifiedName`, `capitalizeFirstLetter` and
-  `removeNamespaceVersionFromFullyQualifiedName` return `string` where 5.x
-  declared `any`, the `yamlToJson` result has `$class: string`, and
-  `ModelUtil.parseNamespace` returns one object type in place of 5.x's union,
-  with `versionParsed` typed `unknown`.
+  below, and a few return types, all narrowed when P5-02 regenerated the type
+  declarations: `ModelUtil.getShortName` (BC-37),
+  `getFullyQualifiedName` (BC-37), `capitalizeFirstLetter` (BC-37) and
+  `removeNamespaceVersionFromFullyQualifiedName` (BC-37) return `string` where
+  5.x declared `any`, both `yamlToJson` declarations (the decorator command set
+  YAML converter's and `DecoratorManager.yamlToJson`) return `$class: string`
+  (BC-37), and `ModelUtil.parseNamespace` returns one object type in place of
+  5.x's union, with `versionParsed` typed `unknown` (BC-37).
 - **Clearer errors.** Several inputs that crashed the JavaScript runtime in 5.x
   (`TypeError`, `RangeError`, out of memory) now throw an error that names the
   problem: `IllegalModelException` (BC-11, BC-12, BC-15, BC-16),
@@ -38,8 +40,7 @@ at concerto `09295b075` and concerto-rust `fa4ee0b` (2026-09-30). The
 ### Performance
 
 Figures are ratios to `@accordproject/concerto-core` 5.0.0 on the same machine
-in the same run, as recorded in `migration/bench/RESULTS.md`, or for P5-60 in
-its report on accordproject/concerto-rust#392 (not yet in `RESULTS.md`).
+in the same run, as recorded in `migration/bench/RESULTS.md`.
 Below 1× is faster than 5.0.0; above 1× is slower. Timings on a shared machine move by up to about
 ±25-35% between rounds, so treat small differences as noise.
 
@@ -50,9 +51,9 @@ Below 1× is faster than 5.0.0; above 1× is slower. Timings on a shared machine
 | `DecoratorManager.validate` | 0.66-0.80× | P5-27 |
 | `DecoratorManager.decorateModels` | 0.80-1.45× | P5-27 |
 | Repeated `getNamespaces`, `getType`, `resolveType` | 0.11-2.46× | P5-29 |
-| First `getNamespaces`, `getType`, `resolveType` call after a model change | 2.6-17.9× (P5-29); `getNamespaces` 20.5-28.2× in P5-60, 3-26 µs once per change | P5-29, P5-60 |
+| First `getNamespaces`, `getType`, `resolveType` call after a model change | `getType` 2.3-2.9×, `resolveType` 2.0-3.3×, `getNamespaces` 9.6-14.0× (2-14 µs once per change) | P5-72 |
 | `Factory.newResource` | 2.5-4.1× | P5-22 |
-| `DecoratorManager.extractDecorators` / `extractVocabularies` | `extractDecorators` 3.5-6.6×, `extractVocabularies` 5.3-9.2×; the first call after a model change 5.2-6.2× | P5-60 (cloud container, Intel Xeon @ 2.10GHz, 4 vCPU) |
+| `DecoratorManager.extractDecorators` / `extractVocabularies` | `extractDecorators` 2.1-3.0×, `extractVocabularies` 3.3-4.0×; the first call after a model change 3.4-3.6× | P5-72 (cloud container, Intel Xeon @ 2.10GHz, 4 vCPU) |
 | `new ModelFile` | 4.9-8.1× | P5-48 |
 | `ModelManager.addModelFile` | 2.9-7.5× | P5-48 |
 | `ModelManager.addCTOModel` (the CTO parser is unchanged JavaScript) | 1.7-4.0× | P5-48 |
@@ -61,13 +62,23 @@ Below 1× is faster than 5.0.0; above 1× is slower. Timings on a shared machine
   Rust crate itself, `addModelFile` is at or near 5.0.0's speed (0.81-1.09×,
   P5-48). Most of the remaining cost is crossing into WebAssembly and
   allocating there.
-- The strict AST check (BC-19) adds one engine call per model file loaded
-  (P5-49).
-- The optimised engine module is 2,833,833 bytes (P5-61). An earlier build of
-  about 3.0 MB compressed to about 947 KB with gzip and 613 KB with brotli
-  (P5-48).
-- _Placeholder: the consolidated R1 re-measure (P5-60, accordproject/concerto-rust#392)
-  is added here when its numbers land in `RESULTS.md`._
+- The strict AST check (BC-19) runs inside the engine's one load of the AST
+  (P5-69), so it adds no engine call. With the check on, `new ModelFile` costs
+  1.11-1.25× what it costs with `metamodelValidation: false`; on
+  `addModelFile` and `addCTOModel` the difference is within noise (P5-72).
+- The optimised engine module is about 2.93-3.05 MB: 3,052,059 bytes in P5-72
+  (973 KB with gzip, 626 KB with brotli), 3,048,959 bytes after P5-76, and
+  2,931,108 bytes in the P5-82 gate build (P5-72 and P5-76 in `RESULTS.md`,
+  merged at concerto `d1ab2619a` and later).
+- The consolidated R1 re-measure (P5-72, accordproject/concerto-rust#413,
+  which repeats P5-60's sweep after BC-19's load-cost fixes): through the
+  JavaScript API, 19 of 73 operation and model-set rows are at or below
+  5.0.0. The geometric mean against 5.0.0 is 3.68× for model loading, 1.48×
+  for introspection including decorator command sets, 1.84× for
+  serialisation, 1.68× for instance creation and 2.05× for validation. Called
+  directly, the Rust crate is at 0.33×, 0.31×, 0.53×, 0.35× and 0.57× for the
+  same categories. P5-72 also measured `new ModelManager()` at 1.26×; P5-73
+  then cut its time to 0.62× of the P5-72 head's.
 
 ## Breaking changes
 
@@ -81,7 +92,7 @@ reason, who is affected and the upgrade step for each one.
   supported. (BC-31)
 - **Browsers need a bundler, or a host that supplies a synchronous `require`,
   to load the engine.** The browser ESM build does not load the engine module
-  by itself, and the engine adds about 2.8 MB before compression. The async
+  by itself, and the engine adds about 2.93-3.05 MB before compression. The async
   `init()` entry and the size reductions are pending a maintainer decision
   (P5-39) and are not in R1 as written. (BC-32)
 - **The `./dist/*` export of `@accordproject/concerto-core` is removed.**
@@ -129,12 +140,16 @@ reason, who is affected and the upgrade step for each one.
 
 ### Model loading from an AST
 
-- **Every AST is checked against the Concerto metamodel when its `ModelFile` is
-  built.** A malformed AST is an `IllegalModelException`. This covers a
+- **Every AST you supply is checked against the Concerto metamodel when its
+  `ModelFile` is built.** A malformed AST is an `IllegalModelException`. This covers a
   `decorators` value that is not an array, non-string names and empty super
   type names, and nodes that used to crash with a `TypeError`. Turn the check
   off with `metamodelValidation: false`, an escape hatch for trusted input
-  only. (BC-19, with BC-17, BC-18 and BC-20)
+  only. ASTs of trusted origin skip the check: the result ASTs the engine
+  writes for `DecoratorManager.decorateModels` from models that all passed it
+  (P5-68), and the two fixed system models, which take a verdict the engine
+  computed once for their exact text (P5-73). (BC-19, with BC-17, BC-18 and
+  BC-20)
 
 ### Regular expressions
 
@@ -182,7 +197,7 @@ error is now thrown.
 | A relationship property with no `type` in an AST | `TypeError` | `IllegalModelException` | BC-15 |
 | A `null` element in a `decorators` array | `TypeError` | `IllegalModelException` | BC-16 |
 | A non-`Identifiable` or `null` value in a relationship or concept array, when validated | `TypeError` | `ValidationException` | BC-06 |
-| An element `fromJSON`/`toJSON` cannot read or write (an enum value as a property, say) | `TypeError` (circular JSON) | `Error` naming the element | BC-08 |
+| An element `fromJSON`/`toJSON` cannot read or write (an enum value as a property, say), or `Factory.newResource` with `generate` for a type it cannot generate (an enum type, say) | `TypeError` (circular JSON) | `Error` naming the element | BC-08 |
 | Circular inheritance (`A extends C`, `B extends A`, `C extends B`) | `RangeError`, or out of memory | `IllegalModelException` naming the cycle | BC-11 |
 | A map whose value type is not declared | `TypeError` | `IllegalModelException` | BC-12 |
 | A decorator validation error under `decoratorValidation` | `IllegalModelException` naming the file twice | the same class, naming the file once | BC-14 |
@@ -199,7 +214,7 @@ error is now thrown.
 
 | Option | Where | R1 behaviour |
 |---|---|---|
-| `metamodelValidation` | `new ModelManager(options)` | On unless set to `false`: every AST is checked against the metamodel when its `ModelFile` is built (BC-19). `true` also runs `validateAst` in `addModelFile`, as before. `false` is an escape hatch for trusted input only (see the migration guide). |
+| `metamodelValidation` | `new ModelManager(options)` | On unless set to `false`: every AST you supply is checked against the metamodel when its `ModelFile` is built; engine-written `decorateModels` results and the fixed system models skip it by trusted origin (BC-19). `true` also runs `validateAst` in `addModelFile`, as before. `false` is an escape hatch for trusted input only (see the migration guide). |
 | `strictQualifiedDateTimes` | `Serializer.fromJSON` options | Only strict `DateTime` values are accepted whatever it says. `false` is ignored, with one warning per process (`concerto-strict-datetime`). `true` still stops `utcOffset` from being applied. (BC-07) |
 | `acceptResourcesForRelationships` | `Serializer.fromJSON` options | Unchanged for relationship properties. It now also lets a relationship-typed map value be an embedded object. (BC-05) |
 | `permitResourcesForRelationships` | `Serializer.toJSON` and validation options | Unchanged for relationship properties. It now also permits embedded objects as relationship-typed map values. (BC-05) |
@@ -224,5 +239,17 @@ release:
 - BC-44: the `utcOffset` units. The option behaves as in 5.x.
 - BC-49: deprecating the per-declaration `validate()` methods.
 - The P5-39 decisions (accordproject/concerto-rust#349): the browser async
-  `init()` and the engine size reductions. Until those are decided, BC-32
-  ships as described above.
+  `init()` and the engine size reductions, and the follow-ups that wait on
+  them: P5-44 (#365, the size wins), P5-45 (#366, async init), P5-46 (#367,
+  unreferenced engine exports) and P5-47 (#368, the CTO parser out of
+  AST-only entry points). Until those are decided, BC-32 ships as described
+  above.
+- The Concertino spike, P5-78 (accordproject/concerto-rust#420): whether
+  Concertino becomes the R1 web story for introspection, validation and
+  plain-JSON serialisation. Its decisions are open, so the browser story also
+  waits on #420, and any BC rows it would add are not in R1.
+- The P5-80 spike (accordproject/concerto-rust#424): a cached
+  per-generation validation plan for instance validation and serialisation.
+  Analysis only.
+- The P5-81 spike (accordproject/concerto-rust#425): a table-driven
+  typed-AST decoder to reduce the engine size. Analysis only.
