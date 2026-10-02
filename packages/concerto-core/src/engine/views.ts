@@ -923,6 +923,16 @@ interface FileState {
      * own, so each `addModelFile` inserted one more weak entry.
      */
     committed: object | undefined;
+    /**
+     * P5-94 (accordproject/concerto-rust#444): set from the ModelFile
+     * constructor's `initDeclarationFields` until the file is either
+     * deferred (`defineLazyFields`) or built eagerly
+     * (`settleDeclarationFields`), with the values its `declarations` and
+     * `localTypes` accessors read and write meanwhile.
+     */
+    early: true | undefined;
+    earlyDeclarations: any;
+    earlyLocalTypes: any;
 }
 
 const fileStates = new WeakMap<object, FileState>();
@@ -951,6 +961,9 @@ function fileState(modelFile: object): FileState {
             deferred: undefined,
             prestageHeader: undefined,
             committed: undefined,
+            early: undefined,
+            earlyDeclarations: undefined,
+            earlyLocalTypes: undefined,
         };
         fileStates.set(modelFile, state);
     }
@@ -1070,7 +1083,22 @@ const stageFinalizer: { register(target: object, held: Stage, token: object): vo
  * the verdict, not another load: `new ModelManager()` builds the metamodel's
  * ModelFile from the same constant AST every time.
  */
-const acceptedUnmirrored = new WeakMap<object, { key: string; header: StagedHeader | null; checked: boolean }>();
+const acceptedUnmirrored = new WeakMap<object, AcceptedUnmirrored>();
+
+/**
+ * An `acceptedUnmirrored` verdict: the text, definitions and file name Rust
+ * loaded (P5-94: compared field by field, where they used to be compared as
+ * one `JSON.stringify([text, definitions, fileName])` key, a string as long
+ * as the text built for every lookup), the header it read, and whether the
+ * load ran the shape check.
+ */
+interface AcceptedUnmirrored {
+    text: string;
+    definitions: string | undefined;
+    fileName: string | undefined;
+    header: StagedHeader | null;
+    checked: boolean;
+}
 
 /**
  * P5-28 (accordproject/concerto-rust#333): the header of a ModelFile's AST
@@ -1080,13 +1108,39 @@ const acceptedUnmirrored = new WeakMap<object, { key: string; header: StagedHead
  * whether the file is a system model file, and the `importShortNames.set`
  * and `importUriMap` assignments in order.
  */
-interface StagedHeader {
+interface ObjectHeader {
     namespace: string;
     version: string | null;
     system: boolean;
     shortNames: Array<[string, string]>;
     uriMap: Array<[string, string]>;
 }
+
+/**
+ * P5-94 (accordproject/concerto-rust#444): the same header in the flat
+ * layout the engine's `...CompactFlat` staging bindings return (concerto-wasm
+ * `flat_staged_text`), kept as the parsed array itself: `[id, namespace,
+ * version, system, n, key_1, name_1, ..., key_n, name_n, uriKey_1, uri_1,
+ * ...]`, where the `n` pairs are the `shortNames` without the implicit
+ * system import's five (`IMPLICIT_SHORT_NAMES`), which every non-system
+ * header ends with, and the pairs after them are the `uriMap`. One array
+ * per file, where the object layout parsed into two objects and an array
+ * per short name.
+ */
+type FlatHeader = any[];
+
+/**
+ * A staged header, in either layout.
+ */
+type StagedHeader = ObjectHeader | FlatHeader;
+
+/**
+ * P5-94: the implicit system import's short names and fully-qualified
+ * names, in the order every non-system header ends with them (concerto-wasm
+ * `IMPLICIT_IMPORT_SHORT_NAMES`), for a `FlatHeader`.
+ */
+const IMPLICIT_SHORT_NAMES = ['Concept', 'Asset', 'Transaction', 'Participant', 'Event'];
+const IMPLICIT_NAMES = IMPLICIT_SHORT_NAMES.map((name) => `concerto@1.0.0.${name}`);
 
 /**
  * P5-28: the staged header of each lazily built ModelFile, from
@@ -1312,13 +1366,107 @@ function checkAstShape(modelFile: any): CheckedAst | undefined {
             return { bytes, generation: encodeAstGeneration(), text: undefined };
         }
     }
-    const text = JSON.stringify(ast);
+    // P5-94: the text of a fixed system model's AST, or of an AST of a
+    // namespace whose check is remembered, is remembered with its compact
+    // bytes (`stableAstText`), so the same AST is not stringified again.
+    const text = systemModelAsts.has(ast) || shapeMemoised(manager, ast.namespace) ? stableAstText(ast) : JSON.stringify(ast);
     const namespace = ast.namespace;
     if (shapeMemoised(manager, namespace) && shapeCheckedUnmirrored.get(namespace) === text) {
         shapeChecked.set(modelFile, ast);
         return text;
     }
     shapePending.add(modelFile);
+    return text;
+}
+
+/**
+ * P5-94 (accordproject/concerto-rust#444): an AST's JSON text, remembered
+ * with the AST's compact bytes (`encodeAst`) when the text was computed,
+ * and, for a fixed system model, the engine's header for that text
+ * (`systemModelVerdict`) and its parse.
+ */
+interface KnownText {
+    text: string;
+    bytes: Uint8Array;
+    header: string | undefined;
+    parsedHeader: StagedHeader | null | undefined;
+}
+
+/**
+ * P5-94: the remembered text (`KnownText`) of each AST of a namespace the
+ * manager never writes (the metamodel copy every `new ModelManager()`
+ * builds from the same constant AST object), by AST object.
+ */
+const knownTextsByAst = new WeakMap<object, KnownText>();
+
+/**
+ * P5-94: the remembered text of the fixed system models' ASTs
+ * (`systemModelAsts`), by namespace: each manager builds them from fresh
+ * AST objects.
+ */
+const knownSystemTexts = new Map<string, KnownText>();
+
+/**
+ * P5-94: whether two byte arrays are equal.
+ * @param {Uint8Array} a the first
+ * @param {Uint8Array} b the second
+ * @return {boolean} true if they have the same bytes
+ */
+function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
+    const n = a.length;
+    if (n !== b.length) {
+        return false;
+    }
+    for (let i = 0; i < n; i++) {
+        if (a[i] !== b[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * P5-94 (accordproject/concerto-rust#444): `JSON.stringify(ast)` for a
+ * fixed system model's AST (`systemModelAsts`, remembered by namespace) or
+ * an AST of a namespace the manager never writes (remembered by object),
+ * without the new string (about two thirds of a `new ModelManager()`'s
+ * JS allocation, with the memo key built from it) when the AST still has
+ * the compact bytes (`encodeAst`) it had when its text was remembered.
+ * The bytes describe exactly the document `JSON.parse(JSON.stringify(ast))`
+ * is (ast-codec.ts), so equal bytes mean the same text. An AST `encodeAst`
+ * leaves to the text path is stringified every time, as before.
+ * @param {object} ast the AST
+ * @return {string} its JSON text
+ */
+function stableAstText(ast: any): string {
+    const system = systemModelAsts.has(ast);
+    const namespace = system ? ast.namespace : undefined;
+    if (system && typeof namespace !== 'string') {
+        return JSON.stringify(ast);
+    }
+    const known = system ? knownSystemTexts.get(namespace) : knownTextsByAst.get(ast);
+    if (known !== undefined) {
+        const bytes = encodeAst(ast);
+        if (bytes !== undefined && sameBytes(bytes, known.bytes)) {
+            return known.text;
+        }
+    }
+    const text = JSON.stringify(ast);
+    const bytes = encodeAst(ast);
+    if (bytes === undefined) {
+        if (system) {
+            knownSystemTexts.delete(namespace);
+        } else {
+            knownTextsByAst.delete(ast);
+        }
+        return text;
+    }
+    const entry: KnownText = { text, bytes: bytes.slice(), header: undefined, parsedHeader: undefined };
+    if (system) {
+        knownSystemTexts.set(namespace, entry);
+    } else {
+        knownTextsByAst.set(ast, entry);
+    }
     return text;
 }
 
@@ -1432,9 +1580,25 @@ function systemModelVerdict(modelFile: any, handle: any, checkedText?: string): 
     if (!systemModelAsts.has(ast) || typeof handle.systemModelFileHeader !== 'function') {
         return undefined;
     }
-    const header = handle.systemModelFileHeader(checkedText ?? JSON.stringify(ast));
-    if (typeof header !== 'string') {
-        return undefined;
+    // P5-94: the engine's header for a text it gave one for is remembered
+    // with that text (`knownSystemTexts`): the verdict is a fixed function
+    // of the text (the engine's own constant system models), so the same
+    // text is not sent again.
+    const text = checkedText ?? stableAstText(ast);
+    const namespace = ast.namespace;
+    const known = typeof namespace === 'string' ? knownSystemTexts.get(namespace) : undefined;
+    let header: string;
+    if (known !== undefined && known.text === text && known.header !== undefined) {
+        header = known.header;
+    } else {
+        const answer = handle.systemModelFileHeader(text);
+        if (typeof answer !== 'string') {
+            return undefined;
+        }
+        header = answer;
+        if (known !== undefined && known.text === text) {
+            known.header = header;
+        }
     }
     if (shapePending.has(modelFile)) {
         shapePending.delete(modelFile);
@@ -1481,6 +1645,12 @@ function stageModelFile(modelFile: any, checkedText?: CheckedAst): boolean {
 }
 
 /**
+ * P5-94: the parse of each header text `systemModelVerdict` returned (the
+ * engine gives one only for its few fixed system model texts).
+ */
+const parsedSystemHeaders = new Map<string, StagedHeader | null>();
+
+/**
  * P5-73 (accordproject/concerto-rust#414): `stageModelFile` for a fixed
  * system model's ModelFile (`systemModelAsts`) whose text the engine gives
  * its precomputed verdict for (`systemModelVerdict`): it is neither loaded
@@ -1508,7 +1678,13 @@ function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | u
     if (Array.isArray(factories) && factories.length > 0) {
         return false;
     }
-    const header = JSON.parse(systemHeader) as StagedHeader | null;
+    // P5-94: the parse of each system header text, shared: the header is
+    // only read (`applyStagedFileHeader`), never changed.
+    let header = parsedSystemHeaders.get(systemHeader);
+    if (header === undefined) {
+        header = JSON.parse(systemHeader) as StagedHeader | null;
+        parsedSystemHeaders.set(systemHeader, header);
+    }
     const state = fileState(modelFile);
     if (header !== null) {
         state.stagedHeader = header;
@@ -1647,9 +1823,9 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             compact = undefined;
             text = checkedText === undefined ? JSON.stringify(ast) : astText(ast, checkedText);
         }
-        const key = unmirrored ? JSON.stringify([text, definitions ?? null, fileName ?? null]) : null;
-        const accepted = key !== null ? acceptedUnmirrored.get(ast) : undefined;
-        if (accepted !== undefined && accepted.key === key) {
+        const accepted = unmirrored ? acceptedUnmirrored.get(ast) : undefined;
+        if (accepted !== undefined && accepted.text === text && accepted.definitions === definitions &&
+            accepted.fileName === fileName) {
             // P5-69: a verdict from a load without the check does not
             // vouch for the shape.
             if (accepted.checked) {
@@ -1677,11 +1853,20 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             // P5-92: the shape check (when pending) and the load, from the
             // compact layout, with the verdict and the error of the text
             // (`ModelFile::from_compact_checked_with_imports`).
-            const staged = JSON.parse(checked
-                ? handle.stageModelFileCheckedCompact(compact, definitions, fileName)
-                : handle.stageModelFileWithHeaderCompact(compact, definitions, fileName));
-            id = staged.id;
-            header = staged.header;
+            // P5-94: in the flat layout (`FlatHeader`) where the engine
+            // has those bindings.
+            const flatBinding = checked ? 'stageModelFileCheckedCompactFlat' : 'stageModelFileWithHeaderCompactFlat';
+            if (typeof handle[flatBinding] === 'function') {
+                const staged = JSON.parse(handle[flatBinding](compact, definitions, fileName));
+                id = staged[0];
+                header = staged.length > 1 ? staged : null;
+            } else {
+                const staged = JSON.parse(checked
+                    ? handle.stageModelFileCheckedCompact(compact, definitions, fileName)
+                    : handle.stageModelFileWithHeaderCompact(compact, definitions, fileName));
+                id = staged.id;
+                header = staged.header;
+            }
             shapeCheckPassed(modelFile, undefined, state);
         } else if (checked && typeof handle.stageModelFileChecked === 'function') {
             // P5-69 (BC-19-b): the shape check and the load, from one
@@ -1704,11 +1889,11 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             completeShapeCheck(modelFile, handle, jsonText, state);
             id = handle.stageModelFile(jsonText, definitions, fileName);
         }
-        if (key !== null) {
+        if (unmirrored) {
             // Never committed: keep the verdict (and the header), not the
             // loaded file.
             handle.dropStagedModelFile(id);
-            acceptedUnmirrored.set(ast, { key, header, checked });
+            acceptedUnmirrored.set(ast, { text: jsonText, definitions, fileName, header, checked });
         } else {
             const stage = { handle, id };
             state.stage = stage;
@@ -1774,7 +1959,9 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
         return false;
     }
     state!.stagedHeader = undefined;
-    if (ast !== modelFile.ast || ast.namespace !== header.namespace) {
+    // P5-94: a header in the flat layout (`FlatHeader`).
+    const flat = Array.isArray(header);
+    if (ast !== modelFile.ast || ast.namespace !== (flat ? header[1] : header.namespace)) {
         return false;
     }
     const astImports = ast.imports;
@@ -1782,9 +1969,10 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
         return false;
     }
     modelFile.namespace = ast.namespace;
-    modelFile.version = header.version;
+    modelFile.version = flat ? header[2] : header.version;
+    const system: boolean = flat ? header[3] : header.system;
     const imports = astImports ? astImports.concat([]) : [];
-    if (!header.system) {
+    if (!system) {
         imports.push({
             $class: 'concerto.metamodel@1.0.0.ImportTypes',
             namespace: 'concerto@1.0.0',
@@ -1792,15 +1980,42 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
         });
     }
     modelFile.imports = imports;
+    // P5-94: indexed loops, so no iterator or destructuring garbage per
+    // entry; the same `set`s and assignments, in the same order.
     const shortNames = modelFile.importShortNames;
-    const names: string[] = [];
-    for (const [key, fqn] of header.shortNames) {
-        shortNames.set(key, fqn);
-        names.push(fqn);
-    }
     const uriMap = modelFile.importUriMap;
-    for (const [key, uri] of header.uriMap) {
-        uriMap[key] = uri;
+    let names: string[];
+    if (flat) {
+        const n: number = header[4];
+        const implicit = system ? 0 : IMPLICIT_NAMES.length;
+        names = new Array(n + implicit);
+        let at = 5;
+        for (let i = 0; i < n; i++, at += 2) {
+            const fqn = header[at + 1];
+            shortNames.set(header[at], fqn);
+            names[i] = fqn;
+        }
+        for (let i = 0; i < implicit; i++) {
+            shortNames.set(IMPLICIT_SHORT_NAMES[i], IMPLICIT_NAMES[i]);
+            names[n + i] = IMPLICIT_NAMES[i];
+        }
+        for (; at < header.length; at += 2) {
+            uriMap[header[at]] = header[at + 1];
+        }
+    } else {
+        const headerNames = header.shortNames;
+        names = new Array(headerNames.length);
+        for (let i = 0; i < headerNames.length; i++) {
+            const entry = headerNames[i];
+            const fqn = entry[1];
+            shortNames.set(entry[0], fqn);
+            names[i] = fqn;
+        }
+        const headerUris = header.uriMap;
+        for (let i = 0; i < headerUris.length; i++) {
+            const entry = headerUris[i];
+            uriMap[entry[0]] = entry[1];
+        }
     }
     recordImportNames(modelFile, names, state);
     if (lazyViewsCheck) {
@@ -1914,11 +2129,25 @@ for (const key of ['declarations', 'localTypes']) {
         enumerable: true,
         get(this: any) {
             const modelFile = lazyFieldOwner(this, key, descriptor.get);
+            // P5-94: a file still being constructed (`initDeclarationFields`).
+            const state = fileStates.get(modelFile);
+            if (state !== undefined && state.early) {
+                return key === 'declarations' ? state.earlyDeclarations : state.earlyLocalTypes;
+            }
             materialise(modelFile);
             return modelFile[key];
         },
         set(this: any, value: any) {
             const modelFile = lazyFieldOwner(this, key, descriptor.set);
+            const state = fileStates.get(modelFile);
+            if (state !== undefined && state.early) {
+                if (key === 'declarations') {
+                    state.earlyDeclarations = value;
+                } else {
+                    state.earlyLocalTypes = value;
+                }
+                return;
+            }
             materialise(modelFile);
             modelFile[key] = value;
         },
@@ -1938,8 +2167,58 @@ function defineLazyFields(modelFile: any): void {
     if (state.deferred === undefined) {
         state.deferred = { byName: undefined, built: undefined, building: false, batch: undefined };
     }
+    // P5-94: a file the constructor gave the accessors already
+    // (`initDeclarationFields`) keeps them; they now build its views.
+    if (state.early) {
+        state.early = undefined;
+        state.earlyDeclarations = undefined;
+        state.earlyLocalTypes = undefined;
+        return;
+    }
     Object.defineProperty(modelFile, 'declarations', lazyFieldDescriptors.declarations);
     Object.defineProperty(modelFile, 'localTypes', lazyFieldDescriptors.localTypes);
+}
+
+/**
+ * P5-94 (accordproject/concerto-rust#444): called by the ModelFile
+ * constructor where it used to set `declarations = []` and
+ * `localTypes = null`: defines them, in the same place among its own
+ * properties, as the lazy views' accessors (`lazyFieldDescriptors`), which
+ * read and write those values (`early`) until the file is staged. A lazily
+ * built file then keeps them (`defineLazyFields`), where it used to have
+ * its two data properties redefined as accessors, which turned every such
+ * ModelFile into a dictionary-mode object, about a tenth of the JS
+ * allocation of `addModelFile`. An eagerly built file has them made data
+ * properties again (`settleDeclarationFields`).
+ * @param {object} modelFile the ModelFile being constructed
+ */
+function initDeclarationFields(modelFile: any): void {
+    const state = fileState(modelFile);
+    state.early = true;
+    state.earlyDeclarations = [];
+    state.earlyLocalTypes = null;
+    Object.defineProperty(modelFile, 'declarations', lazyFieldDescriptors.declarations);
+    Object.defineProperty(modelFile, 'localTypes', lazyFieldDescriptors.localTypes);
+}
+
+/**
+ * P5-94: called by the ModelFile constructor when the file is built
+ * eagerly: makes `declarations` and `localTypes` the data properties, with
+ * the values, the constructor used to set (`initDeclarationFields`).
+ * @param {object} modelFile the ModelFile being constructed
+ */
+function settleDeclarationFields(modelFile: any): void {
+    const state = fileStates.get(modelFile);
+    if (state === undefined || !state.early) {
+        return;
+    }
+    const declarations = state.earlyDeclarations;
+    const localTypes = state.earlyLocalTypes;
+    state.early = undefined;
+    state.earlyDeclarations = undefined;
+    state.earlyLocalTypes = undefined;
+    Object.defineProperty(modelFile, 'declarations', { value: declarations, writable: true, enumerable: true, configurable: true });
+    Object.defineProperty(modelFile, 'localTypes', { value: localTypes, writable: true, enumerable: true, configurable: true });
 }
 
 /**
@@ -3475,6 +3754,8 @@ export {
     recordImportNames,
     recordedImportNames,
     deferDeclarations,
+    initDeclarationFields,
+    settleDeclarationFields,
     commitStaged,
     validateAndCommitStaged,
     dropStaged,

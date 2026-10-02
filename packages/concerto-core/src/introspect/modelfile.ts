@@ -89,8 +89,9 @@ class ModelFile extends Decorated {
     definitions: string | null | undefined;
     fileName: string | null | undefined;
     external: boolean;
-    declarations: Declaration[];
-    localTypes: Map<string, Declaration> | null;
+    // P5-94: set by `initDeclarationFields` (engine/views.ts).
+    declarations!: Declaration[];
+    localTypes!: Map<string, Declaration> | null;
     imports: AstNode[];
     importShortNames: Map<string, string>;
     importWildcardNamespaces: string[];
@@ -120,8 +121,13 @@ class ModelFile extends Decorated {
         constructedModelFiles.add(this);
         this.modelManager = modelManager;
         this.external = false;
-        this.declarations = [];
-        this.localTypes = null;
+        // P5-94 (accordproject/concerto-rust#444): `declarations` and
+        // `localTypes` start as the lazy views' accessors (engine/views.ts,
+        // reading [] and null until the file is staged), so a lazily built
+        // file keeps a fast (non-dictionary) shape; an eagerly built one has
+        // them made plain fields again below, before anything is built.
+        const views = loadEngine('../engine/views');
+        views.initDeclarationFields(this);
         this.imports = [];
         this.importShortNames = new Map();
         this.importWildcardNamespaces = [];
@@ -159,7 +165,6 @@ class ModelFile extends Decorated {
         // the TS code. P5-10b: staged before the decorators are set up, so
         // that a lazily built file's own decorators are built on first read
         // too (staging never throws, so every error keeps its point).
-        const views = loadEngine('../engine/views');
         // P5-49 (BC-19 with BC-17 and BC-20, R1): the AST's shape is checked
         // against the metamodel first, unless the manager opted out with
         // `metamodelValidation: false`, so a malformed AST is an
@@ -168,6 +173,9 @@ class ModelFile extends Decorated {
         // text, or the AST in the engine's compact layout.
         const checkedText: string | object | undefined = views.checkAstShape(this);
         const lazy: boolean = views.stageModelFile(this, checkedText);
+        if (!lazy) {
+            views.settleDeclarationFields(this);
+        }
         // Set up the decorators.
         this.process();
         // Populate from the AST.
@@ -944,6 +952,15 @@ class ModelFile extends Decorated {
         // (concerto-wasm `modelFileIsCompatibleVersion`, node-semver's range
         // grammar ported in concerto-rust semver_range.rs), which sets
         // `this.concertoVersion` or throws the Error TS throws.
+        // P5-94 (accordproject/concerto-rust#444): an AST without a
+        // `concertoVersion` (nearly every model) is accepted without the
+        // engine call, as the binding accepts it, so its three crossings
+        // and the key strings it reads with are not paid for every file.
+        // A nullish `ast` still goes to the binding, which throws for it.
+        const ast: any = this.ast;
+        if (ast !== null && ast !== undefined && !ast.concertoVersion) {
+            return;
+        }
         rust.modelFileIsCompatibleVersion(this);
     }
     /**
