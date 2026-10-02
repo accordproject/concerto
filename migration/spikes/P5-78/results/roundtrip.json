@@ -1,0 +1,552 @@
+{
+ "tool": "roundtrip",
+ "sets": 247,
+ "loaded": 149,
+ "resolver": {
+  "equal": 146,
+  "differs": [
+   {
+    "set": "concerto-core-test-data",
+    "note": "R1 getAst(true) throws: Name Missing not found"
+   },
+   {
+    "set": "packages/concerto-core/test/data/decorators/invalid-typeref.cto",
+    "note": "R1 getAst(true) throws: Name Missing not found"
+   },
+   {
+    "set": "packages/concerto-core/test/data/decorators/model.cto",
+    "note": "R1 getAst(true) throws: Name String not found"
+   }
+  ],
+  "diagnosticsOnLoadable": []
+ },
+ "converters": {
+  "published": {
+   "converted": 149,
+   "throws": [],
+   "lossless": 138,
+   "withDiffs": 11,
+   "patterns": {
+    "dropped decl(AssetDeclaration).properties[].validator": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "probe-0",
+      "path": "decl(AssetDeclaration).properties[11].validator",
+      "before": {
+       "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+       "upper": 1
+      }
+     }
+    },
+    "dropped decl(AssetDeclaration).superType.resolvedName": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "probe-0",
+      "path": "decl(AssetDeclaration).superType.resolvedName",
+      "before": "Thing"
+     }
+    },
+    "changed decl(ConceptDeclaration).properties[].decorators[].arguments[].$class": {
+     "sets": 2,
+     "occurrences": 4,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).properties[0].decorators[1].arguments[0].$class",
+      "before": "concerto.metamodel@1.0.0.DecoratorNumber",
+      "after": "concerto.metamodel@1.0.0.DecoratorString"
+     }
+    },
+    "changed decl(ConceptDeclaration).decorators[].arguments[].$class": {
+     "sets": 2,
+     "occurrences": 4,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).decorators[1].arguments[0].$class",
+      "before": "concerto.metamodel@1.0.0.DecoratorNumber",
+      "after": "concerto.metamodel@1.0.0.DecoratorString"
+     }
+    },
+    "changed decl(ConceptDeclaration).decorators[].arguments[].value": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).decorators[2].arguments[0].value",
+      "before": false,
+      "after": null
+     }
+    },
+    "changed decl(MapDeclaration).key.decorators[].arguments[].$class": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(MapDeclaration).key.decorators[1].arguments[0].$class",
+      "before": "concerto.metamodel@1.0.0.DecoratorNumber",
+      "after": "concerto.metamodel@1.0.0.DecoratorString"
+     }
+    },
+    "changed decl(MapDeclaration).value.decorators[].arguments[].$class": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(MapDeclaration).value.decorators[1].arguments[0].$class",
+      "before": "concerto.metamodel@1.0.0.DecoratorBoolean",
+      "after": "concerto.metamodel@1.0.0.DecoratorString"
+     }
+    },
+    "changed decl(MapDeclaration).value.decorators[].arguments[].value": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(MapDeclaration).value.decorators[1].arguments[0].value",
+      "before": false,
+      "after": null
+     }
+    },
+    "dropped decl(ConceptDeclaration).properties[].decorators[].arguments[]": {
+     "sets": 4,
+     "occurrences": 8,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).properties[0].decorators[0].arguments[0]",
+      "before": {
+       "$class": "concerto.metamodel@1.0.0.DecoratorString",
+       "value": ""
+      }
+     }
+    },
+    "dropped decl(ConceptDeclaration).decorators[].arguments[]": {
+     "sets": 2,
+     "occurrences": 4,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).decorators[0].arguments[0]",
+      "before": {
+       "$class": "concerto.metamodel@1.0.0.DecoratorString",
+       "value": ""
+      }
+     }
+    },
+    "changed decl(ConceptDeclaration).properties[].decorators[].name": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).properties[0].decorators[1].name",
+      "before": "Term_my_type",
+      "after": "Term_my"
+     }
+    },
+    "changed decl(ConceptDeclaration).decorators[].name": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).decorators[1].name",
+      "before": "Term_my_type",
+      "after": "Term_my"
+     }
+    },
+    "added decl(AssetDeclaration).decorators[].arguments[].type.namespace": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(AssetDeclaration).decorators[0].arguments[0].type.namespace",
+      "after": "undefined"
+     }
+    },
+    "changed decl(ParticipantDeclaration).decorators[].name": {
+     "sets": 1,
+     "occurrences": 2,
+     "example": {
+      "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto",
+      "path": "decl(ParticipantDeclaration).decorators[0].name",
+      "before": "M1",
+      "after": "Term_participantName"
+     }
+    },
+    "added decl(ParticipantDeclaration).decorators[].arguments": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto",
+      "path": "decl(ParticipantDeclaration).decorators[0].arguments",
+      "after": [
+       {
+        "$class": "concerto.metamodel@1.0.0.DecoratorString",
+        "value": "some value"
+       }
+      ]
+     }
+    },
+    "dropped decl(ParticipantDeclaration).decorators[].arguments": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto",
+      "path": "decl(ParticipantDeclaration).decorators[1].arguments",
+      "before": [
+       {
+        "$class": "concerto.metamodel@1.0.0.DecoratorString",
+        "value": "some value"
+       }
+      ]
+     }
+    },
+    "added decl(TransactionDeclaration).decorators[].arguments[].type.namespace": {
+     "sets": 1,
+     "occurrences": 2,
+     "example": {
+      "set": "packages/concerto-core/test/data/decorators/model.cto",
+      "path": "decl(TransactionDeclaration).decorators[0].arguments[0].type.namespace",
+      "after": "undefined"
+     }
+    },
+    "dropped decl(ConceptDeclaration).properties[].validator": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "packages/concerto-core/test/data/parser/types.cto",
+      "path": "decl(ConceptDeclaration).properties[1].validator",
+      "before": {
+       "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+       "upper": 10
+      }
+     }
+    }
+   },
+   "schemaInvalid": 2,
+   "dangling": [
+    {
+     "set": "probe-0",
+     "refs": [
+      "probe.main@1.0.0.Widget extends probe.base@1.0.0.BaseThing"
+     ]
+    }
+   ],
+   "schemaInvalidSets": [
+    {
+     "set": "concerto-core-test-data",
+     "errors": [
+      {
+       "instancePath": "/declarations/com.test.allpaths@1.0.0.Product/properties/fieldName/vocabulary/additionalTerms/rank",
+       "schemaPath": "#/properties/additionalTerms/additionalProperties/type",
+       "keyword": "type",
+       "params": {
+        "type": "string"
+       },
+       "message": "must be string"
+      },
+      {
+       "instancePath": "/declarations/com.test.allpaths@1.0.0.Product",
+       "schemaPath": "#/required",
+       "keyword": "required",
+       "params": {
+        "missingProperty": "values"
+       },
+       "message": "must have required property 'values'"
+      }
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-allpaths-nonstring.cto",
+     "errors": [
+      {
+       "instancePath": "/declarations/com.test.allpaths@1.0.0.Product/properties/fieldName/vocabulary/additionalTerms/rank",
+       "schemaPath": "#/properties/additionalTerms/additionalProperties/type",
+       "keyword": "type",
+       "params": {
+        "type": "string"
+       },
+       "message": "must be string"
+      },
+      {
+       "instancePath": "/declarations/com.test.allpaths@1.0.0.Product",
+       "schemaPath": "#/required",
+       "keyword": "required",
+       "params": {
+        "missingProperty": "values"
+       },
+       "message": "must have required property 'values'"
+      }
+     ]
+    }
+   ]
+  },
+  "cleaned": {
+   "converted": 149,
+   "throws": [],
+   "lossless": 138,
+   "withDiffs": 11,
+   "patterns": {
+    "dropped decl(AssetDeclaration).properties[].validator": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "probe-0",
+      "path": "decl(AssetDeclaration).properties[11].validator",
+      "before": {
+       "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+       "upper": 1
+      }
+     }
+    },
+    "changed decl(AssetDeclaration).superType.name": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "probe-0",
+      "path": "decl(AssetDeclaration).superType.name",
+      "before": "BaseThing",
+      "after": "Thing"
+     }
+    },
+    "dropped decl(AssetDeclaration).superType.resolvedName": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "probe-0",
+      "path": "decl(AssetDeclaration).superType.resolvedName",
+      "before": "Thing"
+     }
+    },
+    "changed decl(ConceptDeclaration).properties[].decorators[].arguments[].$class": {
+     "sets": 2,
+     "occurrences": 4,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).properties[0].decorators[1].arguments[0].$class",
+      "before": "concerto.metamodel@1.0.0.DecoratorNumber",
+      "after": "concerto.metamodel@1.0.0.DecoratorString"
+     }
+    },
+    "changed decl(ConceptDeclaration).decorators[].arguments[].$class": {
+     "sets": 2,
+     "occurrences": 4,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).decorators[1].arguments[0].$class",
+      "before": "concerto.metamodel@1.0.0.DecoratorNumber",
+      "after": "concerto.metamodel@1.0.0.DecoratorString"
+     }
+    },
+    "changed decl(ConceptDeclaration).decorators[].arguments[].value": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).decorators[2].arguments[0].value",
+      "before": false,
+      "after": null
+     }
+    },
+    "changed decl(MapDeclaration).key.decorators[].arguments[].$class": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(MapDeclaration).key.decorators[1].arguments[0].$class",
+      "before": "concerto.metamodel@1.0.0.DecoratorNumber",
+      "after": "concerto.metamodel@1.0.0.DecoratorString"
+     }
+    },
+    "changed decl(MapDeclaration).value.decorators[].arguments[].$class": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(MapDeclaration).value.decorators[1].arguments[0].$class",
+      "before": "concerto.metamodel@1.0.0.DecoratorBoolean",
+      "after": "concerto.metamodel@1.0.0.DecoratorString"
+     }
+    },
+    "changed decl(MapDeclaration).value.decorators[].arguments[].value": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(MapDeclaration).value.decorators[1].arguments[0].value",
+      "before": false,
+      "after": null
+     }
+    },
+    "dropped decl(ConceptDeclaration).properties[].decorators[].arguments[]": {
+     "sets": 4,
+     "occurrences": 8,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).properties[0].decorators[0].arguments[0]",
+      "before": {
+       "$class": "concerto.metamodel@1.0.0.DecoratorString",
+       "value": ""
+      }
+     }
+    },
+    "dropped decl(ConceptDeclaration).decorators[].arguments[]": {
+     "sets": 2,
+     "occurrences": 4,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).decorators[0].arguments[0]",
+      "before": {
+       "$class": "concerto.metamodel@1.0.0.DecoratorString",
+       "value": ""
+      }
+     }
+    },
+    "changed decl(ConceptDeclaration).properties[].decorators[].name": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).properties[0].decorators[1].name",
+      "before": "Term_my_type",
+      "after": "Term_my"
+     }
+    },
+    "changed decl(ConceptDeclaration).decorators[].name": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(ConceptDeclaration).decorators[1].name",
+      "before": "Term_my_type",
+      "after": "Term_my"
+     }
+    },
+    "added decl(AssetDeclaration).decorators[].arguments[].type.namespace": {
+     "sets": 2,
+     "occurrences": 2,
+     "example": {
+      "set": "concerto-core-test-data",
+      "path": "decl(AssetDeclaration).decorators[0].arguments[0].type.namespace",
+      "after": ""
+     }
+    },
+    "changed decl(ParticipantDeclaration).decorators[].name": {
+     "sets": 1,
+     "occurrences": 2,
+     "example": {
+      "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto",
+      "path": "decl(ParticipantDeclaration).decorators[0].name",
+      "before": "M1",
+      "after": "Term_participantName"
+     }
+    },
+    "added decl(ParticipantDeclaration).decorators[].arguments": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto",
+      "path": "decl(ParticipantDeclaration).decorators[0].arguments",
+      "after": [
+       {
+        "$class": "concerto.metamodel@1.0.0.DecoratorString",
+        "value": "some value"
+       }
+      ]
+     }
+    },
+    "dropped decl(ParticipantDeclaration).decorators[].arguments": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto",
+      "path": "decl(ParticipantDeclaration).decorators[1].arguments",
+      "before": [
+       {
+        "$class": "concerto.metamodel@1.0.0.DecoratorString",
+        "value": "some value"
+       }
+      ]
+     }
+    },
+    "added decl(TransactionDeclaration).decorators[].arguments[].type.namespace": {
+     "sets": 1,
+     "occurrences": 2,
+     "example": {
+      "set": "packages/concerto-core/test/data/decorators/model.cto",
+      "path": "decl(TransactionDeclaration).decorators[0].arguments[0].type.namespace",
+      "after": ""
+     }
+    },
+    "dropped decl(ConceptDeclaration).properties[].validator": {
+     "sets": 1,
+     "occurrences": 1,
+     "example": {
+      "set": "packages/concerto-core/test/data/parser/types.cto",
+      "path": "decl(ConceptDeclaration).properties[1].validator",
+      "before": {
+       "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+       "upper": 10
+      }
+     }
+    }
+   },
+   "schemaInvalid": 2,
+   "schemaInvalidSets": [
+    {
+     "set": "concerto-core-test-data",
+     "errors": [
+      {
+       "instancePath": "/declarations/com.test.allpaths@1.0.0.Product/properties/fieldName/vocabulary/additionalTerms/rank",
+       "schemaPath": "#/properties/additionalTerms/additionalProperties/type",
+       "keyword": "type",
+       "params": {
+        "type": "string"
+       },
+       "message": "must be string"
+      },
+      {
+       "instancePath": "/declarations/com.test.allpaths@1.0.0.Product",
+       "schemaPath": "#/required",
+       "keyword": "required",
+       "params": {
+        "missingProperty": "values"
+       },
+       "message": "must have required property 'values'"
+      }
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-allpaths-nonstring.cto",
+     "errors": [
+      {
+       "instancePath": "/declarations/com.test.allpaths@1.0.0.Product/properties/fieldName/vocabulary/additionalTerms/rank",
+       "schemaPath": "#/properties/additionalTerms/additionalProperties/type",
+       "keyword": "type",
+       "params": {
+        "type": "string"
+       },
+       "message": "must be string"
+      },
+      {
+       "instancePath": "/declarations/com.test.allpaths@1.0.0.Product",
+       "schemaPath": "#/required",
+       "keyword": "required",
+       "params": {
+        "missingProperty": "values"
+       },
+       "message": "must have required property 'values'"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "sameOutputAsPublished": {
+  "same": 145,
+  "differs": [
+   "probe-0",
+   "concerto-core-test-data",
+   "packages/concerto-core/test/data/decorators/invalid-typeref.cto",
+   "packages/concerto-core/test/data/decorators/model.cto"
+  ]
+ }
+}

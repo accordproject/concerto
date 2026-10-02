@@ -1,0 +1,1600 @@
+{
+ "tool": "conformance",
+ "conformance": "/home/user/wt/P5-78/conformance-ro",
+ "summary": {
+  "instance": {
+   "scenarios": 15,
+   "r1Pass": 15,
+   "prototypePass": 15,
+   "sameOutcomeAndClass": 15
+  },
+  "semantic": {
+   "scenarios": 81,
+   "skipped": 6,
+   "missingFixture": 10,
+   "r1Pass": 66,
+   "expectError": 24,
+   "optionCCaught": 9,
+   "optionCMissed": 15,
+   "expectOk": 42,
+   "optionCFalsePositive": 0,
+   "converterErrorsOnValidModels": 0
+  }
+ },
+ "instance": [
+  {
+   "scenario": "Valid instance with all primitive types should pass",
+   "expect": "ok",
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "prototype": {
+    "pass": true,
+    "ok": true
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "String value for Integer field should fail",
+   "expect": "error",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.count` to be of type `Integer`"
+   },
+   "prototype": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.count` to be of type `Integer`"
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "String value for Boolean field should fail",
+   "expect": "error",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.isActive` to be of type `Boolean`"
+   },
+   "prototype": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.isActive` to be of type `Boolean`"
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Missing required field should fail",
+   "expect": "error",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "The instance \"org.acme.test@1.0.0.Person\" is missing the required field \"age\"."
+   },
+   "prototype": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "The instance \"org.acme.test@1.0.0.Person\" is missing the required field \"age\"."
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "All required fields present should pass",
+   "expect": "ok",
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "prototype": {
+    "pass": true,
+    "ok": true
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Optional field omitted should pass",
+   "expect": "ok",
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "prototype": {
+    "pass": true,
+    "ok": true
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Valid enum value should pass",
+   "expect": "ok",
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "prototype": {
+    "pass": true,
+    "ok": true
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Invalid enum value should fail",
+   "expect": "error",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Model violation in the \"org.acme.test@1.0.0.Car\" instance. Invalid enum value of \"Purple\" for the field \"Color\"."
+   },
+   "prototype": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Instance org.acme.test@1.0.0.Car invalid enum value Purple for Color"
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Matching $class type should pass",
+   "expect": "ok",
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "prototype": {
+    "pass": true,
+    "ok": true
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Non-existent $class type should fail",
+   "expect": "error",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "TypeNotFoundException",
+    "message": "Type \"Dog\" is not defined in namespace \"org.acme.test@1.0.0\"."
+   },
+   "prototype": {
+    "pass": true,
+    "ok": false,
+    "error": "TypeNotFoundException",
+    "message": "Type org.acme.test@1.0.0.Dog not found"
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Array within size bounds should pass",
+   "expect": "ok",
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "prototype": {
+    "pass": true,
+    "ok": true
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Array at minimum bound should pass",
+   "expect": "ok",
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "prototype": {
+    "pass": true,
+    "ok": true
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Array at maximum bound should pass",
+   "expect": "ok",
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "prototype": {
+    "pass": true,
+    "ok": true
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Array with too few elements should fail",
+   "expect": "error",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `org.acme.collections@1.0.0.BoundedTags`. org.acme.collections@1.0.0.BoundedTags.tags: Collection must contain at least 2 elements."
+   },
+   "prototype": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Collection size 1 of tags is outside [2, 5] in org.acme.collections@1.0.0.BoundedTags"
+   },
+   "sameClass": true
+  },
+  {
+   "scenario": "Array with too many elements should fail",
+   "expect": "error",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `org.acme.collections@1.0.0.BoundedTags`. org.acme.collections@1.0.0.BoundedTags.tags: Collection must contain no more than 5 elements."
+   },
+   "prototype": {
+    "pass": true,
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Collection size 6 of tags is outside [2, 5] in org.acme.collections@1.0.0.BoundedTags"
+   },
+   "sameClass": true
+  }
+ ],
+ "semantic": [
+  {
+   "feature": "collections.feature",
+   "scenario": "should pass for valid array size bounds",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "collections.feature",
+   "scenario": "should pass for valid map-typed property size bounds",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "collections.feature",
+   "scenario": "should pass for min-only size constraint",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "collections.feature",
+   "scenario": "should pass for max-only size constraint",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "collections.feature",
+   "scenario": "should throw when minSize > maxSize in collection size",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "minSize must be less than or equal to maxSize",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Validator error for field `items`. org.concerto.collections.invalid.col005@1.0.0.InvalidSize.items: minSize must be less than or equal to maxSize. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "collections.feature",
+   "scenario": "should throw when size validator is applied to non-collection property",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "size validator can only be applied to array or map properties",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "size validator can only be applied to array or map properties: org.concerto.collections.invalid.col006@1.0.0.InvalidTarget.name File 'collections/models/COLLECTION_SIZE_006/collection_size_006_non_col"
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Property name uses system-reserved name",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "Invalid field name '$class'",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Invalid field name '$class' File 'concepts/models/CLASS_DECLARATION_001/class_declaration_001_system_property_name.json': line 3 column 1, to line 6 column 2. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Valid property names that are not system-reserved",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "$class property with invalid type",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "Invalid field name '$class'",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Invalid field name '$class' File 'concepts/models/CLASS_DECLARATION_002/class_declaration_002_invalid_$class_type.json': line 3 column 1, to line 5 column 2. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Model without explicit $class declaration",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Duplicate concept declarations in the same file",
+   "tags": [
+    "@skip-rust"
+   ],
+   "expect": "error",
+   "expectMessage": "Duplicate class name",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Duplicate class name org.concerto.concepts.cd003.invalid@1.0.0.SampleConceptA "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Duplicate class name org.concerto.concepts.cd003.invalid@1.0.0.SampleConceptA"
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Uniquely named concept declarations",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Supertype does not exist",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "Could not find super type",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Could not find super type NonExistentConcept File 'concepts/models/CLASS_DECLARATION_004/class_declaration_004_supertype_not_exist.json': line 3 column 1, to line 5 column 2. "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Undeclared type NonExistentConcept in super type of org.concerto.concepts.cd004.valid@1.0.0.DerivedConcept"
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Supertype is declared correctly",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Identifier field is not of type String or scalar",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "Class",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Class \"Entity\" is identified by field \"id\", but the type of the field is not \"String\". File 'concepts/models/CLASS_DECLARATION_005/class_declaration_005_invalid_identifier_type.json': line 3 column 1,"
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Identifier field is of type String",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Identifier field is a String-based scalar",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Identifier field is optional",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "Identifying fields cannot be optional",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Identifying fields cannot be optional. File 'concepts/models/CLASS_DECLARATION_006/class_declaration_006_optional_identifier.json': line 3 column 1, to line 6 column 2. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Identifier field is required",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Supertype is not system-identified",
+   "tags": [
+    "@missing-fixture"
+   ],
+   "expect": "error",
+   "missing": [
+    "concepts/models/CLASS_DECLARATION_007/class_declaration_007_supertype_not_system_identified.json"
+   ]
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Supertype is system-identified",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Property name duplicated from supertype",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "has more than one field named",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Class \"SubConcept\" has more than one field named \"name\". File 'concepts/models/CLASS_DECLARATION_008/class_declaration_008_duplicate_property_from_super.json': line 7 column 1, to line 9 column 2. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Unique property names across inheritance",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Unique property names across inheritance",
+   "tags": [
+    "@skip-rust"
+   ],
+   "expect": "error",
+   "expectMessage": "Maximum call stack size exceeded",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "The super type chain of \"org.invalid.circular@1.0.0.A\" is circular: org.invalid.circular@1.0.0.A -> org.invalid.circular@1.0.0.C -> org.invalid.circular@1.0.0.B -> org.invalid.circular@1.0.0.A. File '"
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Circular inheritance: org.invalid.circular@1.0.0.A -> org.invalid.circular@1.0.0.C -> org.invalid.circular@1.0.0.B -> org.invalid.circular@1.0.0.A",
+     "IllegalModelException: Circular inheritance: org.invalid.circular@1.0.0.B -> org.invalid.circular@1.0.0.A -> org.invalid.circular@1.0.0.C -> org.invalid.circular@1.0.0.B",
+     "IllegalModelException: Circular inheritance: org.invalid.circular@1.0.0.C -> org.invalid.circular@1.0.0.B -> org.invalid.circular@1.0.0.A -> org.invalid.circular@1.0.0.C"
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Unique property names across inheritance",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Unique property names across inheritance",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "has more than one field",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Class \"Child\" has more than one field named \"name\". File 'concepts/models/CLASS_DECLARATION_010/class_declaration_010_duplicate_property_from_super.json': line 7 column 1, to line 9 column 2. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Unique property names across inheritance",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Duplicate declarations should throw",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "has more than one field named",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Class \"User\" has more than one field named \"name\". File 'concepts/models/DECLARATION_001/declaration_001_duplicate_within_model.json': line 3 column 1, to line 7 column 2. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Unique declarations should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Invalid identifier should throw",
+   "tags": [
+    "@missing-fixture"
+   ],
+   "expect": "error",
+   "missing": [
+    "concepts/models/MODEL_ELEMENT_002/model_element_002_invalid_identifier_name.json"
+   ]
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Valid identifier should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Relationship to primitive should throw",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "cannot be to the primitive type",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Relationship managerId cannot be to the primitive type String File 'concepts/models/RELATIONSHIP_001/relationship_001_non-primitive_type_relationship.json': line 5 column 3, to line 6 column 1. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Valid relationship to non-primitive should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Missing relationship type should throw",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "Undeclared type",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Undeclared type \"School\" in \"property org.example.relationship002.valid@1.0.0.Student.school\". File 'concepts/models/RELATIONSHIP_002/relationship_002_type_not_exist.json': "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Undeclared type School in property org.example.relationship002.valid@1.0.0.Student.school"
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Existing relationship type should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Non-identified relationship target should throw",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "must be to a class that has an identifier",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Relationship dept must be to a class that has an identifier, but this is to org.example.relationship003.invalid@1.0.0.Department File 'concepts/models/RELATIONSHIP_003/relationship_003_not_identified_"
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Identified relationship target should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Undeclared non-primitive type should throw",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "Undeclared type",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Undeclared type \"Profile\" in \"property org.example.property002.invalid@1.0.0.User.profile\". File 'concepts/models/PROPERTY_002/property_002_type_does_not_exist.json': "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Undeclared type Profile in property org.example.property002.invalid@1.0.0.User.profile"
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Declared non-primitive type should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Invalid property meta type should throw",
+   "tags": [
+    "@missing-fixture"
+   ],
+   "expect": "error",
+   "missing": [
+    "concepts/models/PROPERTY_003/property_003_meta_type_invalid.json"
+   ]
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Valid property meta type should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Duplicate decorator should throw",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "Duplicate decorator",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Duplicate decorator custom File 'concepts/models/DECORATED_001/decorated_001_duplicate_decorator.json': line 4 column 3, to line 7 column 1. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "concepts.feature",
+   "scenario": "Single decorator should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "enums.feature",
+   "scenario": "Duplicate enum names in the same file should throw an error",
+   "tags": [
+    "@skip-rust"
+   ],
+   "expect": "error",
+   "expectMessage": "Duplicate",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Duplicate class name org.example.enums.declaration001.invalid@1.0.0.Status "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Duplicate class name org.example.enums.declaration001.invalid@1.0.0.Status"
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "enums.feature",
+   "scenario": "Unique enum names in the same file should pass validation",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "enums.feature",
+   "scenario": "Local enum name does not conflict with imported enum",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "enums.feature",
+   "scenario": "Enum name conflicts with imported enum should throw an error",
+   "tags": [
+    "@skip"
+   ],
+   "expect": "error",
+   "expectMessage": "already defined in an imported model",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Type 'ConflictEnum' clashes with an imported type with the same name. File 'enums/models/DECLARATION_002/declaration_002_name_conflict_with_import.json': line 5 column 1, to line 8 column 2. "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Type 'ConflictEnum' clashes with an imported type with the same name."
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "enums.feature",
+   "scenario": "Valid enum identifier name should pass validation",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "enums.feature",
+   "scenario": "Invalid enum identifier name should throw an error",
+   "tags": [
+    "@missing-fixture"
+   ],
+   "expect": "error",
+   "missing": [
+    "enums/models/MODEL_ELEMENT_002/model_element_002_invalid_enum_name.json"
+   ]
+  },
+  {
+   "feature": "imports.feature",
+   "scenario": "Local and imported types have unique names and should pass validation",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "imports.feature",
+   "scenario": "Conflict with imported type name should throw an error",
+   "tags": [
+    "@skip"
+   ],
+   "expect": "error",
+   "expectMessage": "already defined in an imported model",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Type 'Type' clashes with an imported type with the same name. File 'imports/models/DECLARATION_002/declaration_002_conflict_with_imported_type.json': line 5 column 1, to line 7 column 2. "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Type 'Type' clashes with an imported type with the same name."
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "imports.feature",
+   "scenario": "Valid import and reference of existing type should pass validation",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "imports.feature",
+   "scenario": "Importing a non-existent type should throw an error",
+   "tags": [
+    "@skip-rust"
+   ],
+   "expect": "error",
+   "expectMessage": "Namespace is not defined",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Namespace is not defined for type \"org.ghost.types@1.0.0.Nonexistent\". File 'imports/models/MODEL_FILE_001/model_file_001_import_nonexistent_type.json': "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: No registered namespace for type org.ghost.types@1.0.0.Nonexistent"
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "imports.feature",
+   "scenario": "Unique namespace imports should pass validation",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "imports.feature",
+   "scenario": "Duplicate namespace imports should throw an error",
+   "tags": [
+    "@skip",
+    "@missing-fixture"
+   ],
+   "expect": "error",
+   "missing": [
+    "imports/models/MODEL_FILE_002/model_file_002_duplicate_namespace_imports.json"
+   ]
+  },
+  {
+   "feature": "maps.feature",
+   "scenario": "Valid map key type should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "maps.feature",
+   "scenario": "Invalid map key type should throw error",
+   "tags": [
+    "@missing-fixture"
+   ],
+   "expect": "error",
+   "missing": [
+    "maps/models/MAP_KEY_TYPE_001/map_key_type_001_invalid_key_type.json"
+   ]
+  },
+  {
+   "feature": "maps.feature",
+   "scenario": "Valid map value type should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "maps.feature",
+   "scenario": "Non-existent map value type should throw error",
+   "tags": [
+    "@skip-rust"
+   ],
+   "expect": "error",
+   "expectMessage": "Cannot read properties of null",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Undeclared type \"UnknownType\" in \"the value of map org.concerto.maps.invalid.value001@1.0.0.MyMap\". File 'maps/models/MAP_VALUE_TYPE_001/map_value_type_001_type_not_exist.json': "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Undeclared type UnknownType in map org.concerto.maps.invalid.value001@1.0.0.MyMap"
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "maps.feature",
+   "scenario": "Duplicate map names should throw error",
+   "tags": [
+    "@skip-rust"
+   ],
+   "expect": "error",
+   "expectMessage": "Duplicate class name",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Duplicate class name org.concerto.maps.invalid.name001@1.0.0.MyDuplicateMap "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Duplicate class name org.concerto.maps.invalid.name001@1.0.0.MyDuplicateMap"
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "maps.feature",
+   "scenario": "Unique map names should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "namespaces.feature",
+   "scenario": "Invalid duplicate namespace imports should throw an error",
+   "tags": [
+    "@skip"
+   ],
+   "expect": "error",
+   "expectMessage": "Import namespace is already defined",
+   "r1": {
+    "pass": false,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "namespaces.feature",
+   "scenario": "Valid unique namespace imports should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "namespaces.feature",
+   "scenario": "Invalid self-import should throw MODEL_FILE_003 error",
+   "tags": [
+    "@skip"
+   ],
+   "expect": "error",
+   "expectMessage": "Namespace is not defined for type",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Type 'LocalType' clashes with an imported type with the same name. File 'namespaces/models/MODEL_FILE_003/model_file_003_self_import.json': line 5 column 1, to line 7 column 2. "
+   },
+   "optionC": {
+    "verdict": "caught",
+    "diagnostics": [
+     "IllegalModelException: Type 'LocalType' clashes with an imported type with the same name."
+    ],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "namespaces.feature",
+   "scenario": "Valid model without self-import should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "namespaces.feature",
+   "scenario": "Invalid duplicate declared names from different namespace imports should throw an error",
+   "tags": [
+    "@skip"
+   ],
+   "expect": "error",
+   "expectMessage": "Can't import same names for different namespaces",
+   "r1": {
+    "pass": false,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "namespaces.feature",
+   "scenario": "Valid unique namespace imports should pass",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should pass for valid number bounds",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should throw for no number bounds",
+   "tags": [
+    "@missing-fixture"
+   ],
+   "expect": "error",
+   "missing": [
+    "scalars/models/NUMBER_VALIDATOR_001/number_validator_001_no_bounds.json"
+   ]
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should pass for valid number range",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should throw when lower > upper in number bounds",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "Lower bound must be less than or equal to upper bound",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Validator error for field `null`. org.concerto.scalars.invalid.num002@1.0.0.InvalidRange.value: Lower bound must be less than or equal to upper bound. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "Invalid floating point range on Integer property should throw an error",
+   "tags": [
+    "@missing-fixture"
+   ],
+   "expect": "error",
+   "missing": [
+    "scalars/models/NUMBER_VALIDATOR_003/number_validator_003_invalid_range_type.json"
+   ]
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "Valid integer range on Integer property should pass validation",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should pass for valid string length bounds",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should throw for empty string length bounds",
+   "tags": [
+    "@missing-fixture"
+   ],
+   "expect": "error",
+   "missing": [
+    "scalars/models/STRING_VALIDATOR_001/string_validator_001_no_bounds.json"
+   ]
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should pass for positive string length bounds",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should throw for negative bounds in string length",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "minLength and-or maxLength must be positive integers",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Validator error for field `message`. org.concerto.scalars.invalid.str002@1.0.0.NegativeLength.message: minLength and-or maxLength must be positive integers. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should pass when lower < upper in string length",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should throw when lower > upper in string length",
+   "tags": [],
+   "expect": "error",
+   "expectMessage": "minLength must be less than or equal to maxLength",
+   "r1": {
+    "pass": true,
+    "ok": false,
+    "error": "IllegalModelException",
+    "message": "Validator error for field `field`. org.concerto.scalars.invalid.str003@1.0.0.SwappedBounds.field: minLength must be less than or equal to maxLength. "
+   },
+   "optionC": {
+    "verdict": "missed (needs full model validation)",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should throw for invalid regex",
+   "tags": [],
+   "expect": "ok",
+   "expectMessage": null,
+   "r1": {
+    "pass": true,
+    "ok": true
+   },
+   "optionC": {
+    "verdict": "ok",
+    "diagnostics": [],
+    "convertError": null
+   }
+  },
+  {
+   "feature": "scalars.feature",
+   "scenario": "should pass for valid regex pattern",
+   "tags": [
+    "@missing-fixture"
+   ],
+   "expect": "error",
+   "missing": [
+    "scalars/models/STRING_VALIDATOR_004/string_validator_004_invalid_regex.json"
+   ]
+  }
+ ]
+}

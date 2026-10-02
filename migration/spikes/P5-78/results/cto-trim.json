@@ -1,0 +1,27 @@
+{
+ "tool": "cto-trim",
+ "note": "estimate on the minified bundle; not a working parser change",
+ "bundle": {
+  "raw": 159636,
+  "gzip": 35504,
+  "brotli": 24210
+ },
+ "bigClassRegexes": {
+  "count": 7,
+  "rawBytes": 15931
+ },
+ "bigClassExpectations": {
+  "count": 7,
+  "rawBytes": 24189
+ },
+ "withPropertyEscapes": {
+  "raw": 143775,
+  "gzip": 28712,
+  "brotli": 20933
+ },
+ "withPropertyEscapesAndNoClassExpectations": {
+  "raw": 119600,
+  "gzip": 20572,
+  "brotli": 16991
+ }
+}

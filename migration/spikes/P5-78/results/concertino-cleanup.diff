@@ -1,0 +1,216 @@
+diff --git a/packages/concertino/src/index.ts b/migration/spikes/P5-78/src/concertino/index.ts
+index 70871cc31..afa3556f3 100644
+--- a/packages/concertino/src/index.ts
++++ b/migration/spikes/P5-78/src/concertino/index.ts
+@@ -1,65 +1,41 @@
+ /*
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
++ * P5-78 spike (accordproject/concerto-rust#420): the Concertino converter
++ * entry point after the cleanup in item 3. Not shipped.
+  *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-/**
+- * Concertino Format Converter Utility
+- *
+- * This module provides a standardized way to convert between Concerto metamodel and Concertino format.
++ * Differences from packages/concertino/src/index.ts:
++ * - no `ajv` import: the JSON-schema check moved to the `./schema` subpath
++ *   (schema.ts), backed by a validator precompiled at build time, so this
++ *   entry needs no `new Function` and tree-shakes to the converter alone;
++ * - the metamodel serializer takes getShortName/getNamespace from ../names
++ *   instead of concerto-core's ModelUtil, so there is no runtime dependency
++ *   on concerto-core (or, on the integration branch, on the WASM engine);
++ * - IConcertino is the 5.0.0 type throughout (the published index imports
++ *   it from the 4.0.0-alpha.2 spec file but exports the 5.0.0 types).
+  */
+ /* eslint-disable valid-jsdoc */
+-import { IModels } from '@accordproject/concerto-metamodel';
+-import { IConcertino } from './spec/concertino.metamodel@4.0.0-alpha.2';
+-import schema from './spec/concertino.schema.json';
++import type { IModels } from '@accordproject/concerto-metamodel';
++import type { IConcertino } from './spec/concertino.metamodel@5.0.0';
+ import { convertToConcertino } from './concertinoSerializer';
+ import { convertToMetamodel } from './metamodelSerializer';
+-import Ajv, { ValidateFunction } from 'ajv';
+ 
+-/**
+- * Conversion options for Concertino format.
+- */
++export const CONCERTINO_VERSION = '5.0.0';
++
+ export interface ConcertinoOptions {
+-  /**
+-   * Version of Concertino to use.
+-   */
+-  version?: string;
++    /** Version written to metadata.concertinoVersion. */
++    version?: string;
+ }
+ 
+ /**
+- * Concertino utility class for converting between Concerto metamodel and Concertino format.
++ * Converter between the resolved Concerto metamodel and Concertino. Same
++ * API as the published class, minus isValid/getValidationErrors (see ./schema).
+  */
+ export class ConcertinoConverter {
+     private options: ConcertinoOptions;
+-    private validate?: ValidateFunction;
+-    private ajv: Ajv;
+ 
+-    /**
+-     * Creates a new instance of ConcertinoConverter.
+-     * @param options - Configuration options for the converter.
+-     */
+     constructor(options: ConcertinoOptions = {}) {
+-        this.options = {
+-            version: '5.0.0',
+-            ...options
+-        };
+-        this.ajv = new Ajv();
++        this.options = { version: CONCERTINO_VERSION, ...options };
+     }
+ 
+-    /**
+-     * Convert Concerto metamodel to Concertino format.
+-     * @param metamodel - The Concerto metamodel to convert.
+-     * @returns The converted Concertino representation.
+-     */
+     public fromConcertoMetamodel(metamodel: IModels): IConcertino {
+         const concertino = convertToConcertino(metamodel);
+         if (this.options.version) {
+@@ -68,35 +44,10 @@ export class ConcertinoConverter {
+         return concertino;
+     }
+ 
+-    /**
+-     * Convert Concertino format to Concerto metamodel.
+-     * @param concertino - The Concertino format to convert.
+-     * @returns The converted Concerto metamodel.
+-     */
+     public toConcertoMetamodel(concertino: IConcertino): IModels {
+         return convertToMetamodel(concertino);
+     }
+-
+-    public isValid(concertino: IConcertino): boolean {
+-        return this.getValidator()(concertino);
+-    }
+-
+-    public getValidationErrors() {
+-        return this.validate?.errors ?? null;
+-    }
+-
+-    private getValidator(): ValidateFunction {
+-        if (!this.validate) {
+-            this.validate = this.ajv.compile(schema);
+-        }
+-
+-        return this.validate;
+-    }
+-
+ }
+ 
+-// Export individual conversion functions for direct use
+ export { convertToConcertino, convertToMetamodel };
+-
+-// Export types
+ export * from './spec/concertino.metamodel@5.0.0';
+diff --git a/packages/concertino/src/concertinoSerializer.ts b/migration/spikes/P5-78/src/concertino/concertinoSerializer.ts
+index c5ade5b08..239c8f737 100644
+--- a/packages/concertino/src/concertinoSerializer.ts
++++ b/migration/spikes/P5-78/src/concertino/concertinoSerializer.ts
+@@ -100,6 +100,18 @@ const VALUE_TYPE_MAP: Record<string, string> = {
+     'concerto.metamodel@1.0.0.DoubleMapValueType': 'Double',
+ };
+ 
++/**
++ * P5-78 spike fix: the declared name a resolved TypeIdentifier points at. An
++ * aliased import (`import a@1.0.0.{Foo as Bar}`) resolves to `name: 'Bar'`,
++ * `resolvedName: 'Foo'`; the published converter wrote `a@1.0.0.Bar`, a type
++ * that does not exist.
++ * @param ti the type identifier
++ * @returns the declared short name
++ */
++function typeName(ti: { name: string; resolvedName?: string }): string {
++    return ti.resolvedName ?? ti.name;
++}
++
+ /**
+  * Gets the scalar type from a Concerto IScalarDeclaration.
+  * @param declaration The scalar declaration.
+@@ -133,7 +145,7 @@ function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: IVocabula
+             metadata[decorator.name] = (decorator.arguments
+                 ? decorator.arguments.map((arg: DecoratorLiteralUnion) => {
+                     if ('type' in arg && arg.$class === 'concerto.metamodel@1.0.0.DecoratorTypeReference') {
+-                        const result: {type: string, isArray?: boolean } = { type: `${arg.type.namespace}.${arg.type.name}` };
++                        const result: {type: string, isArray?: boolean } = { type: arg.type.namespace ? `${arg.type.namespace}.${typeName(arg.type)}` : typeName(arg.type) };
+                         if (arg.isArray){
+                             result.isArray = true;
+                         }
+@@ -178,7 +190,7 @@ function transformEnumValues(properties: IEnumProperty[]): EnumValueMap {
+  */
+ export function determinePropertyType(property: PropertyUnion, { modelNamespace }: { modelNamespace: string }): string {
+     if ('type' in property) {
+-        return `${property.type.namespace || modelNamespace}.${property.type.name}`;
++        return `${property.type.namespace || modelNamespace}.${typeName(property.type)}`;
+     }
+     const propertyType = PROPERTY_TYPE_MAP[property.$class];
+     if (!propertyType) {
+@@ -264,7 +276,7 @@ function transformProperties(
+ function mapKeyTypeToString(key: MapKeyTypeUnion, { modelNamespace }: { modelNamespace: string }): string {
+     let keyType = KEY_TYPE_MAP[key.$class];
+     if (!keyType && 'type' in key) {
+-        keyType = `${key.type.namespace || modelNamespace}.${key.type.name}`;
++        keyType = `${key.type.namespace || modelNamespace}.${typeName(key.type)}`;
+     }
+     return keyType;
+ }
+@@ -281,7 +293,7 @@ function mapValueTypeToObject(
+ ): { type: string; isRelationship?: boolean } {
+     let valueType = VALUE_TYPE_MAP[value.$class];
+     if (!valueType && 'type' in value) {
+-        valueType = `${value.type.namespace || modelNamespace}.${value.type.name}`;
++        valueType = `${value.type.namespace || modelNamespace}.${typeName(value.type)}`;
+     }
+     const result: { type: string; isRelationship?: boolean } = { type: valueType };
+     if (value.$class.endsWith('RelationshipMapValueType')) {
+@@ -358,7 +370,7 @@ function transformConceptDeclaration(declaration: IConceptDeclaration, context:
+     }
+     if (declaration.superType) {
+         const superTypeNamespace = declaration.superType.namespace || context.modelNamespace;
+-        result.extends = [`${superTypeNamespace}.${declaration.superType.name}`];
++        result.extends = [`${superTypeNamespace}.${typeName(declaration.superType)}`];
+     }
+     if (declaration.isAbstract) {
+         result.isAbstract = true;
+diff --git a/packages/concertino/src/metamodelSerializer.ts b/migration/spikes/P5-78/src/concertino/metamodelSerializer.ts
+index 1ce86ad6b..1d3f249af 100644
+--- a/packages/concertino/src/metamodelSerializer.ts
++++ b/migration/spikes/P5-78/src/concertino/metamodelSerializer.ts
+@@ -14,7 +14,7 @@
+  */
+ 
+ /* eslint-disable @typescript-eslint/no-explicit-any */
+-import { ModelUtil } from '@accordproject/concerto-core';
++import * as ModelUtil from '../names';
+ import {
+     IConcertino,
+     IConcertinoDeclaration,
+@@ -32,7 +32,7 @@ import {
+     MetadataMap,
+     IVocabulary,
+     IStringDecoratorValue,
+-} from './spec/concertino.metamodel@4.0.0-alpha.2';
++} from './spec/concertino.metamodel@5.0.0';
+ import {
+     IBooleanProperty,
+     IBooleanScalar,
