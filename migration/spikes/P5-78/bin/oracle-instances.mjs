@@ -138,6 +138,9 @@ for (const source of sources) {
         }
         const options = { ...serializer.defaultOptions, ...(args[1] && typeof args[1] === 'object' ? args[1] : {}) };
         const ref = outcomeOf(() => serializer.toJSON(serializer.fromJSON(args[0], args[1]), args[1]));
+        tally[source] = tally[source] || {};
+        const refKey = ref.ok ? 'R1 accepts' : `R1 throws ${ref.error}`;
+        tally[source][refKey] = (tally[source][refKey] || 0) + 1;
         const docs = {};
         try {
             docs.A = S.convertToConcertino(mm.getAst(true));

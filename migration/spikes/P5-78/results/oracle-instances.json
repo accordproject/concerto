@@ -3,40 +3,65 @@
  "fixtures": "/home/user/concerto/migration/oracle/fixtures",
  "reference": "R1 concerto-core dist + WASM engine",
  "total": {
+  "R1 throws ValidationException": 198,
   "A:same": 1992,
   "B:same": 2072,
+  "R1 accepts": 1641,
+  "R1 throws TypeNotFoundException": 212,
   "not-plain-json": 8,
+  "R1 throws Error": 21,
   "A:prototype-throws": 74,
   "A:class-differs": 6
  },
  "tally": {
   "conformance": {
+   "R1 throws ValidationException": 12,
    "A:same": 36,
-   "B:same": 36
+   "B:same": 36,
+   "R1 accepts": 17,
+   "R1 throws TypeNotFoundException": 7
   },
   "unit": {
+   "R1 accepts": 65,
    "A:same": 130,
    "B:same": 130,
-   "not-plain-json": 1
+   "R1 throws ValidationException": 61,
+   "R1 throws TypeNotFoundException": 1,
+   "not-plain-json": 1,
+   "R1 throws Error": 3
   },
   "data": {
+   "R1 accepts": 1533,
    "A:same": 1742,
    "B:same": 1816,
-   "A:prototype-throws": 74
+   "R1 throws TypeNotFoundException": 195,
+   "R1 throws ValidationException": 85,
+   "A:prototype-throws": 74,
+   "R1 throws Error": 3
   },
   "gaps": {
+   "R1 throws TypeNotFoundException": 6,
    "A:class-differs": 6,
    "B:same": 37,
-   "A:same": 31
+   "R1 throws ValidationException": 15,
+   "A:same": 31,
+   "R1 accepts": 7,
+   "R1 throws Error": 9
   },
   "lifted": {
+   "R1 throws ValidationException": 23,
    "A:same": 47,
    "B:same": 47,
+   "R1 accepts": 15,
+   "R1 throws Error": 6,
+   "R1 throws TypeNotFoundException": 3,
    "not-plain-json": 7
   },
   "supplement": {
+   "R1 throws ValidationException": 2,
    "A:same": 6,
-   "B:same": 6
+   "B:same": 6,
+   "R1 accepts": 4
   }
  },
  "differences": [
