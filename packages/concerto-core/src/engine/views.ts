@@ -885,6 +885,106 @@ const lazyEnv = typeof process === 'undefined' ? undefined : process.env;
 const lazyViewsCheck = lazyEnv?.CONCERTO_LAZY_VIEWS_CHECK === '1';
 
 /**
+ * P5-76 (accordproject/concerto-rust#418): the per-ModelFile state of the
+ * lazy load path, in one record per ModelFile. Each `new ModelFile` used
+ * to insert its key into seven separate weak collections (the stage, the
+ * staged header, the shape-check marks, the lazy mark, the import names
+ * and the deferred declarations), which was about a sixth of the TS-API
+ * `modelfile_new` profile on conformance; one WeakMap entry, with a record
+ * of a fixed shape, does the same job. Each `FileSlot` below keeps the
+ * WeakMap/WeakSet interface of the collection it replaces, keyed weakly by
+ * the ModelFile as before, so its readers and writers are unchanged. An
+ * absent entry is `undefined` in the record (no slot ever stores
+ * `undefined` as a value).
+ */
+interface FileState {
+    stage: Stage | undefined;
+    stagedHeader: StagedHeader | undefined;
+    importNames: { imports: any[]; length: number; names: string[] } | undefined;
+    lazy: true | undefined;
+    shapeChecked: object | undefined;
+    shapePending: true | undefined;
+    deferred: DeferredFile | undefined;
+}
+
+const fileStates = new WeakMap<object, FileState>();
+
+/**
+ * One field of the per-ModelFile record (`fileStates`), with the interface
+ * of the WeakMap (`get`, `set`, `has`, `delete`) or WeakSet (`add`, `has`,
+ * `delete`) it replaces.
+ */
+class FileSlot<K extends keyof FileState> {
+    private readonly field: K;
+
+    /**
+     * @param {string} field the record field this slot reads and writes
+     */
+    constructor(field: K) {
+        this.field = field;
+    }
+
+    /**
+     * @param {*} modelFile the ModelFile
+     * @return {*} the value, or undefined
+     */
+    get(modelFile: any): FileState[K] {
+        return fileStates.get(modelFile)?.[this.field];
+    }
+
+    /**
+     * @param {*} modelFile the ModelFile
+     * @return {boolean} true if a value is set
+     */
+    has(modelFile: any): boolean {
+        const state = fileStates.get(modelFile);
+        return state !== undefined && state[this.field] !== undefined;
+    }
+
+    /**
+     * @param {object} modelFile the ModelFile
+     * @param {*} value the value
+     */
+    set(modelFile: object, value: NonNullable<FileState[K]>): void {
+        let state = fileStates.get(modelFile);
+        if (state === undefined) {
+            state = {
+                stage: undefined,
+                stagedHeader: undefined,
+                importNames: undefined,
+                lazy: undefined,
+                shapeChecked: undefined,
+                shapePending: undefined,
+                deferred: undefined,
+            };
+            fileStates.set(modelFile, state);
+        }
+        state[this.field] = value;
+    }
+
+    /**
+     * WeakSet's `add`, for the slots that hold a mark.
+     * @param {object} modelFile the ModelFile
+     */
+    add(this: FileSlot<'lazy' | 'shapePending'>, modelFile: object): void {
+        this.set(modelFile, true);
+    }
+
+    /**
+     * @param {*} modelFile the ModelFile
+     * @return {boolean} true if a value was set
+     */
+    delete(modelFile: any): boolean {
+        const state = fileStates.get(modelFile);
+        if (state === undefined || state[this.field] === undefined) {
+            return false;
+        }
+        state[this.field] = undefined;
+        return true;
+    }
+}
+
+/**
  * A ModelFile's staged load: the rustHandle it was staged in and its stage id.
  */
 interface Stage {
@@ -896,7 +996,7 @@ interface Stage {
  * The staged load of each lazily built ModelFile, until it is committed or
  * dropped.
  */
-const stages = new WeakMap<object, Stage>();
+const stages = new FileSlot('stage');
 
 /**
  * The rustHandle each ModelFile was registered in from its stage.
@@ -954,7 +1054,7 @@ interface StagedHeader {
  * Never set for a ModelFile that took a P5-27 prestage (`takePrestaged`),
  * whose header is in `stagedHeaders`.
  */
-const stagedFileHeaders = new WeakMap<object, StagedHeader>();
+const stagedFileHeaders = new FileSlot('stagedHeader');
 
 /**
  * P5-32 (accordproject/concerto-rust#342): each ModelFile's `getImports()`
@@ -965,7 +1065,7 @@ const stagedFileHeaders = new WeakMap<object, StagedHeader>();
  * import order, so their `fqn`s are exactly those names, and no engine call
  * is needed. Otherwise `ModelFile.getImports` records its first answer.
  */
-const importNamesMemo = new WeakMap<object, { imports: any[]; length: number; names: string[] }>();
+const importNamesMemo = new FileSlot('importNames');
 
 /**
  * P5-32: records `names` as `modelFile.getImports()` for its current
@@ -1022,7 +1122,7 @@ function checkRecordedImportNames(modelFile: any): void {
  * construction would not have applied to the views the eager constructor
  * built.
  */
-const lazyFiles = new WeakSet<object>();
+const lazyFiles = new FileSlot('lazy');
 
 /**
  * P5-49 (BC-19 with BC-17 and BC-20, R1): for the namespaces a manager
@@ -1088,7 +1188,7 @@ function shapeMemoised(manager: any, namespace: unknown): namespace is string {
  * built from checked models only when every model file of the source
  * manager is here, with the AST it still holds.
  */
-const shapeChecked = new WeakMap<object, object>();
+const shapeChecked = new FileSlot('shapeChecked');
 
 /**
  * P5-68 (BC-19-a, R1): the one AST the next `new ModelFile(manager, ast)`
@@ -1107,7 +1207,7 @@ let trustedAst: object | null = null;
  * AST (`stageModelFileChecked`). `stageModelFile` completes the check on
  * every path, and removes the file.
  */
-const shapePending = new WeakSet<object>();
+const shapePending = new FileSlot('shapePending');
 
 /**
  * P5-49 (BC-19 with BC-17 and BC-20, R1): the strict AST shape check at
@@ -1601,6 +1701,55 @@ function materialise(modelFile: any): void {
 }
 
 /**
+ * The object whose own `key` property is the lazy accessor `get` (or
+ * `set`) belongs to: `receiver` itself, or the first object on its
+ * prototype chain with that accessor. That is the ModelFile the accessor
+ * was installed on, which the accessors used to capture in a closure.
+ * @param {*} receiver the `this` the accessor was called with
+ * @param {string} key `declarations` or `localTypes`
+ * @param {Function} accessor the accessor function called
+ * @return {object|undefined} the ModelFile, or undefined
+ */
+function lazyFieldOwner(receiver: any, key: string, accessor: unknown): any {
+    for (let o = receiver; o !== null && o !== undefined && (typeof o === 'object' || typeof o === 'function'); o = Object.getPrototypeOf(o)) {
+        const descriptor = Object.getOwnPropertyDescriptor(o, key);
+        if (descriptor !== undefined) {
+            return descriptor.get === accessor || descriptor.set === accessor ? o : undefined;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * P5-76 (accordproject/concerto-rust#418): the `declarations` and
+ * `localTypes` accessor descriptors, shared by every lazily built
+ * ModelFile. They used to be built per file, with closures over it, so
+ * each file's accessors were new functions: V8 then gave every lazily
+ * built ModelFile a hidden class of its own when they were installed,
+ * which was about 4-7% of the TS-API `modelfile_new` profile. With shared
+ * functions the files share their hidden classes. Each accessor finds its
+ * file from its receiver (`lazyFieldOwner`), and builds it as before.
+ */
+const lazyFieldDescriptors: Record<string, PropertyDescriptor> = {};
+for (const key of ['declarations', 'localTypes']) {
+    const descriptor: PropertyDescriptor = {
+        configurable: true,
+        enumerable: true,
+        get(this: any) {
+            const modelFile = lazyFieldOwner(this, key, descriptor.get);
+            materialise(modelFile);
+            return modelFile[key];
+        },
+        set(this: any, value: any) {
+            const modelFile = lazyFieldOwner(this, key, descriptor.set);
+            materialise(modelFile);
+            modelFile[key] = value;
+        },
+    };
+    lazyFieldDescriptors[key] = descriptor;
+}
+
+/**
  * Installs the `declarations` and `localTypes` accessors that build the
  * declaration views on first use (read or write).
  * @param {object} modelFile the ModelFile
@@ -1609,20 +1758,8 @@ function defineLazyFields(modelFile: any): void {
     if (!deferredFiles.has(modelFile)) {
         deferredFiles.set(modelFile, { byName: undefined, built: new Map(), building: false, batch: undefined });
     }
-    for (const key of ['declarations', 'localTypes']) {
-        Object.defineProperty(modelFile, key, {
-            configurable: true,
-            enumerable: true,
-            get() {
-                materialise(modelFile);
-                return modelFile[key];
-            },
-            set(value) {
-                materialise(modelFile);
-                modelFile[key] = value;
-            },
-        });
-    }
+    Object.defineProperty(modelFile, 'declarations', lazyFieldDescriptors.declarations);
+    Object.defineProperty(modelFile, 'localTypes', lazyFieldDescriptors.localTypes);
 }
 
 /**
@@ -2180,7 +2317,7 @@ interface DeferredFile {
     batch: Batch | null | undefined;
 }
 
-const deferredFiles = new WeakMap<object, DeferredFile>();
+const deferredFiles = new FileSlot('deferred');
 
 /**
  * The metamodel classes `ModelFile._declarationView` builds a view for.

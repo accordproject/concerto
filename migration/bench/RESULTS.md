@@ -74,12 +74,12 @@ takes 70.9 µs, and the count run splits that as follows:
 So even a free engine call would leave conformance at about 3x TS, and
 the current WASM-to-native ratio leaves it near 7x. Reaching 3-4x needs
 two things: less view-side work per ModelFile and a cheaper WASM run of
-the typed read. The view-side work is the WeakMap/WeakSet inserts, the
-FinalizationRegistry and the `defineProperty` calls, about 6-8% of the
-conformance profile. The cheaper WASM run might come from an allocator
-change, which needs a dependency decision. Neither was done here: the
-first is a risky change to the TS view lifecycle and the second is a new
-dependency, so both are follow-up candidates.
+the typed read. The view-side work was trimmed after this table was
+measured (see "View-side trim" below). It moved `modelfile_new` by
+0.94-0.96x through the TS API, which is inside the noise, and
+`add_model_file` on conformance by 0.65x. The cheaper WASM run might come
+from a different WASM global allocator. That is a new dependency, so it
+was not tried here; the P5-76 report raises it as a maintainer decision.
 
 synthetic-large is 80% engine time (2.82 ms against 1.41 ms native) and
 its crate-direct row is still 1.9x TS. That set's remaining native cost is
@@ -118,6 +118,69 @@ The WASM and TS side:
   that the Utf8 bindings give the same results and errors as the string
   ones. The oracle replay shows 0 regressions with no baseline change.
 
+### View-side trim
+
+This was done after the three-round sweep above, so the tables above do not
+include it. In the V8 profile of the TS-API `modelfile_new` loop on
+conformance (`p515-sweep.mjs --mode loop`, 15 s), each `new ModelFile` paid
+for three things on the view side:
+
+- **Separate weak collections.** Each ModelFile was inserted into seven
+  separate weak collections: the stage, the staged header, the two
+  shape-check marks, the lazy mark, the import names and the deferred
+  declarations. Those inserts were about 16% of the profile.
+- **Per-file accessors.** `defineLazyFields` built new `declarations` and
+  `localTypes` accessor closures for every file. V8 then gave every lazily
+  built ModelFile a hidden class of its own. This was about 4-7% of the
+  profile.
+- **The FinalizationRegistry entry.** This was about 2-3% of the profile.
+
+Two changes in `engine/views.ts` address the first two. Neither changes
+behaviour:
+
+- **One record per ModelFile.** One `WeakMap` entry per ModelFile now
+  holds a fixed-shape record of the same seven pieces of state. Each old
+  collection is now a `FileSlot` with the same `get`/`set`/`has`/`delete`/`add`
+  interface, keyed weakly by the ModelFile as before, so no reader or writer
+  changed.
+- **Shared accessor descriptors.** The `declarations` and `localTypes`
+  accessors are now shared by all files. Each accessor finds its file from
+  its receiver: the receiver itself, or the object on its prototype chain
+  that owns the accessor.
+
+The FinalizationRegistry stays. It is what drops the stage of a ModelFile
+that is never added, and removing it would change that lifecycle.
+
+Profile split of the same loop (`results/P5-76/view-trim/cpuprof-after.txt`
+for the last row). The "views" stage also holds the JSON text encode and
+the inlined wasm-bindgen glue of the staging call, which this change does
+not touch:
+
+| step | loop calls in 15 s | views | gc | core |
+|---|---:|---:|---:|---:|
+| before the trim | 6,190 | 39.7% | 13.3% | 40.6% |
+| one record per ModelFile | 7,194 | 32.2% | 10.3% | 50.1% |
+| plus shared accessors | 7,639 | 32.7% | 7.3% | 51.8% |
+
+The time mode ran three interleaved rounds of the dist before and after
+the trim, with the same engine and 30 samples (`results/P5-76/view-trim/`,
+median of the round medians, µs per item):
+
+| op | set | before | after | ratio |
+|---|---|---:|---:|---:|
+| modelfile_new | core-test-data | 123.6 | 118.2 | 0.96 |
+| modelfile_new | conformance | 57.8 | 54.4 | 0.94 |
+| modelfile_new | synthetic-large | 2963.5 | 3088.4 | 1.04 |
+| add_model_file | core-test-data | 148.8 | 135.2 | 0.91 |
+| add_model_file | conformance | 98.0 | 63.7 | 0.65 |
+| add_model_file | synthetic-large | 8502.6 | 8279.8 | 0.97 |
+| mm_new (control) | conformance | 201.8 | 192.7 | 0.96 |
+
+The loop throughput rose by 23% on conformance. In time mode, though, only
+`add_model_file` on conformance moved by more than the 25% noise band.
+`modelfile_new` stays well short of the 3-4x target through the TS API,
+because the WASM run of the typed read is still most of its cost.
+
 Dead ends:
 
 - A generic `Kept` for location gained less than the field-by-field
@@ -127,6 +190,7 @@ Dead ends:
 - serde_json's `raw_value` feature was rejected because it changes how
   `Value` parses a magic key.
 - A faster WASM allocator was not tried, because it is a new dependency.
+  The P5-76 report raises it as a maintainer decision.
 
 # P5-73: `new ModelManager()` with the system models' precomputed verdict (2026-10-01)
 
