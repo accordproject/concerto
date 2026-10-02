@@ -164,7 +164,9 @@ class ModelFile extends Decorated {
         // against the metamodel first, unless the manager opted out with
         // `metamodelValidation: false`, so a malformed AST is an
         // IllegalModelException here, before any part of it is walked.
-        const checkedText: string | undefined = views.checkAstShape(this);
+        // P5-92: what the check hands the staging step is the AST's JSON
+        // text, or the AST in the engine's compact layout.
+        const checkedText: string | object | undefined = views.checkAstShape(this);
         const lazy: boolean = views.stageModelFile(this, checkedText);
         // Set up the decorators.
         this.process();
