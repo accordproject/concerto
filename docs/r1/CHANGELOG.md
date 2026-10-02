@@ -18,7 +18,12 @@ at concerto `09295b075` and concerto-rust `fa4ee0b` (2026-09-30). The
   in the Concerto Rust engine (`concerto-core` crate), shipped to JavaScript
   as a WebAssembly module. The TypeScript API is the same one 5.x has: same
   classes, same exports, same type declarations, apart from the removals listed
-  below.
+  below, and a few return types: `ModelUtil.getShortName`,
+  `getFullyQualifiedName`, `capitalizeFirstLetter` and
+  `removeNamespaceVersionFromFullyQualifiedName` return `string` where 5.x
+  declared `any`, the `yamlToJson` result has `$class: string`, and
+  `ModelUtil.parseNamespace` returns one object type in place of 5.x's union,
+  with `versionParsed` typed `unknown`.
 - **Clearer errors.** Several inputs that crashed the JavaScript runtime in 5.x
   (`TypeError`, `RangeError`, out of memory) now throw an error that names the
   problem: `IllegalModelException` (BC-11, BC-12, BC-15, BC-16),

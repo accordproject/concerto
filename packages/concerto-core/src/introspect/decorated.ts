@@ -43,6 +43,7 @@ import type ModelFile from './modelfile';
 // does not exist, and the relative specifier does not match the flattened
 // chunks' location.
 import { createRequire } from 'module';
+import type { EngineBindings } from '../engine/bindings';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 // P5-10a: memoised per specifier (see introspect/property.ts).
@@ -53,7 +54,7 @@ const loadEngine = (specifier: string) =>
     (engineModules[specifier] =
         typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('../engine').rust;
+const rust: EngineBindings = loadEngine('../engine').rust;
 
 /**
  * The shape shared by every metamodel AST node that the introspect classes

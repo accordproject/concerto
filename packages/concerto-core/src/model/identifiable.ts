@@ -136,7 +136,7 @@ class Identifiable extends Typed {
      * Returns a URI representation of a reference to this identifiable
      * @return {String} the URI for the identifiable
      */
-    toURI() {
+    toURI(): string {
         const resourceId = new ResourceId(this.getNamespace(), this.getType(), this.getIdentifier());
         const result = resourceId.toURI();
         return result;

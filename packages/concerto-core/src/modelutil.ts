@@ -71,13 +71,14 @@ import type ModelFile from './introspect/modelfile';
 // cannot find a directory that (like dist/esm/engine/) only has a `.mjs`
 // entry.
 import { createRequire } from 'module';
+import type { EngineBindings } from './engine/bindings';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 /* istanbul ignore next */
 const loadEngine = (specifier: string) =>
     typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier);
 /* istanbul ignore next */
-const rust: { [binding: string]: (...args: any[]) => never } = loadEngine('./engine').rust;
+const rust: EngineBindings = loadEngine('./engine').rust;
 
 // P5-06: the pure string-to-value members below cross into the engine once
 // per distinct argument rather than once per call (a model load calls
@@ -192,7 +193,7 @@ class ModelUtil {
      * @return {string[]} - the fully qualified names for that import
      * @private
      */
-    static importFullyQualifiedNames(imp) {
+    static importFullyQualifiedNames(imp): string[] {
         return rust.modelUtilImportFullyQualifiedNames(imp);
     }
 
@@ -216,7 +217,7 @@ class ModelUtil {
      * @return {boolean} - true if the type can be assigned to the property
      * @private
      */
-    static isAssignableTo(modelFile, typeName, property) {
+    static isAssignableTo(modelFile, typeName, property): any {
         return rust.modelUtilIsAssignableTo(modelFile, typeName, property);
     }
 
@@ -236,7 +237,7 @@ class ModelUtil {
      * @return {boolean} true if the field is declared as an enumeration
      * @private
      */
-    static isEnum(field) {
+    static isEnum(field): any {
         return rust.modelUtilIsEnum(field);
     }
 
@@ -246,7 +247,7 @@ class ModelUtil {
      * @return {boolean} true if the field is declared as an map
      * @private
      */
-    static isMap(field) {
+    static isMap(field): any {
         return rust.modelUtilIsMap(field);
     }
 
@@ -256,7 +257,7 @@ class ModelUtil {
      * @return {boolean} true if the field is declared as an scalar
      * @private
      */
-    static isScalar(field) {
+    static isScalar(field): any {
         return rust.modelUtilIsScalar(field);
     }
 
@@ -319,7 +320,7 @@ class ModelUtil {
      * @param {Object} key - the Key of the Map Declaration
      * @return {boolean} true if the Key is a valid Map Key
     */
-    static isValidMapKey(key) {
+    static isValidMapKey(key): boolean {
         return rust.modelUtilIsValidMapKey(key);
     }
 
@@ -329,7 +330,7 @@ class ModelUtil {
      * @param {Object} decl - the Map Key Scalar declaration
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
-    static isValidMapKeyScalar(decl) {
+    static isValidMapKeyScalar(decl): any {
         return rust.modelUtilIsValidMapKeyScalar(decl);
     }
 
@@ -339,7 +340,7 @@ class ModelUtil {
      * @param {Object} value - the Value of the Map Declaration
      * @return {boolean} true if the Value is a valid Map Value
      */
-    static isValidMapValue(value) {
+    static isValidMapValue(value): boolean {
         return rust.modelUtilIsValidMapValue(value);
     }
 }
