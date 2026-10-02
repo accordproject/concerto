@@ -427,8 +427,8 @@ const checks = [
     },
     {
         id: 'VI-JSVALUE-002',
-        covers: 'NaN for an Integer: the verdict is fromJSON\'s (it throws), not that of JSON.stringify\'s null',
-        expect: {ok: {valid: [false, false], first: ['TYPE_VIOLATION', '/age'], orThrow: ['ValidationException', 'TYPE_VIOLATION', '/age'], orThrowDry: ['ValidationException', 'TYPE_VIOLATION', '/age'], fromJson: ['ValidationException', null, null]}},
+        covers: 'NaN for an Integer: the verdict is fromJSON\'s (it throws), not that of JSON.stringify\'s null; the engine reads it as fromJSON sends it, so fromJSON\'s error carries the same details',
+        expect: {ok: {valid: [false, false], first: ['TYPE_VIOLATION', '/age'], orThrow: ['ValidationException', 'TYPE_VIOLATION', '/age'], orThrowDry: ['ValidationException', 'TYPE_VIOLATION', '/age'], fromJson: ['ValidationException', 'TYPE_VIOLATION', '/age']}},
         run: jsValue(() => person({ age: NaN })),
     },
     {
@@ -436,6 +436,110 @@ const checks = [
         covers: 'an object with toJSON for a nested String: the verdict is fromJSON\'s (it throws), not that of what toJSON returns',
         expect: {ok: {valid: [false, false], first: ['TYPE_VIOLATION', '/address/city'], orThrow: ['ValidationException', 'TYPE_VIOLATION', '/address/city'], orThrowDry: ['ValidationException', 'TYPE_VIOLATION', '/address/city'], fromJson: ['ValidationException', null, null]}},
         run: jsValue(() => person({ address: { $class: `${NS}.Address`, city: { toJSON: () => 'Paris' } } })),
+    },
+    {
+        id: 'VI-JSVALUE-005',
+        covers: 'undefined optional fields stay on the engine path: the structured diagnostics (codes, paths, expected), collectAll and hydrate: false, as for plain JSON',
+        expect: {ok: {all: [['MISSING_REQUIRED_PROPERTY', '/address/city', 'String'], ['INVALID_ENUM_VALUE', '/colour', 'org.acme.lifted.p589@1.0.0.Colour']], first: [['MISSING_REQUIRED_PROPERTY', '/address/city', 'String']], dry: [false, null, 0], orThrow: ['ValidationException', 'MISSING_REQUIRED_PROPERTY', '/address/city'], orThrowDry: ['ValidationException', 'MISSING_REQUIRED_PROPERTY', '/address/city'], fromJson: ['ValidationException', 'MISSING_REQUIRED_PROPERTY', '/address/city'], valid: [true, true, 0]}},
+        run: (core) => {
+            const mm = manager(core);
+            if (!mm) {
+                return NO_API;
+            }
+            const input = () => person({ age: undefined, tags: undefined, address: { $class: `${NS}.Address`, zip: undefined }, colour: 'BLUE' });
+            const serializer = mm.getSerializer();
+            const original = serializer.fromJSON;
+            let calls = 0;
+            serializer.fromJSON = function (...args) {
+                calls++;
+                return original.apply(this, args);
+            };
+            let dry;
+            let valid;
+            try {
+                const d = mm.validateInstance(input(), { hydrate: false });
+                dry = [d.valid, d.resource, calls];
+                const v = mm.validateInstance(person({ age: undefined, colour: undefined }), { hydrate: false });
+                valid = [v.valid, mm.validateInstanceOrThrow(person({ age: undefined }), { hydrate: false }) === null, calls];
+            } finally {
+                serializer.fromJSON = original;
+            }
+            return {
+                all: mm.validateInstance(input()).errors.map(triple),
+                first: mm.validateInstance(input(), { collectAll: false }).errors.map(triple),
+                dry,
+                orThrow: thrown(() => mm.validateInstanceOrThrow(input())),
+                orThrowDry: thrown(() => mm.validateInstanceOrThrow(input(), { hydrate: false })),
+                fromJson: thrown(() => mm.getSerializer().fromJSON(input())),
+                valid,
+            };
+        },
+    },
+    {
+        id: 'VI-JSVALUE-006',
+        covers: 'an undefined required field is a missing one, located, as fromJSON throws it; an undefined undeclared key is flagged by rejectUnknownKeys at its own path, as fromJSON flags it',
+        expect: {ok: {required: [['MISSING_REQUIRED_PROPERTY', '/address/city', 'String']], requiredThrow: ['ValidationException', 'MISSING_REQUIRED_PROPERTY', '/address/city'], requiredFromJson: ['ValidationException', 'MISSING_REQUIRED_PROPERTY', '/address/city'], unknownDefault: true, unknown: [['UNDECLARED_FIELD', '/extra', null]], unknownThrow: ['ValidationException', 'UNDECLARED_FIELD', '/extra'], unknownFromJson: ['ValidationException', 'UNDECLARED_FIELD', '/extra']}},
+        run: (core) => {
+            const mm = manager(core);
+            if (!mm) {
+                return NO_API;
+            }
+            const required = () => person({ address: { $class: `${NS}.Address`, city: undefined } });
+            const unknown = () => person({ extra: undefined });
+            const strict = { rejectUnknownKeys: true };
+            return {
+                required: mm.validateInstance(required()).errors.map(triple),
+                requiredThrow: thrown(() => mm.validateInstanceOrThrow(required())),
+                requiredFromJson: thrown(() => mm.getSerializer().fromJSON(required())),
+                unknownDefault: mm.validateInstance(unknown()).valid,
+                unknown: mm.validateInstance(unknown(), strict).errors.map(triple),
+                unknownThrow: thrown(() => mm.validateInstanceOrThrow(unknown(), strict)),
+                unknownFromJson: thrown(() => mm.getSerializer().fromJSON(unknown(), strict)),
+            };
+        },
+    },
+    {
+        id: 'VI-JSVALUE-007',
+        covers: '-0 stays on the engine path: valid where fromJSON accepts it, and alongside an error, the structured diagnostics and collectAll as for plain JSON',
+        expect: {ok: {valid: [true, null, 'ok', 'ok'], all: [['MISSING_REQUIRED_PROPERTY', '/address/city', 'String'], ['INVALID_ENUM_VALUE', '/colour', 'org.acme.lifted.p589@1.0.0.Colour']], orThrow: ['ValidationException', 'MISSING_REQUIRED_PROPERTY', '/address/city'], orThrowDry: ['ValidationException', 'MISSING_REQUIRED_PROPERTY', '/address/city'], fromJson: ['ValidationException', 'MISSING_REQUIRED_PROPERTY', '/address/city']}},
+        run: (core) => {
+            const mm = manager(core);
+            if (!mm) {
+                return NO_API;
+            }
+            const ok = () => person({ age: -0 });
+            const bad = () => person({ age: -0, address: { $class: `${NS}.Address` }, colour: 'BLUE' });
+            const dry = mm.validateInstance(ok(), { hydrate: false });
+            return {
+                valid: [dry.valid, dry.resource, thrown(() => mm.validateInstanceOrThrow(ok())) === 'ok' ? 'ok' : 'threw', thrown(() => mm.getSerializer().fromJSON(ok())) === 'ok' ? 'ok' : 'threw'],
+                all: mm.validateInstance(bad()).errors.map(triple),
+                orThrow: thrown(() => mm.validateInstanceOrThrow(bad())),
+                orThrowDry: thrown(() => mm.validateInstanceOrThrow(bad(), { hydrate: false })),
+                fromJson: thrown(() => mm.getSerializer().fromJSON(bad())),
+            };
+        },
+    },
+    {
+        id: 'VI-JSVALUE-008',
+        covers: 'ClassDeclaration.validateInstance of a document with undefined fields: the #1239 $class check, and the structured diagnostics, on the engine path',
+        expect: {ok: {mismatch: [['NOT_ASSIGNABLE', '', 'org.acme.lifted.p589@1.0.0.Person']], mismatchThrow: ['ValidationException', 'NOT_ASSIGNABLE', ''], bare: [['MISSING_REQUIRED_PROPERTY', '/address/city', 'String']], bareThrow: ['ValidationException', 'MISSING_REQUIRED_PROPERTY', '/address/city'], bareValid: [true, 'org.acme.lifted.p589@1.0.0.Person']}},
+        run: (core) => {
+            const mm = manager(core);
+            if (!mm) {
+                return NO_API;
+            }
+            const decl = mm.getType(`${NS}.Person`);
+            const car = { $class: `${NS}.Car`, vin: '1', extra: undefined };
+            const bare = { email: 'b@example.com', age: undefined, address: { city: undefined } };
+            const ok = { email: 'b@example.com', age: undefined, address: { city: 'Rome' } };
+            return {
+                mismatch: decl.validateInstance(car).errors.map(triple),
+                mismatchThrow: thrown(() => decl.validateInstanceOrThrow(car, { hydrate: false })),
+                bare: decl.validateInstance(bare).errors.map(triple),
+                bareThrow: thrown(() => decl.validateInstanceOrThrow(bare)),
+                bareValid: [decl.validateInstance(ok, { hydrate: false }).valid, decl.validateInstance(ok).resource.getFullyQualifiedType()],
+            };
+        },
     },
     {
         id: 'VI-JSVALUE-004',

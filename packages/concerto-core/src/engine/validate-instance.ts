@@ -24,10 +24,15 @@
 // `collectAll`) every other violation it finds.
 //
 // The engine reads the document as `fromJSON`'s own wire encoding
-// (`encodeValue`), never as `JSON.stringify` text. A JS object that is not
-// plain JSON (a Date, `NaN`, an object with `toJSON`, a lone surrogate, ...)
-// is validated by `fromJSON` itself (`routed`), so the verdict, and the
-// exception class, are always `fromJSON`'s, whatever `hydrate` is.
+// (`encodeValue`), never as `JSON.stringify` text, so a value plain JSON
+// cannot hold (an `undefined` field, `-0`, `NaN`, a Map, ...) reaches it as
+// `fromJSON` sends it, and keeps the engine's structured diagnostics,
+// `collectAll` and `hydrate: false`. Only a document the engine cannot read
+// at all, where `fromJSON` itself falls back to its TS path
+// (`EngineFastPathUnsupported`: a Date, an object with `toJSON`, a lone
+// surrogate, a function, ...), is validated by `fromJSON` itself (`routed`),
+// so the verdict, and the exception class, are always `fromJSON`'s,
+// whatever `hydrate` is.
 //
 // - `validateInstance` returns a ValidationResult. A valid instance's
 //   `resource` is a getter: the Resource is built (by `Serializer.fromJSON`)
@@ -43,8 +48,8 @@
 // concerto-core/tests/oracle/instances.rs) and here by
 // test-lifted/validate-instance.checks.js.
 
-import { handleFor } from './serializer';
-import { encodeValue } from './serializer-codec';
+import { asUnsupported, handleFor } from './serializer';
+import { EngineFastPathUnsupported, encodeValue } from './serializer-codec';
 import TypeNotFoundException from '../typenotfoundexception';
 
 // Types needed for TypeScript generation.
@@ -57,9 +62,6 @@ import type { ValidateInstanceOptions, ValidationDiagnostic, ValidationResult } 
 const THROW = 0;
 const FIRST = 1;
 const ALL = 2;
-
-/** The wire codec's tag key (serializer-codec.ts). */
-const TAG = '@@oracle';
 
 /**
  * The `Serializer.fromJSON` options a call validates with: the model
@@ -82,35 +84,18 @@ function fromJsonOptions(modelManager: BaseModelManager, options: ValidateInstan
 }
 
 /**
- * Whether the wire encoding `value` (`encodeValue`'s output) carries a tag,
- * that is, a value plain JSON cannot hold (`undefined`, `NaN`, `-0`, a Map,
- * a dayjs, a Resource, ...).
- * @param {*} value the encoded value
- * @return {boolean} whether it has a tag
- */
-function hasTag(value: unknown): boolean {
-    if (Array.isArray(value)) {
-        return value.some(hasTag);
-    }
-    if (value !== null && typeof value === 'object') {
-        return Object.prototype.hasOwnProperty.call(value, TAG) || Object.values(value).some(hasTag);
-    }
-    return false;
-}
-
-/**
  * The document: the object `Serializer.fromJSON` is given (JSON text is
- * parsed first, as `JSON.parse` reads it) and, when the engine reads it
- * exactly as `fromJSON` does, its JSON text.
+ * parsed first, as `JSON.parse` reads it) and its wire text, the one
+ * `fromJSON` hands the engine.
  *
  * The text is `fromJSON`'s own wire encoding (`encodeValue`), not
  * `JSON.stringify`, which would turn a value plain JSON cannot hold into
  * another one (a Date into a string, `NaN` into `null`, an object with
- * `toJSON` into what it returns, `undefined` into nothing). A document
- * `encodeValue` cannot carry (`fromJSON` falls back to its TS path) or
- * whose encoding has a tag (`validateInstance`'s engine call reads plain
- * JSON only) has no text: it is validated by `fromJSON` itself
- * (`routed`), so the verdict is always `fromJSON`'s.
+ * `toJSON` into what it returns, `undefined` into nothing): a tagged value
+ * (`undefined`, `-0`, `NaN`, a Map, ...) reaches the engine as it reaches
+ * it from `fromJSON`. A document `encodeValue` cannot carry (`fromJSON`
+ * falls back to its TS path) has no text: it is validated by `fromJSON`
+ * itself (`routed`), so the verdict is always `fromJSON`'s.
  * @param {object|string} json the document: a JSON object, or its text
  * @return {object} `{ object, text }`, `text` being `undefined` for a routed document
  */
@@ -125,7 +110,34 @@ function documentOf(json: unknown): { object: any; text: string | undefined } {
         }
         throw err;
     }
-    return { object, text: hasTag(encoded) ? undefined : JSON.stringify(encoded) };
+    return { object, text: JSON.stringify(encoded) };
+}
+
+/** What `engineCall` returns when the engine cannot read the document. */
+const UNSUPPORTED = Symbol('unsupported');
+
+/**
+ * The engine's `validateInstance` for the document, or `UNSUPPORTED` when
+ * the engine cannot read its wire encoding, where `fromJSON` itself falls
+ * back to its TS path (`asUnsupported`), for the caller to route it
+ * (`routed`). Any other error, an invalid document's in `THROW` mode
+ * included, is thrown.
+ * @param {BaseModelManager} modelManager the model manager
+ * @param {object} doc the document (`documentOf`), with its text
+ * @param {object} merged the `fromJSON` options
+ * @param {string|undefined} fqn the type to validate it as
+ * @param {number} mode `THROW`, `FIRST` or `ALL`
+ * @return {string|symbol} the engine's result text, or `UNSUPPORTED`
+ */
+function engineCall(modelManager: BaseModelManager, doc, merged: any, fqn: string | undefined, mode: number): string | typeof UNSUPPORTED {
+    try {
+        return handleFor(modelManager).validateInstance(doc.text, JSON.stringify(merged), fqn, mode);
+    } catch (err) {
+        if (asUnsupported(err) instanceof EngineFastPathUnsupported) {
+            return UNSUPPORTED;
+        }
+        throw err;
+    }
 }
 
 /**
@@ -286,7 +298,8 @@ function withClass(object: any, fqn?: string): any {
 function validateInstance(modelManager: BaseModelManager, json: unknown, options: ValidateInstanceOptions = {}, fqn?: string): ValidationResult<any> {
     const doc = documentOf(json);
     const merged = fromJsonOptions(modelManager, options);
-    if (doc.text === undefined) {
+    const out = doc.text === undefined ? UNSUPPORTED : engineCall(modelManager, doc, merged, fqn, options.collectAll === false ? FIRST : ALL);
+    if (out === UNSUPPORTED) {
         const { resource, error } = routed(modelManager, doc, merged, fqn);
         if (error !== undefined) {
             const all = finish(routedDiagnostics(error).map((d) => Object.assign({}, d)), options, doc);
@@ -295,7 +308,6 @@ function validateInstance(modelManager: BaseModelManager, json: unknown, options
         }
         return { valid: true, warnings: [], resource: options.hydrate === false ? null : resource };
     }
-    const out = handleFor(modelManager).validateInstance(doc.text, JSON.stringify(merged), fqn, options.collectAll === false ? FIRST : ALL);
     const diagnostics: ValidationDiagnostic[] = finish(JSON.parse(out).diagnostics, options, doc);
     const errors = diagnostics.filter((d) => d.severity === 'error');
     const warnings = diagnostics.filter((d) => d.severity !== 'error');
@@ -327,12 +339,15 @@ function validateInstance(modelManager: BaseModelManager, json: unknown, options
 function validateInstanceOrThrow(modelManager: BaseModelManager, json: unknown, options: ValidateInstanceOptions = {}, fqn?: string): any {
     const doc = documentOf(json);
     const merged = fromJsonOptions(modelManager, options);
-    if (doc.text === undefined) {
+    const viaFromJson = () => {
         const { resource, error } = routed(modelManager, doc, merged, fqn);
         if (error !== undefined) {
             throw withDetails(error, options, doc);
         }
         return options.hydrate === false ? null : resource;
+    };
+    if (doc.text === undefined) {
+        return viaFromJson();
     }
     const object = doc.object;
     // A document of its own type (or with none) goes straight to fromJSON,
@@ -340,10 +355,14 @@ function validateInstanceOrThrow(modelManager: BaseModelManager, json: unknown, 
     // is checked against `fqn` first.
     const sameType = fqn === undefined || (object && typeof object === 'object' && (!object.$class || object.$class === fqn));
     if (options.hydrate === false || !sameType) {
+        let out;
         try {
-            handleFor(modelManager).validateInstance(doc.text, JSON.stringify(merged), fqn, THROW);
+            out = engineCall(modelManager, doc, merged, fqn, THROW);
         } catch (err) {
             throw withDetails(err, options, doc);
+        }
+        if (out === UNSUPPORTED) {
+            return viaFromJson();
         }
         if (options.hydrate === false) {
             return null;
