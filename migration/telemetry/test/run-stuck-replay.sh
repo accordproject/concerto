@@ -9,7 +9,7 @@
 # Exit code 0 = pass, non-zero = fail (see stderr for which rule).
 
 set -euo pipefail
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HERE="$(CDPATH= cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TELEMETRY_DIR="$(dirname "$HERE")"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT

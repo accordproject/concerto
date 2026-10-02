@@ -62,7 +62,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 REPO_NAME="$(basename "$REPO_ROOT")"
 BRANCH="migration-telemetry"

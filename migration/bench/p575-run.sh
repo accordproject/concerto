@@ -23,7 +23,7 @@ REF=migration/oracle/reference/node_modules/@accordproject/concerto-core/dist
 OPS=${P575_OPS:-get_namespaces_first,get_namespaces,add_model_file,mm_new}
 mkdir -p "$OUT/now" "$OUT/before" "$OUT/ts"
 # Absolute, as in p572-run.sh.
-OUT=$(cd "$OUT" && pwd)
+OUT=$(CDPATH= cd -- "$OUT" && pwd)
 
 loads() { awk '{print $1" "$2" "$3}' /proc/loadavg; }
 log() { echo "$*"; echo "$(date -u +%H:%M:%S) $*" >> "$OUT/timed-loads.txt"; }

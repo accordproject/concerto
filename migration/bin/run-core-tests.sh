@@ -21,8 +21,8 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CORE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)/packages/concerto-core"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CORE_DIR="$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd)/packages/concerto-core"
 
 NYC_TEMP_DIR="${NYC_TEMP_DIR:-}"
 NYC_REPORT_DIR="${NYC_REPORT_DIR:-}"
@@ -65,7 +65,7 @@ if [[ ${#FILES[@]} -eq 0 ]]; then
   # dependencies those halves are silently skipped (about 400 pending), so
   # a gate run installs them first. Set CONCERTO_SKIP_REFERENCE_INSTALL=1 to
   # opt out (the run then says so).
-  REF_DIR="$(cd "$SCRIPT_DIR/../oracle/reference" && pwd)"
+  REF_DIR="$(CDPATH= cd -- "$SCRIPT_DIR/../oracle/reference" && pwd)"
   if [[ ! -d "$REF_DIR/node_modules" ]]; then
     if [[ "${CONCERTO_SKIP_REFERENCE_INSTALL:-}" == "1" ]]; then
       echo "WARNING: $REF_DIR has no node_modules; the reference@5.0.0 lifted checks will be skipped (pending)" >&2

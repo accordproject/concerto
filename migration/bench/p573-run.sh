@@ -22,7 +22,7 @@ OUT=$1
 REF=migration/oracle/reference/node_modules/@accordproject/concerto-core/dist
 OPS=mm_new,modelfile_new,add_model_file
 mkdir -p "$OUT/now" "$OUT/before" "$OUT/now-mmvoff"
-OUT=$(cd "$OUT" && pwd)
+OUT=$(CDPATH= cd -- "$OUT" && pwd)
 MMVOFF='{"metamodelValidation":false}'
 SAMPLES=${P573_SAMPLES:-30}
 WARMUP=${P573_WARMUP:-5}

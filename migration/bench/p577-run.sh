@@ -39,7 +39,7 @@ WARMUP=${P577_WARMUP:-5}
 mkdir -p "$OUT/now" "$OUT/before"
 # Absolute, because crate() copies the criterion estimates from inside the
 # target dir (P5-72, P5-74).
-OUT=$(cd "$OUT" && pwd)
+OUT=$(CDPATH= cd -- "$OUT" && pwd)
 
 loads() { awk '{print $1" "$2" "$3}' /proc/loadavg; }
 log() { echo "$*"; echo "$(date -u +%H:%M:%S) $*" >> "$OUT/timed-loads.txt"; }

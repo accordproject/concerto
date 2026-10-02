@@ -32,13 +32,13 @@
 # migration/oracle/coverage-gaps.json and migration/oracle/results/coverage.json.
 set -euo pipefail
 WORK="${1:?usage: coverage.sh <work dir> [--with-suite]}"
-ORACLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REPO_DIR="$(cd "$ORACLE_DIR/../.." && pwd)"
+ORACLE_DIR="$(CDPATH= cd -- "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_DIR="$(CDPATH= cd -- "$ORACLE_DIR/../.." && pwd)"
 CORE_DIR="$REPO_DIR/packages/concerto-core"
 REF_PKG="$ORACLE_DIR/reference/node_modules/@accordproject/concerto-core"
 NYC="$REPO_DIR/node_modules/.bin/nyc"
 mkdir -p "$WORK"
-WORK="$(cd "$WORK" && pwd)"
+WORK="$(CDPATH= cd -- "$WORK" && pwd)"
 export TZ=UTC
 
 # 0. Build the workspace's own compiled output. Leg 2 (corpus -> workspace
