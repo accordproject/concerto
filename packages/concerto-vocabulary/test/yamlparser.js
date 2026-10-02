@@ -171,6 +171,24 @@ describe('validateVocabularyYaml', () => {
             errors.filter(e => e.path === 'locale').should.have.lengthOf(0);
         });
 
+        it('accepts a Unicode extension tag (de-DE-u-co-phonebk)', () => {
+            const yaml = loadFixture(VALID, 'locale_extension_tag.voc');
+            const { errors } = validateVocabularyYaml(yaml);
+            errors.filter(e => e.path === 'locale').should.have.lengthOf(0);
+        });
+
+        it('accepts a three-level tag with script and region (zh-Hant-HK)', () => {
+            const yaml = loadFixture(VALID, 'locale_script_region.voc');
+            const { errors } = validateVocabularyYaml(yaml);
+            errors.filter(e => e.path === 'locale').should.have.lengthOf(0);
+        });
+
+        it('accepts a private-use tag (x-custom)', () => {
+            const yaml = loadFixture(VALID, 'locale_private_use.voc');
+            const { errors } = validateVocabularyYaml(yaml);
+            errors.filter(e => e.path === 'locale').should.have.lengthOf(0);
+        });
+
     });
 
     describe('declarations field', () => {

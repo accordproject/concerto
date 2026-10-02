@@ -13,6 +13,8 @@
  */
 
 import YAML from 'yaml';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bcp47 = require('bcp47') as { parse: (tag: string) => object | null };
 
 export interface VocabularyValidationError {
     path: string;
@@ -132,8 +134,6 @@ function validateDeclarations(pairs: Pairs, errors: VocabularyValidationError[])
     }
 }
 
-// validates locale is present and matches BCP-47 format /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/
-// regex preferred over Intl.Locale — Intl.Locale silently accepts invalid tags like 'not-a-locale' without throwing
 function validateLocale(pairs: Pairs, errors: VocabularyValidationError[]): void {
     const pair = findPair(pairs, 'locale');
     if (!pair) {
@@ -142,8 +142,7 @@ function validateLocale(pairs: Pairs, errors: VocabularyValidationError[]): void
         errors.push({ path: 'locale', message: 'locale must be a non-empty string scalar' });
     } else {
         const val = (pair.value as YAML.Scalar).value as string;
-        // regex rather than Intl.Locale — Intl.Locale accepts invalid tags like 'not-a-locale' without throwing
-        if (!/^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/.test(val)) {
+        if (!bcp47.parse(val)) {
             errors.push({ path: 'locale', message: `locale is not a valid BCP-47 tag: '${val}'` });
         }
     }
