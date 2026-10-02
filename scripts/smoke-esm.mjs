@@ -154,6 +154,30 @@ check('the browser graph leaves no free process identifier', () => {
     assert.deepStrictEqual(offenders, [], 'browser modules reference an unbound `process`');
 });
 
+// esbuild inlines concerto-core's own package.json into both ESM builds, so the
+// version ModelFile checks `concerto version` against is whatever package.json
+// said when the build ran. The CJS build require()s it at runtime and cannot
+// drift. Building before the release version bump once shipped an ESM build
+// that still reported the previous prerelease and rejected models declaring
+// `concerto version "^5.0.0"` (accordproject/concerto#1462). Pinning the model
+// to the exact version on disk catches any gap between the two, including a
+// stale patch version that a caret range would tolerate.
+check('ESM builds carry the version in package.json', async () => {
+    const { version } = require('@accordproject/concerto-core/package.json');
+    const pinnedModel = `concerto version "${version}"\n${MODEL}`;
+    const builds = {
+        'dist/esm': await import('@accordproject/concerto-core'),
+        'dist/esm-browser': await import('@accordproject/concerto-core/dist/esm-browser/index.mjs'),
+    };
+    for (const [build, core] of Object.entries(builds)) {
+        const modelManager = new core.ModelManager();
+        assert.doesNotThrow(
+            () => modelManager.addCTOModel(pinnedModel, 'pinned.cto'),
+            `concerto-core ${build} rejected a model pinned to its package.json version ${version}; was it built before the version bump?`
+        );
+    }
+});
+
 check('ESM and CJS entry points expose the same names', async () => {
     for (const name of [
         '@accordproject/concerto-core',
