@@ -125,7 +125,7 @@ index 70871cc31..afa3556f3 100644
 -// Export types
  export * from './spec/concertino.metamodel@5.0.0';
 diff --git a/packages/concertino/src/concertinoSerializer.ts b/migration/spikes/P5-78/src/concertino/concertinoSerializer.ts
-index c5ade5b08..239c8f737 100644
+index c5ade5b08..2c4faee12 100644
 --- a/packages/concertino/src/concertinoSerializer.ts
 +++ b/migration/spikes/P5-78/src/concertino/concertinoSerializer.ts
 @@ -100,6 +100,18 @@ const VALUE_TYPE_MAP: Record<string, string> = {
@@ -165,7 +165,18 @@ index c5ade5b08..239c8f737 100644
      }
      const propertyType = PROPERTY_TYPE_MAP[property.$class];
      if (!propertyType) {
-@@ -264,7 +276,7 @@ function transformProperties(
+@@ -202,7 +214,9 @@ function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion,
+             }
+         } else if (
+             ['Integer', 'IntegerScalar', 'Long', 'LongScalar', 'Double', 'DoubleScalar'].includes(propertyEntry.type) &&
+-            'lower' in property.validator
++            // P5-78 spike fix: a one-sided range (`range=[,10]`) has no `lower`; the
++            // published converter dropped it.
++            ('lower' in property.validator || 'upper' in property.validator)
+         ) {
+             const lower = property.validator.lower === undefined ? null : property.validator.lower;
+             const upper = property.validator.upper === undefined ? null : property.validator.upper;
+@@ -264,7 +278,7 @@ function transformProperties(
  function mapKeyTypeToString(key: MapKeyTypeUnion, { modelNamespace }: { modelNamespace: string }): string {
      let keyType = KEY_TYPE_MAP[key.$class];
      if (!keyType && 'type' in key) {
@@ -174,7 +185,7 @@ index c5ade5b08..239c8f737 100644
      }
      return keyType;
  }
-@@ -281,7 +293,7 @@ function mapValueTypeToObject(
+@@ -281,7 +295,7 @@ function mapValueTypeToObject(
  ): { type: string; isRelationship?: boolean } {
      let valueType = VALUE_TYPE_MAP[value.$class];
      if (!valueType && 'type' in value) {
@@ -183,7 +194,7 @@ index c5ade5b08..239c8f737 100644
      }
      const result: { type: string; isRelationship?: boolean } = { type: valueType };
      if (value.$class.endsWith('RelationshipMapValueType')) {
-@@ -358,7 +370,7 @@ function transformConceptDeclaration(declaration: IConceptDeclaration, context:
+@@ -358,7 +372,7 @@ function transformConceptDeclaration(declaration: IConceptDeclaration, context:
      }
      if (declaration.superType) {
          const superTypeNamespace = declaration.superType.namespace || context.modelNamespace;
@@ -192,6 +203,15 @@ index c5ade5b08..239c8f737 100644
      }
      if (declaration.isAbstract) {
          result.isAbstract = true;
+@@ -499,7 +513,7 @@ function convertToConcertino(metamodel: IModels): IConcertino {
+                                 // Works for other number scalar types too. We pick the Integer type to satisfy the compiler
+                                 (newProperty as IConcertinoIntegerProperty).range = (scalarDecl as IConcertinoIntegerScalarDeclaration).range;
+                             }
+-                            if ('default' in scalarDecl && scalarDecl.default) {
++                            if ('default' in scalarDecl && scalarDecl.default !== undefined && scalarDecl.default !== null) { // P5-78 spike fix: keep falsy defaults (0, false, '')
+                                 // Works for other number scalar types too. We pick the Integer type to satisfy the compiler
+                                 (newProperty as IConcertinoIntegerProperty).default = (scalarDecl as IConcertinoIntegerScalarDeclaration).default;
+                             }
 diff --git a/packages/concertino/src/metamodelSerializer.ts b/migration/spikes/P5-78/src/concertino/metamodelSerializer.ts
 index 1ce86ad6b..1d3f249af 100644
 --- a/packages/concertino/src/metamodelSerializer.ts

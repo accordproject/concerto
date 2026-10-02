@@ -35,48 +35,7 @@ const S = require(path.join(SPIKE, 'build', 'node-all.cjs'));
 
 const strip = (x) => JSON.parse(JSON.stringify(x, (k, v) => (k === 'location' ? undefined : v)));
 
-// Feature probes the corpora above do not exercise: aliased imports, scalar
-// defaults that are falsy, one-sided ranges, map keys and values of every
-// kind, relationship maps, enum value decorators, model-level decorators.
-const PROBES = [
-    [`namespace probe.base@1.0.0
-abstract concept Thing identified { o String label optional }
-concept Point { o Double x o Double y }
-enum Colour { o RED o GREEN }
-participant Person identified by email { o String email }`,
-    `@ModelLevel("m")
-namespace probe.main@1.0.0
-import probe.base@1.0.0.{Thing as BaseThing, Point, Colour, Person}
-scalar Zero extends Integer default=0 range=[0,]
-scalar Off extends Boolean default=false
-scalar Empty extends String default=""
-scalar Code extends String regex=/^[A-Z]{3}$/u length=[3,3]
-scalar When extends DateTime
-map ByCode { o Code o Point }
-map ByWhen { o When o Colour }
-map People { o String --> Person }
-map Flags { o String o Boolean }
-enum Size { @Term("Small") o S @Ignore o M o L }
-@Term("A widget") @Term_description("Widgets") @Other(1, true, "x", Point, Point[])
-asset Widget extends BaseThing {
-  o Zero count
-  o Off enabled
-  o Empty note
-  o Code code optional
-  o When at optional
-  o ByCode points optional
-  o ByWhen colours optional
-  o People owners optional
-  o Flags flags optional
-  o Size size
-  o Colour[] palette size=[1,] optional
-  o Double ratio range=[,1.0] optional
-  o Long big range=[-5,] optional
-  --> Person maker optional
-  --> Person[] fans optional
-}
-event Ping { o String why optional }`],
-];
+import { PROBES } from './probes.mjs';
 
 function sets() {
     const out = [];
@@ -267,6 +226,7 @@ for (const set of sets()) {
             continue;
         }
         r.withDiffs++;
+        (r.setsWithDiffs = r.setsWithDiffs || []).push({ set: set.name, causes: [...new Set(out.diffs.map((d) => `${kindOf(d)} ${pattern(d.path)}`))] });
         const seen = new Set();
         for (const d of out.diffs) {
             const key = `${kindOf(d)} ${pattern(d.path)}`;

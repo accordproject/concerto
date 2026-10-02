@@ -2,6 +2,11 @@
  "tool": "conformance",
  "conformance": "/home/user/wt/P5-78/conformance-ro",
  "summary": {
+  "probes": {
+   "instances": 36,
+   "sameOutcomeValueOrClass": 36,
+   "r1Throws": 29
+  },
   "instance": {
    "scenarios": 15,
    "r1Pass": 15,
@@ -244,6 +249,691 @@
     "message": "Collection size 6 of tags is outside [2, 5] in org.acme.collections@1.0.0.BoundedTags"
    },
    "sameClass": true
+  }
+ ],
+ "probes": [
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S"
+   },
+   "r1": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.main@1.0.0.Widget\",\"$identifier\":\"w1\",\"count\":0,\"enabled\":false,\"note\":\"\",\"size\":\"S\"}"
+   },
+   "prototype": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.main@1.0.0.Widget\",\"$identifier\":\"w1\",\"count\":0,\"enabled\":false,\"note\":\"\",\"size\":\"S\"}"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "code": "ABC",
+    "at": "2020-01-01T00:00:00Z",
+    "points": {
+     "ABC": {
+      "x": 1,
+      "y": 2
+     }
+    },
+    "colours": {
+     "2020-01-01T00:00:00Z": "RED"
+    },
+    "owners": {
+     "a": "p@x"
+    },
+    "flags": {
+     "a": true
+    },
+    "palette": [
+     "RED"
+    ],
+    "ratio": 0.5,
+    "big": 3,
+    "maker": "p@x",
+    "fans": [
+     "a@b"
+    ]
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Unexpected properties for type probe.base@1.0.0.Colour: 0, 1, 2"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Unexpected properties for type probe.base@1.0.0.Colour: 0, 1, 2"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "code": "abc"
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `probe.main@1.0.0.Widget#w1`. probe.main@1.0.0.Widget.code: Value 'abc' failed to match validation regex: /^[A-Z]{3}$/u"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `probe.main@1.0.0.Widget#w1`. probe.main@1.0.0.Widget.code: Value 'abc' failed to match validation regex: /^[A-Z]{3}$/u"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "code": "ABCD"
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `probe.main@1.0.0.Widget#w1`. probe.main@1.0.0.Widget.code: The string length of 'ABCD' should not exceed 3 characters."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `probe.main@1.0.0.Widget#w1`. probe.main@1.0.0.Widget.code: Value 'ABCD' failed to match validation regex: /^[A-Z]{3}$/u"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "palette": []
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `probe.main@1.0.0.Widget#w1`. probe.main@1.0.0.Widget.palette: Collection must contain at least 1 elements."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Collection size 0 of palette is outside [1, null] in probe.main@1.0.0.Widget#w1"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "ratio": 2
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `probe.main@1.0.0.Widget#w1`. probe.main@1.0.0.Widget.ratio: Value 2 is outside upper bound 1"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `probe.main@1.0.0.Widget#w1`. probe.main@1.0.0.Widget.ratio: Value is outside upper or lower bound 2"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "big": -6
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `probe.main@1.0.0.Widget#w1`. probe.main@1.0.0.Widget.big: Value -6 is outside lower bound -5"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Validator error for field `probe.main@1.0.0.Widget#w1`. probe.main@1.0.0.Widget.big: Value is outside upper or lower bound -6"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "big": 1.5
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.big` to be of type `Long`"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.big` to be of type `Long`"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "count": 2147483648
+   },
+   "r1": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.main@1.0.0.Widget\",\"$identifier\":\"w1\",\"count\":2147483648,\"enabled\":false,\"note\":\"\",\"size\":\"S\"}"
+   },
+   "prototype": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.main@1.0.0.Widget\",\"$identifier\":\"w1\",\"count\":2147483648,\"enabled\":false,\"note\":\"\",\"size\":\"S\"}"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "at": "2020-02-30T00:00:00Z"
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.at` to be of type `DateTime`"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.at` to be of type `DateTime`"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "at": "2020-01-01T00:00:00"
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.at` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.at` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "colours": {
+     "2020-01-01": "RED"
+    }
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Unexpected properties for type probe.base@1.0.0.Colour: 0, 1, 2"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Unexpected properties for type probe.base@1.0.0.Colour: 0, 1, 2"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "colours": {
+     "2020-01-01T00:00:00Z": "BLUE"
+    }
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Unexpected properties for type probe.base@1.0.0.Colour: 0, 1, 2, 3"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Unexpected properties for type probe.base@1.0.0.Colour: 0, 1, 2, 3"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "points": {
+     "abc": {
+      "x": 1,
+      "y": 2
+     }
+    }
+   },
+   "r1": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.main@1.0.0.Widget\",\"$identifier\":\"w1\",\"count\":0,\"enabled\":false,\"note\":\"\",\"points\":{\"abc\":{\"$class\":\"probe.base@1.0.0.Point\",\"x\":1,\"y\":2}},\"size\":\"S\"}"
+   },
+   "prototype": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.main@1.0.0.Widget\",\"$identifier\":\"w1\",\"count\":0,\"enabled\":false,\"note\":\"\",\"points\":{\"abc\":{\"$class\":\"probe.base@1.0.0.Point\",\"x\":1,\"y\":2}},\"size\":\"S\"}"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "points": {
+     "ABC": {
+      "x": "1",
+      "y": 2
+     }
+    }
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.points.x` to be of type `Double`"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.points.x` to be of type `Double`"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "owners": {
+     "a": {
+      "$class": "probe.base@1.0.0.Person",
+      "email": "q"
+     }
+    }
+   },
+   "r1": {
+    "ok": false,
+    "error": "Error",
+    "message": "Invalid JSON data. Found a value that is not a string: [object Object] for relationship RelationshipMapValueType {map=probe.main@1.0.0.People, type=probe.base@1"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "Error",
+    "message": "Invalid JSON data. Found a value that is not a string for relationship probe.base@1.0.0.Person"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "flags": {
+     "a": "yes"
+    }
+   },
+   "r1": {
+    "ok": false,
+    "error": "Error",
+    "message": "Model violation in probe.main@1.0.0.Flags. Expected Type of Boolean but found string instead, for value 'yes'."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "Error",
+    "message": "Model violation in \"probe.main@1.0.0.Flags\". Expected Type of Boolean but found string instead, for value 'yes'."
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "maker": "resource:probe.base@1.0.0.Person#p@x"
+   },
+   "r1": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.main@1.0.0.Widget\",\"$identifier\":\"w1\",\"count\":0,\"enabled\":false,\"maker\":\"resource:probe.base@1.0.0.Person#p@x\",\"note\":\"\",\"size\":\"S\"}"
+   },
+   "prototype": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.main@1.0.0.Widget\",\"$identifier\":\"w1\",\"count\":0,\"enabled\":false,\"maker\":\"resource:probe.base@1.0.0.Person#p@x\",\"note\":\"\",\"size\":\"S\"}"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "maker": "resource:probe.main@1.0.0.Widget#w2"
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Instance \"probe.main@1.0.0.Widget#w1\" has a property \"maker\" with type \"probe.main@1.0.0.Widget\" that is not derived from \"probe.main@1.0.0.Person\"."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Instance probe.main@1.0.0.Widget#w1 invalid relationship: probe.main@1.0.0.Widget is not assignable to probe.base@1.0.0.Person"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "maker": 5
+   },
+   "r1": {
+    "ok": false,
+    "error": "Error",
+    "message": "Invalid JSON data. Found a value that is not a string or object: 5 for relationship RelationshipDeclaration {name=maker, type=probe.base@1.0.0.Person, array=fal"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "Error",
+    "message": "Invalid JSON data. Found a value that is not a string or object for relationship probe.base@1.0.0.Person"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "XL"
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Model violation in the \"probe.main@1.0.0.Widget#w1\" instance. Invalid enum value of \"XL\" for the field \"Size\"."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Instance probe.main@1.0.0.Widget#w1 invalid enum value XL for Size"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "",
+    "size": "S"
+   },
+   "r1": {
+    "ok": false,
+    "error": "Error",
+    "message": "Missing identifier for Type \"Widget\" in namespace \"probe.main@1.0.0\"."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "Error",
+    "message": "Missing identifier for type probe.main@1.0.0.Widget"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": 5,
+    "size": "S"
+   },
+   "r1": {
+    "ok": false,
+    "error": "Error",
+    "message": "Invalid or missing identifier for Type \"Widget\" in namespace \"probe.main@1.0.0\"."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "Error",
+    "message": "Invalid or missing identifier for type probe.main@1.0.0.Widget"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "extra": 1
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Unexpected properties for type probe.main@1.0.0.Widget: extra"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Unexpected properties for type probe.main@1.0.0.Widget: extra"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Widget",
+    "$identifier": "w1",
+    "size": "S",
+    "$timestamp": "2020-01-01T00:00:00Z"
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Unexpected property for type probe.main@1.0.0.Widget: $timestamp"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "The class probe.main@1.0.0.Widget is not a transaction or event, so it cannot have a $timestamp"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.base@1.0.0.Thing",
+    "$identifier": "t"
+   },
+   "r1": {
+    "ok": false,
+    "error": "Error",
+    "message": "Cannot instantiate the abstract type \"Thing\" in the \"probe.base@1.0.0\" namespace."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "Error",
+    "message": "Cannot instantiate the abstract type probe.base@1.0.0.Thing"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.base@1.0.0.Colour"
+   },
+   "r1": {
+    "ok": false,
+    "error": "Error",
+    "message": "Attempting to create an ENUM declaration is not supported."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "Error",
+    "message": "Attempting to create an ENUM declaration is not supported."
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Ping"
+   },
+   "r1": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.main@1.0.0.Ping\",\"$timestamp\":\"<generated>\"}"
+   },
+   "prototype": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.main@1.0.0.Ping\",\"$timestamp\":\"<generated>\"}"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.main@1.0.0.Ping",
+    "why": 3
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.why` to be of type `String`"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "Expected value at path `$.why` to be of type `String`"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.base@1.0.0.Person",
+    "email": "a@b"
+   },
+   "r1": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.base@1.0.0.Person\",\"$identifier\":\"a@b\",\"email\":\"a@b\"}"
+   },
+   "prototype": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.base@1.0.0.Person\",\"$identifier\":\"a@b\",\"email\":\"a@b\"}"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.base@1.0.0.Person"
+   },
+   "r1": {
+    "ok": false,
+    "error": "Error",
+    "message": "Invalid or missing identifier for Type \"Person\" in namespace \"probe.base@1.0.0\"."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "Error",
+    "message": "Invalid or missing identifier for type probe.base@1.0.0.Person"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.base@1.0.0.Point",
+    "x": 1
+   },
+   "r1": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "The instance \"probe.base@1.0.0.Point\" is missing the required field \"y\"."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "ValidationException",
+    "message": "The instance \"probe.base@1.0.0.Point\" is missing the required field \"y\"."
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.base@1.0.0.Point",
+    "x": 1,
+    "y": 1.7976931348623157e+308
+   },
+   "r1": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.base@1.0.0.Point\",\"x\":1,\"y\":1.7976931348623157e+308}"
+   },
+   "prototype": {
+    "ok": true,
+    "value": "{\"$class\":\"probe.base@1.0.0.Point\",\"x\":1,\"y\":1.7976931348623157e+308}"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": "probe.nope@1.0.0.Point"
+   },
+   "r1": {
+    "ok": false,
+    "error": "TypeNotFoundException",
+    "message": "Namespace is not defined for type \"probe.nope@1.0.0.Point\"."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "TypeNotFoundException",
+    "message": "Type probe.nope@1.0.0.Point not found"
+   },
+   "same": true
+  },
+  {
+   "json": {
+    "$class": 5
+   },
+   "r1": {
+    "ok": false,
+    "error": "Error",
+    "message": "a $class that is not a string: 5"
+   },
+   "prototype": {
+    "ok": false,
+    "error": "Error",
+    "message": "a $class that is not a string: 5"
+   },
+   "same": true
+  },
+  {
+   "json": {},
+   "r1": {
+    "ok": false,
+    "error": "Error",
+    "message": "Invalid JSON data. Does not contain a $class type identifier."
+   },
+   "prototype": {
+    "ok": false,
+    "error": "Error",
+    "message": "Invalid JSON data. Does not contain a $class type identifier."
+   },
+   "same": true
   }
  ],
  "semantic": [

@@ -214,7 +214,9 @@ function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion,
             }
         } else if (
             ['Integer', 'IntegerScalar', 'Long', 'LongScalar', 'Double', 'DoubleScalar'].includes(propertyEntry.type) &&
-            'lower' in property.validator
+            // P5-78 spike fix: a one-sided range (`range=[,10]`) has no `lower`; the
+            // published converter dropped it.
+            ('lower' in property.validator || 'upper' in property.validator)
         ) {
             const lower = property.validator.lower === undefined ? null : property.validator.lower;
             const upper = property.validator.upper === undefined ? null : property.validator.upper;
@@ -511,7 +513,7 @@ function convertToConcertino(metamodel: IModels): IConcertino {
                                 // Works for other number scalar types too. We pick the Integer type to satisfy the compiler
                                 (newProperty as IConcertinoIntegerProperty).range = (scalarDecl as IConcertinoIntegerScalarDeclaration).range;
                             }
-                            if ('default' in scalarDecl && scalarDecl.default) {
+                            if ('default' in scalarDecl && scalarDecl.default !== undefined && scalarDecl.default !== null) { // P5-78 spike fix: keep falsy defaults (0, false, '')
                                 // Works for other number scalar types too. We pick the Integer type to satisfy the compiler
                                 (newProperty as IConcertinoIntegerProperty).default = (scalarDecl as IConcertinoIntegerScalarDeclaration).default;
                             }

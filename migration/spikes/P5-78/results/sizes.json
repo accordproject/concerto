@@ -118,9 +118,9 @@
   {
    "id": "o3",
    "label": "(o) concerto-cto + resolver + cleaned converter (CTO -> Concertino)",
-   "raw": 172153,
-   "gzip": 39253,
-   "brotli": 27700,
+   "raw": 172205,
+   "gzip": 39266,
+   "brotli": 27671,
    "ran": true,
    "output": "4",
    "expected": "4",
@@ -133,7 +133,7 @@
     ],
     [
      "concertino/concertinoSerializer.ts",
-     6484
+     6536
     ],
     [
      "resolver.ts",
@@ -254,9 +254,9 @@
   {
    "id": "i1",
    "label": "(i) cleaned converter: convertToConcertino",
-   "raw": 8726,
-   "gzip": 2488,
-   "brotli": 2243,
+   "raw": 8778,
+   "gzip": 2500,
+   "brotli": 2255,
    "ran": true,
    "output": "4",
    "expected": "4",
@@ -265,7 +265,7 @@
    "topInputs": [
     [
      "concertino/concertinoSerializer.ts",
-     6426
+     6478
     ],
     [
      "app.mjs",
@@ -280,9 +280,9 @@
   {
    "id": "i2",
    "label": "(i) cleaned converter: both directions (ConcertinoConverter)",
-   "raw": 17328,
-   "gzip": 4301,
-   "brotli": 3854,
+   "raw": 17380,
+   "gzip": 4313,
+   "brotli": 3869,
    "ran": true,
    "output": "1",
    "expected": "1",
@@ -295,7 +295,7 @@
     ],
     [
      "concertino/concertinoSerializer.ts",
-     6426
+     6478
     ],
     [
      "app.mjs",
@@ -414,9 +414,9 @@
   {
    "id": "all",
    "label": "all of (o)+(i)+(ii)+(iii): CTO in, validated plain JSON out",
-   "raw": 191739,
-   "gzip": 45269,
-   "brotli": 33127,
+   "raw": 191791,
+   "gzip": 45282,
+   "brotli": 33061,
    "ran": true,
    "output": "[8,42]",
    "expected": "[8,42]",
@@ -433,7 +433,7 @@
     ],
     [
      "concertino/concertinoSerializer.ts",
-     6484
+     6536
     ],
     [
      "resolver.ts",

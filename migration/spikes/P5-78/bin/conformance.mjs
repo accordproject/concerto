@@ -32,6 +32,7 @@ const OUT = opt('--out', path.join(SPIKE, 'results', 'conformance.json'));
 const core = require(path.join(REPO, 'packages', 'concerto-core'));
 const { Parser } = require(path.join(REPO, 'packages', 'concerto-cto'));
 const S = require(path.join(SPIKE, 'build', 'node-all.cjs'));
+const { PROBES, PROBE_INSTANCES } = await import('./probes.mjs');
 
 function scenarios(file) {
     const out = [];
@@ -98,6 +99,33 @@ for (const sc of scenarios(path.join(CONF, 'validate', 'features', 'validate.fea
         sameClass: r1.ok === proto.ok && (r1.ok || r1.error === proto.error) });
 }
 
+// ---- probe instances (bin/probes.mjs): the corners the suite does not reach -------------
+const probes = [];
+{
+    const ctos = PROBES[0];
+    const mm = new core.ModelManager({ importAliasing: true });
+    ctos.forEach((c, i) => mm.addCTOModel(c, `probe${i}.cto`));
+    const s = new core.Serializer(new core.Factory(mm), mm);
+    const m = S.query.load(S.convertToConcertino(S.resolver.resolveModels(ctos.map((c) => Parser.parse(c)), { failFast: true }).models));
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const canon = (v, now) => (Array.isArray(v) ? v.map((x) => canon(x, now)) : v && typeof v === 'object'
+        ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k], now)]))
+        : typeof v === 'string' && (UUID.test(v) || (/^\d{4}-\d{2}-\d{2}T/.test(v) && Math.abs(Date.parse(v) - now) < 120000)) ? '<generated>' : v);
+    const run = (f) => {
+        const now = Date.now();
+        try {
+            return { ok: true, value: JSON.stringify(canon(f(), now)) };
+        } catch (e) {
+            return { ok: false, error: (e && (e.errorClass || e.constructor.name)) || 'Error', message: String(e && e.message).slice(0, 160) };
+        }
+    };
+    for (const json of PROBE_INSTANCES) {
+        const r1 = run(() => s.toJSON(s.fromJSON(json)));
+        const p = run(() => S.validator.normalise(m, json));
+        probes.push({ json, r1, prototype: p, same: r1.ok === p.ok && (r1.ok ? r1.value === p.value : r1.error === p.error) });
+    }
+}
+
 // ---- semantic (model) scenarios through the resolver: option (c) -----------------------
 const sem = [];
 const specDir = path.join(CONF, 'semantic', 'specifications');
@@ -145,6 +173,7 @@ for (const f of fs.readdirSync(path.join(CONF, 'semantic', 'features')).filter((
 const count = (xs, f) => xs.filter(f).length;
 const live = sem.filter((s) => !s.tags.includes('@skip') && !s.tags.includes('@missing-fixture'));
 const summary = {
+    probes: { instances: probes.length, sameOutcomeValueOrClass: count(probes, (x) => x.same), r1Throws: count(probes, (x) => !x.r1.ok) },
     instance: {
         scenarios: inst.length,
         r1Pass: count(inst, (x) => x.r1.pass),
@@ -165,5 +194,5 @@ const summary = {
     },
 };
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
-fs.writeFileSync(OUT, JSON.stringify({ tool: 'conformance', conformance: CONF, summary, instance: inst, semantic: sem }, null, 1));
+fs.writeFileSync(OUT, JSON.stringify({ tool: 'conformance', conformance: CONF, summary, instance: inst, probes, semantic: sem }, null, 1));
 console.log(JSON.stringify(summary, null, 1));

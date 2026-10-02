@@ -230,6 +230,94 @@
      ]
     }
    ],
+   "setsWithDiffs": [
+    {
+     "set": "probe-0",
+     "causes": [
+      "dropped decl(AssetDeclaration).properties[].validator",
+      "dropped decl(AssetDeclaration).superType.resolvedName"
+     ]
+    },
+    {
+     "set": "concerto-core-test-data",
+     "causes": [
+      "changed decl(ConceptDeclaration).properties[].decorators[].arguments[].$class",
+      "changed decl(ConceptDeclaration).decorators[].arguments[].$class",
+      "changed decl(ConceptDeclaration).decorators[].arguments[].value",
+      "changed decl(MapDeclaration).key.decorators[].arguments[].$class",
+      "changed decl(MapDeclaration).value.decorators[].arguments[].$class",
+      "changed decl(MapDeclaration).value.decorators[].arguments[].value",
+      "dropped decl(ConceptDeclaration).properties[].decorators[].arguments[]",
+      "dropped decl(ConceptDeclaration).decorators[].arguments[]",
+      "changed decl(ConceptDeclaration).properties[].decorators[].name",
+      "changed decl(ConceptDeclaration).decorators[].name",
+      "added decl(AssetDeclaration).decorators[].arguments[].type.namespace"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-allpaths-nonstring.cto",
+     "causes": [
+      "changed decl(ConceptDeclaration).properties[].decorators[].arguments[].$class",
+      "changed decl(ConceptDeclaration).decorators[].arguments[].$class",
+      "changed decl(ConceptDeclaration).decorators[].arguments[].value",
+      "changed decl(MapDeclaration).key.decorators[].arguments[].$class",
+      "changed decl(MapDeclaration).value.decorators[].arguments[].$class",
+      "changed decl(MapDeclaration).value.decorators[].arguments[].value"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-falsy-nonstring-prop-term.cto",
+     "causes": [
+      "dropped decl(ConceptDeclaration).properties[].decorators[].arguments[]"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-falsy-term.cto",
+     "causes": [
+      "dropped decl(ConceptDeclaration).properties[].decorators[].arguments[]",
+      "dropped decl(ConceptDeclaration).decorators[].arguments[]"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-type-suffix.cto",
+     "causes": [
+      "changed decl(ConceptDeclaration).properties[].decorators[].name",
+      "changed decl(ConceptDeclaration).decorators[].name"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto",
+     "causes": [
+      "changed decl(ParticipantDeclaration).decorators[].name",
+      "added decl(ParticipantDeclaration).decorators[].arguments",
+      "dropped decl(ParticipantDeclaration).decorators[].arguments"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-yaml-edge-cases.cto",
+     "causes": [
+      "dropped decl(ConceptDeclaration).properties[].decorators[].arguments[]"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decorators/invalid-typeref.cto",
+     "causes": [
+      "added decl(AssetDeclaration).decorators[].arguments[].type.namespace"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decorators/model.cto",
+     "causes": [
+      "added decl(TransactionDeclaration).decorators[].arguments[].type.namespace"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/parser/types.cto",
+     "causes": [
+      "dropped decl(ConceptDeclaration).properties[].validator"
+     ]
+    }
+   ],
    "schemaInvalidSets": [
     {
      "set": "concerto-core-test-data",
@@ -282,21 +370,9 @@
   "cleaned": {
    "converted": 149,
    "throws": [],
-   "lossless": 138,
-   "withDiffs": 11,
+   "lossless": 139,
+   "withDiffs": 10,
    "patterns": {
-    "dropped decl(AssetDeclaration).properties[].validator": {
-     "sets": 1,
-     "occurrences": 1,
-     "example": {
-      "set": "probe-0",
-      "path": "decl(AssetDeclaration).properties[11].validator",
-      "before": {
-       "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
-       "upper": 1
-      }
-     }
-    },
     "changed decl(AssetDeclaration).superType.name": {
      "sets": 1,
      "occurrences": 1,
@@ -475,21 +551,91 @@
       "path": "decl(TransactionDeclaration).decorators[0].arguments[0].type.namespace",
       "after": ""
      }
-    },
-    "dropped decl(ConceptDeclaration).properties[].validator": {
-     "sets": 1,
-     "occurrences": 1,
-     "example": {
-      "set": "packages/concerto-core/test/data/parser/types.cto",
-      "path": "decl(ConceptDeclaration).properties[1].validator",
-      "before": {
-       "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
-       "upper": 10
-      }
-     }
     }
    },
    "schemaInvalid": 2,
+   "setsWithDiffs": [
+    {
+     "set": "probe-0",
+     "causes": [
+      "changed decl(AssetDeclaration).superType.name",
+      "dropped decl(AssetDeclaration).superType.resolvedName"
+     ]
+    },
+    {
+     "set": "concerto-core-test-data",
+     "causes": [
+      "changed decl(ConceptDeclaration).properties[].decorators[].arguments[].$class",
+      "changed decl(ConceptDeclaration).decorators[].arguments[].$class",
+      "changed decl(ConceptDeclaration).decorators[].arguments[].value",
+      "changed decl(MapDeclaration).key.decorators[].arguments[].$class",
+      "changed decl(MapDeclaration).value.decorators[].arguments[].$class",
+      "changed decl(MapDeclaration).value.decorators[].arguments[].value",
+      "dropped decl(ConceptDeclaration).properties[].decorators[].arguments[]",
+      "dropped decl(ConceptDeclaration).decorators[].arguments[]",
+      "changed decl(ConceptDeclaration).properties[].decorators[].name",
+      "changed decl(ConceptDeclaration).decorators[].name",
+      "added decl(AssetDeclaration).decorators[].arguments[].type.namespace"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-allpaths-nonstring.cto",
+     "causes": [
+      "changed decl(ConceptDeclaration).properties[].decorators[].arguments[].$class",
+      "changed decl(ConceptDeclaration).decorators[].arguments[].$class",
+      "changed decl(ConceptDeclaration).decorators[].arguments[].value",
+      "changed decl(MapDeclaration).key.decorators[].arguments[].$class",
+      "changed decl(MapDeclaration).value.decorators[].arguments[].$class",
+      "changed decl(MapDeclaration).value.decorators[].arguments[].value"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-falsy-nonstring-prop-term.cto",
+     "causes": [
+      "dropped decl(ConceptDeclaration).properties[].decorators[].arguments[]"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-falsy-term.cto",
+     "causes": [
+      "dropped decl(ConceptDeclaration).properties[].decorators[].arguments[]",
+      "dropped decl(ConceptDeclaration).decorators[].arguments[]"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-type-suffix.cto",
+     "causes": [
+      "changed decl(ConceptDeclaration).properties[].decorators[].name",
+      "changed decl(ConceptDeclaration).decorators[].name"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto",
+     "causes": [
+      "changed decl(ParticipantDeclaration).decorators[].name",
+      "added decl(ParticipantDeclaration).decorators[].arguments",
+      "dropped decl(ParticipantDeclaration).decorators[].arguments"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decoratorcommands/extract-test-yaml-edge-cases.cto",
+     "causes": [
+      "dropped decl(ConceptDeclaration).properties[].decorators[].arguments[]"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decorators/invalid-typeref.cto",
+     "causes": [
+      "added decl(AssetDeclaration).decorators[].arguments[].type.namespace"
+     ]
+    },
+    {
+     "set": "packages/concerto-core/test/data/decorators/model.cto",
+     "causes": [
+      "added decl(TransactionDeclaration).decorators[].arguments[].type.namespace"
+     ]
+    }
+   ],
    "schemaInvalidSets": [
     {
      "set": "concerto-core-test-data",
@@ -541,12 +687,13 @@
   }
  },
  "sameOutputAsPublished": {
-  "same": 145,
+  "same": 144,
   "differs": [
    "probe-0",
    "concerto-core-test-data",
    "packages/concerto-core/test/data/decorators/invalid-typeref.cto",
-   "packages/concerto-core/test/data/decorators/model.cto"
+   "packages/concerto-core/test/data/decorators/model.cto",
+   "packages/concerto-core/test/data/parser/types.cto"
   ]
  }
 }
