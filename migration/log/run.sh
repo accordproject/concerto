@@ -8,7 +8,7 @@
 # Needs python3 (stdlib only), git, and gh authenticated for the fetch step. See README.md
 # for LOG_UNTIL, CONCERTO_RUST_REPO and the optional transcript inputs.
 set -eu
-here=$(cd "$(dirname "$0")" && pwd)
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 if [ -z "${LOG_SKIP_FETCH:-}" ]; then
   python3 "$here/fetch.py"
 fi

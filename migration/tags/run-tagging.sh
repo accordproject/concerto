@@ -18,9 +18,9 @@
 #                      included like any other test directory).
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MIGRATION_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-REPO_ROOT="$(cd "$MIGRATION_DIR/.." && pwd)"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MIGRATION_DIR="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(CDPATH= cd -- "$MIGRATION_DIR/.." && pwd)"
 CORE_DIR="$REPO_ROOT/packages/concerto-core"
 
 SCRATCH="${1:?usage: run-tagging.sh <scratch-tmp-dir> [file...]}"

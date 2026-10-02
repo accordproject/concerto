@@ -18,8 +18,8 @@
 set -euo pipefail
 
 WORK="${1:?usage: record-all.sh <work dir>}"
-ORACLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CORE_DIR="$(cd "$ORACLE_DIR/../.." && pwd)/packages/concerto-core"
+ORACLE_DIR="$(CDPATH= cd -- "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CORE_DIR="$(CDPATH= cd -- "$ORACLE_DIR/../.." && pwd)/packages/concerto-core"
 JOBS="${JOBS:-4}"
 
 rm -rf "$WORK/raw" "$WORK/blobs" "$WORK/logs"

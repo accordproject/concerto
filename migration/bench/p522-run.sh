@@ -54,7 +54,7 @@ fi
 mkdir -p "$OUT/now" "$OUT/before"
 # Absolute, because crate() copies the criterion estimates from inside the
 # target dir (a relative OUT there loses every crate round).
-OUT=$(cd "$OUT" && pwd)
+OUT=$(CDPATH= cd -- "$OUT" && pwd)
 
 loads() {
   if [ -r /proc/loadavg ]; then awk '{print $1" "$2" "$3}' /proc/loadavg

@@ -33,7 +33,7 @@ MMVOFF='{"metamodelValidation":false}'
 mkdir -p "$OUT/now" "$OUT/before" "$OUT/p560" "$OUT/now-mmvoff"
 # Absolute, because crate() copies the criterion estimates from inside the
 # target dir (a relative OUT there loses every crate round).
-OUT=$(cd "$OUT" && pwd)
+OUT=$(CDPATH= cd -- "$OUT" && pwd)
 
 loads() { awk '{print $1" "$2" "$3}' /proc/loadavg; }
 log() { echo "$*"; echo "$(date -u +%H:%M:%S) $*" >> "$OUT/timed-loads.txt"; }
