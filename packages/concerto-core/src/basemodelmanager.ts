@@ -23,7 +23,8 @@ import ModelUtil from './modelutil';
 import Serializer from './serializer';
 import rootModelModule from './rootmodelhelper';
 import decoratorModelModule from './decoratormodelhelper';
-import type { ModelFileSource, ModelManagerOptions } from './types';
+import type { ModelFileSource, ModelManagerOptions, ValidateInstanceOptions, ValidationResult } from './types';
+import type Resource from './model/resource';
 import type { AstNode } from './introspect/decorated';
 type ModelFileInstance = InstanceType<typeof ModelFile>;
 type ModelFileInput = string | ModelFileInstance;
@@ -1477,6 +1478,37 @@ class BaseModelManager {
      */
     getSerializer() {
         return this.serializer;
+    }
+
+    /**
+     * Validates an instance against the models in this model manager, as
+     * its own `$class` (accordproject/concerto#1239), without building a
+     * Resource: the instance is valid exactly when
+     * {@link Serializer#fromJSON} (with the same options) would accept it.
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {ValidationResult} `{ valid: true, resource, warnings }`, the
+     * resource being built when first read (or `null` with `hydrate: false`),
+     * or `{ valid: false, resource: null, errors, warnings }`, the first
+     * error being the one {@link BaseModelManager#validateInstanceOrThrow}
+     * throws
+     */
+    validateInstance(json: object | string, options?: ValidateInstanceOptions): ValidationResult<Resource> {
+        return loadEngine('./engine/validate-instance').validateInstance(this, json, options);
+    }
+
+    /**
+     * Validates an instance as {@link BaseModelManager#validateInstance}
+     * does, and returns it as a Resource (accordproject/concerto#1239).
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {Resource|null} the resource, or `null` with `hydrate: false`
+     * @throws {ValidationException|TypeNotFoundException|Error} what
+     * {@link Serializer#fromJSON} throws for the instance, with its
+     * diagnostics as `details`
+     */
+    validateInstanceOrThrow(json: object | string, options?: ValidateInstanceOptions): Resource | null {
+        return loadEngine('./engine/validate-instance').validateInstanceOrThrow(this, json, options);
     }
 
     /**

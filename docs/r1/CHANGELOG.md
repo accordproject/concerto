@@ -36,6 +36,35 @@ at concerto `574faa716` and concerto-rust `bfa4a55` (2026-10-02). The
 - **Lazy model views.** Declaration, property, decorator and validator objects
   are built the first time they are read, not when a model file is loaded
   (BC-23).
+- **Validating an instance in one call (additive; BC-26, concerto#1239).**
+  `ModelManager.validateInstance(json, options?)` and
+  `ClassDeclaration.validateInstance(json, options?)` check a JSON object (or
+  its JSON text) against the model without building a `Resource`, and return
+  `{ valid: true, resource, warnings }` or
+  `{ valid: false, resource: null, errors, warnings }`. The `resource` is
+  built only when it is read; `hydrate: false` skips it. Each error is a
+  diagnostic with a stable `code` (`MISSING_REQUIRED_PROPERTY`,
+  `TYPE_VIOLATION`, `UNDECLARED_FIELD` and so on), a JSON Pointer `path`
+  (`/parties/0/email`), the `expected` type, a `severity` and a `message`.
+  Every violation is reported (`collectAll`, on by default), the first being
+  the error `validateInstanceOrThrow` and `Serializer.fromJSON` throw for the
+  same input. `validateInstanceOrThrow(json, options?)` returns the
+  `Resource`, or throws the exception `Serializer.fromJSON` throws. The
+  `ClassDeclaration` forms also check that the instance's `$class` is that
+  type or a subtype of it. The options are `collectAll`, `hydrate`,
+  concerto#1273's `rejectUnknownKeys` and `rejectRequiredNull` (both off by
+  default), `includeActual`, `redactMessages`, and the `Serializer.fromJSON`
+  options that apply (`utcOffset`, `acceptResourcesForRelationships`, with
+  `permitResourcesForRelationships` as a synonym; `strictQualifiedDateTimes`
+  is ignored, as in `fromJSON`). The existing APIs are unchanged.
+- **Value-free error details (additive; concerto#1325).** A diagnostic's
+  `code`, `path`, `expected` and `severity` never quote the instance, so they
+  are safe to log or return to a caller; `message` may quote a value, and
+  `redactMessages: true` builds it from the value-free fields instead. The
+  offending value is in `actual` only with `includeActual: true`. The
+  exceptions `Serializer.fromJSON` and `validateInstanceOrThrow` throw carry
+  the same diagnostics as a `details` property (not enumerable); their class
+  and message are unchanged.
 
 ### Performance
 

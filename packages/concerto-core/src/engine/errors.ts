@@ -41,6 +41,10 @@ interface ErrorPayload {
     location?: unknown;
     errorType?: string;
     modelFile?: unknown;
+    // P5-89 (accordproject/concerto#1325): an error about an instance
+    // (`Serializer.fromJSON`, `validateInstance*`) carries its diagnostics,
+    // `{code, path, expected?, severity, message}`.
+    details?: unknown[];
     // Whether the engine's own contract (concerto-wasm `throw`, mirroring
     // concerto-core's `attach_model_file`) considers this `IllegalModel`
     // error one that TS attaches a model file to at all. False for the
@@ -136,7 +140,15 @@ function makeError(payload: ErrorPayload): Error {
     if (!factory) {
         return new Error(`Unknown engine error kind ${payload.kind}: ${payload.message}`);
     }
-    return factory(payload);
+    const err = factory(payload);
+    // P5-89 (accordproject/concerto#1325): the structured, value-free
+    // details of an instance error, additively. Not enumerable, so the
+    // exception's own enumerable shape (what `JSON.stringify` or a deep
+    // equality sees) is unchanged.
+    if (Array.isArray(payload.details)) {
+        Object.defineProperty(err, 'details', { value: payload.details, enumerable: false, writable: true, configurable: true });
+    }
+    return err;
 }
 
 export { makeError };

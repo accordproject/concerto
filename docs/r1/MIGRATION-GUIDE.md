@@ -255,6 +255,59 @@ format, `YYYY-MM-DDTHH:mm:ss`, an optional fraction of a second, then `Z` or
 - **What to do:** drop or replace non-finite integer values before
   deserialising.
 
+### New: `validateInstance` and `validateInstanceOrThrow` (BC-26, concerto#1239)
+
+This is an addition, not a breaking change: nothing needs to change, and
+`Serializer.fromJSON` and `Resource.validate()` work as before. The new
+methods replace the usual boilerplate for checking JSON against a model.
+
+Before:
+
+```js
+if (data.$class !== templateModel.getFullyQualifiedName()) {
+    throw new Error(`Invalid data, must be a valid instance of ${templateModel.getFullyQualifiedName()} but got: ${JSON.stringify(data)}`);
+}
+const resource = this.getTemplate().getSerializer().fromJSON(data);
+resource.validate();
+this.concertoData = resource;
+```
+
+After:
+
+```js
+this.concertoData = templateModel.validateInstanceOrThrow(data);
+```
+
+Or, to report every problem instead of throwing the first:
+
+```js
+const result = templateModel.validateInstance(data);
+if (!result.valid) return { errors: result.errors };
+this.concertoData = result.resource;
+```
+
+- `templateModel` is a `ClassDeclaration` (`modelManager.getType(fqn)`): the
+  instance's `$class` must be that type or a subtype of it (an instance with
+  no `$class` is read as that type). `modelManager.validateInstance(data)`
+  uses the instance's own `$class` instead.
+- Each entry of `errors` is
+  `{ code, path, expected?, severity, message }`, for example
+  `{ code: 'MISSING_REQUIRED_PROPERTY', path: '/parties/0/email', expected: 'String', severity: 'error', message: '…' }`.
+  The first entry is the error `validateInstanceOrThrow` throws, which is
+  also what `fromJSON` throws for the same data and options.
+- `code`, `path`, `expected` and `severity` never contain values from the
+  instance (concerto#1325). `message` can; pass `redactMessages: true` to
+  build it from the other fields. `includeActual: true` adds the offending
+  value as `actual`.
+- `result.resource` is built on first read. Pass `hydrate: false` to only
+  validate.
+- The exceptions `fromJSON` and `validateInstanceOrThrow` throw now carry
+  the same diagnostics as `err.details`.
+- `rejectUnknownKeys: true` rejects keys the type does not declare, even
+  with a `null` value, and `rejectRequiredNull: true` rejects `null` for a
+  required property (concerto#1273). Both are off by default, as before;
+  `Serializer.fromJSON` accepts them too.
+
 ---
 
 ## Model loading from an AST

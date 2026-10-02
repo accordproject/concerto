@@ -25,6 +25,8 @@ import ModelUtil from '../modelutil';
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type Property from './property';
+import type Resource from '../model/resource';
+import type { ValidateInstanceOptions, ValidationResult } from '../types';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
@@ -451,6 +453,39 @@ class ClassDeclaration extends Declaration {
         // P5-14: the `classDeclarationGetProperty` binding, answered from
         // the view's cached property list when it has one (engine/views.ts).
         return loadEngine('../engine/views').classDeclarationGetProperty(this, name) as Property | null;
+    }
+
+    /**
+     * Validates an instance as this type (accordproject/concerto#1239),
+     * without building a Resource: its own `$class` must be this type or a
+     * subtype of it, and an instance with no `$class` is read as this type.
+     * The instance is valid exactly when {@link Serializer#fromJSON} (with the
+     * same options) would accept it.
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {ValidationResult} `{ valid: true, resource, warnings }`, the
+     * resource being built when first read (or `null` with `hydrate: false`),
+     * or `{ valid: false, resource: null, errors, warnings }`, the first
+     * error being the one {@link ClassDeclaration#validateInstanceOrThrow}
+     * throws
+     */
+    validateInstance(json: object | string, options?: ValidateInstanceOptions): ValidationResult<Resource> {
+        return loadEngine('../engine/validate-instance').validateInstance(this.modelFile.getModelManager(), json, options, this.getFullyQualifiedName());
+    }
+
+    /**
+     * Validates an instance as {@link ClassDeclaration#validateInstance}
+     * does, and returns it as a Resource (accordproject/concerto#1239).
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {Resource|null} the resource, or `null` with `hydrate: false`
+     * @throws {ValidationException|TypeNotFoundException|Error} what
+     * {@link Serializer#fromJSON} throws for the instance, with its
+     * diagnostics as `details`; a ValidationException when its `$class` is
+     * not this type or a subtype of it
+     */
+    validateInstanceOrThrow(json: object | string, options?: ValidateInstanceOptions): Resource | null {
+        return loadEngine('../engine/validate-instance').validateInstanceOrThrow(this.modelFile.getModelManager(), json, options, this.getFullyQualifiedName());
     }
 
     /**
