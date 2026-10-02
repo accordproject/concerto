@@ -1,0 +1,327 @@
+[
+ {
+  "op": "modelfile_new",
+  "set": "concerto-core-test-data",
+  "tsUs": 30.663385714285717,
+  "derivedApiUs": 128.4053,
+  "tableApiUs": 134.09717142857141,
+  "apiRatioRounds": [
+   0.9794368669986802,
+   1.0443273870204064,
+   1.1993204924568581
+  ],
+  "derivedCrateUs": 29.923446900093367,
+  "tableCrateUs": 36.19748840107261,
+  "crateRatioRounds": [
+   1.2018597406447413,
+   1.1797471910904063,
+   1.4983703672957904
+  ],
+  "derivedApiVsTs": 4.187577366584717,
+  "tableApiVsTs": 4.373201729191212,
+  "apiRatio": 1.0443273870204064,
+  "derivedCrateVsTs": 0.975868978687255,
+  "tableCrateVsTs": 1.1804791792515144,
+  "crateRatio": 1.2096697456655525
+ },
+ {
+  "op": "modelfile_new",
+  "set": "conformance",
+  "tsUs": 10.915012195121951,
+  "derivedApiUs": 58.23359756097561,
+  "tableApiUs": 64.39701219512195,
+  "apiRatioRounds": [
+   1.0023293484714109,
+   1.1328089636960015,
+   1.1072036292256193
+  ],
+  "derivedCrateUs": 9.941576490514906,
+  "tableCrateUs": 10.063975818986131,
+  "crateRatioRounds": [
+   0.9926049166911526,
+   1.008642099498761,
+   1.1370050349402676
+  ],
+  "derivedApiVsTs": 5.335183921003853,
+  "tableApiVsTs": 5.899857099921678,
+  "apiRatio": 1.1058394963095437,
+  "derivedCrateVsTs": 0.9108168010071409,
+  "tableCrateVsTs": 0.9220306527448354,
+  "crateRatio": 1.0123118630720191
+ },
+ {
+  "op": "modelfile_new",
+  "set": "synthetic-large",
+  "tsUs": 774.423,
+  "derivedApiUs": 3278.927,
+  "tableApiUs": 3968.6955,
+  "apiRatioRounds": [
+   1.2083477308277981,
+   1.190906116301013,
+   1.2147681410034985
+  ],
+  "derivedCrateUs": 1561.6259977124184,
+  "tableCrateUs": 1783.068062969925,
+  "crateRatioRounds": [
+   0.9342132352651359,
+   1.148171754851852,
+   1.2245670111517433
+  ],
+  "derivedApiVsTs": 4.234025848922359,
+  "tableApiVsTs": 5.124712850728865,
+  "apiRatio": 1.2103640916677925,
+  "derivedCrateVsTs": 2.0165026060853286,
+  "tableCrateVsTs": 2.302447193549165,
+  "crateRatio": 1.1418022404736414
+ },
+ {
+  "op": "add_model_file",
+  "set": "concerto-core-test-data",
+  "tsUs": 96.70954285714286,
+  "derivedApiUs": 190.0536857142857,
+  "tableApiUs": 191.70399999999998,
+  "apiRatioRounds": [
+   1.0219196667457853,
+   1.00868341110835,
+   1.0578473105059805
+  ],
+  "derivedCrateUs": 51.52203324175824,
+  "tableCrateUs": 58.10383065862709,
+  "crateRatioRounds": [
+   1.1225837082497117,
+   1.2286904445565798,
+   1.1175524977944638
+  ],
+  "derivedApiVsTs": 1.9652009522475842,
+  "tableApiVsTs": 1.9822656000264707,
+  "apiRatio": 1.00868341110835,
+  "derivedCrateVsTs": 0.5327502511087806,
+  "tableCrateVsTs": 0.6008076239638186,
+  "crateRatio": 1.1277472374971094
+ },
+ {
+  "op": "add_model_file",
+  "set": "conformance",
+  "tsUs": 35.679268292682934,
+  "derivedApiUs": 78.25886585365855,
+  "tableApiUs": 85.45928048780488,
+  "apiRatioRounds": [
+   1.130818299347003,
+   0.9958435317934053,
+   0.912566127782107
+  ],
+  "derivedCrateUs": 15.210937176644494,
+  "tableCrateUs": 16.434487158167034,
+  "crateRatioRounds": [
+   0.9275114573262956,
+   1.1777801698305115,
+   1.0804388294628702
+  ],
+  "derivedApiVsTs": 2.1933988447209214,
+  "tableApiVsTs": 2.3952083262125297,
+  "apiRatio": 1.092007653773195,
+  "derivedCrateVsTs": 0.4263242466708303,
+  "tableCrateVsTs": 0.4606172700446719,
+  "crateRatio": 1.0804388294628702
+ },
+ {
+  "op": "add_model_file",
+  "set": "synthetic-large",
+  "tsUs": 2600.5305000000003,
+  "derivedApiUs": 5423.7215,
+  "tableApiUs": 5939.919,
+  "apiRatioRounds": [
+   1.775109727371241,
+   1.110841002261546,
+   1.0407523690145226
+  ],
+  "derivedCrateUs": 2441.196902777778,
+  "tableCrateUs": 2825.4655300000004,
+  "crateRatioRounds": [
+   1.1905281288871323,
+   1.1488965159462199,
+   1.111349387379347
+  ],
+  "derivedApiVsTs": 2.0856211838315293,
+  "tableApiVsTs": 2.284118182809238,
+  "apiRatio": 1.095174042398748,
+  "derivedCrateVsTs": 0.9387303485876355,
+  "tableCrateVsTs": 1.0864958246019418,
+  "crateRatio": 1.1574099273946203
+ },
+ {
+  "op": "add_cto_model",
+  "set": "concerto-core-test-data",
+  "tsUs": 525.8969714285714,
+  "derivedApiUs": 619.0565285714285,
+  "tableApiUs": 642.1878428571428,
+  "apiRatioRounds": [
+   1.1926321368379906,
+   1.0922446416761589,
+   1.00274922966301
+  ],
+  "derivedCrateUs": null,
+  "tableCrateUs": null,
+  "crateRatioRounds": [
+   null,
+   null,
+   null
+  ],
+  "derivedApiVsTs": 1.1771441217655125,
+  "tableApiVsTs": 1.2211286197611546,
+  "apiRatio": 1.0373654314559826,
+  "derivedCrateVsTs": null,
+  "tableCrateVsTs": null,
+  "crateRatio": null
+ },
+ {
+  "op": "add_cto_model",
+  "set": "conformance",
+  "tsUs": 178.6928536585366,
+  "derivedApiUs": 265.97618292682927,
+  "tableApiUs": 308.38279268292683,
+  "apiRatioRounds": [
+   0.8079682072196409,
+   1.159437620652537,
+   1.447922320941641
+  ],
+  "derivedCrateUs": null,
+  "tableCrateUs": null,
+  "crateRatioRounds": [
+   null,
+   null,
+   null
+  ],
+  "derivedApiVsTs": 1.4884545043702868,
+  "tableApiVsTs": 1.7257701489966364,
+  "apiRatio": 1.159437620652537,
+  "derivedCrateVsTs": null,
+  "tableCrateVsTs": null,
+  "crateRatio": null
+ },
+ {
+  "op": "add_cto_model",
+  "set": "synthetic-large",
+  "tsUs": 24494.0055,
+  "derivedApiUs": 28138.1485,
+  "tableApiUs": 33072.542,
+  "apiRatioRounds": [
+   1.058660273969341,
+   1.1903320220412246,
+   1.3621146698196624
+  ],
+  "derivedCrateUs": null,
+  "tableCrateUs": null,
+  "crateRatioRounds": [
+   null,
+   null,
+   null
+  ],
+  "derivedApiVsTs": 1.1487769323804553,
+  "tableApiVsTs": 1.3502300389374862,
+  "apiRatio": 1.1753631195741256,
+  "derivedCrateVsTs": null,
+  "tableCrateVsTs": null,
+  "crateRatio": null
+ },
+ {
+  "op": "mm_new",
+  "set": "conformance",
+  "tsUs": 419.92249999999996,
+  "derivedApiUs": 407.7765,
+  "tableApiUs": 318.74100000000004,
+  "apiRatioRounds": [
+   0.45329796916775705,
+   1.21361824430785,
+   1.0650643500097565
+  ],
+  "derivedCrateUs": 1.3850989264740428,
+  "tableCrateUs": 1.4254204797306265,
+  "crateRatioRounds": [
+   1.0029490952850497,
+   1.0287917615409359,
+   1.0291109555324165
+  ],
+  "derivedApiVsTs": 0.9710756151432706,
+  "tableApiVsTs": 0.7590472051390437,
+  "apiRatio": 0.7816561278053052,
+  "derivedCrateVsTs": 0.003298463231844073,
+  "tableCrateVsTs": 0.0033944846483115972,
+  "crateRatio": 1.0291109555324165
+ },
+ {
+  "op": "dcs_decorate",
+  "set": "concerto-core-test-data",
+  "tsUs": 44656.083000000006,
+  "derivedApiUs": 38866.882000000005,
+  "tableApiUs": 40620.603,
+  "apiRatioRounds": [
+   1.0722466494739658,
+   1.1024433086714835,
+   0.9899908024699333
+  ],
+  "derivedCrateUs": 23723.283590277777,
+  "tableCrateUs": 22738.929277777777,
+  "crateRatioRounds": [
+   0.954245479323111,
+   1.0564578091536379,
+   0.9196332597968436
+  ],
+  "derivedApiVsTs": 0.8703603045524615,
+  "tableApiVsTs": 0.9096320203453581,
+  "apiRatio": 1.0451212165668446,
+  "derivedCrateVsTs": 0.5312441664504649,
+  "tableCrateVsTs": 0.5092011602938344,
+  "crateRatio": 0.9585068269004968
+ },
+ {
+  "op": "dcs_decorate",
+  "set": "conformance",
+  "tsUs": 21376.956,
+  "derivedApiUs": 23344.595999999998,
+  "tableApiUs": 23834.697500000002,
+  "apiRatioRounds": [
+   1.0892225549758927,
+   1.0853431618813172,
+   0.9532407625863866
+  ],
+  "derivedCrateUs": 7998.707362500001,
+  "tableCrateUs": 7670.5101898395715,
+  "crateRatioRounds": [
+   0.9915062996430746,
+   0.9201468176237426,
+   1.1520575959813404
+  ],
+  "derivedApiVsTs": 1.0920449104166188,
+  "tableApiVsTs": 1.114971537575322,
+  "apiRatio": 1.0209942163916652,
+  "derivedCrateVsTs": 0.3741742913490584,
+  "tableCrateVsTs": 0.35882144257767906,
+  "crateRatio": 0.9589687235966273
+ },
+ {
+  "op": "dcs_decorate",
+  "set": "synthetic-large",
+  "tsUs": 61870.9675,
+  "derivedApiUs": 78966.8025,
+  "tableApiUs": 78841.674,
+  "apiRatioRounds": [
+   1.1132269981431884,
+   0.9410561609101494,
+   0.9002375764899522
+  ],
+  "derivedCrateUs": 39409.185125,
+  "tableCrateUs": 40118.388,
+  "crateRatioRounds": [
+   0.9989255053562,
+   1.0132068247777684,
+   1.0409632739523935
+  ],
+  "derivedApiVsTs": 1.276314331111761,
+  "tableApiVsTs": 1.274291920519911,
+  "apiRatio": 0.9984154290659039,
+  "derivedCrateVsTs": 0.6369576348551524,
+  "tableCrateVsTs": 0.6484202465397038,
+  "crateRatio": 1.0179958776805587
+ }
+]

@@ -1,0 +1,178 @@
+{
+ "base-o3": {
+  "shipped": {
+   "raw": 3051845,
+   "gzip": 976919,
+   "brotli": 636379
+  },
+  "named": {
+   "codeBytes": 2551838,
+   "dataBytes": 489312,
+   "functions": 1698,
+   "areas": {
+    "typed-AST deserialisation": 765266,
+    "other serde deserialisation": 136830,
+    "serde serialisation": 93474,
+    "regress": 249199,
+    "else: concerto_core": 640510,
+    "else: concerto_wasm": 356109,
+    "else: concerto_core_js": 105042,
+    "else: Debug/Display": 59045,
+    "else: drop glue": 20825,
+    "else: other": 125536
+   }
+  }
+ },
+ "derived-o3": {
+  "shipped": {
+   "raw": 3055305,
+   "gzip": 976837,
+   "brotli": 637080
+  },
+  "named": {
+   "codeBytes": 2551970,
+   "dataBytes": 489312,
+   "functions": 1693,
+   "areas": {
+    "typed-AST deserialisation": 765092,
+    "other serde deserialisation": 136699,
+    "serde serialisation": 93474,
+    "regress": 249199,
+    "else: concerto_core": 640920,
+    "else: concerto_wasm": 356136,
+    "else: concerto_core_js": 105042,
+    "else: Debug/Display": 59045,
+    "else: drop glue": 20825,
+    "else: other": 125536
+   }
+  }
+ },
+ "table-o3": {
+  "shipped": {
+   "raw": 2449036,
+   "gzip": 824197,
+   "brotli": 543139
+  },
+  "named": {
+   "codeBytes": 1940212,
+   "dataBytes": 497236,
+   "functions": 1616,
+   "areas": {
+    "typed-AST deserialisation": 208280,
+    "other serde deserialisation": 126836,
+    "serde serialisation": 93386,
+    "regress": 248954,
+    "else: concerto_core": 588722,
+    "else: concerto_wasm": 352429,
+    "else: concerto_core_js": 104846,
+    "else: Debug/Display": 59041,
+    "else: drop glue": 31707,
+    "else: other": 126009
+   }
+  }
+ },
+ "altvalue-o3": {
+  "shipped": {
+   "raw": 2840091,
+   "gzip": 912066,
+   "brotli": 597446
+  },
+  "named": null
+ },
+ "altdeny-o3": {
+  "shipped": {
+   "raw": 3021955,
+   "gzip": 968076,
+   "brotli": 634715
+  },
+  "named": null
+ },
+ "base-z": {
+  "shipped": {
+   "raw": 1814867,
+   "gzip": 642596,
+   "brotli": 461535
+  },
+  "named": {
+   "codeBytes": 1326416,
+   "dataBytes": 474847,
+   "functions": 3050,
+   "areas": {
+    "typed-AST deserialisation": 424973,
+    "other serde deserialisation": 64600,
+    "serde serialisation": 31404,
+    "regress": 101518,
+    "else: concerto_core": 322923,
+    "else: concerto_wasm": 178085,
+    "else: concerto_core_js": 53172,
+    "else: Debug/Display": 7151,
+    "else: drop glue": 5589,
+    "else: other": 136999
+   }
+  }
+ },
+ "derived-z": {
+  "shipped": {
+   "raw": 1814915,
+   "gzip": 642515,
+   "brotli": 461123
+  },
+  "named": {
+   "codeBytes": 1326462,
+   "dataBytes": 474845,
+   "functions": 3052,
+   "areas": {
+    "typed-AST deserialisation": 425043,
+    "other serde deserialisation": 64600,
+    "serde serialisation": 31404,
+    "regress": 101518,
+    "else: concerto_core": 322876,
+    "else: concerto_wasm": 178108,
+    "else: concerto_core_js": 53172,
+    "else: Debug/Display": 7151,
+    "else: drop glue": 5589,
+    "else: other": 136999
+   }
+  }
+ },
+ "table-z": {
+  "shipped": {
+   "raw": 1446491,
+   "gzip": 537960,
+   "brotli": 391959
+  },
+  "named": {
+   "codeBytes": 950438,
+   "dataBytes": 482567,
+   "functions": 2776,
+   "areas": {
+    "typed-AST deserialisation": 116999,
+    "other serde deserialisation": 49440,
+    "serde serialisation": 31394,
+    "regress": 101502,
+    "else: concerto_core": 278630,
+    "else: concerto_wasm": 178236,
+    "else: concerto_core_js": 53156,
+    "else: Debug/Display": 7151,
+    "else: drop glue": 5623,
+    "else: other": 128305
+   }
+  }
+ },
+ "altvalue-z": {
+  "shipped": {
+   "raw": 1675657,
+   "gzip": 602821,
+   "brotli": 433238
+  },
+  "named": null
+ },
+ "altdeny-z": {
+  "shipped": {
+   "raw": 1797267,
+   "gzip": 638768,
+   "brotli": 458364
+  },
+  "named": null
+ }
+}
