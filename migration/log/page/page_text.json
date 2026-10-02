@@ -1,0 +1,540 @@
+{
+ "lede": "The work to run @accordproject/concerto-core 5.0.0 on the Rust engine (concerto-rust, through concerto-wasm), from the tracker's creation on 24 September 2026 to 1 October 2026 16:30 UTC. It was coordinated from issue accordproject/concerto-rust#29 by one coordinator and three workers (local-matt, cloud-2, cloud-3; cloud-main in phase 0). Every figure below links back to an issue, PR, commit or benchmark file.",
+ "status_note": "Behavioural parity holds (0 oracle regressions; the baselined failures are intended R1 breaking changes). The single major release (R1) now carries most breaking fixes. BC-19's strict shape check no longer dominates loading after BC-19-a/b. D1 is 39.7% against a 70% bar, and the web bundle is about 16× the size of v5's.",
+ "tiles": [
+  {
+   "k": "Tasks done",
+   "v": "191 <small>done</small>",
+   "pill": [
+    "ok",
+    "phases 0-4 and 6 closed"
+   ],
+   "n": "10 open in scope: 3 in review (P5-53, P5-63, P5-72), 2 awaiting a decision (P5-39, P5-62), 5 backlog (P5-44..P5-47, #260). 14 post-migration issues open."
+  },
+  {
+   "k": "Logic in Rust (D1)",
+   "v": "39.7% <small>/ 70%</small>",
+   "pill": [
+    "bad",
+    "not met"
+   ],
+   "n": "RUST only 19.1%, from the P5-64 re-audit after the R1 changes (30 Sep 19:27Z). It was 45.3% before the test-support removal and the engine-shim reclassification."
+  },
+  {
+   "k": "Oracle fixtures (native)",
+   "v": "13,861 <small>pass</small>",
+   "pill": [
+    "ok",
+    "0 regressions"
+   ],
+   "n": "Of 16,242 fixtures, 0 regressions. 271 baselined failures are intended R1 breaking changes (strict DateTime, BC-19, BC-39/40, BC-02, the P5-63 fixes); 2,110 unsupported ops stay TS."
+  },
+  {
+   "k": "Conformance (Rust-native harness)",
+   "v": "151 / 158",
+   "n": "P5-62's draft harness (conformance#42), 30 Sep: 151 run and passed, 7 upstream @skip, against the integration branch. On conformance main it is 69/116, because steps and the instance runner are missing.",
+   "pill": [
+    "warn",
+    "draft harness"
+   ]
+  },
+  {
+   "k": "Speed vs TS 5.0.0 (P5-72)",
+   "v": "3.68× <small>model loading</small>",
+   "pill": [
+    "warn",
+    "was 7.32× at P5-60"
+   ],
+   "n": "Geometric means through the TS API in one same-run cloud sweep (1 Oct): introspection 1.48×, serialisation 1.84×, instance creation 1.68×, validation 2.05×. 19 of 73 rows at or below TS; crate-direct 0.31-0.57×."
+  },
+  {
+   "k": "Web bundle (gzip)",
+   "v": "1,536.0 KB <small>v5: 94 KB</small>",
+   "pill": [
+    "warn",
+    "decision pending"
+   ],
+   "n": "E1 with keepNames, P5-72 (+3.6% on P5-60; the .wasm grew 102 KB from P5-63, P5-66 and P5-69). 722 KB was possible with the no-API-change wins (P5-39), which wait on a decision."
+  }
+ ],
+ "cov_note": "Sources: D1 from <span class=\"mono\">migration/ledger/SUMMARY.md</span> at each integration-branch commit; oracle from <span class=\"mono\">concerto-core/tests/oracle/baseline.tsv</span> at each merge (unsupported = corpus total − pass − fail, which matches every published figure); conformance from the Rust-native harness runs cited on each point. The D1 drops on 27-28 Sep are changes in how rows are classified, not code moving back to TS.",
+ "perf_note": "Two harnesses feed these charts: run-ts (the 500-instance workload and model load) and the P5-15 sweep (per model set). Their numbers are not directly comparable. Everything measured after 29 Sep 12:00Z ran in a cloud container; load, load + validate, validateAst and parseNamespace still have laptop figures as their latest (P6-04, P5-20). P5-48's table has both TS-API and crate columns; only TS-API values are drawn. The P5-42 figures come from a design run built without wasm-opt. P5-73's new ModelManager result is recorded as absolute times only (314 → 193 µs), because × TS for that op is not comparable across runs. P5-72's bench files (concerto#1464) are still an unmerged draft; P5-60's were squash-merged as 87b8f3c55.",
+ "wins": [
+  [
+   "Differential oracle at zero unexpected failures",
+   "The native harness went from 1,966 passing fixtures (24 Sep) to 13,921 with 0 failures by 26 Sep, and 14,132 once 211 previously uncompared fixtures were brought in (#265, 27 Sep), with 0 regressions reported at every merge."
+  ],
+  [
+   "Conformance suite doubled",
+   "P5-08 promoted oracle and fuzz cases into concerto-conformance: 75 scenarios became 151, all passing on the Rust-backed engine."
+  ],
+  [
+   "Performance moved from 6-100× slower to near parity for instance work",
+   "fromJSON went from 14.9× (P5-04) to about 0.9× (P5-22); Resource validate from 30.8× to 1.3-2.1×; getNamespaces repeated reads from 23× to 0.3-2.5× (P5-29)."
+  ],
+  [
+   "Divergences recorded, not hidden",
+   "20 DV rows in DIVERGENCES.md, each classified (TS bug, engine, maintainer-accepted), and a breaking-changes plan (BC-02..BC-45, BR-rows) with R1/R2/R3/RB releases."
+  ],
+  [
+   "Fast task cycle",
+   "Median of about 1.5 hours from claim to close across 169 claimed tasks; 233 PRs merged into the integration branches of concerto (102) and concerto-rust (131)."
+  ],
+  [
+   "One major release, fixes pulled forward",
+   "On 29 Sep the maintainer folded R3 into R1. That day BC-05, BC-10, BC-28, BC-41, BC-46, BC-47, BC-48 and BC-50 shipped in the Rust engine, and BC-02, BC-17..BC-20, BC-39 and BC-40 were started."
+  ],
+  [
+   "Instance work at or near parity, crate faster than TS",
+   "In P5-60's same-run sweep, instance creation went from 10.5× to 1.79× TS through the TS API, and every category is faster than TS crate-direct (0.30-0.81×). 46 of 57 crate rows are at or below TS."
+  ],
+  [
+   "BC-19 cost removed",
+   "After BC-19-a/b (P5-68, P5-69): new ModelFile 18.8-30.0× → 5.4-7.4×, addModelFile 9.2-12.3× → 3.3-5.8×, extract* 3.6-12.4× → 2.1-4.7×, decorateModels 1.2-1.6× → 0.75-1.15× TS. The check now costs 1.11-1.25× on new ModelFile and is within noise elsewhere (P5-72)."
+  ],
+  [
+   "new ModelManager regression fixed",
+   "P5-73 cut new ModelManager() from 314 µs to 193 µs (−38%) in a same-run benchmark, with flat controls. The earlier 1.26× TS ratio was partly a measurement artefact: TS 5.0.0's own time for this op varies with the sample count (110 µs at 300 samples, 366 µs at 30, 449 µs in P5-72)."
+  ]
+ ],
+ "challenges": [
+  [
+   "D1 measurement changed twice",
+   "The P5-03 adversarial review found 142 ledger rows marked RUST that made no engine call (#261). After reclassification and the P5-11 review (#276), D1 fell from 85.3% to 39.4%, then recovered to 45.3% after the 14 deferred ports."
+  ],
+  [
+   "Performance gap found late",
+   "P5-04 (26 Sep) measured the engine at 6×-100× slower through the public API. This opened a performance track (P5-06 to P5-42) that was paused once (26 Sep) and restarted (28 Sep)."
+  ],
+  [
+   "Error-parity policy changed mid-stream",
+   "Exact TS message parity was replaced on 27 Sep by 'same throw scenarios, same exception class' (P5-09), which re-classified earlier fuzz and oracle differences."
+  ],
+  [
+   "Review failures and rework",
+   "At least 15 adversarial-review FAIL verdicts sent tasks back (for example P4-10, P5-02 over several rounds, P5-05 T2a/T2c)."
+  ],
+  [
+   "Merge checks ran a narrower test command",
+   "The concerto merge check ran a narrow test command without the lifted checks, so P5-34, P5-43 and P5-35 merged without the full core suite. Fixed upstream in 1f86bc13d (29 Sep)."
+  ],
+  [
+   "Worker process drift",
+   "cloud-3 claimed backlog issues that had not been released (P5-37, P5-39 and P5-41, on 29 Sep at 13:28Z), and merged measure-only or design PRs (P5-22, P5-42)."
+  ],
+  [
+   "Tooling false alarm",
+   "A Node 18 shell made the concerto ESM smoke check look broken; verification now pins Node 22."
+  ],
+  [
+   "BC-19's shape check made loading slower (resolved)",
+   "At the P5-60 head, checkAstShape was 58-87% of new ModelFile/addModelFile time and 28-83% of DCS calls, and model loading was 7-8× TS. BC-19-a (P5-68) and BC-19-b (P5-69) removed most of that cost (see wins)."
+  ]
+ ],
+ "risks": [
+  [
+   "Possible addModelFile stall",
+   "P5-73 found that with new ModelManager, new ModelFile and addModelFile in one process, addModelFile can run 1.8-2.2× slower, from a V8 WeakMap stall on stages.set in engine/views.ts (about 120 µs per call). Not fixed yet; P5-72's other follow-ups (2-4) are deferred to the post-R1 performance milestone."
+  ],
+  [
+   "Bundle size",
+   "1,536.0 KB gzip, about 16× v5 (P5-72). The size wins and the browser loader (P5-44..P5-47) wait on the P5-39 decision."
+  ],
+  [
+   "D1 is below its 70% bar",
+   "39.7% after the P5-64 re-audit (30 Sep), against the 70% bar; the gate reports §0.4 as FAIL by maintainer decision (#276)."
+  ],
+  [
+   "R1 now carries every breaking change",
+   "R1 holds strict DateTime and SemVer, strict AST shape (BC-19), validator exception classes (BC-39), unversioned-namespace rejection (BC-02) and the test-support removals; P5-63 adds six minor TS-bug fixes. BC-04/21/24/27/33/35/44/49 are still to decide."
+  ],
+  [
+   "Open items",
+   "DCO sign-off on two merge commits (#260) is left to the maintainer; 14 post-migration issues remain open, 6 of them fixed by the merged P5-63 but not yet closed."
+  ]
+ ],
+ "gaps": [
+  [
+   "No sourced values before the tracker existed",
+   "Work before 24 Sep 09:51Z is not on GitHub; phase-0 tasks were filed already in review, so their start times are the filing time."
+  ],
+  [
+   "Oracle 'unsupported' is computed",
+   "baseline.tsv lists compared fixtures only; unsupported is corpus total minus pass minus fail. The corpus total (16,085, then 16,242) is from issue comments."
+  ],
+  [
+   "Mixed benchmark runs",
+   "Performance ratios are only comparable within one run. There is no single recent run that covers every operation."
+  ],
+  [
+   "Cloud workers have no transcripts",
+   "cloud-2 and cloud-3 session logs are rebuilt from GitHub activity; their start and end times are first and last visible activity, not session boundaries."
+  ],
+  [
+   "Conformance points are sparse",
+   "The Rust-native harness has four sourced runs: 24 Sep, 27 Sep and two on 30 Sep. The 27 Sep total (108) is computed as run plus @skip-rust, and that source does not state the upstream @skip count."
+  ],
+  [
+   "Session logs",
+   "The coordinator and local-matt transcripts are covered up to 1 Oct 16:39Z (the 30 Sep 09:34Z to 1 Oct gap was filled from the transcripts on 1 Oct). Cloud workers have no transcripts; their logs come from GitHub."
+  ]
+ ],
+ "key_turns": [
+  "2026-09-24T11:26:32Z|29",
+  "2026-09-25T13:37:33Z|71",
+  "2026-09-26T15:17:11Z|72",
+  "2026-09-26T19:29:17Z|227",
+  "2026-09-26T20:47:06Z|73",
+  "2026-09-27T12:17:17Z|73",
+  "2026-09-27T17:49:59Z|261",
+  "2026-09-28T06:14:31Z|276",
+  "2026-09-28T17:18:38Z|287",
+  "2026-09-29T08:46:08Z|327",
+  "2026-09-29T12:46:23Z|328",
+  "2026-09-29T16:13:48Z|None"
+ ],
+ "timeline_extra": [
+  {
+   "ts": "2026-09-24T11:10:34Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "Merge policy: PRs into the integration branch that pass adversarial review and CI merge without human review.",
+   "u": null,
+   "src": "local-matt session log",
+   "key": true
+  },
+  {
+   "ts": "2026-09-24T21:41:29Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "Workers merge their own PRs; the coordinator stops merging and only verifies integration heads (after a double merge of P1-07b).",
+   "u": null,
+   "src": "coordinator session log",
+   "key": false
+  },
+  {
+   "ts": "2026-09-25T07:58:44Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "Workers ignore GitHub content from anyone except the maintainer account.",
+   "u": null,
+   "src": "coordinator session log",
+   "key": false
+  },
+  {
+   "ts": "2026-09-25T08:41:01Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "A third worker, cloud-3, joins and takes its first task.",
+   "u": null,
+   "src": "coordinator session log",
+   "key": false
+  },
+  {
+   "ts": "2026-09-26T10:24:10Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "New worker rules: no rebase or force-push of pushed branches; WASM checks for public Rust type changes.",
+   "u": null,
+   "src": "coordinator session log",
+   "key": false
+  },
+  {
+   "ts": "2026-09-26T12:47:28Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "cloud-2 winds down: no new work, only finishing existing jobs (later exceptions approved on #215 and #218).",
+   "u": null,
+   "src": "coordinator session log",
+   "key": false
+  },
+  {
+   "ts": "2026-09-27T05:52:39Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "Relayed-approvals rule: decisions relayed by a worker need the coordinator's confirmation before dependent merges.",
+   "u": null,
+   "src": "coordinator session log",
+   "key": false
+  },
+  {
+   "ts": "2026-09-27T07:27:15Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "Conformance PRs (P5-08a/b) kept as drafts for the maintainer to review and merge.",
+   "u": null,
+   "src": "coordinator session log",
+   "key": false
+  },
+  {
+   "ts": "2026-09-27T16:56:20Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "Lazy views brought back as planned work (P5-10a/b/c), a day after the lazy-views spike was accepted as no-go for parity.",
+   "u": null,
+   "src": "coordinator session log",
+   "key": true
+  },
+  {
+   "ts": "2026-09-28T16:07:08Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "Productivity rules: batch DECISION NEEDED questions under the mig:needs-decision label, a shared compile cache, and fast/full check tiers.",
+   "u": null,
+   "src": "coordinator session log",
+   "key": false
+  },
+  {
+   "ts": "2026-09-29T08:03:58Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "The local machine is in use by the maintainer: timed work such as benchmarks moves to cloud-3.",
+   "u": null,
+   "src": "local-matt session log",
+   "key": false
+  },
+  {
+   "ts": "2026-09-29T13:28:04Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-37",
+   "issue": 347,
+   "s": "cloud-3 claimed P5-37, P5-39 and P5-41 while they were still in the backlog (not yet released by the coordinator).",
+   "u": "https://github.com/accordproject/concerto-rust/issues/347",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-09-29T14:13:40Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-39",
+   "issue": 349,
+   "s": "P5-39 bundle analysis: the engine's web bundle is 1,485 KB gzip against v5's 89 KB; the no-API-change wins bring it to 722 KB. It also found that minified bundles break constructor.name checks.",
+   "u": "https://github.com/accordproject/concerto-rust/issues/349#issuecomment-5892061203",
+   "src": null,
+   "key": true
+  },
+  {
+   "ts": "2026-09-29T15:43:21Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": 356,
+   "s": "Post-migration issues #356-#362 filed for the remaining TS behaviours in the breaking-changes plan (BC-17..BC-20, BC-39, BC-40, BC-44).",
+   "u": "https://github.com/accordproject/concerto-rust/issues/356",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-09-29T15:59:07Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-42",
+   "issue": 352,
+   "s": "cloud-3 merged the P5-42 design/analysis PR (concerto-rust#363), after merging the measure-only P5-22 PRs earlier the same day.",
+   "u": "https://github.com/accordproject/concerto-rust/pull/363",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-09-29T16:13:48Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "One major release: Q2 answered, R3 folded into R1. R1 schedules BC-02, BC-05, BC-10, BC-17..BC-20, BC-28, BC-39 and BC-40 alongside BC-31, BC-41 and BC-46..BC-50; BC-34 becomes changelog-only.",
+   "u": null,
+   "src": "concerto@7776030be:migration/BREAKING-CHANGES-PLAN.md",
+   "key": true
+  },
+  {
+   "ts": "2026-09-29T16:28:00Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-43",
+   "issue": 364,
+   "s": "P5-43 fixed the constructor.name minified-bundle bug found by P5-39 (an R1 web blocker).",
+   "u": "https://github.com/accordproject/concerto-rust/issues/364",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-09-29T15:57:56Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "Cross-platform research for the web decision: how other Rust-core libraries (Prisma, ICU4X, Automerge, Cedar, tree-sitter and others) ship to browsers, and why Prisma moved chatty work back to TS.",
+   "u": null,
+   "src": "coordinator research note, file saved 15:57Z",
+   "key": false
+  },
+  {
+   "ts": "2026-09-29T17:32:32Z",
+   "k": "plan",
+   "cat": "process",
+   "task": null,
+   "issue": null,
+   "s": "Merge-step check fixed upstream (1f86bc13d): it now runs the full core suite, including the lifted checks.",
+   "u": null,
+   "src": "concerto@1f86bc13d",
+   "key": false
+  },
+  {
+   "ts": "2026-09-30T18:04:33Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-63",
+   "issue": 400,
+   "s": "Maintainer scheduled the six minor-class TS-bug fixes for R1 as P5-63 (BC-01, BC-06, BC-08, BC-11, BC-12, BC-14), plus P5-64 (D1 re-audit) and P5-65 (R1 changelog and migration guide).",
+   "u": "https://github.com/accordproject/concerto-rust/issues/400",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-09-30T19:39:54Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-60",
+   "issue": 392,
+   "s": "P5-60 same-run re-measure: 19 of 73 rows at or below TS through the TS API (5 before); model loading worse (4.99× to 8.31×) because of BC-19's shape check. DECISION NEEDED: BC-19-a and BC-19-b recommended before R1.",
+   "u": "https://github.com/accordproject/concerto-rust/issues/392#issuecomment-5918360835",
+   "src": null,
+   "key": true
+  },
+  {
+   "ts": "2026-09-30T19:27:33Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-64",
+   "issue": 401,
+   "s": "P5-64 re-audit of the D1 ledger after the R1 changes: 39.7% (RUST only 19.1%).",
+   "u": "https://github.com/accordproject/concerto-rust/issues/401",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-09-30T20:03:59Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-60",
+   "issue": 392,
+   "s": "BC-19-a and BC-19-b filed for R1 (P5-68, P5-69) on the P5-60 recommendation.",
+   "u": "https://github.com/accordproject/concerto-rust/issues/392#issuecomment-5918719116",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-09-30T21:25:00Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-68",
+   "issue": 407,
+   "s": "P5-68 (BC-19-a) closed: the shape check is skipped for engine-written ASTs in the DCS result managers.",
+   "u": "https://github.com/accordproject/concerto-rust/issues/407",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-10-01T05:55:36Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-60",
+   "issue": null,
+   "s": "P5-60's bench results merged as a squash commit (concerto#1456, 87b8f3c55).",
+   "u": null,
+   "src": "concerto@87b8f3c55",
+   "key": false
+  },
+  {
+   "ts": "2026-10-01T07:00:00Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-69",
+   "issue": 408,
+   "s": "P5-69 (BC-19-b) closed: the shape check is folded into the strict typed read.",
+   "u": "https://github.com/accordproject/concerto-rust/issues/408",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-10-01T11:06:22Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-72",
+   "issue": 413,
+   "s": "P5-72 same-run re-measure after BC-19-a/b: model loading 3.68× TS (7.32× at the P5-60 head), 19 of 73 rows at or below TS. Follow-up decision pending (options 1-5; 1 and 5 recommended).",
+   "u": "https://github.com/accordproject/concerto-rust/issues/413#issuecomment-5930064181",
+   "src": null,
+   "key": true
+  },
+  {
+   "ts": "2026-10-01T11:18:29Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-72",
+   "issue": 413,
+   "s": "P5-72 follow-ups 1 and 5 filed as P5-73 and P5-74; 2-4 deferred until after R1.",
+   "u": "https://github.com/accordproject/concerto-rust/issues/413#issuecomment-5930235327",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-10-01T11:22:44Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-74",
+   "issue": 415,
+   "s": "P5-74 merged: the bench scripts make their output directory absolute, so crate results are no longer lost.",
+   "u": "https://github.com/accordproject/concerto-rust/issues/415",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-10-01T11:40:46Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-71",
+   "issue": 411,
+   "s": "P5-71 merged (BC-34): the ./dist/* export is removed from concerto-core in R1, with a new exports check; no consumers found across the accordproject org.",
+   "u": "https://github.com/accordproject/concerto-rust/issues/411",
+   "src": null,
+   "key": false
+  },
+  {
+   "ts": "2026-10-01T12:33:15Z",
+   "k": "plan",
+   "cat": "process",
+   "task": "P5-73",
+   "issue": 414,
+   "s": "P5-73 merged: new ModelManager() 314 → 193 µs; TS 5.0.0's own time for this op varies with sample count, so its × TS is not comparable across runs. It also found a possible V8 WeakMap stall in addModelFile.",
+   "u": "https://github.com/accordproject/concerto-rust/issues/414#issuecomment-5931464385",
+   "src": null,
+   "key": true
+  }
+ ],
+ "footer": "Built read-only from GitHub (accordproject/concerto, concerto-rust, concerto-conformance), the git history of <span class=\"mono\">claude/tender-pascal-ocwf9q</span>, and the coordinator and local-worker session logs. Snapshot: 29 September 2026, 15:00 UTC. Tracking PRs: <a href=\"https://github.com/accordproject/concerto/pull/1327\">concerto#1327</a>, <a href=\"https://github.com/accordproject/concerto-rust/pull/78\">concerto-rust#78</a>. Plan: <a href=\"https://github.com/accordproject/concerto-rust/issues/29\">concerto-rust#29</a>."
+}
