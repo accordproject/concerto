@@ -22,9 +22,13 @@
 # leg 2's cross-check src/. Comparing a workspace-src suite run branch-by-id
 # against the reference's branch map reports spurious "unexplained" branches
 # for every layout mismatch between the two, so the suite leg instead runs
-# over a scratch copy of packages/concerto-core whose src/ is replaced with
-# `git archive v5.0.0 -- packages/concerto-core/src` (test/ is unchanged
-# since v5.0.0, so the same tests run; README.md "Coverage"). Then writes
+# over a scratch copy of packages/concerto-core whose src/ AND test/ are
+# replaced with `git archive v5.0.0 -- packages/concerto-core/{src,test}`:
+# the v5.0.0 suite over the v5.0.0 source (README.md "Coverage"). The
+# workspace test/ is no longer the v5.0.0 suite: R1's approved test changes
+# (P5-24, P5-33, P5-49, P5-50, P5-52, P5-63 and the P5-09 allow-list) assert
+# R1 behaviour and fail on v5.0.0 src by design (task P5-86,
+# accordproject/concerto-rust#432). Then writes
 # migration/oracle/coverage-gaps.json and migration/oracle/results/coverage.json.
 set -euo pipefail
 WORK="${1:?usage: coverage.sh <work dir> [--with-suite]}"
@@ -97,15 +101,24 @@ grep -E 'engine=|Statements|Branches|Functions|Lines' "$WORK/corpus-coverage.log
 
 SUITE_ARGS=()
 if [[ "${2:-}" == "--with-suite" ]]; then
-  # Point the suite leg at the v5.0.0 reference src, as leg 1 (corpus ->
-  # frozen reference) already does: swap packages/concerto-core/src for the
-  # frozen tag's own src/ (test/ is unchanged since v5.0.0), run the suite,
-  # then restore the workspace src/ exactly as it was, whatever it held.
-  rm -rf "$WORK/suite-nyc-tmp" "$WORK/suite-nyc-report" "$WORK/suite-src-backup"
+  # Point the suite leg at the v5.0.0 reference, as leg 1 (corpus -> frozen
+  # reference) already does: swap packages/concerto-core/src AND test/ for the
+  # frozen tag's own src/ and test/, run the v5.0.0 suite, then restore the
+  # workspace src/ and test/ exactly as they were, whatever they held.
+  # test/ is swapped too because the workspace test/ carries R1's approved
+  # test changes (P5-86, accordproject/concerto-rust#432): they assert R1
+  # behaviour, so running them against v5.0.0 src fails by design and says
+  # nothing about the reference's coverage. The swap is transient: the
+  # workspace test/ is moved aside and moved back unchanged (never edited).
+  rm -rf "$WORK/suite-nyc-tmp" "$WORK/suite-nyc-report" "$WORK/suite-src-backup" "$WORK/suite-test-backup"
   mv "$CORE_DIR/src" "$WORK/suite-src-backup"
   restore_workspace_src() {
     rm -rf "$CORE_DIR/src"
     mv "$WORK/suite-src-backup" "$CORE_DIR/src"
+    if [[ -d "$WORK/suite-test-backup" ]]; then
+      rm -rf "$CORE_DIR/test"
+      mv "$WORK/suite-test-backup" "$CORE_DIR/test"
+    fi
     # dist/ was just rebuilt from the swapped-in v5.0.0 src below; rebuild it
     # again from the restored workspace src so the worktree isn't left with a
     # dist/ that silently disagrees with its own src/ once this script exits.
@@ -122,6 +135,10 @@ if [[ "${2:-}" == "--with-suite" ]]; then
   # current engine/ over into the swapped-in tree so the build has something to
   # compile there; it isn't exercised by the v5.0.0 test/ suite either way.
   cp -R "$WORK/suite-src-backup/engine" "$CORE_DIR/src/engine"
+  mv "$CORE_DIR/test" "$WORK/suite-test-backup"
+  mkdir -p "$CORE_DIR/test"
+  git -C "$REPO_DIR" archive v5.0.0 -- packages/concerto-core/test \
+    | tar -x -C "$CORE_DIR/test" --strip-components=3
   # The unit tests load the package through its package.json "main"
   # (dist/index.js), not via ts-node, so dist/ must be rebuilt from the
   # swapped-in v5.0.0 src before running them - otherwise mocha runs against
@@ -142,7 +159,7 @@ if [[ "${2:-}" == "--with-suite" ]]; then
   # "clean" suite leg with no unexplained branches. Check the exit status,
   # that at least one test passed, that none failed, and that the reported
   # coverage is non-trivial -- any one of these being off means the suite
-  # didn't actually run over the swapped-in v5.0.0 src/test.
+  # didn't actually run the v5.0.0 suite over the swapped-in v5.0.0 src.
   passing_count="$(grep -oE '[0-9]+ passing' "$WORK/suite-coverage.log" | grep -oE '^[0-9]+' | tail -1 || true)"
   failing_count="$(grep -oE '[0-9]+ failing' "$WORK/suite-coverage.log" | grep -oE '^[0-9]+' | tail -1 || true)"
   statements_pct="$(grep -m1 'Statements' "$WORK/suite-coverage.log" | grep -oE '[0-9]+(\.[0-9]+)?' | head -1 || true)"

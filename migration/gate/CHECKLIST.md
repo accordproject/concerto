@@ -172,6 +172,26 @@ for the numbers as found.
   **Expected:** `migration/oracle/results/coverage.json` → `corpus.statements.pct`
   and `corpus.lines.pct` ≥ 99, `corpus.branches.pct` ≥ 94.8 (the unit suite's
   own coverage of the reference, §0.3's floor).
+
+  **The `--with-suite` leg runs the v5.0.0 suite, not today's `test/`**
+  (task P5-86, accordproject/concerto-rust#432). §0.3a measures coverage of
+  the frozen v5.0.0 reference, so the suite leg swaps in both `src/` and
+  `test/` from `git archive v5.0.0 -- packages/concerto-core/{src,test}`,
+  runs the v5.0.0 suite over the v5.0.0 source, and moves the workspace
+  `src/` and `test/` back unchanged afterwards. It does not run the
+  workspace `test/`: R1's approved test changes (P5-24 strict DateTime,
+  P5-33 and P5-49 black-box rewrites, P5-50, P5-52 `u`-flag RegExp, P5-63,
+  and the P5-09 allow-list in `migration/guardrails/`) assert R1 behaviour,
+  so they fail against v5.0.0 `src/` by design. Before this change the
+  runner reported FAIL on those failures (28 at the P5-82 gate) even with
+  the floor met. The other option, running today's `test/` and excluding
+  the allow-listed cases, was not taken: it would need a second
+  test-selection list that has to follow every future allow-list row, and
+  the black-box rewrites (P5-33, P5-49) replace whole cases, which an
+  exclusion list cannot map back to their v5.0.0 originals. The suite leg
+  only sets the "covered by suite" marks in `coverage-gaps.json`; the
+  `corpus.*` floor numbers come from leg 1 (corpus → frozen reference) and
+  do not depend on it.
 - **Native (`cargo test`):**
   ```
   CONCERTO_ORACLE_FIXTURES=<canonical fixtures> \
