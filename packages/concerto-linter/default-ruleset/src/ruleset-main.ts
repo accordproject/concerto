@@ -23,6 +23,7 @@ import stringLengthValidator from './string-length-validator';
 import noReservedKeywords from './no-reserved-keywords';
 import noEmptyDeclarations from './no-empty-declarations';
 import abstractMustSubclassed from './abstract-must-subclassed';
+import reservedSystemConceptDeclarations from './reserved-system-concept-declarations';
 
 const concertoRuleset: RulesetDefinition = {
     rules: {
@@ -35,6 +36,7 @@ const concertoRuleset: RulesetDefinition = {
         'string-length-validator': stringLengthValidator,
         'no-empty-declarations': noEmptyDeclarations,
         'abstract-must-subclassed': abstractMustSubclassed,
+        'reserved-system-concept-declarations': reservedSystemConceptDeclarations,
     }
 };
 
