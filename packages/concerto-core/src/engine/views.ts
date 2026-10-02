@@ -901,14 +901,61 @@ const lazyViewsCheck = lazyEnv?.CONCERTO_LAZY_VIEWS_CHECK === '1';
 interface FileState {
     stage: Stage | undefined;
     stagedHeader: StagedHeader | undefined;
-    importNames: { imports: any[]; length: number; names: string[] } | undefined;
+    /**
+     * P5-32 `getImports()` names (`recordImportNames`), with the `imports`
+     * array, and its length, they were recorded for.
+     */
+    importNames: string[] | undefined;
+    importNamesFor: any[] | undefined;
+    importNamesLength: number | undefined;
     lazy: true | undefined;
     shapeChecked: object | undefined;
     shapePending: true | undefined;
     deferred: DeferredFile | undefined;
+    /**
+     * P5-91 (accordproject/concerto-rust#437): the P5-27 prestage header
+     * (`takePrestaged`, `applyStagedHeader`), which had a WeakMap of its own.
+     */
+    prestageHeader: any[] | undefined;
+    /**
+     * P5-91: the rustHandle the ModelFile was registered in from its stage
+     * (`commitStaged`, `validateAndCommitStaged`), which had a WeakMap of its
+     * own, so each `addModelFile` inserted one more weak entry.
+     */
+    committed: object | undefined;
 }
 
 const fileStates = new WeakMap<object, FileState>();
+
+/**
+ * P5-91 (accordproject/concerto-rust#437): `modelFile`'s record, created
+ * (with every field absent) when it has none. The load path's steps
+ * (`stageModelFile`, the header, `deferDeclarations`, the commit) each look
+ * the record up once and then read and write its fields directly, instead
+ * of one `fileStates` lookup per slot operation.
+ * @param {object} modelFile the ModelFile
+ * @return {object} its record
+ */
+function fileState(modelFile: object): FileState {
+    let state = fileStates.get(modelFile);
+    if (state === undefined) {
+        state = {
+            stage: undefined,
+            stagedHeader: undefined,
+            importNames: undefined,
+            importNamesFor: undefined,
+            importNamesLength: undefined,
+            lazy: undefined,
+            shapeChecked: undefined,
+            shapePending: undefined,
+            deferred: undefined,
+            prestageHeader: undefined,
+            committed: undefined,
+        };
+        fileStates.set(modelFile, state);
+    }
+    return state;
+}
 
 /**
  * One field of the per-ModelFile record (`fileStates`), with the interface
@@ -947,20 +994,7 @@ class FileSlot<K extends keyof FileState> {
      * @param {*} value the value
      */
     set(modelFile: object, value: NonNullable<FileState[K]>): void {
-        let state = fileStates.get(modelFile);
-        if (state === undefined) {
-            state = {
-                stage: undefined,
-                stagedHeader: undefined,
-                importNames: undefined,
-                lazy: undefined,
-                shapeChecked: undefined,
-                shapePending: undefined,
-                deferred: undefined,
-            };
-            fileStates.set(modelFile, state);
-        }
-        state[this.field] = value;
+        fileState(modelFile)[this.field] = value;
     }
 
     /**
@@ -1000,9 +1034,14 @@ interface Stage {
 const stages = new FileSlot('stage');
 
 /**
- * The rustHandle each ModelFile was registered in from its stage.
+ * The rustHandle `modelFile` was registered in from its stage, or undefined
+ * (P5-91: a field of its `fileStates` record, `committed`).
+ * @param {object} modelFile the ModelFile
+ * @return {object|undefined} the rustHandle
  */
-const committed = new WeakMap<object, any>();
+function committedHandle(modelFile: any): object | undefined {
+    return fileStates.get(modelFile)?.committed;
+}
 
 /**
  * Drops the stage of a ModelFile that is garbage-collected before it is
@@ -1053,7 +1092,7 @@ interface StagedHeader {
  * P5-28: the staged header of each lazily built ModelFile, from
  * `stageModelFile` until its constructor applies it (`applyStagedFileHeader`).
  * Never set for a ModelFile that took a P5-27 prestage (`takePrestaged`),
- * whose header is in `stagedHeaders`.
+ * whose header is its record's `prestageHeader`.
  */
 const stagedFileHeaders = new FileSlot('stagedHeader');
 
@@ -1065,18 +1104,23 @@ const stagedFileHeaders = new FileSlot('stagedHeader');
  * `importShortNames.set(key, fqn)` calls are one per imported name, in
  * import order, so their `fqn`s are exactly those names, and no engine call
  * is needed. Otherwise `ModelFile.getImports` records its first answer.
+ * P5-91 (accordproject/concerto-rust#437): kept in three fields of the
+ * file's `fileStates` record (`importNames`, `importNamesFor`,
+ * `importNamesLength`), so recording allocates no memo object.
  */
-const importNamesMemo = new FileSlot('importNames');
 
 /**
  * P5-32: records `names` as `modelFile.getImports()` for its current
  * `imports` array.
  * @param {object} modelFile the ModelFile
  * @param {string[]} names its imports' fully-qualified names, in order
+ * @param {object} [state] `modelFile`'s `fileStates` record (P5-91)
  */
-function recordImportNames(modelFile: any, names: string[]): void {
+function recordImportNames(modelFile: any, names: string[], state: FileState = fileState(modelFile)): void {
     const imports = modelFile.imports;
-    importNamesMemo.set(modelFile, { imports, length: imports.length, names });
+    state.importNamesFor = imports;
+    state.importNamesLength = imports.length;
+    state.importNames = names;
 }
 
 /**
@@ -1087,12 +1131,13 @@ function recordImportNames(modelFile: any, names: string[]): void {
  * @return {string[] | undefined} a copy of the recorded names, or undefined
  */
 function recordedImportNames(modelFile: any): string[] | undefined {
-    const memo = importNamesMemo.get(modelFile);
+    const state = fileStates.get(modelFile);
     const imports = modelFile.imports;
-    if (memo === undefined || memo.imports !== imports || memo.length !== imports.length) {
+    if (state === undefined || state.importNames === undefined || state.importNamesFor !== imports ||
+        state.importNamesLength !== imports.length) {
         return undefined;
     }
-    return memo.names.slice();
+    return state.importNames.slice();
 }
 
 /**
@@ -1350,19 +1395,21 @@ function astText(ast: any, checked: CheckedAst): string {
  * (`shapeMemoised`), which such an AST never has.
  * @param {object} modelFile the ModelFile being constructed
  * @param {string} [text] the AST's JSON text
+ * @param {object} [state] `modelFile`'s `fileStates` record (P5-91)
  */
-function shapeCheckPassed(modelFile: any, text: string | undefined): void {
-    if (!shapePending.has(modelFile)) {
+function shapeCheckPassed(modelFile: any, text: string | undefined, state: FileState | undefined = fileStates.get(modelFile)): void {
+    // P5-91: `state` is `modelFile`'s record, when the caller has it.
+    if (state === undefined || state.shapePending === undefined) {
         return;
     }
-    shapePending.delete(modelFile);
+    state.shapePending = undefined;
     const manager = modelFile.modelManager;
     const ast = modelFile.ast;
     const namespace = ast.namespace;
     if (shapeMemoised(manager, namespace)) {
         shapeCheckedUnmirrored.set(namespace, text ?? JSON.stringify(ast));
     }
-    shapeChecked.set(modelFile, ast);
+    state.shapeChecked = ast;
 }
 
 /**
@@ -1404,14 +1451,15 @@ function systemModelVerdict(modelFile: any, handle: any, checkedText?: string): 
  * @param {object} modelFile the ModelFile being constructed
  * @param {object} handle the manager's rustHandle
  * @param {string} text the AST's JSON text
+ * @param {object} [state] `modelFile`'s `fileStates` record (P5-91)
  * @throws {IllegalModelException} if the AST does not have the metamodel's shape
  */
-function completeShapeCheck(modelFile: any, handle: any, text: string): void {
-    if (!shapePending.has(modelFile)) {
+function completeShapeCheck(modelFile: any, handle: any, text: string, state: FileState | undefined = fileStates.get(modelFile)): void {
+    if (state === undefined || state.shapePending === undefined) {
         return;
     }
     handle.checkAstShape(text);
-    shapeCheckPassed(modelFile, text);
+    shapeCheckPassed(modelFile, text, state);
 }
 
 /**
@@ -1461,10 +1509,11 @@ function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | u
         return false;
     }
     const header = JSON.parse(systemHeader) as StagedHeader | null;
+    const state = fileState(modelFile);
     if (header !== null) {
-        stagedFileHeaders.set(modelFile, header);
+        state.stagedHeader = header;
     }
-    lazyFiles.add(modelFile);
+    state.lazy = true;
     return true;
 }
 
@@ -1556,16 +1605,20 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             return false;
         }
         const ast = modelFile.ast;
+        // P5-91 (accordproject/concerto-rust#437): the file's record, looked
+        // up (or created) once for the whole step, and the AST's prestage.
+        const state = fileState(modelFile);
+        const prestage = ast && typeof ast === 'object' ? prestaged.get(ast) : undefined;
         // P5-69: a prestaged AST is not loaded again, so it is checked on
         // its own first.
-        if (checkedText !== undefined && ast && typeof ast === 'object' && prestaged.has(ast)) {
-            completeShapeCheck(modelFile, handle, astText(ast, checkedText));
+        if (checkedText !== undefined && prestage !== undefined) {
+            completeShapeCheck(modelFile, handle, astText(ast, checkedText), state);
         }
         // P5-27 (F6): a DecoratorManager result model Rust has already
         // loaded, and staged in this handle (`adoptStagedModels`), is used
         // as it is, without sending its AST again.
-        if (takePrestaged(modelFile, manager, handle, ast)) {
-            lazyFiles.add(modelFile);
+        if (prestage !== undefined && takePrestaged(modelFile, manager, handle, ast, prestage, state)) {
+            state.lazy = true;
             return true;
         }
         // P5-92: the AST in the compact layout, when `checkAstShape` wrote
@@ -1600,14 +1653,14 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             // P5-69: a verdict from a load without the check does not
             // vouch for the shape.
             if (accepted.checked) {
-                shapeCheckPassed(modelFile, text);
+                shapeCheckPassed(modelFile, text, state);
             } else {
-                completeShapeCheck(modelFile, handle, text as string);
+                completeShapeCheck(modelFile, handle, text as string, state);
             }
             if (accepted.header !== null) {
-                stagedFileHeaders.set(modelFile, accepted.header);
+                state.stagedHeader = accepted.header;
             }
-            lazyFiles.add(modelFile);
+            state.lazy = true;
             return true;
         }
         // P5-28 (accordproject/concerto-rust#333): staged and its header
@@ -1617,7 +1670,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         // before.
         let id: number;
         let header: StagedHeader | null = null;
-        const checked = shapePending.has(modelFile);
+        const checked = state.shapePending !== undefined;
         // P5-92: there is text whenever there are no bytes.
         const jsonText = text as string;
         if (compact !== undefined) {
@@ -1629,7 +1682,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
                 : handle.stageModelFileWithHeaderCompact(compact, definitions, fileName));
             id = staged.id;
             header = staged.header;
-            shapeCheckPassed(modelFile, undefined);
+            shapeCheckPassed(modelFile, undefined, state);
         } else if (checked && typeof handle.stageModelFileChecked === 'function') {
             // P5-69 (BC-19-b): the shape check and the load, from one
             // parse of the text. P5-76: the text crosses as UTF-8 bytes
@@ -1639,16 +1692,16 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
                 : handle.stageModelFileChecked(jsonText, definitions, fileName));
             id = staged.id;
             header = staged.header;
-            shapeCheckPassed(modelFile, jsonText);
+            shapeCheckPassed(modelFile, jsonText, state);
         } else if (typeof handle.stageModelFileWithHeader === 'function') {
-            completeShapeCheck(modelFile, handle, jsonText);
+            completeShapeCheck(modelFile, handle, jsonText, state);
             const staged = JSON.parse(typeof handle.stageModelFileWithHeaderUtf8 === 'function'
                 ? handle.stageModelFileWithHeaderUtf8(utf8Text(jsonText), definitions, fileName)
                 : handle.stageModelFileWithHeader(jsonText, definitions, fileName));
             id = staged.id;
             header = staged.header;
         } else {
-            completeShapeCheck(modelFile, handle, jsonText);
+            completeShapeCheck(modelFile, handle, jsonText, state);
             id = handle.stageModelFile(jsonText, definitions, fileName);
         }
         if (key !== null) {
@@ -1658,13 +1711,13 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             acceptedUnmirrored.set(ast, { key, header, checked });
         } else {
             const stage = { handle, id };
-            stages.set(modelFile, stage);
+            state.stage = stage;
             stageFinalizer?.register(modelFile, stage, stage);
         }
         if (header !== null) {
-            stagedFileHeaders.set(modelFile, header);
+            state.stagedHeader = header;
         }
-        lazyFiles.add(modelFile);
+        state.lazy = true;
         return true;
     } catch (e) {
         if (checkedText === undefined && (e as { unreadableAst?: boolean } | null)?.unreadableAst) {
@@ -1712,14 +1765,15 @@ function readUnchecked(modelFile: any, handle: any): void {
  * imports); the caller then calls `modelFileFromAstHeader`, as before.
  * @param {object} modelFile the ModelFile being constructed
  * @param {object} ast the AST its header is read from
+ * @param {object} [state] `modelFile`'s `fileStates` record (P5-91)
  * @return {boolean} true if the header was set
  */
-function applyStagedFileHeader(modelFile: any, ast: any): boolean {
-    const header = stagedFileHeaders.get(modelFile);
+function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | undefined = fileStates.get(modelFile)): boolean {
+    const header = state?.stagedHeader;
     if (header === undefined) {
         return false;
     }
-    stagedFileHeaders.delete(modelFile);
+    state!.stagedHeader = undefined;
     if (ast !== modelFile.ast || ast.namespace !== header.namespace) {
         return false;
     }
@@ -1748,7 +1802,7 @@ function applyStagedFileHeader(modelFile: any, ast: any): boolean {
     for (const [key, uri] of header.uriMap) {
         uriMap[key] = uri;
     }
-    recordImportNames(modelFile, names);
+    recordImportNames(modelFile, names, state);
     if (lazyViewsCheck) {
         checkStagedFileHeader(modelFile, ast);
         checkRecordedImportNames(modelFile);
@@ -1878,8 +1932,11 @@ for (const key of ['declarations', 'localTypes']) {
  * @param {object} modelFile the ModelFile
  */
 function defineLazyFields(modelFile: any): void {
-    if (!deferredFiles.has(modelFile)) {
-        deferredFiles.set(modelFile, { byName: undefined, built: new Map(), building: false, batch: undefined });
+    // P5-91 (accordproject/concerto-rust#437): one lookup of the file's
+    // record, and no `built` map until a view is built on its own.
+    const state = fileState(modelFile);
+    if (state.deferred === undefined) {
+        state.deferred = { byName: undefined, built: undefined, building: false, batch: undefined };
     }
     Object.defineProperty(modelFile, 'declarations', lazyFieldDescriptors.declarations);
     Object.defineProperty(modelFile, 'localTypes', lazyFieldDescriptors.localTypes);
@@ -1951,12 +2008,6 @@ interface Prestage {
 const prestaged = new WeakMap<object, Prestage>();
 
 /**
- * The header of each ModelFile that took a prestage with one, until its
- * constructor applies it (`applyStagedHeader`).
- */
-const stagedHeaders = new WeakMap<object, any[]>();
-
-/**
  * Called by `stageModelFile`: when `ast` has a prestage in `handle`, and
  * the ModelFile is being built the way `fromAst` builds it (no definitions,
  * no file name, a namespace the manager writes
@@ -1967,11 +2018,13 @@ const stagedHeaders = new WeakMap<object, any[]>();
  * @param {object} manager its model manager
  * @param {object} handle the manager's rustHandle
  * @param {object} ast the ModelFile's AST
+ * @param {object} prestage the AST's prestage (`prestaged`), which the
+ * caller has looked up (P5-91)
+ * @param {object} state the ModelFile's `fileStates` record (P5-91)
  * @return {boolean} true if the ModelFile took the prestage
  */
-function takePrestaged(modelFile: any, manager: any, handle: any, ast: any): boolean {
-    const prestage = ast && typeof ast === 'object' ? prestaged.get(ast) : undefined;
-    if (prestage === undefined || prestage.handle !== handle) {
+function takePrestaged(modelFile: any, manager: any, handle: any, ast: any, prestage: Prestage, state: FileState): boolean {
+    if (prestage.handle !== handle) {
         return false;
     }
     prestaged.delete(ast);
@@ -1981,10 +2034,10 @@ function takePrestaged(modelFile: any, manager: any, handle: any, ast: any): boo
         return false;
     }
     const stage = { handle, id: prestage.id };
-    stages.set(modelFile, stage);
+    state.stage = stage;
     stageFinalizer?.register(modelFile, stage, stage);
     if (prestage.header) {
-        stagedHeaders.set(modelFile, prestage.header);
+        state.prestageHeader = prestage.header;
     }
     return true;
 }
@@ -1999,14 +2052,17 @@ function takePrestaged(modelFile: any, manager: any, handle: any, ast: any): boo
  * Returns false when there is none; the caller then calls the binding.
  * @param {object} modelFile the ModelFile being constructed
  * @param {object} ast its AST
+ * @param {object} [state] `modelFile`'s `fileStates` record (P5-91)
  * @return {boolean} true if the header was applied
  */
-function applyStagedHeader(modelFile: any, ast: any): boolean {
-    const header = stagedHeaders.get(modelFile);
+function applyStagedHeader(modelFile: any, ast: any, state: FileState | undefined = fileStates.get(modelFile)): boolean {
+    // P5-91: the prestage header is a field of the file's record
+    // (`prestageHeader`), no longer a WeakMap of its own.
+    const header = state?.prestageHeader;
     if (header === undefined || ast !== modelFile.ast) {
         return false;
     }
-    stagedHeaders.delete(modelFile);
+    state!.prestageHeader = undefined;
     const [version, shortNames, uris] = header;
     modelFile.namespace = ast.namespace;
     modelFile.version = version;
@@ -2026,11 +2082,28 @@ function applyStagedHeader(modelFile: any, ast: any): boolean {
         modelFile.importUriMap[uris[i]] = uris[i + 1];
     }
     // P5-32: one `set` per imported name, as for `applyStagedFileHeader`.
-    recordImportNames(modelFile, names);
+    recordImportNames(modelFile, names, state);
     if (lazyViewsCheck) {
         checkRecordedImportNames(modelFile);
     }
     return true;
+}
+
+/**
+ * P5-91 (accordproject/concerto-rust#437): `ModelFile._fromAstHeader`'s
+ * `applyStagedHeader(modelFile, ast) || applyStagedFileHeader(modelFile,
+ * ast)`, with one lookup of the file's record for both. At most one of them
+ * has a header for a file.
+ * @param {object} modelFile the ModelFile being constructed
+ * @param {object} ast the AST its header is read from
+ * @return {boolean} true if a staged header was applied
+ */
+function applyStagedHeaders(modelFile: any, ast: any): boolean {
+    const state = fileStates.get(modelFile);
+    if (state === undefined) {
+        return false;
+    }
+    return applyStagedHeader(modelFile, ast, state) || applyStagedFileHeader(modelFile, ast, state);
 }
 
 /**
@@ -2084,7 +2157,7 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
                 trustedAst = null;
             }
             newModelManager.addModelFile(modelFile, null, null, true);
-            if (committed.get(modelFile) !== handle) {
+            if (committedHandle(modelFile) !== handle) {
                 allStaged = false;
             }
         });
@@ -2317,11 +2390,22 @@ function dcsManagerFor(modelManager: any, resolve: boolean): any {
  * @return {object|undefined} the stage
  */
 function takeStage(modelFile: any, handle: any): Stage | undefined {
-    const stage = stages.get(modelFile);
+    const state = fileStates.get(modelFile);
+    return state === undefined ? undefined : takeStageOf(state, handle);
+}
+
+/**
+ * `takeStage` over the file's record, already looked up (P5-91).
+ * @param {object} state the ModelFile's `fileStates` record
+ * @param {object} handle the manager's rustHandle
+ * @return {object|undefined} the stage
+ */
+function takeStageOf(state: FileState, handle: any): Stage | undefined {
+    const stage = state.stage;
     if (!stage || stage.handle !== handle) {
         return undefined;
     }
-    stages.delete(modelFile);
+    state.stage = undefined;
     stageFinalizer?.unregister(stage);
     return stage;
 }
@@ -2338,7 +2422,8 @@ function takeStage(modelFile: any, handle: any): Stage | undefined {
  * manager caches it), or undefined if the file was not registered
  */
 function commitStaged(modelFile: any, handle: any): number | undefined {
-    const stage = takeStage(modelFile, handle);
+    const state = fileStates.get(modelFile);
+    const stage = state === undefined ? undefined : takeStageOf(state, handle);
     if (!stage) {
         return undefined;
     }
@@ -2346,7 +2431,7 @@ function commitStaged(modelFile: any, handle: any): number | undefined {
     if (id === undefined) {
         return undefined;
     }
-    committed.set(modelFile, handle);
+    state!.committed = handle;
     return id;
 }
 
@@ -2366,7 +2451,8 @@ function commitStaged(modelFile: any, handle: any): number | undefined {
  * the file was not registered
  */
 function validateAndCommitStaged(modelFile: any, handle: any): number | undefined {
-    const stage = stages.get(modelFile);
+    const state = fileStates.get(modelFile);
+    const stage = state?.stage;
     if (!stage || stage.handle !== handle || typeof handle.validateAndCommitStagedModelFile !== 'function') {
         return undefined;
     }
@@ -2379,8 +2465,8 @@ function validateAndCommitStaged(modelFile: any, handle: any): number | undefine
     if (id === undefined) {
         return undefined;
     }
-    takeStage(modelFile, handle);
-    committed.set(modelFile, handle);
+    takeStageOf(state!, handle);
+    state!.committed = handle;
     return id;
 }
 
@@ -2407,11 +2493,12 @@ function dropStaged(modelFile: any, handle: any): void {
  * @return {boolean} true if validated
  */
 function validateLoaded(modelFile: any, handle: any): boolean {
-    const stage = stages.get(modelFile);
+    const state = fileStates.get(modelFile);
+    const stage = state?.stage;
     if (stage && stage.handle === handle) {
         return handle.modelFileValidateStaged(stage.id);
     }
-    if (committed.get(modelFile) === handle) {
+    if (state?.committed === handle) {
         const id = modelFile._rustHandleId();
         if (id !== undefined) {
             handle.modelFileValidate(id);
@@ -2432,8 +2519,11 @@ interface DeferredFile {
      * without building every view; undefined until first needed.
      */
     byName: Map<string, number> | null | undefined;
-    /** The declaration views built on their own, by index, with their AST node. */
-    built: Map<number, { node: any; view: any }>;
+    /**
+     * The declaration views built on their own, by index, with their AST
+     * node; undefined until the first (P5-91).
+     */
+    built: Map<number, { node: any; view: any }> | undefined;
     /** True while a declaration view of the file is being built. */
     building: boolean;
     /** The file's view snapshots, once computed. */
@@ -2518,7 +2608,7 @@ function localType(modelFile: any, type: string): any {
         return null;
     }
     const node = modelFile.ast.declarations[index];
-    const cached = deferred.built.get(index);
+    const cached = deferred.built?.get(index);
     if (cached && cached.node === node) {
         return cached.view;
     }
@@ -2532,7 +2622,7 @@ function localType(modelFile: any, type: string): any {
     } finally {
         deferred.building = false;
     }
-    deferred.built.set(index, { node, view });
+    (deferred.built ??= new Map()).set(index, { node, view });
     return view;
 }
 
@@ -2546,7 +2636,7 @@ function localType(modelFile: any, type: string): any {
  * @return {object|undefined} the view
  */
 function builtDeclaration(modelFile: any, index: number, node: any): any {
-    const cached = deferredFiles.get(modelFile)?.built.get(index);
+    const cached = deferredFiles.get(modelFile)?.built?.get(index);
     return cached && cached.node === node ? cached.view : undefined;
 }
 
@@ -3381,6 +3471,7 @@ export {
     stageModelFile,
     applyStagedHeader,
     applyStagedFileHeader,
+    applyStagedHeaders,
     recordImportNames,
     recordedImportNames,
     deferDeclarations,

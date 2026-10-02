@@ -1002,9 +1002,10 @@ class ModelFile extends Decorated {
         // `applyStagedHeader`), P5-28 (accordproject/concerto-rust#333) for
         // a file `stageModelFile` staged (`applyStagedFileHeader`). At most
         // one of them has a header for a file; otherwise the engine reads it
-        // now.
+        // now. P5-91 (accordproject/concerto-rust#437): both are tried by
+        // `applyStagedHeaders`, with one lookup of the file's staging record.
         const views = loadEngine('../engine/views');
-        if (!views.applyStagedHeader(this, ast) && !views.applyStagedFileHeader(this, ast)) {
+        if (!views.applyStagedHeaders(this, ast)) {
             rust.modelFileFromAstHeader(this, ast);
         }
     }
