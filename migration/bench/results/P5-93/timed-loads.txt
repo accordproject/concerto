@@ -1,0 +1,87 @@
+19:03:39 round 1 ts modelfile_new start load 1.27 1.33 1.35
+19:03:40 round 1 ts modelfile_new end load 1.27 1.33 1.35
+19:03:40 round 1 before modelfile_new start load 1.27 1.33 1.35
+19:03:45 round 1 before modelfile_new end load 1.25 1.33 1.35
+19:03:45 round 1 after modelfile_new start load 1.25 1.33 1.35
+19:03:49 round 1 after modelfile_new end load 1.23 1.32 1.34
+19:03:49 round 1 ts add_model_file start load 1.23 1.32 1.34
+19:03:52 round 1 ts add_model_file end load 1.23 1.32 1.34
+19:03:52 round 1 before add_model_file start load 1.23 1.32 1.34
+19:04:01 round 1 before add_model_file end load 1.81 1.44 1.38
+19:04:01 round 1 after add_model_file start load 1.81 1.44 1.38
+19:04:09 round 1 after add_model_file end load 2.23 1.54 1.42
+19:04:39 gate: quiet after 30s
+19:04:39 round 1 ts add_cto_model start load 1.35 1.39 1.37
+19:04:56 round 1 ts add_cto_model end load 1.27 1.37 1.36
+19:04:56 round 1 before add_cto_model start load 1.27 1.37 1.36
+19:05:29 round 1 before add_cto_model end load 2.66 1.70 1.47
+19:05:59 gate: quiet after 30s
+19:05:59 round 1 after add_cto_model start load 1.61 1.54 1.42
+19:06:32 round 1 after add_cto_model end load 2.42 1.74 1.50
+19:07:02 gate: quiet after 30s
+19:07:02 round 1 typedread-before start load 1.58 1.60 1.46
+19:07:04 round 1 typedread-before end load 1.85 1.66 1.48
+19:07:04 round 1 native-before start load 1.85 1.66 1.48
+19:07:04 round 1 native-before end load 1.85 1.66 1.48
+19:07:04 round 1 typedread-after start load 1.85 1.66 1.48
+19:07:05 round 1 typedread-after end load 1.85 1.66 1.48
+19:07:05 round 1 native-after start load 1.85 1.66 1.48
+19:07:05 round 1 native-after end load 1.85 1.66 1.48
+19:07:06 round 2 before modelfile_new start load 1.85 1.66 1.48
+19:07:10 round 2 before modelfile_new end load 1.78 1.65 1.47
+19:07:10 round 2 after modelfile_new start load 1.78 1.65 1.47
+19:07:14 round 2 after modelfile_new end load 1.72 1.64 1.47
+19:07:14 round 2 ts modelfile_new start load 1.72 1.64 1.47
+19:07:15 round 2 ts modelfile_new end load 1.72 1.64 1.47
+19:07:15 round 2 before add_model_file start load 1.72 1.64 1.47
+19:07:23 round 2 before add_model_file end load 2.23 1.75 1.51
+19:07:53 gate: quiet after 30s
+19:07:53 round 2 after add_model_file start load 1.35 1.58 1.46
+19:08:02 round 2 after add_model_file end load 1.40 1.59 1.46
+19:08:02 round 2 ts add_model_file start load 1.40 1.59 1.46
+19:08:04 round 2 ts add_model_file end load 1.37 1.58 1.46
+19:08:04 round 2 before add_cto_model start load 1.37 1.58 1.46
+19:08:36 round 2 before add_cto_model end load 2.27 1.78 1.53
+19:09:06 gate: quiet after 30s
+19:09:06 round 2 after add_cto_model start load 1.37 1.61 1.48
+19:09:39 round 2 after add_cto_model end load 2.38 1.83 1.56
+19:10:09 gate: quiet after 30s
+19:10:09 round 2 ts add_cto_model start load 1.44 1.65 1.51
+19:10:25 round 2 ts add_cto_model end load 1.34 1.62 1.50
+19:10:25 round 2 typedread-after start load 1.34 1.62 1.50
+19:10:27 round 2 typedread-after end load 1.34 1.62 1.50
+19:10:27 round 2 native-after start load 1.34 1.62 1.50
+19:10:27 round 2 native-after end load 1.34 1.62 1.50
+19:10:27 round 2 typedread-before start load 1.34 1.62 1.50
+19:10:29 round 2 typedread-before end load 1.47 1.64 1.51
+19:10:29 round 2 native-before start load 1.47 1.64 1.51
+19:10:29 round 2 native-before end load 1.47 1.64 1.51
+19:10:29 round 3 after modelfile_new start load 1.47 1.64 1.51
+19:10:33 round 3 after modelfile_new end load 1.76 1.70 1.53
+19:10:33 round 3 ts modelfile_new start load 1.76 1.70 1.53
+19:10:34 round 3 ts modelfile_new end load 1.76 1.70 1.53
+19:10:34 round 3 before modelfile_new start load 1.76 1.70 1.53
+19:10:39 round 3 before modelfile_new end load 1.86 1.72 1.53
+19:10:39 round 3 after add_model_file start load 1.86 1.72 1.53
+19:10:48 round 3 after add_model_file end load 2.10 1.78 1.56
+19:11:18 gate: quiet after 30s
+19:11:18 round 3 ts add_model_file start load 1.40 1.64 1.52
+19:11:20 round 3 ts add_model_file end load 1.40 1.64 1.52
+19:11:20 round 3 before add_model_file start load 1.40 1.64 1.52
+19:11:31 round 3 before add_model_file end load 1.63 1.68 1.53
+19:11:31 round 3 after add_cto_model start load 1.63 1.68 1.53
+19:12:03 round 3 after add_cto_model end load 2.22 1.81 1.58
+19:12:33 gate: quiet after 30s
+19:12:33 round 3 ts add_cto_model start load 1.35 1.64 1.53
+19:12:50 round 3 ts add_cto_model end load 1.27 1.61 1.52
+19:12:50 round 3 before add_cto_model start load 1.27 1.61 1.52
+19:13:25 round 3 before add_cto_model end load 1.98 1.75 1.57
+19:13:25 round 3 typedread-before start load 1.98 1.75 1.57
+19:13:27 round 3 typedread-before end load 1.98 1.75 1.57
+19:13:27 round 3 native-before start load 1.98 1.75 1.57
+19:13:27 round 3 native-before end load 1.98 1.75 1.57
+19:13:27 round 3 typedread-after start load 1.98 1.75 1.57
+19:13:28 round 3 typedread-after end load 1.90 1.73 1.57
+19:13:28 round 3 native-after start load 1.90 1.73 1.57
+19:13:29 round 3 native-after end load 1.90 1.73 1.57
+19:13:29 timed done
