@@ -6,8 +6,8 @@ stricter rules in the same major, so that you only have to upgrade once. The
 [R1 changelog](./CHANGELOG.md) lists every change. This guide gives the reason
 for each breaking change, who it affects and how to upgrade.
 
-**Status: draft for maintainer review.** Written at concerto `09295b075` and
-concerto-rust `fa4ee0b` (2026-09-30). The `BC-nn` IDs refer to rows in
+**Status: draft for maintainer review.** Written at concerto `574faa716` and
+concerto-rust `bfa4a55` (2026-10-02). The `BC-nn` IDs refer to rows in
 `migration/BREAKING-CHANGES-PLAN.md`.
 
 ## Am I affected?
@@ -60,11 +60,14 @@ grep -rnE "length *= *\[ *, *\]" --include=*.cto .
   `../engine/<subpath>` (for example `./engine/views` and `../engine/views`)
   to the matching `dist/esm-browser/engine/*.mjs` modules, and resolve the
   engine's own imports to the same module instances the public graph uses.
-  `e2e/tests/wasm-engine.spec.ts` shows the pattern. Allow for about 2.8 MB of
-  WebAssembly before compression.
+  `e2e/tests/wasm-engine.spec.ts` shows the pattern. Allow for about
+  2.93-3.05 MB of WebAssembly before compression (P5-72 and P5-76 in
+  `migration/bench/RESULTS.md`).
 - **Pending:** an asynchronous `await init()` entry for browsers and smaller
   engine builds are proposed in P5-39 (accordproject/concerto-rust#349). They
   wait on a maintainer decision and are **not in R1** as this guide is written.
+  The browser story also waits on the Concertino spike, P5-78
+  (accordproject/concerto-rust#420).
 
 ### Deep imports (BC-34)
 
@@ -261,8 +264,11 @@ format, `YYYY-MM-DDTHH:mm:ss`, an optional fraction of a second, then `Z` or
 - **Why:** 5.x walked a model AST without checking its shape. Many malformed ASTs
   loaded silently, and others crashed with a `TypeError`. For example, a
   `decorators` string was read one character at a time, and numeric names were
-  coerced to strings. R1 checks every AST against the Concerto metamodel before
-  it is used.
+  coerced to strings. R1 checks every AST you supply against the Concerto
+  metamodel before it is used. ASTs of trusted origin skip the check: the
+  result ASTs the engine writes for `DecoratorManager.decorateModels` from
+  models that all passed it (P5-68), and the two fixed system models, which
+  take a verdict the engine computed once for their exact text (P5-73).
 - **Who:** anyone who builds model ASTs by hand or with their own tools and
   loads them with `fromAst`, `addModel`, `addCTOModel`, `addModelFiles`,
   `updateModelFile`, `new ModelFile` or `addModelFile`. ASTs written by the CTO
@@ -441,7 +447,7 @@ or the return value changes. Update your code if it catches the old class.
 | An AST relationship property with no `type` throws `IllegalModelException` (`Relationship <name> must have a type`), not `TypeError`. | BC-15 |
 | A `null` element in an AST `decorators` array throws `IllegalModelException` (`Invalid decorator. Expected object. Found null`), not `TypeError`. | BC-16 |
 | Validating a relationship array field that holds a value that is not `Identifiable`, or a relationship or concept array that holds `null` or `undefined`, throws `ValidationException`, not `TypeError`. | BC-06 |
-| `fromJSON`/`toJSON` on an element they cannot read or write (an enum value named as a property, a relationship to a scalar) throws `Error` (`Unrecognised element "org.acme@1.0.0.Color.RED"`), not `TypeError: Converting circular structure to JSON`. | BC-08 |
+| `fromJSON`/`toJSON` on an element they cannot read or write (an enum value named as a property, a relationship to a scalar) throws `Error` (`Unrecognised element "org.acme@1.0.0.Color.RED"`), not `TypeError: Converting circular structure to JSON`. So does `Factory.newResource` with the `generate` option for a type it cannot generate, such as an enum type. | BC-08 |
 | Circular inheritance throws `IllegalModelException` naming the cycle, from validation, loading and every super type walk (`getProperties`, `getProperty`, `getIdentifierFieldName`, `getAllSuperTypeDeclarations`, `getAssignableClassDeclarations`, `derivesFrom`), not `RangeError` or out of memory. | BC-11 |
 | A map whose value type is not declared throws `IllegalModelException` naming the type, not `TypeError`. | BC-12 |
 | With `decoratorValidation` set to `error`, a decorator validation error names its model file once and no longer embeds `IllegalModelException: ` in its message. The class is unchanged. | BC-14 |
@@ -454,5 +460,7 @@ or the return value changes. Update your code if it catches the old class.
 
 These proposals do not ship in R1. They are listed in the
 [changelog](./CHANGELOG.md#not-in-r1): BC-04, BC-09, BC-21, BC-24 (the
-factory-timing part), BC-27, BC-33, BC-35, BC-44, BC-49, and the P5-39
-decisions on browser async `init()` and engine size.
+factory-timing part), BC-27, BC-33, BC-35, BC-44, BC-49, the P5-39
+decisions on browser async `init()` and engine size with their follow-ups
+(P5-44 to P5-47), the Concertino spike (P5-78, #420), and the P5-80 and
+P5-81 spikes (#424, #425).
