@@ -157,6 +157,8 @@ for (const set of sets()) {
         continue; // not loadable on its own in R1: out of scope here
     }
     report.loaded++;
+    report.loadedByCorpus = report.loadedByCorpus || {};
+    report.loadedByCorpus[set.corpus] = (report.loadedByCorpus[set.corpus] || 0) + 1;
     const res = S.resolver.resolveModels(set.asts);
     if (res.diagnostics.length) {
         report.resolver.diagnosticsOnLoadable.push({ set: set.name, diagnostics: res.diagnostics.map((d) => d.message) });
@@ -241,7 +243,7 @@ for (const set of sets()) {
 }
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, JSON.stringify(report, null, 1));
-const brief = { sameOutputAsPublished: report.sameOutputAsPublished, sets: report.sets, loaded: report.loaded, resolverEqual: report.resolver.equal, resolverDiffers: report.resolver.differs.length,
+const brief = { loadedByCorpus: report.loadedByCorpus, sameOutputAsPublished: report.sameOutputAsPublished, sets: report.sets, loaded: report.loaded, resolverEqual: report.resolver.equal, resolverDiffers: report.resolver.differs.length,
     resolverDiagnosticsOnLoadable: report.resolver.diagnosticsOnLoadable.length };
 for (const [k, r] of Object.entries(report.converters)) {
     brief[k] = { dangling: (r.dangling || []).map((x) => `${x.set}: ${x.refs.join('; ')}`), converted: r.converted, throws: r.throws.length, lossless: r.lossless, withDiffs: r.withDiffs, schemaInvalid: r.schemaInvalid,
