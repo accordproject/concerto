@@ -1359,7 +1359,11 @@ function checkAstShape(modelFile: any): CheckedAst | undefined {
     if (manager.options?.metamodelValidation === false) {
         return undefined;
     }
-    if (compactStageable(manager, ast, 'stageModelFileCheckedCompact')) {
+    // P5-95 (accordproject/concerto-rust#445): with decorator factories,
+    // `stageLoadedModelFile` takes the eager path, which checks the AST's
+    // JSON text on its own (`completeShapeCheck`) and never sends the
+    // bytes, so the AST is not written in the compact layout for it.
+    if (compactStageable(manager, ast, 'stageModelFileCheckedCompact') && !hasDecoratorFactories(manager)) {
         const bytes = encodeAst(ast);
         if (bytes !== undefined) {
             shapePending.add(modelFile);
@@ -1507,6 +1511,17 @@ type CheckedAst = string | CompactAst;
 function compactStageable(manager: any, ast: any, binding: string): boolean {
     return typeof manager.rustHandle?.[binding] === 'function' && !systemModelAsts.has(ast) &&
         !prestaged.has(ast) && manager._needsRustWrite(ast.namespace);
+}
+
+/**
+ * P5-95 (accordproject/concerto-rust#445): whether `manager` has decorator
+ * factories, which keep `stageLoadedModelFile` on its eager path.
+ * @param {object} manager the ModelFile's manager
+ * @return {boolean} true if it has decorator factories
+ */
+function hasDecoratorFactories(manager: any): boolean {
+    const factories = manager.getDecoratorFactories();
+    return Array.isArray(factories) && factories.length > 0;
 }
 
 /**
