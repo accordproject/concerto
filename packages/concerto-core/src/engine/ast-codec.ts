@@ -67,6 +67,7 @@ const hasIsWellFormed = typeof (String.prototype as any).isWellFormed === 'funct
 // A UTF-16 code unit in D800-DFFF that is not half of a surrogate pair.
 const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 
+const hasOwn = Object.prototype.hasOwnProperty;
 const encoder = new TextEncoder();
 const f64 = new Float64Array(1);
 const f64Bytes = new Uint8Array(f64.buffer);
@@ -221,7 +222,15 @@ function writeValue(v: any, depth: number): void {
     const countAt = pos;
     pos += 4;
     let count = 0;
-    for (const key of Object.keys(v)) {
+    // P5-94 (accordproject/concerto-rust#444): `for...in` with an own-key
+    // check visits exactly `Object.keys(v)`, in the same order, without
+    // allocating a keys array per object (V8 reads a fast object's keys
+    // from its map's enum cache), which was about a quarter of the JS
+    // allocation of `addModelFile`.
+    for (const key in v) {
+        if (!hasOwn.call(v, key)) {
+            continue;
+        }
         const item = v[key];
         if (omitted(item)) {
             continue;

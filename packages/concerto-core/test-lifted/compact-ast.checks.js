@@ -41,6 +41,13 @@
  * differ, so it expects none; on the src core it also fails unless the
  * compact path ran (on the reference, which has no engine, both loads are
  * the same TS load). Run by fallbacks.spec.js.
+ *
+ * P5-94 (accordproject/concerto-rust#444): the compact path's staging
+ * result now comes back in a flat layout where the engine has the
+ * `...CompactFlat` bindings. Each AST is also loaded a third time, with only
+ * those hidden, so that the compact path with the object result runs too;
+ * the flat and the object result must each give the text path's outcome,
+ * and the check fails unless both ran.
  */
 
 const MODELS = [
@@ -201,23 +208,33 @@ function mutate(ast, next) {
 }
 
 /**
+ * The compact staging bindings with the object result, and (P5-94) with
+ * the flat one.
+ */
+const OBJECT_BINDINGS = ['stageModelFileCheckedCompact', 'stageModelFileWithHeaderCompact'];
+const FLAT_BINDINGS = ['stageModelFileCheckedCompactFlat', 'stageModelFileWithHeaderCompactFlat'];
+
+/**
  * Loads `ast` in a fresh manager built with `options`, with the compact
- * staging bindings hidden when `textOnly`, and reports what happened.
+ * staging bindings hidden when `mode` is `'text'`, and (P5-94) only the
+ * flat ones hidden when it is `'object'`, and reports what happened.
  * @param {object} core the core under test
  * @param {object} options the manager options
  * @param {Function} makeAst builds the AST (a fresh copy per load)
- * @param {boolean} textOnly whether to hide the compact bindings
- * @param {object} counter counts the compact binding calls
+ * @param {string} mode `'flat'` (every binding), `'object'` or `'text'`
+ * @param {object} counter counts the compact binding calls, by layout
  * @returns {Array} the constructor's outcome, `addModelFile`'s, and the AST read back
  */
-function load(core, options, makeAst, textOnly, counter) {
+function load(core, options, makeAst, mode, counter) {
     const mm = new core.ModelManager(options);
     const handle = mm.rustHandle;
     if (handle) {
-        for (const binding of ['stageModelFileCheckedCompact', 'stageModelFileWithHeaderCompact']) {
+        for (const binding of OBJECT_BINDINGS.concat(FLAT_BINDINGS)) {
+            const flat = FLAT_BINDINGS.includes(binding);
+            const hidden = mode === 'text' || (mode === 'object' && flat);
             const original = handle[binding];
-            handle[binding] = textOnly || typeof original !== 'function' ? undefined : function (...args) {
-                counter.calls++;
+            handle[binding] = hidden || typeof original !== 'function' ? undefined : function (...args) {
+                counter[flat ? 'flat' : 'object']++;
                 return original.apply(this, args);
             };
         }
@@ -247,7 +264,7 @@ function compare(core, seed, rounds) {
     const parser = new core.ModelManager({ strict: true });
     const bases = MODELS.map((cto) => parser.addCTOModel(cto, undefined, true).getAst());
     const next = random(seed);
-    const counter = { calls: 0 };
+    const counter = { flat: 0, object: 0 };
     const mismatches = [];
     bases.forEach((base, b) => {
         for (let round = 0; round < rounds; round++) {
@@ -265,15 +282,19 @@ function compare(core, seed, rounds) {
                 return ast;
             };
             for (const options of [{}, { metamodelValidation: false }]) {
-                const compact = load(core, options, makeAst, false, counter);
-                const text = load(core, options, makeAst, true, counter);
+                const compact = load(core, options, makeAst, 'flat', counter);
+                const object = load(core, options, makeAst, 'object', counter);
+                const text = load(core, options, makeAst, 'text', counter);
                 if (JSON.stringify(compact) !== JSON.stringify(text)) {
                     mismatches.push({ base: b, round, options, compact, text });
+                }
+                if (JSON.stringify(object) !== JSON.stringify(text)) {
+                    mismatches.push({ base: b, round, options, object, text });
                 }
             }
         }
     });
-    if (new core.ModelManager().rustHandle && counter.calls === 0) {
+    if (new core.ModelManager().rustHandle && (counter.flat === 0 || counter.object === 0)) {
         throw new Error('the compact staging path never ran');
     }
     return mismatches;

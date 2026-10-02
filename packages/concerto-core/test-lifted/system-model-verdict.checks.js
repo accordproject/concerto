@@ -121,8 +121,10 @@ function countCalls(handle, names) {
 // has them). P5-92: so are `stageModelFileCheckedCompact` and
 // `stageModelFileWithHeaderCompact`, for an AST written in the engine's
 // compact layout instead of as text.
+// P5-94: and so are `stageModelFileCheckedCompactFlat` and
+// `stageModelFileWithHeaderCompactFlat`, with their result in a flat layout.
 const LOADS = ['systemModelFileHeader', 'stageModelFileChecked', 'stageModelFileCheckedUtf8', 'stageModelFileWithHeader', 'stageModelFileWithHeaderUtf8', 'stageModelFile', 'checkAstShape',
-    'stageModelFileCheckedCompact', 'stageModelFileWithHeaderCompact'];
+    'stageModelFileCheckedCompact', 'stageModelFileWithHeaderCompact', 'stageModelFileCheckedCompactFlat', 'stageModelFileWithHeaderCompactFlat'];
 
 module.exports = [
     {
@@ -231,7 +233,8 @@ module.exports = [
                 const outcome = probe(() => {
                     new core.ModelFile(mm, copyOf(mm, ns), undefined, 'x.json');
                 });
-                return [outcome, counts.systemModelFileHeader, counts.stageModelFileChecked + counts.stageModelFileCheckedUtf8 + counts.stageModelFileCheckedCompact];
+                return [outcome, counts.systemModelFileHeader, counts.stageModelFileChecked + counts.stageModelFileCheckedUtf8 + counts.stageModelFileCheckedCompact +
+                    counts.stageModelFileCheckedCompactFlat];
             });
         },
         expect: { ok: [['ok', 0, 1], ['ok', 0, 1]] },
@@ -258,7 +261,8 @@ module.exports = [
     },
     {
         id: 'P573-SYS-007',
-        covers: 'P5-73: clearModelFiles() takes the precomputed verdict for both system models, with no engine load or shape check of them, with and without the shape check',
+        covers: 'P5-73: clearModelFiles() takes the precomputed verdict for both system models, with no engine load or shape check of them, with and without the shape check; ' +
+            'P5-94: the engine\'s verdict for the same text is remembered, so after the manager\'s constructor asked for it, clearModelFiles() does not ask again',
         run: (core) => [undefined, { metamodelValidation: false }].map((options) => {
             const mm = new core.ModelManager(options);
             if (typeof mm._newRustHandle !== 'function') {
@@ -275,8 +279,8 @@ module.exports = [
             return [counts, mm.getNamespaces()];
         }),
         expect: { ok: Array(2).fill([
-            { systemModelFileHeader: 2, stageModelFileChecked: 0, stageModelFileCheckedUtf8: 0, stageModelFileWithHeader: 0, stageModelFileWithHeaderUtf8: 0, stageModelFile: 0, checkAstShape: 0,
-                stageModelFileCheckedCompact: 0, stageModelFileWithHeaderCompact: 0 },
+            { systemModelFileHeader: 0, stageModelFileChecked: 0, stageModelFileCheckedUtf8: 0, stageModelFileWithHeader: 0, stageModelFileWithHeaderUtf8: 0, stageModelFile: 0, checkAstShape: 0,
+                stageModelFileCheckedCompact: 0, stageModelFileWithHeaderCompact: 0, stageModelFileCheckedCompactFlat: 0, stageModelFileWithHeaderCompactFlat: 0 },
             ['concerto.decorator@1.0.0', 'concerto@1.0.0'],
         ]) },
         reference: { ok: ['no engine', 'no engine'] },
