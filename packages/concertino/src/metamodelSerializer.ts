@@ -14,7 +14,7 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ModelUtil } from '@accordproject/concerto-core';
+import * as ModelUtil from './names';
 import {
     IConcertino,
     IConcertinoDeclaration,
@@ -32,7 +32,7 @@ import {
     MetadataMap,
     IVocabulary,
     IStringDecoratorValue,
-} from './spec/concertino.metamodel@4.0.0-alpha.2';
+} from './spec/concertino.metamodel@5.0.0';
 import {
     IBooleanProperty,
     IBooleanScalar,
@@ -67,6 +67,59 @@ import {
     PropertyUnion,
     ScalarDeclarationUnion,
 } from '@accordproject/concerto-metamodel';
+
+/**
+ * The local names a model gives to imported types, keyed by the fully
+ * qualified name of the declared type: `import b@1.0.0.{Foo as Bar}` maps
+ * `b@1.0.0.Foo` to `Bar`.
+ */
+type Aliases = Map<string, string>;
+
+const NO_ALIASES: Aliases = new Map();
+
+/**
+ * Reads the aliased types of a model's imports.
+ * @param {any[]} [imports] - The model's imports.
+ * @returns {Aliases} The aliases.
+ */
+function aliasesOf(imports?: any[]): Aliases {
+    const aliases: Aliases = new Map();
+    (imports || []).forEach((imp) => {
+        (imp.aliasedTypes || []).forEach((aliased: { name: string; aliasedName: string }) => {
+            aliases.set(`${imp.namespace}.${aliased.name}`, aliased.aliasedName);
+        });
+    });
+    return aliases;
+}
+
+/**
+ * Builds the TypeIdentifier for a fully qualified type name, as the resolved
+ * metamodel writes it. A type the model imports under an alias gets the
+ * local name, with the declared name as `resolvedName`, when the two differ.
+ * A name without a namespace (a primitive type in a decorator type
+ * reference) gets no namespace.
+ * @param {string} fqn - The fully qualified type name.
+ * @param {Aliases} aliases - The model's import aliases.
+ * @returns {any} The TypeIdentifier.
+ */
+function typeIdentifier(fqn: string, aliases: Aliases): any {
+    const namespace = ModelUtil.getNamespace(fqn);
+    const name = ModelUtil.getShortName(fqn);
+    const result: any = {
+        '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
+        name,
+    };
+    if (namespace !== '') {
+        result.namespace = namespace;
+    }
+    const alias = aliases.get(fqn);
+    // `import a@1.0.0.{Foo as Foo}` resolves without a resolvedName.
+    if (alias !== undefined && alias !== name) {
+        result.name = alias;
+        result.resolvedName = name;
+    }
+    return result;
+}
 
 /**
  * Extracts scalar validators (regex, range, length) from a ScalarDeclaration.
@@ -123,9 +176,10 @@ function extractScalarValidators(declaration: IConcertinoScalarDeclaration) {
  * Converts vocabulary and metadata into Concerto decorators.
  * @param {IVocabulary} [vocabulary] - The vocabulary object.
  * @param {MetadataMap} [metadata] - The metadata map.
+ * @param {Aliases} [aliases] - The model's import aliases.
  * @returns {any[] | undefined} The decorators array or undefined if none.
  */
-function decoratorsFromVocabularyAndMetadata(vocabulary?: IVocabulary, metadata?: MetadataMap): any[] | undefined {
+function decoratorsFromVocabularyAndMetadata(vocabulary?: IVocabulary, metadata?: MetadataMap, aliases: Aliases = NO_ALIASES): any[] | undefined {
     const decorators: any[] = [];
 
     if (vocabulary?.label === null) {
@@ -171,11 +225,7 @@ function decoratorsFromVocabularyAndMetadata(vocabulary?: IVocabulary, metadata?
                         return {
                             '$class': 'concerto.metamodel@1.0.0.DecoratorTypeReference',
                             'isArray': (arg as { isArray?: boolean}).isArray || false,
-                            'type': {
-                                '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
-                                'name': ModelUtil.getShortName((arg as { type: string}).type),
-                                'namespace': ModelUtil.getNamespace((arg as { type: string}).type)
-                            }
+                            'type': typeIdentifier((arg as { type: string}).type, aliases)
                         };
                     }
                     throw new Error(`Unsupported argument type: ${typeof arg}`);
@@ -197,7 +247,7 @@ function decoratorsFromVocabularyAndMetadata(vocabulary?: IVocabulary, metadata?
  * @param {string} value - The value type string.
  * @returns {MapValueTypeUnion} The Concerto map value type.
  */
-function mapValueType(value: MapValue): MapValueTypeUnion {
+function mapValueType(value: MapValue, aliases: Aliases): MapValueTypeUnion {
     const valueTypeMap: Record<string, string> = {
         String: 'concerto.metamodel@1.0.0.StringMapValueType',
         Integer: 'concerto.metamodel@1.0.0.IntegerMapValueType',
@@ -215,17 +265,10 @@ function mapValueType(value: MapValue): MapValueTypeUnion {
     const result: MapValueTypeUnion = { $class: valueClass };
 
     if (['concerto.metamodel@1.0.0.RelationshipMapValueType', 'concerto.metamodel@1.0.0.ObjectMapValueType'].includes(valueClass)) {
-        const typeName = ModelUtil.getShortName(value.type);
-        const namespace = ModelUtil.getNamespace(value.type);
-
-        (result as IObjectMapValueType).type = {
-            '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
-            name: typeName,
-            namespace
-        };
+        (result as IObjectMapValueType).type = typeIdentifier(value.type, aliases);
     }
 
-    const decorators = decoratorsFromVocabularyAndMetadata(value.vocabulary, value.metadata);
+    const decorators = decoratorsFromVocabularyAndMetadata(value.vocabulary, value.metadata, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
@@ -238,7 +281,7 @@ function mapValueType(value: MapValue): MapValueTypeUnion {
  * @param {string} key - The key type.
  * @returns {object} The Concerto map key type.
  */
-function mapKeyType(key: MapValue): MapKeyTypeUnion {
+function mapKeyType(key: MapValue, aliases: Aliases): MapKeyTypeUnion {
     const keyTypeMap: Record<string, string> = {
         String: 'concerto.metamodel@1.0.0.StringMapKeyType',
         DateTime: 'concerto.metamodel@1.0.0.DateTimeMapKeyType',
@@ -247,18 +290,11 @@ function mapKeyType(key: MapValue): MapKeyTypeUnion {
         $class: keyTypeMap[key.type]
     };
     if (!keyTypeMap[key.type]){
-        const typeName = ModelUtil.getShortName(key.type);
-        const namespace = ModelUtil.getNamespace(key.type);
-
         result.$class = 'concerto.metamodel@1.0.0.ObjectMapKeyType';
-        (result as IObjectMapKeyType).type = {
-            '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
-            'name': typeName,
-            namespace,
-        };
+        (result as IObjectMapKeyType).type = typeIdentifier(key.type, aliases);
     }
 
-    const decorators = decoratorsFromVocabularyAndMetadata(key.vocabulary, key.metadata);
+    const decorators = decoratorsFromVocabularyAndMetadata(key.vocabulary, key.metadata, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
@@ -271,14 +307,14 @@ function mapKeyType(key: MapValue): MapKeyTypeUnion {
  * @param {Record<string, IConcertinoEnumValue>} values - The enum values.
  * @returns {any[]} The array of Concerto enum properties.
  */
-function transformEnumValues(values: Record<string, IConcertinoEnumValue>): any[] {
+function transformEnumValues(values: Record<string, IConcertinoEnumValue>, aliases: Aliases): any[] {
     return Object.entries(values).map(([name, value]) => {
         const result: IEnumProperty = {
             $class: 'concerto.metamodel@1.0.0.EnumProperty',
             name,
         };
 
-        const decorators = decoratorsFromVocabularyAndMetadata(value.vocabulary, value.metadata);
+        const decorators = decoratorsFromVocabularyAndMetadata(value.vocabulary, value.metadata, aliases);
         if (decorators !== undefined) {
             result.decorators = decorators;
         }
@@ -293,7 +329,7 @@ function transformEnumValues(values: Record<string, IConcertinoEnumValue>): any[
  * @param {Record<string, IConcertinoProperty>} properties - The properties object.
  * @returns {{ properties: any[], identifier?: string }} The properties array and optional identifier.
  */
-function transformProperties(properties: Record<string, IConcertinoProperty>): { properties: any[], identifier?: string } {
+function transformProperties(properties: Record<string, IConcertinoProperty>, aliases: Aliases): { properties: any[], identifier?: string } {
     let identifier = undefined;
     return {
         properties: Object.entries(properties)
@@ -399,19 +435,13 @@ function transformProperties(properties: Record<string, IConcertinoProperty>): {
                     }
                 }
 
-                const decorators = decoratorsFromVocabularyAndMetadata(property.vocabulary, property.metadata);
+                const decorators = decoratorsFromVocabularyAndMetadata(property.vocabulary, property.metadata, aliases);
                 if (decorators !== undefined) {
                     result.decorators = decorators;
                 }
 
                 if (['concerto.metamodel@1.0.0.RelationshipProperty', 'concerto.metamodel@1.0.0.ObjectProperty'].includes(propertyClass)) {
-                    const namespace = ModelUtil.getNamespace(property.scalarType ? property.scalarType : property.type);
-                    const typeName = ModelUtil.getShortName(property.scalarType ? property.scalarType :property.type);
-                    (result as IObjectProperty).type = {
-                        '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
-                        'name': typeName,
-                        'namespace': namespace
-                    };
+                    (result as IObjectProperty).type = typeIdentifier(property.scalarType ? property.scalarType : property.type, aliases);
                 }
 
                 if (property.isIdentifier) {
@@ -430,15 +460,15 @@ function transformProperties(properties: Record<string, IConcertinoProperty>): {
  * @param {IConcertinoMapDeclaration} declaration - The map declaration.
  * @returns {IMapDeclaration} The Concerto map declaration.
  */
-function transformMap(name: string, declaration: IConcertinoMapDeclaration): any {
+function transformMap(name: string, declaration: IConcertinoMapDeclaration, aliases: Aliases): any {
     const result: IMapDeclaration = {
         $class: 'concerto.metamodel@1.0.0.MapDeclaration',
         name,
-        key: mapKeyType(declaration.key),
-        value: mapValueType(declaration.value),
+        key: mapKeyType(declaration.key, aliases),
+        value: mapValueType(declaration.value, aliases),
     };
 
-    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata);
+    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
@@ -453,7 +483,7 @@ function transformMap(name: string, declaration: IConcertinoMapDeclaration): any
  * @param {IConcertinoScalarDeclaration} declaration - The scalar declaration.
  * @returns {ScalarDeclarationUnion & { namespace: string }} The Concerto scalar declaration.
  */
-function transformScalar(namespace: string, name: string, declaration: IConcertinoScalarDeclaration):  ScalarDeclarationUnion & { namespace : string} {
+function transformScalar(namespace: string, name: string, declaration: IConcertinoScalarDeclaration, aliases: Aliases):  ScalarDeclarationUnion & { namespace : string} {
     const scalarTypeMap: Record<string, string> = {
         StringScalar: 'concerto.metamodel@1.0.0.StringScalar',
         IntegerScalar: 'concerto.metamodel@1.0.0.IntegerScalar',
@@ -477,7 +507,7 @@ function transformScalar(namespace: string, name: string, declaration: IConcerti
         (result as IStringScalar | IIntegerScalar | ILongScalar | IDoubleScalar | IBooleanScalar).defaultValue = stringDeclaration.default;
     }
 
-    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata);
+    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
@@ -491,14 +521,14 @@ function transformScalar(namespace: string, name: string, declaration: IConcerti
  * @param {IConcertinoEnumDeclaration} declaration - The enum declaration.
  * @returns {IEnumDeclaration} The Concerto enum declaration.
  */
-function transformEnum(name: string, declaration: IConcertinoEnumDeclaration): any {
+function transformEnum(name: string, declaration: IConcertinoEnumDeclaration, aliases: Aliases): any {
     const result: IEnumDeclaration = {
         $class: 'concerto.metamodel@1.0.0.EnumDeclaration',
         name,
-        properties: transformEnumValues(declaration.values),
+        properties: transformEnumValues(declaration.values, aliases),
     };
 
-    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata);
+    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
@@ -512,8 +542,8 @@ function transformEnum(name: string, declaration: IConcertinoEnumDeclaration): a
  * @param {IConcertinoConceptDeclaration} declaration - The concept declaration.
  * @returns {IConceptDeclaration} The Concerto concept declaration.
  */
-function transformConcept(name: string, declaration: IConcertinoConceptDeclaration): IConceptDeclaration {
-    const { properties, identifier } = transformProperties(declaration.properties ?? {});
+function transformConcept(name: string, declaration: IConcertinoConceptDeclaration, aliases: Aliases): IConceptDeclaration {
+    const { properties, identifier } = transformProperties(declaration.properties ?? {}, aliases);
     const result: IConceptDeclaration = {
         $class: `concerto.metamodel@1.0.0.${declaration.prototype || 'ConceptDeclaration'}`,
         name,
@@ -521,19 +551,13 @@ function transformConcept(name: string, declaration: IConcertinoConceptDeclarati
         properties,
     };
 
-    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata);
+    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
 
     if (declaration.extends) {
-        const namespace = ModelUtil.getNamespace(declaration.extends[0]);
-        const typeName = ModelUtil.getShortName(declaration.extends[0]);
-        result.superType = {
-            '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
-            'name': typeName,
-            'namespace': namespace
-        };
+        result.superType = typeIdentifier(declaration.extends[0], aliases);
     }
 
     if (identifier) {
@@ -556,24 +580,25 @@ function transformConcept(name: string, declaration: IConcertinoConceptDeclarati
  * Converts a list of Concertino declarations to Concerto metamodel format.
  * @param {string} namespace - The namespace.
  * @param {[string, IConcertinoDeclaration][]} declarations - The list of declarations.
+ * @param {Aliases} [aliases] - The model's import aliases.
  * @returns {any[]} The array of Concerto declarations.
  */
-function transformDeclarations(namespace: string, declarations: [string, IConcertinoDeclaration][]): any[] {
+function transformDeclarations(namespace: string, declarations: [string, IConcertinoDeclaration][], aliases: Aliases = NO_ALIASES): any[] {
     return declarations.map(([name, declaration]) => {
         switch (declaration.type) {
         case 'ConceptDeclaration':
-            return transformConcept(name, declaration as IConcertinoConceptDeclaration);
+            return transformConcept(name, declaration as IConcertinoConceptDeclaration, aliases);
         case 'EnumDeclaration':
-            return transformEnum(name, declaration as IConcertinoEnumDeclaration);
+            return transformEnum(name, declaration as IConcertinoEnumDeclaration, aliases);
         case 'StringScalar':
         case 'IntegerScalar':
         case 'BooleanScalar':
         case 'DoubleScalar':
         case 'LongScalar':
         case 'DateTimeScalar':
-            return transformScalar(namespace, name, declaration as IConcertinoScalarDeclaration);
+            return transformScalar(namespace, name, declaration as IConcertinoScalarDeclaration, aliases);
         case 'MapDeclaration':
-            return transformMap(name, declaration as IConcertinoMapDeclaration);
+            return transformMap(name, declaration as IConcertinoMapDeclaration, aliases);
         }
     });
 }
@@ -622,7 +647,7 @@ function convertToMetamodel(concertino: IConcertino): IModels {
             namespace,
         };
 
-        const ctoDeclarations = transformDeclarations(namespace, declarations);
+        const ctoDeclarations = transformDeclarations(namespace, declarations, aliasesOf(concertino.metadata.models[namespace]?.imports));
         if (ctoDeclarations.length > 0){
             model.declarations = ctoDeclarations;
         }

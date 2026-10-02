@@ -60,6 +60,21 @@ console.log('#### Concerto AST (Full Metamodel Instance):')
 console.log(JSON.stringify(metamodel, null, 2));
 ```
 
+### Checking a document against the Concertino schema
+
+`converter.isValid(concertino)` checks a document against `concertino.schema.json`, and `converter.getValidationErrors()` returns the errors of the last check (ajv error objects), or `null`.
+
+The schema checks are compiled at build time, so the package needs neither `ajv` nor `new Function` at run time (a strict Content-Security-Policy is fine). To check documents without the converter, import the `./schema` subpath:
+
+```javascript
+const { isValid, checkSchema } = require('@accordproject/concertino/schema');
+
+isValid(concertino);     // true or false
+checkSchema(concertino); // null, or the errors
+```
+
+`convertToConcertino` and `convertToMetamodel` imported on their own leave the schema checks out of a bundle.
+
 ## Model Size
 
 Despite the denormalization of metadata, the JSON serialization of Concertino models are often smaller in size than their Concerto AST equivalents due to a flatter, dictionary-like design and the removal of type-discriminators (i.e. `$class` properties).
