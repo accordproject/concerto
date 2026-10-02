@@ -1,0 +1,50 @@
+# §0.6a addendum: cargo llvm-cov --workspace --summary-only, run separately (status.mjs 6-min budget timed out), exit 0, oracle replay on (CONCERTO_ORACLE_FIXTURES set)
+# concerto-core lines: 26635 total, 1450 missed, 94.56% (bar >= 90%): PASS
+Filename                                        Regions    Missed Regions     Cover   Functions  Missed Functions  Executed       Lines      Missed Lines     Cover    Branches   Missed Branches     Cover
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+concerto-core-js/src/deserialize.rs                  36                 0   100.00%           6                 0   100.00%          48                 0   100.00%           0                 0         -
+concerto-core-js/src/factory.rs                     638                45    92.95%          37                 4    89.19%         515                29    94.37%           0                 0         -
+concerto-core-js/src/generator.rs                   487                87    82.14%          20                 1    95.00%         269                36    86.62%           0                 0         -
+concerto-core-js/src/populator.rs                  1299               199    84.68%          73                 6    91.78%         774                99    87.21%           0                 0         -
+concerto-core-js/src/resource.rs                    195                11    94.36%          10                 0   100.00%         129                 5    96.12%           0                 0         -
+concerto-core-js/src/serializer.rs                 1373                43    96.87%          53                 1    98.11%         728                32    95.60%           0                 0         -
+concerto-core-js/src/value.rs                       359                28    92.20%          26                 0   100.00%         203                13    93.60%           0                 0         -
+concerto-core/src/dcs/dcsconverter.rs              1252               184    85.30%          57                 6    89.47%         753               108    85.66%           0                 0         -
+concerto-core/src/dcs/extractor.rs                 1966                84    95.73%          79                 1    98.73%        1140                32    97.19%           0                 0         -
+concerto-core/src/dcs/mod.rs                       2927               238    91.87%         171                20    88.30%        1728               140    91.90%           0                 0         -
+concerto-core/src/dcs/yaml_quote.rs                 333                26    92.19%          33                 2    93.94%         158                 9    94.30%           0                 0         -
+concerto-core/src/ecma.rs                           426                 1    99.77%          33                 0   100.00%         210                 1    99.52%           0                 0         -
+concerto-core/src/error/catalogue.rs                 42                 0   100.00%           5                 0   100.00%          22                 0   100.00%           0                 0         -
+concerto-core/src/error/mod.rs                     1398                59    95.78%         210                 6    97.14%        1502                33    97.80%           0                 0         -
+concerto-core/src/instance/dayjs.rs                1076                 1    99.91%          64                 0   100.00%         640                 0   100.00%           0                 0         -
+concerto-core/src/instance/diagnostic.rs            342                17    95.03%          27                 0   100.00%         215                 7    96.74%           0                 0         -
+concerto-core/src/instance/from_json.rs            2096               195    90.70%         112                14    87.50%        1206                88    92.70%           0                 0         -
+concerto-core/src/instance/metamodel.rs            1539                27    98.25%          92                 0   100.00%         872                 8    99.08%           0                 0         -
+concerto-core/src/instance/model.rs                 368                69    81.25%          42                 7    83.33%         255                41    83.92%           0                 0         -
+concerto-core/src/instance/options.rs                46                 0   100.00%           4                 0   100.00%          38                 0   100.00%           0                 0         -
+concerto-core/src/instance/resource_id.rs           532                22    95.86%          38                 4    89.47%         319                14    95.61%           0                 0         -
+concerto-core/src/instance/validate.rs             4100               255    93.78%         218                10    95.41%        2392               145    93.94%           0                 0         -
+concerto-core/src/introspect/declaration.rs        1552                46    97.04%         143                 8    94.41%        1011                25    97.53%           0                 0         -
+concerto-core/src/introspect/decorator.rs           904                74    91.81%          60                 5    91.67%         584                41    92.98%           0                 0         -
+concerto-core/src/introspect/field.rs               154                57    62.99%          12                 6    50.00%         109                42    61.47%           0                 0         -
+concerto-core/src/introspect/import.rs              423                12    97.16%          42                 2    95.24%         298                 5    98.32%           0                 0         -
+concerto-core/src/introspect/kept.rs                912               122    86.62%         106                20    81.13%         552                77    86.05%           0                 0         -
+concerto-core/src/introspect/mod.rs                  12                 0   100.00%           3                 0   100.00%           7                 0   100.00%           0                 0         -
+concerto-core/src/introspect/model_file.rs         1751               132    92.46%         173                21    87.86%        1120                81    92.77%           0                 0         -
+concerto-core/src/introspect/property.rs           1365                21    98.46%          84                 0   100.00%         848                 9    98.94%           0                 0         -
+concerto-core/src/introspect/scalar.rs              406                43    89.41%          55                17    69.09%         294                45    84.69%           0                 0         -
+concerto-core/src/introspect/shape.rs              1165                23    98.03%          78                 1    98.72%         774                14    98.19%           0                 0         -
+concerto-core/src/introspect/typed_ast.rs          1785               149    91.65%         142                14    90.14%        1012                77    92.39%           0                 0         -
+concerto-core/src/introspect/validators.rs         1985                31    98.44%         119                 2    98.32%        1045                13    98.76%           0                 0         -
+concerto-core/src/lib.rs                              4                 4     0.00%           2                 2     0.00%           2                 2     0.00%           0                 0         -
+concerto-core/src/model_manager.rs                 6185               371    94.00%         442                37    91.63%        3374               166    95.08%           0                 0         -
+concerto-core/src/model_util.rs                    1108                69    93.77%          88                11    87.50%         653                38    94.18%           0                 0         -
+concerto-core/src/rootmodel.rs                      155                 2    98.71%          15                 0   100.00%          81                 1    98.77%           0                 0         -
+concerto-core/src/semver_range.rs                   679               176    74.08%          45                11    75.56%         402               114    71.64%           0                 0         -
+concerto-core/src/validation.rs                    4855               119    97.55%         216                 6    97.22%        3019                74    97.55%           0                 0         -
+concerto-macros/src/expand.rs                       373                 6    98.39%          26                 0   100.00%         243                 2    99.18%           0                 0         -
+concerto-macros/src/lib.rs                           16                 0   100.00%           2                 0   100.00%          12                 0   100.00%           0                 0         -
+concerto-metamodel/src/utils.rs                      20                20     0.00%           3                 3     0.00%          14                14     0.00%           0                 0         -
+concerto-vocabulary/src/lib.rs                        2                 2     0.00%           1                 1     0.00%           2                 2     0.00%           0                 0         -
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TOTAL                                             48641              3070    93.69%        3267               249    92.38%       29572              1682    94.31%           0                 0         -

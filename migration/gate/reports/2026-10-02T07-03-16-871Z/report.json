@@ -1,0 +1,2372 @@
+{
+  "generated_at": "2026-10-02T07:29:24.051Z",
+  "task": "P5-01",
+  "plan_issue": "accordproject/concerto-rust#29",
+  "task_issue": "accordproject/concerto-rust#72",
+  "options": {
+    "oracleFixtures": "/Users/matt/dev/gh/accordproject/concerto-migration/concerto/migration/oracle/fixtures",
+    "rustRoot": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust",
+    "validateRsRoot": "/Users/matt/dev/gh/accordproject/concerto-migration/concerto-validate-rs",
+    "conformanceRoot": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-conformance",
+    "skipStatus": false,
+    "skipOracleCoverage": false,
+    "skipWasm": false,
+    "skipConformanceInstall": false,
+    "fast": false
+  },
+  "skipped_steps": [],
+  "criteria_summary": {
+    "items": [
+      {
+        "id": "§0.1",
+        "label": "Behavioural (B) unit tests pass unchanged, CONCERTO_ENGINE=rust",
+        "ok": true,
+        "detail": "tag B: 926/932 passing, 0 failing, 6 pending; suite exit 0 [engine module: /Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs (--rust-root default, built 2026-10-02T07:05:10.263Z)]"
+      },
+      {
+        "id": "§0.2",
+        "label": "White-box (W) tests pass unchanged (or lifted + signed off)",
+        "ok": true,
+        "detail": "tag W: 269/269 passing, 0 failing, 0 pending [engine module: /Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs (--rust-root default, built 2026-10-02T07:05:10.263Z)]"
+      },
+      {
+        "id": "§0.3a",
+        "label": "Oracle corpus coverage of the reference (floor: stmt/fn/line >= 99%, branch >= 94.8%)",
+        "ok": false,
+        "detail": "not available"
+      },
+      {
+        "id": "§0.3b",
+        "label": "Oracle corpus: 0 regressions vs baseline.tsv (16,242 fixtures; 2110 unsupported), native (cargo test --test oracle)",
+        "ok": true,
+        "detail": "13861/16242 pass, 271 fail, 2110 unsupported, 0 harness error, 0 unowned, 0 regressions vs baseline.tsv; unsupported by owner: P2-01+P4-03 2, P2-02+P4-04 17, P2-03+P4-06 8, P2-04+P4-07 1, P2-07+P4-05 15, P2-08+P4-08 61, P3-01b 45, P4-09 119, stays-ts 2113"
+      },
+      {
+        "id": "§0.3c",
+        "label": "Oracle corpus 100% pass, WASM/JS binding (replay.js)",
+        "ok": false,
+        "detail": "15971/16242 pass (98.3315% agreement) [engine module: /Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs (--rust-root default, built 2026-10-02T07:05:10.263Z)]"
+      },
+      {
+        "id": "§0.4",
+        "label": ">=70% of concerto-core logic, by weight, runs in Rust (ledger)",
+        "ok": false,
+        "detail": "ledger-weighted Rust+hybrid share: 39.7%"
+      },
+      {
+        "id": "§0.5",
+        "label": "Public TS API unchanged (exports, deep paths, .d.ts snapshot)",
+        "ok": true,
+        "detail": "check-guardrails.mjs exit 0"
+      },
+      {
+        "id": "§0.6a",
+        "label": "concerto-core llvm-cov >= 90% lines",
+        "ok": null,
+        "detail": "not available (llvm-cov tool missing or not judged)"
+      },
+      {
+        "id": "§0.6b",
+        "label": "cargo-mutants catch rate on validation modules >= 85%",
+        "ok": true,
+        "detail": "358/420 caught (94.5%), source: concerto-core/MUTANTS.md (accordproject/concerto-rust#183, P5-06)"
+      },
+      {
+        "id": "§0.7",
+        "label": "concerto-conformance Rust harness current, local run green",
+        "ok": true,
+        "detail": "109/109 scenarios passing locally (concerto-conformance 57d3c23); CI status must be read separately (this runner cannot see GitHub Actions)"
+      }
+    ],
+    "p5_04": {
+      "label": "P5-04 benchmark finding (not a §0 criterion; report only)",
+      "detail": "concerto#1368 measured the Rust engine at 6x-100x slower than TS through the public API. The maintainer decided to accept current performance (P5-06a/b closed) rather than block the gate on it."
+    }
+  },
+  "steps": {
+    "workspace_build": {
+      "name": "TS workspace build (prerequisite for §0.1/§0.2/§0.3a/§0.5)",
+      "ok": true,
+      "exit": 0,
+      "log": "workspace-build.log"
+    },
+    "corpus_provenance": {
+      "name": "oracle corpus provenance (must be the canonical corpus, never self-recorded)",
+      "ok": true,
+      "fixtures_dir": "/Users/matt/dev/gh/accordproject/concerto-migration/concerto/migration/oracle/fixtures",
+      "exists": true,
+      "file_count": 16862,
+      "expected_file_count": 16862,
+      "pin_file_count": 16704,
+      "expected_pin_file_count": 16704,
+      "supplement_present": true,
+      "supplement_file_count": 158,
+      "expected_supplement_file_count": 158,
+      "manifest_present": true,
+      "note": "This checks the fixtures directory is populated as expected; it does not re-hash the corpus (that was verified once at extraction time against e8a2bf72c7775a2d45123dea7b6ff897823c74a108603f5412251ced2619fce1, plus the supplement's own pinned content hash 7b9be1de66690be63e689b3bf0feb4583ed6cd9597099fdec1acb32f87736e71)."
+    },
+    "guardrails": {
+      "name": "guardrails (§0.5 API snapshot + guardrails)",
+      "ok": true,
+      "exit": 0,
+      "log": "guardrails.log"
+    },
+    "conformance_install": {
+      "name": "conformance npm install",
+      "ok": true,
+      "log": "conformance-npm-install.log"
+    },
+    "wasm": {
+      "name": "WASM build (size budget) + smoke:node",
+      "ok": true,
+      "build_ok": true,
+      "size_bytes": 2931108,
+      "size_budget_bytes": 4194304,
+      "within_budget": true,
+      "install_ok": true,
+      "smoke_ok": true,
+      "smoke_failures": [],
+      "logs": {
+        "build": "wasm-build.log",
+        "install": "wasm-npm-install.log",
+        "smoke": "wasm-smoke.log"
+      }
+    },
+    "core_suite_rust": {
+      "name": "concerto-core suite, CONCERTO_ENGINE=rust (§0.1/§0.2, real run)",
+      "ok": true,
+      "exit": 0,
+      "engine_module": {
+        "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+        "source": "--rust-root default",
+        "exists": true,
+        "built_at": "2026-10-02T07:05:10.263Z"
+      },
+      "unexpected_fallbacks": 0,
+      "unexpected_fallback_sample": [],
+      "stats": {
+        "suites": 411,
+        "tests": 1308,
+        "passes": 1300,
+        "pending": 8,
+        "failures": 0,
+        "start": "2026-10-02T07:05:36.060Z",
+        "end": "2026-10-02T07:05:44.179Z",
+        "duration": 8119
+      },
+      "by_tag": {
+        "B": {
+          "tests": 932,
+          "passing": 926,
+          "failing": 0,
+          "pending": 6
+        },
+        "M": {
+          "tests": 80,
+          "passing": 78,
+          "failing": 0,
+          "pending": 2
+        },
+        "W": {
+          "tests": 269,
+          "passing": 269,
+          "failing": 0,
+          "pending": 0
+        },
+        "untagged": {
+          "tests": 27,
+          "passing": 27,
+          "failing": 0,
+          "pending": 0
+        }
+      },
+      "failures": [],
+      "log": "core-suite-rust.log"
+    },
+    "oracle_native": {
+      "name": "oracle native (cargo test --test oracle, §0.3 native leg)",
+      "ok": true,
+      "passed": 34,
+      "failed": 0,
+      "fixtures": {
+        "total_fixtures": 16242,
+        "load_errors": 0,
+        "pass": 13861,
+        "fail": 271,
+        "unsupported": 2110,
+        "harness_error": 0,
+        "unowned": 0,
+        "owners": {
+          "P2-01+P4-03": 2,
+          "P2-02+P4-04": 17,
+          "P2-03+P4-06": 8,
+          "P2-04+P4-07": 1,
+          "P2-07+P4-05": 15,
+          "P2-08+P4-08": 61,
+          "P3-01b": 45,
+          "P4-09": 119,
+          "stays-ts": 2113
+        },
+        "regressions": 0
+      },
+      "log": "oracle-native.log"
+    },
+    "oracle_reference_install": {
+      "name": "oracle reference npm ci (frozen concerto-core 5.0.0)",
+      "ok": true,
+      "exit": 0,
+      "log": "oracle-reference-npm-ci.log"
+    },
+    "oracle_coverage": {
+      "name": "oracle corpus coverage of the reference (§0.3 floor)",
+      "ok": false,
+      "exit": 1,
+      "log": "oracle-coverage.log",
+      "coverage": null,
+      "floor": {
+        "statements": 99,
+        "functions": 99,
+        "lines": 99,
+        "branches": 94.8
+      },
+      "meets_floor": null
+    },
+    "oracle_wasm": {
+      "name": "oracle WASM/JS-binding leg (§0.3, replay.js --engine rust-adapter.js)",
+      "ok": false,
+      "exit": 1,
+      "engine_module": {
+        "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+        "source": "--rust-root default",
+        "exists": true,
+        "built_at": "2026-10-02T07:05:10.263Z"
+      },
+      "log": "oracle-wasm.log",
+      "replay": {
+        "total": 16242,
+        "pass": 15971,
+        "fail": 271,
+        "harness_error": 0,
+        "agreement_pct": 98.3315,
+        "failures_truncated": true
+      },
+      "failures": [
+        {
+          "file": "conformance/ModelFile.new/bdb431e0cda8fe58f6290730.json",
+          "op": "ModelFile.new",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelFile.new/bf2720822629387877f85dec.json",
+          "op": "ModelFile.new",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelFile.new/ce3c3765f776df2457fa2172.json",
+          "op": "ModelFile.new",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelFile.new/ea6dd9f821792570a3270f48.json",
+          "op": "ModelFile.new",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.addCTOModel/043b3c027015aed75cd6ab1b.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.addCTOModel/48a5fca59bbf5b8333f8da83.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.addCTOModel/5982dc1078d9bc711c90d391.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.addCTOModel/86d8728f782c4378437d2daf.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.addCTOModel/9a32aa6233dd756d6d4c39b9.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.addCTOModel/aed7af84b5fe90e1d32b2482.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.addCTOModel/baaa6fe4dbfad944b5cfafa0.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.addCTOModel/d38cf1f58721bf76487ed5d0.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.addCTOModel/d85b28076a8ece00c558322c.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"RangeError\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.addCTOModel/d954b75af671265579268b39.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.validateModelFiles/0e00ad666a82bab5f4398fc2.json",
+          "op": "ModelManager.validateModelFiles",
+          "status": "fail",
+          "detail": "state divergence: step validateModelFiles recorded error(TypeError), replayed error(IllegalModelException)"
+        },
+        {
+          "file": "conformance/ModelManager.validateModelFiles/343223828152dd93cffd4c24.json",
+          "op": "ModelManager.validateModelFiles",
+          "status": "fail",
+          "detail": "$.error.class: expected \"RangeError\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.validateModelFiles/91fbc42e091bda3907e47d53.json",
+          "op": "ModelManager.validateModelFiles",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.validateModelFiles/b25d9dd5f7e2162ef0a0b2ee.json",
+          "op": "ModelManager.validateModelFiles",
+          "status": "fail",
+          "detail": "state divergence: step validateModelFiles recorded error(RangeError), replayed error(IllegalModelException)"
+        },
+        {
+          "file": "conformance/ModelManager.validateModelFiles/ce4c72b99abd76dea938c762.json",
+          "op": "ModelManager.validateModelFiles",
+          "status": "fail",
+          "detail": "$.error.class: expected \"RangeError\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/ModelManager.validateModelFiles/e69364085d56bf0e71748217.json",
+          "op": "ModelManager.validateModelFiles",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"IllegalModelException\""
+        },
+        {
+          "file": "conformance/Serializer.fromJSON/3fd7878b64ffd91a8fdaafd8.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "conformance/Serializer.fromJSON/473af29343921aa8bb2dd0df.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "conformance/Serializer.fromJSON/e541fb5cfcc2a7bf22214bad.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "conformance/Serializer.fromJSON/fb33005ed13aaba9f5011dbb.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/02712786c4566c62f34fb3e2.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/03c6b7a8160715e3db137b49.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/05880bc6fddd6b2ae4a8c88a.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/07ce9ea59d1603106cc8208a.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/0c19c540edd5efb8d1bab846.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/0c3eeae2c60441e6971779af.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/0ee711c21efdf224d0ffc36f.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/10f5233891bd1979f117185d.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/17a56b73420d1236d138f974.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/182aca2413f694fd52c99a70.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/19aafb9278d2c2803e4b2ca4.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/1a83fe1df2d313d701b7001d.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/1c8e01779d57d39aa2a9af67.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/2415c8d7a54e87942bc6d7f2.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/24e44a912e67d892dac14a9e.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/266a9ee8cec6e82f7de7b00c.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/2a245a72addcad22ab260212.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/2abab32073780d23f5463551.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/3436f2285fdd32f55c797a02.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/3462fd6c506e7bd956da558c.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/3480f2d8d39479f934633376.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/37dd6314ba52db2558ddf781.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/3b60629728a53c13cd87bafe.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/403e639e4c0eb37a0865a8b5.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/4171e2f000d0bee863bf00fc.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/45856dcef7eb45caa408df27.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/4b57ce5c71cbd9cc57dce9b2.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/4f6d7ec957df912747fd9ddc.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/4fc7c33f385d9184753c147d.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/51f4a756b1a1b4ce67376e0f.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/524893e9093ac5403d76b257.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/55ad6ba1665eee91475d503c.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/55ff4a08cb7abd4093fb02d9.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/56e47777b73910928d04f550.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/5f5743e3de2d25d08551e5eb.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/60ea5a8821e537fa2784a1c1.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/615d294c3ca0be4290ff75c7.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/657fa94514831933c22ec2e9.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/65f5c8a4b228cba17acaa992.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/666e17bcc61091bc9bd6bdb6.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/68724a94aac9c58814d8ce94.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/70580b501db34fe355a114ce.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/710492d2cac3fd47b059f8b7.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/7143e4165d1117ac46507984.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/73b4c5da40978aba55e2394d.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/7a8205af84c079cb7abbcc85.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/808275bcbb1483fcdd395de5.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/80cfc8303b294d12457dc231.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/81b7edc705235ede5342fb60.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/827deabd153b0767d0f938dd.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/82eeee857b080028179cae25.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/84176fcadda135768e14ec3d.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/87cd16923d20c833d4706f69.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/8e0e8b9868e847d82aa27303.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/8f53769ae9fb102c0b9cb29d.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/9223025992aa052e1e497d8d.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/9298fe8e1066d985b1a814b1.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/94aefb8c28968b7ab9d4c062.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/9615fce19c212ece35ae8ecc.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/994da6389f6ad2efd1960dd0.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/9db249e7b645f1c6e3a63687.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/9f1d25264f9ac8d03a1b4dc7.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/a345c70a5c0096fa674cf600.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/a4734e3a765a1d92c55412f9.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/a475816b7d3edbeb6008b3f6.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/a49f84622c76590b2b0419a2.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/a56e12981542c0f587e36e61.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/b2bd41f09b0a35d36d08947a.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/b3d53051b2b3e4240d87cfb1.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/bb1efd564675a5c786225d3e.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/c0e55dd171a37e10f6a374fe.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/d02a808a1442c61ca7903ae7.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/d447ab5db207b55f3c133501.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/d576cc1bd93478cad24ce69d.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/d62ed9a12178e37fbfa96d17.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/d644f4ce6bf9214d38892bca.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/d82987fd319b23a64ad2248c.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/d9cabc0377a22727d3415782.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/dac871de2469e94e126bc291.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/df3cc7ab93c6fcb9f3c251aa.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/e26540b8039c54b62648dc0a.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/e28b2986584912e9713699c1.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/e2a8970641b175f8f1f98f12.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/e2b3a67a5f7e287bfc0ae7ad.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/e487231e0a2745a37bcc90dd.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/ebf807829d9756a4f2107327.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/ec96f7216c5ef5f620451845.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/ecd264f76dd9dd000fef0b20.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/f133cae23012761e169f5354.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/f4e01831e9d647b0ed1dec77.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/f60316184610561d648a02cf.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/f6ea36ef516025de20263687.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/f8bfd14bcba07364d0a3413e.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/f926acde3071dd4a9f2ec811.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/fd29bcc82fb4d37cb56974af.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+        },
+        {
+          "file": "data/DecoratorManager.decorateModels/fd3dbc93d425bba788ca5506.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "gaps/ClassDeclaration.getProperty/0d408271fa91e648a4093020.json",
+          "op": "ClassDeclaration.getProperty",
+          "status": "fail",
+          "detail": "state divergence: step fromAst recorded ok, replayed error(IllegalModelException)"
+        },
+        {
+          "file": "gaps/CollectionSizeValidator.compatibleWith/045dc70766e21be935ad53c1.json",
+          "op": "CollectionSizeValidator.compatibleWith",
+          "status": "fail",
+          "detail": "state divergence: step fromAst recorded ok, replayed error(IllegalModelException)"
+        },
+        {
+          "file": "gaps/Factory.newResource/8556634c0dde38ec28d1fbd0.json",
+          "op": "Factory.newResource",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+        },
+        {
+          "file": "gaps/Factory.newResource/f7aca8c97373ef49085690d1.json",
+          "op": "Factory.newResource",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+        },
+        {
+          "file": "gaps/ModelManager.addCTOModel/600a2c246ae04367d123921d.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.addCTOModel/6a6c169b79c3ef6b2c46fe35.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.addCTOModel/af3bd91061265917b8b0578e.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/07a3c74cf230338389412f0b.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/274f8cebaf47c4089b212e87.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/6226cf4c4132dfadcfcf00c9.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error.class: expected \"Error\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/6b2963681152f24e8334562b.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"IllegalModelException\",\"component\":\"@accordproject/concerto-core\",\"location\":null}"
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/7b9fc1eca8208827732709eb.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/81611c59a730271c6f367bee.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"IllegalModelException\",\"component\":\"@accordproject/concerto-core\",\"location\":null}"
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/968849bcd5b6b86038d6f832.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/9f5ad88d748e3c1073c0d6f8.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/a932ac7be9e572e694f8e909.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.fromAst/c640dc9ea473b3b7cce95e16.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "gaps/ModelManager.getType/97fa8184f570990d8f7f19dd.json",
+          "op": "ModelManager.getType",
+          "status": "fail",
+          "detail": "state divergence: step fromAst recorded ok, replayed error(IllegalModelException)"
+        },
+        {
+          "file": "gaps/NumberValidator.validate/d53d0800f7cc33d437a69826.json",
+          "op": "NumberValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/NumberValidator.validate/e2b902739597d1fbfc49cf6e.json",
+          "op": "NumberValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/Property.getSizeValidator/8f990b8bd062d7839b2983ce.json",
+          "op": "Property.getSizeValidator",
+          "status": "fail",
+          "detail": "state divergence: step fromAst recorded ok, replayed error(IllegalModelException)"
+        },
+        {
+          "file": "gaps/Resource.validate/3c27c0784b532b087d7df40e.json",
+          "op": "Resource.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/Resource.validate/a7fd0f19c7d95f5cfddc9f0d.json",
+          "op": "Resource.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/Resource.validate/d444ebcf0cf5a3c23e5ee6dd.json",
+          "op": "Resource.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/Serializer.fromJSON/85289b13ad849c509a61d932.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+        },
+        {
+          "file": "gaps/Serializer.fromJSON/ad039b9b37ee60b1a1556f69.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "gaps/Serializer.fromJSON/f15994fd38479210bfa67c82.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+        },
+        {
+          "file": "gaps/Serializer.toJSON/3b324a181dc418651686defb.json",
+          "op": "Serializer.toJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/Serializer.toJSON/6684ed223599d0576d1512f8.json",
+          "op": "Serializer.toJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/Serializer.toJSON/7d3800e3f4640b92e2c224b4.json",
+          "op": "Serializer.toJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/Serializer.toJSON/8dddc00b8bfae07bfef03ca5.json",
+          "op": "Serializer.toJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+        },
+        {
+          "file": "gaps/Serializer.toJSON/979f875542a474e9f77835ee.json",
+          "op": "Serializer.toJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+        },
+        {
+          "file": "gaps/Serializer.toJSON/a1904c4ff977a8514e15a39c.json",
+          "op": "Serializer.toJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/Serializer.toJSON/a3466b1921a98b4a78b9a2ab.json",
+          "op": "Serializer.toJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/Serializer.toJSON/b3c16848226bd8f97f67bf40.json",
+          "op": "Serializer.toJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/Serializer.toJSON/fa5b026e1b5119eead5524e5.json",
+          "op": "Serializer.toJSON",
+          "status": "fail",
+          "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/StringValidator.validate/212af0a7e03338e645d4bdaf.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/StringValidator.validate/23fb80cd5e9f31264b8cc823.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "gaps/StringValidator.validate/48f161667db64951937a14d0.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/ModelManager.addCTOModel/176db94c1729628a1bf289e7.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "lifted/ModelManager.addCTOModel/258ff4af328b96cf6f77cfc8.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "lifted/ModelManager.addCTOModel/354eab10434833df4a39a288.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "lifted/ModelManager.addCTOModel/719a297346e00ae34a6821dd.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "lifted/ModelManager.addCTOModel/971aa21b83527c5f2c7476b4.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "lifted/ModelManager.addCTOModel/a11a5dab7c795eeefa4433b1.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "lifted/ModelManager.addCTOModel/c5c0ae82175904edc6524e80.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "lifted/ModelManager.fromAst/14d322663ca024d8cf61abb1.json",
+          "op": "ModelManager.fromAst",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "lifted/Serializer.fromJSON/519856916d57a599469553de.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "lifted/Serializer.fromJSON/aed20361683be45d7c305857.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "lifted/Serializer.fromJSON/c4658233d7917d290972e42b.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "lifted/StringValidator.validate/0b342c7c7be08e043cafe617.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/StringValidator.validate/21309ced95fb59f0210b87e2.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/StringValidator.validate/3bf7e90d5c833c6f5cff00d1.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/StringValidator.validate/4ff9c4e5bf1d03e3eac2284b.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/StringValidator.validate/57c6c0f1a39e9f1ff9507a67.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/StringValidator.validate/a8ad4404a8d9fca86925da56.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/StringValidator.validate/b4cd31f091db21e503019001.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/StringValidator.validate/bdb5b634df9afdb6e600a0a0.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/StringValidator.validate/de983525a593fc98060f4067.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/StringValidator.validate/f6dfc812305a41c6991f8940.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "lifted/StringValidator.validate/fc4acc202ee4e70457b55a13.json",
+          "op": "StringValidator.validate",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+        },
+        {
+          "file": "unit/ClassDeclaration.getProperty/6a9a87e9edf8c459bda6134f.json",
+          "op": "ClassDeclaration.getProperty",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ClassDeclaration.getProperty/98d1c8a4284594cf284dcf6f.json",
+          "op": "ClassDeclaration.getProperty",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ClassDeclaration.getProperty/9b1308781655ade48b6df2b9.json",
+          "op": "ClassDeclaration.getProperty",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ClassDeclaration.getProperty/ae6d4f95e400d81352955b9c.json",
+          "op": "ClassDeclaration.getProperty",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ClassDeclaration.getProperty/ba14fc8109ee86f5b0e775c3.json",
+          "op": "ClassDeclaration.getProperty",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ClassDeclaration.getProperty/beef019127eaaeab512f073f.json",
+          "op": "ClassDeclaration.getProperty",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ClassDeclaration.getProperty/fa3815406ef20ed1f4cbecfd.json",
+          "op": "ClassDeclaration.getProperty",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/1a173a27658e9da45c1824c0.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/221c0a7ef0098435f0dcbffc.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/26cb740eb3e75f618a04e4c8.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/26cfdd282a2e47bbfb2de2dc.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/458228f8f52e002a39f7febf.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/6a3cc15d915298a73aea81ed.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/ad613adbe5b7bcbe6e34b87e.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/cd1a105c463b4e6f2e8d8769.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/d913c2afb3b20a75cf0a49a2.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/e3203272f426a09ad36d9252.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/e9ba244fc520ed03fc7436c6.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/f6ca361391e4789469f5b6ea.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorated.getDecorator/fb728261f45709a028c25991.json",
+          "op": "Decorated.getDecorator",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorator.getArguments/b1ddc43126c707ab6dc60069.json",
+          "op": "Decorator.getArguments",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/Decorator.getArguments/ff9f67306ff4d5112f510b3b.json",
+          "op": "Decorator.getArguments",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/02494476b6851ae52a67397b.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/07adf89849de8875b74e1565.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/13bea62a15de80343e280b3c.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/16a9be9030979a417b3b3d3d.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/1a3c45ef40abb7d7887277c6.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/457bfe320dbe0c3ce6f35a94.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/66dfc5849d908925bbfc0073.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/6d71cbf5cd531631c05d3113.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/7b5fae9dd69e2132f496134f.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/82ff8016808d89b54c316a08.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/8a9241f37ee6b45ab9db03e9.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/9fbb59aa0623041e4f056123.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/a673d7ceff26dd25ec1db2f5.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/c42bc0568ef6d89fb3b9284b.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/c9044a571b6b57e65d5d24dd.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/ca6f0992b048d4f465a365a0.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/cabc0d65824ea63b4b191ede.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/cdc6d570b765db615a25cd40.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/d1bd2636a89efea85ed2659b.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/d7714f3535efbad83b1cabb0.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/d7f1c02f8b21beb2a9933975.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/e399c5b5ca377e85e1ced268.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/DecoratorManager.decorateModels/f06543cbce2ea99e14348790.json",
+          "op": "DecoratorManager.decorateModels",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+        },
+        {
+          "file": "unit/ModelFile.getAst/12c184659f82719af7141075.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelFile.getAst/55a344bd7d228a396d2a6ab9.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelFile.getAst/59e9812035755217e55ba56d.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelFile.getAst/5da2c0b39233cb1500546879.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelFile.getAst/601317211c3c4bbed3a4247f.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelFile.getAst/71ebcdaee68bcbb4d5d5ae9d.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelFile.getAst/890988f9b4e2e548e1442cdb.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelFile.getAst/8c18cc89fa43826735a5305b.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelFile.getAst/980448fde8c0aefe96ef44e6.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelFile.getAst/b0ceae244a8730bd6807dfab.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelFile.getAst/b2a19d3d2c988b4a7cb5ab1d.json",
+          "op": "ModelFile.getAst",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelManager.addCTOModel/25970ac4061611aa887a8b82.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "unit/ModelManager.addCTOModel/dee4955adbadd1782b484242.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "unit/ModelManager.addCTOModel/ede4594d7ab4449dcd5eaccf.json",
+          "op": "ModelManager.addCTOModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "unit/ModelManager.addModel/6b183dd04a82a63d693b6d35.json",
+          "op": "ModelManager.addModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"MetamodelException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "unit/ModelManager.addModel/75ea10eea76396079fe879ff.json",
+          "op": "ModelManager.addModel",
+          "status": "fail",
+          "detail": "$.error.class: expected \"MetamodelException\" got \"IllegalModelException\""
+        },
+        {
+          "file": "unit/ModelManager.getType/31dff4b23c6d4831e348e62c.json",
+          "op": "ModelManager.getType",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelManager.getType/a9f6277e06d21da74e6588cd.json",
+          "op": "ModelManager.getType",
+          "status": "fail",
+          "detail": "input construction failed: Error: Invalid namespace test"
+        },
+        {
+          "file": "unit/ModelUtil.isValidIdentifier/69180a304acffbfb4c5dd2b9.json",
+          "op": "ModelUtil.isValidIdentifier",
+          "status": "fail",
+          "detail": "$.ok: expected true got false"
+        },
+        {
+          "file": "unit/ModelUtil.isValidIdentifier/ddc54fdc16555fd15439a76d.json",
+          "op": "ModelUtil.isValidIdentifier",
+          "status": "fail",
+          "detail": "$.ok: expected true got false"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/18085424055e321750edebee.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/1fea82f44c36875c961b3f8e.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/494d8d9083a7b7e614fee3fa.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/526f1b9728b27dd31e9494f6.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/65335daaf05e8f1799e91ccb.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/6afd7912da6ffd43a408ffb7.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/6cbc00266ff1e25615aa2772.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/6e9026f51cd5ece8fc5ea402.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/7c1630d2a1cc381f73b18e68.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/81ae419d4329b9d36ba21e1c.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/8baf0a6515bd18d305be36ac.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/95353aac5a3d8b7ee9c05a38.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/a3a1a6ab000a539d70b29dc9.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/b656bb812e2a1c9b18606ea8.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/b781d8e9f91991a4111ee5ff.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/dae941961d1b8633c1c9ad99.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/deccc004cdb69dcd4dce17dc.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/e0100bce1a50d508eec71c88.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/e65b396734b2af5db3fd8851.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/eda5cf1dffe07a15996b2b08.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/edebccb603047fe3d939a63f.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/f5b5a7cf3b6aa55727f05512.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/fc5be1b119349be81dbdce5a.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        },
+        {
+          "file": "unit/Serializer.fromJSON/fe97d9372a3576fba7f2bc41.json",
+          "op": "Serializer.fromJSON",
+          "status": "fail",
+          "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+        }
+      ]
+    },
+    "status": {
+      "name": "status.mjs (full run)",
+      "ok": false,
+      "exit": 0,
+      "log": "status-run.log",
+      "status": {
+        "$schema": "migration/status/status.json",
+        "generated_at": "2026-10-02T07:29:23.940Z",
+        "requested_at_sha": null,
+        "fast": false,
+        "runtime_ms": 765368,
+        "repos": {
+          "concerto": {
+            "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto",
+            "commit": "4578718b27bf054bb87e54dfcc0a50ce19559759",
+            "commit_used": "4578718b27bf054bb87e54dfcc0a50ce19559759"
+          },
+          "concerto-rust": {
+            "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust",
+            "commit": "bfa4a5535e4a64f81954d5287ed0c0a331e3c241"
+          },
+          "concerto-validate-rs": {
+            "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-validate-rs",
+            "commit": null
+          },
+          "concerto-conformance": {
+            "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-conformance",
+            "commit": "57d3c2397acf333985f761684ad2cbef55ba7ead"
+          }
+        },
+        "metrics": {
+          "queue": {
+            "available": true,
+            "total": 56,
+            "counts": {
+              "done": 11,
+              "in_progress": 4,
+              "pending": 41
+            },
+            "by_priority": {
+              "P0": {
+                "done": 9,
+                "in_progress": 2,
+                "pending": 9
+              },
+              "P1": {
+                "done": 2,
+                "pending": 24,
+                "in_progress": 2
+              },
+              "P2": {
+                "pending": 7
+              },
+              "P3": {
+                "pending": 1
+              }
+            }
+          },
+          "concerto_core_tests": {
+            "overall": {
+              "available": true,
+              "engine": "ts",
+              "suites": 436,
+              "tests": 2234,
+              "passing": 2226,
+              "failing": 0,
+              "pending": 8,
+              "duration_ms": 13022
+            },
+            "by_tag": {
+              "available": true,
+              "tally": {
+                "untagged": {
+                  "tests": 953,
+                  "passing": 953,
+                  "failing": 0,
+                  "pending": 0
+                },
+                "B": {
+                  "tests": 932,
+                  "passing": 926,
+                  "failing": 0,
+                  "pending": 6
+                },
+                "M": {
+                  "tests": 80,
+                  "passing": 78,
+                  "failing": 0,
+                  "pending": 2
+                },
+                "W": {
+                  "tests": 269,
+                  "passing": 269,
+                  "failing": 0,
+                  "pending": 0
+                }
+              }
+            },
+            "engine_modes": {
+              "ts": {
+                "available": true,
+                "engine": "ts",
+                "suites": 436,
+                "tests": 2234,
+                "passing": 2226,
+                "failing": 0,
+                "pending": 8,
+                "duration_ms": 13022
+              },
+              "rust": {
+                "available": true,
+                "engine": "rust",
+                "engine_module": {
+                  "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+                  "source": "env (CONCERTO_ENGINE_MODULE)",
+                  "exists": true,
+                  "built_at": "2026-10-02T07:05:10.263Z"
+                },
+                "suites": 411,
+                "tests": 1308,
+                "passing": 1300,
+                "failing": 0,
+                "pending": 8,
+                "duration_ms": 8288,
+                "by_tag": {
+                  "available": true,
+                  "tally": {
+                    "B": {
+                      "tests": 932,
+                      "passing": 926,
+                      "failing": 0,
+                      "pending": 6
+                    },
+                    "M": {
+                      "tests": 80,
+                      "passing": 78,
+                      "failing": 0,
+                      "pending": 2
+                    },
+                    "W": {
+                      "tests": 269,
+                      "passing": 269,
+                      "failing": 0,
+                      "pending": 0
+                    },
+                    "untagged": {
+                      "tests": 27,
+                      "passing": 27,
+                      "failing": 0,
+                      "pending": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "nyc_coverage": {
+            "available": true,
+            "statements_pct": 99.4,
+            "branches_pct": 95.45,
+            "functions_pct": 99.81,
+            "lines_pct": 99.44,
+            "thresholds": {
+              "statements": 99,
+              "branches": 94.8,
+              "functions": 99,
+              "lines": 99
+            },
+            "gate_status": "PASS"
+          },
+          "oracle": {
+            "reference": {
+              "available": true,
+              "engine": "reference@5.0.0",
+              "total": 15850,
+              "pass": 15850,
+              "fail": 0,
+              "harness_error": 0,
+              "pass_pct": 100,
+              "by_source": {
+                "conformance": {
+                  "total": 815,
+                  "pass": 815,
+                  "fail": 0,
+                  "harness_error": 0
+                },
+                "data": {
+                  "total": 10231,
+                  "pass": 10231,
+                  "fail": 0,
+                  "harness_error": 0
+                },
+                "gaps": {
+                  "total": 658,
+                  "pass": 658,
+                  "fail": 0,
+                  "harness_error": 0
+                },
+                "lifted": {
+                  "total": 64,
+                  "pass": 64,
+                  "fail": 0,
+                  "harness_error": 0
+                },
+                "unit": {
+                  "total": 4082,
+                  "pass": 4082,
+                  "fail": 0,
+                  "harness_error": 0
+                }
+              }
+            },
+            "native": {
+              "available": true,
+              "generated_at": "2026-10-02T07:06:25.947Z",
+              "total_fixtures": 16242,
+              "pass": 13861,
+              "fail": 271,
+              "unsupported": 2110,
+              "harness_error": 0,
+              "regressions": 0,
+              "pass_pct": 85.34
+            },
+            "wasm": {
+              "available": false,
+              "reason": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs is built (P4-01/P4-02 have landed), but this collector has no stable corpus-replay report to read for it; see migration/gate/run.mjs's stepOracleWasm for a real replay"
+            },
+            "corpus_coverage_of_reference": {
+              "available": true,
+              "generated_at": "2026-09-27T04:05:59.736Z",
+              "corpus": {
+                "statements": {
+                  "pct": 99.21,
+                  "covered": 3400,
+                  "total": 3427
+                },
+                "branches": {
+                  "pct": 96.34,
+                  "covered": 1768,
+                  "total": 1835
+                },
+                "functions": {
+                  "pct": 99.01,
+                  "covered": 604,
+                  "total": 610
+                },
+                "lines": {
+                  "pct": 99.19,
+                  "covered": 3345,
+                  "total": 3372
+                }
+              },
+              "unit_suite": {
+                "statements": {
+                  "pct": 99.01,
+                  "covered": 3308,
+                  "total": 3341
+                },
+                "branches": {
+                  "pct": 95.8,
+                  "covered": 1758,
+                  "total": 1835
+                },
+                "functions": {
+                  "pct": 99.34,
+                  "covered": 606,
+                  "total": 610
+                },
+                "lines": {
+                  "pct": 99.02,
+                  "covered": 3254,
+                  "total": 3286
+                }
+              },
+              "thresholds": {
+                "statements": 99,
+                "branches": 94.8,
+                "functions": 99,
+                "lines": 99
+              }
+            },
+            "mutants": {
+              "available": true,
+              "detected": 13,
+              "total": 13,
+              "catch_rate_pct": 100,
+              "all_mutants_detected": true,
+              "harness_checks_ok": true
+            }
+          },
+          "rust": {
+            "concerto-rust": {
+              "cargo_test": {
+                "available": false,
+                "reason": "cargo test timed out"
+              },
+              "llvm_cov": {
+                "available": false,
+                "reason": "cargo llvm-cov timed out"
+              }
+            },
+            "concerto-validate-rs": {
+              "cargo_test": {
+                "available": false,
+                "reason": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-validate-rs does not exist"
+              },
+              "llvm_cov": {
+                "available": false,
+                "reason": "n/a"
+              }
+            }
+          },
+          "ledger": {
+            "available": true,
+            "rows": 672,
+            "full_weight": {
+              "total_weight": 7594,
+              "weight_by_classification": {
+                "RUST": 1438,
+                "HYBRID": 1545.5,
+                "PARTIAL": 0,
+                "TS": 4610.5
+              },
+              "weighted_pct_rust_plus_hybrid": 39.3
+            },
+            "d1_denominator_weight": 7513,
+            "d1_excluded": {
+              "members": 54,
+              "weight": 81
+            },
+            "weighted_pct_rust_plus_hybrid": 39.7,
+            "weighted_pct_rust_only": 19.1
+          },
+          "mutants": {
+            "available": true,
+            "source": "concerto-core/MUTANTS.md (accordproject/concerto-rust#183, P5-06)",
+            "total": 420,
+            "caught": 358,
+            "missed": 21,
+            "unviable": 41,
+            "catch_rate_pct": 94.5,
+            "floor_pct": 85,
+            "meets_floor": true
+          },
+          "conformance": {
+            "available": true,
+            "total_scenarios": 109,
+            "passed": 109,
+            "failed": 0
+          }
+        }
+      },
+      "thresholds": {
+        "ledger_weighted_pct_rust_plus_hybrid": {
+          "value": 39.7,
+          "floor": 70,
+          "meets": false
+        },
+        "llvm_cov_lines_pct": {
+          "crate": "concerto-core",
+          "value": null,
+          "floor": 90,
+          "meets": null
+        },
+        "conformance_all_scenarios_pass": {
+          "value": {
+            "total": 109,
+            "failed": 0
+          },
+          "meets": true
+        },
+        "core_tests_tag_B_pass": {
+          "failing": 0,
+          "meets": true
+        },
+        "core_tests_tag_W_pass": {
+          "failing": 0,
+          "meets": true
+        }
+      },
+      "ts_failures": [],
+      "engine_module": {
+        "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+        "source": "--rust-root default",
+        "exists": true,
+        "built_at": "2026-10-02T07:05:10.263Z"
+      }
+    },
+    "cargo_mutants": {
+      "name": "cargo-mutants on validation modules (§0.6 catch rate)",
+      "ok": true,
+      "source": "concerto-core/MUTANTS.md (accordproject/concerto-rust#183, P5-06)",
+      "total": 420,
+      "caught": 358,
+      "missed": 21,
+      "unviable": 41,
+      "catch_rate_pct": 94.5,
+      "floor_pct": 85,
+      "meets_floor": true
+    }
+  },
+  "classification": {
+    "workspace_build": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "corpus_provenance": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "guardrails": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "conformance_install": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "wasm": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "core_suite_rust": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "oracle_native": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "oracle_reference_install": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    },
+    "oracle_coverage": {
+      "verdict": "unexpected",
+      "items": [
+        {
+          "item": "oracle coverage",
+          "verdict": "unexpected",
+          "owner": null,
+          "reason": "coverage.sh exited 1 or produced no coverage.json"
+        }
+      ],
+      "owners": []
+    },
+    "oracle_wasm": {
+      "verdict": "unexpected",
+      "items": [
+        {
+          "item": "oracle WASM replay: failures",
+          "verdict": "unexpected",
+          "owner": null,
+          "reason": "271 failing fixture(s) but the full list is not available"
+        }
+      ],
+      "owners": []
+    },
+    "status": {
+      "verdict": "unexpected",
+      "items": [
+        {
+          "item": "threshold: ledger_weighted_pct_rust_plus_hybrid",
+          "verdict": "unexpected",
+          "owner": null,
+          "reason": "§0 threshold not met (value 39.7, floor 70); no known pending owner"
+        },
+        {
+          "item": "threshold: llvm_cov_lines_pct",
+          "verdict": "unexpected",
+          "owner": null,
+          "reason": "not judged: the metric was unavailable in status.json"
+        }
+      ],
+      "owners": []
+    },
+    "cargo_mutants": {
+      "verdict": "pass",
+      "items": [],
+      "owners": []
+    }
+  }
+}
