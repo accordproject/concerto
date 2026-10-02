@@ -1,0 +1,46 @@
+   Compiling accordproject-concerto-metamodel v3.17.0 (/home/user/wt/P5-81/concerto-rust/concerto-metamodel)
+   Compiling accordproject-concerto-core v0.1.0 (/home/user/wt/P5-81/concerto-rust/concerto-core)
+   Compiling concerto-core-js v0.0.0 (/home/user/wt/P5-81/concerto-rust/concerto-core-js)
+    Finished `release` profile [optimized] target(s) in 2m 35s
+     Running unittests src/lib.rs (/home/user/wt/P5-81/target/release/deps/concerto_core-0f7f598c8386b7bf)
+
+running 1 test
+table_equiv: 1717 models
+table_equiv: case: inputs / accepted (checked text load) / rejected
+table_equiv: conformance/as-given: 81 / 75 / 6
+table_equiv: conformance/class-last: 486 / 450 / 36
+table_equiv: conformance/duplicate-class-last: 486 / 0 / 486
+table_equiv: conformance/duplicate-key: 486 / 337 / 149
+table_equiv: conformance/missing-key: 486 / 79 / 407
+table_equiv: conformance/null: 486 / 79 / 407
+table_equiv: conformance/positional: 486 / 0 / 486
+table_equiv: conformance/unknown-class: 486 / 0 / 486
+table_equiv: conformance/unknown-key: 486 / 0 / 486
+table_equiv: conformance/wrong-type: 486 / 0 / 486
+table_equiv: conformance/wrong-type-last: 486 / 0 / 486
+table_equiv: core-test/as-given: 166 / 162 / 4
+table_equiv: core-test/class-last: 981 / 967 / 14
+table_equiv: core-test/duplicate-class-last: 981 / 0 / 981
+table_equiv: core-test/duplicate-key: 981 / 828 / 153
+table_equiv: core-test/missing-key: 981 / 198 / 783
+table_equiv: core-test/null: 981 / 198 / 783
+table_equiv: core-test/positional: 981 / 0 / 981
+table_equiv: core-test/unknown-class: 981 / 0 / 981
+table_equiv: core-test/unknown-key: 981 / 0 / 981
+table_equiv: core-test/wrong-type: 981 / 0 / 981
+table_equiv: core-test/wrong-type-last: 981 / 0 / 981
+table_equiv: oracle/as-given: 1470 / 1275 / 195
+table_equiv: oracle/class-last: 7204 / 6535 / 669
+table_equiv: oracle/duplicate-class-last: 7204 / 0 / 7204
+table_equiv: oracle/duplicate-key: 7336 / 3211 / 4125
+table_equiv: oracle/missing-key: 7134 / 2950 / 4184
+table_equiv: oracle/null: 7134 / 1175 / 5959
+table_equiv: oracle/positional: 7336 / 74 / 7262
+table_equiv: oracle/unknown-class: 7204 / 0 / 7204
+table_equiv: oracle/unknown-key: 7336 / 0 / 7336
+table_equiv: oracle/wrong-type: 7134 / 98 / 7036
+table_equiv: oracle/wrong-type-last: 7134 / 8 / 7126
+test introspect::table_equiv::table_decoder_matches_derived_decoder ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 880 filtered out; finished in 34.66s
+
