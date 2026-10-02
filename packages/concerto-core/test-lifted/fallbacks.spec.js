@@ -31,7 +31,7 @@
  *
  * Every check is `{ id, covers, run(core), expect }`:
  * - `run(core)` uses only the public classes on `core` (see
- *   migration/oracle/lib/core.js `loadCore`) and returns plain data;
+ *   lib/core.js `loadCore`) and returns plain data;
  * - `expect` is the outcome the frozen v5.0.0 reference gives, either
  *   `{ ok: <value> }` or `{ throws: { name, message } }`;
  * - `reference`, only on a check that covers an intended breaking change
@@ -41,18 +41,23 @@
  * Each check runs twice: against the workspace `src/` (this is what
  * counts towards concerto-core's nyc gate: packages/concerto-core's `test`
  * script and migration/bin/status.mjs add this spec to the suite), and
- * against the reference (migration/oracle/reference, `npm ci` there),
- * which confirms `expect` is what v5.0.0 does. The reference run is skipped
- * (pending) when the reference is not installed.
+ * against the reference concerto-core@5.0.0, which confirms `expect` is what
+ * v5.0.0 does. The reference halves are optional (accordproject/concerto-rust#252):
+ * the reference is found as lib/core.js describes (`ORACLE_REFERENCE_DIR`,
+ * else migration/oracle/reference with `npm ci` run there). When it is not
+ * installed, the reference halves are not registered; one pending test and
+ * a warning name the directory that was looked in and how to enable them.
  *
- * Unlike drivers/lifted.spec.js this never records fixtures: it asserts.
+ * Moved from migration/oracle/lifted/ (accordproject/concerto-rust#252).
+ * Unlike migration/oracle/drivers/lifted.spec.js this never records
+ * fixtures: it asserts.
  * No file here is named `*.scenarios.js`, so the recorder never sees them.
  */
 
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { getSrcCore, getRefCore, REF_PKG_DIR } = require('../lib/core');
+const { getSrcCore, getRefCore, REF_DIR, REF_PKG_DIR } = require('./lib/core');
 
 const LIFTED_DIR = __dirname;
 
@@ -116,9 +121,20 @@ const checkFiles = fs
     .sort();
 
 const referenceInstalled = fs.existsSync(path.join(REF_PKG_DIR, 'package.json'));
+const REFERENCE_SKIP_REASON =
+    `reference@5.0.0 comparison halves skipped: concerto-core@5.0.0 is not installed under ${REF_DIR} ` +
+    '(run `npm ci` there, or set ORACLE_REFERENCE_DIR to a directory with it installed); only the src halves ran';
 
 describe('lifted fallback checks (P5-02b)', function () {
     this.timeout(30000);
+
+    if (!referenceInstalled) {
+        // Not silent: a warning on stderr, and one pending test whose title
+        // gives the reason, instead of one anonymous pending per check.
+        // eslint-disable-next-line no-console
+        console.warn(`WARNING: lifted fallback checks: ${REFERENCE_SKIP_REASON}`);
+        it.skip(REFERENCE_SKIP_REASON);
+    }
 
     for (const file of checkFiles) {
         describe(file, () => {
@@ -132,12 +148,11 @@ describe('lifted fallback checks (P5-02b)', function () {
                     assert.deepStrictEqual(await outcomeOf(check, getSrcCore()), check.expect);
                 });
 
-                it(`${check.id} (reference@5.0.0)`, async function () {
-                    if (!referenceInstalled) {
-                        this.skip();
-                    }
-                    assert.deepStrictEqual(await outcomeOf(check, getRefCore()), check.reference ?? check.expect);
-                });
+                if (referenceInstalled) {
+                    it(`${check.id} (reference@5.0.0)`, async () => {
+                        assert.deepStrictEqual(await outcomeOf(check, getRefCore()), check.reference ?? check.expect);
+                    });
+                }
             }
         });
     }

@@ -21,7 +21,7 @@ import dayjs from './dayjs-setup';
  * and rejects a leap second, so reading the fields back must give the same
  * fields). The Rust engine's rule (`instance::dayjs::strict_instant`): the
  * same regex, then chrono's RFC 3339 calendar checks. The lifted checks in
- * migration/oracle/lifted/datetimeutil-strict.checks.js compare the two.
+ * packages/concerto-core/test-lifted/datetimeutil-strict.checks.js compare the two.
  * @param {*} value the value
  * @returns {boolean} true for a strict `DateTime` string
  * @internal

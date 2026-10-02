@@ -1154,10 +1154,10 @@ module.exports = [
             throws: {
                 name: 'TypeError',
                 message: 'Converting circular structure to JSON\n' +
-                    "    --> starting at object with constructor 'ModelManager'\n" +
-                    "    |     property 'modelFiles' -> object with constructor 'Object'\n" +
-                    "    |     property 'concerto.decorator@1.0.0' -> object with constructor 'ModelFile'\n" +
-                    "    --- property 'modelManager' closes the circle"
+                    '    --> starting at object with constructor \'ModelManager\'\n' +
+                    '    |     property \'modelFiles\' -> object with constructor \'Object\'\n' +
+                    '    |     property \'concerto.decorator@1.0.0\' -> object with constructor \'ModelFile\'\n' +
+                    '    --- property \'modelManager\' closes the circle'
             }
         },
     },

@@ -24,10 +24,11 @@ lib/              core.js      loads the modules of one build (workspace src/ vi
 drivers/          data.spec.js (test/data, test/1.0.0), conformance.spec.js (concerto-conformance),
                   gaps.spec.js (task P2-11: targeted inputs closing coverage-gaps.json branches;
                   task accordproject/concerto-rust#94 added predicates, factories, async ops),
-                  lifted.spec.js (task P2-10: runs lifted/*.scenarios.js),
+                  lifted.spec.js (task P2-10: runs packages/concerto-core/test-lifted/*.scenarios.js),
                   supplement.spec.js (task P2-11b: the additive corpus supplement, see "Corpus supplement"),
                   unit-setup.js (global chai set-up for per-file unit runs)
-lifted/           task P2-10: black-box scenarios replacing white-box unit tests (see lifted/README.md)
+lifted/           moved to packages/concerto-core/test-lifted/ (accordproject/concerto-rust#252); only a
+                  forwarding note (MOVED.md) remains. lib/core.js likewise forwards to test-lifted/lib/core.js
 bin/              record-all.sh, build-corpus.js, replay.js, coverage.sh, coverage-gaps.js, self-check.js,
                   cto-cache.js (P0-04b trial version, kept as-is, not used by anything else any more),
                   build-cto-cache.js (CTO -> AST cache for the native Rust harness, OD-9; task P1-07a),
@@ -75,7 +76,7 @@ Five sources feed it:
 | `data` | `drivers/data.spec.js`: every `.cto`, AST `.json`, instance `.json`/`.expect`, DCS `.json` and `.yaml` under `test/data` and `test/1.0.0`, loaded alone and per directory, with and without validation, metamodel validation, instance generation (`sample`/`empty`), `toJSON`/`fromJSON` round trips, decorator application and extraction. |
 | `conformance` | `drivers/conformance.spec.js`: every semantic scenario of concerto-conformance run exactly as its JavaScript step definitions do (`new ModelFile`, `addModelFile(…, true)`, `validateModelFiles`), every AST and CTO file under `semantic/specifications` on its own, and every instance scenario of `validate/features` (ModelLoader, `fromJSON`, `toJSON`). |
 | `gaps` | `drivers/gaps.spec.js` (task P2-11, plan §2.4): targeted black-box inputs — crafted CTO models, mutated metamodel ASTs (via `fromAst`), Resources built by a Factory and assigned field values directly, `Serializer`/`Factory` options, and direct calls on the introspection objects a model manager returns — each aimed at one or more branches listed in `coverage-gaps.json` that the unit suite covers but the corpus did not. |
-| `lifted` | `drivers/lifted.spec.js` (task P2-10, plan §2.3): every scenario in `lifted/*.scenarios.js`, each replacing a white-box unit test with a public `Serializer.fromJSON` call. |
+| `lifted` | `drivers/lifted.spec.js` (task P2-10, plan §2.3): every scenario in `packages/concerto-core/test-lifted/*.scenarios.js` (formerly `lifted/`), each replacing a white-box unit test with a public `Serializer.fromJSON` call. |
 
 A call is **skipped** (and counted by op and reason in `fixtures/manifest.json`) when:
 

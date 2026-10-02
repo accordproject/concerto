@@ -5,6 +5,14 @@ Black-box replacements for the white-box (W) unit tests listed in
 `accordproject/concerto-rust#54` for the task and `accordproject/concerto-rust#29`
 §2.3 for the plan.
 
+> **Location.** This directory was `migration/oracle/lifted/` until
+> accordproject/concerto-rust#252 moved it here, with the core loader it
+> uses (`lib/core.js`, formerly `migration/oracle/lib/core.js`, which now
+> only forwards here), so the lifted checks outlive `migration/`. Paths
+> below that start with `drivers/`, `bin/` or `lib/` other than
+> `lib/core.js` are relative to `migration/oracle/`, which still holds the
+> recorder and the drivers that read the `*.scenarios.js` files from here.
+
 ## Status: in progress, not complete
 
 **`serializer/jsonpopulator.js` is done (65 of 65 W tests): 58 lifted, 7
@@ -370,7 +378,9 @@ primitive values take `convertToObject`'s TS switch too.
 
 Each check is `{ id, covers, run(core), expect }`. `fallbacks.spec.js` runs
 `run` against the workspace `src/` and against the frozen v5.0.0 reference
-(`migration/oracle/reference`, skipped when not installed) and asserts both
+(`ORACLE_REFERENCE_DIR`, else `migration/oracle/reference`; when it is not
+installed the reference halves are not registered, and one pending test and
+a warning say why) and asserts both
 give `expect`, which was taken from the reference. concerto-core's `test`
 script and `migration/bin/status.mjs` run this spec before `test/` under the
 same nyc run. It must come first: `test/serializer/jsongenerator.js` leaves a

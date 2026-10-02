@@ -122,13 +122,14 @@ This file only *checks*. It never fixes product code, never touches
 ### 2. White-box (W) tests pass unchanged, or are lifted and signed off
 
 - **Command:** same run as §1, tally filtered to tag `W`; cross-checked
-  against `migration/oracle/lifted/**` and the sign-off notes referenced
+  against `packages/concerto-core/test-lifted/**` (moved from
+  `migration/oracle/lifted/` by accordproject/concerto-rust#252) and the sign-off notes referenced
   from `migration/ledger/SUMMARY.md` / the P2-10 tracking issues.
 - **Expected:** every `W` test passes via the P1-04 context-trait fallback,
-  **or** has a lifted black-box fixture under `migration/oracle/lifted/`
+  **or** has a lifted black-box fixture under `packages/concerto-core/test-lifted/`
   that a human reviewer signed off (D10). No `W` test is silently skipped.
 - **Evidence:** `status.json` → `metrics.concerto_core_tests.by_tag.tally.W`;
-  a diff of `migration/oracle/lifted/` file count against the W-test count
+  a diff of `packages/concerto-core/test-lifted/` file count against the W-test count
   minus fallback-passing W tests (`run.mjs` reports the gap, not a verdict —
   the sign-off itself is a human review artifact, not machine-checkable).
 

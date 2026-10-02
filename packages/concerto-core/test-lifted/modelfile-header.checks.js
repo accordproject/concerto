@@ -78,6 +78,9 @@ function modelFileClass(core) {
  */
 function eagerManager(core) {
     const mm = new core.ModelManager();
+    /**
+     * A decorator factory that never replaces a decorator.
+     */
     class NullFactory extends core.DecoratorFactory {
         /**
          * @returns {null} null: build the decorator as usual
