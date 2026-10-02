@@ -118,8 +118,11 @@ function countCalls(handle, names) {
 // P5-76: `stageModelFileCheckedUtf8` and `stageModelFileWithHeaderUtf8` are
 // the same loads as `stageModelFileChecked` and `stageModelFileWithHeader`,
 // for the AST's text as UTF-8 bytes (the views call them where the engine
-// has them).
-const LOADS = ['systemModelFileHeader', 'stageModelFileChecked', 'stageModelFileCheckedUtf8', 'stageModelFileWithHeader', 'stageModelFileWithHeaderUtf8', 'stageModelFile', 'checkAstShape'];
+// has them). P5-92: so are `stageModelFileCheckedCompact` and
+// `stageModelFileWithHeaderCompact`, for an AST written in the engine's
+// compact layout instead of as text.
+const LOADS = ['systemModelFileHeader', 'stageModelFileChecked', 'stageModelFileCheckedUtf8', 'stageModelFileWithHeader', 'stageModelFileWithHeaderUtf8', 'stageModelFile', 'checkAstShape',
+    'stageModelFileCheckedCompact', 'stageModelFileWithHeaderCompact'];
 
 module.exports = [
     {
@@ -228,7 +231,7 @@ module.exports = [
                 const outcome = probe(() => {
                     new core.ModelFile(mm, copyOf(mm, ns), undefined, 'x.json');
                 });
-                return [outcome, counts.systemModelFileHeader, counts.stageModelFileChecked + counts.stageModelFileCheckedUtf8];
+                return [outcome, counts.systemModelFileHeader, counts.stageModelFileChecked + counts.stageModelFileCheckedUtf8 + counts.stageModelFileCheckedCompact];
             });
         },
         expect: { ok: [['ok', 0, 1], ['ok', 0, 1]] },
@@ -272,7 +275,8 @@ module.exports = [
             return [counts, mm.getNamespaces()];
         }),
         expect: { ok: Array(2).fill([
-            { systemModelFileHeader: 2, stageModelFileChecked: 0, stageModelFileCheckedUtf8: 0, stageModelFileWithHeader: 0, stageModelFileWithHeaderUtf8: 0, stageModelFile: 0, checkAstShape: 0 },
+            { systemModelFileHeader: 2, stageModelFileChecked: 0, stageModelFileCheckedUtf8: 0, stageModelFileWithHeader: 0, stageModelFileWithHeaderUtf8: 0, stageModelFile: 0, checkAstShape: 0,
+                stageModelFileCheckedCompact: 0, stageModelFileWithHeaderCompact: 0 },
             ['concerto.decorator@1.0.0', 'concerto@1.0.0'],
         ]) },
         reference: { ok: ['no engine', 'no engine'] },
