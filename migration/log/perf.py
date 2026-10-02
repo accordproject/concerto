@@ -191,6 +191,8 @@ for op, b, a in [("from_json", 4.60, 4.58), ("validate", 4.54, 2.31), ("set_prop
     add(op, ts, "P5-12c", 293, "TS-API", b, a, "laptop", run, s, INS, note="round 2 on the head with P5-11 and P5-14, plus the setPropertyValue fix")
 
 # ---------- P5-15 (#309) laptop sweep (parsed from table.md) ----------
+# f6f6b10d7 is only on the measure-only branch claude/tender-pascal-ocwf9q-local-matt-P5-15;
+# show() fetches it by sha when the clone lacks it.
 s = C("f6f6b10d7", "migration/bench/results/P5-15/table.md"); ts = "2026-09-28T20:28:01Z"; run = "P5-15/rounds1-3"
 for line in show("concerto", "f6f6b10d7837d539ec5034a6f9fc44cc111c091e", "migration/bench/results/P5-15/table.md").splitlines(True):
     if not line.startswith("| ") or line.startswith("| op ") or line.startswith("|---"):
@@ -271,7 +273,7 @@ for op, st, b, a in rows:
 
 # ---------- P5-22 (#326) cloud, parsed from compare.md ----------
 s = C("d3abd4555", "migration/bench/results/P5-22/compare.md"); ts = "2026-09-29T09:22:29Z"; run = "P5-22/rounds1-3"
-for line in show("concerto", "d3abd4555", "migration/bench/results/P5-22/compare.md").splitlines(True):
+for line in show("concerto", "d3abd4555a5750cf883e34402ed82d73914db363", "migration/bench/results/P5-22/compare.md").splitlines(True):
     if not line.startswith("| ") or line.startswith("| op ") or line.startswith("|---"):
         continue
     c = [x.strip() for x in line.strip().strip("|").split("|")]
@@ -297,7 +299,7 @@ for st, b, a in [(TD, 1.07, 0.66), (CF, 1.22, 0.78), (SL, 1.12, 0.80)]:
 
 # ---------- P5-28 (#333) cloud, parsed from table.md ----------
 s = C("e55569e53", "migration/bench/results/P5-28/table.md"); ts = "2026-09-29T10:44:45Z"; run = "P5-28/rounds1-3"
-for line in show("concerto", "e55569e53", "migration/bench/results/P5-28/table.md").splitlines(True):
+for line in show("concerto", "e55569e534c639f54b383a7cc673b4cf0e55a050", "migration/bench/results/P5-28/table.md").splitlines(True):
     if not line.startswith("| ") or line.startswith("| op ") or line.startswith("|---"):
         continue
     c = [x.strip() for x in line.strip().strip("|").split("|")]
@@ -371,12 +373,15 @@ add("mm_new", "2026-09-29T21:21:54Z", "P5-48", 369, "TS-API", None, 1.09, "cloud
 
 # ---------- P5-60 (#392) and P5-72 (#413) cloud same-run sweeps, parsed from tables.json ----------
 # These carry their own event summaries, so they are kept apart from E until assembly.
+# The cited commits (cdcfe6f61, 503ffea23) were on task branches that were squash-merged and
+# deleted; the files are read from the squash merges on the integration branch (87b8f3c55,
+# d1ab2619a), whose copies are byte-identical.
 SAME_RUN = []
 SWEEPS = [
-    ("P5-60", 392, "cdcfe6f61", "2026-09-30T19:35:47Z",
+    ("P5-60", 392, "87b8f3c5511763e81af7524c7521132d3c817e7a", "2026-09-30T19:35:47Z",
      "P5-60/same-run sweep rounds1-3 (pre-F1 head vs now: concerto 2a6a71754 / concerto-rust 299935e; TS 5.0.0 in the same run)",
      "concerto@cdcfe6f61:migration/bench/results/P5-60/report-now.json (before: report-before.json); https://github.com/accordproject/concerto-rust/issues/392#issuecomment-5918360835"),
-    ("P5-72", 413, "503ffea23", "2026-10-01T11:03:44Z",
+    ("P5-72", 413, "d1ab2619a55238cf186177845d94955499443160", "2026-10-01T11:03:44Z",
      "P5-72/same-run sweep (pre-F1 vs P5-60 head 2a6a71754/299935e vs now 503ffea23 base; TS 5.0.0 in each round)",
      "concerto@503ffea23:migration/bench/results/P5-72/report-now.json (pre-F1: report-before.json; P5-60 head: report-p560.json); https://github.com/accordproject/concerto-rust/issues/413#issuecomment-5930064181"),
 ]

@@ -100,7 +100,8 @@ def first_parent_log(repo, path, cutoff=None):
 
 def show(repo, rev, path):
     """File contents at a commit. Fetches the commit by sha from origin if the clone lacks it
-    (benchmark tables on unmerged measure-only branches)."""
+    (benchmark results published on task branches that were squash-merged or never merged);
+    such revs must be full 40-character shas, since only those can be fetched."""
     r = subprocess.run(['git', '-C', REPO_DIRS[repo], 'show', f'{rev}:{path}'], capture_output=True, text=True)
     if r.returncode == 0:
         return r.stdout
