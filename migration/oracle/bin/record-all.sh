@@ -11,7 +11,7 @@
 # 4. gaps:        drivers/gaps.spec.js, targeted inputs for coverage-gaps.json
 #                 branches (task P2-11).
 # 5. lifted:      drivers/lifted.spec.js, black-box replacements for white-box
-#                 unit tests (task P2-10, lifted/*.scenarios.js).
+#                 unit tests (task P2-10, packages/concerto-core/test-lifted/*.scenarios.js).
 # Then build-corpus.js dedupes into migration/oracle/fixtures.
 #
 # Raw records, staging blobs and logs stay in <work dir>.

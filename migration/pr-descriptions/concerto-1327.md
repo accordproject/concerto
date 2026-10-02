@@ -24,7 +24,7 @@ This is the integration PR for the concerto side of the migration that makes `@a
 - `packages/concerto-engine/` (new workspace package): re-exports the CommonJS/ESM loader that concerto-rust's `concerto-wasm/build.sh` writes, from a concerto-rust checkout next to this one. Per D9 it is linked locally and not published.
 - `scripts/build-esm.js` and `scripts/browser-module-shim.js`: the ESM and browser bundles inline the WASM engine.
 - `packages/concerto-core/tsconfig.build.internal.json`: a second `tsc` pass for the internal engine types.
-- `packages/concerto-core` `test` script: it now also runs `migration/oracle/lifted/fallbacks.spec.js` (146 lifted checks for the fallbacks that remain). The root `pretest` installs the frozen v5.0.0 reference those checks compare against.
+- `packages/concerto-core` `test` script: it now also runs `packages/concerto-core/test-lifted/fallbacks.spec.js` (the lifted checks for the fallbacks that remain, moved out of `migration/` by accordproject/concerto-rust#252). The root `pretest` installs the frozen v5.0.0 reference those checks compare against; without it the reference halves are skipped with a stated reason.
 
 **Guardrails and CI**
 - `.github/workflows/migration-guardrails.yml` and `migration/bin/check-guardrails.mjs` fail on:
@@ -38,7 +38,7 @@ This is the integration PR for the concerto side of the migration that makes `@a
 - `PLAN.md`, `queue.yaml`, `COORDINATOR.md`, `worker/`: the plan, the task queue and the orchestration scripts.
 - `baseline.json`, `tags/`: the pre-migration baseline and the B/W/M tagging of every `it()`.
 - `ledger/`: the seam ledger, which classifies every `src/**` member as RUST, HYBRID or TS with a weight and a reason. This drives the §0.4 figure.
-- `oracle/`: the recorder and judge for the behavioural oracle, the WASM replay (`replay.js`), lifted white-box fixtures (`lifted/`), coverage-gap reports and results. The corpus is **not** committed. It is the draft release `oracle-corpus-p107-06aa375` plus the supplement `oracle-corpus-supplement-d842c0ab7` in accordproject/concerto-rust.
+- `oracle/`: the recorder and judge for the behavioural oracle, the WASM replay (`replay.js`), the drivers for the lifted white-box scenarios (now in `packages/concerto-core/test-lifted/`), coverage-gap reports and results. The corpus is **not** committed. It is the draft release `oracle-corpus-p107-06aa375` plus the supplement `oracle-corpus-supplement-d842c0ab7` in accordproject/concerto-rust.
 - `gate/`: the §0 gate runner and its reports. `fuzz/`: differential fuzzing (P5-05). `bench/`: the TS-vs-Rust benchmarks (P5-04, P5-06x).
 - `status/`, `telemetry/`, `dashboard/`: status snapshots and run telemetry.
 - `BREAKING-CHANGES-PLAN.md`: the catalogue of intentional breaks and the release plan (R1, R2, R3, RB). `CONFORMANCE-PROMOTION-PLAN.md`, `gap-audit.md`.
@@ -66,7 +66,7 @@ This is the integration PR for the concerto side of the migration that makes `@a
   - accordproject/concerto-rust#262: catch-all `try { rustHandle.x() } catch { run the TS body }` fallbacks in `basemodelmanager.ts` and `modelfile.ts`. They discard the engine's domain errors, so on those paths users see the TS exception. Upheld.
   - accordproject/concerto-rust#263: the key order of `ModelFile.getExternalImports()` differs from v5.0.0. Upheld.
 - **Other follow-ups:** accordproject/concerto-rust#264 (DIVERGENCES categories), accordproject/concerto-rust#265 (211 Rust-owned fixtures never compared natively) and accordproject/concerto-rust#266 (umbrella for the TS-only remainder: the CTO parse seam, Factory and instances, value generation, YAML, Globalize).
-- **`migration/` is scaffolding.** It adds about 270k lines, mostly fuzz results, test-tag traces, bench fixtures and gate reports. Slim it or remove it before this merges. First move `migration/oracle/lifted/fallbacks.spec.js`, which the concerto-core `test` script runs, somewhere permanent (a post-migration follow-up is filed).
+- **`migration/` is scaffolding.** It adds about 270k lines, mostly fuzz results, test-tag traces, bench fixtures and gate reports. Slim it or remove it before this merges. The lifted checks the concerto-core `test` script runs already live outside it, in `packages/concerto-core/test-lifted/` (accordproject/concerto-rust#252).
 - **concerto-validate-rs** has no PR. The maintainer decided to leave it untouched and archive it after the migration. Its checks and tests are folded into concerto-rust (D3, P3-04).
 
 ### Screenshots or Video

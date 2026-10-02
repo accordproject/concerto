@@ -38,6 +38,9 @@ lib-cov
 # test directory
 test
 
+# lifted behavioural checks (accordproject/concerto-rust#252)
+test-lifted
+
 # scripts directory
 scripts
 output

@@ -126,7 +126,7 @@ Tagging is automated from the AST (acorn) plus a sinon trace, then reviewed. The
 ### 2.3 Lift the white-box tests (P2-10)
 - For each W test, an agent writes a **black-box fixture that exercises the same rule**. Example: *"ModelFile built from a stub whose `getType` returns an abstract class"* becomes *"a model with an abstract super type"*.
 - The fixture is **checked against the reference** first, so the oracle defines the expected outcome, not the agent.
-- Test files stay untouched. Lifted fixtures live in `migration/oracle/lifted/`.
+- Test files stay untouched. Lifted fixtures live in `packages/concerto-core/test-lifted/` (moved from `migration/oracle/lifted/` by accordproject/concerto-rust#252).
 
 ### 2.4 Measure the oracle's coverage of the reference (P0-05, P5-01)
 - Run nyc on the TS reference with **only the oracle corpus** as the driver.

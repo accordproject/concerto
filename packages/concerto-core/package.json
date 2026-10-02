@@ -19,7 +19,7 @@
     "licchk": "license-check-and-add",
     "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "cross-env TS_NODE_PROJECT=tsconfig.build.json TZ=UTC nyc mocha -r ts-node/register --recursive -t 10000 ../../migration/oracle/lifted/fallbacks.spec.js test",
+    "test": "cross-env TS_NODE_PROJECT=tsconfig.build.json TZ=UTC nyc mocha -r ts-node/register --recursive -t 10000 test-lifted/fallbacks.spec.js test",
     "test:watch": "cross-env TZ=UTC nyc mocha -r ts-node/register --watch --recursive -t 10000",
     "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.build.internal.json && cpx \"src/*.json\" dist/ && cpx \"src/messages/*.json\" dist/messages/ && npm run build:esm",
     "build:esm": "node ../../scripts/build-esm.js"

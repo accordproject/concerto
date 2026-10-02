@@ -16,7 +16,8 @@
 
 /**
  * Lifted-fixture driver (task P2-10, plan §2.3): replays every scenario
- * from `migration/oracle/lifted/*.scenarios.js` through the public API of
+ * from `packages/concerto-core/test-lifted/*.scenarios.js` (moved from
+ * `migration/oracle/lifted/` by accordproject/concerto-rust#252) through the public API of
  * concerto-core `src/` while the recorder is active (ORACLE_SOURCE=lifted).
  *
  * Each scenario replaces one white-box (W) unit test that stubbed or spied
@@ -34,7 +35,7 @@ const { ModelManager } = S('modelmanager');
 const { Factory } = S('factory');
 const { Serializer } = S('serializer');
 
-const LIFTED_DIR = path.resolve(__dirname, '..', 'lifted');
+const LIFTED_DIR = path.resolve(__dirname, '..', '..', '..', 'packages', 'concerto-core', 'test-lifted');
 
 const attempt = (f) => {
     try {

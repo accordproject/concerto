@@ -13,7 +13,7 @@
 #   MOCHA_JSON_OUT -> --json-out
 #
 # With no test files/globs given, the full `test/` tree is run
-# (--recursive), after migration/oracle/lifted/fallbacks.spec.js. Pass one or more files for a fast, per-file run while
+# (--recursive), after packages/concerto-core/test-lifted/fallbacks.spec.js. Pass one or more files for a fast, per-file run while
 # iterating; do a full-suite run only when you need the whole picture.
 #
 # Exit code is mocha/nyc's exit code (non-zero on test failure or on a
@@ -58,17 +58,17 @@ if [[ ${#FILES[@]} -eq 0 ]]; then
   # as in concerto-core's own `test` script. They run first, because
   # test/serializer/jsongenerator.js leaves a sinon stub on ModelUtil.isEnum
   # for the rest of the process.
-  FILES=("../../migration/oracle/lifted/fallbacks.spec.js" "test/")
+  FILES=("test-lifted/fallbacks.spec.js" "test/")
 
   # The lifted checks also run each case against the published reference
   # (migration/oracle/reference, concerto-core@5.0.0). Without its
-  # dependencies those halves are silently skipped (about 400 pending), so
-  # a gate run installs them first. Set CONCERTO_SKIP_REFERENCE_INSTALL=1 to
+  # dependencies those halves are skipped (one pending test and a warning
+  # give the reason), so a gate run installs them first. Set CONCERTO_SKIP_REFERENCE_INSTALL=1 to
   # opt out (the run then says so).
   REF_DIR="$(cd "$SCRIPT_DIR/../oracle/reference" && pwd)"
   if [[ ! -d "$REF_DIR/node_modules" ]]; then
     if [[ "${CONCERTO_SKIP_REFERENCE_INSTALL:-}" == "1" ]]; then
-      echo "WARNING: $REF_DIR has no node_modules; the reference@5.0.0 lifted checks will be skipped (pending)" >&2
+      echo "WARNING: $REF_DIR has no node_modules; the reference@5.0.0 lifted checks will be skipped" >&2
     else
       echo "run-core-tests: installing reference dependencies in $REF_DIR" >&2
       (cd "$REF_DIR" && npm ci --no-audit --no-fund --silent) || {
