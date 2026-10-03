@@ -1243,7 +1243,7 @@ class ModelFile extends Decorated {
             };
             const handles = engineHandles();
             const target: EngineHandle | undefined = modelManager.rustHandle;
-            if (typeof manager.rustHandle.modelFileFilterStaged === 'function' && target && target !== manager.rustHandle) {
+            if (target && target !== manager.rustHandle) {
                 // P5-97 (accordproject/concerto-rust#448): a file the filter
                 // keeps exactly as it is (every declaration kept, every
                 // import unchanged) is staged, shared, in `modelManager`'s

@@ -777,6 +777,6 @@ function decodeValue(v, modelManager: BaseModelManager) {
     }
 }
 
-export { EngineFastPathUnsupported, typedCtorName, modelClasses, encodeValue, encodeBytes, decodeValue, decodeParsed, materializeCompact, checkString, checkJsonText };
+export { EngineFastPathUnsupported, typedCtorName, modelClasses, encodeValue, encodeBytes, decodeValue, materializeCompact, checkString, checkJsonText };
 export type { TypeCache };
 export { newTypeCache };

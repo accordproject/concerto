@@ -18,9 +18,10 @@
 //
 // The converted members always delegate to the Rust engine; nothing in
 // concerto-core runs a TS body for them any more. The whole directory is
-// rust-mode code: it is excluded from coverage (`istanbul ignore file`) and
-// from the declaration build (tsconfig.build.json), so neither the nyc gate
-// nor the .d.ts snapshot moves (PORTING.md 1.5). It still ships, as
+// rust-mode code: it is excluded from the declaration build
+// (tsconfig.build.json), so the .d.ts snapshot does not move (PORTING.md
+// 1.5), and since P5-103 it counts towards the nyc gate like the rest of
+// src/ (accordproject/concerto-rust#457). It still ships, as
 // JavaScript only with no .d.ts (OD-11): tsconfig.build.internal.json
 // compiles it into dist/engine/, and scripts/build-esm.js builds it into
 // dist/esm*/engine/ in a pass of its own, with the public modules it imports
@@ -38,7 +39,7 @@
 // and the Rust function stays for the engine's own use. Work that needs the
 // engine's state, or that would take many crossings, is batched or
 // snapshotted instead: one call answers for a whole file, document or walk
-// (`modelFileViewSnapshot`, `serializerFromJson`,
+// (`modelFileViewSnapshot`, `serializerFromJsonCompact`,
 // `classDeclarationGetIdentifierFieldNameWalk`), and its answer is kept for
 // as long as it holds (`EngineState` in `bindings.d.ts`, keyed on the
 // manager's model version). Data the engine already holds is not sent back

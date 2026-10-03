@@ -164,9 +164,9 @@ class DecoratorManager {
         // The structural check only (src/dcs/mod.rs `validate`); the
         // validationModelManager above is still built the TS way (CTO
         // parsing is not ported) and returned unchanged. P5-27 (F6): the
-        // check runs against validationModelManager's own rustHandle when it
+        // check runs against validationModelManager's own rustHandle, which
         // mirrors its model files, instead of rebuilding them in Rust.
-        engineViews().decoratorManagerValidate(validationModelManager, decoratorCommandSet, modelFiles);
+        engineViews().decoratorManagerValidate(validationModelManager, decoratorCommandSet);
         return validationModelManager;
     }
 

@@ -327,7 +327,7 @@ function computeBatch(modelFile: any, ast: any): Batch | null {
  * that building the views does not send and parse the AST again. As
  * everywhere the engine's copy stands for the view's (`commitStaged`,
  * `validateLoaded`), the AST is taken to be unchanged since it was staged.
- * Undefined when the engine holds no such copy (or has no such binding);
+ * Undefined when the engine holds no such copy;
  * the caller then sends the AST, as before.
  * @param {object} modelFile the ModelFile
  * @param {string} [namespace] its namespace
@@ -340,13 +340,12 @@ function heldViewSnapshot(modelFile: any, namespace: string | undefined): string
     }
     const stage = state.stage;
     if (stage !== undefined) {
-        return typeof stage.handle.stagedModelFileViewSnapshot === 'function'
-            ? stage.handle.stagedModelFileViewSnapshot(stage.id, namespace) : undefined;
+        return stage.handle.stagedModelFileViewSnapshot(stage.id, namespace);
     }
     const committed: any = state.committed;
     const manager = modelFile.modelManager;
     if (committed === undefined || namespace === undefined || manager?.rustHandle !== committed ||
-        manager.modelFiles?.[namespace] !== modelFile || typeof committed.modelFileViewSnapshotOf !== 'function') {
+        manager.modelFiles?.[namespace] !== modelFile) {
         return undefined;
     }
     const id = manager._rustModelFileId(namespace);
@@ -568,23 +567,15 @@ function fieldGetScalarField(field: any): any {
  * set is checked against the manager's rustHandle's own resident manager
  * (concerto-wasm `ModelManagerHandle.dcsValidate`), which mirrors its model
  * files (P5-34: a BaseModelManager holds only ModelFiles its constructor
- * built, all mirrored) and so already holds exactly the models the per-call
- * binding would load: the model files are neither sent again nor loaded into
- * a second manager. Only an engine without the binding takes the per-call
- * `decoratorManagerValidate`, which rebuilds them, as before. Either throws
- * the same errors: any error loading the models has already been thrown by
- * the TS body while it built `validationModelManager`.
+ * built, all mirrored): the model files are neither sent again nor loaded
+ * into a second manager. Any error loading the models has already been
+ * thrown by the TS body while it built `validationModelManager`. P5-103
+ * removed the per-call binding an engine without `dcsValidate` took.
  * @param {object} validationModelManager the validation ModelManager, built
  * @param {*} decoratorCommandSet the DecoratorCommandSet object
- * @param {object[]} [modelFiles] the model files validate was given
  */
-function decoratorManagerValidate(validationModelManager: any, decoratorCommandSet: any, modelFiles?: any[]): void {
-    const handle = validationModelManager.rustHandle;
-    if (handle && typeof handle.dcsValidate === 'function') {
-        handle.dcsValidate(decoratorCommandSet);
-        return;
-    }
-    rust.decoratorManagerValidate(decoratorCommandSet, modelFiles?.map((mf: any) => mf.getAst()));
+function decoratorManagerValidate(validationModelManager: any, decoratorCommandSet: any): void {
+    validationModelManager.rustHandle.dcsValidate(decoratorCommandSet);
 }
 
 /**
@@ -602,16 +593,12 @@ function decorateResultTrusted(modelManager: any, decoratorCommandSets: any[], o
 
 /**
  * DecoratorManager.decorateModels in rust mode, after the TS body's
- * `skipValidationAndResolution` handling. Metamodel resolution itself is not
- * ported (concerto-rust src/dcs/mod.rs `decorate_models`'s doc comment), but
- * the ModelManager this phase runs against is still the TS one (P4-08 has not
- * converted it), so resolution runs here, on the TS side, exactly as the
- * ts-mode body does (`resolveMetaModel` unless
- * `options.disableMetamodelResolution`), and the already-resolved AST is
- * handed across. System namespaces are left out (`getAst`'s second argument
- * false): the Rust-side manager carries its own copy of them, and re-adding
- * one is a duplicate-namespace error there. The decorated AST comes back and
- * is loaded into a new ModelManager, as the TS body does.
+ * `skipValidationAndResolution` handling: on the source ModelManager's own
+ * rustHandle (`sourceDcsHandle`), or else on the resident DCS input manager
+ * built from `getAst(!options.disableMetamodelResolution, false)`'s models
+ * (`dcsManagerFor`; system namespaces left out, since the engine-side
+ * manager carries its own copy of them). The decorated models are staged
+ * into a new ModelManager's rustHandle (`adoptStagedModels`).
  * @param {object} modelManager the input ModelManager
  * @param {object[]} decoratorCommandSets the decorator command sets, as an array
  * @param {object} [options] the decorateModels options
@@ -619,7 +606,7 @@ function decorateResultTrusted(modelManager: any, decoratorCommandSets: any[], o
  */
 function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets: any[], options?: any): any {
     const { default: ModelManager } = require('../modelmanager');
-    const source = sourceDcsHandle(modelManager, 'dcsDecorateModels');
+    const source = sourceDcsHandle(modelManager);
     if (source) {
         // P5-55 (T1, F-A1): on the source manager's own rustHandle, which
         // resolves its models itself; nothing is copied.
@@ -634,32 +621,23 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
             decorateResultTrusted(modelManager, decoratorCommandSets, options));
         return decoratedModelManager;
     }
-    if (residentDcsAvailable()) {
-        // P5-27 (F6): the resident input manager, and the result staged
-        // into the new manager's rustHandle (see `adoptStagedModels`).
-        const { dcs, resident } = dcsManagerFor(modelManager, !options?.disableMetamodelResolution);
-        try {
-            const decoratedModelManager = new ModelManager({
-                decoratorValidation: modelManager.getDecoratorValidation()
-            });
-            decoratedModelManager.clearModelFiles();
-            const result = dcs.decorateModels(decoratedModelManager.rustHandle, decoratorCommandSets, options ?? {});
-            adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation,
-                decorateResultTrusted(modelManager, decoratorCommandSets, options));
-            return decoratedModelManager;
-        } finally {
-            if (!resident) {
-                dcs.free();
-            }
+    // P5-27 (F6): the resident input manager, and the result staged into
+    // the new manager's rustHandle (see `adoptStagedModels`).
+    const { dcs, resident } = dcsManagerFor(modelManager, !options?.disableMetamodelResolution);
+    try {
+        const decoratedModelManager = new ModelManager({
+            decoratorValidation: modelManager.getDecoratorValidation()
+        });
+        decoratedModelManager.clearModelFiles();
+        const result = dcs.decorateModels(decoratedModelManager.rustHandle, decoratorCommandSets, options ?? {});
+        adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation,
+            decorateResultTrusted(modelManager, decoratorCommandSets, options));
+        return decoratedModelManager;
+    } finally {
+        if (!resident) {
+            dcs.free();
         }
     }
-    const ast = modelManager.getAst(!options?.disableMetamodelResolution, false);
-    const decoratedAst = rust.decoratorManagerDecorateModels(ast.models, decoratorCommandSets, options ?? {});
-    const newModelManager = new ModelManager({
-        decoratorValidation: modelManager.getDecoratorValidation()
-    });
-    newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
-    return newModelManager;
 }
 
 /**
@@ -724,43 +702,31 @@ function restoreAllUndefinedDecorators(sourceModels: any[], resultModels: any[])
 
 /**
  * The three DecoratorManager.extract* methods in rust mode, after the TS
- * body's option defaults. The AST is resolved here, on the TS side, as each
- * ts-mode body resolves its own `getAst(true, ...)`, with the system
- * namespaces left out as in `decoratorManagerDecorateModels`. Rust returns
- * the stripped models' AST, loaded here into a new ModelManager, and the
- * extracted command sets and vocabularies; each caller returns the fields
- * its TS body returns, in the same order. When `options.removeDecoratorsFromModel`
- * is set, `restoreUndefinedDecorators` re-shapes the stripped declarations to
+ * body's option defaults: on the source ModelManager's own rustHandle
+ * (`decoratorManagerExtractOnSource`), or else on the resident DCS input
+ * manager (`decoratorManagerExtractStaged`). Rust returns the stripped
+ * models' AST, staged into a new ModelManager, and the extracted command
+ * sets and vocabularies; each caller returns the fields its TS body
+ * returns, in the same order. When `options.removeDecoratorsFromModel` is
+ * set, `restoreUndefinedDecorators` re-shapes the stripped declarations to
  * match the TS extractor exactly (see its doc comment).
- * @param {string} binding the concerto-wasm binding to call
+ * @param {string} binding the extract method (an `EXTRACT_ACTION` key)
  * @param {object} modelManager the input ModelManager
  * @param {object} options the extract options, defaults applied
  * @return {object} the binding's result, with `modelManager` materialised
  */
 function decoratorManagerExtract(binding: string, modelManager: any, options: any): any {
-    const { default: ModelManager } = require('../modelmanager');
-    const source = sourceDcsHandle(modelManager, 'dcsExtract');
+    const source = sourceDcsHandle(modelManager);
     if (source) {
         return decoratorManagerExtractOnSource(binding, source, modelManager, options);
     }
-    if (residentDcsAvailable()) {
-        return decoratorManagerExtractStaged(binding, modelManager, options);
-    }
-    const sourceModels = modelManager.getAst(true, false).models;
-    const result = rust![binding](sourceModels, options);
-    if (options?.removeDecoratorsFromModel) {
-        restoreAllUndefinedDecorators(sourceModels, result.modelManager.models);
-    }
-    const updatedModelManager = new ModelManager();
-    updatedModelManager.fromAst(result.modelManager);
-    result.modelManager = updatedModelManager;
-    return result;
+    return decoratorManagerExtractStaged(binding, modelManager, options);
 }
 
 /**
- * The extract action of each per-call extract binding, for the one extract
- * binding of the resident manager (`DcsManagerHandle.extract`) and of the
- * source handle (`ModelManagerHandle.dcsExtract`): P5-101 (D-10,
+ * The extract action of each DecoratorManager.extract* method, for the one
+ * extract binding of the resident manager (`DcsManagerHandle.extract`) and
+ * of the source handle (`ModelManagerHandle.dcsExtract`): P5-101 (D-10,
  * accordproject/concerto-rust#455), in place of one binding per action.
  */
 const EXTRACT_ACTION: { [binding: string]: number } = {
@@ -771,16 +737,16 @@ const EXTRACT_ACTION: { [binding: string]: number } = {
 
 /**
  * `decoratorManagerExtract` on the source ModelManager's own rustHandle
- * (P5-55, T1, F-A1; concerto-wasm `ModelManagerHandle.dcsExtract*`), with
+ * (P5-55, T1, F-A1; concerto-wasm `ModelManagerHandle.dcsExtract`), with
  * the result staged into the new ModelManager's rustHandle as
  * `decoratorManagerExtractStaged` stages it. Rust resolves the handle's
- * models itself, as the per-call binding's input was resolved, so the
+ * models itself, as the resident manager's input is resolved, so the
  * source models are read only when `restoreUndefinedDecorators` needs them,
  * and then unresolved (`getAst(false, false)`: the model files' own ASTs,
  * not copied): it reads only which nodes have `decorators`, and their
  * `declarations`, `properties`, `key` and `value`, which resolution never
- * changes, so a per-call `resolveMetaModel` would only cost time.
- * @param {string} binding the per-call concerto-wasm binding it replaces
+ * changes, so a `resolveMetaModel` here would only cost time.
+ * @param {string} binding the extract method (an `EXTRACT_ACTION` key)
  * @param {object} source the source ModelManager's rustHandle
  * @param {object} modelManager the input ModelManager
  * @param {object} options the extract options, defaults applied
@@ -812,7 +778,7 @@ function decoratorManagerExtractOnSource(binding: string, source: any, modelMana
  * AST, re-shaped by `restoreUndefinedDecorators` when
  * `options.removeDecoratorsFromModel` is set, is what the new ModelManager
  * is built from.
- * @param {string} binding the per-call concerto-wasm binding it replaces
+ * @param {string} binding the extract method (an `EXTRACT_ACTION` key)
  * @param {object} modelManager the input ModelManager
  * @param {object} options the extract options, defaults applied
  * @return {object} the result, with `modelManager` materialised
@@ -1521,7 +1487,7 @@ function shapeCheckPassed(modelFile: any, text: string | undefined, state: FileS
 function systemModelVerdict(modelFile: any, checkedText?: string): string | undefined {
     const ast = modelFile.ast;
     // P5-101 (D-7): a free engine function, which reads no handle.
-    if (!systemModelAsts.has(ast) || typeof rust.systemModelFileHeader !== 'function') {
+    if (!systemModelAsts.has(ast)) {
         return undefined;
     }
     // P5-94: the engine's header for a text it gave one for is remembered
@@ -2265,16 +2231,6 @@ interface DcsResident {
 // `getAst(false, false)`, 1 for `getAst(true, false)`.
 
 /**
- * Whether the engine has the resident DCS manager (concerto-wasm
- * `DcsManagerHandle`, P5-27); without it, the DecoratorManager views keep
- * the per-call bindings.
- * @return {boolean} true if it does
- */
-function residentDcsAvailable(): boolean {
-    return typeof rust.DcsManagerHandle === 'function';
-}
-
-/**
  * Whether the resident DCS input manager of `modelManager` may be kept:
  * `getAst` is BaseModelManager's own, over `getModelFiles` and
  * `resolveMetaModel` also its own, over the manager's rustHandle, which
@@ -2373,24 +2329,21 @@ function dcsCommandsShapeChecked(decoratorCommandSets: any[], options?: any): bo
  * P5-55 (T1, F-A1, accordproject/concerto-rust#376): the source
  * ModelManager's own rustHandle, when the DecoratorManager operation can run
  * on it (concerto-wasm `ModelManagerHandle.dcsDecorateModels` and
- * `dcsExtract*`) instead of on a `DcsManagerHandle` built from a copy of its
- * models: the engine has `method`, `dcsCacheable` holds (the manager's
- * `getAst`, `getModelFiles` and `resolveMetaModel` are BaseModelManager's
- * own) and the handle mirrors the model files (`_mirrorPending`, P5-34).
- * The handle then holds exactly the models `getAst(resolve, false)` reads,
- * with the same system models, and resolves them itself, so no epoch or
- * invalidation is needed. Otherwise undefined, and the caller keeps the
- * `DcsManagerHandle` or the per-call binding, as before.
+ * `dcsExtract`) instead of on a `DcsManagerHandle` built from a copy of its
+ * models: `dcsCacheable` holds (the manager's `getAst`, `getModelFiles` and
+ * `resolveMetaModel` are BaseModelManager's own) and the handle mirrors the
+ * model files (`_mirrorPending`, P5-34). The handle then holds exactly the
+ * models `getAst(resolve, false)` reads, with the same system models, and
+ * resolves them itself, so no epoch or invalidation is needed. Otherwise
+ * undefined, and the caller takes the `DcsManagerHandle`.
  * @param {object} modelManager the source ModelManager
- * @param {string} method the handle method the caller will call
  * @return {object|undefined} the rustHandle, or undefined
  */
-function sourceDcsHandle(modelManager: any, method: string): any {
+function sourceDcsHandle(modelManager: any): any {
     if (!dcsCacheable(modelManager) || modelManager._mirrorPending) {
         return undefined;
     }
-    const handle = modelManager.rustHandle;
-    return typeof handle[method] === 'function' ? handle : undefined;
+    return modelManager.rustHandle;
 }
 
 /**
@@ -2411,8 +2364,8 @@ function assertDistinctHandles(source: any, target: any): void {
  * The DCS input manager for `modelManager.getAst(resolve, false).models`
  * (concerto-wasm `DcsManagerHandle`): the resident one while the manager's
  * rustHandle, its epoch, its model files and their ASTs are the ones it was
- * built from, or else a new one, built from `getAst` as each per-call
- * binding builds its own (the same errors, at the same point), and kept.
+ * built from, or else a new one, built from `getAst` (its errors thrown
+ * at that point), and kept.
  * @param {object} modelManager the source ModelManager
  * @param {boolean} resolve getAst's `resolve` argument
  * @return {object} `{dcs, resident, sourceModels}`: the DcsManagerHandle,
@@ -2437,7 +2390,7 @@ function dcsManagerFor(modelManager: any, resolve: boolean): any {
         }
     }
     const models = modelManager.getAst(resolve, false).models;
-    const dcs = new rust.DcsManagerHandle!(models);
+    const dcs = new rust.DcsManagerHandle(models);
     if (cacheable) {
         const residents: Array<DcsResident | undefined> = modelManager._engine.dcsResidents ??= [];
         residents[slot]?.dcs.free();
@@ -2523,7 +2476,7 @@ let commitBuffer = new Uint32Array(64);
  */
 function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | undefined {
     const n = modelFiles.length;
-    if (n < 2 || typeof handle.commitStagedModelFiles !== 'function') {
+    if (n < 2) {
         return undefined;
     }
     const states: FileState[] = new Array(n);
@@ -2568,7 +2521,7 @@ function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | un
  * `validateAndCommitStagedModelFile`), in place of `ModelFile.validate()`'s
  * `modelFileValidateStaged` followed by `commitStaged`. Returns undefined,
  * having changed nothing, when there is no usable stage (not staged, staged
- * in another handle, evicted, or an engine without the binding); the caller
+ * in another handle, or evicted); the caller
  * then validates and registers the file as before. A validation error is
  * thrown as `ModelFile.validate()` throws it (`_engineValidationError`),
  * and leaves the file staged, as that path does.
@@ -2587,7 +2540,7 @@ function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | un
 function validateAndCommitStaged(modelFile: any, handle: any, metamodel?: boolean): number | undefined {
     const state = fileStates.get(modelFile);
     const stage = state?.stage;
-    if (!stage || stage.handle !== handle || typeof handle.validateAndCommitStagedModelFile !== 'function') {
+    if (!stage || stage.handle !== handle) {
         return undefined;
     }
     let id: number | undefined;
@@ -2625,17 +2578,14 @@ function dropStaged(modelFile: any, handle: any): void {
  * `modelFile`'s stage (concerto-wasm `updateStagedModelFile`): replaces the
  * file registered under its namespace with the one Rust loaded at
  * construction. Returns undefined when there is no usable stage (not
- * staged, staged in another handle, evicted, or an engine without the
- * binding); the caller then sends the AST as before. An error propagates,
+ * staged, staged in another handle, or evicted); the caller then sends the
+ * AST as before. An error propagates,
  * as `updateModelFile`'s would.
  * @param {object} modelFile the ModelFile replacing the registered one
  * @param {object} handle the manager's rustHandle
  * @return {number|undefined} the registered file's handle, or undefined
  */
 function updateStaged(modelFile: any, handle: any): number | undefined {
-    if (typeof handle.updateStagedModelFile !== 'function') {
-        return undefined;
-    }
     const state = fileStates.get(modelFile);
     const stage = state === undefined ? undefined : takeStageOf(state, handle);
     if (!stage) {
@@ -2660,7 +2610,7 @@ function updateStaged(modelFile: any, handle: any): number | undefined {
  */
 function validateAstStaged(modelFile: any, handle: any): boolean {
     const stage = fileStates.get(modelFile)?.stage;
-    if (!stage || stage.handle !== handle || typeof handle.validateAstStaged !== 'function') {
+    if (!stage || stage.handle !== handle) {
         return false;
     }
     return handle.validateAstStaged(stage.id) === true;
@@ -2671,7 +2621,7 @@ function validateAstStaged(modelFile: any, handle: any): boolean {
  * from the downloaded files' stages (concerto-wasm
  * `updateExternalModelsStaged`), without sending their ASTs. Returns false,
  * having changed nothing, unless every file is staged in `handle` (and the
- * engine has the binding and still holds every stage); the caller then
+ * engine still holds every stage); the caller then
  * sends the ASTs as before. Throws what that update throws; either way the
  * stages are consumed.
  * @param {object[]} modelFiles the downloaded files' ModelFiles, in order
@@ -2680,9 +2630,6 @@ function validateAstStaged(modelFile: any, handle: any): boolean {
  * @return {boolean} true if updated
  */
 function updateExternalStaged(modelFiles: any[], handle: any, next: object): boolean {
-    if (typeof handle.updateExternalModelsStaged !== 'function') {
-        return false;
-    }
     const states: FileState[] = [];
     const ids: number[] = [];
     for (const modelFile of modelFiles) {

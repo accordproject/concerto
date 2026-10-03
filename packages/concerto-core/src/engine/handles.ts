@@ -44,7 +44,7 @@ const pendingRelease: Array<{ free(): void }> = [];
  * @param {object} handle the handle
  */
 function releaseHandle(handle: { free(): void } | undefined | null): void {
-    if (!handle || typeof handle.free !== 'function') {
+    if (!handle) {
         return;
     }
     if (callbackDepth > 0) {

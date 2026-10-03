@@ -14,8 +14,9 @@
 
 /* istanbul ignore file */
 // Maps the engine's error payload to the TS exception class (PORTING.md 2.3;
-// P4-02). Every ErrorKind concerto-rust's error/mod.rs defines has an entry
-// here, so no converted member (from the original P0-04b trial units of
+// P4-02). Every ErrorKind concerto-rust's error/mod.rs raises has an entry
+// here (`Validator`, raised by none since BC-39, maps to a plain `Error` in
+// concerto-wasm; P5-103 removed its entry), so no converted member (from the original P0-04b trial units of
 // ModelUtil, NumberValidator and ScalarDeclaration through to the full
 // conversion at P5-02) is ever left throwing the "unknown engine error kind"
 // fallback.
@@ -24,7 +25,6 @@
 // modelFile}. `message` is the raw rendered message: each TS constructor
 // decorates it exactly as it does for the TS code path.
 
-import { BaseException } from '@accordproject/concerto-util';
 import IllegalModelException from '../introspect/illegalmodelexception';
 import TypeNotFoundException from '../typenotfoundexception';
 import ValidationException from '../serializer/validationexception';
@@ -155,9 +155,6 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
         }
         return err;
     },
-    // Not raised since BC-39 (concerto-rust error/mod.rs `ErrorKind::Validator`);
-    // kept for an engine that still sends it.
-    Validator: (p) => new BaseException(p.message, undefined, p.errorType),
     Error: (p) => new Error(p.message),
     JsTypeError: (p) => new TypeError(p.message),
     // error/mod.rs `ErrorKind::JsRangeError` (task accordproject/concerto-rust#151,

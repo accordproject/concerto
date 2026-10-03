@@ -36,7 +36,7 @@
 
 import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 import { rust } from './index';
-import { encodeValue, encodeBytes, decodeValue, decodeParsed, materializeCompact, newTypeCache, checkJsonText } from './serializer-codec';
+import { encodeValue, encodeBytes, decodeValue, materializeCompact, newTypeCache, checkJsonText } from './serializer-codec';
 import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import Factory from '../factory';
 import Serializer from '../serializer';
@@ -81,9 +81,6 @@ function cachedHandleFor(modelManager: BaseModelManager): CachedHandle {
     // P5-52 (BC-28, R1): `options.regExp` is ignored, so a model manager
     // built with one no longer leaves the fast path.
     const handle = modelManager.rustHandle;
-    if (!handle || typeof handle.serializerToJson !== 'function') {
-        throw new EngineFastPathUnsupported('no-rust-handle');
-    }
     // The batch `addModelFiles` registers its files in `modelFiles` before
     // it mirrors them (P5-34): until then rustHandle is behind.
     if (modelManager._mirrorPending) {
@@ -182,34 +179,23 @@ function optionsText(options: SerializerOptions): string {
 function fastFromJson(modelManager: BaseModelManager, jsonObject: unknown, options: SerializerOptions) {
     const cached = cachedHandleFor(modelManager);
     const { handle } = cached;
-    // P5-16: the compact result shape where the engine has it (an engine
-    // built before it only has `serializerFromJson`).
-    const compact = typeof handle.serializerFromJsonCompact === 'function';
     let text;
     try {
         // P5-101 (E-7): the document written straight to the compact binary
         // layout (`encodeBytes`) where the engine reads it, rather than
-        // built as a tagged tree and `JSON.stringify`d; the text otherwise.
-        const bytes = compact && typeof handle.serializerFromJsonCompactBytes === 'function'
-            ? encodeBytes(jsonObject)
-            : undefined;
-        if (bytes !== undefined) {
-            text = handle.serializerFromJsonCompactBytes(bytes, optionsText(options), fromJsonEnv);
-        } else {
-            const jsonText = JSON.stringify(encodeValue(jsonObject));
-            text = compact
-                ? handle.serializerFromJsonCompact(jsonText, optionsText(options), fromJsonEnv)
-                : handle.serializerFromJson(jsonText, optionsText(options), fromJsonEnv);
-        }
+        // built as a tagged tree and `JSON.stringify`d; the text otherwise
+        // (a value only the text path carries). P5-16: the compact result
+        // shape.
+        const bytes = encodeBytes(jsonObject);
+        text = bytes !== undefined
+            ? handle.serializerFromJsonCompactBytes(bytes, optionsText(options), fromJsonEnv)
+            : handle.serializerFromJsonCompact(JSON.stringify(encodeValue(jsonObject)), optionsText(options), fromJsonEnv);
     } catch (err) {
         throw asUnsupported(err);
     }
     // P5-16: decoded in place (the parsed text is ours alone), with the
     // class lookups kept next to the handle.
-    const node = JSON.parse(text);
-    return compact
-        ? materializeCompact(node, modelManager, cached.types)
-        : decodeParsed(node, modelManager, cached.types);
+    return materializeCompact(JSON.parse(text), modelManager, cached.types);
 }
 
 /**
@@ -228,7 +214,7 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
         // for them; the resource written straight to the compact binary
         // layout (`encodeBytes`) where the engine reads it, the text
         // otherwise.
-        const bytes = typeof handle.serializerToJsonBytes === 'function' ? encodeBytes(resource) : undefined;
+        const bytes = encodeBytes(resource);
         text = bytes !== undefined
             ? handle.serializerToJsonBytes(bytes, optionsText(options))
             : handle.serializerToJson(JSON.stringify(encodeValue(resource)), optionsText(options));

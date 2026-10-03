@@ -41,13 +41,9 @@ import type Property from '../introspect/property';
 export interface EngineHandle {
     addModel(ast: string, file_name?: string | null): number;
     addModelWithDefinitions(ast: string, definitions: string | null | undefined, file_name: string | null | undefined, validate: boolean): number;
-    checkAstShape(ast: string): void;
     commitStagedModelFile(stage: number): number | undefined;
     commitStagedModelFiles(stages: Uint32Array): boolean;
     dcsDecorateModels(target: EngineHandle, decorator_command_sets: any, options: any): any;
-    dcsExtractDecorators(target: EngineHandle, options: any): any;
-    dcsExtractNonVocabDecorators(target: EngineHandle, options: any): any;
-    dcsExtractVocabularies(target: EngineHandle, options: any): any;
     dcsExtract(target: EngineHandle, options: any, action: number): any;
     dcsValidate(decorator_command_set: any): void;
     deleteModelFile(namespace: string): void;
@@ -72,7 +68,6 @@ export interface EngineHandle {
     modelFileValidateStaged(stage: number): boolean;
     modelManagerGetModelFileByFileName(file_name?: string | null): string | undefined;
     resolveType(context: string, type_name: string): string;
-    serializerFromJson(json_text: string, options_text: string, env: any): string;
     serializerFromJsonCompact(json_text: string, options_text: string, env: any): string;
     serializerToJson(wire_text: string, options_text: string): string;
     serializerToJsonBytes(bytes: Uint8Array, options_text: string): string;
@@ -80,7 +75,6 @@ export interface EngineHandle {
     setDangerouslyAllowReservedSystemTypeNamesInUserModels(allow: boolean): void;
     setDecoratorValidation(options: any): void;
     stageModelFileBytes(ast: Uint8Array, definitions: string | null | undefined, file_name: string | null | undefined, flags: number): string;
-    systemModelFileHeader(ast: string): string | undefined;
     throwAlreadyExists(namespace: string, file_name?: string | null): void;
     updateExternalModels(sources: string, model_files: any): void;
     updateModelFile(ast: string, definitions: string | null | undefined, file_name: string | null | undefined, validate: boolean): number;
@@ -218,9 +212,7 @@ export interface EngineBindings {
 export interface EngineDcsHandle {
     free(): void;
     decorateModels(target: EngineHandle, decoratorCommandSets: any, options: any): any;
-    extractDecorators(target: EngineHandle, options: any): any;
-    extractNonVocabDecorators(target: EngineHandle, options: any): any;
-    extractVocabularies(target: EngineHandle, options: any): any;
+    extract(target: EngineHandle, options: any, action: number): any;
 }
 
 /**
@@ -228,8 +220,8 @@ export interface EngineDcsHandle {
  * `EngineBindings`, the type of `rust` in src/engine/index.ts.
  */
 export interface EngineInternals {
-    setHost(errorFactory: Function, semverParse: Function): void;
-    DcsManagerHandle?: new (models: any) => EngineDcsHandle;
+    setHost(errorFactory: Function): void;
+    DcsManagerHandle: new (models: any) => EngineDcsHandle;
     scalarDeclarationProcess(declaration: object): any;
     classDeclarationProcess(declaration: object): any;
     propertyProcess(view: object): any;
@@ -241,8 +233,6 @@ export interface EngineInternals {
     classDeclarationGetProperties(declaration: object): any[];
     classDeclarationGetProperty(declaration: object, name: unknown): any;
     classDeclarationGetIdentifierFieldNameWalk(declaration: object): any[];
-    decoratorManagerValidate(decoratorCommandSet: unknown, modelFiles: unknown): void;
-    decoratorManagerDecorateModels(models: unknown, decoratorCommandSets: unknown, options: unknown): any;
     modelFileViewSnapshot(ast: string, namespace?: string | null): string | undefined;
     validateErrorMessage(): string;
     validateTakeError(): any;
@@ -307,7 +297,7 @@ export interface EngineViewsModule {
     deferDecorators(element: object): boolean;
     decoratorFactories(modelFile: object): any[] | undefined;
     // DecoratorManager
-    decoratorManagerValidate(validationModelManager: object, decoratorCommandSet: object, modelFiles?: object[]): void;
+    decoratorManagerValidate(validationModelManager: object, decoratorCommandSet: object): void;
     decoratorManagerDecorateModels(modelManager: object, decoratorCommandSets: object[], options?: object): ModelManager;
     decoratorManagerExtractDecorators(modelManager: object, options: object): ExtractDecoratorsResult;
     decoratorManagerExtractVocabularies(modelManager: object, options: object): { modelManager: ModelManager; vocabularies: never[] };

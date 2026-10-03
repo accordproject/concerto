@@ -454,9 +454,7 @@ function validateProperty(resource, propName: string, value, rootId: string, fie
         throw err;
     }
     const fqn = resource.getFullyQualifiedType();
-    const slot = typeof handle.validatePropertyById === 'function'
-        ? propertySlot(resource.getModelManager(), handle, fqn, propName)
-        : undefined;
+    const slot = propertySlot(resource.getModelManager(), handle, fqn, propName);
     if (slot !== undefined) {
         // P5-101 (D-10): by the slot, and with a `Validation` error's
         // message in the same call (any other error is thrown by it).
