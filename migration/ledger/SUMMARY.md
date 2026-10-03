@@ -37,7 +37,7 @@ without a ledger rebuild fails the build.
 
 ## Method
 
-* **Scope.** 718 members in 71 files. Nested closures count
+* **Scope.** 724 members in 71 files. Nested closures count
   as part of the member that encloses them. `index.ts`, `types.ts` and
   `dayjs-setup.ts` have no members: they hold re-exports, types and a dayjs
   plugin setup only.
@@ -130,25 +130,25 @@ without a ledger rebuild fails the build.
 
 | | members | loc | weight | share of weight |
 |---|---|---|---|---|
-| RUST | 81 | 1017 | 1190 | 14.0% |
-| HYBRID | 78 | 1898 | 2106 | 24.7% |
-| PARTIAL | 39 | 363 | 399 | 4.7% |
-| TS | 520 | 5050 | 4832 | 56.7% |
-| **total** | 718 | 8328 | 8527 | 100% |
+| RUST | 72 | 983 | 1160 | 13.4% |
+| HYBRID | 83 | 1922 | 2122 | 24.6% |
+| PARTIAL | 49 | 474 | 522.5 | 6.0% |
+| TS | 520 | 5050 | 4832 | 55.9% |
+| **total** | 724 | 8429 | 8636.5 | 100% |
 
-* **RUST+HYBRID weighted share (new D1 denominator): 39.1%**, HYBRID at full weight
+* **RUST+HYBRID weighted share (new D1 denominator): 38.4%**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. **NOT met.**
   PARTIAL rows (section 5b) are not in the numerator.
   Denominator excludes constant markers and `accept()` visitor entry points
   (60 members, weight 90) as not-logic, per the maintainer's
-  decision on open question 2 below. New total weight: 8437 (was 8527).
+  decision on open question 2 below. New total weight: 8546.5 (was 8636.5).
   D1 stays as defined, with the 70% bar, by maintainer decision (accordproject/concerto-rust#276,
   2026-09-28): the proposed D1′ was not adopted, and the gate reports §0.4 as FAIL at this figure.
-* **Old figure (previous denominator, all 718 members): 38.7%.**
-* RUST only (new denominator): 14.1%.
-* For comparison only, not the D1 figure: counting PARTIAL *read* rows (28 members,
-  weight 124) as Rust gives 40.5%; counting every PARTIAL row (39 members,
-  weight 399) gives 43.8%. That is how the ledger counted them before
+* **Old figure (previous denominator, all 724 members): 38.0%.**
+* RUST only (new denominator): 13.6%.
+* For comparison only, not the D1 figure: counting PARTIAL *read* rows (31 members,
+  weight 128.5) as Rust gives 39.9%; counting every PARTIAL row (49 members,
+  weight 522.5) gives 44.5%. That is how the ledger counted them before
   accordproject/concerto-rust#261 (then 78.9%, which also counted three `rustHandle`
   plumbing helpers as RUST; they are now TS, engine shim). After #261 and before P5-11 the
   figure was 57.4% (61.5% at #261 itself): P5-11 reclassified TS 128 PARTIAL rows and 57 HYBRID
@@ -166,34 +166,34 @@ By weight category:
 
 | category | members | loc | weight | RUST w | HYBRID w | PARTIAL w | TS w |
 |---|---|---|---|---|---|---|---|
-| glue (x0.5) | 350 | 1231 | 615.5 | 51.5 | 43.5 | 27.5 | 493 |
-| logic (x1) | 294 | 5468 | 5468 | 465 | 1308 | 181 | 3514 |
-| validation (x1.5) | 74 | 1629 | 2443.5 | 673.5 | 754.5 | 190.5 | 825 |
+| glue (x0.5) | 348 | 1225 | 612.5 | 41 | 46.5 | 32 | 493 |
+| logic (x1) | 302 | 5564 | 5564 | 465 | 1336 | 249 | 3514 |
+| validation (x1.5) | 74 | 1640 | 2460 | 654 | 739.5 | 241.5 | 825 |
 
 ## 2. By planned task
 
 | task | members | weight | of which HYBRID |
 |---|---|---|---|
 | P1-05 | 6 | 22.5 | 0 |
-| P2-01 | 22 | 106.5 | 0 |
+| P2-01 | 23 | 149.5 | 0 |
 | P2-02 | 20 | 68.5 | 1 |
-| P2-03 | 46 | 420 | 0 |
+| P2-03 | 46 | 439 | 0 |
 | P2-04 | 29 | 120.5 | 0 |
-| P2-05 | 6 | 16 | 0 |
+| P2-05 | 6 | 28 | 0 |
 | P2-06 | 22 | 63.5 | 0 |
-| P2-07 | 12 | 121 | 1 |
+| P2-07 | 12 | 140.5 | 1 |
 | P2-08 | 104 | 1746.5 | 6 |
 | P3-01 | 41 | 1402.5 | 5 |
 | P3-04 | 4 | 109 | 0 |
 | P4-02 | 6 | 22.5 | 0 |
-| P4-03 | 22 | 106.5 | 0 |
+| P4-03 | 23 | 149.5 | 0 |
 | P4-04 | 20 | 68.5 | 1 |
-| P4-05 | 20 | 178 | 1 |
-| P4-06 | 114 | 1478.5 | 54 |
-| P4-07 | 129 | 1309.5 | 54 |
+| P4-05 | 20 | 197.5 | 1 |
+| P4-06 | 119 | 1528.5 | 59 |
+| P4-07 | 134 | 1352.5 | 59 |
 | P4-08 | 108 | 1855.5 | 6 |
 | P4-09 | 12 | 129 | 1 |
-| P4-10 | 48 | 1527.5 | 8 |
+| P4-10 | 48 | 1512.5 | 8 |
 | P5-100 | 3 | 6 | 0 |
 | P5-10a | 8 | 96.5 | 0 |
 | P5-10b | 18 | 310.5 | 0 |
@@ -221,23 +221,23 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/index.ts | 1 | 0 / 0 / 0 / 1 | 1.5 | 0 / 0 / 0 / 1.5 | 0.0% | - |
 | engine/rust.ts | 1 | 0 / 0 / 0 / 1 | 7 | 0 / 0 / 0 / 7 | 0.0% | - |
 | engine/serializer-codec.ts | 21 | 0 / 0 / 0 / 21 | 418.5 | 0 / 0 / 0 / 418.5 | 0.0% | - |
-| engine/serializer.ts | 7 | 0 / 3 / 0 / 4 | 125 | 0 / 65.5 / 0 / 59.5 | 52.4% | P4-10 |
+| engine/serializer.ts | 7 | 0 / 3 / 0 / 4 | 110 | 0 / 50.5 / 0 / 59.5 | 45.9% | P4-10 |
 | engine/util.ts | 3 | 0 / 0 / 0 / 3 | 14.5 | 0 / 0 / 0 / 14.5 | 0.0% | - |
 | engine/validate-instance.ts | 13 | 0 / 2 / 0 / 11 | 234 | 0 / 105 / 0 / 129 | 44.9% | - |
 | engine/validate-resource.ts | 12 | 0 / 2 / 0 / 10 | 314.5 | 0 / 96 / 0 / 218.5 | 30.5% | - |
-| engine/views.ts | 110 | 0 / 54 / 0 / 56 | 1614.5 | 0 / 866.5 / 0 / 748 | 53.7% | P4-06+P4-07, P5-10b, P5-10a, P5-100, P5-14, P5-19 |
+| engine/views.ts | 115 | 0 / 59 / 0 / 56 | 1645.5 | 0 / 897.5 / 0 / 748 | 54.5% | P4-06+P4-07, P5-10b, P5-10a, P5-100, P5-14, P5-19 |
 | engine/wire.ts | 15 | 0 / 0 / 0 / 15 | 97.5 | 0 / 0 / 0 / 97.5 | 0.0% | - |
 | engineloader.ts | 6 | 0 / 0 / 0 / 6 | 15.5 | 0 / 0 / 0 / 15.5 | 0.0% | - |
 | engineutil.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | - |
 | factory.ts | 9 | 0 / 0 / 0 / 9 | 143.5 | 0 / 0 / 0 / 143.5 | 0.0% | - |
 | globalize.ts | 3 | 0 / 0 / 0 / 3 | 16.5 | 0 / 0 / 0 / 16.5 | 0.0% | - |
 | introspect/assetdeclaration.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | P2-03+P4-06 |
-| introspect/classdeclaration.ts | 33 | 8 / 0 / 15 / 10 | 355 | 159 / 0 / 170.5 / 25.5 | 44.8% | P2-03+P4-06 |
+| introspect/classdeclaration.ts | 33 | 6 / 0 / 17 / 10 | 374 | 156 / 0 / 192.5 / 25.5 | 41.7% | P2-03+P4-06 |
 | introspect/collectionsizevalidator.ts | 5 | 3 / 0 / 0 / 2 | 11 | 8 / 0 / 0 / 3 | 72.7% | P2-02+P4-04 |
 | introspect/conceptdeclaration.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | P2-03+P4-06 |
 | introspect/declaration.ts | 22 | 2 / 0 / 1 / 19 | 78 | 24.5 / 0 / 24 / 29.5 | 31.4% | P2-03+P4-05 |
 | introspect/decorated.ts | 7 | 1 / 1 / 0 / 5 | 77.5 | 24 / 33 / 0 / 20.5 | 73.5% | P2-07+P4-05 |
-| introspect/decorator.ts | 9 | 2 / 0 / 0 / 7 | 49.5 | 18 / 0 / 0 / 31.5 | 36.4% | P2-07+P4-05 |
+| introspect/decorator.ts | 9 | 1 / 0 / 1 / 7 | 69 | 6 / 0 / 31.5 / 31.5 | 8.7% | P2-07+P4-05 |
 | introspect/decoratorfactory.ts | 1 | 0 / 0 / 0 / 1 | 1.5 | 0 / 0 / 0 / 1.5 | 0.0% | - |
 | introspect/enumdeclaration.ts | 3 | 0 / 0 / 1 / 2 | 4.5 | 0 / 0 / 1.5 / 3 | 0.0% | P2-04+P4-06 |
 | introspect/enumvaluedeclaration.ts | 3 | 0 / 0 / 0 / 3 | 7.5 | 0 / 0 / 0 / 7.5 | 0.0% | P2-04+P4-07 |
@@ -255,7 +255,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | introspect/participantdeclaration.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | P2-03+P4-06 |
 | introspect/property.ts | 15 | 1 / 0 / 1 / 13 | 71 | 7.5 / 0 / 16 / 47.5 | 10.6% | P2-04+P4-07 |
 | introspect/relationshipdeclaration.ts | 4 | 1 / 0 / 0 / 3 | 12 | 7.5 / 0 / 0 / 4.5 | 62.5% | P2-04+P4-07 |
-| introspect/scalardeclaration.ts | 18 | 2 / 0 / 1 / 15 | 34 | 9 / 0 / 2.5 / 22.5 | 26.5% | P2-05+P4-07 |
+| introspect/scalardeclaration.ts | 18 | 1 / 0 / 2 / 15 | 46 | 1.5 / 0 / 22 / 22.5 | 3.3% | P2-05+P4-07 |
 | introspect/stringvalidator.ts | 7 | 2 / 1 / 0 / 4 | 40.5 | 6 / 15 / 0 / 19.5 | 51.9% | P2-02+P4-04 |
 | introspect/transactiondeclaration.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | P2-03+P4-06 |
 | introspect/validator.ts | 6 | 0 / 0 / 0 / 6 | 10 | 0 / 0 / 0 / 10 | 0.0% | P2-02+P4-04 |
@@ -268,7 +268,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | model/validatedresource.ts | 4 | 0 / 3 / 0 / 1 | 75 | 0 / 73 / 0 / 2 | 97.3% | P5-12c |
 | modelloader.ts | 3 | 0 / 0 / 0 / 3 | 56 | 0 / 0 / 0 / 56 | 0.0% | - |
 | modelmanager.ts | 3 | 0 / 0 / 0 / 3 | 18.5 | 0 / 0 / 0 / 18.5 | 0.0% | P2-08+P4-08 |
-| modelutil.ts | 19 | 19 / 0 / 0 / 0 | 88 | 88 / 0 / 0 / 0 | 100.0% | P2-01+P4-03 |
+| modelutil.ts | 20 | 14 / 0 / 6 / 0 | 131 | 80.5 / 0 / 50.5 / 0 | 61.5% | P2-01+P4-03 |
 | rootmodelhelper.ts | 1 | 0 / 0 / 0 / 1 | 16 | 0 / 0 / 0 / 16 | 0.0% | P2-08+P4-08 |
 | securityexception.ts | 1 | 0 / 0 / 0 / 1 | 1.5 | 0 / 0 / 0 / 1.5 | 0.0% | P1-05+P4-02 |
 | serializer.ts | 5 | 0 / 2 / 0 / 3 | 148 | 0 / 122 / 0 / 26 | 82.4% | P3-01+P4-10 |
@@ -283,7 +283,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 4. TS items (stay in TypeScript) with reasons
 
-520 members, weight 4832 (56.7%).
+520 members, weight 4832 (55.9%).
 
 ### 4a. Grouped by reason
 
@@ -997,7 +997,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 5. HYBRID items with reasons
 
-78 members, weight 2106 (24.7%).
+83 members, weight 2122 (24.6%).
 
 | file | class | member | weight | what stays in JS |
 |---|---|---|---|---|
@@ -1007,7 +1007,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | decoratormanager.ts | DecoratorManager | validate | 30 | the DCS model is CTO text compiled by concerto-cto in JS (via addCTOModel); the command-set instance validation itself is Rust (Serializer fast path / validateCommand) |
 | engine/serializer.ts | (function) | fastFromJson | 21 | JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
 | engine/serializer.ts | (function) | fastToJson | 19 | JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
-| engine/serializer.ts | (function) | validateMetaModel | 25.5 | JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
+| engine/serializer.ts | (function) | validateMetaModel | 10.5 | JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
 | engine/validate-instance.ts | (function) | validateInstance | 48 | one engine validateInstance call per document: the diagnostics come back from Rust, which validates; TS builds the result object and the lazily hydrated resource |
 | engine/validate-instance.ts | (function) | validateInstanceOrThrow | 57 | one engine validateInstance call per document in throw mode, or Serializer.fromJSON for a document of its own type; the validation itself runs in Rust |
 | engine/validate-resource.ts | (function) | validateResource | 33 | one validateResourceBinary call per ValidatedResource.validate(): the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust |
@@ -1066,6 +1066,11 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/views.ts | (function) | propertiesOf | 30 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (property lookup cache: the cached list, else the Rust classDeclarationGetProperties binding, recording the super type's call) |
 | engine/views.ts | (function) | classDeclarationGetProperty | 30 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (property lookup cache: a name lookup over the cached list, else the Rust classDeclarationGetProperty binding) |
 | engine/views.ts | (function) | classDeclarationGetIdentifierFieldName | 24 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-19 identifier memo: the cached answer, else the Rust classDeclarationGetIdentifierFieldNameWalk binding, whose answer it caches). Classified at the P5-64 re-audit (accordproject/concerto-rust#401) |
+| engine/views.ts | (function) | modelFileArenaRef | 7 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views.ts | (function) | cachedArenaRef | 10 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views.ts | (function) | declarationArenaRef | 11 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views.ts | (function) | notInArena | 1.5 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views.ts | (function) | declarationViews | 1.5 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | introspect/decorated.ts | Decorated | process | 33 | decorator objects may be produced by user DecoratorFactory subclasses (JS callbacks); Rust supplies the decorator ASTs and order |
 | introspect/modelfile.ts | ModelFile | constructor | 157.5 | argument checks and view-field set-up stay JS; the AST shape check (P5-49), staging and the header come from Rust (checkAstShape, stageModelFile, _fromAstHeader). P5-35 (BC-47) removed the collaborator-context fallback over stub ModelManagers: a manager the BaseModelManager constructor did not build is a TypeError. Reason updated at the P5-64 re-audit (accordproject/concerto-rust#401) |
 | introspect/modelfile.ts | ModelFile | _fromAstDeclarations | 18 | reads the file's one-call Rust view snapshot (modelFileViewSnapshot) around the declaration views it builds |
@@ -1082,7 +1087,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 5b. PARTIAL items (no engine call)
 
-39 members, weight 399 (4.7%). Set automatically by the engine-call
+49 members, weight 522.5 (6.0%). Set automatically by the engine-call
 scan (see Method); accordproject/concerto-rust#261. 0 of them (weight
 0) are **port candidates, deferred by maintainer decision**
 (accordproject/concerto-rust#276, 2026-09-28). The P5-11 evaluation recommended moving 14 rows
@@ -1094,7 +1099,7 @@ A row marked **undecided** has not been evaluated.
 
 ### PARTIAL *logic*: unconverted TS bodies
 
-11 members, weight 275. The TS body is still the live path, including which
+18 members, weight 394. The TS body is still the live path, including which
 exception is thrown.
 
 | file | class | member | loc | weight | planned task | P5-11 |
@@ -1103,17 +1108,24 @@ exception is thrown.
 | basemodelmanager.ts | (function) | noteNamespaceRemoved | 9 | 9 | P2-08+P4-08 | **undecided** |
 | decoratormanager.ts | DecoratorManager | decorateModels | 30 | 30 | P4-09 | **undecided** |
 | introspect/classdeclaration.ts | ClassDeclaration | process | 83 | 124.5 | P2-03+P4-06 | **undecided** |
+| introspect/classdeclaration.ts | ClassDeclaration | getAssignableClassDeclarations | 13 | 13 | P2-03+P4-06 | **undecided** |
+| introspect/classdeclaration.ts | ClassDeclaration | getDirectSubclasses | 9 | 9 | P2-03+P4-06 | **undecided** |
 | introspect/classdeclaration.ts | ClassDeclaration | toString | 7 | 7 | P2-03+P4-06 | **undecided** |
 | introspect/declaration.ts | Declaration | process | 16 | 24 | P2-03+P4-05 | **undecided** |
+| introspect/decorator.ts | Decorator | validate | 21 | 31.5 | P2-07+P4-05 | **undecided** |
 | introspect/field.ts | Field | getScalarField | 9 | 9 | P2-04+P4-07 | **undecided** |
 | introspect/modelfile.ts | ModelFile | _sharedView | 9 | 9 | P2-08+P4-08 | **undecided** |
 | introspect/modelfile.ts | ModelFile | getLocalType | 22 | 22 | P2-08+P4-08 | **undecided** |
 | introspect/modelfile.ts | ModelFile | _fromAstDeclarationViews | 11 | 16.5 | P2-08+P4-08 | **undecided** |
 | introspect/property.ts | Property | process | 16 | 16 | P2-04+P4-07 | **undecided** |
+| introspect/scalardeclaration.ts | ScalarDeclaration | validate | 13 | 19.5 | P2-05+P4-07 | **undecided** |
+| modelutil.ts | (function) | fieldTypeIs | 9 | 9 | P2-01+P4-03 | **undecided** |
+| modelutil.ts | ModelUtil | isAssignableTo | 23 | 23 | P2-01+P4-03 | **undecided** |
+| modelutil.ts | ModelUtil | isValidMapKeyScalar | 14 | 14 | P2-01+P4-03 | **undecided** |
 
 ### PARTIAL *read*: straight-line reads and forwards
 
-28 members, weight 124.
+31 members, weight 128.5.
 
 | file | class | member | loc | weight | planned task | P5-11 |
 |---|---|---|---|---|---|---|
@@ -1145,6 +1157,9 @@ exception is thrown.
 | introspect/mapvaluetype.ts | MapValueType | process | 5 | 2.5 | P2-06+P4-07 | **undecided** |
 | introspect/modelfile.ts | ModelFile | _copyHeader | 10 | 10 | P2-08+P4-08 | **undecided** |
 | introspect/scalardeclaration.ts | ScalarDeclaration | process | 5 | 2.5 | P2-05+P4-07 | **undecided** |
+| modelutil.ts | ModelUtil | isEnum | 3 | 1.5 | P2-01+P4-03 | **undecided** |
+| modelutil.ts | ModelUtil | isMap | 3 | 1.5 | P2-01+P4-03 | **undecided** |
+| modelutil.ts | ModelUtil | isScalar | 3 | 1.5 | P2-01+P4-03 | **undecided** |
 
 ## 6. White-box coupling seen in tests
 
@@ -1216,8 +1231,8 @@ expose a stubbable TS method. The `visitX` shells are the certain cases: tests s
 | model/typed.ts | Typed.getFullyQualifiedType | TS | W:serializer.js,serializer/resourcevalidator.js |
 | model/typed.ts | Typed.getNamespace | TS | W:serializer/jsonpopulator.js |
 | modelutil.ts | ModelUtil.getNamespace | RUST | W:serializer/jsonpopulator.js |
-| modelutil.ts | ModelUtil.isAssignableTo | RUST | W:serializer/resourcevalidator.js |
-| modelutil.ts | ModelUtil.isEnum | RUST | W:serializer/jsongenerator.js |
+| modelutil.ts | ModelUtil.isAssignableTo | PARTIAL | W:serializer/resourcevalidator.js |
+| modelutil.ts | ModelUtil.isEnum | PARTIAL | W:serializer/jsongenerator.js |
 | modelutil.ts | ModelUtil.getFullyQualifiedName | RUST | W:introspect/numbervalidator.js,introspect/stringvalidator.js,introspect/validator.js |
 | serializer/instancegenerator.ts | InstanceGenerator.visit | TS | W:model/identifiable.js |
 | serializer/instancegenerator.ts | InstanceGenerator.visitClassDeclaration | TS | W:serializer/resourcevalidator.js |
@@ -1305,8 +1320,8 @@ fallback (plan section 3): `ModelFile`'s is HYBRID, and the others are TS view g
 
 Kept for history; every question below has a maintainer decision now, linked from each item.
 
-1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 39.1%
-   (old figure, previous denominator: 38.7%). See section 1.
+1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 38.4%
+   (old figure, previous denominator: 38.0%). See section 1.
 2. **Constant markers and `accept()` count as TS. Settled: excluded from the D1
    denominator.** They are not "logic". 60 members, weight 90,
    removed from the denominator (section 1).
