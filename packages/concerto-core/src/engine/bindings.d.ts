@@ -125,6 +125,11 @@ export interface EngineState {
         typeNames: Map<string, string>;
         /** `rustHandle.resolveType(context, type)`, by type (the context only words an error). */
         resolvedTypes: Map<string, string>;
+        /**
+         * P5-113: `rustHandle.modelFileGetTypeName(id, type)` (`ModelFile.getType`),
+         * by the model file's namespace and then by type.
+         */
+        fileTypeNames: Map<string, Map<string, string | undefined>>;
     } | undefined;
     /**
      * P5-75: the namespaces, in `getNamespaces()` order, updated in place by
@@ -204,6 +209,10 @@ export interface EngineBindings {
     // ResourceId
     resourceIdFromURI(uri: string, legacyNamespace?: string, legacyType?: string): { namespace: string, type: string, id: string };
     resourceIdToURI(namespace: string, type: string, id: string): string;
+    // P5-113: many at once, for a relationship-typed map; flat, with
+    // `undefined` where one fails (the caller then makes the single call).
+    resourceIdsFromURIs(uris: string[], legacyNamespace?: string, legacyType?: string): (string | undefined)[];
+    resourceIdsToURIs(fields: unknown[]): (string | undefined)[];
 }
 
 /**

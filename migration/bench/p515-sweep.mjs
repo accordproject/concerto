@@ -545,6 +545,10 @@ const OPS = {
             }
         },
     },
+    // P5-113 (accordproject/concerto-rust#480): toJSON of the same
+    // documents, read once by fromJSON in setup (untimed).
+    to_json_map: p5109ToJson('maps'),
+    to_json_relmap: p5109ToJson('relmaps'),
     // validateInstance with collectAll (the default) on an `Order` with
     // several errors (P5-99's one validation walk), and with
     // collectAll:false for comparison; a hundred documents per pass. TS
@@ -656,6 +660,28 @@ function p5109FromJson(items) {
         serializer.fromJSON(json);
     }
     return { serializer, items };
+}
+
+/**
+ * The op for toJSON of the `p5109` documents `key` names (P5-113), each
+ * read once by fromJSON in setup.
+ * @param {string} key `maps` or `relmaps`
+ * @return {object} the op
+ */
+function p5109ToJson(key) {
+    return {
+        family: 'serializer', setOnly: 'p5109',
+        setup: (d) => {
+            const { serializer, items } = p5109FromJson(d[key]);
+            return { serializer, items: items.map((json) => serializer.fromJSON(json)) };
+        },
+        n: (c) => c.items.length,
+        run: (c) => {
+            for (const r of c.items) {
+                c.serializer.toJSON(r);
+            }
+        },
+    };
 }
 
 /**
