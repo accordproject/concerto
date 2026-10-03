@@ -1,0 +1,8 @@
+18:20:41 time phase (load 0.02 0.06 0.41)
+18:20:41 time round 1 start (load 0.02 0.06 0.41)
+18:22:45 time round 1 done (load 1.63 0.75 0.63)
+18:22:45 time round 2 start (load 1.63 0.75 0.63)
+18:24:45 time round 2 done (load 2.05 1.20 0.81)
+18:25:15 time round 3 start (load 1.24 1.08 0.79)
+18:27:17 time round 3 done (load 1.93 1.42 0.95)
+18:27:17 p5109-server-run done (load 1.93 1.42 0.95)

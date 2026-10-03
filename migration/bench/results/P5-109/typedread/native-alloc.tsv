@@ -1,0 +1,3 @@
+typed_read	concerto-core-test-data	allocs 34	reallocs 2	bytes 18593	text bytes 3259
+typed_read	conformance	allocs 14	reallocs 1	bytes 5936	text bytes 1300
+typed_read	synthetic-large	allocs 284	reallocs 1	bytes 1109717	text bytes 229584
