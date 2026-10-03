@@ -238,9 +238,11 @@ error is now thrown.
 - **`ModelManager.filter` keeps the built-in models whole.** The filtered
   manager holds its own `concerto.decorator@1.0.0` and `concerto@1.0.0` (and
   the metamodel with `addMetamodel`), and the predicate is no longer called
-  on their declarations. In 5.x, a predicate that kept any declaration of the
+  on their declarations, so a user model's import of one of their types is
+  always kept. In 5.x, a predicate that kept any declaration of the
   decorator model, including `filter(() => true)`, threw `Namespace
-  concerto.decorator@1.0.0 … is already declared`, so models that extend
+  concerto.decorator@1.0.0 … is already declared`, and one that dropped them
+  threw `Could not find super type Decorator`, so models that extend
   `Decorator` could not be filtered. (BC-53)
 - **A lone UTF-16 surrogate in a string reaches the engine as U+FFFD.** Strings
   cross into the engine as UTF-8. This is accepted as is, with no fix

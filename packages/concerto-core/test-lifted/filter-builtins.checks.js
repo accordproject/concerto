@@ -252,6 +252,38 @@ for (const strict of [true, false]) {
                 },
             },
         },
+        {
+            id: `FILTER-BI-07-${tag}`,
+            covers: `BC-53: a predicate that drops the decorator model's declarations keeps a user type extending Decorator, and is never called on them (strict: ${strict})`,
+            run: (core) => {
+                const mm = base(core, options);
+                const seen = new Set();
+                const filtered = mm.filter((d) => {
+                    seen.add(d.getNamespace());
+                    return d.getNamespace() !== DECORATOR_NS;
+                });
+                filtered.validateModelFiles();
+                return {
+                    same: same(mm, filtered),
+                    superType: filtered.getType(`${USER_NS}.Tag`).getSuperType(),
+                    seen: [...seen].sort(),
+                };
+            },
+            expect: {
+                ok: {
+                    same: true,
+                    superType: `${DECORATOR_NS}.Decorator`,
+                    seen: [OTHER_NS, USER_NS],
+                },
+            },
+            // v5.0.0 pruned the user model's import of Decorator.
+            reference: {
+                throws: {
+                    name: 'IllegalModelException',
+                    message: 'Could not find super type Decorator File \'user.cto\': ',
+                },
+            },
+        },
     );
 }
 
