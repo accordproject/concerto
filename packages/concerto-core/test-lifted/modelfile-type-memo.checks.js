@@ -32,6 +32,14 @@
  *   read and written by fromJSON/toJSON, twice: every value a Relationship
  *   to the map's target type, and the document written back unchanged. TS
  *   5.0.0 rejects the document (BC-05), which is its `reference`.
+ * - `MFTYPE-04`: the same map on the serializer's visitor path (a lone
+ *   surrogate elsewhere in the document): fromJSON reads its URIs with one
+ *   `resourceIdsFromURIs` call and toJSON writes them with one
+ *   `resourceIdsToURIs` call, not one ResourceId call per value;
+ * - `MFTYPE-05`: on the visitor path, a bad value among good ones throws
+ *   the class the per-value read throws, and an embedded resource is still
+ *   read under `acceptResourcesForRelationships`. TS 5.0.0 rejects both
+ *   documents as in `MFTYPE-03`.
  *
  * `expect` is the frozen v5.0.0 reference's outcome, which src matches,
  * except where `reference` says otherwise. Run by fallbacks.spec.js.
@@ -135,8 +143,62 @@ map RelMap {
 concept Holder identified by hid {
   o String hid
   o RelMap refs optional
+  o String note optional
 }
 `;
+
+// A lone surrogate: the wire codec cannot carry it, so a document holding
+// one takes the serializer's visitor path (serializer-fallback.checks.js).
+const L = '\uD800';
+
+/**
+ * Counts the src engine's ResourceId bindings (single and batched) while
+ * `body` runs; `null` on the reference, which has no engine.
+ * @param {object} core the core under test
+ * @param {Function} body the work
+ * @returns {object} `{ result, calls }`
+ */
+function countURICalls(core, body) {
+    let rust = null;
+    try {
+        rust = core.req('engineloader').rust;
+    } catch (e) {
+        rust = null;
+    }
+    if (!rust || typeof rust.resourceIdsFromURIs !== 'function') {
+        return { result: body(), calls: null };
+    }
+    const names = ['resourceIdFromURI', 'resourceIdToURI', 'resourceIdsFromURIs', 'resourceIdsToURIs'];
+    const calls = {};
+    const originals = names.map((name) => rust[name]);
+    names.forEach((name, i) => {
+        rust[name] = (...args) => {
+            calls[name] = (calls[name] || 0) + 1;
+            return originals[i](...args);
+        };
+    });
+    try {
+        return { result: body(), calls };
+    } finally {
+        names.forEach((name, i) => {
+            rust[name] = originals[i];
+        });
+    }
+}
+
+/**
+ * The error class `body` throws, or 'ok'.
+ * @param {Function} body the work
+ * @returns {string} the class name
+ */
+function thrown(body) {
+    try {
+        body();
+        return 'ok';
+    } catch (e) {
+        return e.constructor.name;
+    }
+}
 
 /**
  * A `Holder` whose relationship map has 20 entries.
@@ -212,6 +274,78 @@ const checks = [
         })) },
         // v5.0.0 reads the first value as an embedded Person: a string's
         // characters are its unexpected properties.
+        reference: { throws: {
+            name: 'ValidationException',
+            message: `Unexpected properties for type ${MAPS_NS}.Person: ${[...holder(0).refs.k0].map((_, i) => i).join(', ')}`,
+        } },
+    },
+    {
+        id: 'MFTYPE-04',
+        covers: 'P5-113: a relationship-typed map on the visitor path (a lone surrogate in the document) is read and written with one ResourceId engine call each, not one per value',
+        run: (core) => {
+            const mm = new core.ModelManager();
+            mm.addCTOModel(MAPS, 'maps.cto');
+            const serializer = mm.getSerializer();
+            const json = { ...holder(0), note: L };
+            const read = countURICalls(core, () => serializer.fromJSON(json));
+            const values = [...read.result.refs.values()];
+            const written = countURICalls(core, () => serializer.toJSON(read.result));
+            const asIds = countURICalls(core, () => serializer.toJSON(read.result, { convertResourcesToId: true }));
+            return {
+                relationships: values.every((v) => v instanceof core.Relationship),
+                ids: values.slice(0, 2).map((v) => v.getIdentifier()),
+                roundTrip: JSON.stringify(written.result) === JSON.stringify(json),
+                asIds: asIds.result.refs.k1,
+                calls: { fromJSON: read.calls, toJSON: written.calls, toJSONAsIds: asIds.calls },
+            };
+        },
+        expect: { ok: {
+            relationships: true,
+            ids: ['p0-0', 'p0-1'],
+            roundTrip: true,
+            asIds: 'p0-1',
+            calls: { fromJSON: { resourceIdsFromURIs: 1 }, toJSON: { resourceIdsToURIs: 1 }, toJSONAsIds: {} },
+        } },
+        // v5.0.0 reads the first value as an embedded Person (MFTYPE-03).
+        reference: { throws: {
+            name: 'ValidationException',
+            message: `Unexpected properties for type ${MAPS_NS}.Person: ${[...holder(0).refs.k0].map((_, i) => i).join(', ')}`,
+        } },
+    },
+    {
+        id: 'MFTYPE-05',
+        covers: 'P5-113: on the visitor path, a bad value after good ones throws the class the per-value read throws (a number, an empty URI, an unknown type, an object without the option), and an embedded resource is still read under acceptResourcesForRelationships',
+        run: (core) => {
+            const mm = new core.ModelManager();
+            mm.addCTOModel(MAPS, 'maps.cto');
+            const serializer = mm.getSerializer();
+            const withValue = (value, options) => () => {
+                const json = { ...holder(0), note: L };
+                json.refs = { ...json.refs, k5: value };
+                return serializer.fromJSON(json, options);
+            };
+            const embedded = { $class: `${MAPS_NS}.Person`, pid: 'e1' };
+            const read = withValue(embedded, { acceptResourcesForRelationships: true, validate: false })();
+            return {
+                number: thrown(withValue(42)),
+                empty: thrown(withValue('')),
+                unknownType: thrown(withValue('resource:org.nope@1.0.0.Nope#1')),
+                object: thrown(withValue(embedded)),
+                embedded: [read.refs.get('k4').toString(), read.refs.get('k5').toString(), read.refs.get('k6').toString()],
+            };
+        },
+        expect: { ok: {
+            number: 'Error',
+            empty: 'Error',
+            unknownType: 'TypeNotFoundException',
+            object: 'Error',
+            embedded: [
+                `Relationship {id=${MAPS_NS}.Person#p0-4}`,
+                `Resource {id=${MAPS_NS}.Person#e1}`,
+                `Relationship {id=${MAPS_NS}.Person#p0-6}`,
+            ],
+        } },
+        // v5.0.0 reads the first value as an embedded Person (MFTYPE-03).
         reference: { throws: {
             name: 'ValidationException',
             message: `Unexpected properties for type ${MAPS_NS}.Person: ${[...holder(0).refs.k0].map((_, i) => i).join(', ')}`,

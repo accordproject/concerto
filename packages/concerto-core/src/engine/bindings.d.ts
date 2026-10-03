@@ -209,6 +209,10 @@ export interface EngineBindings {
     // ResourceId
     resourceIdFromURI(uri: string, legacyNamespace?: string, legacyType?: string): { namespace: string, type: string, id: string };
     resourceIdToURI(namespace: string, type: string, id: string): string;
+    // P5-113: many at once, for a relationship-typed map; flat, with
+    // `undefined` where one fails (the caller then makes the single call).
+    resourceIdsFromURIs(uris: string[], legacyNamespace?: string, legacyType?: string): (string | undefined)[];
+    resourceIdsToURIs(fields: unknown[]): (string | undefined)[];
 }
 
 /**
