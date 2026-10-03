@@ -40,25 +40,8 @@ import type { IModel } from '@accordproject/concerto-metamodel';
  * A predicate over a Declaration, used by ModelFile#filter.
  */
 export type FilterFunction = (declaration: Declaration) => boolean;
-
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See classdeclaration.ts's
-// own copy of this comment for the bundler/webpack reasoning this loader
-// relies on.
-import { createRequire } from 'module';
-import type { EngineBindings } from '../engine/bindings';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-// P5-06: memoised per specifier (see introspect/property.ts).
-/* istanbul ignore next */
-const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    engineModules[specifier] ??
-    (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
-/* istanbul ignore next */
-const rust: EngineBindings = loadEngine('../engine').rust;
+import { rust, engineHandles, engineViews } from '../engineloader';
+import type { EngineHandle } from '../engine/bindings';
 
 /**
  * Every ModelFile the ModelFile constructor ran for (P5-34, BC-46). A
@@ -107,7 +90,8 @@ class ModelFile extends Decorated {
     definitions: string | null | undefined;
     fileName: string | null | undefined;
     external: boolean;
-    // P5-94: set by `initDeclarationFields` (engine/views.ts).
+    // P5-100 (E-13): prototype accessors (`installLazyField`, below) until
+    // first read or write, then plain own fields.
     declarations!: Declaration[];
     localTypes!: Map<string, Declaration> | null;
     imports: AstNode[];
@@ -142,13 +126,12 @@ class ModelFile extends Decorated {
         constructedModelFiles.add(this);
         this.modelManager = modelManager;
         this.external = false;
-        // P5-94 (accordproject/concerto-rust#444): `declarations` and
-        // `localTypes` start as the lazy views' accessors (engine/views.ts,
-        // reading [] and null until the file is staged), so a lazily built
-        // file keeps a fast (non-dictionary) shape; an eagerly built one has
-        // them made plain fields again below, before anything is built.
-        const views = loadEngine('../engine/views');
-        views.initDeclarationFields(this);
+        // P5-100 (E-13, accordproject/concerto-rust#454): `declarations`
+        // and `localTypes` are not set here: they are ModelFile.prototype
+        // accessors (below) reading [] and null, and a write stores a plain
+        // own field, so an eagerly built file gets them as plain fields and
+        // a lazily built one has them deferred (`deferDeclarations`).
+        const views = engineViews();
         this.imports = [];
         this.importShortNames = new Map();
         this.importWildcardNamespaces = [];
@@ -202,9 +185,6 @@ class ModelFile extends Decorated {
         } else {
             const checkedText: string | object | undefined = views.checkAstShape(this);
             lazy = views.stageModelFile(this, checkedText);
-        }
-        if (!lazy) {
-            views.settleDeclarationFields(this);
         }
         // Set up the decorators.
         this.process();
@@ -288,7 +268,7 @@ class ModelFile extends Decorated {
         this.importShortNames = new Map(source.importShortNames);
         this.importWildcardNamespaces = source.importWildcardNamespaces.slice();
         this.importUriMap = { ...source.importUriMap };
-        loadEngine('../engine/views').copyImportNames(this, source);
+        engineViews().copyImportNames(this, source);
     }
 
     /**
@@ -487,7 +467,7 @@ class ModelFile extends Decorated {
         // for a registered file, as before, and the TS body otherwise (the
         // two agree). Every later call answers from that record, with no
         // engine call, as a fresh array, as both routes did.
-        const views = loadEngine('../engine/views');
+        const views = engineViews();
         const recorded: string[] | undefined = views.recordedImportNames(this);
         if (recorded !== undefined) {
             return recorded;
@@ -496,7 +476,7 @@ class ModelFile extends Decorated {
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            const manager = this.modelManager;
             result = manager.rustHandle.modelFileGetImports(id);
         } else {
             this.imports.forEach( imp => {
@@ -575,7 +555,7 @@ class ModelFile extends Decorated {
             // P5-10a: the file Rust already loaded (staged, or registered
             // from its stage) is validated without sending the AST again
             // (engine/views.ts `validateLoaded`).
-            if (!loadEngine('../engine/views').validateLoaded(this, manager.rustHandle)) {
+            if (!engineViews().validateLoaded(this, manager.rustHandle)) {
                 // Falsy non-string `definitions`/`fileName` (`0`, `false`,
                 // `NaN`) pass the constructor's truthy-only check and reach
                 // here raw: only a genuine string is forwarded to the wasm
@@ -616,7 +596,7 @@ class ModelFile extends Decorated {
         const id = typeof context === 'string' && typeof type === 'string' ? this._rustHandleId() : undefined;
         /* istanbul ignore if */
         if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            const manager = this.modelManager;
             manager.rustHandle.modelFileResolveType(id, context, type, fileLocation, this);
             return;
         }
@@ -657,7 +637,7 @@ class ModelFile extends Decorated {
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            const manager = this.modelManager;
             return manager.rustHandle.modelFileIsLocalType(id, type);
         }
         return this.getLocalType(type) !== null;
@@ -731,7 +711,7 @@ class ModelFile extends Decorated {
         const id = typeof type === 'string' ? this._rustHandleId() : undefined;
         /* istanbul ignore if */
         if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any }; modelFiles: Record<string, ModelFile> };
+            const manager = this.modelManager;
             const name: string | undefined = manager.rustHandle.modelFileGetTypeName(id, type);
             if (name === undefined) {
                 return null;
@@ -783,7 +763,7 @@ class ModelFile extends Decorated {
         const id = typeof type === 'string' ? this._rustHandleId() : undefined;
         /* istanbul ignore if */
         if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            const manager = this.modelManager;
             return manager.rustHandle.modelFileGetFullyQualifiedTypeName(id, type) ?? null;
         }
         // is the type a primitive?
@@ -817,7 +797,7 @@ class ModelFile extends Decorated {
         // P5-10b: a lazily built file whose declaration views are not all
         // built yet builds only the one asked for (engine/views.ts
         // `localType`).
-        const lazy = loadEngine('../engine/views').localType(this, type);
+        const lazy = engineViews().localType(this, type);
         if (lazy !== undefined) {
             return lazy;
         }
@@ -1110,7 +1090,7 @@ class ModelFile extends Decorated {
         // one of them has a header for a file; otherwise the engine reads it
         // now. P5-91 (accordproject/concerto-rust#437): both are tried by
         // `applyStagedHeaders`, with one lookup of the file's staging record.
-        const views = loadEngine('../engine/views');
+        const views = engineViews();
         if (!views.applyStagedHeaders(this, ast)) {
             rust.modelFileFromAstHeader(this, ast);
         }
@@ -1126,7 +1106,7 @@ class ModelFile extends Decorated {
         // P5-06/P5-10a: every declaration's and property's engine snapshot
         // in one call, read by the views built below (engine/views.ts
         // `beginModelFile`).
-        const views = loadEngine('../engine/views');
+        const views = engineViews();
         const saved = views.beginModelFile(this, ast);
         try {
             this._fromAstDeclarationViews(ast);
@@ -1145,7 +1125,7 @@ class ModelFile extends Decorated {
         // P5-10b: a declaration view already built on its own (a lazily
         // built file's `getLocalType`, engine/views.ts `localType`) is
         // reused, so each declaration has one view.
-        const views = loadEngine('../engine/views');
+        const views = engineViews();
         for(let n=0; n < ast.declarations.length; n++) {
             const thing = ast.declarations[n];
             const built = views.builtDeclaration(this, n, thing);
@@ -1251,7 +1231,7 @@ class ModelFile extends Decorated {
         const id = this._rustHandleId();
         /* istanbul ignore if */
         if (id !== undefined) {
-            const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
+            const manager = this.modelManager;
             const sourceManager = this.getModelManager();
             // The Rust predicate carries no Declaration objects of its
             // own -- it calls back with each candidate's
@@ -1269,8 +1249,8 @@ class ModelFile extends Decorated {
                 }
                 return predicate(decl);
             };
-            const handles = loadEngine('../engine/handles');
-            const target = (modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } }).rustHandle;
+            const handles = engineHandles();
+            const target: EngineHandle | undefined = modelManager.rustHandle;
             if (typeof manager.rustHandle.modelFileFilterStaged === 'function' && target && target !== manager.rustHandle) {
                 // P5-97 (accordproject/concerto-rust#448): a file the filter
                 // keeps exactly as it is (every declaration kept, every
@@ -1299,7 +1279,7 @@ class ModelFile extends Decorated {
             // namespace-set invariant `_rustHandleMatchesModelFiles` relies on.
             // P5-97: freed here once its last use returns, not left to the
             // garbage collector.
-            const scratch = new (rust.ModelManagerHandle as unknown as { new (): { [binding: string]: (...args: any[]) => any } })();
+            const scratch = new rust.ModelManagerHandle();
             let filteredSnapshot;
             try {
                 const filteredId = handles.withEngineCallbacks(
@@ -1375,6 +1355,11 @@ class ModelFile extends Decorated {
         return new ModelFile(modelManager, ast, undefined, this.fileName);
     }
 }
+
+// P5-100 (E-13): built on first read in a lazily built file
+// (engine/views.ts `deferModelFileFields`), like the other lazy parts.
+engineViews().installLazyField(ModelFile.prototype, 'declarations', () => [], true);
+engineViews().installLazyField(ModelFile.prototype, 'localTypes', () => null, true);
 
 export { ModelFile };
 export default ModelFile;

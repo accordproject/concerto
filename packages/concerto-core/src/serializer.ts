@@ -34,26 +34,7 @@ import type { SerializerOptions } from './types';
 import type { JsonPopulatorParameters } from './serializer/jsonpopulator';
 import type Resource from './model/resource';
 /* eslint-enable no-unused-vars */
-
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See introspect/property.ts's
-// identical preamble for why `loadEngine` takes a non-literal specifier (kept
-// ts-mode bundles free of src/engine/, which ships as JavaScript only,
-// PORTING.md 1.5) and why rust mode only works through the CommonJS dist/
-// today.
-import { createRequire } from 'module';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-// P5-06: memoised per specifier, so a call site on a per-element or
-// per-instance path (propertyProcess, fastFromJson, ...) resolves the module
-// once rather than on every call.
-/* istanbul ignore next */
-const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    engineModules[specifier] ??
-    (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
+import { engineSerializer } from './engineloader';
 
 // P5-24 (BC-07, R1; accordproject/concerto-rust#328): `DateTime` strings are
 // strict whatever `strictQualifiedDateTimes` says, so an explicit `false` no
@@ -155,7 +136,7 @@ class Serializer {
         // does for callers/tests that need them.
         try {
             const merged = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
-            return loadEngine('./engine/serializer').fastToJson(this.modelManager, resource, merged);
+            return engineSerializer().fastToJson(this.modelManager, resource, merged);
         } catch (err) {
             if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
                 throw err;
@@ -225,7 +206,7 @@ class Serializer {
         // exactly as calling the visitor directly still does for
         // callers/tests that need it.
         try {
-            return loadEngine('./engine/serializer').fastFromJson(this.modelManager, jsonObject, options);
+            return engineSerializer().fastFromJson(this.modelManager, jsonObject, options);
         } catch (err) {
             if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
                 throw err;

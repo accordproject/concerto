@@ -20,20 +20,7 @@ import type ModelFile from './modelfile';
 import type MapDeclaration from './mapdeclaration';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
-
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See property.ts's own
-// copy of this comment for the bundler/webpack reasoning this loader relies
-// on.
-import { createRequire } from 'module';
-import type { EngineBindings } from '../engine/bindings';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier);
-/* istanbul ignore next */
-const rust: EngineBindings = loadEngine('../engine').rust;
+import { rust, engineViews } from '../engineloader';
 
 /**
  * MapValueType defines a Value type of MapDeclaration.
@@ -70,7 +57,7 @@ class MapValueType extends Decorated {
     process() {
         super.process();
         // P5-10b: from the file's view snapshot when it has it.
-        this.type = loadEngine('../engine/views').mapValueTypeProcess(this);
+        this.type = engineViews().mapValueTypeProcess(this);
     }
 
     /**

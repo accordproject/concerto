@@ -22,42 +22,7 @@ import type ModelFile from './modelfile';
 import type { AstNode } from './decorated';
 import type CollectionSizeValidator from './collectionsizevalidator';
 /* eslint-enable no-unused-vars */
-
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
-// `never` so that a view leaves the member's inferred return type, and so
-// the .d.ts, exactly as the TS body used to make it.
-//
-// dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
-// with no .d.ts, since it is not public API (tsconfig.build.internal.json;
-// OD-11). A bundler must never see a specifier it would resolve: `loadEngine`
-// takes a non-literal one (esbuild, rollup and browserify leave it alone) and
-// never names the bare `require` (esbuild's ESM output would add its
-// `__require` shim, which webpack reports as a critical dependency), and
-// webpack folds the `typeof __webpack_require__` test and keeps only the
-// dead-in-Node `__non_webpack_require__` branch, so it neither resolves nor
-// warns.
-//
-// rust mode works through the CommonJS dist/ only. Through the public ESM and
-// browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
-// not supported yet and is deferred to a follow-up: there `module.require`
-// does not exist, and the relative specifier does not match the flattened
-// chunks' location.
-import { createRequire } from 'module';
-import type { EngineBindings } from '../engine/bindings';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-// P5-06: memoised per specifier, so a call site on a per-element or
-// per-instance path (propertyProcess, fastFromJson, ...) resolves the module
-// once rather than on every call.
-const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    engineModules[specifier] ??
-    (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
-/* istanbul ignore next */
-const rust: EngineBindings = loadEngine('../engine').rust;
+import { rust, engineViews } from '../engineloader';
 
 /**
  * Property representing an attribute of a class declaration,
@@ -125,7 +90,7 @@ class Property extends Decorated {
         if (this.ast.name === null || this.ast.name === undefined) {
             throw new Error('No name for type ' + JSON.stringify(this.ast));
         }
-        loadEngine('../engine/views').propertyProcess(this);
+        engineViews().propertyProcess(this);
     }
 
     /**
@@ -247,7 +212,7 @@ class Property extends Decorated {
 }
 
 // P5-10b: built on first read in a lazily built file (engine/views.ts).
-loadEngine('../engine/views').installLazyField(Property.prototype, 'sizeValidator');
+engineViews().installLazyField(Property.prototype, 'sizeValidator');
 
 export { Property };
 export default Property;

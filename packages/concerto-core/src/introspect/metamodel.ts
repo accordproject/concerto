@@ -18,16 +18,7 @@ import ModelManager from '../modelmanager';
 import Factory from '../factory';
 import Serializer from '../serializer';
 import ModelFile from '../introspect/modelfile';
-
-// The Rust engine (src/engine/index.ts) is the only path. See
-// classdeclaration.ts's own copy of this comment for the bundler/webpack
-// reasoning this loader relies on.
-import { createRequire } from 'module';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier);
+import { engineHandles, engineSerializer } from '../engineloader';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -63,7 +54,7 @@ function validateMetaModel(input) {
     // cannot cross (EngineFastPathUnsupported) is validated below, through
     // the Serializer's own fallback path.
     try {
-        loadEngine('../engine/serializer').validateMetaModel(input);
+        engineSerializer().validateMetaModel(input);
         return input;
     } catch (err) {
         if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
@@ -81,7 +72,7 @@ function validateMetaModel(input) {
         // P5-97 (accordproject/concerto-rust#448): the manager is this
         // function's own and nothing built from it escapes, so its engine
         // handle is released here rather than left to the garbage collector.
-        loadEngine('../engine/handles').releaseHandle((metaModelManager as unknown as { rustHandle?: { free(): void } }).rustHandle);
+        engineHandles().releaseHandle(metaModelManager.rustHandle);
     }
 
     return input;

@@ -30,14 +30,17 @@
  *   builds from one shared constant AST (engine/views.ts `stableAstText`):
  *   a change to that constant is seen by the next manager, which checks
  *   and loads the changed AST, and a change back is accepted again.
- * - `declarations` and `localTypes`, which a ModelFile now has as the lazy
- *   views' accessors from its constructor on (`initDeclarationFields`):
- *   the same own keys in the same order, and the same declarations, for a
- *   lazily and an eagerly (decorator factory) built ModelFile, as v5.0.0.
+ * - `declarations` and `localTypes`, which P5-100 (E-13,
+ *   accordproject/concerto-rust#454) made ModelFile.prototype accessors
+ *   (`installLazyField`), like the other lazy parts: the same declarations
+ *   and local types as v5.0.0, for a lazily and an eagerly (decorator
+ *   factory) built ModelFile. Their place among the own keys is BC-23(b)'s
+ *   object-shape change: absent until first read in a lazily built file,
+ *   then last; v5.0.0's order is the checks' `reference`.
  *
  * Only public members are used. `expect` is the frozen v5.0.0 reference's
- * outcome, which src matches, so no check needs a `reference`. Run by
- * fallbacks.spec.js.
+ * outcome, which src matches, except for the two P594-FIELDS checks, whose
+ * `reference` is v5.0.0's (BC-23(b)). Run by fallbacks.spec.js.
  */
 
 const MM = 'concerto.metamodel@1.0.0';
@@ -218,6 +221,15 @@ function fields(mf) {
 const KEYS = ['ast', 'modelManager', 'external', 'declarations', 'localTypes', 'imports', 'importShortNames', 'importWildcardNamespaces',
     'importUriMap', 'fileName', 'concertoVersion', 'version', 'definitions', 'namespace'];
 
+/**
+ * P5-100 (E-13, BC-23(b)): a ModelFile's own keys in src: `declarations`
+ * and `localTypes` are prototype accessors until first read or write, and
+ * then plain own fields, last.
+ */
+const KEYS_UNREAD = ['ast', 'modelManager', 'external', 'imports', 'importShortNames', 'importWildcardNamespaces',
+    'importUriMap', 'fileName', 'concertoVersion', 'version', 'definitions', 'namespace'];
+const KEYS_READ = KEYS_UNREAD.concat(['declarations', 'localTypes']);
+
 module.exports = [
     {
         id: 'P594-HDR-001',
@@ -273,20 +285,22 @@ module.exports = [
     },
     {
         id: 'P594-FIELDS-001',
-        covers: 'P5-94: a lazily built ModelFile has declarations and localTypes in the same place among its own keys, and the same values',
+        covers: 'P5-94, P5-100 (E-13, BC-23(b)): a lazily built ModelFile has the same declarations and localTypes; they are own keys only from first read, last',
         run: (core) => {
             const mm = new core.ModelManager();
             return fields(mm.addCTOModel('namespace org.acme.f@1.0.0\nconcept A {}\nconcept B {}', 'f.cto'));
         },
-        expect: { ok: [KEYS, ['A', 'B'], ['org.acme.f@1.0.0.A', 'org.acme.f@1.0.0.B'], ['A'], KEYS] },
+        expect: { ok: [KEYS_UNREAD, ['A', 'B'], ['org.acme.f@1.0.0.A', 'org.acme.f@1.0.0.B'], ['A'], KEYS_READ] },
+        reference: { ok: [KEYS, ['A', 'B'], ['org.acme.f@1.0.0.A', 'org.acme.f@1.0.0.B'], ['A'], KEYS] },
     },
     {
         id: 'P594-FIELDS-002',
-        covers: 'P5-94: an eagerly built ModelFile (decorator factory) has declarations and localTypes in the same place among its own keys, and the same values',
+        covers: 'P5-94, P5-100 (E-13, BC-23(b)): an eagerly built ModelFile (decorator factory) has the same declarations and localTypes, as its last own keys',
         run: (core) => {
             const mm = eagerManager(core);
             return fields(mm.addCTOModel('namespace org.acme.f@1.0.0\nconcept A {}\nconcept B {}', 'f.cto'));
         },
-        expect: { ok: [KEYS, ['A', 'B'], ['org.acme.f@1.0.0.A', 'org.acme.f@1.0.0.B'], ['A'], KEYS] },
+        expect: { ok: [KEYS_READ, ['A', 'B'], ['org.acme.f@1.0.0.A', 'org.acme.f@1.0.0.B'], ['A'], KEYS_READ] },
+        reference: { ok: [KEYS, ['A', 'B'], ['org.acme.f@1.0.0.A', 'org.acme.f@1.0.0.B'], ['A'], KEYS] },
     },
 ];

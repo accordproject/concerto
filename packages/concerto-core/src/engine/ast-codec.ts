@@ -83,9 +83,9 @@ let pos = 0;
 
 /**
  * How many times `encodeAst` has run: the bytes it returned are valid
- * while this is unchanged.
+ * while this is unchanged (P5-100, F-3: named `generation` before).
  */
-let generation = 0;
+let encodeCount = 0;
 
 /**
  * Grows `buf` to hold `n` more bytes.
@@ -251,7 +251,7 @@ function writeValue(v: any, depth: number): void {
  * @throws {*} whatever reading the AST throws (a getter's error)
  */
 function encodeAst(ast: object): Uint8Array | undefined {
-    generation++;
+    encodeCount++;
     pos = 0;
     let out: Uint8Array | undefined;
     try {
@@ -272,10 +272,10 @@ function encodeAst(ast: object): Uint8Array | undefined {
 /**
  * The number of `encodeAst` calls so far: the bytes one returned are
  * valid while this is unchanged.
- * @return {number} the generation
+ * @return {number} the count
  */
-function encodeAstGeneration(): number {
-    return generation;
+function encodeAstCount(): number {
+    return encodeCount;
 }
 
-export { encodeAst, encodeAstGeneration };
+export { encodeAst, encodeAstCount };

@@ -69,6 +69,12 @@ const adapter = engineKind === 'rust'
     ? require(path.join(ORACLE_LIB, 'rust-adapter')).createAdapter()
     : require(path.join(ORACLE_LIB, 'adapter')).referenceAdapter();
 
+// P5-100 (E-15): the lazy-views diagnostic is the harness's own, installed
+// into the Rust side's concerto-core once the adapter has loaded it.
+if (engineKind === 'rust' && process.env.CONCERTO_LAZY_VIEWS_CHECK === '1') {
+    require('./lazy-views-check').install();
+}
+
 const store = blobStore(fixturesDir);
 
 /**

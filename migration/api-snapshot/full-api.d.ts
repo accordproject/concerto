@@ -676,6 +676,9 @@ declare const _default: {
 };
 export default _default;
 
+// ==== engineloader.d.ts ====
+export {};
+
 // ==== factory.d.ts ====
 import Relationship from './model/relationship';
 import Resource from './model/resource';

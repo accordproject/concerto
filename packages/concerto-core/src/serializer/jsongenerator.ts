@@ -18,27 +18,6 @@ import ModelUtil from '../modelutil';
 import { NullUtil as Util } from '@accordproject/concerto-util';
 import { getRelationshipMapValue } from './relationshipmapvalue';
 
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See jsonpopulator.ts's
-// identical preamble. `convertToJSON`'s per-field coercion delegates to the
-// engine, one field at a time; the visitor shell stays here.
-import { createRequire } from 'module';
-import type { EngineBindings } from '../engine/bindings';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-// P5-06: memoised per specifier, so a call site on a per-element or
-// per-instance path (propertyProcess, fastFromJson, ...) resolves the module
-// once rather than on every call.
-/* istanbul ignore next */
-const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    engineModules[specifier] ??
-    (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
-/* istanbul ignore next */
-const rust: EngineBindings = loadEngine('../engine').rust;
-
 /**
  * Converts the contents of a Resource to JSON. The parameters
  * object should contain the keys
@@ -256,32 +235,9 @@ class JSONGenerator {
      * @return {Object} the text JSON safe representation
      */
     convertToJSON(field, obj) {
-        // P4-10: delegated to the engine (module preamble). No declaration
-        // lookup is needed, so this is safe for a field built by a test
-        // stub too. A value the wire codec cannot express falls through to
-        // the TS switch below, exactly as the whole-document fast path
-        // falls back on the same `EngineFastPathUnsupported`. Every arm but
-        // DateTime returns `obj` itself, so the view does too once the
-        // engine has accepted it (identity, as in TS).
-        try {
-            const codec = loadEngine('../engine/serializer-codec');
-            codec.checkString(String(field.getType()));
-            const options = { utcOffset: this.utcOffset };
-            const resultText = rust.generatorConvertPrimitive(
-                field.getType(),
-                JSON.stringify(codec.encodeValue(obj)),
-                JSON.stringify(codec.encodeValue(options)),
-            );
-            if (field.getType() !== 'DateTime') {
-                return obj;
-            }
-            return codec.decodeValue(JSON.parse(resultText), undefined as any);
-        } catch (err) {
-            if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
-                throw err;
-            }
-        }
-
+        // P5-100 (E-2, M2): converted here, over the value TS already holds;
+        // it no longer crosses into the engine per primitive
+        // (`generatorConvertPrimitive`).
         switch (field.getType()) {
         case 'DateTime':
         {

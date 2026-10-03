@@ -50,134 +50,58 @@ import type TransactionDeclaration from './introspect/transactiondeclaration';
 
 import debugLib from 'debug';
 const debug = debugLib('concerto:BaseModelManager');
-
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See classdeclaration.ts's
-// own copy of this comment for the bundler/webpack reasoning this loader
-// relies on.
-import { createRequire } from 'module';
-import type { EngineBindings } from './engine/bindings';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier);
-/* istanbul ignore next */
-const rust: EngineBindings = loadEngine('./engine').rust;
-// P5-10a: engine/views, required once on first use.
-let engineViewsModule: any;
-/* istanbul ignore next */
-const engineViews = () => engineViewsModule ?? (engineViewsModule = loadEngine('./engine/views'));
+import { rust, engineHandles, engineValidateInstance, engineViews } from './engineloader';
+import type { EngineHandle, EngineState } from './engine/bindings';
 
 /**
- * The engine's answers to `getType` and `resolveType` for
- * one BaseModelManager (P5-29, accordproject/concerto-rust#334), valid while
- * the manager's model epoch (P5-14's, per manager since F-2: `modelGeneration`, moved by every
- * `addModelFile`, `updateModelFile`, `deleteModelFile`, `addModelFiles` and
- * `updateExternalModels`) is unchanged and the manager still holds the same
- * `modelFiles` map and rustHandle (`clearModelFiles` and the roll-back of a
- * failed `addModelFiles` or `updateExternalModels` replace one or both). A
- * call that throws keeps nothing.
- */
-interface ManagerReadMemo {
-    generation: number;
-    modelFiles: object;
-    handle: object;
-    /** `rustHandle.getTypeName(name)`, by name. */
-    typeNames: Map<string, string>;
-    /** `rustHandle.resolveType(context, type)`, by type (the context only words an error). */
-    resolvedTypes: Map<string, string>;
-}
-
-/* istanbul ignore next */
-const managerReadMemos = new WeakMap<object, ManagerReadMemo>();
-
-/**
- * Whether `memo` is still `manager`'s (see `ManagerReadMemo`).
- * @param {object} manager - the BaseModelManager
- * @param {object} memo - its memo
- * @return {boolean} true if it may be used
+ * P5-100 (M1, accordproject/concerto-rust#454): a new manager's engine
+ * state record (`BaseModelManager._engine`; its shape is `EngineState` in
+ * src/engine/bindings.d.ts). It replaces the module-level WeakMaps that
+ * used to hold the same state by manager, here and in src/engine/.
+ * @return {EngineState} the record, with model version 0 and nothing cached
  * @private
  */
-/* istanbul ignore next */
-function managerReadMemoValid(manager: { modelFiles: object; rustHandle: object }, memo: ManagerReadMemo): boolean {
-    return memo.generation === engineViews().modelGeneration(manager) && memo.modelFiles === manager.modelFiles &&
-        memo.handle === manager.rustHandle;
+function newEngineState(): EngineState {
+    return {
+        version: 0,
+        readMemo: undefined,
+        namespaces: undefined,
+        dcsResidents: undefined,
+        serializerCache: undefined,
+    };
 }
 
 /**
- * `manager`'s memo, started afresh when the model epoch, its `modelFiles`
- * map or its rustHandle has changed.
- * @param {object} manager - the BaseModelManager
- * @return {ManagerReadMemo} its current memo
+ * `manager`'s read memo (`EngineState.readMemo`), started afresh when its
+ * model version has moved since it was made.
+ * @param {object} state - the manager's engine state
+ * @return {object} its current memo
  * @private
  */
 /* istanbul ignore next */
-function managerReadMemo(manager: { modelFiles: object; rustHandle: object }): ManagerReadMemo {
-    let memo = managerReadMemos.get(manager);
-    if (!memo || !managerReadMemoValid(manager, memo)) {
-        memo = {
-            generation: engineViews().modelGeneration(manager),
-            modelFiles: manager.modelFiles,
-            handle: manager.rustHandle,
+function managerReadMemo(state: EngineState): NonNullable<EngineState['readMemo']> {
+    let memo = state.readMemo;
+    if (memo === undefined || memo.version !== state.version) {
+        memo = state.readMemo = {
+            version: state.version,
             typeNames: new Map(),
             resolvedTypes: new Map(),
         };
-        managerReadMemos.set(manager, memo);
     }
     return memo;
 }
 
 /**
- * One BaseModelManager's namespaces, in `getNamespaces()` order (P5-75,
- * accordproject/concerto-rust#417): `Object.keys(modelFiles)`, which the
- * engine's `rustHandle.getNamespaces()` mirrors. Unlike `ManagerReadMemo`,
- * a model change does not drop it: every mutator of this manager updates it
- * in place once the change has succeeded (`noteNamespaceAdded`,
- * `noteNamespaceRemoved`; a replacement keeps its key's place, as in TS),
- * so the first `getNamespaces()` after a change does not cross into the
- * engine. It is valid while the manager holds the same `modelFiles` map
- * and rustHandle: `clearModelFiles` and the constructor start a new list
- * for the new map, the roll-back of a failed `addModelFiles` keeps the list
- * it had before the batch, and anything else that replaces the map (the
- * roll-back of a failed `updateExternalModels`) drops it, so the next call
- * asks the engine again.
- */
-interface NamespaceList {
-    modelFiles: object;
-    handle: object;
-    /** Never handed out: callers get a copy. */
-    list: string[];
-}
-
-/* istanbul ignore next */
-const namespaceLists = new WeakMap<object, NamespaceList>();
-
-/**
- * `manager`'s namespace list, or undefined when it has none for its current
- * `modelFiles` map and rustHandle, or while a batch is being added
- * (`_mirrorPending`, when `modelFiles` is ahead of rustHandle).
+ * `manager`'s namespace list (`EngineState.namespaces`), or undefined when
+ * it has none, or while a batch is being added (`_mirrorPending`, when
+ * `modelFiles` is ahead of rustHandle).
  * @param {object} manager - the BaseModelManager
- * @return {NamespaceList|undefined} its list
+ * @return {string[]|undefined} its list
  * @private
  */
 /* istanbul ignore next */
-function namespaceListOf(manager: { modelFiles: object; rustHandle: object; _mirrorPending: boolean }): NamespaceList | undefined {
-    const entry = namespaceLists.get(manager);
-    return entry && !manager._mirrorPending && entry.modelFiles === manager.modelFiles &&
-        entry.handle === manager.rustHandle ? entry : undefined;
-}
-
-/**
- * Starts `manager`'s namespace list afresh, for its current `modelFiles`
- * map and rustHandle, as `list`.
- * @param {object} manager - the BaseModelManager
- * @param {string[]} list - its namespaces, in order (kept, not copied)
- * @private
- */
-/* istanbul ignore next */
-function startNamespaceList(manager: { modelFiles: object; rustHandle: object }, list: string[]): void {
-    namespaceLists.set(manager, { modelFiles: manager.modelFiles, handle: manager.rustHandle, list });
+function namespaceListOf(manager: { _engine: EngineState; _mirrorPending: boolean }): string[] | undefined {
+    return manager._mirrorPending ? undefined : manager._engine.namespaces;
 }
 
 /**
@@ -189,12 +113,12 @@ function startNamespaceList(manager: { modelFiles: object; rustHandle: object },
  * @private
  */
 /* istanbul ignore next */
-function noteNamespaceAdded(manager: { modelFiles: object; rustHandle: object; _mirrorPending: boolean }, namespace: string): void {
-    const entry = namespaceListOf(manager);
-    if (entry) {
-        entry.list.push(namespace);
+function noteNamespaceAdded(manager: { _engine: EngineState; _mirrorPending: boolean }, namespace: string): void {
+    const list = namespaceListOf(manager);
+    if (list) {
+        list.push(namespace);
     } else {
-        namespaceLists.delete(manager);
+        manager._engine.namespaces = undefined;
     }
 }
 
@@ -207,12 +131,13 @@ function noteNamespaceAdded(manager: { modelFiles: object; rustHandle: object; _
  * @private
  */
 /* istanbul ignore next */
-function noteNamespaceRemoved(manager: { modelFiles: object; rustHandle: object; _mirrorPending: boolean }, namespace: string): void {
-    const at = namespaceListOf(manager)?.list.indexOf(namespace) ?? -1;
+function noteNamespaceRemoved(manager: { _engine: EngineState; _mirrorPending: boolean }, namespace: string): void {
+    const list = namespaceListOf(manager);
+    const at = list?.indexOf(namespace) ?? -1;
     if (at < 0) {
-        namespaceLists.delete(manager);
+        manager._engine.namespaces = undefined;
     } else {
-        namespaceLists.get(manager)!.list.splice(at, 1);
+        list!.splice(at, 1);
     }
 }
 
@@ -323,7 +248,7 @@ class BaseModelManager {
      * (`_needsRustWrite`). Always set by the end of the constructor.
      * @internal
      */
-     rustHandle: { [binding: string]: (...args: any[]) => any };
+     rustHandle: EngineHandle;
     /**
      * (P5-31, accordproject/concerto-rust#341): true only while the
      * constructor builds `metamodelModelFile`, the cached copy of the
@@ -361,6 +286,14 @@ class BaseModelManager {
      */
      _rustPreloaded: Set<string>;
     /**
+     * (P5-100, accordproject/concerto-rust#454): this manager's engine
+     * state: its model version, moved by every change of `modelFiles` or
+     * `rustHandle` and the key of every cached answer, and those cached
+     * answers (`EngineState` in src/engine/bindings.d.ts).
+     * @internal
+     */
+     _engine: EngineState;
+    /**
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
@@ -385,6 +318,7 @@ class BaseModelManager {
         // P5-35 (BC-47): a ModelFile may be built only for a manager whose
         // constructor ran; registered before this constructor builds any.
         ModelFile._registerManager(this);
+        this._engine = newEngineState();
         this.processFile = processFile ? processFile : defaultProcessFile;
         this.modelFiles = {};
         this.factory = new Factory(this);
@@ -401,7 +335,7 @@ class BaseModelManager {
         this.rustHandle = this._newRustHandle();
         // P5-75: the namespace list starts empty with the map; the system
         // models below are appended as they are registered.
-        startNamespaceList(this, []);
+        this._engine.namespaces = [];
         this.addDecoratorModel();
         this.addRootModel();
 
@@ -640,10 +574,17 @@ class BaseModelManager {
      */
     /* istanbul ignore next */
     _rustMirrorUpdate(modelFile) {
-        // P5-10a: an update always sends the AST (updateModelFile), so a
-        // lazily built file's stage is dropped rather than committed.
-        engineViews().dropStaged(modelFile, this.rustHandle);
         const namespace = modelFile.getNamespace();
+        // P5-100 (E-6): the file Rust loaded when the ModelFile was
+        // constructed replaces the registered one (engine/views.ts
+        // `updateStaged`); only a file with no usable stage sends its AST.
+        const staged = engineViews().updateStaged(modelFile, this.rustHandle);
+        if (staged !== undefined) {
+            this._modelFileIds.clear();
+            this._modelFileIds.set(namespace, staged);
+            return;
+        }
+        engineViews().dropStaged(modelFile, this.rustHandle);
         // TS has already validated (or was asked not to); the mirror call
         // only needs to keep rustHandle's state in sync, so it never
         // re-validates itself. Same falsy-non-string forward as
@@ -775,8 +716,9 @@ class BaseModelManager {
             this.modelFiles[modelFile.getNamespace()] = modelFile;
             // P5-75: a new key, appended to the namespace list.
             noteNamespaceAdded(this, modelFile.getNamespace());
-            // P5-14: a model change drops the cached property lookups.
-            engineViews().invalidatePropertyLookups(this);
+            // P5-14, P5-100: a model change moves the model version, which
+            // every cached answer of this manager's is keyed on.
+            this._engine.version++;
         } else {
             this._throwAlreadyExists(modelFile);
         }
@@ -806,7 +748,11 @@ class BaseModelManager {
         // propagates unchanged.
         const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
         try {
-            this.rustHandle.validateAstValue(JSON.stringify(modelFile.getAst()));
+            // P5-100 (E-6): over the copy Rust staged when the ModelFile was
+            // constructed, when it has one, rather than the AST sent again.
+            if (!engineViews().validateAstStaged(modelFile, this.rustHandle)) {
+                this.rustHandle.validateAstValue(JSON.stringify(modelFile.getAst()));
+            }
         } catch (err) {
             // rustHandle's own validate_ast (concerto-core
             // ModelManager::validate_ast) only leaks its copy of the
@@ -830,7 +776,7 @@ class BaseModelManager {
             if (!alreadyHasMetamodel && this.rustHandle.modelFileId(MetaModelNamespace) !== undefined) {
                 this.modelFiles[MetaModelNamespace] = this.metamodelModelFile;
                 noteNamespaceAdded(this, MetaModelNamespace);
-                engineViews().invalidatePropertyLookups(this);
+                this._engine.version++;
             }
             throw err;
         }
@@ -897,7 +843,7 @@ class BaseModelManager {
         // Mirrored first, so a mirror error leaves both unchanged.
         this._rustMirrorUpdate(modelFile);
         this.modelFiles[modelFile.getNamespace()] = modelFile;
-        engineViews().invalidatePropertyLookups(this);
+        this._engine.version++;
         return modelFile;
     }
 
@@ -924,7 +870,7 @@ class BaseModelManager {
             delete this.modelFiles[namespace];
             // P5-75: the key TS deletes is `namespace`'s string form.
             noteNamespaceRemoved(this, String(namespace));
-            engineViews().invalidatePropertyLookups(this);
+            this._engine.version++;
         }
     }
 
@@ -972,7 +918,7 @@ class BaseModelManager {
                 }
                 if (!this.modelFiles[m.getNamespace()]) {
                     this.modelFiles[m.getNamespace()] = m;
-                    engineViews().invalidatePropertyLookups(this);
+                    this._engine.version++;
                     newModelFiles.push(m);
                 } else {
                     this._throwAlreadyExists(m);
@@ -1005,7 +951,7 @@ class BaseModelManager {
             // them.
             /* istanbul ignore next */
             if (namespaces && namespaceListOf(this) === namespaces) {
-                newModelFiles.forEach((m) => namespaces.list.push(m.getNamespace()));
+                newModelFiles.forEach((m) => namespaces.push(m.getNamespace()));
             }
 
             // return the model files.
@@ -1013,6 +959,7 @@ class BaseModelManager {
         } catch (err) {
             this.modelFiles = {};
             Object.assign(this.modelFiles, originalModelFiles);
+            this._engine.version++;
             // Undo any rustHandle mirroring this batch made: a
             // partially-mirrored or now-invalid batch must not leave
             // rustHandle out of sync with `this.modelFiles`, which the lines
@@ -1039,9 +986,7 @@ class BaseModelManager {
             // delete above propagates first, dropping the list), so the
             // list from before the batch holds for the restored map.
             /* istanbul ignore next */
-            if (namespaces && namespaceLists.get(this) === namespaces && namespaces.handle === this.rustHandle) {
-                startNamespaceList(this, namespaces.list);
-            }
+            this._engine.namespaces = namespaces;
             throw err;
         } finally {
             this._mirrorPending = false;
@@ -1103,23 +1048,27 @@ class BaseModelManager {
                 views.forEach((mf) => {
                     next[mf.getNamespace()] = mf;
                 });
-                // Only a genuine string crosses for `definitions` and
-                // `fileName` (accordproject/concerto-rust#294 follow-up), as
-                // for every other mirror write.
-                const sources = views.map((mf) => {
-                    const definitions = mf.getDefinitions();
-                    const fileName = mf.getName();
-                    return {
-                        ast: mf.getAst(),
-                        definitions: typeof definitions === 'string' ? definitions : undefined,
-                        fileName: typeof fileName === 'string' ? fileName : undefined,
-                    };
-                });
-                this.rustHandle.updateExternalModels(JSON.stringify(sources), next);
+                // P5-100 (E-6): from the files Rust loaded when each view was
+                // constructed (engine/views.ts `updateExternalStaged`);
+                // otherwise every AST is sent. Only a genuine string crosses
+                // for `definitions` and `fileName`
+                // (accordproject/concerto-rust#294 follow-up), as for every
+                // other mirror write.
+                if (!engineViews().updateExternalStaged(views, this.rustHandle, next)) {
+                    const sources = views.map((mf) => {
+                        const definitions = mf.getDefinitions();
+                        const fileName = mf.getName();
+                        return {
+                            ast: mf.getAst(),
+                            definitions: typeof definitions === 'string' ? definitions : undefined,
+                            fileName: typeof fileName === 'string' ? fileName : undefined,
+                        };
+                    });
+                    this.rustHandle.updateExternalModels(JSON.stringify(sources), next);
+                }
             } finally {
-                // rustHandle loaded each file from `sources`, not from the
-                // stage its constructor made; an update rebuilds its model
-                // file arena.
+                // A stage the update did not consume is dropped; an update
+                // rebuilds rustHandle's model file arena.
                 views.forEach((mf) => engineViews().dropStaged(mf, this.rustHandle));
                 this._modelFileIds.clear();
             }
@@ -1132,12 +1081,17 @@ class BaseModelManager {
                     noteNamespaceAdded(this, mf.getNamespace());
                 }
             });
-            engineViews().invalidatePropertyLookups(this);
+            this._engine.version++;
             return views;
         } catch (err) {
             // Restore original files
             this.modelFiles = {};
             Object.assign(this.modelFiles, originalModelFiles);
+            // P5-75, P5-100: the map was replaced, so the namespace list is
+            // dropped (the next getNamespaces asks the engine) and the model
+            // version moves.
+            this._engine.namespaces = undefined;
+            this._engine.version++;
             throw err;
         }
     }
@@ -1240,10 +1194,10 @@ class BaseModelManager {
         // sent, as v5.0.0's message formatter used it.
         const typeName = typeNameArgument(type);
         // P5-29: a type the engine resolved since the last model change is
-        // answered from the memo (`ManagerReadMemo`), without crossing into
+        // answered from the memo (`EngineState.readMemo`), without crossing into
         // the engine.
         /* istanbul ignore next */
-        const memo = managerReadMemo(this);
+        const memo = managerReadMemo(this._engine);
         const resolved = memo.resolvedTypes.get(typeName);
         /* istanbul ignore next */
         if (resolved !== undefined) {
@@ -1253,7 +1207,7 @@ class BaseModelManager {
         // (accordproject/concerto-rust#262).
         const result: string = this.rustHandle.resolveType(typeof context === 'string' ? context : String(context), typeName);
         /* istanbul ignore next */
-        if (managerReadMemoValid(this, memo)) {
+        if (memo.version === this._engine.version) {
             memo.resolvedTypes.set(typeName, result);
         }
         return result;
@@ -1275,8 +1229,8 @@ class BaseModelManager {
      * @private
      * @internal
      */
-    _newRustHandle(): { [binding: string]: (...args: any[]) => any } {
-        const handle = new (rust.ModelManagerHandle as unknown as { new(): { [binding: string]: (...args: any[]) => any } })();
+    _newRustHandle(): EngineHandle {
+        const handle = new rust.ModelManagerHandle();
         handle.setDangerouslyAllowReservedSystemTypeNamesInUserModels(
             !!this.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels
         );
@@ -1307,10 +1261,12 @@ class BaseModelManager {
         // calls it again: its engine memory is released now, not when the
         // garbage collector gets to its finalizer. Internal only: there is
         // no public release API.
-        loadEngine('./engine/handles').releaseHandle(replaced);
+        engineHandles().releaseHandle(replaced);
         // P5-75: a new, empty namespace list for the new map, appended to
-        // as the system models are registered again.
-        startNamespaceList(this, []);
+        // as the system models are registered again. P5-100: a new map and
+        // handle are a model change.
+        this._engine.namespaces = [];
+        this._engine.version++;
         this.addDecoratorModel();
         this.addRootModel();
     }
@@ -1356,15 +1312,15 @@ class BaseModelManager {
         // Each call gets its own copy, so changing the returned array
         // reaches neither the list nor the engine.
         /* istanbul ignore next */
-        const entry = namespaceListOf(this);
+        const list = namespaceListOf(this);
         /* istanbul ignore next */
-        if (entry) {
-            return entry.list.slice();
+        if (list) {
+            return list.slice();
         }
         const result: string[] = this.rustHandle.getNamespaces();
         /* istanbul ignore next */
         if (!this._mirrorPending) {
-            startNamespaceList(this, result.slice());
+            this._engine.namespaces = result.slice();
         }
         return result;
     }
@@ -1381,10 +1337,10 @@ class BaseModelManager {
         // threw (`typeNameArgument`).
         const name = typeNameArgument(qualifiedName);
         // P5-29: the fully-qualified name the engine answered since the
-        // last model change is kept (`ManagerReadMemo`); it is still mapped
+        // last model change is kept (`EngineState.readMemo`); it is still mapped
         // to its view below on every call.
         /* istanbul ignore next */
-        const memo = managerReadMemo(this);
+        const memo = managerReadMemo(this._engine);
         let fqn = memo.typeNames.get(name);
         /* istanbul ignore next */
         if (fqn === undefined) {
@@ -1394,7 +1350,7 @@ class BaseModelManager {
             // declaration's fully-qualified name, mapped here to its view
             // in the model file of its namespace.
             fqn = this.rustHandle.getTypeName(name) as string;
-            if (managerReadMemoValid(this, memo)) {
+            if (memo.version === this._engine.version) {
                 memo.typeNames.set(name, fqn);
             }
         }
@@ -1501,7 +1457,7 @@ class BaseModelManager {
      * throws
      */
     validateInstance(json: object | string, options?: ValidateInstanceOptions): ValidationResult<Resource> {
-        return loadEngine('./engine/validate-instance').validateInstance(this, json, options);
+        return engineValidateInstance().validateInstance(this, json, options);
     }
 
     /**
@@ -1515,7 +1471,7 @@ class BaseModelManager {
      * diagnostics as `details`
      */
     validateInstanceOrThrow(json: object | string, options?: ValidateInstanceOptions): Resource | null {
-        return loadEngine('./engine/validate-instance').validateInstanceOrThrow(this, json, options);
+        return engineValidateInstance().validateInstanceOrThrow(this, json, options);
     }
 
     /**
@@ -1676,6 +1632,8 @@ class BaseModelManager {
         fork.decoratorFactories = this.decoratorFactories.slice();
         fork.decoratorValidation = this.decoratorValidation;
         fork._mirrorPending = false;
+        // P5-100: the fork's own engine state, nothing cached yet.
+        fork._engine = newEngineState();
         // The fork's engine handles are this manager's (`ModelManager::fork`).
         fork._modelFileIds = new Map(this._modelFileIds);
         fork._rustPreloaded = new Set(this._rustPreloaded);
@@ -1707,9 +1665,7 @@ class BaseModelManager {
             fork.metamodelModelFile = fork.modelFiles[MetaModelNamespace];
         }
         const namespaces = namespaceListOf(this);
-        if (namespaces) {
-            startNamespaceList(fork, namespaces.list.slice());
-        }
+        fork._engine.namespaces = namespaces?.slice();
         return fork;
     }
 

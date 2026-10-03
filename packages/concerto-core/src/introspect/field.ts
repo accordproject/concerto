@@ -20,28 +20,7 @@ import type ClassDeclaration from './classdeclaration';
 import type Validator from './validator';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
-
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
-// `never` so that a view leaves the member's inferred return type, and so
-// the .d.ts, exactly as the TS body used to make it. See property.ts's own
-// copy of this comment for the bundler/webpack reasoning this loader relies
-// on.
-import { createRequire } from 'module';
-import type { EngineBindings } from '../engine/bindings';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-// P5-06: memoised per specifier, so a call site on a per-element or
-// per-instance path (propertyProcess, fastFromJson, ...) resolves the module
-// once rather than on every call.
-const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    engineModules[specifier] ??
-    (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
-/* istanbul ignore next */
-const rust: EngineBindings = loadEngine('../engine').rust;
+import { rust, engineViews } from '../engineloader';
 
 /**
  * Class representing the definition of a Field. A Field is owned
@@ -78,7 +57,7 @@ class Field extends Property {
     process() {
         super.process();
 
-        loadEngine('../engine/views').fieldProcess(this);
+        engineViews().fieldProcess(this);
     }
 
     /**
@@ -142,14 +121,14 @@ class Field extends Property {
             return this.scalarField;
         }
 
-        const scalarField: Field = loadEngine('../engine/views').fieldGetScalarField(this);
+        const scalarField: Field = engineViews().fieldGetScalarField(this);
         this.scalarField = scalarField;
         return scalarField;
     }
 }
 
 // P5-10b: built on first read in a lazily built file (engine/views.ts).
-loadEngine('../engine/views').installLazyField(Field.prototype, 'validator');
+engineViews().installLazyField(Field.prototype, 'validator');
 
 export { Field };
 export default Field;

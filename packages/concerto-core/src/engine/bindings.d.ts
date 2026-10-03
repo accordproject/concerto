@@ -34,10 +34,101 @@ import type ClassDeclaration from '../introspect/classdeclaration';
 import type Property from '../introspect/property';
 
 /**
- * An engine-side ModelManager handle (concerto-wasm `ModelManagerHandle`).
+ * An engine-side ModelManager handle (concerto-wasm `ModelManagerHandle`):
+ * the methods concerto-core calls, with the signatures wasm-bindgen
+ * generates for them (P5-100, E-10).
  */
 export interface EngineHandle {
-    [binding: string]: (...args: any[]) => any;
+    addModel(ast: string, file_name?: string | null): number;
+    addModelWithDefinitions(ast: string, definitions: string | null | undefined, file_name: string | null | undefined, validate: boolean): number;
+    checkAstShape(ast: string): void;
+    commitStagedModelFile(stage: number): number | undefined;
+    dcsDecorateModels(target: EngineHandle, decorator_command_sets: any, options: any): any;
+    dcsExtractDecorators(target: EngineHandle, options: any): any;
+    dcsExtractNonVocabDecorators(target: EngineHandle, options: any): any;
+    dcsExtractVocabularies(target: EngineHandle, options: any): any;
+    dcsValidate(decorator_command_set: any): void;
+    deleteModelFile(namespace: string): void;
+    derivesFrom(fqt1: string, fqt2: string): boolean;
+    dropStagedModelFile(stage: number): void;
+    fork(): EngineHandle;
+    free(): void;
+    getNamespaces(): string[];
+    getTypeName(qualified_name: string): string;
+    isAssignableTo(fqn: string, base_fqn: string): boolean;
+    modelFileFilter(model_file: number, predicate: Function, target: EngineHandle): number | undefined;
+    modelFileFilterStaged(model_file: number, predicate: Function, target: EngineHandle): string | undefined;
+    modelFileGetFullyQualifiedTypeName(model_file: number, type_name: string): string | undefined;
+    modelFileGetImports(model_file: number): Array<any>;
+    modelFileGetTypeName(model_file: number, type_name: string): string | undefined;
+    modelFileId(namespace: string): number | undefined;
+    modelFileIsLocalType(model_file: number, type_name: string): boolean;
+    modelFileResolveType(model_file: number, context: string, type_name: string, file_location: any, view: any): void;
+    modelFileSnapshot(model_file: number): string;
+    modelFileValidate(model_file: number): void;
+    modelFileValidateDetached(ast: string, definitions?: string | null, file_name?: string | null): void;
+    modelFileValidateStaged(stage: number): boolean;
+    modelManagerGetModelFileByFileName(file_name?: string | null): string | undefined;
+    resolveType(context: string, type_name: string): string;
+    serializerFromJson(json_text: string, options_text: string, env: any): string;
+    serializerFromJsonCompact(json_text: string, options_text: string, env: any): string;
+    serializerToJson(wire_text: string, options_text: string): string;
+    setDangerouslyAllowReservedSystemTypeNamesInUserModels(allow: boolean): void;
+    setDecoratorValidation(options: any): void;
+    stageModelFile(ast: string, definitions?: string | null, file_name?: string | null): number;
+    stageModelFileChecked(ast: string, definitions?: string | null, file_name?: string | null): string;
+    stageModelFileCheckedCompact(ast: Uint8Array, definitions?: string | null, file_name?: string | null): string;
+    stageModelFileWithHeader(ast: string, definitions?: string | null, file_name?: string | null): string;
+    stageModelFileWithHeaderCompact(ast: Uint8Array, definitions?: string | null, file_name?: string | null): string;
+    systemModelFileHeader(ast: string): string | undefined;
+    throwAlreadyExists(namespace: string, file_name?: string | null): void;
+    updateExternalModels(sources: string, model_files: any): void;
+    updateModelFile(ast: string, definitions: string | null | undefined, file_name: string | null | undefined, validate: boolean): number;
+    validateAndCommitStagedModelFile(stage: number): number | undefined;
+    validateAstValue(ast: string): void;
+    validateAstStaged(stage: number): boolean;
+    updateStagedModelFile(stage: number): number | undefined;
+    updateExternalModelsStaged(stages: Uint32Array, model_files: any): boolean;
+    stagedModelFileViewSnapshot(stage: number, namespace?: string | null): string | undefined;
+    modelFileViewSnapshotOf(model_file: number, namespace?: string | null): string | undefined;
+    validateInstance(json_text: string, options_text: string, fqn: string | null | undefined, mode: number): string;
+    validateModelFiles(model_files: any): void;
+    validatePropertyBinary(bytes: Uint8Array, class_fqn: string, prop_name: string, root_id: string, flags: number): number;
+    validateResourceBinary(bytes: Uint8Array, root_id: string, flags: number): number;
+}
+
+/**
+ * P5-100 (M1, accordproject/concerto-rust#454): one BaseModelManager's
+ * engine state (`BaseModelManager._engine`), which replaces the
+ * module-level WeakMaps that used to hold it by manager.
+ */
+export interface EngineState {
+    /**
+     * The model version: moved by every change of the manager's
+     * `modelFiles` or `rustHandle` (the mutation sites in
+     * basemodelmanager.ts). Every cached answer below, and every view's
+     * cached answer (engine/views.ts), is valid only for the version it was
+     * made at.
+     */
+    version: number;
+    /** P5-29: `getType`'s and `resolveType`'s engine answers, by argument. */
+    readMemo: {
+        version: number;
+        /** `rustHandle.getTypeName(name)`, by name. */
+        typeNames: Map<string, string>;
+        /** `rustHandle.resolveType(context, type)`, by type (the context only words an error). */
+        resolvedTypes: Map<string, string>;
+    } | undefined;
+    /**
+     * P5-75: the namespaces, in `getNamespaces()` order, updated in place by
+     * every mutator; undefined when the manager has none (the next
+     * `getNamespaces()` asks the engine).
+     */
+    namespaces: string[] | undefined;
+    /** P5-27: the resident DCS input managers (engine/views.ts `dcsManagerFor`). */
+    dcsResidents: unknown[] | undefined;
+    /** P5-16: the class lookups of the serializer fast path (engine/serializer.ts). */
+    serializerCache: { version: number; handle: EngineHandle; types: unknown } | undefined;
 }
 
 /**
@@ -79,17 +170,13 @@ export interface EngineBindings {
     modelFileEnforceImportVersioning(imp: object): void;
     modelFileFromAstHeader(modelFile: object, ast: object): void;
 
-    // Serializer fast paths (JSON text in, JSON text out)
-    populatorConvertPrimitive(type: string, valueJson: string, optionsJson: string, path: string): string;
-    generatorConvertPrimitive(type: string, valueJson: string, optionsJson: string): string;
-    resourceValidatorPrimitiveValid(type: string, valueJson: string): boolean;
-
     // Introspection
     decoratedFindDuplicateName(names: string[]): string | null;
     /** The decorator's processed arguments, to assign onto it. */
     decoratorProcess(ast: object, decorator: object): object;
     decoratorValidate(decorator: object, modelFile: object, decoratedName: string | undefined): void;
-    enumDeclarationToString(fqn: string): string;
+    declarationValidate(declaration: object): void;
+    declarationIsReservedSystemTypeImport(modelFile: object, typeName: string): boolean;
     classDeclarationResolveSuperType(classDeclaration: object): ClassDeclaration | null;
     classDeclarationIdentifierRedeclareConflict(systemIdentified: boolean, superSystemIdentified: boolean, superExplicitlyIdentified: boolean): boolean;
     classDeclarationGetSuperType(classDeclaration: object): string | null;
@@ -98,8 +185,6 @@ export interface EngineBindings {
     classDeclarationGetDirectSubclasses(classDeclaration: object): ClassDeclaration[];
     classDeclarationGetAllSuperTypeDeclarations(classDeclaration: object): ClassDeclaration[];
     classDeclarationGetNestedProperty(classDeclaration: object, propertyPath: string): Property;
-    classDeclarationToString(fqn: string, superType: string | null | undefined, abstract: boolean): string;
-    classDeclarationIsKind(type: string, kind: string): boolean;
     scalarDeclarationValidate(scalarDeclaration: object): void;
     scalarDeclarationToString(scalarDeclaration: object): string;
     fieldToString(field: object): string;
@@ -126,6 +211,42 @@ export interface EngineBindings {
 }
 
 /**
+ * An engine-side DCS input manager (concerto-wasm `DcsManagerHandle`, P5-27).
+ */
+export interface EngineDcsHandle {
+    free(): void;
+    decorateModels(target: EngineHandle, decoratorCommandSets: any, options: any): any;
+    extractDecorators(target: EngineHandle, options: any): any;
+    extractNonVocabDecorators(target: EngineHandle, options: any): any;
+    extractVocabularies(target: EngineHandle, options: any): any;
+}
+
+/**
+ * The bindings only src/engine/ calls (P5-100, E-10): together with
+ * `EngineBindings`, the type of `rust` in src/engine/index.ts.
+ */
+export interface EngineInternals {
+    setHost(errorFactory: Function, semverParse: Function): void;
+    DcsManagerHandle?: new (models: any) => EngineDcsHandle;
+    scalarDeclarationProcess(declaration: object): any;
+    classDeclarationProcess(declaration: object): any;
+    propertyProcess(view: object): any;
+    fieldProcess(view: object): any;
+    fieldGetScalarField(view: object): any;
+    mapDeclarationProcess(view: object): void;
+    mapKeyTypeProcess(view: object): any;
+    mapValueTypeProcess(view: object): any;
+    classDeclarationGetProperties(declaration: object): any[];
+    classDeclarationGetProperty(declaration: object, name: unknown): any;
+    classDeclarationGetIdentifierFieldNameWalk(declaration: object): any[];
+    decoratorManagerValidate(decoratorCommandSet: unknown, modelFiles: unknown): void;
+    decoratorManagerDecorateModels(models: unknown, decoratorCommandSets: unknown, options: unknown): any;
+    modelFileViewSnapshot(ast: string, namespace?: string | null): string | undefined;
+    validateErrorMessage(): string;
+    validateTakeError(): any;
+}
+
+/**
  * The DecoratorManager.extract* result shapes, exactly as the published
  * concerto-core 5.0.0 declared them (its compiler inferred `never[]` from the
  * TS bodies' `[]` initialisers, so the arrays keep that element type).
@@ -137,13 +258,85 @@ export interface ExtractDecoratorsResult {
 }
 
 /**
- * The rust-mode view functions (src/engine/views.ts) DecoratorManager calls,
- * as `loadEngine('./engine/views')` exposes them.
+ * The view functions (src/engine/views.ts) the public modules call, as
+ * src/engineloader.ts's `engineViews()` exposes them.
  */
-export interface EngineViews {
+export interface EngineViewsModule {
+    // ModelFile load path
+    markSystemModelAst(ast: object): void;
+    checkAstShape(modelFile: object): string | object | undefined;
+    stageModelFile(modelFile: object, checkedText?: string | object): boolean;
+    adoptSharedView(modelFile: object, source: object, stage?: object, committed?: object): boolean;
+    copyImportNames(modelFile: object, source: object): void;
+    applyStagedHeaders(modelFile: object, ast: object): boolean;
+    recordImportNames(modelFile: object, names: string[]): void;
+    recordedImportNames(modelFile: object): string[] | undefined;
+    deferDeclarations(modelFile: object): void;
+    beginModelFile(modelFile: object, ast: object): object | null;
+    endModelFile(saved: object | null): void;
+    builtDeclaration(modelFile: object, index: number, node: object): any;
+    localType(modelFile: object, type: string): any;
+    commitStaged(modelFile: object, handle: EngineHandle): number | undefined;
+    validateAndCommitStaged(modelFile: object, handle: EngineHandle): number | undefined;
+    dropStaged(modelFile: object, handle: EngineHandle): void;
+    updateStaged(modelFile: object, handle: EngineHandle): number | undefined;
+    validateAstStaged(modelFile: object, handle: EngineHandle): boolean;
+    updateExternalStaged(modelFiles: object[], handle: EngineHandle, next: object): boolean;
+    validateLoaded(modelFile: object, handle: EngineHandle): boolean;
+    // Declarations and properties
+    declarationIsValidIdentifier(view: object): boolean;
+    declarationFullyQualifiedName(view: object): string;
+    classDeclarationProcess(view: object): { superType?: string | null; idField?: string | null } | any;
+    classDeclarationGetProperties(view: object): any[];
+    classDeclarationGetProperty(view: object, name: string): any;
+    classDeclarationGetIdentifierFieldName(view: object): string | null;
+    scalarDeclarationProcess(declaration: object): void;
+    propertyProcess(property: object): void;
+    fieldProcess(field: object): void;
+    fieldGetScalarField(field: object): any;
+    mapDeclarationProcess(view: object, buildKey: () => any, buildValue: () => any): void;
+    mapKeyTypeProcess(view: object): string;
+    mapValueTypeProcess(view: object): string;
+    // Decorators
+    installLazyField(proto: object, key: string, initial?: () => any, buildOnWrite?: boolean): void;
+    deferDecorators(element: object): boolean;
+    decoratorFactories(modelFile: object): any[] | undefined;
+    // DecoratorManager
     decoratorManagerValidate(validationModelManager: object, decoratorCommandSet: object, modelFiles?: object[]): void;
     decoratorManagerDecorateModels(modelManager: object, decoratorCommandSets: object[], options?: object): ModelManager;
     decoratorManagerExtractDecorators(modelManager: object, options: object): ExtractDecoratorsResult;
     decoratorManagerExtractVocabularies(modelManager: object, options: object): { modelManager: ModelManager; vocabularies: never[] };
     decoratorManagerExtractNonVocabDecorators(modelManager: object, options: object): { modelManager: ModelManager; decoratorCommandSet: never[] };
+}
+
+/** src/engine/serializer.ts, as `engineSerializer()` exposes it. */
+export interface EngineSerializerModule {
+    fastFromJson(modelManager: object, jsonObject: unknown, options: object): any;
+    fastToJson(modelManager: object, resource: unknown, options: object): any;
+    validateMetaModel(input: unknown): void;
+}
+
+/** src/engine/serializer-codec.ts, as `engineSerializerCodec()` exposes it. */
+export interface EngineSerializerCodecModule {
+    encodeValue(value: unknown): unknown;
+    decodeValue(wire: unknown, modelManager: object | undefined): unknown;
+    checkString(value: string): void;
+}
+
+/** src/engine/validate-resource.ts, as `engineValidateResource()` exposes it. */
+export interface EngineValidateResourceModule {
+    validateResource(resource: object, rootId: string): boolean;
+    validateProperty(resource: object, propName: string, value: unknown, rootId: string, field?: object): boolean;
+}
+
+/** src/engine/validate-instance.ts, as `engineValidateInstance()` exposes it. */
+export interface EngineValidateInstanceModule {
+    validateInstance(modelManager: object, json: unknown, options?: object, fqn?: string): any;
+    validateInstanceOrThrow(modelManager: object, json: unknown, options?: object, fqn?: string): any;
+}
+
+/** src/engine/handles.ts, as `engineHandles()` exposes it. */
+export interface EngineHandlesModule {
+    releaseHandle(handle: { free(): void } | undefined | null): void;
+    withEngineCallbacks<T>(fn: () => T): T;
 }

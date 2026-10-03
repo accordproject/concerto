@@ -21,17 +21,7 @@ import MapKeyType from './mapkeytype';
 import type ModelFile from './modelfile';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
-
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). See property.ts's own
-// copy of this comment for the bundler/webpack reasoning this loader relies
-// on.
-import { createRequire } from 'module';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier);
+import { engineViews } from '../engineloader';
 
 /**
  * MapDeclaration defines a Map data structure, which allows storage of a collection
@@ -73,7 +63,7 @@ class MapDeclaration extends Declaration {
         // (engine/views.ts `mapDeclarationProcess`).
         const key = this.ast.key;
         const value = this.ast.value;
-        loadEngine('../engine/views').mapDeclarationProcess(
+        engineViews().mapDeclarationProcess(
             this,
             () => new MapKeyType(this, key),
             () => new MapValueType(this, value),
@@ -138,8 +128,8 @@ class MapDeclaration extends Declaration {
 }
 
 // P5-10b: built on first read in a lazily built file (engine/views.ts).
-loadEngine('../engine/views').installLazyField(MapDeclaration.prototype, 'key');
-loadEngine('../engine/views').installLazyField(MapDeclaration.prototype, 'value');
+engineViews().installLazyField(MapDeclaration.prototype, 'key');
+engineViews().installLazyField(MapDeclaration.prototype, 'value');
 
 export { MapDeclaration };
 export default MapDeclaration;

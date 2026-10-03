@@ -138,8 +138,9 @@ module.exports = {
     // registry, the error-payload mapper and the fast-path wire codec -- not
     // TS logic superseded by Rust, so each is classified TS with a reason
     // naming what it does, per the maintainer's 2026-09-27 ruling on #73.
+    'src/engineloader.ts': { c: 'TS', t: NONE, p: NONE, r: 'the one engine loader of the public modules (P5-100, E-3): requires src/engine/ modules once, through a non-literal specifier, and exposes the bindings and the engine modules typed; no model logic' },
     'src/engine/errors.ts': { c: 'TS', t: NONE, p: NONE, r: 'JS error-class mapping for engine results: builds the TS exception (IllegalModelException/TypeNotFoundException/ValidationException/MetamodelException/BaseException/Error/TypeError/RangeError) for an engine error payload {kind, code, params, message, location}; Rust decides the kind and renders the message, this only picks the constructor' },
-    'src/engine/handles.ts': { c: 'TS', t: NONE, p: NONE, r: 'handle registry bookkeeping: a per-ModelManagerHandle WeakMap from a live TS view object to its Rust arena handle (ModelFileId/DeclId/PropId); no model logic' },
+    'src/engine/handles.ts': { c: 'TS', t: NONE, p: NONE, r: 'engine handle release bookkeeping (releaseHandle, withEngineCallbacks; P5-97); no model logic' },
     'src/engine/index.ts': { c: 'TS', t: NONE, p: NONE, r: 'engine loader entry point: requires rust.ts and re-exports the loaded engine; no model logic' },
     'src/engine/rust.ts': { c: 'TS', t: NONE, p: NONE, r: 'loads the @accordproject/concerto-engine WASM module and registers its host callbacks (the error factory, semver.parse); no model logic' },
     'src/engine/serializer-codec.ts': { c: 'TS', t: NONE, p: NONE, r: 'JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own' },
