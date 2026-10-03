@@ -41,6 +41,7 @@ import type { IModel } from '@accordproject/concerto-metamodel';
  */
 export type FilterFunction = (declaration: Declaration) => boolean;
 import { rust, engineHandles, engineViews } from '../engineloader';
+import { optionalString } from '../engineutil';
 import type { EngineHandle } from '../engine/bindings';
 
 /**
@@ -556,17 +557,10 @@ class ModelFile extends Decorated {
             // from its stage) is validated without sending the AST again
             // (engine/views.ts `validateLoaded`).
             if (!engineViews().validateLoaded(this, manager.rustHandle)) {
-                // Falsy non-string `definitions`/`fileName` (`0`, `false`,
-                // `NaN`) pass the constructor's truthy-only check and reach
-                // here raw: only a genuine string is forwarded to the wasm
-                // `Option<String>` params, matching the `stageModelFile`
-                // guard (accordproject/concerto-rust#294 follow-up).
-                const definitions = this.getDefinitions();
-                const fileName = this.getName();
                 manager.rustHandle.modelFileValidateDetached(
                     JSON.stringify(this.getAst()),
-                    typeof definitions === 'string' ? definitions : undefined,
-                    typeof fileName === 'string' ? fileName : undefined,
+                    optionalString(this.getDefinitions()),
+                    optionalString(this.getName()),
                 );
             }
         } catch (e) {
@@ -1084,12 +1078,10 @@ class ModelFile extends Decorated {
         //
         // The engine call that staged the file may have read its header
         // already, and then it is applied without crossing again: P5-27 (F6)
-        // for a DecoratorManager result model (engine/views.ts
-        // `applyStagedHeader`), P5-28 (accordproject/concerto-rust#333) for
-        // a file `stageModelFile` staged (`applyStagedFileHeader`). At most
-        // one of them has a header for a file; otherwise the engine reads it
-        // now. P5-91 (accordproject/concerto-rust#437): both are tried by
-        // `applyStagedHeaders`, with one lookup of the file's staging record.
+        // for a DecoratorManager result model, P5-28
+        // (accordproject/concerto-rust#333) for a file `stageModelFile`
+        // staged, both in the one header format since P5-101 (engine/views.ts
+        // `applyStagedHeaders`); otherwise the engine reads it now.
         const views = engineViews();
         if (!views.applyStagedHeaders(this, ast)) {
             rust.modelFileFromAstHeader(this, ast);

@@ -29,6 +29,7 @@ import IllegalModelException from '../introspect/illegalmodelexception';
 import TypeNotFoundException from '../typenotfoundexception';
 import ValidationException from '../serializer/validationexception';
 import MetamodelException from '../metamodelexception';
+import { FAST_PATH_UNSUPPORTED } from '../engineutil';
 
 /**
  * The error payload the engine hands to the factory.
@@ -54,6 +55,10 @@ interface ErrorPayload {
     // `ModelFile.validate()` (modelfile.ts), the only caller that consults
     // this, since `p.modelFile` above is never populated for that binding.
     needsModelFile?: boolean;
+    // P5-101 (E-11, accordproject/concerto-rust#455): the serializer fast
+    // path's wire codec could not carry the value (concerto-wasm
+    // `Error::Unsupported`): the caller runs its TS path instead.
+    fastPathUnsupported?: boolean;
 }
 
 /**
@@ -81,6 +86,11 @@ interface EngineErrorFlags {
     unreadableAst?: boolean;
     /** P5-69 (BC-19-b): an error of BC-19's AST shape check. */
     astShape?: boolean;
+    /**
+     * P5-101 (D-9): an error of `validateAst`'s metamodel check, run by
+     * `validateAndCommitStagedModelFile` (set by the engine itself).
+     */
+    metamodelCheck?: boolean;
 }
 
 /**
@@ -119,7 +129,7 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
             setInternalFlag(err, 'unreadableAst', true);
         }
         // P5-69 (BC-19-b): an error of BC-19's AST shape check, which the
-        // engine's folded load (`stageModelFileChecked`) throws before any
+        // engine's folded load (`stageModelFileBytes`) throws before any
         // other, and the ModelFile constructor throws as the check's
         // (engine/views.ts `stageModelFile`).
         if (AST_SHAPE_CODES.has(p.code)) {
@@ -176,6 +186,12 @@ function makeError(payload: ErrorPayload): Error {
     // equality sees) is unchanged.
     if (Array.isArray(payload.details)) {
         Object.defineProperty(err, 'details', { value: payload.details, enumerable: false, writable: true, configurable: true });
+    }
+    // P5-101 (E-11): a value the fast path cannot carry is a fallback
+    // signal, branded as `EngineFastPathUnsupported` is
+    // (`isFastPathUnsupported`), so no caller decides by the message text.
+    if (payload.fastPathUnsupported === true) {
+        Object.defineProperty(err, FAST_PATH_UNSUPPORTED, { value: true, enumerable: false, writable: true, configurable: true });
     }
     return err;
 }

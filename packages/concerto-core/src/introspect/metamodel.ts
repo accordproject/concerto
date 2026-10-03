@@ -19,6 +19,7 @@ import Factory from '../factory';
 import Serializer from '../serializer';
 import ModelFile from '../introspect/modelfile';
 import { engineHandles, engineSerializer } from '../engineloader';
+import { isFastPathUnsupported } from '../engineutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -57,7 +58,7 @@ function validateMetaModel(input) {
         engineSerializer().validateMetaModel(input);
         return input;
     } catch (err) {
-        if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
+        if (!isFastPathUnsupported(err)) {
             throw err;
         }
     }

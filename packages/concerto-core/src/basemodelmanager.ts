@@ -51,6 +51,7 @@ import type TransactionDeclaration from './introspect/transactiondeclaration';
 import debugLib from 'debug';
 const debug = debugLib('concerto:BaseModelManager');
 import { rust, engineHandles, engineValidateInstance, engineViews } from './engineloader';
+import { optionalString } from './engineutil';
 import type { EngineHandle, EngineState } from './engine/bindings';
 
 /**
@@ -516,23 +517,57 @@ class BaseModelManager {
         }
         let id = engineViews().commitStaged(modelFile, this.rustHandle);
         if (id === undefined) {
-            // `ModelFile`'s constructor only rejects a *truthy* non-string
-            // `definitions`/`fileName`: `0`, `false` and `NaN` are stored
-            // as-is and reach here raw. Only a genuine string is forwarded
-            // to the wasm `Option<String>` params, matching v5.0.0 (which
-            // makes no wasm call at all) (accordproject/concerto-rust#294
-            // follow-up).
-            const definitions = modelFile.getDefinitions();
-            const fileName = modelFile.getName();
             id = this.rustHandle.addModelWithDefinitions(
                 JSON.stringify(modelFile.getAst()),
-                typeof definitions === 'string' ? definitions : undefined,
-                typeof fileName === 'string' ? fileName : undefined,
+                optionalString(modelFile.getDefinitions()),
+                optionalString(modelFile.getName()),
                 false,
             );
         }
         this._modelFileIds.set(namespace, id as number);
         return true;
+    }
+
+    /**
+     * P5-101 (D-10, M5; accordproject/concerto-rust#455): `_rustMirrorAdd`
+     * for each of `modelFiles`, in order, in one engine call when every one
+     * is written to rustHandle from its stage (engine/views.ts
+     * `commitStagedAll`); otherwise one write per file, as before. Adds each
+     * namespace written to `mirrored`, also when a write throws (the files
+     * the engine registered before the error), so the caller can undo them.
+     * @param {ModelFile[]} modelFiles - the model files being added
+     * @param {Set<string>} mirrored - the namespaces written, filled in
+     * @private
+     * @internal
+     */
+    /* istanbul ignore next */
+    _rustMirrorAddAll(modelFiles: ModelFileInstance[], mirrored: Set<string>) {
+        const handle = this.rustHandle;
+        if (modelFiles.every((m) => this._needsRustWrite(m.getNamespace()))) {
+            let ids;
+            try {
+                ids = engineViews().commitStagedAll(modelFiles, handle);
+            } catch (err) {
+                modelFiles.forEach((m) => {
+                    if (handle.modelFileId(m.getNamespace()) !== undefined) {
+                        mirrored.add(m.getNamespace());
+                    }
+                });
+                throw err;
+            }
+            if (ids !== undefined) {
+                modelFiles.forEach((m, i) => {
+                    this._modelFileIds.set(m.getNamespace(), ids[i]);
+                    mirrored.add(m.getNamespace());
+                });
+                return;
+            }
+        }
+        modelFiles.forEach((m) => {
+            if (this._rustMirrorAdd(m)) {
+                mirrored.add(m.getNamespace());
+            }
+        });
     }
 
     /**
@@ -543,18 +578,33 @@ class BaseModelManager {
      * for any other file: the caller then calls `modelFile.validate()` and
      * `_rustMirrorAdd`, as before. A validation error propagates as
      * `modelFile.validate()` throws it.
+     * P5-101 (D-9): with `metamodel`, `validateAst`'s check runs first, in
+     * the same engine call; its error is thrown as `validateAst` throws it,
+     * after the same metamodel mirroring (`_mirrorMetamodelLeak`).
      * @param {ModelFile} modelFile - the model file being added
+     * @param {boolean} [metamodel] - whether to run the metamodel check too
      * @return {boolean} true if the file was validated and written
      * @private
      * @internal
      */
     /* istanbul ignore next */
-    _rustValidateAndMirrorAdd(modelFile) {
+    _rustValidateAndMirrorAdd(modelFile, metamodel?: boolean) {
         const namespace = modelFile.getNamespace();
         if (modelFile.validate !== ModelFile.prototype.validate || !this._needsRustWrite(namespace)) {
             return false;
         }
-        const id = engineViews().validateAndCommitStaged(modelFile, this.rustHandle);
+        let id;
+        if (metamodel) {
+            const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
+            try {
+                id = engineViews().validateAndCommitStaged(modelFile, this.rustHandle, true);
+            } catch (err) {
+                this._mirrorMetamodelLeak(alreadyHasMetamodel);
+                throw err;
+            }
+        } else {
+            id = engineViews().validateAndCommitStaged(modelFile, this.rustHandle);
+        }
         if (id === undefined) {
             return false;
         }
@@ -587,16 +637,11 @@ class BaseModelManager {
         engineViews().dropStaged(modelFile, this.rustHandle);
         // TS has already validated (or was asked not to); the mirror call
         // only needs to keep rustHandle's state in sync, so it never
-        // re-validates itself. Same falsy-non-string forward as
-        // `_rustMirrorAdd`: only a genuine string reaches the wasm
-        // `Option<String>` params (accordproject/concerto-rust#294
-        // follow-up).
-        const updateDefinitions = modelFile.getDefinitions();
-        const updateFileName = modelFile.getName();
+        // re-validates itself.
         const id = this.rustHandle.updateModelFile(
             JSON.stringify(modelFile.getAst()),
-            typeof updateDefinitions === 'string' ? updateDefinitions : undefined,
-            typeof updateFileName === 'string' ? updateFileName : undefined,
+            optionalString(modelFile.getDefinitions()),
+            optionalString(modelFile.getName()),
             false,
         );
         this._modelFileIds.clear();
@@ -695,18 +740,20 @@ class BaseModelManager {
             // unchanged.
             let mirrored = false;
             if (!disableValidation) {
-                // Structural validation against the Metamodel
-                if(this.options?.metamodelValidation){
-                    this.validateAst(modelFile);
-                }
-
-                // Semantic validation of the model file. P4-08 delegated
+                // Structural validation against the Metamodel, then
+                // semantic validation of the model file. P4-08 delegated
                 // `ModelFile.validate()` fully to Rust (maintainer decision
                 // 2026-09-26). P5-34 (I-5): a staged file is validated and
-                // written to rustHandle in one engine call; any other file
-                // is validated by its own `validate()`, then written.
-                mirrored = this._rustValidateAndMirrorAdd(modelFile);
+                // written to rustHandle in one engine call; P5-101 (D-9):
+                // with the metamodel check in the same call. Any other file
+                // is checked by `validateAst` and its own `validate()`, then
+                // written.
+                const metamodel = !!this.options?.metamodelValidation;
+                mirrored = this._rustValidateAndMirrorAdd(modelFile, metamodel);
                 if (!mirrored) {
+                    if (metamodel) {
+                        this.validateAst(modelFile);
+                    }
                     modelFile.validate();
                 }
             }
@@ -754,31 +801,40 @@ class BaseModelManager {
                 this.rustHandle.validateAstValue(JSON.stringify(modelFile.getAst()));
             }
         } catch (err) {
-            // rustHandle's own validate_ast (concerto-core
-            // ModelManager::validate_ast) only leaks its copy of the
-            // metamodel when the *structural* check (`deserialize_ast`)
-            // fails after the version check already passed -- a
-            // version-mismatch failure returns before the metamodel is ever
-            // inserted, so rustHandle never registers it. Mirroring the leak
-            // unconditionally on every error would register the metamodel in
-            // `this.modelFiles` on a version mismatch that rustHandle itself
-            // never registered, and the two would no longer mirror each
-            // other.
-            // Ask rustHandle for the ground truth instead of re-deriving
-            // TS's own control flow: mirror into `this.modelFiles` only when
-            // rustHandle's own handle now actually holds `MetaModelNamespace`.
-            // rustHandle already holds its own copy in the case that
-            // reaches it, so this writes only this.modelFiles, not
-            // rustHandle (P5-31, accordproject/concerto-rust#341): it is the
-            // one metamodel copy that is not mirrored through
-            // `_rustMirrorAdd`. `metamodelModelFile` was never staged
-            // (`_buildingMetamodelCopy`), so there is no stage to drop.
-            if (!alreadyHasMetamodel && this.rustHandle.modelFileId(MetaModelNamespace) !== undefined) {
-                this.modelFiles[MetaModelNamespace] = this.metamodelModelFile;
-                noteNamespaceAdded(this, MetaModelNamespace);
-                this._engine.version++;
-            }
+            this._mirrorMetamodelLeak(alreadyHasMetamodel);
             throw err;
+        }
+    }
+
+    /**
+     * After a failed metamodel check (`validateAst`): rustHandle's own
+     * validate_ast (concerto-core ModelManager::validate_ast) only leaks its
+     * copy of the metamodel when the *structural* check (`deserialize_ast`)
+     * fails after the version check already passed -- a version-mismatch
+     * failure returns before the metamodel is ever inserted, so rustHandle
+     * never registers it. Mirroring the leak unconditionally on every error
+     * would register the metamodel in `this.modelFiles` on a version
+     * mismatch that rustHandle itself never registered, and the two would
+     * no longer mirror each other.
+     * Ask rustHandle for the ground truth instead of re-deriving TS's own
+     * control flow: mirror into `this.modelFiles` only when rustHandle's own
+     * handle now actually holds `MetaModelNamespace`. rustHandle already
+     * holds its own copy in the case that reaches it, so this writes only
+     * this.modelFiles, not rustHandle (P5-31, accordproject/concerto-rust#341):
+     * it is the one metamodel copy that is not mirrored through
+     * `_rustMirrorAdd`. `metamodelModelFile` was never staged
+     * (`_buildingMetamodelCopy`), so there is no stage to drop.
+     * @param {boolean} alreadyHasMetamodel - whether the manager held the
+     * metamodel before the check
+     * @private
+     * @internal
+     */
+    /* istanbul ignore next */
+    _mirrorMetamodelLeak(alreadyHasMetamodel: boolean) {
+        if (!alreadyHasMetamodel && this.rustHandle.modelFileId(MetaModelNamespace) !== undefined) {
+            this.modelFiles[MetaModelNamespace] = this.metamodelModelFile;
+            noteNamespaceAdded(this, MetaModelNamespace);
+            this._engine.version++;
         }
     }
 
@@ -935,11 +991,7 @@ class BaseModelManager {
             // rustHandle before validateModelFiles() below validates any of
             // them. Each write is a structural mirror write only (no
             // validation); validateModelFiles() decides pass/fail.
-            newModelFiles.forEach((m) => {
-                if (this._rustMirrorAdd(m)) {
-                    mirroredNamespaces.add(m.getNamespace());
-                }
-            });
+            this._rustMirrorAddAll(newModelFiles, mirroredNamespaces);
             this._mirrorPending = false;
 
             // re-validate all the model files
@@ -1050,20 +1102,13 @@ class BaseModelManager {
                 });
                 // P5-100 (E-6): from the files Rust loaded when each view was
                 // constructed (engine/views.ts `updateExternalStaged`);
-                // otherwise every AST is sent. Only a genuine string crosses
-                // for `definitions` and `fileName`
-                // (accordproject/concerto-rust#294 follow-up), as for every
-                // other mirror write.
+                // otherwise every AST is sent.
                 if (!engineViews().updateExternalStaged(views, this.rustHandle, next)) {
-                    const sources = views.map((mf) => {
-                        const definitions = mf.getDefinitions();
-                        const fileName = mf.getName();
-                        return {
-                            ast: mf.getAst(),
-                            definitions: typeof definitions === 'string' ? definitions : undefined,
-                            fileName: typeof fileName === 'string' ? fileName : undefined,
-                        };
-                    });
+                    const sources = views.map((mf) => ({
+                        ast: mf.getAst(),
+                        definitions: optionalString(mf.getDefinitions()),
+                        fileName: optionalString(mf.getName()),
+                    }));
                     this.rustHandle.updateExternalModels(JSON.stringify(sources), next);
                 }
             } finally {

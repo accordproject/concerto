@@ -21,14 +21,10 @@
 // `addModelFile`/`fromAst` input) for the engine to parse the text again
 // before its typed read. `encodeAst` writes the object straight into the
 // compact binary layout of the instance fast path (validate-resource.ts,
-// P5-12b/P5-12c), which the engine reads straight into the typed model
-// (`rustHandle.stageModelFileCheckedCompact`/`...WithHeaderCompact`,
-// concerto-rust concerto-core `introspect::compact`, which has the layout):
-//
-//   0 null, 1 false, 2 true, 3 a double (8 bytes LE), 4 an i32 (4 bytes
-//   LE), 5 a string (u32 LE byte length, then UTF-8), 6 an array (u32 LE
-//   count, then the items), 7 an object (u32 LE count, then a u32 LE key
-//   length, the UTF-8 key and the value per entry).
+// P5-12b/P5-12c), through the one writer of that layout (wire.ts, P5-101),
+// which the engine reads straight into the typed model
+// (`rustHandle.stageModelFileBytes`, concerto-rust concerto-core
+// `introspect::compact`, which has the layout).
 //
 // The bytes describe exactly the document `JSON.parse(JSON.stringify(ast))`
 // is, so the engine's verdict, and its error, are the text path's. Where
@@ -51,6 +47,9 @@
 // Any other error (a getter that throws) is thrown, as `JSON.stringify`
 // would throw it.
 
+import { EngineFastPathUnsupported } from './util';
+import { WireWriter } from './wire';
+
 /** Thrown (and caught by `encodeAst`) for an AST the text path must take. */
 const UNSUPPORTED: unique symbol = Symbol('ast-codec unsupported');
 
@@ -61,86 +60,15 @@ const UNSUPPORTED: unique symbol = Symbol('ast-codec unsupported');
  */
 const MAX_DEPTH = 100;
 
-/** Whether this runtime has `String.prototype.isWellFormed` (ES2024). */
-const hasIsWellFormed = typeof (String.prototype as any).isWellFormed === 'function';
-
-// A UTF-16 code unit in D800-DFFF that is not half of a surrogate pair.
-const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
-
 const hasOwn = Object.prototype.hasOwnProperty;
-const encoder = new TextEncoder();
-const f64 = new Float64Array(1);
-const f64Bytes = new Uint8Array(f64.buffer);
-
-/** The size `buf` starts at, and goes back to when it grew past `KEPT`. */
-const INITIAL = 64 * 1024;
-const KEPT = 4 * 1024 * 1024;
-
-// Reused across calls; grown on demand. The engine binding copies the
-// bytes into WASM memory before it returns.
-let buf = new Uint8Array(INITIAL);
-let pos = 0;
 
 /**
- * How many times `encodeAst` has run: the bytes it returned are valid
- * while this is unchanged (P5-100, F-3: named `generation` before).
+ * The writer `encodeAst` writes into (wire.ts): its buffer is reused across
+ * calls, and the engine binding copies the bytes into WASM memory before it
+ * returns. Its `count` is how many times `encodeAst` has run: the bytes it
+ * returned are valid while that is unchanged (P5-100, F-3).
  */
-let encodeCount = 0;
-
-/**
- * Grows `buf` to hold `n` more bytes.
- * @param {number} n bytes needed
- */
-function ensure(n: number): void {
-    if (pos + n <= buf.length) {
-        return;
-    }
-    let cap = buf.length * 2;
-    while (cap < pos + n) {
-        cap *= 2;
-    }
-    const next = new Uint8Array(cap);
-    next.set(buf.subarray(0, pos));
-    buf = next;
-}
-
-/**
- * @param {number} at offset
- * @param {number} n a u32
- */
-function putU32(at: number, n: number): void {
-    buf[at] = n & 0xff;
-    buf[at + 1] = (n >>> 8) & 0xff;
-    buf[at + 2] = (n >>> 16) & 0xff;
-    buf[at + 3] = (n >>> 24) & 0xff;
-}
-
-/**
- * A length-prefixed UTF-8 string (no tag).
- * @param {string} s the string
- */
-function writeRawStr(s: string): void {
-    const n = s.length;
-    ensure(4 + n * 3);
-    const lenAt = pos;
-    pos += 4;
-    let i = 0;
-    for (; i < n; i++) {
-        const c = s.charCodeAt(i);
-        if (c >= 0x80) {
-            break;
-        }
-        buf[pos++] = c;
-    }
-    if (i < n) {
-        // Not ASCII: `encodeInto` would write a lone surrogate as U+FFFD.
-        if (hasIsWellFormed ? !(s as any).isWellFormed() : LONE_SURROGATE.test(s)) {
-            throw UNSUPPORTED;
-        }
-        pos += encoder.encodeInto(s.substring(i), buf.subarray(pos)).written;
-    }
-    putU32(lenAt, pos - lenAt - 4);
-}
+const writer = new WireWriter(64 * 1024);
 
 /**
  * Whether `JSON.stringify` leaves a property with this value out (and
@@ -161,36 +89,23 @@ function omitted(v: unknown): boolean {
 function writeValue(v: any, depth: number): void {
     const t = typeof v;
     if (t === 'string') {
-        ensure(1);
-        buf[pos++] = 5;
-        writeRawStr(v);
+        writer.str(v);
         return;
     }
     if (t === 'number') {
-        ensure(9);
-        if ((v | 0) === v) {
-            // `-0` lands here as `0`, which is how `JSON.stringify` writes it.
-            buf[pos++] = 4;
-            putU32(pos, v);
-            pos += 4;
-        } else if (Number.isFinite(v)) {
-            buf[pos++] = 3;
-            f64[0] = v;
-            buf.set(f64Bytes, pos);
-            pos += 8;
+        if (Number.isFinite(v)) {
+            writer.num(v);
         } else {
-            buf[pos++] = 0;
+            writer.literal(null);
         }
         return;
     }
     if (t === 'boolean') {
-        ensure(1);
-        buf[pos++] = v ? 2 : 1;
+        writer.literal(v);
         return;
     }
     if (v === null) {
-        ensure(1);
-        buf[pos++] = 0;
+        writer.literal(null);
         return;
     }
     if (t !== 'object' || depth >= MAX_DEPTH || typeof v.toJSON === 'function') {
@@ -198,15 +113,11 @@ function writeValue(v: any, depth: number): void {
     }
     if (Array.isArray(v)) {
         const n = v.length;
-        ensure(5);
-        buf[pos++] = 6;
-        putU32(pos, n);
-        pos += 4;
+        writer.array(n);
         for (let i = 0; i < n; i++) {
             const item = v[i];
             if (omitted(item)) {
-                ensure(1);
-                buf[pos++] = 0;
+                writer.literal(null);
             } else {
                 writeValue(item, depth + 1);
             }
@@ -217,10 +128,7 @@ function writeValue(v: any, depth: number): void {
     if (proto !== Object.prototype && proto !== null) {
         throw UNSUPPORTED;
     }
-    ensure(5);
-    buf[pos++] = 7;
-    const countAt = pos;
-    pos += 4;
+    const countAt = writer.beginObject();
     let count = 0;
     // P5-94 (accordproject/concerto-rust#444): `for...in` with an own-key
     // check visits exactly `Object.keys(v)`, in the same order, without
@@ -235,36 +143,34 @@ function writeValue(v: any, depth: number): void {
         if (omitted(item)) {
             continue;
         }
-        writeRawStr(key);
+        writer.rawStr(key);
         writeValue(item, depth + 1);
         count++;
     }
-    putU32(countAt, count);
+    writer.putU32(countAt, count);
 }
 
 /**
  * The AST in the compact binary layout (module doc): a view of a reused
  * buffer, valid until the next call. Undefined for an AST the caller must
- * send as JSON text instead.
+ * send as JSON text instead (a lone surrogate among them, which the writer
+ * reports as `EngineFastPathUnsupported`).
  * @param {object} ast the model's AST
  * @return {Uint8Array | undefined} its bytes
  * @throws {*} whatever reading the AST throws (a getter's error)
  */
 function encodeAst(ast: object): Uint8Array | undefined {
-    encodeCount++;
-    pos = 0;
+    writer.begin();
     let out: Uint8Array | undefined;
     try {
         writeValue(ast, 0);
-        out = buf.subarray(0, pos);
+        out = writer.bytes();
     } catch (e) {
-        if (e !== UNSUPPORTED) {
+        if (e !== UNSUPPORTED && !(e instanceof EngineFastPathUnsupported)) {
             throw e;
         }
     } finally {
-        if (buf.length > KEPT) {
-            buf = new Uint8Array(INITIAL);
-        }
+        writer.release();
     }
     return out;
 }
@@ -275,7 +181,7 @@ function encodeAst(ast: object): Uint8Array | undefined {
  * @return {number} the count
  */
 function encodeAstCount(): number {
-    return encodeCount;
+    return writer.count;
 }
 
 export { encodeAst, encodeAstCount };

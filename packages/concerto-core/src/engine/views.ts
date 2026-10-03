@@ -23,6 +23,8 @@
 
 import { rust } from './index';
 import { encodeAst, encodeAstCount } from './ast-codec';
+import { optionalString } from './util';
+import { WireWriter } from './wire';
 import type { EngineState } from './bindings';
 import type { EngineErrorFlags } from './errors';
 
@@ -738,7 +740,7 @@ function restoreAllUndefinedDecorators(sourceModels: any[], resultModels: any[])
  */
 function decoratorManagerExtract(binding: string, modelManager: any, options: any): any {
     const { default: ModelManager } = require('../modelmanager');
-    const source = sourceDcsHandle(modelManager, SOURCE_EXTRACT[binding]);
+    const source = sourceDcsHandle(modelManager, 'dcsExtract');
     if (source) {
         return decoratorManagerExtractOnSource(binding, source, modelManager, options);
     }
@@ -757,21 +759,15 @@ function decoratorManagerExtract(binding: string, modelManager: any, options: an
 }
 
 /**
- * The DcsManagerHandle method for each per-call extract binding.
+ * The extract action of each per-call extract binding, for the one extract
+ * binding of the resident manager (`DcsManagerHandle.extract`) and of the
+ * source handle (`ModelManagerHandle.dcsExtract`): P5-101 (D-10,
+ * accordproject/concerto-rust#455), in place of one binding per action.
  */
-const STAGED_EXTRACT: { [binding: string]: string } = {
-    decoratorManagerExtractDecorators: 'extractDecorators',
-    decoratorManagerExtractVocabularies: 'extractVocabularies',
-    decoratorManagerExtractNonVocabDecorators: 'extractNonVocabDecorators',
-};
-
-/**
- * The source-handle method for each per-call extract binding (P5-55).
- */
-const SOURCE_EXTRACT: { [binding: string]: string } = {
-    decoratorManagerExtractDecorators: 'dcsExtractDecorators',
-    decoratorManagerExtractVocabularies: 'dcsExtractVocabularies',
-    decoratorManagerExtractNonVocabDecorators: 'dcsExtractNonVocabDecorators',
+const EXTRACT_ACTION: { [binding: string]: number } = {
+    decoratorManagerExtractDecorators: 0,
+    decoratorManagerExtractVocabularies: 1,
+    decoratorManagerExtractNonVocabDecorators: 2,
 };
 
 /**
@@ -797,7 +793,7 @@ function decoratorManagerExtractOnSource(binding: string, source: any, modelMana
     updatedModelManager.clearModelFiles();
     const target = updatedModelManager.rustHandle;
     assertDistinctHandles(source, target);
-    const result = source[SOURCE_EXTRACT[binding]](target, options);
+    const result = source.dcsExtract(target, options, EXTRACT_ACTION[binding]);
     const { staged, validated } = result;
     delete result.staged;
     delete result.validated;
@@ -828,7 +824,7 @@ function decoratorManagerExtractStaged(binding: string, modelManager: any, optio
     try {
         const updatedModelManager = new ModelManager();
         updatedModelManager.clearModelFiles();
-        const result = dcs[STAGED_EXTRACT[binding]](updatedModelManager.rustHandle, options);
+        const result = dcs.extract(updatedModelManager.rustHandle, options, EXTRACT_ACTION[binding]);
         const { staged, validated } = result;
         delete result.staged;
         delete result.validated;
@@ -965,8 +961,8 @@ interface FileState {
     /**
      * P5-28: the staged header of each lazily built ModelFile, from
      * `stageModelFile` until its constructor applies it (`applyStagedFileHeader`).
-     * Never set for a ModelFile that took a P5-27 prestage (`takePrestaged`),
-     * whose header is its record's `prestageHeader`.
+     * P5-101 (D-4): a ModelFile that took a P5-27 prestage (`takePrestaged`)
+     * has its header here too, in the same format.
      */
     stagedHeader: StagedHeader | undefined;
     /**
@@ -995,16 +991,11 @@ interface FileState {
     /**
      * P5-69 (BC-19-b, R1): every ModelFile whose AST `checkAstShape` has left
      * for `stageModelFile` to check, folded into the engine's one load of the
-     * AST (`stageModelFileChecked`). `stageModelFile` completes the check on
+     * AST (`stageModelFileBytes`). `stageModelFile` completes the check on
      * every path, and removes the file.
      */
     shapePending: true | undefined;
     deferred: DeferredFile | undefined;
-    /**
-     * P5-91 (accordproject/concerto-rust#437): the P5-27 prestage header
-     * (`takePrestaged`, `applyStagedHeader`), which had a WeakMap of its own.
-     */
-    prestageHeader: any[] | undefined;
     /**
      * P5-91: the rustHandle the ModelFile was registered in from its stage
      * (`commitStaged`, `validateAndCommitStaged`), which had a WeakMap of its
@@ -1037,7 +1028,6 @@ function fileState(modelFile: object): FileState {
             shapeChecked: undefined,
             shapePending: undefined,
             deferred: undefined,
-            prestageHeader: undefined,
             committed: undefined,
         };
         fileStates.set(modelFile, state);
@@ -1109,43 +1099,27 @@ interface AcceptedUnmirrored {
 }
 
 /**
- * P5-28 (accordproject/concerto-rust#333): the header of a ModelFile's AST
- * as `stageModelFileWithHeader` read it when staging, which is what
- * `modelFileFromAstHeader` would set on the ModelFile (concerto-wasm
- * `staged_header_from_parts`): the namespace, its version (or null),
- * whether the file is a system model file, and the `importShortNames.set`
- * and `importUriMap` assignments in order.
+ * P5-28 (accordproject/concerto-rust#333), P5-94 (#444), P5-101 (D-4, #455):
+ * the header of a ModelFile's AST as the engine read it when staging, which
+ * is what `modelFileFromAstHeader` would set on the ModelFile (concerto-wasm
+ * `staged_header_from_parts`), in the one staged-header wire format, the
+ * flat layout (concerto-wasm `FlatStaged`), kept as the parsed array itself:
+ * `[id, namespace, version, system, n, key_1, name_1, ..., key_n, name_n,
+ * uriKey_1, uri_1, ...]`, where the `n` pairs are the `importShortNames.set`
+ * calls without the implicit system import's five (`IMPLICIT_SHORT_NAMES`),
+ * which every non-system header ends with, and the pairs after them are the
+ * `importUriMap` assignments, in order. Every staging path returns it: a
+ * file staged from its AST (`stageModelFileBytes`), a fixed system model's
+ * verdict (`systemModelFileHeader`, whose id slot is 0) and a
+ * DecoratorManager result (`adoptStagedModels`); `applyStagedFileHeader`
+ * is its one reader.
  */
-interface ObjectHeader {
-    namespace: string;
-    version: string | null;
-    system: boolean;
-    shortNames: Array<[string, string]>;
-    uriMap: Array<[string, string]>;
-}
-
-/**
- * P5-94 (accordproject/concerto-rust#444): the same header in the flat
- * layout the engine's `...CompactFlat` staging bindings return (concerto-wasm
- * `flat_staged_text`), kept as the parsed array itself: `[id, namespace,
- * version, system, n, key_1, name_1, ..., key_n, name_n, uriKey_1, uri_1,
- * ...]`, where the `n` pairs are the `shortNames` without the implicit
- * system import's five (`IMPLICIT_SHORT_NAMES`), which every non-system
- * header ends with, and the pairs after them are the `uriMap`. One array
- * per file, where the object layout parsed into two objects and an array
- * per short name.
- */
-type FlatHeader = any[];
-
-/**
- * A staged header, in either layout.
- */
-type StagedHeader = ObjectHeader | FlatHeader;
+type StagedHeader = any[];
 
 /**
  * P5-94: the implicit system import's short names and fully-qualified
  * names, in the order every non-system header ends with them (concerto-wasm
- * `IMPLICIT_IMPORT_SHORT_NAMES`), for a `FlatHeader`.
+ * `IMPLICIT_IMPORT_SHORT_NAMES`), for a `StagedHeader`.
  */
 const IMPLICIT_SHORT_NAMES = ['Concept', 'Asset', 'Transaction', 'Participant', 'Event'];
 const IMPLICIT_NAMES = IMPLICIT_SHORT_NAMES.map((name) => `concerto@1.0.0.${name}`);
@@ -1155,7 +1129,7 @@ const IMPLICIT_NAMES = IMPLICIT_SHORT_NAMES.map((name) => `concerto@1.0.0.${name
  * P5-32 (accordproject/concerto-rust#342): each ModelFile's `getImports()`
  * names (every import's fully-qualified names, in order), recorded for the
  * `imports` array they were computed from. A staged header records them when
- * it is applied (`applyStagedFileHeader`, `applyStagedHeader`): its
+ * it is applied (`applyStagedFileHeader`): its
  * `importShortNames.set(key, fqn)` calls are one per imported name, in
  * import order, so their `fqn`s are exactly those names, and no engine call
  * is needed. Otherwise `ModelFile.getImports` records its first answer.
@@ -1296,7 +1270,7 @@ let trustedAst: object | null = null;
  * into a manager it writes (`compactStageable`) is written straight from
  * the object into the compact binary layout (`encodeAst`) instead of being
  * `JSON.stringify`d, and is checked, as pending, by the same fold
- * (`stageModelFileCheckedCompact`); its JSON text is computed only where a
+ * (`stageModelFileBytes`); its JSON text is computed only where a
  * path still needs it (`astText`). An AST `encodeAst` leaves to the text
  * path is checked as before.
  * @param {object} modelFile the ModelFile being constructed
@@ -1320,7 +1294,7 @@ function checkAstShape(modelFile: any): CheckedAst | undefined {
     // `stageLoadedModelFile` takes the eager path, which checks the AST's
     // JSON text on its own (`completeShapeCheck`) and never sends the
     // bytes, so the AST is not written in the compact layout for it.
-    if (compactStageable(manager, ast, 'stageModelFileCheckedCompact') && !hasDecoratorFactories(manager)) {
+    if (compactStageable(manager, ast) && !hasDecoratorFactories(manager)) {
         const bytes = encodeAst(ast);
         if (bytes !== undefined) {
             fileState(modelFile).shapePending = true;
@@ -1453,7 +1427,7 @@ type CheckedAst = string | CompactAst;
 /**
  * P5-92: whether a ModelFile's AST may cross into the engine in the
  * compact binary layout (`encodeAst`) through the staging binding
- * `binding`: the engine has that binding, and the AST is loaded into a
+ * (`stageModelFileBytes`, P5-101): the AST is loaded into a
  * manager that writes its namespace into rustHandle and is neither a fixed
  * system model's (`systemModelAsts`, whose verdict is looked up by its
  * text) nor a staged DecoratorManager result (`prestaged`, never sent
@@ -1462,11 +1436,10 @@ type CheckedAst = string | CompactAst;
  * `shapeCheckedUnmirrored`).
  * @param {object} manager the ModelFile's manager
  * @param {object} ast the AST
- * @param {string} binding the compact staging binding
  * @return {boolean} true if the AST may cross in the compact layout
  */
-function compactStageable(manager: any, ast: any, binding: string): boolean {
-    return typeof manager.rustHandle?.[binding] === 'function' && !systemModelAsts.has(ast) &&
+function compactStageable(manager: any, ast: any): boolean {
+    return !systemModelAsts.has(ast) &&
         !prestaged.has(ast) && manager._needsRustWrite(ast.namespace);
 }
 
@@ -1653,9 +1626,12 @@ function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | u
     }
     // P5-94: the parse of each system header text, shared: the header is
     // only read (`applyStagedFileHeader`), never changed.
+    // P5-101 (D-4): in the one header format, its id slot 0 (nothing is
+    // staged); `[0]` alone when there is no header.
     let header = parsedSystemHeaders.get(systemHeader);
     if (header === undefined) {
-        header = JSON.parse(systemHeader) as StagedHeader | null;
+        const flat = JSON.parse(systemHeader) as StagedHeader;
+        header = flat.length > 1 ? flat : null;
         parsedSystemHeaders.set(systemHeader, header);
     }
     const state = fileState(modelFile);
@@ -1673,34 +1649,27 @@ function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | u
  * `ModelFile`'s construction. The `...Utf8` staging bindings take the same
  * text as the UTF-8 bytes a `TextEncoder` writes, copied in one go.
  */
-const utf8Encoder = new TextEncoder();
-
 /**
- * The buffer `utf8Text` encodes into, reused across calls (a fresh
- * `TextEncoder.encode` array per call is an external allocation, which
- * made the garbage collector run more often), and the largest it is kept.
+ * The writer `utf8Text` encodes into (wire.ts, P5-101 E-14: one buffer
+ * policy for every byte buffer the engine is handed): reused across calls,
+ * where a fresh `TextEncoder.encode` array per call is an external
+ * allocation, which made the garbage collector run more often.
  */
-let utf8Buffer = new Uint8Array(0);
-const UTF8_BUFFER_KEPT = 4 * 1024 * 1024;
+const utf8Writer = new WireWriter(64 * 1024);
+
+/** `stageModelFileBytes`'s flags (concerto-wasm `STAGE_CHECKED`, `STAGE_COMPACT`). */
+const STAGE_CHECKED = 1;
+const STAGE_COMPACT = 2;
 
 /**
- * The UTF-8 bytes of `text`, for the engine's `...Utf8` bindings: a view
- * of a reused buffer, valid until the next call (the binding copies it
- * into the engine's memory before it returns).
+ * The UTF-8 bytes of `text`, for the engine's staging binding: a view of a
+ * reused buffer, valid until the next call (the binding copies it into the
+ * engine's memory before it returns).
  * @param {string} text the text
  * @return {Uint8Array} its UTF-8 bytes
  */
 function utf8Text(text: string): Uint8Array {
-    // At most three bytes per UTF-16 code unit.
-    const most = text.length * 3;
-    if (most > UTF8_BUFFER_KEPT) {
-        return utf8Encoder.encode(text);
-    }
-    if (utf8Buffer.length < most) {
-        utf8Buffer = new Uint8Array(Math.max(most, 2 * utf8Buffer.length, 64 * 1024));
-    }
-    const { written } = utf8Encoder.encodeInto(text, utf8Buffer);
-    return utf8Buffer.subarray(0, written);
+    return utf8Writer.utf8(text);
 }
 
 /**
@@ -1717,15 +1686,15 @@ function utf8Text(text: string): Uint8Array {
  * left to the eager walk; the AST is read for that even for a manager with
  * decorator factories. With the check on, the check has rejected any such
  * AST already. P5-69 (BC-19-b): with the check pending (`shapePending`),
- * it runs here first, folded into the load (`stageModelFileChecked`) or on
+ * it runs here first, folded into the load (`stageModelFileBytes`) or on
  * its own (`completeShapeCheck`) where nothing is loaded, and its error is
  * thrown; any other error is handled as before.
  *
  * P5-92 (accordproject/concerto-rust#438): an AST `checkAstShape` wrote in
  * the compact binary layout is loaded, and checked, from those bytes
- * (`stageModelFileCheckedCompact`); with the check off, an AST loaded into a
+ * (`stageModelFileBytes`); with the check off, an AST loaded into a
  * manager that writes its namespace is written in that layout here
- * (`stageModelFileWithHeaderCompact`). Either way the engine's verdict and
+ * (`stageModelFileBytes` too). Either way the engine's verdict and
  * error are those of the AST's JSON text, which is computed only on the
  * paths that still need it (`astText`), and sent instead for an AST
  * `encodeAst` leaves to the text path.
@@ -1774,21 +1743,13 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         // it so, or, with the check off, when it may cross so; otherwise its
         // JSON text, as before.
         let compact = compactBytes(checkedText);
-        if (checkedText === undefined && compactStageable(manager, ast, 'stageModelFileWithHeaderCompact')) {
+        if (checkedText === undefined && compactStageable(manager, ast)) {
             compact = encodeAst(ast);
         }
         let text: string | undefined = compact !== undefined ? undefined
             : checkedText === undefined ? JSON.stringify(ast) : astText(ast, checkedText);
-        // `ModelFile`'s constructor only rejects a *truthy* non-string
-        // `definitions`/`fileName` (introspect/modelfile.ts): `0`, `false`
-        // and `NaN` are stored as-is, and `?? undefined` maps only
-        // null/undefined, so either would otherwise reach `stageModelFile`'s
-        // wasm `Option<String>` params raw and trap the engine
-        // (accordproject/concerto-rust#294 follow-up). Only a genuine string
-        // is forwarded; anything else becomes `undefined`, matching v5.0.0
-        // (no wasm call at all).
-        const definitions = typeof modelFile.definitions === 'string' ? modelFile.definitions : undefined;
-        const fileName = typeof modelFile.fileName === 'string' ? modelFile.fileName : undefined;
+        const definitions = optionalString(modelFile.definitions);
+        const fileName = optionalString(modelFile.fileName);
         const unmirrored = !manager._needsRustWrite(ast.namespace);
         if (unmirrored && text === undefined) {
             // P5-92: never the case for an AST `compactStageable` let
@@ -1813,54 +1774,28 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             return true;
         }
         // P5-28 (accordproject/concerto-rust#333): staged and its header
-        // read in one call, from one decode of the text, so the
+        // read in one call, from one decode of the AST, so the
         // constructor's `_fromAstHeader` does not cross again
-        // (`applyStagedFileHeader`). An engine without that binding stages as
-        // before.
-        let id: number;
-        let header: StagedHeader | null = null;
+        // (`applyStagedFileHeader`). P5-101 (D-4, D-10): through the one
+        // staging binding (`stageModelFileBytes`), from the compact layout
+        // (P5-92) or the text as UTF-8 (P5-76), with the shape check folded
+        // into the load when it is pending (P5-69), and its result in the
+        // one header format (`StagedHeader`).
         const checked = state.shapePending !== undefined;
         // P5-92: there is text whenever there are no bytes.
         const jsonText = text as string;
+        if (compact === undefined && !checked) {
+            completeShapeCheck(modelFile, handle, jsonText, state);
+        }
+        const staged: StagedHeader = JSON.parse(handle.stageModelFileBytes(
+            compact ?? utf8Text(jsonText), definitions, fileName,
+            (checked ? STAGE_CHECKED : 0) | (compact !== undefined ? STAGE_COMPACT : 0)));
+        const id: number = staged[0];
+        const header: StagedHeader | null = staged.length > 1 ? staged : null;
         if (compact !== undefined) {
-            // P5-92: the shape check (when pending) and the load, from the
-            // compact layout, with the verdict and the error of the text
-            // (`ModelFile::from_compact_checked_with_imports`).
-            // P5-94: in the flat layout (`FlatHeader`) where the engine
-            // has those bindings.
-            const flatBinding = checked ? 'stageModelFileCheckedCompactFlat' : 'stageModelFileWithHeaderCompactFlat';
-            if (typeof handle[flatBinding] === 'function') {
-                const staged = JSON.parse(handle[flatBinding](compact, definitions, fileName));
-                id = staged[0];
-                header = staged.length > 1 ? staged : null;
-            } else {
-                const staged = JSON.parse(checked
-                    ? handle.stageModelFileCheckedCompact(compact, definitions, fileName)
-                    : handle.stageModelFileWithHeaderCompact(compact, definitions, fileName));
-                id = staged.id;
-                header = staged.header;
-            }
             shapeCheckPassed(modelFile, undefined, state);
-        } else if (checked && typeof handle.stageModelFileChecked === 'function') {
-            // P5-69 (BC-19-b): the shape check and the load, from one
-            // parse of the text. P5-76: the text crosses as UTF-8 bytes
-            // where the engine takes them (`utf8Text`).
-            const staged = JSON.parse(typeof handle.stageModelFileCheckedUtf8 === 'function'
-                ? handle.stageModelFileCheckedUtf8(utf8Text(jsonText), definitions, fileName)
-                : handle.stageModelFileChecked(jsonText, definitions, fileName));
-            id = staged.id;
-            header = staged.header;
+        } else if (checked) {
             shapeCheckPassed(modelFile, jsonText, state);
-        } else if (typeof handle.stageModelFileWithHeader === 'function') {
-            completeShapeCheck(modelFile, handle, jsonText, state);
-            const staged = JSON.parse(typeof handle.stageModelFileWithHeaderUtf8 === 'function'
-                ? handle.stageModelFileWithHeaderUtf8(utf8Text(jsonText), definitions, fileName)
-                : handle.stageModelFileWithHeader(jsonText, definitions, fileName));
-            id = staged.id;
-            header = staged.header;
-        } else {
-            completeShapeCheck(modelFile, handle, jsonText, state);
-            id = handle.stageModelFile(jsonText, definitions, fileName);
         }
         if (unmirrored) {
             // Never committed: keep the verdict (and the header), not the
@@ -1958,9 +1893,9 @@ function copyImportNames(modelFile: any, source: any): void {
  * @param {object} handle the manager's rustHandle
  */
 function readUnchecked(modelFile: any, handle: any): void {
-    const definitions = typeof modelFile.definitions === 'string' ? modelFile.definitions : undefined;
-    const fileName = typeof modelFile.fileName === 'string' ? modelFile.fileName : undefined;
-    handle.dropStagedModelFile(handle.stageModelFile(JSON.stringify(modelFile.ast), definitions, fileName));
+    const staged = JSON.parse(handle.stageModelFileBytes(utf8Text(JSON.stringify(modelFile.ast)),
+        optionalString(modelFile.definitions), optionalString(modelFile.fileName), 0));
+    handle.dropStagedModelFile(staged[0]);
 }
 
 
@@ -1986,9 +1921,8 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
         return false;
     }
     state!.stagedHeader = undefined;
-    // P5-94: a header in the flat layout (`FlatHeader`).
-    const flat = Array.isArray(header);
-    if (ast !== modelFile.ast || ast.namespace !== (flat ? header[1] : header.namespace)) {
+    // P5-101 (D-4): the one header format (`StagedHeader`).
+    if (ast !== modelFile.ast || ast.namespace !== header[1]) {
         return false;
     }
     const astImports = ast.imports;
@@ -1996,8 +1930,8 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
         return false;
     }
     modelFile.namespace = ast.namespace;
-    modelFile.version = flat ? header[2] : header.version;
-    const system: boolean = flat ? header[3] : header.system;
+    modelFile.version = header[2];
+    const system: boolean = header[3];
     const imports = astImports ? astImports.concat([]) : [];
     if (!system) {
         imports.push({
@@ -2011,38 +1945,21 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
     // entry; the same `set`s and assignments, in the same order.
     const shortNames = modelFile.importShortNames;
     const uriMap = modelFile.importUriMap;
-    let names: string[];
-    if (flat) {
-        const n: number = header[4];
-        const implicit = system ? 0 : IMPLICIT_NAMES.length;
-        names = new Array(n + implicit);
-        let at = 5;
-        for (let i = 0; i < n; i++, at += 2) {
-            const fqn = header[at + 1];
-            shortNames.set(header[at], fqn);
-            names[i] = fqn;
-        }
-        for (let i = 0; i < implicit; i++) {
-            shortNames.set(IMPLICIT_SHORT_NAMES[i], IMPLICIT_NAMES[i]);
-            names[n + i] = IMPLICIT_NAMES[i];
-        }
-        for (; at < header.length; at += 2) {
-            uriMap[header[at]] = header[at + 1];
-        }
-    } else {
-        const headerNames = header.shortNames;
-        names = new Array(headerNames.length);
-        for (let i = 0; i < headerNames.length; i++) {
-            const entry = headerNames[i];
-            const fqn = entry[1];
-            shortNames.set(entry[0], fqn);
-            names[i] = fqn;
-        }
-        const headerUris = header.uriMap;
-        for (let i = 0; i < headerUris.length; i++) {
-            const entry = headerUris[i];
-            uriMap[entry[0]] = entry[1];
-        }
+    const n: number = header[4];
+    const implicit = system ? 0 : IMPLICIT_NAMES.length;
+    const names: string[] = new Array(n + implicit);
+    let at = 5;
+    for (let i = 0; i < n; i++, at += 2) {
+        const fqn = header[at + 1];
+        shortNames.set(header[at], fqn);
+        names[i] = fqn;
+    }
+    for (let i = 0; i < implicit; i++) {
+        shortNames.set(IMPLICIT_SHORT_NAMES[i], IMPLICIT_NAMES[i]);
+        names[n + i] = IMPLICIT_NAMES[i];
+    }
+    for (; at < header.length; at += 2) {
+        uriMap[header[at]] = header[at + 1];
     }
     recordImportNames(modelFile, names, state);
     if (lazyViewsCheck) {
@@ -2172,7 +2089,7 @@ function deferDeclarations(modelFile: any): void {
 // the new ModelManager's own rustHandle and returns their stage ids and
 // headers with the result AST. `adoptStagedModels` then does what `fromAst`
 // does, but each ModelFile takes its stage (`takePrestaged`) and header
-// (`applyStagedHeader`) instead of crossing again, and `validateModelFiles`
+// (`applyStagedFileHeader`) instead of crossing again, and `validateModelFiles`
 // is skipped when Rust has validated exactly those files, under the same
 // (default) options the new manager's rustHandle has. Every error is still
 // thrown by the same Rust or TS code, at the same point of the call.
@@ -2180,12 +2097,12 @@ function deferDeclarations(modelFile: any): void {
 
 /**
  * A result model's stage in a new ModelManager's rustHandle, and its header
- * (concerto-wasm `staged_header`: `[version, shortNames, uris]`, or null).
+ * in the one header format (`StagedHeader`, P5-101 D-4), when it has one.
  */
 interface Prestage {
     handle: any;
     id: number;
-    header: any[] | null;
+    header: StagedHeader | undefined;
 }
 
 /**
@@ -2224,62 +2141,19 @@ function takePrestaged(modelFile: any, manager: any, handle: any, ast: any, pres
     const stage = { handle, id: prestage.id };
     state.stage = stage;
     stageFinalizer?.register(modelFile, stage, stage);
+    // P5-101 (D-4): a DecoratorManager result's header is in the one
+    // header format, applied as any staged file's (`applyStagedFileHeader`).
     if (prestage.header) {
-        state.prestageHeader = prestage.header;
+        state.stagedHeader = prestage.header;
     }
-    return true;
-}
-
-/**
- * `ModelFile._fromAstHeader(ast)` from the header Rust computed when it
- * staged the file (concerto-wasm `staged_header`): sets the same
- * `namespace`, `version` and `imports` (a copy of `ast.imports` plus the
- * implicit import of the system types), and the same `importShortNames`
- * and `importUriMap` entries in the same order, as `modelFileFromAstHeader`
- * would. Rust returns a header only when that binding would not throw.
- * Returns false when there is none; the caller then calls the binding.
- * @param {object} modelFile the ModelFile being constructed
- * @param {object} ast its AST
- * @param {object} [state] `modelFile`'s `fileStates` record (P5-91)
- * @return {boolean} true if the header was applied
- */
-function applyStagedHeader(modelFile: any, ast: any, state: FileState | undefined = fileStates.get(modelFile)): boolean {
-    // P5-91: the prestage header is a field of the file's record
-    // (`prestageHeader`), no longer a WeakMap of its own.
-    const header = state?.prestageHeader;
-    if (header === undefined || ast !== modelFile.ast) {
-        return false;
-    }
-    state!.prestageHeader = undefined;
-    const [version, shortNames, uris] = header;
-    modelFile.namespace = ast.namespace;
-    modelFile.version = version;
-    const imports = ast.imports ? ast.imports.concat([]) : [];
-    imports.push({
-        $class: 'concerto.metamodel@1.0.0.ImportTypes',
-        namespace: 'concerto@1.0.0',
-        types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event'],
-    });
-    modelFile.imports = imports;
-    const names: string[] = [];
-    for (let i = 0; i < shortNames.length; i += 2) {
-        modelFile.importShortNames.set(shortNames[i], shortNames[i + 1]);
-        names.push(shortNames[i + 1]);
-    }
-    for (let i = 0; i < uris.length; i += 2) {
-        modelFile.importUriMap[uris[i]] = uris[i + 1];
-    }
-    // P5-32: one `set` per imported name, as for `applyStagedFileHeader`.
-    recordImportNames(modelFile, names, state);
-    lazyViewsCheck?.importNames(modelFile);
     return true;
 }
 
 /**
  * P5-91 (accordproject/concerto-rust#437): `ModelFile._fromAstHeader`'s
- * `applyStagedHeader(modelFile, ast) || applyStagedFileHeader(modelFile,
- * ast)`, with one lookup of the file's record for both. At most one of them
- * has a header for a file.
+ * staged header, with one lookup of the file's record. P5-101 (D-4): a
+ * DecoratorManager result's header is in the one header format too, so
+ * `applyStagedFileHeader` applies every staged header.
  * @param {object} modelFile the ModelFile being constructed
  * @param {object} ast the AST its header is read from
  * @return {boolean} true if a staged header was applied
@@ -2289,7 +2163,7 @@ function applyStagedHeaders(modelFile: any, ast: any): boolean {
     if (state === undefined) {
         return false;
     }
-    return applyStagedHeader(modelFile, ast, state) || applyStagedFileHeader(modelFile, ast, state);
+    return applyStagedFileHeader(modelFile, ast, state);
 }
 
 /**
@@ -2324,14 +2198,17 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
     const handle = newModelManager.rustHandle;
     let allStaged = true;
     const models: any[] = ast.models;
+    const built: any[] = [];
     try {
         models.forEach((model: any, i: number) => {
             if (DCS_EXCLUDE_NS.includes(model.namespace)) {
                 return;
             }
+            // P5-101 (D-4): `[stageId, ...header]`, in the one header
+            // format (`StagedHeader`), or `[stageId]`.
             const entry = staged[i];
             if (entry) {
-                prestaged.set(model, { handle, id: entry[0], header: entry[1] });
+                prestaged.set(model, { handle, id: entry[0], header: entry.length > 1 ? entry : undefined });
             }
             let modelFile;
             if (trusted) {
@@ -2342,11 +2219,17 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
             } finally {
                 trustedAst = null;
             }
-            newModelManager.addModelFile(modelFile, null, null, true);
-            if (committedHandle(modelFile) !== handle) {
-                allStaged = false;
-            }
+            built.push(modelFile);
         });
+        // P5-101 (D-10, M5): added as one batch, so the files are
+        // registered from their stages in one engine call
+        // (`commitStagedAll`), where `addModelFile` crossed once per file.
+        // The batch adds them in the same order, with the same checks, and
+        // without validating them (`disableValidation`), as `fromAst` adds
+        // them; the files are built first, which reads nothing another
+        // result file's registration changes.
+        newModelManager.addModelFiles(built, null, true);
+        allStaged = built.every((modelFile) => committedHandle(modelFile) === handle);
     } finally {
         // A stage no ModelFile took (the loop threw first).
         models.forEach((model: any) => {
@@ -2617,6 +2500,57 @@ function commitStaged(modelFile: any, handle: any): number | undefined {
 }
 
 /**
+ * P5-101 (D-10, M5; accordproject/concerto-rust#455): `commitStaged` for
+ * several files, in order, in one engine call (concerto-wasm
+ * `commitStagedModelFiles`), for the batch `addModelFiles` (and the
+ * DecoratorManager results it adds, `adoptStagedModels`). Returns the
+ * files' handles, in order, or undefined, having changed nothing, when any
+ * of them has no usable stage in `handle` (or there are fewer than two):
+ * the caller then writes each file on its own, as before. A registration
+ * error propagates, as `commitStaged`'s would, with every file the engine
+ * registered before it marked as registered from its stage.
+ * @param {object[]} modelFiles the ModelFiles being added
+ * @param {object} handle the manager's rustHandle
+ * @return {number[]|undefined} the registered files' handles, or undefined
+ */
+function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | undefined {
+    if (modelFiles.length < 2 || typeof handle.commitStagedModelFiles !== 'function') {
+        return undefined;
+    }
+    const states: FileState[] = new Array(modelFiles.length);
+    const stages = new Uint32Array(modelFiles.length);
+    for (let i = 0; i < modelFiles.length; i++) {
+        const state = fileStates.get(modelFiles[i]);
+        const stage = state?.stage;
+        if (!stage || stage.handle !== handle) {
+            return undefined;
+        }
+        states[i] = state!;
+        stages[i] = stage.id;
+    }
+    let ids: ArrayLike<number> | undefined;
+    try {
+        ids = handle.commitStagedModelFiles(stages);
+    } catch (e) {
+        modelFiles.forEach((modelFile, i) => {
+            if (handle.modelFileId(modelFile.getNamespace()) !== undefined) {
+                takeStageOf(states[i], handle);
+                states[i].committed = handle;
+            }
+        });
+        throw e;
+    }
+    if (ids === undefined) {
+        return undefined;
+    }
+    for (const state of states) {
+        takeStageOf(state, handle);
+        state.committed = handle;
+    }
+    return ids;
+}
+
+/**
  * P5-34 (I-5): `BaseModelManager.addModelFile`'s validation and registration
  * of a staged file in one engine call (concerto-wasm
  * `validateAndCommitStagedModelFile`), in place of `ModelFile.validate()`'s
@@ -2626,12 +2560,19 @@ function commitStaged(modelFile: any, handle: any): number | undefined {
  * then validates and registers the file as before. A validation error is
  * thrown as `ModelFile.validate()` throws it (`_engineValidationError`),
  * and leaves the file staged, as that path does.
+ *
+ * P5-101 (D-9, accordproject/concerto-rust#455): with `metamodel`,
+ * `BaseModelManager.validateAst`'s check runs first, in the same engine
+ * call, over the staged AST (`validateAstStaged`'s check): one crossing
+ * where there were two. Its error is thrown as `validateAst` throws it
+ * (marked `metamodelCheck` by the engine), unwrapped.
  * @param {object} modelFile the ModelFile being added
  * @param {object} handle the manager's rustHandle
+ * @param {boolean} [metamodel] whether to run the metamodel check first
  * @return {number|undefined} the registered file's handle, or undefined if
  * the file was not registered
  */
-function validateAndCommitStaged(modelFile: any, handle: any): number | undefined {
+function validateAndCommitStaged(modelFile: any, handle: any, metamodel?: boolean): number | undefined {
     const state = fileStates.get(modelFile);
     const stage = state?.stage;
     if (!stage || stage.handle !== handle || typeof handle.validateAndCommitStagedModelFile !== 'function') {
@@ -2639,8 +2580,11 @@ function validateAndCommitStaged(modelFile: any, handle: any): number | undefine
     }
     let id: number | undefined;
     try {
-        id = handle.validateAndCommitStagedModelFile(stage.id);
+        id = handle.validateAndCommitStagedModelFile(stage.id, metamodel === true);
     } catch (e) {
+        if ((e as EngineErrorFlags | null)?.metamodelCheck) {
+            throw e;
+        }
         throw modelFile._engineValidationError(e);
     }
     if (id === undefined) {
@@ -3747,13 +3691,13 @@ export {
     stageModelFile,
     adoptSharedView,
     copyImportNames,
-    applyStagedHeader,
     applyStagedFileHeader,
     applyStagedHeaders,
     recordImportNames,
     recordedImportNames,
     deferDeclarations,
     commitStaged,
+    commitStagedAll,
     validateAndCommitStaged,
     updateStaged,
     validateAstStaged,

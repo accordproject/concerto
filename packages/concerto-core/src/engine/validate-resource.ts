@@ -71,7 +71,9 @@
 // visitor never visits.
 
 import { rust } from './index';
-import { EngineFastPathUnsupported, checkString, typedCtorName, modelClasses } from './serializer-codec';
+import { checkString, typedCtorName, modelClasses } from './serializer-codec';
+import { EngineFastPathUnsupported, isDayjsLike, isTypedLike } from './util';
+import { WireWriter } from './wire';
 import { handleFor } from './serializer';
 import { classDeclarationGetIdentifierFieldName } from './views';
 import ValidationException from '../serializer/validationexception';
@@ -92,28 +94,6 @@ const PRIVATE_ONLY = new Set([
 const CODE_VALID = 0;
 const CODE_VALIDATION = 1;
 const CODE_UNSUPPORTED = 3;
-
-/**
- * @param {object} v a non-null object
- * @returns {boolean} duck-typed dayjs instance (serializer-codec's test)
- */
-function isDayjsLike(v): boolean {
-    return typeof v.isValid === 'function' &&
-        typeof v.utcOffset === 'function' &&
-        typeof v.isBefore === 'function' &&
-        typeof v.valueOf === 'function';
-}
-
-/**
- * @param {object} v a non-null object
- * @returns {boolean} duck-typed Resource/ValidatedResource/Relationship
- * (serializer-codec's test)
- */
-function isTypedLike(v): boolean {
-    return typeof v.getFullyQualifiedType === 'function' &&
-        typeof v.$namespace === 'string' &&
-        typeof v.$type === 'string';
-}
 
 /**
  * `Dayjs::to_iso_string` (concerto-core instance/dayjs.rs): `null` when the
@@ -143,128 +123,12 @@ function visit(v: object, seen: Set<object>): void {
 }
 
 // ---------------------------------------------------------------------
-// The binary layout (concerto-wasm src/validate_resource.rs)
+// The binary layout (concerto-rust concerto-core `introspect::compact`),
+// written through the one writer of that layout (wire.ts, P5-101 F-8).
 // ---------------------------------------------------------------------
 
-const encoder = new TextEncoder();
-const f64 = new Float64Array(1);
-const f64Bytes = new Uint8Array(f64.buffer);
-
-// Reused across calls; grown on demand. wasm-bindgen copies the bytes in.
-let buf: Uint8Array = new Uint8Array(1 << 12);
-let pos = 0;
-
-/**
- * Grows `buf` to hold `n` more bytes.
- * @param {number} n bytes needed
- */
-function ensure(n: number): void {
-    if (pos + n <= buf.length) {
-        return;
-    }
-    let cap = buf.length * 2;
-    while (cap < pos + n) {
-        cap *= 2;
-    }
-    const next = new Uint8Array(cap);
-    next.set(buf.subarray(0, pos));
-    buf = next;
-}
-
-/**
- * @param {number} at offset
- * @param {number} n a u32
- */
-function putU32(at: number, n: number): void {
-    buf[at] = n & 0xff;
-    buf[at + 1] = (n >>> 8) & 0xff;
-    buf[at + 2] = (n >>> 16) & 0xff;
-    buf[at + 3] = (n >>> 24) & 0xff;
-}
-
-/**
- * A length-prefixed UTF-8 string (no tag).
- * @param {string} s the string
- */
-function writeRawStr(s: string): void {
-    const n = s.length;
-    ensure(4 + n * 3);
-    const lenAt = pos;
-    pos += 4;
-    let i = 0;
-    for (; i < n; i++) {
-        const c = s.charCodeAt(i);
-        if (c >= 0x80) {
-            break;
-        }
-        buf[pos++] = c;
-    }
-    if (i < n) {
-        // Not ASCII: `encodeInto` would turn a lone surrogate into U+FFFD,
-        // so reject one first (the engine cannot hold it, PORTING.md 3.1).
-        checkString(s);
-        pos += encoder.encodeInto(s.substring(i), buf.subarray(pos)).written;
-    }
-    putU32(lenAt, pos - lenAt - 4);
-}
-
-/**
- * @param {number} tag the tag byte
- */
-function writeTag(tag: number): void {
-    ensure(1);
-    buf[pos++] = tag;
-}
-
-/**
- * @param {string} s the string
- */
-function writeStr(s: string): void {
-    writeTag(5);
-    writeRawStr(s);
-}
-
-/**
- * A finite number, as `validate::js_number` reads it.
- * @param {number} v the number
- */
-function writeNum(v: number): void {
-    ensure(9);
-    if ((v | 0) === v) {
-        // `-0` lands here as `0`, which is how `js_number` spells it too.
-        buf[pos++] = 4;
-        putU32(pos, v);
-        pos += 4;
-        return;
-    }
-    buf[pos++] = 3;
-    f64[0] = v;
-    buf.set(f64Bytes, pos);
-    pos += 8;
-}
-
-/**
- * An object header, with its entry count patched in later.
- * @return {number} where the count goes
- */
-function beginObject(): number {
-    ensure(5);
-    buf[pos++] = 7;
-    pos += 4;
-    return pos - 4;
-}
-
-/**
- * The head of a one-key marker object `{key: <value>}`.
- * @param {string} key the marker key
- */
-function writeMarkerHead(key: string): void {
-    ensure(5);
-    buf[pos++] = 7;
-    putU32(pos, 1);
-    pos += 4;
-    writeRawStr(key);
-}
+/** The writer every call writes its value into; wasm-bindgen copies the bytes in. */
+const writer = new WireWriter(1 << 12);
 
 /**
  * A live value, in one pass.
@@ -273,29 +137,29 @@ function writeMarkerHead(key: string): void {
  */
 function writeValue(v, seen: Set<object>): void {
     if (v === undefined) {
-        writeMarkerHead('$$undefined');
-        writeTag(2);
+        writer.markerHead('$$undefined');
+        writer.literal(true);
         return;
     }
     const t = typeof v;
     if (t === 'string') {
-        writeStr(v);
+        writer.str(v);
         return;
     }
     if (v === null) {
-        writeTag(0);
+        writer.literal(null);
         return;
     }
     if (t === 'boolean') {
-        writeTag(v ? 2 : 1);
+        writer.literal(v);
         return;
     }
     if (t === 'number') {
         if (Number.isFinite(v)) {
-            writeNum(v);
+            writer.num(v);
         } else {
-            writeMarkerHead('$$number');
-            writeStr(String(v));
+            writer.markerHead('$$number');
+            writer.str(String(v));
         }
         return;
     }
@@ -304,10 +168,7 @@ function writeValue(v, seen: Set<object>): void {
     }
     if (Array.isArray(v)) {
         visit(v, seen);
-        ensure(5);
-        buf[pos++] = 6;
-        putU32(pos, v.length);
-        pos += 4;
+        writer.array(v.length);
         for (let i = 0; i < v.length; i++) {
             writeValue(v[i], seen);
         }
@@ -315,28 +176,22 @@ function writeValue(v, seen: Set<object>): void {
     }
     if (v instanceof Map) {
         visit(v, seen);
-        writeMarkerHead('$$map');
-        ensure(5);
-        buf[pos++] = 6;
-        putU32(pos, v.size);
-        pos += 4;
+        writer.markerHead('$$map');
+        writer.array(v.size);
         v.forEach((x, k) => {
-            ensure(5);
-            buf[pos++] = 6;
-            putU32(pos, 2);
-            pos += 4;
+            writer.array(2);
             writeValue(k, seen);
             writeValue(x, seen);
         });
         return;
     }
     if (isDayjsLike(v)) {
-        writeMarkerHead('$$dayjs');
+        writer.markerHead('$$dayjs');
         const iso = dayjsIso(v);
         if (iso === null) {
-            writeTag(0);
+            writer.literal(null);
         } else {
-            writeStr(iso);
+            writer.str(iso);
         }
         return;
     }
@@ -350,17 +205,17 @@ function writeValue(v, seen: Set<object>): void {
         throw new EngineFastPathUnsupported(`instance:${(v.constructor && v.constructor.name) || 'Object'}`);
     }
     visit(v, seen);
-    const countAt = beginObject();
+    const countAt = writer.beginObject();
     let count = 0;
     for (const key of Object.keys(v)) {
         if (key === '__proto__') {
             throw new EngineFastPathUnsupported('proto-key');
         }
-        writeRawStr(key);
+        writer.rawStr(key);
         writeValue(v[key], seen);
         count++;
     }
-    putU32(countAt, count);
+    writer.putU32(countAt, count);
 }
 
 /**
@@ -373,22 +228,22 @@ function writeValue(v, seen: Set<object>): void {
 function writeTyped(v, seen: Set<object>): void {
     const ctor = typedCtorName(v);
     const fqn = v.getFullyQualifiedType();
-    const countAt = beginObject();
+    const countAt = writer.beginObject();
     let count;
     if (ctor === 'Relationship') {
-        writeRawStr('$$relationship');
-        writeTag(2);
-        writeRawStr('$class');
-        writeStr(fqn);
+        writer.rawStr('$$relationship');
+        writer.literal(true);
+        writer.rawStr('$class');
+        writer.str(fqn);
         count = 2;
         const field = v.$identifierFieldName;
         const id = v[field];
         if (typeof id === 'string') {
-            writeRawStr(String(field));
-            writeStr(id);
+            writer.rawStr(String(field));
+            writer.str(id);
             count++;
         }
-        putU32(countAt, count);
+        writer.putU32(countAt, count);
         return;
     }
     // The engine reads a Resource's identifier from its model's identifying
@@ -407,8 +262,8 @@ function writeTyped(v, seen: Set<object>): void {
     if (field !== '$identifier') {
         v.$identifier = id;
     }
-    writeRawStr('$class');
-    writeStr(fqn);
+    writer.rawStr('$class');
+    writer.str(fqn);
     count = 1;
     for (const key of Object.keys(v)) {
         if (PRIVATE_ONLY.has(key)) {
@@ -422,11 +277,11 @@ function writeTyped(v, seen: Set<object>): void {
             // replace its value in place. Left to the visitor.
             throw new EngineFastPathUnsupported('own-$class');
         }
-        writeRawStr(key);
+        writer.rawStr(key);
         writeValue(v[key], seen);
         count++;
     }
-    putU32(countAt, count);
+    writer.putU32(countAt, count);
 }
 
 /**
@@ -508,15 +363,18 @@ function validateResource(resource, rootId: string): boolean {
     try {
         checkString(rootId);
         handle = handleFor(resource.getModelManager());
-        pos = 0;
+        writer.begin();
         writeTyped(resource, new Set<object>([resource]));
     } catch (err) {
+        writer.release();
         if (err instanceof EngineFastPathUnsupported) {
             return false;
         }
         throw err;
     }
-    return outcome(handle.validateResourceBinary(buf.subarray(0, pos), rootId, flags));
+    const code = handle.validateResourceBinary(writer.bytes(), rootId, flags);
+    writer.release();
+    return outcome(code);
 }
 
 /**
@@ -576,15 +434,18 @@ function validateProperty(resource, propName: string, value, rootId: string, fie
         checkString(propName);
         checkString(rootId);
         handle = handleFor(resource.getModelManager());
-        pos = 0;
+        writer.begin();
         writeValue(value, new Set<object>());
     } catch (err) {
+        writer.release();
         if (err instanceof EngineFastPathUnsupported) {
             return false;
         }
         throw err;
     }
-    return outcome(handle.validatePropertyBinary(buf.subarray(0, pos), resource.getFullyQualifiedType(), propName, rootId, flags));
+    const code = handle.validatePropertyBinary(writer.bytes(), resource.getFullyQualifiedType(), propName, rootId, flags);
+    writer.release();
+    return outcome(code);
 }
 
 export { validateResource, validateProperty };

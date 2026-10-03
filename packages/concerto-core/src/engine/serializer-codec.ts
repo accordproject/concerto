@@ -40,6 +40,7 @@
 // back to the TS visitor path, exactly as an unconverted call would run.
 
 import dayjs from '../dayjs-setup';
+import { EngineFastPathUnsupported, isDayjsLike, isTypedLike, hasLoneSurrogate } from './util';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -48,51 +49,6 @@ import type BaseModelManager from '../basemodelmanager';
 
 const TAG = '@@oracle';
 
-/** Thrown when a value cannot cross the fast path; the caller falls back to the visitor path. */
-class EngineFastPathUnsupported extends Error {
-}
-
-// P5-43 (accordproject/concerto-rust#364): the brand the fast path's
-// callers test for (`err[Symbol.for(...)] === true`), instead of the
-// class's `constructor.name`, which a minifier renames (a production bundle
-// without `keepNames` would rethrow every EngineFastPathUnsupported instead
-// of falling back). A registered symbol, so a caller needs no reference to
-// this module (the public modules reach it only through `loadEngine`).
-Object.defineProperty(EngineFastPathUnsupported.prototype,
-    Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported'), { value: true });
-
-/**
- * @param {*} v value
- * @returns {boolean} duck-typed dayjs instance
- */
-function isDayjsLike(v): boolean {
-    return !!v && typeof v === 'object' &&
-        typeof v.isValid === 'function' &&
-        typeof v.utcOffset === 'function' &&
-        typeof v.isBefore === 'function' &&
-        typeof v.valueOf === 'function';
-}
-
-/**
- * @param {*} v value
- * @returns {boolean} duck-typed Resource/ValidatedResource/Relationship
- */
-function isTypedLike(v): boolean {
-    return !!v && typeof v === 'object' &&
-        typeof v.getFullyQualifiedType === 'function' &&
-        typeof v.$namespace === 'string' &&
-        typeof v.$type === 'string';
-}
-
-// A UTF-16 code unit in D800-DFFF that is not half of a surrogate pair.
-// `JSON.stringify` writes one as a `\udXXX` escape, which serde_json (the
-// engine's JSON reader) rejects outright, and Rust strings cannot hold one
-// anyway (PORTING.md 3.1, DV-004).
-const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
-
-/** Whether this runtime has `String.prototype.isWellFormed` (ES2024). */
-const hasIsWellFormed = typeof (String.prototype as any).isWellFormed === 'function';
-
 /**
  * Throws `EngineFastPathUnsupported` for a string the engine cannot receive
  * unchanged: one with a lone surrogate. The caller falls back to the TS
@@ -100,10 +56,7 @@ const hasIsWellFormed = typeof (String.prototype as any).isWellFormed === 'funct
  * @param {string} s the string (a value, an object key or a map key)
  */
 function checkString(s: string): void {
-    // P5-16: `isWellFormed()` (Node 20+) is false exactly when the string
-    // holds a lone surrogate, and costs much less than the regular
-    // expression, which stays for older runtimes.
-    if (hasIsWellFormed ? !(s as any).isWellFormed() : LONE_SURROGATE.test(s)) {
+    if (hasLoneSurrogate(s)) {
         throw new EngineFastPathUnsupported('lone-surrogate');
     }
 }
