@@ -1,3 +1,116 @@
+# P5-108: filter(() => true) after BC-53, next to P5-97 (2026-10-03)
+
+Task P5-108 (accordproject/concerto-rust#466) fixes `filter`, which re-added
+the decorator model and threw on every engine (BC-53). This re-runs P5-97's
+server bench (below) with approach (b) using the plain `filter(() => true)`
+predicate ("b-all"), next to (b) with P5-97's workaround predicate
+`keepUserModels` and (c) fork. Raw outputs in `results/P5-108/` (`time/`,
+`memory/`, `tables.md`, `tables.json`, `run-log.txt`).
+
+| | |
+|---|---|
+| Machine | Cloud container (cloud-3), Intel Xeon @ 2.10GHz, 4 vCPU, Linux 6.18 |
+| P5-108 (after) | `concerto` `97bf5b9dc` (concerto-core dist), `concerto-rust` `dc35793` (engine `concerto_wasm.wasm` 3,907,570 bytes) |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, approach (a), re-measured in this run |
+| Driver | `p5108-run.sh`: time phase (three rounds of `p597-server.mjs --mode time`, TS 5.0.0 first, the three engine sides in reverse order every other round; same request counts and warm-up as P5-97), memory phase (100 held managers after a GC). No gc or soak phase. |
+| Noise | As for P5-97: round-to-round medians move by up to about ±30%; each figure is the median over three rounds. Ratios are against the TS 5.0.0 (a) row of the same run. |
+
+**(b) on concerto-core-test-data now works with both predicates.** In P5-97 it
+was n/a (`Could not find super type Decorator`), since `keepUserModels` drops
+the decorator declarations; under BC-53 the decorator model is kept whole
+whatever the predicate says, so the user models that extend `Decorator`
+resolve.
+
+## Per-request latency and throughput (P5-108)
+
+#### concerto-core-test-data
+
+| N | side | p50 ms | p95 ms | req/s | p50 x TS (a) | req/s x TS (a) |
+|---:|---|---:|---:|---:|---:|---:|
+| 1 | TS 5.0.0 (a) | 2.42 | 6.17 | 324 | 1.00 | 1.00 |
+| 1 | P5-108 (b) filter(keepUserModels) | 3.53 | 6.10 | 259 | 1.46 | 0.80 |
+| 1 | P5-108 (b) filter(() => true) | 3.66 | 6.66 | 246 | 1.51 | 0.76 |
+| 1 | P5-108 (c) fork | 1.46 | 3.13 | 544 | 0.60 | 1.68 |
+| 16 | TS 5.0.0 (a) | 44.3 | 68.0 | 332 | 1.00 | 1.00 |
+| 16 | P5-108 (b) filter(keepUserModels) | 61.3 | 85.1 | 248 | 1.38 | 0.75 |
+| 16 | P5-108 (b) filter(() => true) | 61.4 | 82.4 | 251 | 1.39 | 0.76 |
+| 16 | P5-108 (c) fork | 27.1 | 46.3 | 573 | 0.61 | 1.73 |
+| 64 | TS 5.0.0 (a) | 179 | 208 | 338 | 1.00 | 1.00 |
+| 64 | P5-108 (b) filter(keepUserModels) | 239 | 274 | 255 | 1.34 | 0.76 |
+| 64 | P5-108 (b) filter(() => true) | 244 | 279 | 251 | 1.37 | 0.74 |
+| 64 | P5-108 (c) fork | 96.3 | 143 | 592 | 0.54 | 1.75 |
+
+#### conformance
+
+| N | side | p50 ms | p95 ms | req/s | p50 x TS (a) | req/s x TS (a) |
+|---:|---|---:|---:|---:|---:|---:|
+| 1 | TS 5.0.0 (a) | 1.14 | 5.66 | 592 | 1.00 | 1.00 |
+| 1 | P5-108 (b) filter(keepUserModels) | 2.40 | 5.62 | 342 | 2.09 | 0.58 |
+| 1 | P5-108 (b) filter(() => true) | 2.43 | 5.89 | 331 | 2.13 | 0.56 |
+| 1 | P5-108 (c) fork | 1.06 | 5.22 | 647 | 0.93 | 1.09 |
+| 16 | TS 5.0.0 (a) | 21.0 | 40.3 | 656 | 1.00 | 1.00 |
+| 16 | P5-108 (b) filter(keepUserModels) | 39.7 | 70.2 | 365 | 1.89 | 0.56 |
+| 16 | P5-108 (b) filter(() => true) | 45.3 | 66.0 | 331 | 2.16 | 0.50 |
+| 16 | P5-108 (c) fork | 18.1 | 34.2 | 773 | 0.86 | 1.18 |
+| 64 | TS 5.0.0 (a) | 86.3 | 125 | 615 | 1.00 | 1.00 |
+| 64 | P5-108 (b) filter(keepUserModels) | 169 | 204 | 354 | 1.95 | 0.58 |
+| 64 | P5-108 (b) filter(() => true) | 164 | 209 | 349 | 1.90 | 0.57 |
+| 64 | P5-108 (c) fork | 70.4 | 95.8 | 822 | 0.82 | 1.34 |
+
+#### synthetic-large
+
+| N | side | p50 ms | p95 ms | req/s | p50 x TS (a) | req/s x TS (a) |
+|---:|---|---:|---:|---:|---:|---:|
+| 1 | TS 5.0.0 (a) | 2.36 | 6.72 | 307 | 1.00 | 1.00 |
+| 1 | P5-108 (b) filter(keepUserModels) | 7.73 | 13.4 | 114 | 3.28 | 0.37 |
+| 1 | P5-108 (b) filter(() => true) | 7.80 | 13.9 | 116 | 3.31 | 0.38 |
+| 1 | P5-108 (c) fork | 7.25 | 13.0 | 122 | 3.07 | 0.40 |
+| 16 | TS 5.0.0 (a) | 46.0 | 73.0 | 310 | 1.00 | 1.00 |
+| 16 | P5-108 (b) filter(keepUserModels) | 135 | 165 | 112 | 2.94 | 0.36 |
+| 16 | P5-108 (b) filter(() => true) | 134 | 146 | 118 | 2.92 | 0.38 |
+| 16 | P5-108 (c) fork | 120 | 148 | 126 | 2.60 | 0.41 |
+| 64 | TS 5.0.0 (a) | 180 | 206 | 315 | 1.00 | 1.00 |
+| 64 | P5-108 (b) filter(keepUserModels) | 512 | 574 | 113 | 2.85 | 0.36 |
+| 64 | P5-108 (b) filter(() => true) | 541 | 575 | 110 | 3.01 | 0.35 |
+| 64 | P5-108 (c) fork | 464 | 527 | 129 | 2.58 | 0.41 |
+
+Side by side with P5-97 (p50 x TS 5.0.0 (a), N = 1/16/64):
+
+| set | P5-97 (b) keepUserModels | P5-108 (b) keepUserModels | P5-108 (b) `() => true` | P5-97 (c) fork | P5-108 (c) fork |
+|---|---|---|---|---|---|
+| concerto-core-test-data | n/a (throws) | 1.46 / 1.38 / 1.34 | 1.51 / 1.39 / 1.37 | 0.66 / 0.60 / 0.57 | 0.60 / 0.61 / 0.54 |
+| conformance | 2.19 / 2.11 / 1.86 | 2.09 / 1.89 / 1.95 | 2.13 / 2.16 / 1.90 | 1.00 / 0.81 / 0.87 | 0.93 / 0.86 / 0.82 |
+| synthetic-large | 4.11 / 3.62 / 3.59 | 3.28 / 2.94 / 2.85 | 3.31 / 2.92 / 3.01 | 3.70 / 3.29 / 3.44 | 3.07 / 2.60 / 2.58 |
+
+`filter(() => true)` costs the same as the workaround predicate, within the
+noise, on every set and N: the fix does not slow the filter path. It is
+1.37-1.51x TS 5.0.0's p50 on concerto-core-test-data, 1.90-2.16x on
+conformance and 2.92-3.31x on synthetic-large. Fork stays the fastest engine
+approach. The synthetic-large ratios are lower than in P5-97's run for every
+side, fork included (a path this task does not touch), so that shift is most
+likely run-to-run noise.
+
+## Memory per held manager (P5-108)
+
+| set | side | WASM KB | RSS KB | JS heap KB |
+|---|---|---:|---:|---:|
+| concerto-core-test-data | TS 5.0.0 (a) | 0.0 | 433.4 | 303.1 |
+| concerto-core-test-data | P5-108 (b) filter(keepUserModels) | 42.2 | 159.5 | 62.4 |
+| concerto-core-test-data | P5-108 (b) filter(() => true) | 42.2 | 160.8 | 62.3 |
+| concerto-core-test-data | P5-108 (c) fork | 35.8 | 138.8 | 60.5 |
+| conformance | TS 5.0.0 (a) | 0.0 | 361.3 | 161.2 |
+| conformance | P5-108 (b) filter(keepUserModels) | 32.6 | 166.0 | 71.8 |
+| conformance | P5-108 (b) filter(() => true) | 32.6 | -45.8 | 71.7 |
+| conformance | P5-108 (c) fork | 24.3 | 50.8 | 67.8 |
+| synthetic-large | TS 5.0.0 (a) | 0.0 | 514.0 | 410.0 |
+| synthetic-large | P5-108 (b) filter(keepUserModels) | 58.2 | 161.3 | 22.0 |
+| synthetic-large | P5-108 (b) filter(() => true) | 58.2 | 166.4 | 21.9 |
+| synthetic-large | P5-108 (c) fork | 42.2 | 39.7 | 18.8 |
+
+`filter(() => true)` holds the same WASM memory per manager as the workaround
+predicate (32.6-58.2 KB per set). The negative RSS figure on conformance (b) `() => true` is
+allocator noise (RSS moves with page reuse), as in P5-97's tables.
+
 # P5-97: server reuse, fork() from a base, filter fast path, internal handle release (2026-10-03)
 
 Task P5-97 (accordproject/concerto-rust#448) adds `ModelManager.fork()`, a

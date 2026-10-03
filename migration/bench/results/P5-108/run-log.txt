@@ -1,0 +1,7 @@
+12:51:46 time phase (load 5.52 3.61)
+12:52:57 time round 1 done (load 4.61 3.84)
+12:54:00 time round 2 done (load 4.54 3.94)
+12:55:02 time round 3 done (load 4.02 3.87)
+12:55:02 memory phase (load 4.02 3.87)
+12:55:14 memory done (load 3.82 3.82)
+12:55:14 p5108-run done (load 3.82 3.82)

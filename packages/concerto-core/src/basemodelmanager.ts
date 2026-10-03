@@ -1682,6 +1682,14 @@ class BaseModelManager {
      *
      * ModelFiles with no declarations after filtering will be removed.
      *
+     * The model files the new ModelManager holds from its constructor (the
+     * decorator and root models, and the metamodel under `addMetamodel`)
+     * are kept whole: the predicate is not called on their declarations
+     * (an import of one is always kept), and this manager's copies are not
+     * added again (BC-53, P5-108,
+     * accordproject/concerto-rust#466; v5.0.0 re-added the decorator
+     * model and threw).
+     *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @param {Object} [options] - options for the filter method
      * @param {boolean} [options.disableValidation] — If true then the model files are not validated
@@ -1690,12 +1698,20 @@ class BaseModelManager {
     filter(predicate, options?){
         const modelManager = new BaseModelManager({...this.options}, this.processFile);
         const filteredModels: ModelFileInstance[] = [];
+        // BC-53: a declaration of a file the new manager holds from its
+        // constructor is kept without asking `predicate`, so an import of
+        // one (a user type extending `Decorator`) is never pruned while the
+        // file it names stays whole.
+        const keep = (declaration) =>
+            modelManager.modelFiles[declaration.getNamespace()] !== undefined || predicate(declaration);
 
         for (const modelFile of Object.values(this.modelFiles) as ModelFileInstance[]) {
-            if (modelFile.isSystemModelFile()) {
+            // BC-53: skip every file the new manager's constructor already
+            // added, not only the system root model.
+            if (modelFile.isSystemModelFile() || modelManager.modelFiles[modelFile.getNamespace()] !== undefined) {
                 continue;
             }
-            const filtered = modelFile.filter(predicate, modelManager);
+            const filtered = modelFile.filter(keep, modelManager);
             if (filtered) {
                 filteredModels.push(filtered);
             }

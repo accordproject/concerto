@@ -609,11 +609,19 @@ module.exports = [
             other.fromAst({ ...ast, models: [ast.models[2], ast.models[0], ast.models[1]] });
             const afterFromAst = other.getNamespaces();
             other.addCTOModel(cto('org.d'), 'd.cto');
-            // v5.0.0's filter() rejects a ModelManager's own decorator model.
+            // v5.0.0's filter() rejects a ModelManager's own decorator model;
+            // src keeps the constructor-held models whole (P5-108, BC-53).
             const filtered = probe(() => mm.filter((d) => d.getName() !== 'C_org_c').getNamespaces());
             return [before, afterFromAst, other.getNamespaces(), filtered, mm.getNamespaces()];
         },
         expect: { ok: [
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.z@1.0.0'],
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.c@1.0.0', 'org.a@1.0.0', 'org.b@1.0.0'],
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.c@1.0.0', 'org.a@1.0.0', 'org.b@1.0.0', 'org.d@1.0.0'],
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.a@1.0.0', 'org.b@1.0.0'],
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.a@1.0.0', 'org.b@1.0.0', 'org.c@1.0.0'],
+        ] },
+        reference: { ok: [
             ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.z@1.0.0'],
             ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.c@1.0.0', 'org.a@1.0.0', 'org.b@1.0.0'],
             ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.c@1.0.0', 'org.a@1.0.0', 'org.b@1.0.0', 'org.d@1.0.0'],
