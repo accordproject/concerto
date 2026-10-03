@@ -204,6 +204,14 @@ reason, who is affected and the upgrade step for each one.
   the type declarations. (BC-48)
 - **Replacing `ClassDeclaration` methods at runtime is not supported.** The
   identifier walk no longer calls replaced methods. (BC-50)
+- **The `ModelUtil` type predicates, scalar and decorator validation and the
+  subclass queries answer from the engine's model.** `ModelUtil.isAssignableTo`,
+  `isEnum`, `isMap`, `isScalar` and `isValidMapKeyScalar`,
+  `ScalarDeclaration.validate()`, decorator validation and
+  `ClassDeclaration.getAssignableClassDeclarations()` and
+  `getDirectSubclasses()` no longer call replaced `getType`, `getSuperType`
+  or `getModelFiles` methods, and answer only for a `ModelFile` registered in
+  its `ModelManager`. (BC-52)
 
 ### Lazy views and internals
 

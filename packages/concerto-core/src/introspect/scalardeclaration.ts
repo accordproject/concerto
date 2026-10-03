@@ -69,7 +69,15 @@ class ScalarDeclaration extends Declaration {
     validate() {
         super.validate();
 
-        rust.scalarDeclarationValidate(this);
+        // P5-106 (BC-52): answered by the engine from its arena, by this
+        // declaration's handle; a replaced `getModelFile` or
+        // `getAllDeclarations` method is not called.
+        const views = engineViews();
+        const ref = views.declarationArenaRef(this);
+        if (ref === undefined) {
+            throw views.notInArena('ScalarDeclaration.validate');
+        }
+        ref.handle.scalarDeclarationValidate(ref.id);
     }
 
     /**

@@ -1,0 +1,174 @@
+{
+  "rounds": [
+    1,
+    2,
+    3
+  ],
+  "rows": [
+    {
+      "op": "add_array_value",
+      "set": "concerto-core-test-data",
+      "tsUs": 18.7282,
+      "beforeUs": 43.51159090909092,
+      "afterUs": 35.773745454545455,
+      "xBefore": 2.306436486748352,
+      "xAfter": 1.9078511355120642,
+      "crossingsBefore": 6.345454545454546,
+      "crossingsAfter": 6.381818181818182
+    },
+    {
+      "op": "add_array_value",
+      "set": "conformance",
+      "tsUs": 1.5075,
+      "beforeUs": 3.87375,
+      "afterUs": 4.57075,
+      "xBefore": 2.5696517412935322,
+      "xAfter": 3.032006633499171,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "add_array_value",
+      "set": "synthetic-large",
+      "tsUs": 0.8297683333333334,
+      "beforeUs": 2.51628,
+      "afterUs": 2.488415,
+      "xBefore": 3.032509073817792,
+      "xAfter": 2.9168944745621768,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "set_property_value",
+      "set": "concerto-core-test-data",
+      "tsUs": 2.270402920962199,
+      "beforeUs": 2.562749140893471,
+      "afterUs": 2.4508823024054984,
+      "xBefore": 1.1287640256414817,
+      "xAfter": 1.085639013222538,
+      "crossingsBefore": 0.23711340206185566,
+      "crossingsAfter": 0.23711340206185566
+    },
+    {
+      "op": "set_property_value",
+      "set": "conformance",
+      "tsUs": 0.81065,
+      "beforeUs": 1.8347333333333335,
+      "afterUs": 1.7911,
+      "xBefore": 2.2623154591488452,
+      "xAfter": 2.209461543206069,
+      "crossingsBefore": 0.26666666666666666,
+      "crossingsAfter": 0.26666666666666666
+    },
+    {
+      "op": "set_property_value",
+      "set": "synthetic-large",
+      "tsUs": 0.7712591727818546,
+      "beforeUs": 1.1933035356904604,
+      "afterUs": 1.251991661107405,
+      "xBefore": 1.547214707847602,
+      "xAfter": 1.6301033280420314,
+      "crossingsBefore": 0.19946631087391595,
+      "crossingsAfter": 0.19946631087391595
+    },
+    {
+      "op": "new_resource",
+      "set": "concerto-core-test-data",
+      "tsUs": 8.348779166666667,
+      "beforeUs": 9.940045833333334,
+      "afterUs": 9.860766666666667,
+      "xBefore": 1.1905987252627257,
+      "xAfter": 1.1455242707641387,
+      "crossingsBefore": 2.4916666666666667,
+      "crossingsAfter": 2.4916666666666667
+    },
+    {
+      "op": "new_resource",
+      "set": "conformance",
+      "tsUs": 4.894181818181818,
+      "beforeUs": 5.074431818181818,
+      "afterUs": 5.092329545454546,
+      "xBefore": 1.0368294449810536,
+      "xAfter": 1.0698758764924545,
+      "crossingsBefore": 1.1818181818181817,
+      "crossingsAfter": 1.1818181818181817
+    },
+    {
+      "op": "new_resource",
+      "set": "synthetic-large",
+      "tsUs": 3.4414216666666664,
+      "beforeUs": 4.41153,
+      "afterUs": 4.229995000000001,
+      "xBefore": 1.1817160834209506,
+      "xAfter": 1.224006146743005,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "get_assignable_class_declarations",
+      "set": "concerto-core-test-data",
+      "tsUs": 34.246221874999996,
+      "beforeUs": 1038.0841812499998,
+      "afterUs": 3.096828125,
+      "xBefore": 30.312370954058707,
+      "xAfter": 0.09031802048607594,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "get_assignable_class_declarations",
+      "set": "conformance",
+      "tsUs": 17.619226415094342,
+      "beforeUs": 380.77536792452827,
+      "afterUs": 2.1053867924528302,
+      "xBefore": 21.6113556267328,
+      "xAfter": 0.12031683236641452,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "get_assignable_class_declarations",
+      "set": "synthetic-large",
+      "tsUs": 44.20150496688742,
+      "beforeUs": 1881.9851937086094,
+      "afterUs": 1.7279337748344372,
+      "xBefore": 42.72733829342896,
+      "xAfter": 0.03899928374214239,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "get_direct_subclasses",
+      "set": "concerto-core-test-data",
+      "tsUs": 33.200209375,
+      "beforeUs": 1035.3918156250002,
+      "afterUs": 1.3914687499999998,
+      "xBefore": 31.40283076151534,
+      "xAfter": 0.04172332093551271,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "get_direct_subclasses",
+      "set": "conformance",
+      "tsUs": 16.684179245283016,
+      "beforeUs": 375.79730188679247,
+      "afterUs": 1.0893867924528302,
+      "xBefore": 22.524170734562123,
+      "xAfter": 0.062309905089963,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "get_direct_subclasses",
+      "set": "synthetic-large",
+      "tsUs": 43.09633940397351,
+      "beforeUs": 2001.9777698675493,
+      "afterUs": 1.0052284768211919,
+      "xBefore": 46.43061091538484,
+      "xAfter": 0.023382888230277548,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    }
+  ]
+}

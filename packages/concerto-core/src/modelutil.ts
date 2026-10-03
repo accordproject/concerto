@@ -18,7 +18,7 @@ import semver from 'semver';
 /* eslint-disable no-unused-vars */
 import type ModelFile from './introspect/modelfile';
 /* eslint-enable no-unused-vars */
-import { rust } from './engineloader';
+import { rust, engineViews } from './engineloader';
 import type { EngineBindings } from './engine/bindings';
 
 // P5-06: the other pure string-to-value members below cross into the engine
@@ -70,6 +70,28 @@ const PRIVATE_RESERVED_PROPERTIES = [
     '$identifierFieldName', '$imports', '$superTypes', '$id',
 ];
 const ASSIGNABLE_RESERVED_PROPERTIES = ['$identifier', '$timestamp'];
+
+/**
+ * P5-106 (BC-52): `ModelUtil.isEnum`, `isMap` and `isScalar` resolve
+ * `field.getParent().getModelFile().getType(field.getType())` in the
+ * engine's arena, by the handle of that model file and the field's type
+ * name (a Property, or a MapKeyType or MapValueType, whose parent is the
+ * MapDeclaration); a replaced `getType` method is not called. `undefined`
+ * stands for a type that is not found, as when the model file is outside
+ * the arena (it resolves no type).
+ * @param {Field} field - the field
+ * @param {string} binding - the handle method answering for a found type
+ * @return {boolean|undefined} the answer, or undefined when the type is not found
+ */
+function fieldTypeIs(field, binding: 'modelUtilIsEnum' | 'modelUtilIsMap' | 'modelUtilIsScalar'): boolean | undefined {
+    const modelFile = field.getParent().getModelFile();
+    const type = field.getType();
+    const file = engineViews().modelFileArenaRef(modelFile);
+    if (file === undefined || (type !== null && type !== undefined && typeof type !== 'string')) {
+        return undefined;
+    }
+    return file.handle[binding](file.id, type);
+}
 
 /**
  * Internal Model Utility Class
@@ -176,7 +198,27 @@ class ModelUtil {
      * @private
      */
     static isAssignableTo(modelFile, typeName, property): any {
-        return rust.modelUtilIsAssignableTo(modelFile, typeName, property);
+        // P5-106 (BC-52): the type is resolved by the engine from its arena,
+        // by the handle of `modelFile` (engine/views.ts, "Arena handles of
+        // views"); a replaced `getType` or `getAllSuperTypeDeclarations`
+        // method is not called. The property's own type is still read
+        // through `getFullyQualifiedTypeName` (the serializer passes a
+        // relationship map value's stand-in), and a direct match or a
+        // primitive on either side is decided here, with no crossing.
+        // `typeName` is converted with `String()`, as the JS-object binding
+        // did.
+        const propertyTypeName = property.getFullyQualifiedTypeName();
+        const name = String(typeName);
+        const isDirectMatch = name === propertyTypeName;
+        if (isDirectMatch || ModelUtil.isPrimitiveType(name) || ModelUtil.isPrimitiveType(propertyTypeName)) {
+            return isDirectMatch;
+        }
+        const file = engineViews().modelFileArenaRef(modelFile);
+        if (file === undefined) {
+            // A model file outside the arena resolves no type.
+            throw new Error(`Cannot find type ${name}`);
+        }
+        return file.handle.modelUtilIsAssignableTo(file.id, name, String(propertyTypeName));
     }
 
     /**
@@ -196,7 +238,7 @@ class ModelUtil {
      * @private
      */
     static isEnum(field): any {
-        return rust.modelUtilIsEnum(field);
+        return fieldTypeIs(field, 'modelUtilIsEnum');
     }
 
     /**
@@ -206,7 +248,7 @@ class ModelUtil {
      * @private
      */
     static isMap(field): any {
-        return rust.modelUtilIsMap(field);
+        return fieldTypeIs(field, 'modelUtilIsMap');
     }
 
     /**
@@ -216,7 +258,7 @@ class ModelUtil {
      * @private
      */
     static isScalar(field): any {
-        return rust.modelUtilIsScalar(field);
+        return fieldTypeIs(field, 'modelUtilIsScalar');
     }
 
     /**
@@ -291,7 +333,18 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
     static isValidMapKeyScalar(decl): any {
-        return rust.modelUtilIsValidMapKeyScalar(decl);
+        // `decl?.isScalarDeclaration?.() && ...`: a nullish declaration is
+        // undefined. P5-106 (BC-52): any other declaration is answered by
+        // the engine from its arena, by the declaration's handle.
+        if (decl === null || decl === undefined) {
+            return undefined;
+        }
+        const views = engineViews();
+        const ref = views.declarationArenaRef(decl);
+        if (ref === undefined) {
+            throw views.notInArena('ModelUtil.isValidMapKeyScalar');
+        }
+        return ref.handle.modelUtilIsValidMapKeyScalar(ref.id);
     }
 
     /**

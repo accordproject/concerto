@@ -33,12 +33,10 @@
 // cached per model manager, until the set of `ModelFile` *instances* or
 // the rustHandle changes.
 
-import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 import { rust } from './index';
 import { encodeValue, encodeBytes, decodeValue, materializeCompact, newTypeCache } from './serializer-codec';
 import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import Factory from '../factory';
-import Serializer from '../serializer';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -231,47 +229,25 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
 }
 
 /**
- * The engine-side model manager `validateMetaModel` validates against: the
- * metamodel alone, as `newMetaModelManager()` holds it (P5-11,
- * accordproject/concerto-rust#287). Built on first use and kept: the
- * metamodel is fixed, and validating an instance does not change a handle.
- */
-let metaModelHandle: any;
-
-/**
- * The wire text of the options `validateMetaModel`'s Serializer uses: a
- * Serializer's own defaults (`new Serializer(factory, modelManager)` with
- * no options), which are fixed, so their text is computed once (P5-101,
- * E-7).
- */
-let metaModelOptionsText: string | undefined;
-
-/**
  * `validateMetaModel(input)` (introspect/metamodel.ts) in one engine call
  * (P5-11, accordproject/concerto-rust#287): validates the metamodel
  * instance `input` as `Serializer.fromJSON` does for a Serializer over
  * `newMetaModelManager()`, without building that model manager, its Factory
- * and its Serializer on every call. P5-101 (D-3, E-7): through the engine's
- * validate-only binding (`validateInstance`, mode 0), which throws what
- * `fromJSON` throws, in the same cases and with the same class, without
- * building and serialising a resource only to discard it. Throws
+ * and its Serializer on every call. P5-102 (F-7,
+ * accordproject/concerto-rust#456): the engine runs it on its one resident
+ * metamodel manager (`validateMetaModelInstance`, with the `'serializer'`
+ * preset: a Serializer's own defaults), so this module keeps no metamodel
+ * handle of its own; as P5-101 (D-3, E-7) made it, the check is
+ * validate-only (`validateInstance`'s mode 0), which throws what `fromJSON`
+ * throws, in the same cases and with the same class, without building and
+ * serialising a resource only to discard it. Throws
  * `EngineFastPathUnsupported` for an input it cannot cross, which the
  * caller then validates through its TS body.
  * @param {object} input the metamodel instance in JSON
  */
 function validateMetaModel(input: unknown): void {
-    if (!metaModelHandle) {
-        const handle = new rust.ModelManagerHandle();
-        // The metamodel's constant AST: plain JSON, with no lone surrogate.
-        handle.addModel(JSON.stringify(MetaModelUtil.metaModelAst), 'concerto.metamodel');
-        metaModelHandle = handle;
-    }
-    if (metaModelOptionsText === undefined) {
-        // Serializer's constructor only checks that both are given.
-        metaModelOptionsText = JSON.stringify(encodeValue(new Serializer({} as any, {} as any).defaultOptions));
-    }
     try {
-        metaModelHandle.validateInstance(JSON.stringify(encodeValue(input)), metaModelOptionsText, undefined, 0);
+        rust.validateMetaModelInstance(JSON.stringify(encodeValue(input)), 'serializer');
     } catch (err) {
         throw asUnsupported(err);
     }

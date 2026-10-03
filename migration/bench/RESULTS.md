@@ -1,3 +1,55 @@
+# P5-106: the JsContext callback bindings retired, BC-52 (2026-10-03)
+
+Task P5-106 (accordproject/concerto-rust#460) answers `ModelUtil.isAssignableTo`,
+`isEnum`, `isMap`, `isScalar` and `isValidMapKeyScalar`, `ScalarDeclaration.validate`,
+decorator validation and the subclass queries from the engine's arena, by
+handle, instead of through JS callbacks. This measures the rows that call
+them: the `ModelUtil.isAssignableTo`-heavy instance rows (`add_array_value`,
+`set_property_value`, `new_resource`; P5-96 row #12) and the subclass
+queries (`get_assignable_class_declarations`, `get_direct_subclasses`, ops
+added to `p515-sweep.mjs` by this task: each class declaration the set's
+`pairs` name, once). Raw outputs in `results/P5-106/` (`before/`, `after/`,
+`ts-reference/`, `tables.md`, `tables.json`, `run-log.txt`).
+
+| | |
+|---|---|
+| Machine | Local (worker local-matt), Intel Core i7-7820HQ @ 2.90GHz, 8 logical CPUs, macOS 13.7.8, Node 22.23.2; other jobs running (load average 3.6 to 5.2 during the run) |
+| Before | the integration head: `concerto` `f1fab513d` (concerto-core dist), `concerto-rust` `70fc2d5` (engine `concerto_wasm.wasm` 3,746,168 bytes) |
+| After (P5-106) | `concerto-rust` `8e19bc7` (engine 3,754,783 bytes) and this branch's concerto-core dist |
+| TS reference | Published `@accordproject/concerto-core` 5.0.0, re-measured in this run |
+| Driver | `p5106-run.sh`: `p515-sweep.mjs --ops ... --samples 30 --warmup 5`, three rounds (TS 5.0.0, before, after; reversed every other round), then `--mode count` on both engine sides. Tables: `p5100-table.mjs`. |
+| Noise | The machine was shared, so single-row ratios move by up to about ±30% between rounds (cv up to 75% on the 1 us rows); each figure is the median over three rounds. |
+
+**The subclass queries drop from 0.4 to 2 ms per call (21x to 46x TS 5.0.0)
+to 1 to 3 us (0.02x to 0.12x TS 5.0.0).** Before, each call walked every
+declaration of the model set through about 3 JS callbacks, uncached; now
+it is one crossing that reads the manager's cached subclass map. The
+instance rows move within the noise, apart from `add_array_value` on
+concerto-core-test-data (2.31x to 1.91x): `modelUtilIsAssignableTo` (x1.5
+per item before, with its nested `modelFileGetTypeName` calls) no longer
+crosses for a direct match or a primitive, and otherwise crosses once
+without callbacks. Its crossings per item stay at 6.3 to 6.4, since
+`Property.getFullyQualifiedTypeName` (`modelFileGetFullyQualifiedTypeName`,
+x2.7) is now called from TS rather than from inside the engine.
+
+| op | set | TS 5.0.0 | x TS before | **x TS after** | before | after | crossings/item before | after |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| add_array_value | concerto-core-test-data | 18.73 us | 2.31 | **1.91** | 43.51 us | 35.77 us | 6.3 | 6.4 |
+| add_array_value | conformance | 1.51 us | 2.57 | **3.03** | 3.87 us | 4.57 us | 1.0 | 1.0 |
+| add_array_value | synthetic-large | 0.83 us | 3.03 | **2.92** | 2.52 us | 2.49 us | 1.0 | 1.0 |
+| set_property_value | concerto-core-test-data | 2.27 us | 1.13 | **1.09** | 2.56 us | 2.45 us | 0.2 | 0.2 |
+| set_property_value | conformance | 0.81 us | 2.26 | **2.21** | 1.83 us | 1.79 us | 0.3 | 0.3 |
+| set_property_value | synthetic-large | 0.77 us | 1.55 | **1.63** | 1.19 us | 1.25 us | 0.2 | 0.2 |
+| new_resource | concerto-core-test-data | 8.35 us | 1.19 | **1.15** | 9.94 us | 9.86 us | 2.5 | 2.5 |
+| new_resource | conformance | 4.89 us | 1.04 | **1.07** | 5.07 us | 5.09 us | 1.2 | 1.2 |
+| new_resource | synthetic-large | 3.44 us | 1.18 | **1.22** | 4.41 us | 4.23 us | 1.0 | 1.0 |
+| get_assignable_class_declarations | concerto-core-test-data | 34.25 us | 30.31 | **0.09** | 1.04 ms | 3.10 us | 1.0 | 1.0 |
+| get_assignable_class_declarations | conformance | 17.62 us | 21.61 | **0.12** | 380.78 us | 2.11 us | 1.0 | 1.0 |
+| get_assignable_class_declarations | synthetic-large | 44.20 us | 42.73 | **0.04** | 1.88 ms | 1.73 us | 1.0 | 1.0 |
+| get_direct_subclasses | concerto-core-test-data | 33.20 us | 31.40 | **0.04** | 1.04 ms | 1.39 us | 1.0 | 1.0 |
+| get_direct_subclasses | conformance | 16.68 us | 22.52 | **0.06** | 375.80 us | 1.09 us | 1.0 | 1.0 |
+| get_direct_subclasses | synthetic-large | 43.10 us | 46.43 | **0.02** | 2.00 ms | 1.01 us | 1.0 | 1.0 |
+
 # P5-108: filter(() => true) after BC-53, next to P5-97 (2026-10-03)
 
 Task P5-108 (accordproject/concerto-rust#466) fixes `filter`, which re-added
