@@ -47,7 +47,6 @@ export type FilterFunction = (declaration: Declaration) => boolean;
 // relies on.
 import { createRequire } from 'module';
 import type { EngineBindings } from '../engine/bindings';
-import type { EngineErrorFlags } from '../engine/errors';
 declare const __webpack_require__: unknown;
 declare const __non_webpack_require__: NodeRequire;
 // P5-06: memoised per specifier (see introspect/property.ts).
@@ -450,7 +449,7 @@ class ModelFile extends Decorated {
      */
     _engineValidationError(e: unknown): unknown {
         if (e instanceof IllegalModelException) {
-            const needsModelFile = (e as IllegalModelException & EngineErrorFlags).needsModelFile;
+            const needsModelFile = (e as unknown as { needsModelFile?: boolean }).needsModelFile;
             if (needsModelFile !== false && e.getFileName() !== this.getName()) {
                 return new IllegalModelException(e.getShortMessage(), this, e.getFileLocation());
             }
