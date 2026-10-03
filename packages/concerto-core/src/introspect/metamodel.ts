@@ -71,11 +71,18 @@ function validateMetaModel(input) {
         }
     }
     const metaModelManager = newMetaModelManager();
-    const factory = new Factory(metaModelManager);
-    const serializer = new Serializer(factory, metaModelManager);
+    try {
+        const factory = new Factory(metaModelManager);
+        const serializer = new Serializer(factory, metaModelManager);
 
-    // validate the metaModel
-    serializer.fromJSON(input);
+        // validate the metaModel
+        serializer.fromJSON(input);
+    } finally {
+        // P5-97 (accordproject/concerto-rust#448): the manager is this
+        // function's own and nothing built from it escapes, so its engine
+        // handle is released here rather than left to the garbage collector.
+        loadEngine('../engine/handles').releaseHandle((metaModelManager as unknown as { rustHandle?: { free(): void } }).rustHandle);
+    }
 
     return input;
 }

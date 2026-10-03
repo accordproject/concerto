@@ -78,6 +78,24 @@ const constructedModelFiles = new WeakSet<object>();
 const engineManagers = new WeakSet<object>();
 
 /**
+ * P5-97 (accordproject/concerto-rust#448): a view of a model file another
+ * manager already loaded, which the next ModelFile constructor call builds
+ * (`ModelFile._sharedView`): the source file, and the engine stage or
+ * registration of the same engine-side file in the new manager.
+ */
+interface SharedViewSource {
+    source: ModelFile;
+    stage: { handle: object; id: number } | undefined;
+    committed: object | undefined;
+}
+
+/**
+ * The view `ModelFile._sharedView` is building; read and cleared by the
+ * constructor it calls.
+ */
+let sharedViewSource: SharedViewSource | null = null;
+
+/**
  * Class representing a Model File. A Model File contains a single namespace
  * and a set of model elements: assets, transactions etc.
  *
@@ -113,6 +131,9 @@ class ModelFile extends Decorated {
      */
     constructor(modelManager: BaseModelManager, ast: AstNode, definitions?: string | null, fileName?: string | null) {
         super(ast);
+        // P5-97: set only for `ModelFile._sharedView`'s own call.
+        const shared = sharedViewSource;
+        sharedViewSource = null;
         // P5-35 (BC-47): only a BaseModelManager has the engine mirror this
         // ModelFile is loaded, read and validated through.
         if (typeof modelManager !== 'object' || modelManager === null || !engineManagers.has(modelManager)) {
@@ -171,21 +192,37 @@ class ModelFile extends Decorated {
         // IllegalModelException here, before any part of it is walked.
         // P5-92: what the check hands the staging step is the AST's JSON
         // text, or the AST in the engine's compact layout.
-        const checkedText: string | object | undefined = views.checkAstShape(this);
-        const lazy: boolean = views.stageModelFile(this, checkedText);
+        // P5-97 (accordproject/concerto-rust#448): a view of a file another
+        // manager already loaded (`_sharedView`) is neither checked nor
+        // staged again: the engine-side file is the same, shared, and the
+        // header is copied from the source view.
+        let lazy: boolean;
+        if (shared !== null) {
+            lazy = views.adoptSharedView(this, shared.source, shared.stage, shared.committed);
+        } else {
+            const checkedText: string | object | undefined = views.checkAstShape(this);
+            lazy = views.stageModelFile(this, checkedText);
+        }
         if (!lazy) {
             views.settleDeclarationFields(this);
         }
         // Set up the decorators.
         this.process();
         // Populate from the AST.
-        if (lazy) {
+        if (shared !== null) {
+            this._copyHeader(shared.source);
+            if (!lazy && this.ast.declarations) {
+                this._fromAstDeclarations(this.ast);
+            }
+        } else if (lazy) {
             this._fromAstHeader(this.ast);
         } else {
             this.fromAst(this.ast);
         }
-        // Check version compatibility
-        this.isCompatibleVersion();
+        // Check version compatibility (P5-97: a view's source was checked)
+        if (shared === null) {
+            this.isCompatibleVersion();
+        }
 
         if (lazy) {
             views.deferDeclarations(this);
@@ -200,6 +237,58 @@ class ModelFile extends Decorated {
             let localType = namespace + '.' + classDeclaration.getName();
             this.localTypes.set(localType, this.declarations[index]);
         }
+    }
+
+    /**
+     * P5-97 (accordproject/concerto-rust#448): a new ModelFile of `manager`
+     * that is a view of `source`, a model file another manager already
+     * loaded: the same AST object and file name, with `definitions`, and
+     * the same header (namespace, version, imports), copied from `source`
+     * without an engine call. The engine-side file is the one `source`'s
+     * manager holds, shared: `stage` is its stage in `manager`'s
+     * rustHandle (`BaseModelManager.filter`, which registers it from there),
+     * or `committed` the rustHandle that already holds it
+     * (`BaseModelManager.fork`). The declaration views are built on first
+     * use, as for any lazily built file (P5-06a), unless `manager` has
+     * decorator factories and `source` was built eagerly; then they are
+     * built now, as the constructor builds them.
+     * @param {BaseModelManager} manager the manager the view belongs to
+     * @param {ModelFile} source the model file it is a view of
+     * @param {string} [definitions] the view's definitions
+     * @param {object} [stage] the shared file's stage in manager's rustHandle
+     * @param {object} [committed] the rustHandle that holds the shared file
+     * @return {ModelFile} the view
+     * @private
+     * @internal
+     */
+    static _sharedView(manager: BaseModelManager, source: ModelFile, definitions: string | null | undefined,
+        stage?: { handle: object; id: number }, committed?: object): ModelFile {
+        sharedViewSource = { source, stage, committed };
+        try {
+            return new ModelFile(manager, source.ast, definitions, source.fileName);
+        } finally {
+            sharedViewSource = null;
+        }
+    }
+
+    /**
+     * P5-97: `_fromAstHeader`'s fields, copied from `source`, a view of the
+     * same AST (`_sharedView`), with no engine call: `namespace`,
+     * `version`, `concertoVersion`, and copies of `imports`,
+     * `importShortNames`, `importWildcardNamespaces` and `importUriMap`.
+     * @param {ModelFile} source the view whose header is copied
+     * @private
+     * @internal
+     */
+    _copyHeader(source: ModelFile) {
+        this.namespace = source.namespace;
+        this.version = source.version;
+        this.concertoVersion = source.concertoVersion;
+        this.imports = source.imports.slice();
+        this.importShortNames = new Map(source.importShortNames);
+        this.importWildcardNamespaces = source.importWildcardNamespaces.slice();
+        this.importUriMap = { ...source.importUriMap };
+        loadEngine('../engine/views').copyImportNames(this, source);
     }
 
     /**
@@ -1164,14 +1253,6 @@ class ModelFile extends Decorated {
         if (id !== undefined) {
             const manager = this.modelManager as unknown as { rustHandle: { [binding: string]: (...args: any[]) => any } };
             const sourceManager = this.getModelManager();
-            // A scratch handle, never `modelManager`'s own `rustHandle`:
-            // `filter`'s result is returned *detached* (TS never adds it
-            // to `modelManager` here -- `BaseModelManager.filter` does
-            // that later, via `addModelFiles`), so writing straight into
-            // `modelManager`'s real mirror here would register a
-            // namespace there ahead of the TS side, breaking the
-            // namespace-set invariant `_rustHandleMatchesModelFiles` relies on.
-            const scratch = new (rust.ModelManagerHandle as unknown as { new (): { [binding: string]: (...args: any[]) => any } })();
             // The Rust predicate carries no Declaration objects of its
             // own -- it calls back with each candidate's
             // fully-qualified name (its own namespace, not necessarily
@@ -1188,11 +1269,48 @@ class ModelFile extends Decorated {
                 }
                 return predicate(decl);
             };
-            const filteredId = manager.rustHandle.modelFileFilter(id, wrappedPredicate, scratch);
-            if (filteredId === undefined) {
-                return null;
+            const handles = loadEngine('../engine/handles');
+            const target = (modelManager as unknown as { rustHandle?: { [binding: string]: (...args: any[]) => any } }).rustHandle;
+            if (typeof manager.rustHandle.modelFileFilterStaged === 'function' && target && target !== manager.rustHandle) {
+                // P5-97 (accordproject/concerto-rust#448): a file the filter
+                // keeps exactly as it is (every declaration kept, every
+                // import unchanged) is staged, shared, in `modelManager`'s
+                // own rustHandle (staging registers nothing there), and its
+                // view is built from this file's own AST and header: no
+                // JSON round trip. Any other result comes back as its AST,
+                // as `modelFileSnapshot` returned it, with no scratch handle.
+                const result: string | undefined = handles.withEngineCallbacks(
+                    () => manager.rustHandle.modelFileFilterStaged(id, wrappedPredicate, target));
+                if (result === undefined) {
+                    return null;
+                }
+                const filtered = JSON.parse(result);
+                if (filtered.stage !== undefined) {
+                    return ModelFile._sharedView(modelManager, this, undefined, { handle: target, id: filtered.stage });
+                }
+                return new ModelFile(modelManager, filtered.ast, undefined, this.fileName);
             }
-            const filteredSnapshot = JSON.parse(scratch.modelFileSnapshot(filteredId));
+            // A scratch handle, never `modelManager`'s own `rustHandle`:
+            // `filter`'s result is returned *detached* (TS never adds it
+            // to `modelManager` here -- `BaseModelManager.filter` does
+            // that later, via `addModelFiles`), so writing straight into
+            // `modelManager`'s real mirror here would register a
+            // namespace there ahead of the TS side, breaking the
+            // namespace-set invariant `_rustHandleMatchesModelFiles` relies on.
+            // P5-97: freed here once its last use returns, not left to the
+            // garbage collector.
+            const scratch = new (rust.ModelManagerHandle as unknown as { new (): { [binding: string]: (...args: any[]) => any } })();
+            let filteredSnapshot;
+            try {
+                const filteredId = handles.withEngineCallbacks(
+                    () => manager.rustHandle.modelFileFilter(id, wrappedPredicate, scratch));
+                if (filteredId === undefined) {
+                    return null;
+                }
+                filteredSnapshot = JSON.parse(scratch.modelFileSnapshot(filteredId));
+            } finally {
+                handles.releaseHandle(scratch);
+            }
             return new ModelFile(modelManager, filteredSnapshot.ast, undefined, this.fileName);
         }
         const declarations: AstNode[] = [];
