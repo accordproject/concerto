@@ -1,0 +1,461 @@
+{
+ "tool": "sizes",
+ "esbuild": "0.27.7",
+ "node": "v22.22.2",
+ "results": [
+  {
+   "id": "o1",
+   "label": "(o) concerto-cto: Parser.parse + Printer.toCTO",
+   "raw": 166828,
+   "gzip": 36938,
+   "brotli": 25581,
+   "ran": true,
+   "output": "[4,true]",
+   "expected": "[4,true]",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "concerto-cto",
+     162323
+    ],
+    [
+     "concerto-util",
+     4015
+    ],
+    [
+     "app.mjs",
+     489
+    ]
+   ]
+  },
+  {
+   "id": "o1p",
+   "label": "(o) concerto-cto: Parser.parse only",
+   "raw": 159636,
+   "gzip": 35504,
+   "brotli": 24210,
+   "ran": true,
+   "output": "4",
+   "expected": "4",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "concerto-cto",
+     155165
+    ],
+    [
+     "concerto-util",
+     4015
+    ],
+    [
+     "app.mjs",
+     455
+    ]
+   ]
+  },
+  {
+   "id": "o1v5",
+   "label": "(o) concerto-cto 5.0.0 (npm): Parser.parse + Printer.toCTO",
+   "raw": 166818,
+   "gzip": 36928,
+   "brotli": 25578,
+   "ran": true,
+   "output": "[4,true]",
+   "expected": "[4,true]",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "@accordproject/concerto-cto",
+     162323
+    ],
+    [
+     "@accordproject/concerto-util",
+     4005
+    ],
+    [
+     "app.mjs",
+     489
+    ]
+   ]
+  },
+  {
+   "id": "o2",
+   "label": "(o) concerto-cto + browser-side resolver",
+   "raw": 165702,
+   "gzip": 37471,
+   "brotli": 26052,
+   "ran": true,
+   "output": "[0,\"org.example.p560@1.0.0\"]",
+   "expected": "[0,\"org.example.p560@1.0.0\"]",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "concerto-cto",
+     155221
+    ],
+    [
+     "resolver.ts",
+     5764
+    ],
+    [
+     "concerto-util",
+     4015
+    ],
+    [
+     "app.mjs",
+     528
+    ],
+    [
+     "names.ts",
+     173
+    ]
+   ]
+  },
+  {
+   "id": "o3",
+   "label": "(o) concerto-cto + resolver + cleaned converter (CTO -> Concertino)",
+   "raw": 172205,
+   "gzip": 39266,
+   "brotli": 27671,
+   "ran": true,
+   "output": "4",
+   "expected": "4",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "concerto-cto",
+     155221
+    ],
+    [
+     "concertino/concertinoSerializer.ts",
+     6536
+    ],
+    [
+     "resolver.ts",
+     5764
+    ],
+    [
+     "concerto-util",
+     4015
+    ],
+    [
+     "app.mjs",
+     495
+    ],
+    [
+     "names.ts",
+     173
+    ],
+    [
+     "concertino/index.ts",
+     0
+    ]
+   ]
+  },
+  {
+   "id": "ipub",
+   "label": "(i) published concertino 5.0.0 (npm), ConcertinoConverter + isValid",
+   "raw": 220331,
+   "gzip": 57770,
+   "brotli": 50457,
+   "ran": true,
+   "output": "[4,true]",
+   "expected": "[4,true]",
+   "error": null,
+   "usesNewFunction": true,
+   "topInputs": [
+    [
+     "index.mjs",
+     130017
+    ],
+    [
+     "@accordproject/concerto-core",
+     72408
+    ],
+    [
+     "chunk-AWADBCTC.mjs",
+     8303
+    ],
+    [
+     "chunk-J3RL6WS7.mjs",
+     6434
+    ],
+    [
+     "app.mjs",
+     2359
+    ],
+    [
+     "chunk-ZLCYQZTC.mjs",
+     809
+    ]
+   ]
+  },
+  {
+   "id": "ipubconv",
+   "label": "(i) published concertino 5.0.0 (npm), convertToConcertino only",
+   "raw": 134284,
+   "gzip": 40472,
+   "brotli": 35646,
+   "ran": true,
+   "output": "4",
+   "expected": "4",
+   "error": null,
+   "usesNewFunction": true,
+   "topInputs": [
+    [
+     "index.mjs",
+     124740
+    ],
+    [
+     "chunk-J3RL6WS7.mjs",
+     6434
+    ],
+    [
+     "app.mjs",
+     2300
+    ],
+    [
+     "chunk-ZLCYQZTC.mjs",
+     809
+    ]
+   ]
+  },
+  {
+   "id": "iws",
+   "label": "(i) workspace concertino (integration branch, R1 concerto-core), ConcertinoConverter + isValid",
+   "raw": 177974,
+   "gzip": 51893,
+   "brotli": 45508,
+   "ran": false,
+   "output": null,
+   "expected": "[4,true]",
+   "error": "file:///home/user/wt/P5-78/concerto/migration/spikes/P5-78/build/sizes/iws/bundle.mjs:1 | var Lr=Object.create,cr=Object.defineProperty,qr=Object.getOwnPropertyDescriptor,He=Object.getOwnPropertyNames,Ur=Object.getPrototypeOf,Fr=Object.prototype.hasOwnProperty,zr=(e,r)=>function(){return e&&(r=(0,e[",
+   "usesNewFunction": true,
+   "topInputs": [
+    [
+     "concertino",
+     145563
+    ],
+    [
+     "concerto-core",
+     30051
+    ],
+    [
+     "app.mjs",
+     2359
+    ]
+   ]
+  },
+  {
+   "id": "i1",
+   "label": "(i) cleaned converter: convertToConcertino",
+   "raw": 8778,
+   "gzip": 2500,
+   "brotli": 2255,
+   "ran": true,
+   "output": "4",
+   "expected": "4",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "concertino/concertinoSerializer.ts",
+     6478
+    ],
+    [
+     "app.mjs",
+     2299
+    ],
+    [
+     "concertino/index.ts",
+     0
+    ]
+   ]
+  },
+  {
+   "id": "i2",
+   "label": "(i) cleaned converter: both directions (ConcertinoConverter)",
+   "raw": 17380,
+   "gzip": 4313,
+   "brotli": 3869,
+   "ran": true,
+   "output": "1",
+   "expected": "1",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "concertino/metamodelSerializer.ts",
+     8115
+    ],
+    [
+     "concertino/concertinoSerializer.ts",
+     6478
+    ],
+    [
+     "app.mjs",
+     2343
+    ],
+    [
+     "concertino/index.ts",
+     236
+    ],
+    [
+     "names.ts",
+     207
+    ]
+   ]
+  },
+  {
+   "id": "i3",
+   "label": "(i) cleaned ./schema subpath: isValid (precompiled ajv)",
+   "raw": 48815,
+   "gzip": 5885,
+   "brotli": 4737,
+   "ran": true,
+   "output": "true",
+   "expected": "true",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "concertino/schema-validator.mjs",
+     47465
+    ],
+    [
+     "app.mjs",
+     1274
+    ],
+    [
+     "concertino/schema.ts",
+     75
+    ]
+   ]
+  },
+  {
+   "id": "ii",
+   "label": "(ii) runtime query layer (every function)",
+   "raw": 5476,
+   "gzip": 1872,
+   "brotli": 1701,
+   "ran": true,
+   "output": "[[\"org.example.p560@1.0.0\"],4,\"ParticipantDeclaration\",false,[\"org.example.p560@1.0.0.Party\",\"concerto@1.0.0.Participant\"],true,true,2,\"age,since,emails,tier,referrals,partyId,name,$identifier\",[0,150],\"partyId\",false,\"enum\",[\"GOLD\",\"SILVER\"],null,{},\"A party\",0,false,false,false,true,false,false,true,\"Customer\",\"org.example.p560@1.0.0\",true,false,true]",
+   "expected": "[[\"org.example.p560@1.0.0\"],4,\"ParticipantDeclaration\",false,[\"org.example.p560@1.0.0.Party\",\"concerto@1.0.0.Participant\"],true,true,2,\"age,since,emails,tier,referrals,partyId,name,$identifier\",[0,150],\"partyId\",false,\"enum\",[\"GOLD\",\"SILVER\"],null,{},\"A party\",0,false,false,false,true,false,false,true,\"Customer\",\"org.example.p560@1.0.0\",true,false,true]",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "query.ts",
+     3679
+    ],
+    [
+     "app.mjs",
+     1796
+    ]
+   ]
+  },
+  {
+   "id": "iii",
+   "label": "(iii) validator + normaliser",
+   "raw": 20925,
+   "gzip": 6822,
+   "brotli": 6172,
+   "ran": true,
+   "output": "[\"2024-01-02T03:04:05.000Z\",false]",
+   "expected": "[\"2024-01-02T03:04:05.000Z\",false]",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "validator.ts",
+     16388
+    ],
+    [
+     "query.ts",
+     2809
+    ],
+    [
+     "app.mjs",
+     1727
+    ]
+   ]
+  },
+  {
+   "id": "iv",
+   "label": "(iv) concerto-form-shaped entry: query layer + validator over a prebuilt Concertino",
+   "raw": 21555,
+   "gzip": 7051,
+   "brotli": 6373,
+   "ran": true,
+   "output": "[[\"org.example.p560@1.0.0.Customer\"],7,\"partyId\",\"A party\",true,\"GOLD\"]",
+   "expected": "[[\"org.example.p560@1.0.0.Customer\"],7,\"partyId\",\"A party\",true,\"GOLD\"]",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "validator.ts",
+     16395
+    ],
+    [
+     "query.ts",
+     3218
+    ],
+    [
+     "app.mjs",
+     1941
+    ]
+   ]
+  },
+  {
+   "id": "all",
+   "label": "all of (o)+(i)+(ii)+(iii): CTO in, validated plain JSON out",
+   "raw": 191791,
+   "gzip": 45282,
+   "brotli": 33061,
+   "ran": true,
+   "output": "[8,42]",
+   "expected": "[8,42]",
+   "error": null,
+   "usesNewFunction": false,
+   "topInputs": [
+    [
+     "concerto-cto",
+     155265
+    ],
+    [
+     "validator.ts",
+     16453
+    ],
+    [
+     "concertino/concertinoSerializer.ts",
+     6536
+    ],
+    [
+     "resolver.ts",
+     5764
+    ],
+    [
+     "concerto-util",
+     4015
+    ],
+    [
+     "query.ts",
+     2854
+    ],
+    [
+     "app.mjs",
+     730
+    ],
+    [
+     "names.ts",
+     173
+    ]
+   ]
+  }
+ ]
+}

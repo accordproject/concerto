@@ -1,0 +1,485 @@
+{
+ "tool": "speed",
+ "commit": "65538093d",
+ "node": "v22.22.2",
+ "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+ "samples": 30,
+ "rounds": [
+  {
+   "order": [
+    "ts",
+    "engine",
+    "proto",
+    "proto-n"
+   ],
+   "parts": {
+    "ts": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.41,
+       0.58,
+       0.58
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 60.7652625,
+       "cv": 0.13653243554523678
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 15.041772727272727,
+       "cv": 0.33879817328846035
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 19.319599999999998,
+       "cv": 0.45441958903818297
+      }
+     ]
+    },
+    "engine": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.41,
+       0.58,
+       0.58
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 62.449962500000005,
+       "cv": 0.16770962015946408
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 17.64553409090909,
+       "cv": 0.5992429977234954
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 26.55464,
+       "cv": 0.19660455475634192
+      }
+     ]
+    },
+    "proto": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.41,
+       0.58,
+       0.58
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 15.2978375,
+       "cv": 0.2453252569915723
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 5.372681818181818,
+       "cv": 0.6891522941330435
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 5.766921666666667,
+       "cv": 0.1868737410257222
+      }
+     ]
+    },
+    "proto-n": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.41,
+       0.58,
+       0.58
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 19.141233333333332,
+       "cv": 0.24571151018345452
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 5.270045454545454,
+       "cv": 0.5982277985954483
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 6.278625000000001,
+       "cv": 0.2169935664301608
+      }
+     ]
+    }
+   }
+  },
+  {
+   "order": [
+    "engine",
+    "proto",
+    "proto-n",
+    "ts"
+   ],
+   "parts": {
+    "engine": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.41,
+       0.58,
+       0.58
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 65.06408333333333,
+       "cv": 0.19572051783773262
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 18.074375,
+       "cv": 0.35328658964954845
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 24.993836666666667,
+       "cv": 0.05802162694411723
+      }
+     ]
+    },
+    "proto": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.41,
+       0.58,
+       0.58
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 14.610000000000001,
+       "cv": 0.44697867841523375
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 5.198045454545454,
+       "cv": 1.2081088642833864
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 9.096836666666666,
+       "cv": 0.26157387691882816
+      }
+     ]
+    },
+    "proto-n": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.41,
+       0.58,
+       0.58
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 20.964904166666667,
+       "cv": 0.35843335218095834
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 5.7219204545454545,
+       "cv": 0.5888744381853386
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 6.482905,
+       "cv": 0.20690061499553225
+      }
+     ]
+    },
+    "ts": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.41,
+       0.58,
+       0.58
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 59.09885416666667,
+       "cv": 0.1097048865714534
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 15.090329545454546,
+       "cv": 0.3015544893345305
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 18.089803333333336,
+       "cv": 0.2487338400790776
+      }
+     ]
+    }
+   }
+  },
+  {
+   "order": [
+    "proto",
+    "proto-n",
+    "ts",
+    "engine"
+   ],
+   "parts": {
+    "proto": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.53,
+       0.6,
+       0.59
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 16.504325,
+       "cv": 0.2221173124335056
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 5.080102272727273,
+       "cv": 0.9963866846767908
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 5.93599,
+       "cv": 0.1342056439842619
+      }
+     ]
+    },
+    "proto-n": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.53,
+       0.6,
+       0.59
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 29.518608333333336,
+       "cv": 0.26536917230460566
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 10.151034090909091,
+       "cv": 0.4491928004923167
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 6.751804999999999,
+       "cv": 0.13006353779587285
+      }
+     ]
+    },
+    "ts": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.53,
+       0.6,
+       0.59
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 59.714625,
+       "cv": 0.09287815291499976
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 14.365875,
+       "cv": 0.27135603678044123
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 19.34589666666667,
+       "cv": 0.09411390568052634
+      }
+     ]
+    },
+    "engine": {
+     "gate": {
+      "waited": 0,
+      "loads": [
+       0.53,
+       0.6,
+       0.59
+      ]
+     },
+     "results": [
+      {
+       "set": "concerto-core-test-data",
+       "n": 120,
+       "medianUs": 53.70269166666667,
+       "cv": 0.23894474640169705
+      },
+      {
+       "set": "conformance",
+       "n": 44,
+       "medianUs": 24.382545454545454,
+       "cv": 0.3065130135270058
+      },
+      {
+       "set": "synthetic-large",
+       "n": 300,
+       "medianUs": 27.12038166666667,
+       "cv": 0.13552971467530658
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "table": [
+  {
+   "set": "concerto-core-test-data",
+   "ts": 59.714625,
+   "tsRounds": [
+    60.77,
+    59.1,
+    59.71
+   ],
+   "engine": 62.449962500000005,
+   "engineRounds": [
+    62.45,
+    65.06,
+    53.7
+   ],
+   "proto": 15.2978375,
+   "protoRounds": [
+    15.3,
+    14.61,
+    16.5
+   ],
+   "proto-n": 20.964904166666667,
+   "proto-nRounds": [
+    19.14,
+    20.96,
+    29.52
+   ],
+   "n": 120
+  },
+  {
+   "set": "conformance",
+   "ts": 15.041772727272727,
+   "tsRounds": [
+    15.04,
+    15.09,
+    14.37
+   ],
+   "engine": 18.074375,
+   "engineRounds": [
+    17.65,
+    18.07,
+    24.38
+   ],
+   "proto": 5.198045454545454,
+   "protoRounds": [
+    5.37,
+    5.2,
+    5.08
+   ],
+   "proto-n": 5.7219204545454545,
+   "proto-nRounds": [
+    5.27,
+    5.72,
+    10.15
+   ],
+   "n": 44
+  },
+  {
+   "set": "synthetic-large",
+   "ts": 19.319599999999998,
+   "tsRounds": [
+    19.32,
+    18.09,
+    19.35
+   ],
+   "engine": 26.55464,
+   "engineRounds": [
+    26.55,
+    24.99,
+    27.12
+   ],
+   "proto": 5.93599,
+   "protoRounds": [
+    5.77,
+    9.1,
+    5.94
+   ],
+   "proto-n": 6.482905,
+   "proto-nRounds": [
+    6.28,
+    6.48,
+    6.75
+   ],
+   "n": 300
+  }
+ ]
+}

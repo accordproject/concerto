@@ -1,0 +1,2385 @@
+{
+ "tool": "oracle-instances",
+ "fixtures": "/home/user/concerto/migration/oracle/fixtures",
+ "reference": "R1 concerto-core dist + WASM engine",
+ "total": {
+  "R1 throws ValidationException": 198,
+  "A:same": 1992,
+  "B:same": 2072,
+  "R1 accepts": 1641,
+  "R1 throws TypeNotFoundException": 212,
+  "not-plain-json": 8,
+  "R1 throws Error": 21,
+  "A:prototype-throws": 74,
+  "A:class-differs": 6
+ },
+ "tally": {
+  "conformance": {
+   "R1 throws ValidationException": 12,
+   "A:same": 36,
+   "B:same": 36,
+   "R1 accepts": 17,
+   "R1 throws TypeNotFoundException": 7
+  },
+  "unit": {
+   "R1 accepts": 65,
+   "A:same": 130,
+   "B:same": 130,
+   "R1 throws ValidationException": 61,
+   "R1 throws TypeNotFoundException": 1,
+   "not-plain-json": 1,
+   "R1 throws Error": 3
+  },
+  "data": {
+   "R1 accepts": 1533,
+   "A:same": 1742,
+   "B:same": 1816,
+   "R1 throws TypeNotFoundException": 195,
+   "R1 throws ValidationException": 85,
+   "A:prototype-throws": 74,
+   "R1 throws Error": 3
+  },
+  "gaps": {
+   "R1 throws TypeNotFoundException": 6,
+   "A:class-differs": 6,
+   "B:same": 37,
+   "R1 throws ValidationException": 15,
+   "A:same": 31,
+   "R1 accepts": 7,
+   "R1 throws Error": 9
+  },
+  "lifted": {
+   "R1 throws ValidationException": 23,
+   "A:same": 47,
+   "B:same": 47,
+   "R1 accepts": 15,
+   "R1 throws Error": 6,
+   "R1 throws TypeNotFoundException": 3,
+   "not-plain-json": 7
+  },
+  "supplement": {
+   "R1 throws ValidationException": 2,
+   "A:same": 6,
+   "B:same": 6,
+   "R1 accepts": 4
+  }
+ },
+ "differences": [
+  {
+   "source": "unit",
+   "id": "79e391a0676f110316f571fa",
+   "test": "Serializer #fromJSON should not error on unexpected properties if their value is undefined",
+   "route": "setup",
+   "verdict": "not-plain-json"
+  },
+  {
+   "source": "data",
+   "id": "06436e2844a2b3cc5ee95c8a",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransaction",
+    "$timestamp": "2026-09-24T21:59:34.526Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransaction",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "088fa229c90fdb4a8cdae71e",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyEvent",
+    "$timestamp": "2026-09-24T21:59:34.549Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyEvent",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "08b24253b584e4cd90084063",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyEvent",
+    "$timestamp": "2026-09-24T21:59:34.540Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyEvent",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "0970fba07d71910181d1eaf6",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+    "$timestamp": "2026-09-24T21:59:34.586Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "11825e711d6d547f10636e33",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransaction",
+    "$timestamp": "2026-09-24T21:59:34.526Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransaction",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "1325e2802694e64f3b47095e",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+    "$timestamp": "2026-09-24T21:59:34.643Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "133847c9d37bf203d2eb82ee",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyEvent",
+    "$timestamp": "2026-09-24T21:59:34.545Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyEvent",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "13b41277ee112b5a671dec3e",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyEvent",
+    "$timestamp": "2026-09-24T21:59:34.545Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyEvent",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "1de3431ef3aea65403bdee24",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Driver",
+    "email": "id1",
+    "firstName": "",
+    "lastName": "",
+    "myDouble": 0,
+    "myInt": 0,
+    "myLong": 0,
+    "myDateTime": "2026-09-24T21:59:34.473Z",
+    "myBoolean": false,
+    "myConcept": {
+     "$class": "org.acme@1.0.0.MyConcept"
+    },
+    "myRegulator": "resource:org.acme@1.0.0.Regulator#0211",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Driver",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "",
+     "lastName": "",
+     "myBoolean": false,
+     "myConcept": {
+      "$class": "org.acme@1.0.0.MyConcept"
+     },
+     "myDateTime": "2026-09-24T21:59:34.473Z",
+     "myDouble": 0,
+     "myInt": 0,
+     "myLong": 0,
+     "myRegulator": "resource:org.acme@1.0.0.Regulator#0211"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "1ec8b87f5a05b3165e6e221d",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+    "$timestamp": "2026-09-24T21:59:34.634Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "235b863bbeca0632748a3e24",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+    "$timestamp": "2026-09-24T21:59:34.652Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "235e29b0ea1d896c8ae3a79d",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+    "$timestamp": "2026-09-24T21:59:34.610Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "25e774d2876ac094cc5bfb55",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+    "$timestamp": "2026-09-24T21:59:34.620Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "26c9ff9857217d1bf7e13b7c",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Driver",
+    "email": "id1",
+    "firstName": "",
+    "lastName": "",
+    "myDouble": 0,
+    "myInt": 0,
+    "myLong": 0,
+    "myDateTime": "2026-09-24T21:59:34.473Z",
+    "myBoolean": false,
+    "myConcept": {
+     "$class": "org.acme@1.0.0.MyConcept"
+    },
+    "myRegulator": "resource:org.acme@1.0.0.Regulator#0211",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Driver",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "",
+     "lastName": "",
+     "myBoolean": false,
+     "myConcept": {
+      "$class": "org.acme@1.0.0.MyConcept"
+     },
+     "myDateTime": "2026-09-24T21:59:34.473Z",
+     "myDouble": 0,
+     "myInt": 0,
+     "myLong": 0,
+     "myRegulator": "resource:org.acme@1.0.0.Regulator#0211"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "2b03f15ef184425753169c50",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+    "$timestamp": "2026-09-24T21:59:34.648Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "2b34be1f11584142876eea98",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Driver",
+    "email": "id1",
+    "firstName": "",
+    "lastName": "",
+    "myDouble": 0,
+    "myInt": 0,
+    "myLong": 0,
+    "myDateTime": "2026-09-24T21:59:34.482Z",
+    "myBoolean": false,
+    "myConcept": {
+     "$class": "org.acme@1.0.0.MyConcept"
+    },
+    "myRegulator": "resource:org.acme@1.0.0.Regulator#0211",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Driver",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "",
+     "lastName": "",
+     "myBoolean": false,
+     "myConcept": {
+      "$class": "org.acme@1.0.0.MyConcept"
+     },
+     "myDateTime": "2026-09-24T21:59:34.482Z",
+     "myDouble": 0,
+     "myInt": 0,
+     "myLong": 0,
+     "myRegulator": "resource:org.acme@1.0.0.Regulator#0211"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "2b69fd1912a34899d302a84f",
+   "test": "oracle data driver single CTO files test/data/decorators/invalid-typeref.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Car",
+    "id": "id1",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Car",
+     "$identifier": "id1",
+     "id": "id1"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name Missing not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "30791ea1705dedc80f35d7ed",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+    "$timestamp": "2026-09-24T21:59:34.582Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "36134e744b08e8fddc4c03bc",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+    "$timestamp": "2026-09-24T21:59:34.667Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "387ea9ec3bd8d8017de5486e",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+    "$timestamp": "2026-09-24T21:59:34.664Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "38a5c987ee51aed63261ed92",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Driver",
+    "email": "id1",
+    "firstName": "Veniam.",
+    "lastName": "Nostrud sit magna amet.",
+    "myDouble": 93.113,
+    "myInt": 50910,
+    "myLong": 1279969327,
+    "myDateTime": "2026-09-24T21:59:34.467Z",
+    "myBoolean": false,
+    "myConcept": {
+     "$class": "org.acme@1.0.0.MyConcept"
+    },
+    "myRegulator": "resource:org.acme@1.0.0.Regulator#0504",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Driver",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "Veniam.",
+     "lastName": "Nostrud sit magna amet.",
+     "myBoolean": false,
+     "myConcept": {
+      "$class": "org.acme@1.0.0.MyConcept"
+     },
+     "myDateTime": "2026-09-24T21:59:34.467Z",
+     "myDouble": 93.113,
+     "myInt": 50910,
+     "myLong": 1279969327,
+     "myRegulator": "resource:org.acme@1.0.0.Regulator#0504"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "453c345ea5f77b2c1b1b9862",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+    "$timestamp": "2026-09-24T21:59:34.625Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "45d5f352980da50479cc536f",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+    "$timestamp": "2026-09-24T21:59:34.652Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "4c311a38d80e23804a009361",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+    "$timestamp": "2026-09-24T21:59:34.573Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "4ddda643e9fbf9fd5a5b510f",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+    "$timestamp": "2026-09-24T21:59:34.664Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "50c12fa6cd4ae88fe5d8cd10",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyEvent",
+    "$timestamp": "2026-09-24T21:59:34.549Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyEvent",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "52eb7185c39667ad5bcb2be9",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Regulator",
+    "email": "id1",
+    "firstName": "Veniam.",
+    "lastName": "Nostrud sit magna amet.",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Regulator",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "Veniam.",
+     "lastName": "Nostrud sit magna amet."
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "5824cf1b1c99a9f4363369ac",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+    "$timestamp": "2026-09-24T21:59:34.643Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "61cae53bf1e0f8da9001b38b",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransaction",
+    "$timestamp": "2026-09-24T21:59:34.517Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransaction",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "673067bbfa1dcbbd8e18b6f8",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+    "$timestamp": "2026-09-24T21:59:34.582Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "682e5de5b98b510b4ae38114",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+    "$timestamp": "2026-09-24T21:59:34.576Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "7375b4eaa4d67b5e026b292d",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+    "$timestamp": "2026-09-24T21:59:34.576Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "73d658cda5d0a3d6c3b9e0c5",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransaction",
+    "$timestamp": "2026-09-24T21:59:34.521Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransaction",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "7477c0f9c7d9c0a3724f6286",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+    "$timestamp": "2026-09-24T21:59:34.603Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "7e14bd138abea51c1d4262f6",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Regulator",
+    "email": "id1",
+    "firstName": "",
+    "lastName": "",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Regulator",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "",
+     "lastName": ""
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "80c281aedd228aebff5e6929",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Driver",
+    "email": "id1",
+    "firstName": "",
+    "lastName": "",
+    "myDouble": 0,
+    "myInt": 0,
+    "myLong": 0,
+    "myDateTime": "2026-09-24T21:59:34.482Z",
+    "myBoolean": false,
+    "myConcept": {
+     "$class": "org.acme@1.0.0.MyConcept"
+    },
+    "myRegulator": "resource:org.acme@1.0.0.Regulator#0211",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Driver",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "",
+     "lastName": "",
+     "myBoolean": false,
+     "myConcept": {
+      "$class": "org.acme@1.0.0.MyConcept"
+     },
+     "myDateTime": "2026-09-24T21:59:34.482Z",
+     "myDouble": 0,
+     "myInt": 0,
+     "myLong": 0,
+     "myRegulator": "resource:org.acme@1.0.0.Regulator#0211"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "80d2355e66fe5caa953d0be6",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Car",
+    "id": "id1",
+    "owner": "resource:org.acme@1.0.0.Driver#0211",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Car",
+     "$identifier": "id1",
+     "id": "id1",
+     "owner": "resource:org.acme@1.0.0.Driver#0211"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "83748fb2ccfeacd3c5ba0500",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+    "$timestamp": "2026-09-24T21:59:34.593Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "844f7a93467e10a63a90bce5",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Driver",
+    "email": "id1",
+    "firstName": "Veniam.",
+    "lastName": "Nostrud sit magna amet.",
+    "myDouble": 93.113,
+    "myInt": 50910,
+    "myLong": 1279969327,
+    "myDateTime": "2026-09-24T21:59:34.467Z",
+    "myBoolean": false,
+    "myConcept": {
+     "$class": "org.acme@1.0.0.MyConcept"
+    },
+    "myRegulator": "resource:org.acme@1.0.0.Regulator#0504",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Driver",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "Veniam.",
+     "lastName": "Nostrud sit magna amet.",
+     "myBoolean": false,
+     "myConcept": {
+      "$class": "org.acme@1.0.0.MyConcept"
+     },
+     "myDateTime": "2026-09-24T21:59:34.467Z",
+     "myDouble": 93.113,
+     "myInt": 50910,
+     "myLong": 1279969327,
+     "myRegulator": "resource:org.acme@1.0.0.Regulator#0504"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "8c66ca7461a2bdbafaca45d8",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+    "$timestamp": "2026-09-24T21:59:34.625Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "8e9aaf880f7be371876f0539",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyEvent",
+    "$timestamp": "2026-09-24T21:59:34.540Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyEvent",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "8f46f8cd334cdd2fc72296dc",
+   "test": "oracle data driver single CTO files test/data/decorators/invalid-typeref.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Car",
+    "id": "id1",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Car",
+     "$identifier": "id1",
+     "id": "id1"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name Missing not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "96619accf6b118bf29f54264",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+    "$timestamp": "2026-09-24T21:59:34.657Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "98c05762a1a2523cd0d327c7",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyConcept"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyConcept"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "99ec9e211622470d40d5237a",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Driver",
+    "email": "id1",
+    "firstName": "Veniam.",
+    "lastName": "Nostrud sit magna amet.",
+    "myDouble": 93.113,
+    "myInt": 50910,
+    "myLong": 1279969327,
+    "myDateTime": "2026-09-24T21:59:34.456Z",
+    "myBoolean": false,
+    "myConcept": {
+     "$class": "org.acme@1.0.0.MyConcept"
+    },
+    "myRegulator": "resource:org.acme@1.0.0.Regulator#0504",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Driver",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "Veniam.",
+     "lastName": "Nostrud sit magna amet.",
+     "myBoolean": false,
+     "myConcept": {
+      "$class": "org.acme@1.0.0.MyConcept"
+     },
+     "myDateTime": "2026-09-24T21:59:34.456Z",
+     "myDouble": 93.113,
+     "myInt": 50910,
+     "myLong": 1279969327,
+     "myRegulator": "resource:org.acme@1.0.0.Regulator#0504"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "9bee3574e345275aee8e4f5a",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+    "$timestamp": "2026-09-24T21:59:34.603Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "a1a338529d88e015c88bfd33",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+    "$timestamp": "2026-09-24T21:59:34.593Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "a25ce0b01a422e02c2010bba",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+    "$timestamp": "2026-09-24T21:59:34.657Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "ad9e09f91af382445f256ea3",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransaction",
+    "$timestamp": "2026-09-24T21:59:34.512Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransaction",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "b758c087e650a714761b67b6",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+    "$timestamp": "2026-09-24T21:59:34.648Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "b9a937b69855115a816dd937",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+    "$timestamp": "2026-09-24T21:59:34.639Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "bcb7cb227adb6de5e50c406d",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransaction",
+    "$timestamp": "2026-09-24T21:59:34.517Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransaction",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "bd6a5cd6e38daaf4e098867d",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Regulator",
+    "email": "id1",
+    "firstName": "",
+    "lastName": "",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Regulator",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "",
+     "lastName": ""
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "bf26f5d68802b5ceb329f909",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+    "$timestamp": "2026-09-24T21:59:34.634Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "c0bd8f409005cc7d2e681780",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+    "$timestamp": "2026-09-24T21:59:34.614Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "c221ffe3c0f480bf412cff8c",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+    "$timestamp": "2026-09-24T21:59:34.660Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "c3fb93e9d8bda647b6427f4d",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+    "$timestamp": "2026-09-24T21:59:34.667Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "cdafb37541326089c62181df",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyEvent",
+    "$timestamp": "2026-09-24T21:59:34.533Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyEvent",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "cf19640798011461b72fcc17",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+    "$timestamp": "2026-09-24T21:59:34.660Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier5",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "d2b6b42ce86a34d723206bfb",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyEvent",
+    "$timestamp": "2026-09-24T21:59:34.533Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyEvent",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "d38e8da9de4864832cdfc2ed",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Regulator",
+    "email": "id1",
+    "firstName": "Veniam.",
+    "lastName": "Nostrud sit magna amet.",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Regulator",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "Veniam.",
+     "lastName": "Nostrud sit magna amet."
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "d3bdf174cf365807c97e54bb",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransaction",
+    "$timestamp": "2026-09-24T21:59:34.521Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransaction",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "d48c7f07c0f25303755fd7cb",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Car",
+    "id": "id1",
+    "owner": "resource:org.acme@1.0.0.Driver#0211",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Car",
+     "$identifier": "id1",
+     "id": "id1",
+     "owner": "resource:org.acme@1.0.0.Driver#0211"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "d72ff4825cba7942700d1bd7",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransaction",
+    "$timestamp": "2026-09-24T21:59:34.512Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransaction",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "de760886de8914f254bbdd33",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+    "$timestamp": "2026-09-24T21:59:34.630Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "e3f3eee9beced18da35e39aa",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+    "$timestamp": "2026-09-24T21:59:34.586Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "e904108ca9b9b9192561e32b",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+    "$timestamp": "2026-09-24T21:59:34.630Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "e970025cf3acb871be1bbe1d",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+    "$timestamp": "2026-09-24T21:59:34.620Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier3",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "eac2a3ea61de0ee45b157cf9",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+    "$timestamp": "2026-09-24T21:59:34.573Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier1",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "f204bce12fd94cd884ea7e81",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+    "$timestamp": "2026-09-24T21:59:34.610Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "f24c04ec4860fdc847169ec6",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+    "$timestamp": "2026-09-24T21:59:34.614Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier2",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "f781541176fca59a87de721f",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.Driver",
+    "email": "id1",
+    "firstName": "Veniam.",
+    "lastName": "Nostrud sit magna amet.",
+    "myDouble": 93.113,
+    "myInt": 50910,
+    "myLong": 1279969327,
+    "myDateTime": "2026-09-24T21:59:34.456Z",
+    "myBoolean": false,
+    "myConcept": {
+     "$class": "org.acme@1.0.0.MyConcept"
+    },
+    "myRegulator": "resource:org.acme@1.0.0.Regulator#0504",
+    "$identifier": "id1"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.Driver",
+     "$identifier": "id1",
+     "email": "id1",
+     "firstName": "Veniam.",
+     "lastName": "Nostrud sit magna amet.",
+     "myBoolean": false,
+     "myConcept": {
+      "$class": "org.acme@1.0.0.MyConcept"
+     },
+     "myDateTime": "2026-09-24T21:59:34.456Z",
+     "myDouble": 93.113,
+     "myInt": 50910,
+     "myLong": 1279969327,
+     "myRegulator": "resource:org.acme@1.0.0.Regulator#0504"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "f94ba89977d5e1b78d4d2bff",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0,
+    "strictQualifiedDateTimes": true
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+    "$timestamp": "2026-09-24T21:59:34.639Z"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyTransactionIdentifier4",
+     "$timestamp": "<now>"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "data",
+   "id": "fb156529637c0cb4697b0323",
+   "test": "oracle data driver single CTO files test/data/decorators/model.cto",
+   "route": "A",
+   "verdict": "prototype-throws",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "org.acme@1.0.0.MyConcept"
+   },
+   "ref": {
+    "ok": {
+     "$class": "org.acme@1.0.0.MyConcept"
+    }
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "gaps",
+   "id": "015f40e75c16d1bc3ac92a4e",
+   "test": "oracle gaps driver jsonpopulator.ts: Serializer.fromJSON of a relationship to a primitive type (model added without validation) single and array relationships, string and object values",
+   "route": "A",
+   "verdict": "class-differs",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "gaps.relprim@1.0.0.C",
+    "ss": [
+     "abc",
+     "resource:gaps.other@1.0.0.X#1"
+    ]
+   },
+   "ref": {
+    "error": "TypeNotFoundException",
+    "message": "Type \"String\" is not defined in namespace \"gaps.relprim@1.0.0\"."
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "gaps",
+   "id": "04c11ca9eef39e7a31928cce",
+   "test": "oracle gaps driver jsonpopulator.ts: Serializer.fromJSON of a relationship to a primitive type (model added without validation) single and array relationships, string and object values",
+   "route": "A",
+   "verdict": "class-differs",
+   "options": {
+    "validate": false,
+    "utcOffset": 0,
+    "acceptResourcesForRelationships": true
+   },
+   "input": {
+    "$class": "gaps.relprim@1.0.0.C",
+    "ss": [
+     "abc",
+     "resource:gaps.other@1.0.0.X#1"
+    ]
+   },
+   "ref": {
+    "error": "TypeNotFoundException",
+    "message": "Type \"String\" is not defined in namespace \"gaps.relprim@1.0.0\"."
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "gaps",
+   "id": "1191566925a4e8104565e27b",
+   "test": "oracle gaps driver jsonpopulator.ts: Serializer.fromJSON of a relationship to a primitive type (model added without validation) single and array relationships, string and object values",
+   "route": "A",
+   "verdict": "class-differs",
+   "options": {
+    "validate": true,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "gaps.relprim@1.0.0.C",
+    "s": "abc"
+   },
+   "ref": {
+    "error": "TypeNotFoundException",
+    "message": "Type \"String\" is not defined in namespace \"gaps.relprim@1.0.0\"."
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "gaps",
+   "id": "1fc7830b83e5a5a9a97f576c",
+   "test": "oracle gaps driver jsonpopulator.ts: Serializer.fromJSON of a relationship to a primitive type (model added without validation) single and array relationships, string and object values",
+   "route": "A",
+   "verdict": "class-differs",
+   "options": {
+    "validate": false,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "gaps.relprim@1.0.0.C",
+    "ss": [
+     "abc",
+     "resource:gaps.other@1.0.0.X#1"
+    ]
+   },
+   "ref": {
+    "error": "TypeNotFoundException",
+    "message": "Type \"String\" is not defined in namespace \"gaps.relprim@1.0.0\"."
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "gaps",
+   "id": "a39ace1560e1593b21ead6a1",
+   "test": "oracle gaps driver jsonpopulator.ts: Serializer.fromJSON of a relationship to a primitive type (model added without validation) single and array relationships, string and object values",
+   "route": "A",
+   "verdict": "class-differs",
+   "options": {
+    "validate": false,
+    "utcOffset": 0
+   },
+   "input": {
+    "$class": "gaps.relprim@1.0.0.C",
+    "s": "abc"
+   },
+   "ref": {
+    "error": "TypeNotFoundException",
+    "message": "Type \"String\" is not defined in namespace \"gaps.relprim@1.0.0\"."
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "gaps",
+   "id": "f100f98cbea1fa3dbf58f160",
+   "test": "oracle gaps driver jsonpopulator.ts: Serializer.fromJSON of a relationship to a primitive type (model added without validation) single and array relationships, string and object values",
+   "route": "A",
+   "verdict": "class-differs",
+   "options": {
+    "validate": false,
+    "utcOffset": 0,
+    "acceptResourcesForRelationships": true
+   },
+   "input": {
+    "$class": "gaps.relprim@1.0.0.C",
+    "s": "abc"
+   },
+   "ref": {
+    "error": "TypeNotFoundException",
+    "message": "Type \"String\" is not defined in namespace \"gaps.relprim@1.0.0\"."
+   },
+   "prototype": {
+    "error": "Converter",
+    "message": "Name String not found"
+   }
+  },
+  {
+   "source": "lifted",
+   "id": "648a492e4cef700df339b4ee",
+   "test": "oracle lifted driver jsonpopulator.scenarios.js JP-CV-033",
+   "route": "setup",
+   "verdict": "not-plain-json"
+  },
+  {
+   "source": "lifted",
+   "id": "76cb58b8715aef927fe84a59",
+   "test": "oracle lifted driver jsonpopulator.scenarios.js JP-CV-023",
+   "route": "setup",
+   "verdict": "not-plain-json"
+  },
+  {
+   "source": "lifted",
+   "id": "7dbc10ec5efb3b2c5d43b9cf",
+   "test": "oracle lifted driver jsonpopulator.scenarios.js JP-CV-005",
+   "route": "setup",
+   "verdict": "not-plain-json"
+  },
+  {
+   "source": "lifted",
+   "id": "a34531872483c498b476714c",
+   "test": "oracle lifted driver jsonpopulator.scenarios.js JP-CV-029",
+   "route": "setup",
+   "verdict": "not-plain-json"
+  },
+  {
+   "source": "lifted",
+   "id": "c5b87cdb0253a6634bd0db1d",
+   "test": "oracle lifted driver jsonpopulator.scenarios.js JP-CV-018",
+   "route": "setup",
+   "verdict": "not-plain-json"
+  },
+  {
+   "source": "lifted",
+   "id": "e9364c7ad7baa93d7a8aab75",
+   "test": "oracle lifted driver jsonpopulator.scenarios.js JP-CV-014",
+   "route": "setup",
+   "verdict": "not-plain-json"
+  },
+  {
+   "source": "lifted",
+   "id": "f60e5abc2bafbd2a5f63f6ac",
+   "test": "oracle lifted driver jsonpopulator.scenarios.js JP-CV-008",
+   "route": "setup",
+   "verdict": "not-plain-json"
+  }
+ ]
+}
