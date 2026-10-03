@@ -34,7 +34,7 @@
 // the rustHandle changes.
 
 import { rust } from './index';
-import { encodeValue, encodeBytes, decodeValue, materializeCompact, newTypeCache } from './serializer-codec';
+import { encodeValue, encodeBytes, decodeParsed, materializeCompact, newTypeCache } from './serializer-codec';
 import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import Factory from '../factory';
 
@@ -209,7 +209,8 @@ function fastFromJson(modelManager: BaseModelManager, jsonObject: unknown, optio
  * @return {object} the plain JSON object
  */
 function fastToJson(modelManager: BaseModelManager, resource: unknown, options: SerializerOptions) {
-    const handle = handleFor(modelManager);
+    const cached = cachedHandleFor(modelManager);
+    const { handle } = cached;
     let text;
     try {
         // P5-101 (E-7): the options' wire text cached as for fromJSON
@@ -224,8 +225,9 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
     } catch (err) {
         throw asUnsupported(err);
     }
-    const node = JSON.parse(text);
-    return decodeValue(node, modelManager);
+    // P5-113: decoded in place (the parsed text is ours alone), as
+    // fromJSON's result is.
+    return decodeParsed(JSON.parse(text), modelManager, cached.types);
 }
 
 /**

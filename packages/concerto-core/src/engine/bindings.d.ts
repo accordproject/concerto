@@ -125,6 +125,11 @@ export interface EngineState {
         typeNames: Map<string, string>;
         /** `rustHandle.resolveType(context, type)`, by type (the context only words an error). */
         resolvedTypes: Map<string, string>;
+        /**
+         * P5-113: `rustHandle.modelFileGetTypeName(id, type)` (`ModelFile.getType`),
+         * by the model file's namespace and then by type.
+         */
+        fileTypeNames: Map<string, Map<string, string | undefined>>;
     } | undefined;
     /**
      * P5-75: the namespaces, in `getNamespaces()` order, updated in place by

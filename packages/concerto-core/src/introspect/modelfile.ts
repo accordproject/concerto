@@ -701,7 +701,9 @@ class ModelFile extends Decorated {
         const id = typeof type === 'string' ? this._rustHandleId() : undefined;
         if (id !== undefined) {
             const manager = this.modelManager;
-            const name: string | undefined = manager.rustHandle.modelFileGetTypeName(id, type);
+            // P5-113: through the manager's read memo, so one type is
+            // resolved once per model version, not once per call.
+            const name: string | undefined = manager._modelFileTypeName(this.namespace, id, type);
             if (name === undefined) {
                 return null;
             }
