@@ -42,6 +42,17 @@ export interface EngineHandle {
     addModel(ast: string, file_name?: string | null): number;
     addModelWithDefinitions(ast: string, definitions: string | null | undefined, file_name: string | null | undefined, validate: boolean): number;
     checkAstShape(ast: string): void;
+    // P5-106 (BC-52): the arena answers of the retired JsContext bindings.
+    classDeclarationGetAssignableClassDeclarations(declaration: number): string[];
+    classDeclarationGetDirectSubclasses(declaration: number): string[];
+    decoratorValidate(decorator: object, modelFile: object, modelFileId: number, decoratedName: string | undefined, options: object): void;
+    declarationId(fqn: string): number | undefined;
+    modelUtilIsAssignableTo(modelFile: number, typeName: string, propertyType: string): boolean;
+    modelUtilIsEnum(modelFile: number, typeName?: string | null): boolean | undefined;
+    modelUtilIsMap(modelFile: number, typeName?: string | null): boolean | undefined;
+    modelUtilIsScalar(modelFile: number, typeName?: string | null): boolean | undefined;
+    modelUtilIsValidMapKeyScalar(declaration: number): boolean | undefined;
+    scalarDeclarationValidate(declaration: number): void;
     commitStagedModelFile(stage: number): number | undefined;
     dcsDecorateModels(target: EngineHandle, decorator_command_sets: any, options: any): any;
     dcsExtractDecorators(target: EngineHandle, options: any): any;
@@ -144,18 +155,13 @@ export interface EngineBindings {
     modelUtilParseNamespaceChecked(ns: string, options?: object): string;
     modelUtilImportFullyQualifiedNames(imp: object): string[];
     modelUtilIsPrimitiveType(typeName: string): boolean;
-    modelUtilIsAssignableTo(modelFile: object, typeName: string, property: object): boolean;
     modelUtilCapitalizeFirstLetter(value: string): string;
-    modelUtilIsEnum(field: object): boolean;
-    modelUtilIsMap(field: object): boolean;
-    modelUtilIsScalar(field: object): boolean;
     modelUtilIsValidIdentifier(name: unknown): boolean;
     modelUtilGetFullyQualifiedName(namespace: string, type: string): string;
     modelUtilRemoveNamespaceVersionFromFullyQualifiedName(fqn: string): string;
     modelUtilIsSystemProperty(propertyName: string): boolean;
     modelUtilIsPrivateSystemProperty(propertyName: string): boolean;
     modelUtilIsValidMapKey(key: object): boolean;
-    modelUtilIsValidMapKeyScalar(decl: object): boolean;
     modelUtilIsValidMapValue(value: object): boolean;
 
     // DecoratorManager
@@ -174,18 +180,14 @@ export interface EngineBindings {
     decoratedFindDuplicateName(names: string[]): string | null;
     /** The decorator's processed arguments, to assign onto it. */
     decoratorProcess(ast: object, decorator: object): object;
-    decoratorValidate(decorator: object, modelFile: object, decoratedName: string | undefined): void;
     declarationValidate(declaration: object): void;
     declarationIsReservedSystemTypeImport(modelFile: object, typeName: string): boolean;
     classDeclarationResolveSuperType(classDeclaration: object): ClassDeclaration | null;
     classDeclarationIdentifierRedeclareConflict(systemIdentified: boolean, superSystemIdentified: boolean, superExplicitlyIdentified: boolean): boolean;
     classDeclarationGetSuperType(classDeclaration: object): string | null;
     classDeclarationGetSuperTypeDeclaration(classDeclaration: object): ClassDeclaration | null;
-    classDeclarationGetAssignableClassDeclarations(classDeclaration: object): ClassDeclaration[];
-    classDeclarationGetDirectSubclasses(classDeclaration: object): ClassDeclaration[];
     classDeclarationGetAllSuperTypeDeclarations(classDeclaration: object): ClassDeclaration[];
     classDeclarationGetNestedProperty(classDeclaration: object, propertyPath: string): Property;
-    scalarDeclarationValidate(scalarDeclaration: object): void;
     scalarDeclarationToString(scalarDeclaration: object): string;
     fieldToString(field: object): string;
     propertyValidate(property: object, classDeclaration: object): void;
@@ -283,6 +285,11 @@ export interface EngineViewsModule {
     validateAstStaged(modelFile: object, handle: EngineHandle): boolean;
     updateExternalStaged(modelFiles: object[], handle: EngineHandle, next: object): boolean;
     validateLoaded(modelFile: object, handle: EngineHandle): boolean;
+    // P5-106 (BC-52): arena handles of views
+    modelFileArenaRef(modelFile: unknown): { handle: EngineHandle; id: number } | undefined;
+    declarationArenaRef(declaration: unknown): { handle: EngineHandle; id: number } | undefined;
+    declarationViews(manager: object, names: string[]): any[];
+    notInArena(member: string): TypeError;
     // Declarations and properties
     declarationIsValidIdentifier(view: object): boolean;
     declarationFullyQualifiedName(view: object): string;

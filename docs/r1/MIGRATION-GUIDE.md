@@ -437,6 +437,23 @@ cannot see into. No production use was found for any of them.
   methods while walking the super types.
 - **What to do:** change the model instead of patching its declarations.
 
+### Model answers from the engine (BC-52)
+
+- **Who:** code (usually tests) that replaces `getType`, `getSuperType` or
+  `getModelFiles` (on a model file, a declaration, a manager or a prototype),
+  or passes stand-in objects to `ModelUtil`, and code that calls these
+  members for a `ModelFile` that is not added to its `ModelManager`.
+- **What changes:** `ModelUtil.isAssignableTo`, `isEnum`, `isMap`, `isScalar`
+  and `isValidMapKeyScalar`, `ScalarDeclaration.validate()`, decorator
+  validation and `ClassDeclaration.getAssignableClassDeclarations()` and
+  `getDirectSubclasses()` answer from the engine's copy of the model and no
+  longer call replaced methods. For a `ModelFile` that is not registered in
+  its manager, `isEnum`, `isMap` and `isScalar` return `undefined` and
+  `isAssignableTo` cannot find the type, and the other members throw a
+  `TypeError`.
+- **What to do:** add model files to their `ModelManager` before asking these
+  questions, and change the model instead of patching it.
+
 ---
 
 ## Lazy views and internals

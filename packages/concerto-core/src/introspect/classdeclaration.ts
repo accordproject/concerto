@@ -402,7 +402,17 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} subclass declarations.
      */
     getAssignableClassDeclarations(): ClassDeclaration[] {
-        return rust.classDeclarationGetAssignableClassDeclarations(this) as ClassDeclaration[];
+        // P5-106 (BC-52): answered by the engine from its arena and its
+        // cached subclass map, by this declaration's handle, as fully
+        // qualified names (this declaration's first); a replaced
+        // `getSuperType` or `getModelFiles` method is not called.
+        const views = engineViews();
+        const ref = views.declarationArenaRef(this);
+        if (ref === undefined) {
+            throw views.notInArena('ClassDeclaration.getAssignableClassDeclarations');
+        }
+        const names = ref.handle.classDeclarationGetAssignableClassDeclarations(ref.id);
+        return [this, ...views.declarationViews(this.modelFile.modelManager, names.slice(1))];
     }
 
     /**
@@ -410,7 +420,13 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} direct subclass declarations.
      */
     getDirectSubclasses(): ClassDeclaration[] {
-        return rust.classDeclarationGetDirectSubclasses(this) as ClassDeclaration[];
+        // P5-106 (BC-52): as `getAssignableClassDeclarations`.
+        const views = engineViews();
+        const ref = views.declarationArenaRef(this);
+        if (ref === undefined) {
+            throw views.notInArena('ClassDeclaration.getDirectSubclasses');
+        }
+        return views.declarationViews(this.modelFile.modelManager, ref.handle.classDeclarationGetDirectSubclasses(ref.id));
     }
 
     /**
