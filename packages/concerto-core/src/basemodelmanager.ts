@@ -1682,6 +1682,13 @@ class BaseModelManager {
      *
      * ModelFiles with no declarations after filtering will be removed.
      *
+     * The model files the new ModelManager holds from its constructor (the
+     * decorator and root models, and the metamodel under `addMetamodel`)
+     * are kept whole: the predicate is not called on their declarations,
+     * and this manager's copies are not added again (BC-53, P5-108,
+     * accordproject/concerto-rust#466; v5.0.0 re-added the decorator
+     * model and threw).
+     *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @param {Object} [options] - options for the filter method
      * @param {boolean} [options.disableValidation] — If true then the model files are not validated
@@ -1692,7 +1699,9 @@ class BaseModelManager {
         const filteredModels: ModelFileInstance[] = [];
 
         for (const modelFile of Object.values(this.modelFiles) as ModelFileInstance[]) {
-            if (modelFile.isSystemModelFile()) {
+            // BC-53: skip every file the new manager's constructor already
+            // added, not only the system root model.
+            if (modelFile.isSystemModelFile() || modelManager.modelFiles[modelFile.getNamespace()] !== undefined) {
                 continue;
             }
             const filtered = modelFile.filter(predicate, modelManager);

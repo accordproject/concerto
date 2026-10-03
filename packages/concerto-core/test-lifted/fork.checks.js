@@ -28,7 +28,10 @@
  *   base, not rebuilt, and is not validated again when that cannot change
  *   the outcome) must be observably identical to v5.0.0's filter: the same
  *   files, ASTs, definitions, file names, errors and order. Each `expect`
- *   is v5.0.0's own outcome.
+ *   is v5.0.0's own outcome, except where BC-53 (P5-108,
+ *   accordproject/concerto-rust#466) changes it: FILTER-04 and FILTER-05
+ *   record v5.0.0's outcome as `reference` (filter-builtins.checks.js has
+ *   the rest of BC-53's checks).
  * - `CLEAR-*`: a manager's replaced engine handle is released inside the
  *   library (`clearModelFiles`, `fromAst`); the manager behaves as before.
  *
@@ -145,7 +148,9 @@ function base(core, options) {
 
 /**
  * The predicate that keeps every declaration but the decorator model's
- * (v5.0.0's `filter(() => true)` throws, adding that model twice).
+ * (v5.0.0's `filter(() => true)` throws, adding that model twice; BC-53
+ * fixes that, and these checks keep v5.0.0's predicate so that their
+ * outcomes stay comparable with it).
  * @param {object} d the declaration
  * @returns {boolean} true to keep it
  */
@@ -564,9 +569,10 @@ const checks = [
     },
     {
         id: 'FILTER-04',
-        covers: 'filter(() => true) throws as v5.0.0 does (the decorator model is added twice)',
+        covers: 'BC-53: filter(() => true) keeps every model file (v5.0.0 threw, adding the decorator model twice)',
         run: (core) => thrown(() => base(core).filter(() => true)),
-        expect: {
+        expect: { ok: 'ok' },
+        reference: {
             ok: [
                 'Error',
                 'Namespace concerto.decorator@1.0.0 specified in file concerto_decorator_1.0.0.cto is already declared in file concerto_decorator_1.0.0.cto',
@@ -575,7 +581,7 @@ const checks = [
     },
     {
         id: 'FILTER-05',
-        covers: 'filter\'s predicate is called on the same declarations, in the same order, as v5.0.0',
+        covers: 'filter\'s predicate is called on the same user declarations, in the same order, as v5.0.0; BC-53: not on the built-in models\' declarations',
         run: (core) => {
             const mm = filterBase(core);
             const seen = [];
@@ -586,6 +592,22 @@ const checks = [
             return seen;
         },
         expect: {
+            ok: [
+                'org.acme.p597.base@1.0.0.Shape',
+                'org.acme.p597.base@1.0.0.Address',
+                'org.acme.p597.base@1.0.0.Colour',
+                'org.acme.p597.base@1.0.0.Code',
+                'org.acme.p597.base@1.0.0.Labels',
+                'org.acme.p597.base@1.0.0.Person',
+                'org.acme.p597.base@1.0.0.Car',
+                'org.acme.p597.other@1.0.0.Office',
+                'org.acme.p597.base@1.0.0.Address',
+                'org.acme.p597.base@1.0.0.Person',
+            ],
+        },
+        // BC-53: v5.0.0 also called the predicate on the decorator model's
+        // declarations.
+        reference: {
             ok: [
                 'concerto.decorator@1.0.0.Decorator',
                 'concerto.decorator@1.0.0.DotNetNamespace',
