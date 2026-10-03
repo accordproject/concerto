@@ -98,6 +98,7 @@
     "decoratormanager.d.ts",
     "decoratormodelhelper.d.ts",
     "engineloader.d.ts",
+    "engineutil.d.ts",
     "factory.d.ts",
     "globalize.d.ts",
     "index.d.ts",

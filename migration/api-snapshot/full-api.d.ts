@@ -451,6 +451,14 @@ declare class BaseModelManager {
      *
      * ModelFiles with no declarations after filtering will be removed.
      *
+     * The model files the new ModelManager holds from its constructor (the
+     * decorator and root models, and the metamodel under `addMetamodel`)
+     * are kept whole: the predicate is not called on their declarations
+     * (an import of one is always kept), and this manager's copies are not
+     * added again (BC-53, P5-108,
+     * accordproject/concerto-rust#466; v5.0.0 re-added the decorator
+     * model and threw).
+     *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @param {Object} [options] - options for the filter method
      * @param {boolean} [options.disableValidation] — If true then the model files are not validated
@@ -677,6 +685,9 @@ declare const _default: {
 export default _default;
 
 // ==== engineloader.d.ts ====
+export {};
+
+// ==== engineutil.d.ts ====
 export {};
 
 // ==== factory.d.ts ====

@@ -49,7 +49,8 @@
 // test-lifted/validate-instance.checks.js.
 
 import { asUnsupported, handleFor } from './serializer';
-import { EngineFastPathUnsupported, encodeValue } from './serializer-codec';
+import { encodeValue } from './serializer-codec';
+import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import TypeNotFoundException from '../typenotfoundexception';
 
 // Types needed for TypeScript generation.
@@ -105,12 +106,35 @@ function documentOf(json: unknown): { object: any; text: string | undefined } {
     try {
         encoded = encodeValue(object);
     } catch (err) {
-        if (err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true) {
+        if (isFastPathUnsupported(err)) {
             return { object, text: undefined };
         }
         throw err;
     }
     return { object, text: JSON.stringify(encoded) };
+}
+
+/**
+ * The wire text of the merged `fromJSON` options (P5-101, E-7): the same
+ * encoding `Serializer.fromJSON`'s fast path sends (`encodeValue`, as
+ * `optionsText` writes it), so the engine reads them, and keeps the
+ * serializer it builds for them, as it does for `fromJSON` (its cache is
+ * keyed by this text). The merged object is new on every call, so it is not
+ * remembered here (`optionsText`'s cache is by object). Options that
+ * encoding cannot carry (a value of a class it does not know) are sent as
+ * `JSON.stringify` writes them, as before.
+ * @param {object} merged the merged `fromJSON` options
+ * @return {string} their text
+ */
+function mergedText(merged: any): string {
+    try {
+        return JSON.stringify(encodeValue(merged));
+    } catch (err) {
+        if (isFastPathUnsupported(err)) {
+            return JSON.stringify(merged);
+        }
+        throw err;
+    }
 }
 
 /** What `engineCall` returns when the engine cannot read the document. */
@@ -131,7 +155,7 @@ const UNSUPPORTED = Symbol('unsupported');
  */
 function engineCall(modelManager: BaseModelManager, doc, merged: any, fqn: string | undefined, mode: number): string | typeof UNSUPPORTED {
     try {
-        return handleFor(modelManager).validateInstance(doc.text, JSON.stringify(merged), fqn, mode);
+        return handleFor(modelManager).validateInstance(doc.text, mergedText(merged), fqn, mode);
     } catch (err) {
         if (asUnsupported(err) instanceof EngineFastPathUnsupported) {
             return UNSUPPORTED;
@@ -187,7 +211,7 @@ function routed(modelManager: BaseModelManager, doc, merged: any, fqn?: string):
     if (fqn !== undefined && typeof $class === 'string' && $class !== '' && $class !== fqn) {
         const handle = handleFor(modelManager);
         const skeleton = JSON.stringify({ $class });
-        const options = JSON.stringify(merged);
+        const options = mergedText(merged);
         const first = JSON.parse(handle.validateInstance(skeleton, options, fqn, FIRST)).diagnostics[0];
         if (first && first.path === '' && (first.code === 'NOT_ASSIGNABLE' || first.code === 'TYPE_NOT_FOUND')) {
             try {

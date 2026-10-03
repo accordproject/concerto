@@ -35,7 +35,8 @@
 // the rustHandle changes.
 
 import { rust } from './index';
-import { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, newTypeCache } from './serializer-codec';
+import { encodeValue, encodeBytes, decodeValue, decodeParsed, materializeCompact, newTypeCache } from './serializer-codec';
+import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import Factory from '../factory';
 
 // Types needed for TypeScript generation.
@@ -101,11 +102,12 @@ function cachedHandleFor(modelManager: BaseModelManager): CachedHandle {
 }
 
 /**
- * An engine call's thrown error as `EngineFastPathUnsupported`, when it
- * names the catalogue's "pre-port" code the codec's own decode errors use
- * for a wire shape it does not recognise (the codec's own throws already
- * are one; this also catches the engine's own `pre-port` throws for a
- * value it could not decode on its side).
+ * An engine call's thrown error as `EngineFastPathUnsupported`, when it is
+ * a fallback signal (`isFastPathUnsupported`): the codec's own throws
+ * already are one, and since P5-101 (E-11) the engine flags the error it
+ * throws for a value its wire codec could not decode (`fastPathUnsupported`
+ * in the payload, engine/errors.ts), where this used to match the error's
+ * message text.
  * @param {*} err the error the engine call threw
  * @return {Error} an `EngineFastPathUnsupported` to fall back on, or `err` unchanged
  */
@@ -113,7 +115,7 @@ function asUnsupported(err) {
     if (err instanceof EngineFastPathUnsupported) {
         return err;
     }
-    if (err && typeof err.message === 'string' && /wire (value|number|map)|typed wire value/.test(err.message)) {
+    if (isFastPathUnsupported(err)) {
         return new EngineFastPathUnsupported(err.message);
     }
     return err;
@@ -183,10 +185,20 @@ function fastFromJson(modelManager: BaseModelManager, jsonObject: unknown, optio
     const compact = typeof handle.serializerFromJsonCompact === 'function';
     let text;
     try {
-        const jsonText = JSON.stringify(encodeValue(jsonObject));
-        text = compact
-            ? handle.serializerFromJsonCompact(jsonText, optionsText(options), fromJsonEnv)
-            : handle.serializerFromJson(jsonText, optionsText(options), fromJsonEnv);
+        // P5-101 (E-7): the document written straight to the compact binary
+        // layout (`encodeBytes`) where the engine reads it, rather than
+        // built as a tagged tree and `JSON.stringify`d; the text otherwise.
+        const bytes = compact && typeof handle.serializerFromJsonCompactBytes === 'function'
+            ? encodeBytes(jsonObject)
+            : undefined;
+        if (bytes !== undefined) {
+            text = handle.serializerFromJsonCompactBytes(bytes, optionsText(options), fromJsonEnv);
+        } else {
+            const jsonText = JSON.stringify(encodeValue(jsonObject));
+            text = compact
+                ? handle.serializerFromJsonCompact(jsonText, optionsText(options), fromJsonEnv)
+                : handle.serializerFromJson(jsonText, optionsText(options), fromJsonEnv);
+        }
     } catch (err) {
         throw asUnsupported(err);
     }
@@ -209,10 +221,15 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
     const handle = handleFor(modelManager);
     let text;
     try {
-        text = handle.serializerToJson(
-            JSON.stringify(encodeValue(resource)),
-            JSON.stringify(encodeValue(options)),
-        );
+        // P5-101 (E-7): the options' wire text cached as for fromJSON
+        // (`optionsText`), so the engine reuses the serializer it built
+        // for them; the resource written straight to the compact binary
+        // layout (`encodeBytes`) where the engine reads it, the text
+        // otherwise.
+        const bytes = typeof handle.serializerToJsonBytes === 'function' ? encodeBytes(resource) : undefined;
+        text = bytes !== undefined
+            ? handle.serializerToJsonBytes(bytes, optionsText(options))
+            : handle.serializerToJson(JSON.stringify(encodeValue(resource)), optionsText(options));
     } catch (err) {
         throw asUnsupported(err);
     }
@@ -229,18 +246,17 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
  * accordproject/concerto-rust#456): the engine runs it on its one resident
  * metamodel manager (`validateMetaModelInstance`, with the `'serializer'`
  * preset: a Serializer's own defaults), so this module keeps no metamodel
- * handle of its own. Throws what the fast path throws, and
+ * handle of its own; as P5-101 (D-3, E-7) made it, the check is
+ * validate-only (`validateInstance`'s mode 0), which throws what `fromJSON`
+ * throws, in the same cases and with the same class, without building and
+ * serialising a resource only to discard it. Throws
  * `EngineFastPathUnsupported` for an input it cannot cross, which the
  * caller then validates through its TS body.
  * @param {object} input the metamodel instance in JSON
  */
 function validateMetaModel(input: unknown): void {
-    const env = {
-        newId: () => Factory.newId(),
-        nowMs: () => Date.now(),
-    };
     try {
-        rust.validateMetaModelInstance(JSON.stringify(encodeValue(input)), 'serializer', env);
+        rust.validateMetaModelInstance(JSON.stringify(encodeValue(input)), 'serializer');
     } catch (err) {
         throw asUnsupported(err);
     }

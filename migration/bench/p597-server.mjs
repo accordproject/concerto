@@ -3,7 +3,7 @@
 // one base ModelManager of platform models and serves concurrent async
 // requests, each with its own small user model. Measure only.
 //
-//   node --expose-gc migration/bench/p597-server.mjs --approach a|b|c --set S
+//   node --expose-gc migration/bench/p597-server.mjs --approach a|b|b-all|c --set S
 //       [--core-dist DIR] [--mode time|memory|soak] [--concurrency N]
 //       [--requests R] [--warmup W] [--held K] [--seconds S] [--out FILE]
 //
@@ -15,6 +15,9 @@
 //      (`filter(() => true)` throws on every engine: the decorator model is
 //      added twice);
 //   c  `base.fork()` per request (P5-97).
+//   b-all  `base.filter(() => true)` per request (P5-108,
+//      accordproject/concerto-rust#466: BC-53 makes it work; it throws on
+//      TS 5.0.0 and on engines before P5-108).
 //
 // --mode time    N concurrent requests (N async workers, each yielding to
 //                the event loop between a request's steps), R requests in
@@ -163,6 +166,8 @@ function makeManager() {
         mm = loadPlatform();
     } else if (args.approach === 'b') {
         mm = base.filter(keepUserModels);
+    } else if (args.approach === 'b-all') {
+        mm = base.filter(() => true);
     } else if (args.approach === 'c') {
         mm = base.fork();
     } else {

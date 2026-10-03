@@ -505,6 +505,7 @@ or the return value changes. Update your code if it catches the old class.
 | A map whose value type is not declared throws `IllegalModelException` naming the type, not `TypeError`. | BC-12 |
 | With `decoratorValidation` set to `error`, a decorator validation error names its model file once and no longer embeds `IllegalModelException: ` in its message. The class is unchanged. | BC-14 |
 | `ModelUtil.isValidIdentifier` returns `false` for any value that is not a string (`undefined`, `null`, a number). The string `"undefined"` is still valid. | BC-01 |
+| `ModelManager.filter` keeps the built-in models (`concerto.decorator@1.0.0`, `concerto@1.0.0`, and the metamodel with `addMetamodel`) whole and no longer calls the predicate on their declarations, so a user model's import of one of their types is always kept. A predicate that keeps a decorator-model declaration, such as `filter(() => true)`, returns the filtered manager instead of throwing `Error` (`Namespace concerto.decorator@1.0.0 … is already declared`), and one that drops them keeps a user type extending `Decorator` instead of throwing `Could not find super type Decorator`. | BC-53 |
 | A JavaScript string with a lone UTF-16 surrogate reaches the engine as U+FFFD, because strings cross into WebAssembly as UTF-8. This is accepted, with no fix planned. | BC-03 |
 
 ---

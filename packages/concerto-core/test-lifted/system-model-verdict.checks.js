@@ -109,8 +109,15 @@ function countCalls(handle, names) {
         }
         handle[name] = function (...args) {
             counts[name]++;
+            // P5-101: the one staging binding's checked loads (flag 1).
+            if (name === 'stageModelFileBytes' && (args[3] & 1) !== 0) {
+                counts.stageModelFileBytesChecked++;
+            }
             return original.apply(this, args);
         };
+    }
+    if (names.includes('stageModelFileBytes')) {
+        counts.stageModelFileBytesChecked = 0;
     }
     return counts;
 }
@@ -123,8 +130,10 @@ function countCalls(handle, names) {
 // compact layout instead of as text.
 // P5-94: and so are `stageModelFileCheckedCompactFlat` and
 // `stageModelFileWithHeaderCompactFlat`, with their result in a flat layout.
+// P5-101 (D-10): the views stage through the one binding
+// `stageModelFileBytes`, whose flag 1 is the checked load.
 const LOADS = ['systemModelFileHeader', 'stageModelFileChecked', 'stageModelFileCheckedUtf8', 'stageModelFileWithHeader', 'stageModelFileWithHeaderUtf8', 'stageModelFile', 'checkAstShape',
-    'stageModelFileCheckedCompact', 'stageModelFileWithHeaderCompact', 'stageModelFileCheckedCompactFlat', 'stageModelFileWithHeaderCompactFlat'];
+    'stageModelFileCheckedCompact', 'stageModelFileWithHeaderCompact', 'stageModelFileCheckedCompactFlat', 'stageModelFileWithHeaderCompactFlat', 'stageModelFileBytes'];
 
 module.exports = [
     {
@@ -234,7 +243,7 @@ module.exports = [
                     new core.ModelFile(mm, copyOf(mm, ns), undefined, 'x.json');
                 });
                 return [outcome, counts.systemModelFileHeader, counts.stageModelFileChecked + counts.stageModelFileCheckedUtf8 + counts.stageModelFileCheckedCompact +
-                    counts.stageModelFileCheckedCompactFlat];
+                    counts.stageModelFileCheckedCompactFlat + counts.stageModelFileBytesChecked];
             });
         },
         expect: { ok: [['ok', 0, 1], ['ok', 0, 1]] },
@@ -280,7 +289,8 @@ module.exports = [
         }),
         expect: { ok: Array(2).fill([
             { systemModelFileHeader: 0, stageModelFileChecked: 0, stageModelFileCheckedUtf8: 0, stageModelFileWithHeader: 0, stageModelFileWithHeaderUtf8: 0, stageModelFile: 0, checkAstShape: 0,
-                stageModelFileCheckedCompact: 0, stageModelFileWithHeaderCompact: 0, stageModelFileCheckedCompactFlat: 0, stageModelFileWithHeaderCompactFlat: 0 },
+                stageModelFileCheckedCompact: 0, stageModelFileWithHeaderCompact: 0, stageModelFileCheckedCompactFlat: 0, stageModelFileWithHeaderCompactFlat: 0,
+                stageModelFileBytes: 0, stageModelFileBytesChecked: 0 },
             ['concerto.decorator@1.0.0', 'concerto@1.0.0'],
         ]) },
         reference: { ok: ['no engine', 'no engine'] },
