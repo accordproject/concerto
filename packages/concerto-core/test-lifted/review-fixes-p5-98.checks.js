@@ -20,7 +20,11 @@
  *
  * - A-1: an enum derives from, and is assignable to, its implicit
  *   `concerto@1.0.0.Concept` super type (`derivesFrom`, `isAssignableTo`);
- *   a scalar does not.
+ *   a scalar does not, and is never assignable, itself included (v5.0.0's
+ *   `ScalarDeclaration.isAbstract()` is `true`).
+ * - DV-022 (concerto-rust DIVERGENCES.md, maintainer-accepted): for a map
+ *   declaration the engine answers `derivesFrom` and `isAssignableTo`
+ *   (`true` only against itself) where v5.0.0 throws a `TypeError`.
  * - A-2: when two imports give the same local name, the last one wins for
  *   `extends` and for a field's type alike (TS `importShortNames`'
  *   `Map.set`), for two user imports and for a user import of a system
@@ -37,8 +41,8 @@
  *
  * Only public members are used, except F-1's count of the engine binding
  * calls (on the manager's `rustHandle`, absent on the reference). `expect`
- * is the frozen v5.0.0 reference's outcome, which src matches, so no check
- * needs a `reference`. Run by fallbacks.spec.js.
+ * is the frozen v5.0.0 reference's outcome, which src matches, except
+ * DV-022's check, whose `reference` is v5.0.0's. Run by fallbacks.spec.js.
  */
 
 /**
@@ -180,6 +184,55 @@ module.exports = [
             enumAssignableToConcept: true,
             enumDerivesFromPerson: false,
             scalarDerivesFromConcept: false,
+        } },
+    },
+    {
+        id: 'P598-A1-002',
+        covers: 'A-1: a scalar is never assignable (v5.0.0 ScalarDeclaration.isAbstract() is true), itself included; derivesFrom matches too',
+        run: (core) => {
+            const mm = new core.ModelManager();
+            mm.addCTOModel('namespace test@1.0.0\nscalar SSN extends String\nconcept Person {\n  o String name\n}\n', 'test.cto');
+            return {
+                derivesFromConcept: probe(() => mm.derivesFrom('test@1.0.0.SSN', 'concerto@1.0.0.Concept')),
+                derivesFromItself: probe(() => mm.derivesFrom('test@1.0.0.SSN', 'test@1.0.0.SSN')),
+                assignableToConcept: probe(() => mm.isAssignableTo('test@1.0.0.SSN', 'concerto@1.0.0.Concept')),
+                assignableToItself: probe(() => mm.isAssignableTo('test@1.0.0.SSN', 'test@1.0.0.SSN')),
+            };
+        },
+        expect: { ok: {
+            derivesFromConcept: ['ok', false],
+            derivesFromItself: ['ok', true],
+            assignableToConcept: ['ok', false],
+            assignableToItself: ['ok', false],
+        } },
+    },
+    {
+        id: 'P598-A1-003',
+        covers: 'DV-022 (maintainer-accepted): for a map declaration the engine answers derivesFrom and isAssignableTo (true only against itself) where v5.0.0 throws a TypeError',
+        run: (core) => {
+            const mm = new core.ModelManager();
+            mm.addCTOModel('namespace test@1.0.0\nmap Lookup {\n  o String\n  o String\n}\nconcept Person {\n  o String name\n}\n', 'test.cto');
+            return {
+                derivesFromConcept: probe(() => mm.derivesFrom('test@1.0.0.Lookup', 'concerto@1.0.0.Concept')),
+                derivesFromPerson: probe(() => mm.derivesFrom('test@1.0.0.Lookup', 'test@1.0.0.Person')),
+                derivesFromItself: probe(() => mm.derivesFrom('test@1.0.0.Lookup', 'test@1.0.0.Lookup')),
+                assignableToConcept: probe(() => mm.isAssignableTo('test@1.0.0.Lookup', 'concerto@1.0.0.Concept')),
+                assignableToItself: probe(() => mm.isAssignableTo('test@1.0.0.Lookup', 'test@1.0.0.Lookup')),
+            };
+        },
+        expect: { ok: {
+            derivesFromConcept: ['ok', false],
+            derivesFromPerson: ['ok', false],
+            derivesFromItself: ['ok', true],
+            assignableToConcept: ['ok', false],
+            assignableToItself: ['ok', true],
+        } },
+        reference: { ok: {
+            derivesFromConcept: ['throws', 'TypeError', 'typeDeclaration.getSuperTypeDeclaration is not a function'],
+            derivesFromPerson: ['throws', 'TypeError', 'typeDeclaration.getSuperTypeDeclaration is not a function'],
+            derivesFromItself: ['ok', true],
+            assignableToConcept: ['throws', 'TypeError', 'typeDeclaration.isAbstract is not a function'],
+            assignableToItself: ['throws', 'TypeError', 'typeDeclaration.isAbstract is not a function'],
         } },
     },
     {
