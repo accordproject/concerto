@@ -208,7 +208,7 @@ class ResourceValidator {
 
         // are we dealing with a Resource?
         if(!((obj instanceof Resource))) {
-            ResourceValidator.reportNotResouceViolation(parameters.rootResourceIdentifier, classDeclaration, obj );
+            ResourceValidator.reportNotResourceViolation(parameters.rootResourceIdentifier, classDeclaration, obj );
         }
 
         if(obj instanceof Identifiable) {
@@ -557,7 +557,7 @@ class ResourceValidator {
      * @param {Object} value - the value of the field.
      * @private
      */
-    static reportNotResouceViolation(id, classDeclaration, value) {
+    static reportNotResourceViolation(id, classDeclaration, value) {
         let formatter = Globalize.messageFormatter('resourcevalidator-notresourceorconcept');
         throw new ValidationException(formatter({
             resourceId: id,

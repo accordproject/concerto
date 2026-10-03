@@ -138,3 +138,48 @@ export interface InstanceGeneratorParameters {
     stack?: TypedStack<Typed>;
     seen?: string[];
 }
+
+/**
+ * Options accepted by Serializer#toJSON, Serializer#fromJSON and the
+ * visitors they drive.
+ */
+export interface SerializerOptions {
+  /** validate the structure of the Resource against its model. Defaults to true. */
+  validate?: boolean;
+  /** error on extra fields not in the model */
+  rejectUnknownKeys?: boolean;
+  /** fail fast when a required field is explicitly null */
+  rejectRequiredNull?: boolean;
+  /** convert resources supplied for relationship fields into relationships. */
+  convertResourcesToRelationships?: boolean;
+  /** permit resources in the place of relationships, serializing them as resources. */
+  permitResourcesForRelationships?: boolean;
+  /** accept JSON objects in the place of relationships when deserializing. */
+  acceptResourcesForRelationships?: boolean;
+  /** serialize repeated resources once, writing only $id for later instances. */
+  deduplicateResources?: boolean;
+  /** convert resources supplied for relationship fields into their id. */
+  convertResourcesToId?: boolean;
+  /** UTC offset, in minutes, for DateTime values. */
+  utcOffset?: number;
+  /** only allow fully-qualified date-times with offsets. */
+  strictQualifiedDateTimes?: boolean;
+}
+
+/**
+ * Options for deserializing and validating metamodels and JSON instances.
+ */
+export interface DeserializeOptions {
+  /** Error on extra fields not in the model */
+  rejectUnknownKeys?: boolean;
+  /** Fail fast when a required field is explicitly null */
+  rejectRequiredNull?: boolean;
+}
+
+/**
+ * Strict validation preset for metamodel and deserialization checks.
+ */
+export const STRICT_VALIDATE_OPTIONS: DeserializeOptions = {
+  rejectUnknownKeys: true,
+  rejectRequiredNull: true,
+};
