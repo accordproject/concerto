@@ -165,6 +165,21 @@ describe('JSONPopulator', () => {
                 jsonPopulator.convertToObject(field, 'abc', {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
+        it('should include structured details when date type validation fails', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+
+            try {
+                jsonPopulator.convertToObject(field, 123, {});
+            } catch (error) {
+                error.should.be.instanceOf(ValidationException);
+                error.details.should.deep.equal({
+                    code: 'TYPE_VIOLATION',
+                    path: '$',
+                    expected: 'DateTime'
+                });
+            }
+        });
 
         it('should not convert to dates from null', () => {
             let field = sinon.createStubInstance(Field);
