@@ -1940,6 +1940,60 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
 }
 
 /**
+ * P5-97 (accordproject/concerto-rust#448): the ModelFile constructor's
+ * load step for a view of `source` (`ModelFile._sharedView`), in place of
+ * `checkAstShape` and `stageModelFile`: the view's AST is `source`'s own
+ * object, which the engine has already checked and loaded, and the
+ * engine-side file is the same one, shared. Records `stage`, the shared
+ * file's stage in the view's manager's rustHandle (registered from there
+ * by `commitStaged`, as any staged file), or `committed`, the rustHandle
+ * that already holds it; and `source`'s shape-check mark, when `source`
+ * still holds the AST it was checked with. Returns whether the declaration
+ * views are built lazily: when `source`'s were, or the view's manager has
+ * no decorator factories (as `stageModelFile` decides it for a new file);
+ * otherwise the constructor builds them now, with the factories.
+ * @param {object} modelFile the view being constructed
+ * @param {object} source the ModelFile it is a view of
+ * @param {object} [stage] the shared file's stage
+ * @param {object} [committed] the rustHandle that holds the shared file
+ * @return {boolean} true if the declarations may be built lazily
+ */
+function adoptSharedView(modelFile: any, source: any, stage?: Stage, committed?: object): boolean {
+    const state = fileState(modelFile);
+    if (stage !== undefined) {
+        state.stage = stage;
+        stageFinalizer?.register(modelFile, stage, stage);
+    }
+    if (committed !== undefined) {
+        state.committed = committed;
+    }
+    const sourceState = fileStates.get(source);
+    if (sourceState?.shapeChecked !== undefined && sourceState.shapeChecked === source.ast) {
+        state.shapeChecked = sourceState.shapeChecked;
+    }
+    const factories = modelFile.modelManager.getDecoratorFactories();
+    const lazy = sourceState?.lazy !== undefined || !(Array.isArray(factories) && factories.length > 0);
+    if (lazy) {
+        state.lazy = true;
+    }
+    return lazy;
+}
+
+/**
+ * P5-97: records for `modelFile` the `getImports()` names recorded for
+ * `source`, the view it copied its header from (`ModelFile._copyHeader`),
+ * when there are any.
+ * @param {object} modelFile the view
+ * @param {object} source the ModelFile it is a view of
+ */
+function copyImportNames(modelFile: any, source: any): void {
+    const names = recordedImportNames(source);
+    if (names !== undefined) {
+        recordImportNames(modelFile, names);
+    }
+}
+
+/**
  * P5-61: reads the AST of a ModelFile whose manager has decorator factories
  * and the shape check off, only to throw `stageModelFile`'s `unreadableAst`
  * error for an AST the engine cannot read. The staged file is dropped.
@@ -3335,9 +3389,9 @@ function buildDeferredParts(modelFile: any): void {
 // back through this module and is recorded, so the entry knows which view
 // supplied the inherited part and which of that view's entries it copied.
 // An entry is reused only while:
-// - no model file was added, updated or deleted in any ModelManager since
-//   it was built (`invalidatePropertyLookups`, called by BaseModelManager
-//   where it changes its `modelFiles` map in place: `addModelFile`,
+// - no model file was added, updated or deleted in the view's ModelManager
+//   since it was built (`invalidatePropertyLookups(manager)`, called by
+//   BaseModelManager where it changes its `modelFiles` map in place: `addModelFile`,
 //   `updateModelFile`, `deleteModelFile`, `addModelFiles`), and the view's
 //   manager still holds the same `modelFiles` map (`clearModelFiles` and the
 //   roll-back of a failed `addModelFiles` or `updateExternalModels` replace
@@ -3359,30 +3413,47 @@ function buildDeferredParts(modelFile: any): void {
 // (BC-23).
 // ---------------------------------------------------------------------------
 
-/** Bumped whenever any ModelManager's model files change. */
-let propertyGeneration = 0;
+/**
+ * Each ModelManager's model epoch, bumped whenever its model files change
+ * (F-2, accordproject/concerto-rust#448: per manager, so that one manager's
+ * change, a fork's for instance, keeps every other manager's cached
+ * answers; a view's answers depend on its own manager's models only).
+ */
+const managerGenerations = new WeakMap<object, number>();
 
 /**
- * Drops every cached property lookup: called by BaseModelManager whenever
- * it adds, replaces or deletes a model file in its `modelFiles` map. (A
- * manager that replaces the whole map is caught by `lookupValid`.)
+ * `manager`'s model epoch: 0 until its model files first change.
+ * @param {object} manager the ModelManager
+ * @return {number} its epoch
  */
-function invalidatePropertyLookups(): void {
-    propertyGeneration++;
+function generationOf(manager: any): number {
+    return (typeof manager === 'object' && manager !== null ? managerGenerations.get(manager) : undefined) ?? 0;
 }
 
 /**
- * The model epoch `invalidatePropertyLookups` moves (P5-29): BaseModelManager
- * keys its getNamespaces/getType/resolveType memo on it.
- * @return {number} the current `propertyGeneration`
+ * Drops every cached property lookup of `manager`'s views: called by
+ * BaseModelManager whenever it adds, replaces or deletes a model file in
+ * its `modelFiles` map. (A manager that replaces the whole map is caught by
+ * `lookupValid`.)
+ * @param {object} manager the ModelManager whose model files changed
  */
-function modelGeneration(): number {
-    return propertyGeneration;
+function invalidatePropertyLookups(manager: object): void {
+    managerGenerations.set(manager, generationOf(manager) + 1);
+}
+
+/**
+ * The model epoch `invalidatePropertyLookups` moves for `manager` (P5-29):
+ * BaseModelManager keys its getNamespaces/getType/resolveType memo on it.
+ * @param {object} manager the ModelManager
+ * @return {number} its current epoch
+ */
+function modelGeneration(manager: object): number {
+    return generationOf(manager);
 }
 
 /** One ClassDeclaration view's cached `getProperties()` list. */
 interface PropertyLookup {
-    /** `propertyGeneration` when it was built. */
+    /** Its manager's epoch (`generationOf`) when it was built. */
     generation: number;
     /** The own properties array (`getOwnProperties()`, `properties`) it was built from. */
     own: any[];
@@ -3433,7 +3504,7 @@ function lookupCacheable(view: any): boolean {
  * @return {boolean} true if it may be reused
  */
 function lookupValid(view: any, entry: PropertyLookup): boolean {
-    if (entry.generation !== propertyGeneration || view.superType !== entry.superType ||
+    if (entry.generation !== generationOf(view.modelFile?.modelManager) || view.superType !== entry.superType ||
         view.modelFile !== entry.modelFile || view.properties !== entry.own ||
         view.modelFile.modelManager?.modelFiles !== entry.modelFiles) {
         return false;
@@ -3473,7 +3544,7 @@ function validLookup(view: any): PropertyLookup | undefined {
  * @param {object} view the ClassDeclaration view
  * @param {any[]} own the own properties array before the call
  * @param {object} state the view's `superType`, `modelFile` and manager's
- * `modelFiles`, and `propertyGeneration`, before the call
+ * `modelFiles`, and that manager's epoch, before the call
  * @param {any[]} list what the binding returned
  * @param {object[]} calls the `getProperties()` calls it made
  * @return {object|undefined} the entry
@@ -3481,7 +3552,8 @@ function validLookup(view: any): PropertyLookup | undefined {
 function newLookup(view: any, own: any, state: { superType: any; modelFile: any; modelFiles: any; generation: number },
     list: any, calls: LookupCall[]): PropertyLookup | undefined {
     if (!Array.isArray(own) || view.properties !== own || view.superType !== state.superType ||
-        view.modelFile !== state.modelFile || !Array.isArray(list) || state.generation !== propertyGeneration ||
+        view.modelFile !== state.modelFile || !Array.isArray(list) ||
+        state.generation !== generationOf(view.modelFile.modelManager) ||
         view.modelFile.modelManager?.modelFiles !== state.modelFiles) {
         return undefined;
     }
@@ -3561,7 +3633,7 @@ function propertiesOf(view: any): any[] {
         superType: view.superType,
         modelFile: view.modelFile,
         modelFiles: view.modelFile.modelManager.modelFiles,
-        generation: propertyGeneration,
+        generation: generationOf(view.modelFile.modelManager),
     };
     const calls: LookupCall[] = [];
     lookupFrames.push(calls);
@@ -3624,7 +3696,7 @@ function classDeclarationGetProperty(view: any, name: any): any {
 // ---------------------------------------------------------------------------
 // Identifier field names (P5-19, accordproject/concerto-rust#317): the
 // answer of `ClassDeclaration.getIdentifierFieldName()` is kept per view,
-// keyed on the model epoch P5-14 introduced (`propertyGeneration`), so the
+// keyed on the model epoch P5-14 introduced (per manager since F-2), so the
 // repeated calls Factory, Serializer and ResourceValidator make
 // (`isIdentified()`, `isSystemIdentified()`, `getIdentifierFieldName()`) do
 // not cross into the engine again.
@@ -3635,8 +3707,8 @@ function classDeclarationGetProperty(view: any, name: any): any {
 // comment in concerto-wasm). Its answer is kept only when it did, for views
 // of model files built for a real BaseModelManager (as P5-14's property
 // lookups), and is reused only while:
-// - no model file was added, updated or deleted since (`propertyGeneration`,
-//   bumped by `invalidatePropertyLookups`), and each manager on the way still
+// - no model file was added, updated or deleted in any manager on the way
+//   since (its epoch, bumped by `invalidatePropertyLookups`), and each still
 //   holds the same `modelFiles` map;
 // - every declaration in the chain still has the `idField`, `superType`,
 //   `superTypeDeclaration` and `modelFile` it had, and its model file the
@@ -3657,12 +3729,12 @@ interface IdentifierLevel {
     modelFile: any;
     manager: any;
     modelFiles: any;
+    /** The manager's epoch (`generationOf`) then. */
+    generation: number;
 }
 
 /** One ClassDeclaration view's cached `getIdentifierFieldName()` answer. */
 interface IdentifierEntry {
-    /** `propertyGeneration` when it was built. */
-    generation: number;
     /** The declarations the walk read, the view first. */
     levels: IdentifierLevel[];
     value: any;
@@ -3688,6 +3760,7 @@ function identifierLevel(view: any): IdentifierLevel | undefined {
         modelFile: view.modelFile,
         manager,
         modelFiles: manager.modelFiles,
+        generation: generationOf(manager),
     };
 }
 
@@ -3697,12 +3770,9 @@ function identifierLevel(view: any): IdentifierLevel | undefined {
  * @return {boolean} true if it may be reused
  */
 function identifierValid(entry: IdentifierEntry): boolean {
-    if (entry.generation !== propertyGeneration) {
-        return false;
-    }
     for (const level of entry.levels) {
         const view = level.view;
-        if (view.idField !== level.idField || view.superType !== level.superType ||
+        if (level.generation !== generationOf(level.manager) || view.idField !== level.idField || view.superType !== level.superType ||
             view.superTypeDeclaration !== level.superTypeDeclaration || view.modelFile !== level.modelFile ||
             level.modelFile.modelManager !== level.manager || level.manager.modelFiles !== level.modelFiles) {
             return false;
@@ -3729,10 +3799,11 @@ function classDeclarationGetIdentifierFieldName(view: any): any {
             identifierEntries.delete(view);
         }
     }
-    const generation = propertyGeneration;
+    const manager = view.modelFile?.modelManager;
+    const generation = generationOf(manager);
     const result = rust!.classDeclarationGetIdentifierFieldNameWalk(view);
     const value = result[0];
-    if (cacheable && result[1] === true && generation === propertyGeneration) {
+    if (cacheable && result[1] === true && generation === generationOf(manager)) {
         const levels: IdentifierLevel[] = [];
         for (let n = 2; n < result.length; n++) {
             const level = identifierLevel(result[n]);
@@ -3741,7 +3812,7 @@ function classDeclarationGetIdentifierFieldName(view: any): any {
             }
             levels.push(level);
         }
-        identifierEntries.set(view, { generation, levels, value });
+        identifierEntries.set(view, { levels, value });
     }
     return value;
 }
@@ -3764,6 +3835,8 @@ export {
     checkAstShape,
     markSystemModelAst,
     stageModelFile,
+    adoptSharedView,
+    copyImportNames,
     applyStagedHeader,
     applyStagedFileHeader,
     applyStagedHeaders,

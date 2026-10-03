@@ -420,6 +420,26 @@ declare class BaseModelManager {
      */
     getAst(resolve?: any, includeConcertoNamespaces?: any): IModels;
     /**
+     * Returns a new ModelManager over the same model files as this one,
+     * with the same options and decorator factories, without loading or
+     * validating any model file again (P5-97,
+     * accordproject/concerto-rust#448). Unlike a `filter` that keeps every
+     * declaration, every model file is kept, including one with no
+     * declarations, and no predicate is called.
+     *
+     * The fork is independent of this manager from then on: model files
+     * added to, updated in or deleted from either one never reach the
+     * other. A server can therefore keep one base manager of its common
+     * models and fork it per request, each request adding its own models to
+     * its own fork. The engine shares the base's model files with every
+     * fork instead of copying them, and a fork starts with the base's warmed
+     * per-type caches. A fork's ModelFile views are its own; their
+     * declarations are built on first use. Memory is released by the
+     * garbage collector when a fork is no longer referenced.
+     * @returns {BaseModelManager} the fork, of this manager's own class
+     */
+    fork(): this;
+    /**
      * A function type definition for use as an argument to the filter function
      * @callback FilterFunction
      * @param {Declaration} declaration
