@@ -424,6 +424,43 @@ const checks = [
         reference: { ok: NO_FORK },
     },
     {
+        id: 'FORK-04',
+        covers: 'a fork and its base each answer from their own models after the other changes a shared file (model epochs are per manager)',
+        run: (core) => {
+            const mm = base(core);
+            if (typeof mm.fork !== 'function') {
+                return NO_FORK;
+            }
+            const names = (m) => m.getType(`${BASE_NS}.Address`).getProperties().map((p) => p.getName());
+            const office = (m) => m.getType('org.acme.p597.other@1.0.0.Office').getProperty('address')
+                .getParent().getModelFile().getModelManager() === m;
+            const identifier = (m) => m.getType(`${BASE_NS}.Person`).getIdentifierFieldName();
+            const fork = mm.fork();
+            // Warm both managers' cached answers first.
+            const warm = [names(mm), names(fork), identifier(mm), identifier(fork)];
+            fork.updateModelFile(BASE.replace('o String city', 'o String city\n  o String street'), 'base.cto');
+            const afterForkUpdate = [names(mm), names(fork), mm.getType(`${BASE_NS}.Address`).getProperty('street')];
+            mm.updateModelFile(BASE.replace('o String city', 'o String city\n  o String country'), 'base.cto');
+            const afterBaseUpdate = [names(mm), names(fork)];
+            fork.deleteModelFile('org.acme.p597.other@1.0.0');
+            return {
+                warm,
+                afterForkUpdate,
+                afterBaseUpdate,
+                afterForkDelete: [office(mm), fork.getModelFile('org.acme.p597.other@1.0.0') === undefined, identifier(mm), identifier(fork)],
+            };
+        },
+        expect: {
+            ok: {
+                warm: [['city', 'zip'], ['city', 'zip'], 'email', 'email'],
+                afterForkUpdate: [['city', 'zip'], ['city', 'street', 'zip'], null],
+                afterBaseUpdate: [['city', 'country', 'zip'], ['city', 'street', 'zip']],
+                afterForkDelete: [true, true, 'email', 'email'],
+            },
+        },
+        reference: { ok: NO_FORK },
+    },
+    {
         id: 'FILTER-01',
         covers: 'filter keeping every user declaration: the same files, ASTs, definitions and names as v5.0.0',
         run: (core) => {

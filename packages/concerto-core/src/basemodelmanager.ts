@@ -72,7 +72,7 @@ const engineViews = () => engineViewsModule ?? (engineViewsModule = loadEngine('
 /**
  * The engine's answers to `getType` and `resolveType` for
  * one BaseModelManager (P5-29, accordproject/concerto-rust#334), valid while
- * the model epoch P5-14 introduced (`modelGeneration`, moved by every
+ * the manager's model epoch (P5-14's, per manager since F-2: `modelGeneration`, moved by every
  * `addModelFile`, `updateModelFile`, `deleteModelFile`, `addModelFiles` and
  * `updateExternalModels`) is unchanged and the manager still holds the same
  * `modelFiles` map and rustHandle (`clearModelFiles` and the roll-back of a
@@ -101,7 +101,7 @@ const managerReadMemos = new WeakMap<object, ManagerReadMemo>();
  */
 /* istanbul ignore next */
 function managerReadMemoValid(manager: { modelFiles: object; rustHandle: object }, memo: ManagerReadMemo): boolean {
-    return memo.generation === engineViews().modelGeneration() && memo.modelFiles === manager.modelFiles &&
+    return memo.generation === engineViews().modelGeneration(manager) && memo.modelFiles === manager.modelFiles &&
         memo.handle === manager.rustHandle;
 }
 
@@ -117,7 +117,7 @@ function managerReadMemo(manager: { modelFiles: object; rustHandle: object }): M
     let memo = managerReadMemos.get(manager);
     if (!memo || !managerReadMemoValid(manager, memo)) {
         memo = {
-            generation: engineViews().modelGeneration(),
+            generation: engineViews().modelGeneration(manager),
             modelFiles: manager.modelFiles,
             handle: manager.rustHandle,
             typeNames: new Map(),
@@ -776,7 +776,7 @@ class BaseModelManager {
             // P5-75: a new key, appended to the namespace list.
             noteNamespaceAdded(this, modelFile.getNamespace());
             // P5-14: a model change drops the cached property lookups.
-            engineViews().invalidatePropertyLookups();
+            engineViews().invalidatePropertyLookups(this);
         } else {
             this._throwAlreadyExists(modelFile);
         }
@@ -830,7 +830,7 @@ class BaseModelManager {
             if (!alreadyHasMetamodel && this.rustHandle.modelFileId(MetaModelNamespace) !== undefined) {
                 this.modelFiles[MetaModelNamespace] = this.metamodelModelFile;
                 noteNamespaceAdded(this, MetaModelNamespace);
-                engineViews().invalidatePropertyLookups();
+                engineViews().invalidatePropertyLookups(this);
             }
             throw err;
         }
@@ -897,7 +897,7 @@ class BaseModelManager {
         // Mirrored first, so a mirror error leaves both unchanged.
         this._rustMirrorUpdate(modelFile);
         this.modelFiles[modelFile.getNamespace()] = modelFile;
-        engineViews().invalidatePropertyLookups();
+        engineViews().invalidatePropertyLookups(this);
         return modelFile;
     }
 
@@ -924,7 +924,7 @@ class BaseModelManager {
             delete this.modelFiles[namespace];
             // P5-75: the key TS deletes is `namespace`'s string form.
             noteNamespaceRemoved(this, String(namespace));
-            engineViews().invalidatePropertyLookups();
+            engineViews().invalidatePropertyLookups(this);
         }
     }
 
@@ -972,7 +972,7 @@ class BaseModelManager {
                 }
                 if (!this.modelFiles[m.getNamespace()]) {
                     this.modelFiles[m.getNamespace()] = m;
-                    engineViews().invalidatePropertyLookups();
+                    engineViews().invalidatePropertyLookups(this);
                     newModelFiles.push(m);
                 } else {
                     this._throwAlreadyExists(m);
@@ -1132,7 +1132,7 @@ class BaseModelManager {
                     noteNamespaceAdded(this, mf.getNamespace());
                 }
             });
-            engineViews().invalidatePropertyLookups();
+            engineViews().invalidatePropertyLookups(this);
             return views;
         } catch (err) {
             // Restore original files
