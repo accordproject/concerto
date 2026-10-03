@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // Engine handle release (P5-97, accordproject/concerto-rust#448). P5-100
 // (accordproject/concerto-rust#454) removed the P4-02 handle registry
 // (`registryFor`, a module-level WeakMap by ModelManagerHandle) that no view
@@ -43,10 +42,7 @@ const pendingRelease: Array<{ free(): void }> = [];
  * `free()` is ignored, as the finalizer would have freed it anyway.
  * @param {object} handle the handle
  */
-function releaseHandle(handle: { free(): void } | undefined | null): void {
-    if (!handle) {
-        return;
-    }
+function releaseHandle(handle: { free(): void }): void {
     if (callbackDepth > 0) {
         pendingRelease.push(handle);
         return;

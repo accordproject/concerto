@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // Loads the WASM engine (P4-02; P5-02 removed the CONCERTO_ENGINE=ts|rust
 // flag: the Rust engine is now the only path) and registers the host
 // function it calls back: the error factory. P5-103 removed the

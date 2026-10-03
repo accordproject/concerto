@@ -329,7 +329,6 @@ class ModelFile extends Decorated {
      * @internal
      */
     _rustHandleId(): number | undefined {
-        /* istanbul ignore next */
         if (!this._isRegistered()) {
             return undefined;
         }
@@ -475,7 +474,6 @@ class ModelFile extends Decorated {
         }
         let result: string[] = [];
         const id = this._rustHandleId();
-        /* istanbul ignore if */
         if (id !== undefined) {
             const manager = this.modelManager;
             result = manager.rustHandle.modelFileGetImports(id);
@@ -588,7 +586,6 @@ class ModelFile extends Decorated {
         // a detached file) and non-string arguments, which the binding's
         // `&str` parameters cannot take, keep the TS body below.
         const id = typeof context === 'string' && typeof type === 'string' ? this._rustHandleId() : undefined;
-        /* istanbul ignore if */
         if (id !== undefined) {
             const manager = this.modelManager;
             manager.rustHandle.modelFileResolveType(id, context, type, fileLocation, this);
@@ -629,7 +626,6 @@ class ModelFile extends Decorated {
             return (type && this.getLocalType(type) !== null);
         }
         const id = this._rustHandleId();
-        /* istanbul ignore if */
         if (id !== undefined) {
             const manager = this.modelManager;
             return manager.rustHandle.modelFileIsLocalType(id, type);
@@ -703,7 +699,6 @@ class ModelFile extends Decorated {
         // undefined for null. A file that is not mirrored and a non-string
         // type keep the TS body below.
         const id = typeof type === 'string' ? this._rustHandleId() : undefined;
-        /* istanbul ignore if */
         if (id !== undefined) {
             const manager = this.modelManager;
             const name: string | undefined = manager.rustHandle.modelFileGetTypeName(id, type);
@@ -755,7 +750,6 @@ class ModelFile extends Decorated {
         // null) for a file its manager has mirrored into rustHandle. A file
         // that is not mirrored and a non-string type keep the TS body below.
         const id = typeof type === 'string' ? this._rustHandleId() : undefined;
-        /* istanbul ignore if */
         if (id !== undefined) {
             const manager = this.modelManager;
             return manager.rustHandle.modelFileGetFullyQualifiedTypeName(id, type) ?? null;
@@ -1221,7 +1215,6 @@ class ModelFile extends Decorated {
      */
     filter(predicate: FilterFunction, modelManager: BaseModelManager): ModelFile | null {
         const id = this._rustHandleId();
-        /* istanbul ignore if */
         if (id !== undefined) {
             const manager = this.modelManager;
             const sourceManager = this.getModelManager();

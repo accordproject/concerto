@@ -67,7 +67,6 @@ function newEngineState(): EngineState {
         version: 0,
         readMemo: undefined,
         namespaces: undefined,
-        dcsResidents: undefined,
         serializerCache: undefined,
     };
 }
@@ -79,7 +78,6 @@ function newEngineState(): EngineState {
  * @return {object} its current memo
  * @private
  */
-/* istanbul ignore next */
 function managerReadMemo(state: EngineState): NonNullable<EngineState['readMemo']> {
     let memo = state.readMemo;
     if (memo === undefined || memo.version !== state.version) {
@@ -100,7 +98,6 @@ function managerReadMemo(state: EngineState): NonNullable<EngineState['readMemo'
  * @return {string[]|undefined} its list
  * @private
  */
-/* istanbul ignore next */
 function namespaceListOf(manager: { _engine: EngineState; _mirrorPending: boolean }): string[] | undefined {
     return manager._mirrorPending ? undefined : manager._engine.namespaces;
 }
@@ -113,7 +110,6 @@ function namespaceListOf(manager: { _engine: EngineState; _mirrorPending: boolea
  * @param {string} namespace - the namespace added
  * @private
  */
-/* istanbul ignore next */
 function noteNamespaceAdded(manager: { _engine: EngineState; _mirrorPending: boolean }, namespace: string): void {
     const list = namespaceListOf(manager);
     if (list) {
@@ -131,7 +127,6 @@ function noteNamespaceAdded(manager: { _engine: EngineState; _mirrorPending: boo
  * @param {string} namespace - the namespace (key) removed
  * @private
  */
-/* istanbul ignore next */
 function noteNamespaceRemoved(manager: { _engine: EngineState; _mirrorPending: boolean }, namespace: string): void {
     const list = namespaceListOf(manager);
     const at = list?.indexOf(namespace) ?? -1;
@@ -467,7 +462,6 @@ class BaseModelManager {
      * @private
      * @internal
      */
-    /* istanbul ignore next */
     _needsRustWrite(namespace) {
         if (this._rustPreloaded.has(namespace)) {
             return false;
@@ -507,7 +501,6 @@ class BaseModelManager {
      * @private
      * @internal
      */
-    /* istanbul ignore next */
     _rustMirrorAdd(modelFile) {
         const namespace = modelFile.getNamespace();
         if (!this._needsRustWrite(namespace)) {
@@ -533,28 +526,19 @@ class BaseModelManager {
      * for each of `modelFiles`, in order, in one engine call when every one
      * is written to rustHandle from its stage (engine/views.ts
      * `commitStagedAll`); otherwise one write per file, as before. Adds each
-     * namespace written to `mirrored`, also when a write throws (the files
-     * the engine registered before the error), so the caller can undo them.
+     * namespace written to `mirrored`, so the caller can undo them. P5-103:
+     * the one engine call cannot fail part way: its only registration error
+     * is a namespace already registered, which `addModelFiles` rejects
+     * before it mirrors anything.
      * @param {ModelFile[]} modelFiles - the model files being added
      * @param {Set<string>} mirrored - the namespaces written, filled in
      * @private
      * @internal
      */
-    /* istanbul ignore next */
     _rustMirrorAddAll(modelFiles: ModelFileInstance[], mirrored: Set<string>) {
         const handle = this.rustHandle;
         if (modelFiles.every((m) => this._needsRustWrite(m.getNamespace()))) {
-            let ids;
-            try {
-                ids = engineViews().commitStagedAll(modelFiles, handle);
-            } catch (err) {
-                modelFiles.forEach((m) => {
-                    if (handle.modelFileId(m.getNamespace()) !== undefined) {
-                        mirrored.add(m.getNamespace());
-                    }
-                });
-                throw err;
-            }
+            const ids = engineViews().commitStagedAll(modelFiles, handle);
             if (ids !== undefined) {
                 modelFiles.forEach((m, i) => {
                     this._modelFileIds.set(m.getNamespace(), ids[i]);
@@ -576,46 +560,19 @@ class BaseModelManager {
      * DecoratorManager results (engine/views.ts `adoptStagedModels`, which
      * decorateModels and every extract use), with the files registered in
      * rustHandle from their stages in one engine call (`commitStagedAll`)
-     * where each `addModelFile` crossed once. Used only when every file
-     * passes `addModelFile`'s own checks (a ModelFile the constructor built,
-     * a version, a namespace this manager and the batch do not already
-     * hold) and is written to rustHandle from its stage; otherwise each file
-     * is added by `addModelFile`, as before, so its errors are thrown at the
-     * same file. A registration error leaves the files the engine registered
-     * before it in `modelFiles` too, as the same `addModelFile` calls would.
+     * where each `addModelFile` crossed once. Every file passes
+     * `addModelFile`'s own checks by construction (P5-103 removed the checks
+     * again here): `adoptStagedModels` built each one, with a versioned
+     * namespace no other result file has, into this new, cleared manager,
+     * which writes it to rustHandle. When there is one file, or a file has
+     * no usable stage, each file is added by `addModelFile`, as before.
      * @param {ModelFile[]} modelFiles - the model files being added
      * @private
      * @internal
      */
-    /* istanbul ignore next */
     _addStagedModelFiles(modelFiles: ModelFileInstance[]) {
-        const handle = this.rustHandle;
-        const namespaces = new Set<string>();
-        const batchable = modelFiles.length > 1 && modelFiles.every((m) => {
-            if (!ModelFile._isConstructed(m) || !m.getVersion()) {
-                return false;
-            }
-            const namespace = m.getNamespace();
-            if (this.modelFiles[namespace] || namespaces.has(namespace) || !this._needsRustWrite(namespace)) {
-                return false;
-            }
-            namespaces.add(namespace);
-            return true;
-        });
-        let ids: ArrayLike<number> | undefined;
-        if (batchable) {
-            try {
-                ids = engineViews().commitStagedAll(modelFiles, handle);
-            } catch (err) {
-                modelFiles.forEach((m) => {
-                    const id = handle.modelFileId(m.getNamespace());
-                    if (id !== undefined) {
-                        this._registerAdded(m, id);
-                    }
-                });
-                throw err;
-            }
-        }
+        // `commitStagedAll` answers undefined for fewer than two files.
+        const ids = engineViews().commitStagedAll(modelFiles, this.rustHandle);
         if (ids === undefined) {
             modelFiles.forEach((m) => this.addModelFile(m, null, null, true));
             return;
@@ -632,7 +589,6 @@ class BaseModelManager {
      * @private
      * @internal
      */
-    /* istanbul ignore next */
     _registerAdded(modelFile: ModelFileInstance, id: number) {
         const namespace = modelFile.getNamespace();
         this._modelFileIds.set(namespace, id);
@@ -658,7 +614,6 @@ class BaseModelManager {
      * @private
      * @internal
      */
-    /* istanbul ignore next */
     _rustValidateAndMirrorAdd(modelFile, metamodel?: boolean) {
         const namespace = modelFile.getNamespace();
         if (modelFile.validate !== ModelFile.prototype.validate || !this._needsRustWrite(namespace)) {
@@ -693,7 +648,6 @@ class BaseModelManager {
      * @private
      * @internal
      */
-    /* istanbul ignore next */
     _rustMirrorUpdate(modelFile) {
         const namespace = modelFile.getNamespace();
         // P5-100 (E-6): the file Rust loaded when the ModelFile was
@@ -744,7 +698,6 @@ class BaseModelManager {
      * @private
      * @internal
      */
-    /* istanbul ignore next */
     _rustModelFileId(namespace: string): number | undefined {
         let id = this._modelFileIds.get(namespace);
         if (id === undefined) {
@@ -764,7 +717,6 @@ class BaseModelManager {
     _throwAlreadyExists(modelFile) {
         const namespace = modelFile.getNamespace();
         const fileName = modelFile.getName();
-        /* istanbul ignore next */
         if (!this._mirrorPending && typeof namespace === 'string' &&
             (typeof fileName === 'string' || fileName === undefined || fileName === null)) {
             // P5-11 (accordproject/concerto-rust#287): the plain Error is
@@ -900,7 +852,6 @@ class BaseModelManager {
      * @private
      * @internal
      */
-    /* istanbul ignore next */
     _mirrorMetamodelLeak(alreadyHasMetamodel: boolean) {
         if (!alreadyHasMetamodel && this.rustHandle.modelFileId(MetaModelNamespace) !== undefined) {
             this.modelFiles[MetaModelNamespace] = this.metamodelModelFile;
@@ -1072,7 +1023,6 @@ class BaseModelManager {
 
             // P5-75: the batch's namespaces, in the order `modelFiles` took
             // them.
-            /* istanbul ignore next */
             if (namespaces && namespaceListOf(this) === namespaces) {
                 newModelFiles.forEach((m) => namespaces.push(m.getNamespace()));
             }
@@ -1097,7 +1047,6 @@ class BaseModelManager {
             // (rustHandle never heard of them). A delete of a namespace this
             // batch did mirror propagates its error
             // (accordproject/concerto-rust#262).
-            /* istanbul ignore next */
             newModelFiles.forEach((m) => {
                 if (!mirroredNamespaces.has(m.getNamespace())) {
                     return;
@@ -1108,7 +1057,6 @@ class BaseModelManager {
             // P5-75: both are back as they were before the batch (a failed
             // delete above propagates first, dropping the list), so the
             // list from before the batch holds for the restored map.
-            /* istanbul ignore next */
             this._engine.namespaces = namespaces;
             throw err;
         } finally {
@@ -1312,17 +1260,14 @@ class BaseModelManager {
         // P5-29: a type the engine resolved since the last model change is
         // answered from the memo (`EngineState.readMemo`), without crossing into
         // the engine.
-        /* istanbul ignore next */
         const memo = managerReadMemo(this._engine);
         const resolved = memo.resolvedTypes.get(typeName);
-        /* istanbul ignore next */
         if (resolved !== undefined) {
             return resolved;
         }
         // The engine's answer is final, including any error it throws
         // (accordproject/concerto-rust#262).
         const result: string = this.rustHandle.resolveType(typeof context === 'string' ? context : String(context), typeName);
-        /* istanbul ignore next */
         if (memo.version === this._engine.version) {
             memo.resolvedTypes.set(typeName, result);
         }
@@ -1409,7 +1354,6 @@ class BaseModelManager {
         // `Option<String>` turns a JS null into None (which would match an
         // unnamed file, where TS's `=== null` does not), and a number or
         // object traps the engine. Any other argument takes the TS body.
-        /* istanbul ignore next */
         if (typeof fileName === 'string' || fileName === undefined) {
             const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
             return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
@@ -1427,14 +1371,11 @@ class BaseModelManager {
         // manager without one asks the engine, and then keeps its answer.
         // Each call gets its own copy, so changing the returned array
         // reaches neither the list nor the engine.
-        /* istanbul ignore next */
         const list = namespaceListOf(this);
-        /* istanbul ignore next */
         if (list) {
             return list.slice();
         }
         const result: string[] = this.rustHandle.getNamespaces();
-        /* istanbul ignore next */
         if (!this._mirrorPending) {
             this._engine.namespaces = result.slice();
         }
@@ -1455,10 +1396,8 @@ class BaseModelManager {
         // P5-29: the fully-qualified name the engine answered since the
         // last model change is kept (`EngineState.readMemo`); it is still mapped
         // to its view below on every call.
-        /* istanbul ignore next */
         const memo = managerReadMemo(this._engine);
         let fqn = memo.typeNames.get(name);
-        /* istanbul ignore next */
         if (fqn === undefined) {
             // P5-11 (accordproject/concerto-rust#287): resolved in Rust
             // (concerto-wasm `getTypeName`), which throws the
@@ -1734,7 +1673,6 @@ class BaseModelManager {
     fork(): this {
         // The batch `addModelFiles` is the only time `modelFiles` is ahead
         // of rustHandle, and it never calls out.
-        /* istanbul ignore if */
         if (this._mirrorPending) {
             throw new Error('A ModelManager cannot be forked while model files are being added to it');
         }

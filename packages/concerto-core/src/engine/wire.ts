@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // P5-101 (F-8, D-4, E-14; accordproject/concerto-rust#455): the one writer
 // of the compact binary layout the engine reads (concerto-rust concerto-core
 // `introspect::compact`, its one reader, which concerto-wasm's instance fast

@@ -12,11 +12,12 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // Maps the engine's error payload to the TS exception class (PORTING.md 2.3;
 // P4-02). Every ErrorKind concerto-rust's error/mod.rs raises has an entry
-// here (`Validator`, raised by none since BC-39, maps to a plain `Error` in
-// concerto-wasm; P5-103 removed its entry), so no converted member (from the original P0-04b trial units of
+// here (`Validator`, raised by none since BC-39, and `RecursionLimit`, by
+// none since BC-11 reports a circular super type chain as an
+// IllegalModelException, map to a plain `Error` in concerto-wasm; P5-103
+// removed their entries), so no converted member (from the original P0-04b trial units of
 // ModelUtil, NumberValidator and ScalarDeclaration through to the full
 // conversion at P5-02) is ever left throwing the "unknown engine error kind"
 // fallback.
@@ -157,10 +158,6 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     },
     Error: (p) => new Error(p.message),
     JsTypeError: (p) => new TypeError(p.message),
-    // error/mod.rs `ErrorKind::JsRangeError` (task accordproject/concerto-rust#151,
-    // P2-08b): a JS `RangeError(message)`, the same relationship JsTypeError
-    // above has to TypeError.
-    JsRangeError: (p) => new RangeError(p.message),
     // `MetamodelException(message)` (P4-08b): thrown by
     // `BaseModelManager.validateAst`.
     Metamodel: (p) => new MetamodelException(p.message),
@@ -172,11 +169,9 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
  * @return {Error} the exception to throw
  */
 function makeError(payload: ErrorPayload): Error {
-    const factory = FACTORIES[payload.kind];
-    if (!factory) {
-        return new Error(`Unknown engine error kind ${payload.kind}: ${payload.message}`);
-    }
-    const err = factory(payload);
+    // concerto-wasm sends only these kinds (its `kind_name` maps any other
+    // to `Error`), and it is pinned in lockstep with this shim.
+    const err = FACTORIES[payload.kind](payload);
     // P5-89 (accordproject/concerto#1325): the structured, value-free
     // details of an instance error, additively. Not enumerable, so the
     // exception's own enumerable shape (what `JSON.stringify` or a deep

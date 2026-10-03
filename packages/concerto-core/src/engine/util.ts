@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // P5-101 (E-14, accordproject/concerto-rust#455): the helpers the engine
 // codecs share (serializer-codec.ts, validate-resource.ts, ast-codec.ts and
 // wire.ts), where each kept its own copy, and the fast-path fallback signal

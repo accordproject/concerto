@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // Serializer.fromJSON/toJSON's fast path (P4-10; PORTING.md section 5 row
 // 6, D7): a single call into the WASM engine's `ModelManagerHandle.
 // serializerFromJson`/`serializerToJson` (concerto-wasm/src/lib.rs) rather
@@ -36,7 +35,7 @@
 
 import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 import { rust } from './index';
-import { encodeValue, encodeBytes, decodeValue, materializeCompact, newTypeCache, checkJsonText } from './serializer-codec';
+import { encodeValue, encodeBytes, decodeValue, materializeCompact, newTypeCache } from './serializer-codec';
 import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import Factory from '../factory';
 import Serializer from '../serializer';
@@ -81,6 +80,12 @@ function cachedHandleFor(modelManager: BaseModelManager): CachedHandle {
     // P5-52 (BC-28, R1): `options.regExp` is ignored, so a model manager
     // built with one no longer leaves the fast path.
     const handle = modelManager.rustHandle;
+    // A model manager that is not a BaseModelManager (the Serializer
+    // accepts any object with the ModelManager methods it calls) has no
+    // engine mirror: the visitor path serves it.
+    if (!handle) {
+        throw new EngineFastPathUnsupported('no-rust-handle');
+    }
     // The batch `addModelFiles` registers its files in `modelFiles` before
     // it mirrors them (P5-34): until then rustHandle is behind.
     if (modelManager._mirrorPending) {
@@ -257,7 +262,8 @@ let metaModelOptionsText: string | undefined;
 function validateMetaModel(input: unknown): void {
     if (!metaModelHandle) {
         const handle = new rust.ModelManagerHandle();
-        handle.addModel(checkJsonText(JSON.stringify(MetaModelUtil.metaModelAst)), 'concerto.metamodel');
+        // The metamodel's constant AST: plain JSON, with no lone surrogate.
+        handle.addModel(JSON.stringify(MetaModelUtil.metaModelAst), 'concerto.metamodel');
         metaModelHandle = handle;
     }
     if (metaModelOptionsText === undefined) {

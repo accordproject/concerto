@@ -121,8 +121,6 @@ export interface EngineState {
      * `getNamespaces()` asks the engine).
      */
     namespaces: string[] | undefined;
-    /** P5-27: the resident DCS input managers (engine/views.ts `dcsManagerFor`). */
-    dcsResidents: unknown[] | undefined;
     /** P5-16: the class lookups of the serializer fast path (engine/serializer.ts). */
     serializerCache: { version: number; handle: EngineHandle; types: unknown } | undefined;
 }
@@ -311,13 +309,6 @@ export interface EngineSerializerModule {
     validateMetaModel(input: unknown): void;
 }
 
-/** src/engine/serializer-codec.ts, as `engineSerializerCodec()` exposes it. */
-export interface EngineSerializerCodecModule {
-    encodeValue(value: unknown): unknown;
-    decodeValue(wire: unknown, modelManager: object | undefined): unknown;
-    checkString(value: string): void;
-}
-
 /** src/engine/validate-resource.ts, as `engineValidateResource()` exposes it. */
 export interface EngineValidateResourceModule {
     validateResource(resource: object, rootId: string): boolean;
@@ -332,6 +323,6 @@ export interface EngineValidateInstanceModule {
 
 /** src/engine/handles.ts, as `engineHandles()` exposes it. */
 export interface EngineHandlesModule {
-    releaseHandle(handle: { free(): void } | undefined | null): void;
+    releaseHandle(handle: { free(): void }): void;
     withEngineCallbacks<T>(fn: () => T): T;
 }

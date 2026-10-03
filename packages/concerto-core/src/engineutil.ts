@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // P5-101 (E-11, E-14; accordproject/concerto-rust#455): the engine helpers
 // the public modules share with src/engine/, in a module with no imports, so
 // a public module reaches them without loading the engine (engineloader.ts

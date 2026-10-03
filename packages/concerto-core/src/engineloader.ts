@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // P5-100 (E-3, E-10; accordproject/concerto-rust#454): the one loader the
 // public modules reach the engine (src/engine/) through. It replaces the 31
 // copies of `loadEngine` each public module used to carry.
@@ -53,7 +52,7 @@
 
 import { createRequire } from 'module';
 import type {
-    EngineBindings, EngineHandlesModule, EngineSerializerCodecModule, EngineSerializerModule,
+    EngineBindings, EngineHandlesModule, EngineSerializerModule,
     EngineValidateInstanceModule, EngineValidateResourceModule, EngineViewsModule,
 } from './engine/bindings';
 declare const __webpack_require__: unknown;
@@ -67,7 +66,7 @@ const engineModules: { [specifier: string]: any } = {};
  * @return {*} the module
  * @internal
  */
-/* istanbul ignore next */
+/* istanbul ignore next: the bundler and ESM branches never run under Node's CommonJS require, where the suite runs */
 function loadEngine(specifier: string): any {
     return engineModules[specifier] ??
         (engineModules[specifier] =
@@ -99,15 +98,6 @@ export function engineViews(): EngineViewsModule {
  */
 export function engineSerializer(): EngineSerializerModule {
     return engineModules['./engine/serializer'] ?? loadEngine('./engine/serializer');
-}
-
-/**
- * src/engine/serializer-codec.ts.
- * @return {object} the module
- * @internal
- */
-export function engineSerializerCodec(): EngineSerializerCodecModule {
-    return engineModules['./engine/serializer-codec'] ?? loadEngine('./engine/serializer-codec');
 }
 
 /**

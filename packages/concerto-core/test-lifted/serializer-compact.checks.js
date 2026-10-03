@@ -16,16 +16,12 @@
 
 /**
  * P5-16 lifted checks (accordproject/concerto-rust#310): `Serializer.fromJSON`'s
- * engine fast path reads the engine's result in one of two shapes. It uses
- * concerto-wasm's `serializerFromJsonCompact` when the engine has it, and
- * otherwise `serializerFromJson`'s `"typed"` result (an engine built before
- * P5-16). Both must build the same resource the v5.0.0 reference does.
- *
- * Each document below is checked twice: once as the engine is, and once with
- * `serializerFromJsonCompact` hidden from the engine's `ModelManagerHandle`
- * for the duration of the call, so that the typed-result branch of
- * `engine/serializer.ts` runs. The reference never calls the engine, so hiding
- * the binding changes nothing there, and `expect` is its outcome for both.
+ * engine fast path reads the engine's compact result
+ * (concerto-wasm `serializerFromJsonCompact`, or its binary-input form), and
+ * must build the same resource the v5.0.0 reference does. P5-103
+ * (accordproject/concerto-rust#457) removed the `"typed"` result an engine
+ * built before P5-16 gave (`serializerFromJson`), and with it the checks of
+ * that branch, which hid the compact binding.
  *
  * A check reports the resource's class, its own property names, its
  * identifiers, the class of each nested resource, and its `toJSON()`. No
@@ -54,43 +50,6 @@ concept Item identified by id {
 }
 concept Plain { o String s optional o Boolean b optional }
 `;
-
-/**
- * The engine's `ModelManagerHandle` prototype, or undefined when the engine
- * cannot be loaded here (it is only needed to hide the compact binding).
- * @returns {object|undefined} the prototype
- */
-function handlePrototype() {
-    try {
-        // eslint-disable-next-line global-require
-        const engine = require(process.env.CONCERTO_ENGINE_MODULE || '@accordproject/concerto-engine');
-        return engine.ModelManagerHandle && engine.ModelManagerHandle.prototype;
-    } catch (err) {
-        return undefined;
-    }
-}
-
-/**
- * Runs `body` with `serializerFromJsonCompact` hidden from the engine's
- * handles when `hide` is true, restoring it afterwards.
- * @param {boolean} hide whether to hide the compact binding
- * @param {Function} body the code to run
- * @returns {*} what `body` returns
- */
-function withCompact(hide, body) {
-    const proto = hide ? handlePrototype() : undefined;
-    const own = proto && Object.getOwnPropertyDescriptor(proto, 'serializerFromJsonCompact');
-    if (own) {
-        delete proto.serializerFromJsonCompact;
-    }
-    try {
-        return body();
-    } finally {
-        if (own) {
-            Object.defineProperty(proto, 'serializerFromJsonCompact', own);
-        }
-    }
-}
 
 /**
  * A plain description of a resource: see the module doc.
@@ -123,11 +82,10 @@ function describeResource(r) {
  * The check body: `fromJSON(doc, options)` over MODEL, described.
  * @param {object} doc the document
  * @param {object} [options] fromJSON options
- * @param {boolean} hide whether to hide the compact binding
  * @returns {Function} the check body
  */
-function fromJson(doc, options, hide) {
-    return (core) => withCompact(hide, () => {
+function fromJson(doc, options) {
+    return (core) => {
         const mm = new core.ModelManager();
         mm.addCTOModel(MODEL, 'compact.cto');
         const ser = new core.Serializer(new core.Factory(mm), mm);
@@ -136,7 +94,7 @@ function fromJson(doc, options, hide) {
         const first = describeResource(ser.fromJSON(doc, options));
         const second = describeResource(ser.fromJSON(doc, options));
         return { first, second };
-    });
+    };
 }
 
 const CAR = {
@@ -271,16 +229,12 @@ const EXPECT = {
 
 const DOCS = { CAR: [CAR, undefined], ITEM: [ITEM, { validate: false }], PLAIN: [PLAIN, undefined] };
 
-module.exports = [];
-for (const hide of [false, true]) {
-    const suffix = hide ? 'typed-result' : 'compact-result';
-    for (const name of Object.keys(DOCS)) {
-        const [doc, options] = DOCS[name];
-        module.exports.push({
-            id: `P516-COMPACT-${name}-${suffix}`,
-            covers: `Serializer.fromJSON fast path, the engine's ${hide ? '"typed"' : 'compact'} result`,
-            run: fromJson(doc, options, hide),
-            expect: EXPECT[name],
-        });
-    }
-}
+module.exports = Object.keys(DOCS).map((name) => {
+    const [doc, options] = DOCS[name];
+    return {
+        id: `P516-COMPACT-${name}-compact-result`,
+        covers: 'Serializer.fromJSON fast path, the engine\'s compact result',
+        run: fromJson(doc, options),
+        expect: EXPECT[name],
+    };
+});

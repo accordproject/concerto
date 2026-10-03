@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // The engine loader (P4-02; P5-02 removed the CONCERTO_ENGINE=ts|rust flag:
 // the Rust engine is now the only path).
 //

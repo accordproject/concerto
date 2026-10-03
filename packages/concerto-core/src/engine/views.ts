@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // Snapshot materialisation for the views whose Rust call builds objects
 // (P0-04b trial scaffold; PORTING.md 1.5).
 //
@@ -241,14 +240,16 @@ function beginModelFile(modelFile: any, ast: any): Batch | null {
  */
 function computeBatch(modelFile: any, ast: any): Batch | null {
     let batch: Batch | null = null;
+    // P5-103: no guard for an AST or a snapshot of an unexpected shape: the
+    // engine loaded this AST (its declarations are an array of objects),
+    // and any failure here is caught below, as before.
     try {
         const namespace = modelFile.namespace;
-        if (ast && Array.isArray(ast.declarations)) {
-            const ns = typeof namespace === 'string' ? namespace : undefined;
+        {
             // P5-100 (E-6): read from the file the engine already holds,
             // when it holds this one, rather than from the AST sent again.
-            const text = (ast === modelFile.ast ? heldViewSnapshot(modelFile, ns) : undefined) ??
-                rust.modelFileViewSnapshot(JSON.stringify(ast), ns);
+            const text = (ast === modelFile.ast ? heldViewSnapshot(modelFile, namespace) : undefined) ??
+                rust.modelFileViewSnapshot(JSON.stringify(ast), namespace);
             if (typeof text === 'string') {
                 const snapshots = JSON.parse(text);
                 const next: Batch = {
@@ -270,10 +271,7 @@ function computeBatch(modelFile: any, ast: any): Batch | null {
                     }
                 };
                 ast.declarations.forEach((declaration: any, i: number) => {
-                    const snapshot = Array.isArray(snapshots) ? snapshots[i] : null;
-                    if (!snapshot || !declaration || typeof declaration !== 'object') {
-                        return;
-                    }
+                    const snapshot = snapshots[i];
                     const properties = declaration.properties;
                     addDecorators(declaration, snapshot.dec);
                     if (snapshot.s && !next.scalars.has(declaration)) {
@@ -375,10 +373,9 @@ function declarationEntry(view: any): PrecomputedDeclaration | undefined {
     if (!batch || view.modelFile !== batch.modelFile) {
         return undefined;
     }
+    // The Decorated constructor rejects a view with no AST; any other
+    // AST that is not an object is found in neither map below.
     const ast = view.ast;
-    if (!ast || typeof ast !== 'object') {
-        return undefined;
-    }
     const direct = batch.declarations.get(ast);
     if (direct) {
         return direct;
@@ -452,8 +449,8 @@ function classDeclarationProcess(view: any): any {
  * @return {boolean} true if the snapshot applies
  */
 function sameType(actual: any, expected: any): boolean {
-    const nullish = (v: any) => v === null || v === undefined;
-    return actual === expected || (nullish(actual) && nullish(expected));
+    // `== null`: null or undefined.
+    return actual === expected || (actual == null && expected == null);
 }
 
 /**
@@ -594,7 +591,7 @@ function decorateResultTrusted(modelManager: any, decoratorCommandSets: any[], o
 /**
  * DecoratorManager.decorateModels in rust mode, after the TS body's
  * `skipValidationAndResolution` handling: on the source ModelManager's own
- * rustHandle (`sourceDcsHandle`), or else on the resident DCS input manager
+ * rustHandle (`sourceDcsHandle`), or else on a DCS input manager
  * built from `getAst(!options.disableMetamodelResolution, false)`'s models
  * (`dcsManagerFor`; system namespaces left out, since the engine-side
  * manager carries its own copy of them). The decorated models are staged
@@ -621,9 +618,9 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
             decorateResultTrusted(modelManager, decoratorCommandSets, options));
         return decoratedModelManager;
     }
-    // P5-27 (F6): the resident input manager, and the result staged into
-    // the new manager's rustHandle (see `adoptStagedModels`).
-    const { dcs, resident } = dcsManagerFor(modelManager, !options?.disableMetamodelResolution);
+    // P5-27 (F6): a DCS input manager, and the result staged into the new
+    // manager's rustHandle (see `adoptStagedModels`).
+    const { dcs } = dcsManagerFor(modelManager, !options?.disableMetamodelResolution);
     try {
         const decoratedModelManager = new ModelManager({
             decoratorValidation: modelManager.getDecoratorValidation()
@@ -634,9 +631,7 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
             decorateResultTrusted(modelManager, decoratorCommandSets, options));
         return decoratedModelManager;
     } finally {
-        if (!resident) {
-            dcs.free();
-        }
+        dcs.free();
     }
 }
 
@@ -703,8 +698,8 @@ function restoreAllUndefinedDecorators(sourceModels: any[], resultModels: any[])
 /**
  * The three DecoratorManager.extract* methods in rust mode, after the TS
  * body's option defaults: on the source ModelManager's own rustHandle
- * (`decoratorManagerExtractOnSource`), or else on the resident DCS input
- * manager (`decoratorManagerExtractStaged`). Rust returns the stripped
+ * (`decoratorManagerExtractOnSource`), or else on a DCS input manager
+ * (`decoratorManagerExtractStaged`). Rust returns the stripped
  * models' AST, staged into a new ModelManager, and the extracted command
  * sets and vocabularies; each caller returns the fields its TS body
  * returns, in the same order. When `options.removeDecoratorsFromModel` is
@@ -740,7 +735,7 @@ const EXTRACT_ACTION: { [binding: string]: number } = {
  * (P5-55, T1, F-A1; concerto-wasm `ModelManagerHandle.dcsExtract`), with
  * the result staged into the new ModelManager's rustHandle as
  * `decoratorManagerExtractStaged` stages it. Rust resolves the handle's
- * models itself, as the resident manager's input is resolved, so the
+ * models itself, as a DCS input manager's input is resolved, so the
  * source models are read only when `restoreUndefinedDecorators` needs them,
  * and then unresolved (`getAst(false, false)`: the model files' own ASTs,
  * not copied): it reads only which nodes have `decorators`, and their
@@ -771,7 +766,7 @@ function decoratorManagerExtractOnSource(binding: string, source: any, modelMana
 }
 
 /**
- * `decoratorManagerExtract` on the resident DCS input manager, with the
+ * `decoratorManagerExtract` on a DCS input manager (`dcsManagerFor`), with the
  * result staged into the new ModelManager's rustHandle (P5-27, F6; see
  * `adoptStagedModels`). The same result, and the same errors at the same
  * points: the input is `getAst(true, false)`'s models, and the result
@@ -785,7 +780,7 @@ function decoratorManagerExtractOnSource(binding: string, source: any, modelMana
  */
 function decoratorManagerExtractStaged(binding: string, modelManager: any, options: any): any {
     const { default: ModelManager } = require('../modelmanager');
-    const { dcs, resident, sourceModels } = dcsManagerFor(modelManager, true);
+    const { dcs, sourceModels } = dcsManagerFor(modelManager, true);
     try {
         const updatedModelManager = new ModelManager();
         updatedModelManager.clearModelFiles();
@@ -800,9 +795,7 @@ function decoratorManagerExtractStaged(binding: string, modelManager: any, optio
         result.modelManager = updatedModelManager;
         return result;
     } finally {
-        if (!resident) {
-            dcs.free();
-        }
+        dcs.free();
     }
 }
 
@@ -900,6 +893,7 @@ let lazyViewsCheck: LazyViewsCheck | null = null;
  * Installs (or, with null, removes) the fuzz harness's lazy-views check.
  * @param {object|null} check the check
  */
+/* istanbul ignore next: the fuzz harness's hook (migration/fuzz/lib/lazy-views-check.js); the library never installs it */
 function installLazyViewsCheck(check: LazyViewsCheck | null): void {
     lazyViewsCheck = check;
 }
@@ -1333,34 +1327,24 @@ function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
  * JS allocation, with the memo key built from it) when the AST still has
  * the compact bytes (`encodeAst`) it had when its text was remembered.
  * The bytes describe exactly the document `JSON.parse(JSON.stringify(ast))`
- * is (ast-codec.ts), so equal bytes mean the same text. An AST `encodeAst`
- * leaves to the text path is stringified every time, as before.
+ * is (ast-codec.ts), so equal bytes mean the same text.
  * @param {object} ast the AST
  * @return {string} its JSON text
  */
 function stableAstText(ast: any): string {
+    // A fixed system model's AST is the library's own, with a string
+    // namespace.
     const system = systemModelAsts.has(ast);
     const namespace = system ? ast.namespace : undefined;
-    if (system && typeof namespace !== 'string') {
-        return JSON.stringify(ast);
-    }
     const known = system ? knownSystemTexts.get(namespace) : knownTextsByAst.get(ast);
-    if (known !== undefined) {
-        const bytes = encodeAst(ast);
-        if (bytes !== undefined && sameBytes(bytes, known.bytes)) {
-            return known.text;
-        }
+    // Only the library's own ASTs come here (a fixed system model's, or the
+    // metamodel copy's, `shapeMemoised`), which `encodeAst` always writes.
+    const bytes = encodeAst(ast)!;
+    if (known !== undefined && sameBytes(bytes, known.bytes)) {
+        return known.text;
     }
+    // `JSON.stringify` does not touch the writer, so `bytes` still holds.
     const text = JSON.stringify(ast);
-    const bytes = encodeAst(ast);
-    if (bytes === undefined) {
-        if (system) {
-            knownSystemTexts.delete(namespace);
-        } else {
-            knownTextsByAst.delete(ast);
-        }
-        return text;
-    }
     const entry: KnownText = { text, bytes: bytes.slice(), header: undefined, parsedHeader: undefined };
     if (system) {
         knownSystemTexts.set(namespace, entry);
@@ -1485,22 +1469,20 @@ function shapeCheckPassed(modelFile: any, text: string | undefined, state: FileS
  * @return {string | undefined} the header's JSON text, or undefined
  */
 function systemModelVerdict(modelFile: any, checkedText?: string): string | undefined {
+    // The caller (`stageSystemModelFile`) has checked that this is a fixed
+    // system model's AST (`systemModelAsts`).
     const ast = modelFile.ast;
-    // P5-101 (D-7): a free engine function, which reads no handle.
-    if (!systemModelAsts.has(ast)) {
-        return undefined;
-    }
     // P5-94: the engine's header for a text it gave one for is remembered
     // with that text (`knownSystemTexts`): the verdict is a fixed function
     // of the text (the engine's own constant system models), so the same
     // text is not sent again.
     const text = checkedText ?? stableAstText(ast);
-    const namespace = ast.namespace;
-    const known = typeof namespace === 'string' ? knownSystemTexts.get(namespace) : undefined;
+    const known = knownSystemTexts.get(ast.namespace);
     let header: string;
     if (known !== undefined && known.text === text && known.header !== undefined) {
         header = known.header;
     } else {
+        // P5-101 (D-7): a free engine function, which reads no handle.
         const answer = rust.systemModelFileHeader(text);
         if (typeof answer !== 'string') {
             return undefined;
@@ -1559,7 +1541,7 @@ function stageModelFile(modelFile: any, checkedText?: CheckedAst): boolean {
  * P5-94: the parse of each header text `systemModelVerdict` returned (the
  * engine gives one only for its few fixed system model texts).
  */
-const parsedSystemHeaders = new Map<string, StagedHeader | null>();
+const parsedSystemHeaders = new Map<string, StagedHeader>();
 
 /**
  * P5-73 (accordproject/concerto-rust#414): `stageModelFile` for a fixed
@@ -1592,17 +1574,15 @@ function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | u
     // P5-94: the parse of each system header text, shared: the header is
     // only read (`applyStagedFileHeader`), never changed.
     // P5-101 (D-4): in the one header format, its id slot 0 (nothing is
-    // staged); `[0]` alone when there is no header.
+    // staged). Each fixed system model has a versioned namespace, so it
+    // always has a header.
     let header = parsedSystemHeaders.get(systemHeader);
     if (header === undefined) {
-        const flat = JSON.parse(systemHeader) as StagedHeader;
-        header = flat.length > 1 ? flat : null;
+        header = JSON.parse(systemHeader) as StagedHeader;
         parsedSystemHeaders.set(systemHeader, header);
     }
     const state = fileState(modelFile);
-    if (header !== null) {
-        state.stagedHeader = header;
-    }
+    state.stagedHeader = header;
     state.lazy = true;
     return true;
 }
@@ -1691,7 +1671,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         // P5-91 (accordproject/concerto-rust#437): the file's record, looked
         // up (or created) once for the whole step, and the AST's prestage.
         const state = fileState(modelFile);
-        const prestage = ast && typeof ast === 'object' ? prestaged.get(ast) : undefined;
+        const prestage = prestaged.get(ast);
         // P5-69: a prestaged AST is not loaded again, so it is checked on
         // its own first.
         if (checkedText !== undefined && prestage !== undefined) {
@@ -1700,7 +1680,8 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         // P5-27 (F6): a DecoratorManager result model Rust has already
         // loaded, and staged in this handle (`adoptStagedModels`), is used
         // as it is, without sending its AST again.
-        if (prestage !== undefined && takePrestaged(modelFile, manager, handle, ast, prestage, state)) {
+        if (prestage !== undefined) {
+            takePrestaged(modelFile, handle, ast, prestage, state);
             state.lazy = true;
             return true;
         }
@@ -1715,13 +1696,9 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             : checkedText === undefined ? JSON.stringify(ast) : astText(ast, checkedText);
         const definitions = optionalString(modelFile.definitions);
         const fileName = optionalString(modelFile.fileName);
+        // P5-92: an AST of a namespace the manager does not write is never
+        // in the compact layout (`compactStageable`), so it has its text.
         const unmirrored = !manager._needsRustWrite(ast.namespace);
-        if (unmirrored && text === undefined) {
-            // P5-92: never the case for an AST `compactStageable` let
-            // through, unless its namespace changed since.
-            compact = undefined;
-            text = checkedText === undefined ? JSON.stringify(ast) : astText(ast, checkedText);
-        }
         const accepted = unmirrored ? acceptedUnmirrored.get(ast) : undefined;
         if (accepted !== undefined && accepted.text === text && accepted.definitions === definitions &&
             accepted.fileName === fileName) {
@@ -1886,14 +1863,10 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
         return false;
     }
     state!.stagedHeader = undefined;
-    // P5-101 (D-4): the one header format (`StagedHeader`).
-    if (ast !== modelFile.ast || ast.namespace !== header[1]) {
-        return false;
-    }
+    // P5-101 (D-4): the one header format (`StagedHeader`), read from this
+    // AST by the load that staged it moments ago (P5-103: so its namespace
+    // is the header's, and its imports nullish or an array).
     const astImports = ast.imports;
-    if (astImports !== undefined && astImports !== null && !Array.isArray(astImports)) {
-        return false;
-    }
     modelFile.namespace = ast.namespace;
     modelFile.version = header[2];
     const system: boolean = header[3];
@@ -1927,6 +1900,7 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
         uriMap[header[at]] = header[at + 1];
     }
     recordImportNames(modelFile, names, state);
+    /* istanbul ignore if: the fuzz harness's hook (installLazyViewsCheck) */
     if (lazyViewsCheck) {
         lazyViewsCheck.stagedFileHeader(modelFile, ast);
         lazyViewsCheck.importNames(modelFile);
@@ -1943,34 +1917,31 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
  * @param {object} modelFile the ModelFile
  */
 function materialise(modelFile: any): void {
-    const thunks = pendingFields.get(modelFile);
-    if (thunks !== undefined) {
-        thunks.delete('declarations');
-        thunks.delete('localTypes');
-    }
+    // Called only for a file `deferDeclarations` deferred (its pending
+    // builders, or the fuzz harness's hook just after it), so the file has
+    // its pending builders and its `deferred` record.
+    const thunks = pendingFields.get(modelFile)!;
+    thunks.delete('declarations');
+    thunks.delete('localTypes');
     defineOwn(modelFile, 'declarations', []);
     defineOwn(modelFile, 'localTypes', null);
-    const deferred = fileStates.get(modelFile)?.deferred;
-    if (deferred) {
-        deferred.building = true;
-    }
+    const state = fileStates.get(modelFile)!;
+    const deferred = state.deferred!;
+    deferred.building = true;
     try {
         // `fromAst`'s declarations part (declarations is an optional field).
         if (modelFile.ast.declarations) {
             modelFile._fromAstDeclarations(modelFile.ast);
         }
     } catch (e) {
+        // Defensive: the engine's load rejects every model whose
+        // declarations' TS construction throws (the fuzz harness checks it).
         deferModelFileFields(modelFile);
         throw e;
     } finally {
-        if (deferred) {
-            deferred.building = false;
-        }
+        deferred.building = false;
     }
-    const settled = fileStates.get(modelFile);
-    if (settled !== undefined) {
-        settled.deferred = undefined;
-    }
+    state.deferred = undefined;
     const localTypes = new Map();
     const namespace = modelFile.getNamespace();
     for (const declaration of modelFile.declarations) {
@@ -2028,10 +1999,8 @@ function deferModelFileFields(modelFile: any): void {
 function deferDeclarations(modelFile: any): void {
     // P5-91 (accordproject/concerto-rust#437): one lookup of the file's
     // record, and no `built` map until a view is built on its own.
-    const state = fileState(modelFile);
-    if (state.deferred === undefined) {
-        state.deferred = { byName: undefined, built: undefined, building: false, batch: undefined };
-    }
+    // Called once, at the end of the file's constructor.
+    fileState(modelFile).deferred = { byName: undefined, built: undefined, building: false, batch: undefined };
     deferModelFileFields(modelFile);
     lazyViewsCheck?.deferred(modelFile);
 }
@@ -2047,10 +2016,11 @@ function deferDeclarations(modelFile: any): void {
 // header across the boundary (`modelFileFromAstHeader`) and validated the
 // set again (`validateModelFiles`).
 //
-// Now the input manager stays resident in Rust (concerto-wasm
-// `DcsManagerHandle`), one per source ModelManager and resolution flag,
-// rebuilt when the source manager's rustHandle epoch or model files change
-// (`dcsManagerFor`). Each operation stages the result's model files into
+// Now the operation runs on the source ModelManager's own rustHandle
+// (P5-55, `sourceDcsHandle`), or else on a DCS input manager built in Rust
+// for the call (concerto-wasm `DcsManagerHandle`, `dcsManagerFor`; P5-103
+// removed the resident copy kept per source manager, which only a manager
+// the source handle serves could use). Each operation stages the result's model files into
 // the new ModelManager's own rustHandle and returns their stage ids and
 // headers with the result AST. `adoptStagedModels` then does what `fromAst`
 // does, but each ModelFile takes its stage (`takePrestaged`) and header
@@ -2078,31 +2048,22 @@ interface Prestage {
 const prestaged = new WeakMap<object, Prestage>();
 
 /**
- * Called by `stageModelFile`: when `ast` has a prestage in `handle`, and
- * the ModelFile is being built the way `fromAst` builds it (no definitions,
- * no file name, a namespace the manager writes
- * to its rustHandle), makes that stage the ModelFile's own, as if
- * `stageModelFile` had just staged `JSON.stringify(ast)`. Otherwise drops
- * the prestage, and the caller stages the AST as before.
+ * Called by `stageModelFile` when `ast` has a prestage: makes that stage the
+ * ModelFile's own, as if `stageModelFile` had just staged
+ * `JSON.stringify(ast)`. `adoptStagedModels` prestages each result model in
+ * the new manager's rustHandle and builds its ModelFile there at once, the
+ * way `fromAst` builds it (no definitions, no file name, a namespace the
+ * manager writes to its rustHandle), so the prestage is always this
+ * file's (P5-103 removed the checks for any other case).
  * @param {object} modelFile the ModelFile being constructed
- * @param {object} manager its model manager
  * @param {object} handle the manager's rustHandle
  * @param {object} ast the ModelFile's AST
  * @param {object} prestage the AST's prestage (`prestaged`), which the
  * caller has looked up (P5-91)
  * @param {object} state the ModelFile's `fileStates` record (P5-91)
- * @return {boolean} true if the ModelFile took the prestage
  */
-function takePrestaged(modelFile: any, manager: any, handle: any, ast: any, prestage: Prestage, state: FileState): boolean {
-    if (prestage.handle !== handle) {
-        return false;
-    }
+function takePrestaged(modelFile: any, handle: any, ast: any, prestage: Prestage, state: FileState): void {
     prestaged.delete(ast);
-    if (modelFile.definitions !== undefined || modelFile.fileName !== undefined ||
-        !manager._needsRustWrite(ast.namespace)) {
-        handle.dropStagedModelFile(prestage.id);
-        return false;
-    }
     const stage = { handle, id: prestage.id };
     state.stage = stage;
     stageFinalizer?.register(modelFile, stage, stage);
@@ -2111,7 +2072,6 @@ function takePrestaged(modelFile: any, manager: any, handle: any, ast: any, pres
     if (prestage.header) {
         state.stagedHeader = prestage.header;
     }
-    return true;
 }
 
 /**
@@ -2124,11 +2084,7 @@ function takePrestaged(modelFile: any, manager: any, handle: any, ast: any, pres
  * @return {boolean} true if a staged header was applied
  */
 function applyStagedHeaders(modelFile: any, ast: any): boolean {
-    const state = fileStates.get(modelFile);
-    if (state === undefined) {
-        return false;
-    }
-    return applyStagedFileHeader(modelFile, ast, state);
+    return applyStagedFileHeader(modelFile, ast);
 }
 
 /**
@@ -2170,11 +2126,10 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
                 return;
             }
             // P5-101 (D-4): `[stageId, ...header]`, in the one header
-            // format (`StagedHeader`), or `[stageId]`.
+            // format (`StagedHeader`), or `[stageId]`. The engine stages
+            // every model but the system ones (null), skipped above.
             const entry = staged[i];
-            if (entry) {
-                prestaged.set(model, { handle, id: entry[0], header: entry.length > 1 ? entry : undefined });
-            }
+            prestaged.set(model, { handle, id: entry[0], header: entry.length > 1 ? entry : undefined });
             let modelFile;
             if (trusted) {
                 trustedAst = model;
@@ -2199,7 +2154,7 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
     } finally {
         // A stage no ModelFile took (the loop threw first).
         models.forEach((model: any) => {
-            const prestage = model && typeof model === 'object' ? prestaged.get(model) : undefined;
+            const prestage = prestaged.get(model);
             if (prestage !== undefined) {
                 prestaged.delete(model);
                 prestage.handle.dropStagedModelFile(prestage.id);
@@ -2212,32 +2167,15 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
 }
 
 /**
- * The resident DCS input manager of one source ModelManager, for one
- * resolution flag, and what it was built from.
- */
-interface DcsResident {
-    handle: any;
-    /** The source manager's model version (`EngineState.version`) then. */
-    version: number;
-    files: any[];
-    asts: any[];
-    /** `getAst(resolve, false).models`, as the manager was built from them. */
-    sourceModels: any[];
-    dcs: any;
-}
-
-// The resident DCS input managers of a source ModelManager are kept in its
-// engine state (`EngineState.dcsResidents`, P5-100): index 0 for
-// `getAst(false, false)`, 1 for `getAst(true, false)`.
-
-/**
- * Whether the resident DCS input manager of `modelManager` may be kept:
- * `getAst` is BaseModelManager's own, over `getModelFiles` and
- * `resolveMetaModel` also its own, over the manager's rustHandle, which
- * mirrors every model file (P5-34), and the manager has its engine state,
- * whose model version moves on every model change (P5-100).
+ * Whether a DecoratorManager operation may read `modelManager`'s models from
+ * its rustHandle (`sourceDcsHandle`): `getAst` is BaseModelManager's own,
+ * over `getModelFiles` and `resolveMetaModel` also its own, over the
+ * manager's rustHandle, which mirrors every model file (P5-34), and the
+ * manager has its engine state (P5-100). P5-103 removed the resident DCS
+ * input manager this used to decide the keeping of: a manager it holds
+ * for always runs on its own rustHandle (P5-55).
  * @param {object} modelManager the source ModelManager
- * @return {boolean} true if it may be kept
+ * @return {boolean} true if it may be
  */
 function dcsCacheable(modelManager: any): boolean {
     const { default: BaseModelManager } = require('../basemodelmanager');
@@ -2354,7 +2292,7 @@ function sourceDcsHandle(modelManager: any): any {
  * @param {object} target the new ModelManager's rustHandle
  */
 function assertDistinctHandles(source: any, target: any): void {
-    /* istanbul ignore next */
+    /* istanbul ignore next: the result manager is always built for the call, so its handle is never the source's */
     if (source === target) {
         throw new Error('DecoratorManager: the result ModelManager must not share the source ModelManager\'s engine handle');
     }
@@ -2362,41 +2300,17 @@ function assertDistinctHandles(source: any, target: any): void {
 
 /**
  * The DCS input manager for `modelManager.getAst(resolve, false).models`
- * (concerto-wasm `DcsManagerHandle`): the resident one while the manager's
- * rustHandle, its epoch, its model files and their ASTs are the ones it was
- * built from, or else a new one, built from `getAst` (its errors thrown
- * at that point), and kept.
+ * (concerto-wasm `DcsManagerHandle`), for a manager whose operations cannot
+ * run on its own rustHandle (`sourceDcsHandle`): built from `getAst` (its
+ * errors thrown at that point), for one operation, which frees it.
  * @param {object} modelManager the source ModelManager
  * @param {boolean} resolve getAst's `resolve` argument
- * @return {object} `{dcs, resident, sourceModels}`: the DcsManagerHandle,
- * whether it is kept (when not, the caller frees it once done), and the
+ * @return {object} `{dcs, sourceModels}`: the DcsManagerHandle and the
  * models it was built from (read only)
  */
 function dcsManagerFor(modelManager: any, resolve: boolean): any {
-    const cacheable = dcsCacheable(modelManager);
-    const slot = resolve ? 1 : 0;
-    let handle: any;
-    let version = 0;
-    let files: any[] = [];
-    if (cacheable) {
-        handle = modelManager.rustHandle;
-        version = modelManager._engine.version;
-        files = modelManager.getModelFiles(false);
-        const resident: DcsResident | undefined = modelManager._engine.dcsResidents?.[slot];
-        if (resident && resident.handle === handle && resident.version === version &&
-            resident.files.length === files.length &&
-            resident.files.every((f: any, i: number) => f === files[i] && resident.asts[i] === f.ast)) {
-            return { dcs: resident.dcs, resident: true, sourceModels: resident.sourceModels };
-        }
-    }
     const models = modelManager.getAst(resolve, false).models;
-    const dcs = new rust.DcsManagerHandle(models);
-    if (cacheable) {
-        const residents: Array<DcsResident | undefined> = modelManager._engine.dcsResidents ??= [];
-        residents[slot]?.dcs.free();
-        residents[slot] = { handle, version, files, asts: files.map((f: any) => f.ast), sourceModels: models, dcs };
-    }
-    return { dcs, resident: cacheable, sourceModels: models };
+    return { dcs: new rust.DcsManagerHandle(models), sourceModels: models };
 }
 
 /**
@@ -2467,9 +2381,7 @@ let commitBuffer = new Uint32Array(64);
  * files' handles, in order (a view of a reused buffer, valid until the
  * next call), or undefined, having changed nothing, when any of them has no
  * usable stage in `handle` (or there are fewer than two): the caller then
- * writes each file on its own, as before. A registration error propagates,
- * as `commitStaged`'s would, with every file the engine registered before
- * it marked as registered from its stage.
+ * writes each file on its own, as before.
  * @param {object[]} modelFiles the ModelFiles being added
  * @param {object} handle the manager's rustHandle
  * @return {ArrayLike<number>|undefined} the registered files' handles, or undefined
@@ -2493,18 +2405,10 @@ function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | un
         states[i] = state!;
         ids[i] = stage.id;
     }
-    let committed: boolean;
-    try {
-        committed = handle.commitStagedModelFiles(ids);
-    } catch (e) {
-        modelFiles.forEach((modelFile, i) => {
-            if (handle.modelFileId(modelFile.getNamespace()) !== undefined) {
-                takeStageOf(states[i], handle);
-                states[i].committed = handle;
-            }
-        });
-        throw e;
-    }
+    // P5-103: the engine's only registration error, a namespace already
+    // registered, is rejected by both callers before they get here, so the
+    // call cannot fail part way.
+    const committed: boolean = handle.commitStagedModelFiles(ids);
     if (!committed) {
         return undefined;
     }
@@ -2921,27 +2825,16 @@ function installLazyField(proto: object, key: string, initial?: () => any, build
  * @param {Function} build the builder
  */
 function deferField(target: any, key: string, build: (this: any) => any): void {
-    if (Object.prototype.hasOwnProperty.call(target, key)) {
-        // The element runs process() again (IdentifiedDeclaration's
-        // constructor, MapDeclaration's) after its part was read.
-        delete target[key];
-    }
+    // An own field left by an earlier read: the element runs process()
+    // again (IdentifiedDeclaration's constructor, MapDeclaration's) after
+    // its part was read. Deleting a field it does not own does nothing.
+    delete target[key];
     let thunks = pendingFields.get(target);
     if (!thunks) {
         thunks = new Map();
         pendingFields.set(target, thunks);
     }
     thunks.set(key, build);
-}
-
-/**
- * Whether `target`'s field `key` is deferred and not built yet.
- * @param {object} target the element
- * @param {string} key the field
- * @return {boolean} true if pending
- */
-function isPending(target: any, key: string): boolean {
-    return pendingFields.get(target)?.has(key) === true;
 }
 
 /**
@@ -3196,6 +3089,7 @@ function mapValueTypeProcess(view: any): string {
  * reports any that throws.
  * @param {object} modelFile the ModelFile
  */
+/* istanbul ignore next: called by the fuzz harness's hook only (migration/fuzz/lib/lazy-views-check.js) */
 function buildDeferredParts(modelFile: any): void {
     const touch = (element: any, keys: string[]) => {
         for (const key of keys) {
@@ -3368,33 +3262,17 @@ function newLookup(view: any, own: any, state: { superType: any; modelFile: any;
     const ownLength = own.length;
     let superView: any = null;
     let superEntry: PropertyLookup | null = null;
-    let inherited: any[] = [];
     if (state.superType !== null) {
-        if (calls.length !== 1) {
-            return undefined;
-        }
         superView = calls[0].view;
         superEntry = propertyLookups.get(superView) ?? null;
-        inherited = calls[0].result;
-        if (superEntry === null || superView === view) {
-            return undefined;
-        }
-    } else if (calls.length !== 0) {
-        return undefined;
     }
-    if (list.length !== ownLength + inherited.length) {
-        return undefined;
-    }
-    for (let n = 0; n < ownLength; n++) {
-        if (list[n] !== own[n]) {
-            return undefined;
-        }
-    }
-    for (let n = 0; n < inherited.length; n++) {
-        if (list[ownLength + n] !== inherited[n]) {
-            return undefined;
-        }
-    }
+    // P5-103: the binding returns `own` (the view's own `getOwnProperties()`)
+    // then, for a view with a super type, what its one recorded call (the
+    // super type's view, never this one: a circular chain is rejected at
+    // load) returned, and makes no call for a view without one; it is
+    // pinned in lockstep with this shim, so that is not checked again here.
+    // A super type's view with no entry of its own (`superEntry` null) makes
+    // this entry invalid at its next use (`lookupValid`).
     return {
         state: state.engine,
         version: state.version,
@@ -3551,19 +3429,15 @@ interface IdentifierEntry {
 const identifierEntries = new WeakMap<object, IdentifierEntry>();
 
 /**
- * `view` as the walk read it, or undefined when it may not be cached.
+ * `view` as the walk read it.
  * @param {object} view a declaration of the chain
  * @return {object|undefined} the level
  */
-function identifierLevel(view: any): IdentifierLevel | undefined {
-    if (!lookupCacheable(view)) {
-        return undefined;
-    }
+function identifierLevel(view: any): IdentifierLevel {
+    // The walk's declarations are views of the model files of the asking
+    // view's manager, a BaseModelManager, so each may be cached.
     const manager = view.modelFile.modelManager;
-    const state = engineStateOf(manager);
-    if (state === undefined) {
-        return undefined;
-    }
+    const state = engineStateOf(manager)!;
     return {
         view,
         idField: view.idField,
@@ -3618,11 +3492,7 @@ function classDeclarationGetIdentifierFieldName(view: any): any {
     if (cacheable && result[1] === true && state !== undefined && version === state.version) {
         const levels: IdentifierLevel[] = [];
         for (let n = 2; n < result.length; n++) {
-            const level = identifierLevel(result[n]);
-            if (level === undefined) {
-                return value;
-            }
-            levels.push(level);
+            levels.push(identifierLevel(result[n]));
         }
         identifierEntries.set(view, { levels, value });
     }
@@ -3639,7 +3509,6 @@ export {
     localType,
     builtDeclaration,
     installLazyField,
-    isPending,
     deferDecorators,
     decoratorFactories,
     mapDeclarationProcess,
