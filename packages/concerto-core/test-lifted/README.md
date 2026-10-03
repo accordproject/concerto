@@ -371,6 +371,11 @@ without editing `packages/concerto-core/test/**`:
   (`Serializer.fromJSON`) accept the same strings, at the same instant: the
   strict format naming a real instant. `reference` holds v5.0.0's lenient
   outcome.
+* `declaration-kind-stub.checks.js` (task P5-112,
+  accordproject/concerto-rust#479): the kind predicates (`isAsset()` and
+  its siblings) on a `ClassDeclaration` built from a stub AST with no
+  `$class`, under `metamodelValidation: false`, return false as on v5.0.0
+  rather than throwing a TypeError.
 
 `serializer-fallback.checks.js` also passes a boxed `utcOffset`
 (`new Number(0)`) to `fromJSON`: the codec cannot carry it, so plain, valid

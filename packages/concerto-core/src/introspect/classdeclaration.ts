@@ -36,11 +36,17 @@ import { rust, engineValidateInstance, engineViews } from '../engineloader';
  * the engine's `ClassDeclaration::is_kind` compares it: whatever follows
  * the last `.`. A pure predicate over a string the view already holds, so
  * it runs here rather than crossing into the engine on every call.
+ * A missing or non-string `$class` (a declaration built from a stub AST
+ * with `metamodelValidation: false`) gives `''`, which matches no kind, so
+ * `isAsset()` and its siblings return false as the TS string checks did.
  * @param {string} type - the declaration's `$class` (`this.type`)
  * @return {string} its short name
  * @private
  */
 function declarationKindOf(type: string): string {
+    if (typeof type !== 'string') {
+        return '';
+    }
     return type.substring(type.lastIndexOf('.') + 1);
 }
 
