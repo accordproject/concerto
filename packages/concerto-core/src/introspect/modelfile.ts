@@ -90,7 +90,8 @@ class ModelFile extends Decorated {
     definitions: string | null | undefined;
     fileName: string | null | undefined;
     external: boolean;
-    // P5-94: set by `initDeclarationFields` (engine/views.ts).
+    // P5-100 (E-13): prototype accessors (`installLazyField`, below) until
+    // first read or write, then plain own fields.
     declarations!: Declaration[];
     localTypes!: Map<string, Declaration> | null;
     imports: AstNode[];
@@ -125,13 +126,12 @@ class ModelFile extends Decorated {
         constructedModelFiles.add(this);
         this.modelManager = modelManager;
         this.external = false;
-        // P5-94 (accordproject/concerto-rust#444): `declarations` and
-        // `localTypes` start as the lazy views' accessors (engine/views.ts,
-        // reading [] and null until the file is staged), so a lazily built
-        // file keeps a fast (non-dictionary) shape; an eagerly built one has
-        // them made plain fields again below, before anything is built.
+        // P5-100 (E-13, accordproject/concerto-rust#454): `declarations`
+        // and `localTypes` are not set here: they are ModelFile.prototype
+        // accessors (below) reading [] and null, and a write stores a plain
+        // own field, so an eagerly built file gets them as plain fields and
+        // a lazily built one has them deferred (`deferDeclarations`).
         const views = engineViews();
-        views.initDeclarationFields(this);
         this.imports = [];
         this.importShortNames = new Map();
         this.importWildcardNamespaces = [];
@@ -185,9 +185,6 @@ class ModelFile extends Decorated {
         } else {
             const checkedText: string | object | undefined = views.checkAstShape(this);
             lazy = views.stageModelFile(this, checkedText);
-        }
-        if (!lazy) {
-            views.settleDeclarationFields(this);
         }
         // Set up the decorators.
         this.process();
@@ -1358,6 +1355,11 @@ class ModelFile extends Decorated {
         return new ModelFile(modelManager, ast, undefined, this.fileName);
     }
 }
+
+// P5-100 (E-13): built on first read in a lazily built file
+// (engine/views.ts `deferModelFileFields`), like the other lazy parts.
+engineViews().installLazyField(ModelFile.prototype, 'declarations', () => [], true);
+engineViews().installLazyField(ModelFile.prototype, 'localTypes', () => null, true);
 
 export { ModelFile };
 export default ModelFile;

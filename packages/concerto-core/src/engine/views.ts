@@ -1010,16 +1010,6 @@ interface FileState {
      * own, so each `addModelFile` inserted one more weak entry.
      */
     committed: object | undefined;
-    /**
-     * P5-94 (accordproject/concerto-rust#444): set from the ModelFile
-     * constructor's `initDeclarationFields` until the file is either
-     * deferred (`defineLazyFields`) or built eagerly
-     * (`settleDeclarationFields`), with the values its `declarations` and
-     * `localTypes` accessors read and write meanwhile.
-     */
-    early: true | undefined;
-    earlyDeclarations: any;
-    earlyLocalTypes: any;
 }
 
 const fileStates = new WeakMap<object, FileState>();
@@ -1048,9 +1038,6 @@ function fileState(modelFile: object): FileState {
             deferred: undefined,
             prestageHeader: undefined,
             committed: undefined,
-            early: undefined,
-            earlyDeclarations: undefined,
-            earlyLocalTypes: undefined,
         };
         fileStates.set(modelFile, state);
     }
@@ -2067,17 +2054,19 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
 /**
  * Builds a lazily built ModelFile's declaration views, the way its
  * constructor would have: `fromAst`'s declarations part, then
- * `localTypes`. Replaces the accessors with plain fields first; if TS
- * construction throws, the accessors are put back, so every later access
- * throws again.
+ * `localTypes`. Makes both plain own fields first (and drops their
+ * pending builders); if TS construction throws, both are deferred again
+ * (`deferModelFileFields`), so every later access throws again.
  * @param {object} modelFile the ModelFile
  */
 function materialise(modelFile: any): void {
-    const field = (key: string, value: any) => Object.defineProperty(modelFile, key, {
-        value, writable: true, enumerable: true, configurable: true
-    });
-    field('declarations', []);
-    field('localTypes', null);
+    const thunks = pendingFields.get(modelFile);
+    if (thunks !== undefined) {
+        thunks.delete('declarations');
+        thunks.delete('localTypes');
+    }
+    defineOwn(modelFile, 'declarations', []);
+    defineOwn(modelFile, 'localTypes', null);
     const deferred = fileStates.get(modelFile)?.deferred;
     if (deferred) {
         deferred.building = true;
@@ -2088,7 +2077,7 @@ function materialise(modelFile: any): void {
             modelFile._fromAstDeclarations(modelFile.ast);
         }
     } catch (e) {
-        defineLazyFields(modelFile);
+        deferModelFileFields(modelFile);
         throw e;
     } finally {
         if (deferred) {
@@ -2108,132 +2097,43 @@ function materialise(modelFile: any): void {
 }
 
 /**
- * The object whose own `key` property is the lazy accessor `get` (or
- * `set`) belongs to: `receiver` itself, or the first object on its
- * prototype chain with that accessor. That is the ModelFile the accessor
- * was installed on, which the accessors used to capture in a closure.
- * @param {*} receiver the `this` the accessor was called with
- * @param {string} key `declarations` or `localTypes`
- * @param {Function} accessor the accessor function called
- * @return {object|undefined} the ModelFile, or undefined
+ * P5-100 (E-13, accordproject/concerto-rust#454): the pending builder of a
+ * lazily built ModelFile's `declarations` (`deferModelFileFields`), shared
+ * by every file: `installLazyField` calls it with the file as `this`.
+ * @this {object} the ModelFile
+ * @return {Array} its declarations
  */
-function lazyFieldOwner(receiver: any, key: string, accessor: unknown): any {
-    for (let o = receiver; o !== null && o !== undefined && (typeof o === 'object' || typeof o === 'function'); o = Object.getPrototypeOf(o)) {
-        const descriptor = Object.getOwnPropertyDescriptor(o, key);
-        if (descriptor !== undefined) {
-            return descriptor.get === accessor || descriptor.set === accessor ? o : undefined;
-        }
-    }
-    return undefined;
+function buildModelFileDeclarations(this: any): any {
+    materialise(this);
+    return this.declarations;
 }
 
 /**
- * P5-76 (accordproject/concerto-rust#418): the `declarations` and
- * `localTypes` accessor descriptors, shared by every lazily built
- * ModelFile. They used to be built per file, with closures over it, so
- * each file's accessors were new functions: V8 then gave every lazily
- * built ModelFile a hidden class of its own when they were installed,
- * which was about 4-7% of the TS-API `modelfile_new` profile. With shared
- * functions the files share their hidden classes. Each accessor finds its
- * file from its receiver (`lazyFieldOwner`), and builds it as before.
+ * P5-100 (E-13): the pending builder of a lazily built ModelFile's
+ * `localTypes`, as `buildModelFileDeclarations`.
+ * @this {object} the ModelFile
+ * @return {Map} its local types
  */
-const lazyFieldDescriptors: Record<string, PropertyDescriptor> = {};
-for (const key of ['declarations', 'localTypes']) {
-    const descriptor: PropertyDescriptor = {
-        configurable: true,
-        enumerable: true,
-        get(this: any) {
-            const modelFile = lazyFieldOwner(this, key, descriptor.get);
-            // P5-94: a file still being constructed (`initDeclarationFields`).
-            const state = fileStates.get(modelFile);
-            if (state !== undefined && state.early) {
-                return key === 'declarations' ? state.earlyDeclarations : state.earlyLocalTypes;
-            }
-            materialise(modelFile);
-            return modelFile[key];
-        },
-        set(this: any, value: any) {
-            const modelFile = lazyFieldOwner(this, key, descriptor.set);
-            const state = fileStates.get(modelFile);
-            if (state !== undefined && state.early) {
-                if (key === 'declarations') {
-                    state.earlyDeclarations = value;
-                } else {
-                    state.earlyLocalTypes = value;
-                }
-                return;
-            }
-            materialise(modelFile);
-            modelFile[key] = value;
-        },
-    };
-    lazyFieldDescriptors[key] = descriptor;
+function buildModelFileLocalTypes(this: any): any {
+    materialise(this);
+    return this.localTypes;
 }
 
 /**
- * Installs the `declarations` and `localTypes` accessors that build the
- * declaration views on first use (read or write).
+ * P5-100 (E-13, accordproject/concerto-rust#454): defers a ModelFile's
+ * `declarations` and `localTypes` through the same prototype-level
+ * accessors (`installLazyField` on `ModelFile.prototype`, introspect/
+ * modelfile.ts) and pending builders (`pendingFields`) as the other lazy
+ * parts. It replaces P5-94's per-instance accessors, their `early` state
+ * and the prototype walk that found their file. A ModelFile never sets
+ * the two fields in its constructor: until it is staged, a read gives
+ * `[]` or `null` and a write stores a plain own field, as the class fields
+ * did; an eagerly built file keeps them as plain own fields.
  * @param {object} modelFile the ModelFile
  */
-function defineLazyFields(modelFile: any): void {
-    // P5-91 (accordproject/concerto-rust#437): one lookup of the file's
-    // record, and no `built` map until a view is built on its own.
-    const state = fileState(modelFile);
-    if (state.deferred === undefined) {
-        state.deferred = { byName: undefined, built: undefined, building: false, batch: undefined };
-    }
-    // P5-94: a file the constructor gave the accessors already
-    // (`initDeclarationFields`) keeps them; they now build its views.
-    if (state.early) {
-        state.early = undefined;
-        state.earlyDeclarations = undefined;
-        state.earlyLocalTypes = undefined;
-        return;
-    }
-    Object.defineProperty(modelFile, 'declarations', lazyFieldDescriptors.declarations);
-    Object.defineProperty(modelFile, 'localTypes', lazyFieldDescriptors.localTypes);
-}
-
-/**
- * P5-94 (accordproject/concerto-rust#444): called by the ModelFile
- * constructor where it used to set `declarations = []` and
- * `localTypes = null`: defines them, in the same place among its own
- * properties, as the lazy views' accessors (`lazyFieldDescriptors`), which
- * read and write those values (`early`) until the file is staged. A lazily
- * built file then keeps them (`defineLazyFields`), where it used to have
- * its two data properties redefined as accessors, which turned every such
- * ModelFile into a dictionary-mode object, about a tenth of the JS
- * allocation of `addModelFile`. An eagerly built file has them made data
- * properties again (`settleDeclarationFields`).
- * @param {object} modelFile the ModelFile being constructed
- */
-function initDeclarationFields(modelFile: any): void {
-    const state = fileState(modelFile);
-    state.early = true;
-    state.earlyDeclarations = [];
-    state.earlyLocalTypes = null;
-    Object.defineProperty(modelFile, 'declarations', lazyFieldDescriptors.declarations);
-    Object.defineProperty(modelFile, 'localTypes', lazyFieldDescriptors.localTypes);
-}
-
-/**
- * P5-94: called by the ModelFile constructor when the file is built
- * eagerly: makes `declarations` and `localTypes` the data properties, with
- * the values, the constructor used to set (`initDeclarationFields`).
- * @param {object} modelFile the ModelFile being constructed
- */
-function settleDeclarationFields(modelFile: any): void {
-    const state = fileStates.get(modelFile);
-    if (state === undefined || !state.early) {
-        return;
-    }
-    const declarations = state.earlyDeclarations;
-    const localTypes = state.earlyLocalTypes;
-    state.early = undefined;
-    state.earlyDeclarations = undefined;
-    state.earlyLocalTypes = undefined;
-    Object.defineProperty(modelFile, 'declarations', { value: declarations, writable: true, enumerable: true, configurable: true });
-    Object.defineProperty(modelFile, 'localTypes', { value: localTypes, writable: true, enumerable: true, configurable: true });
+function deferModelFileFields(modelFile: any): void {
+    deferField(modelFile, 'declarations', buildModelFileDeclarations);
+    deferField(modelFile, 'localTypes', buildModelFileLocalTypes);
 }
 
 /**
@@ -2243,7 +2143,13 @@ function settleDeclarationFields(modelFile: any): void {
  * @param {object} modelFile the ModelFile
  */
 function deferDeclarations(modelFile: any): void {
-    defineLazyFields(modelFile);
+    // P5-91 (accordproject/concerto-rust#437): one lookup of the file's
+    // record, and no `built` map until a view is built on its own.
+    const state = fileState(modelFile);
+    if (state.deferred === undefined) {
+        state.deferred = { byName: undefined, built: undefined, building: false, batch: undefined };
+    }
+    deferModelFileFields(modelFile);
     lazyViewsCheck?.deferred(modelFile);
 }
 
@@ -3016,6 +2922,11 @@ function builtDeclaration(modelFile: any, index: number, node: any): any {
 // - Validators: a Field's or a ScalarDeclaration's `validator` (number or
 //   string) and a Property's `sizeValidator`.
 // - A MapDeclaration's `key` and `value` types.
+// - P5-100 (E-13, accordproject/concerto-rust#454): a ModelFile's
+//   `declarations` and `localTypes` (part 1's declaration views), with the
+//   same accessors and pending builders (`deferModelFileFields`), deferred
+//   whenever the file is (they are built by `materialise`, not from the
+//   snapshot, so they throw where the declarations' TS construction does).
 //
 // Each is deferred only when the file's view snapshot proves that building
 // it cannot throw (an entry exists only where the per-element binding would
@@ -3031,7 +2942,7 @@ function builtDeclaration(modelFile: any, index: number, node: any): any {
 // ---------------------------------------------------------------------------
 
 /** The pending builders of each element's deferred parts, by field name. */
-const pendingFields = new WeakMap<object, Map<string, () => any>>();
+const pendingFields = new WeakMap<object, Map<string, (this: any) => any>>();
 
 /**
  * Stores `value` as `target`'s own plain field `key`.
@@ -3047,12 +2958,17 @@ function defineOwn(target: any, key: string, value: any): void {
  * Installs the accessor for field `key` on `proto`: a read builds a
  * deferred value (or, for an element that never set the field, returns
  * `initial()` and keeps it, when `initial` is given), and a write stores
- * a plain own field, as the class field did.
+ * a plain own field, as the class field did. A builder is called with the
+ * element as `this`, so one function can serve every element.
+ * P5-100 (E-13): with `buildOnWrite`, a write to a field still pending
+ * builds it first (a ModelFile's `declarations` and `localTypes`, which
+ * are built together, so writing one must not drop the other's build).
  * @param {object} proto the class prototype
  * @param {string} key the field
  * @param {Function} [initial] the value of a field never set
+ * @param {boolean} [buildOnWrite] build a pending value before a write
  */
-function installLazyField(proto: object, key: string, initial?: () => any): void {
+function installLazyField(proto: object, key: string, initial?: () => any, buildOnWrite?: boolean): void {
     Object.defineProperty(proto, key, {
         configurable: true,
         enumerable: false,
@@ -3073,7 +2989,7 @@ function installLazyField(proto: object, key: string, initial?: () => any): void
             thunks!.delete(key);
             let value;
             try {
-                value = thunk();
+                value = thunk.call(this);
             } catch (e) {
                 if (Object.prototype.hasOwnProperty.call(this, key)) {
                     delete this[key];
@@ -3085,6 +3001,9 @@ function installLazyField(proto: object, key: string, initial?: () => any): void
             return value;
         },
         set(this: any, value: any) {
+            if (buildOnWrite && pendingFields.get(this)?.has(key) === true) {
+                void this[key];
+            }
             pendingFields.get(this)?.delete(key);
             defineOwn(this, key, value);
         },
@@ -3097,7 +3016,7 @@ function installLazyField(proto: object, key: string, initial?: () => any): void
  * @param {string} key the field
  * @param {Function} build the builder
  */
-function deferField(target: any, key: string, build: () => any): void {
+function deferField(target: any, key: string, build: (this: any) => any): void {
     if (Object.prototype.hasOwnProperty.call(target, key)) {
         // The element runs process() again (IdentifiedDeclaration's
         // constructor, MapDeclaration's) after its part was read.
@@ -3833,8 +3752,6 @@ export {
     recordImportNames,
     recordedImportNames,
     deferDeclarations,
-    initDeclarationFields,
-    settleDeclarationFields,
     commitStaged,
     validateAndCommitStaged,
     updateStaged,

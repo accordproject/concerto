@@ -271,8 +271,6 @@ export interface EngineViewsModule {
     applyStagedHeaders(modelFile: object, ast: object): boolean;
     recordImportNames(modelFile: object, names: string[]): void;
     recordedImportNames(modelFile: object): string[] | undefined;
-    initDeclarationFields(modelFile: object): void;
-    settleDeclarationFields(modelFile: object): void;
     deferDeclarations(modelFile: object): void;
     beginModelFile(modelFile: object, ast: object): object | null;
     endModelFile(saved: object | null): void;
@@ -300,7 +298,7 @@ export interface EngineViewsModule {
     mapKeyTypeProcess(view: object): string;
     mapValueTypeProcess(view: object): string;
     // Decorators
-    installLazyField(proto: object, key: string, initial?: () => any): void;
+    installLazyField(proto: object, key: string, initial?: () => any, buildOnWrite?: boolean): void;
     deferDecorators(element: object): boolean;
     decoratorFactories(modelFile: object): any[] | undefined;
     // DecoratorManager
