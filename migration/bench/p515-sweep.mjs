@@ -491,7 +491,42 @@ const OPS = {
             }
         },
     },
+    // P5-106 (accordproject/concerto-rust#460, BC-52): the subclass queries,
+    // over the class declarations the `pairs` name (each once).
+    get_assignable_class_declarations: {
+        family: 'introspect',
+        setup: (d) => subclassQueryItems(d),
+        n: (c) => c.items.length,
+        run: (c) => {
+            for (const decl of c.items) {
+                decl.getAssignableClassDeclarations();
+            }
+        },
+    },
+    get_direct_subclasses: {
+        family: 'introspect',
+        setup: (d) => subclassQueryItems(d),
+        n: (c) => c.items.length,
+        run: (c) => {
+            for (const decl of c.items) {
+                decl.getDirectSubclasses();
+            }
+        },
+    },
 };
+
+/**
+ * P5-106: the class declarations the set's `pairs` name, each once, in the
+ * order first named, on a manager of the set's models.
+ * @param {object} d the set's data
+ * @return {object} the op context: the manager and the declarations
+ */
+function subclassQueryItems(d) {
+    const mm = managerOf(d.models);
+    const names = [...new Set(d.pairs.flat())];
+    const items = names.map((fqn) => mm.getType(fqn)).filter((decl) => typeof decl.getAssignableClassDeclarations === 'function');
+    return { mm, items };
+}
 
 function selected() {
     const ops = args.ops || Object.keys(OPS);

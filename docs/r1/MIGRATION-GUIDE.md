@@ -437,6 +437,28 @@ cannot see into. No production use was found for any of them.
   methods while walking the super types.
 - **What to do:** change the model instead of patching its declarations.
 
+### Model answers from the engine (BC-52)
+
+- **Who:** code (usually tests) that replaces `getType`, `getSuperType` or
+  `getModelFiles` (on a model file, a declaration, a manager or a prototype),
+  or passes stand-in objects to `ModelUtil`, and code that calls these
+  members for a `ModelFile` that is not added to its `ModelManager`.
+- **What changes:** `ModelUtil.isAssignableTo`, `isEnum`, `isMap`, `isScalar`
+  and `isValidMapKeyScalar`, `ScalarDeclaration.validate()`, decorator
+  validation and `ClassDeclaration.getAssignableClassDeclarations()` and
+  `getDirectSubclasses()` answer from the engine's copy of the model and no
+  longer call replaced methods. For a `ModelFile` that is not registered in
+  its manager, `isEnum`, `isMap` and `isScalar` return `undefined` and
+  `isAssignableTo` cannot find the type (a direct match or a primitive type
+  still answers), and the other members throw a `TypeError`. In 5.0.0 these
+  members answered for such a detached file as they do for a registered one;
+  that is no longer so. The lifted checks BC52-005 (model files) and BC52-006
+  (declarations) in `packages/concerto-core/test-lifted/bc52-arena-answers.checks.js`
+  record exactly what a detached model file or declaration now gets, next
+  to the 5.0.0 outcome.
+- **What to do:** add model files to their `ModelManager` before asking these
+  questions, and change the model instead of patching it.
+
 ---
 
 ## Lazy views and internals

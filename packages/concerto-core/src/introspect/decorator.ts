@@ -20,7 +20,7 @@ import IllegalModelException from './illegalmodelexception';
 import type Decorated from './decorated';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
-import { rust } from '../engineloader';
+import { rust, engineViews } from '../engineloader';
 
 /**
  * A decorator argument that references a type, produced from a
@@ -125,7 +125,20 @@ class Decorator {
         const parent = this.getParent() as Decorated & { getFullyQualifiedName?(): string };
         const decoratedName = parent.getFullyQualifiedName?.();
 
-        rust.decoratorValidate(this, mf, decoratedName);
+        // P5-106 (BC-52): the types are resolved by the engine from its
+        // arena, by the handle of `mf`; a replaced `getType` method is not
+        // called. Each problem is still reported through `handleError`.
+        // With both options off (the default) nothing is resolved.
+        const options = mf.getModelManager().getDecoratorValidation();
+        if (!options.missingDecorator && !options.invalidDecorator) {
+            return;
+        }
+        const views = engineViews();
+        const ref = views.modelFileArenaRef(mf);
+        if (ref === undefined) {
+            throw views.notInArena('Decorator.validate');
+        }
+        ref.handle.decoratorValidate(this, mf, ref.id, decoratedName, options);
     }
 
     /**

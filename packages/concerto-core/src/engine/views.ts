@@ -25,7 +25,7 @@ import { rust } from './index';
 import { encodeAst, encodeAstCount } from './ast-codec';
 import { optionalString } from './util';
 import { WireWriter } from './wire';
-import type { EngineState } from './bindings';
+import type { EngineHandle, EngineState } from './bindings';
 import type { EngineErrorFlags } from './errors';
 
 // P5-06: the introspect modules the per-element views below construct
@@ -3682,7 +3682,130 @@ function classDeclarationGetIdentifierFieldName(view: any): any {
     return value;
 }
 
+// ---------------------------------------------------------------------------
+// Arena handles of views (P5-106, BC-52; accordproject/concerto-rust#460)
+//
+// `ModelUtil.isAssignableTo`, `isEnum`, `isMap`, `isScalar` and
+// `isValidMapKeyScalar`, `ScalarDeclaration.validate`, `Decorator.validate`
+// and `ClassDeclaration.getAssignableClassDeclarations`/`getDirectSubclasses`
+// are answered by the engine from its own arena, by the handle of the model
+// file or declaration they are given (concerto-wasm "Arena answers"),
+// rather than by calling the views' methods back from the engine. A replaced `getType`, `getSuperType` or `getModelFiles` method (on
+// a view, a manager or a prototype, e.g. a sinon stub) is therefore not
+// called (BC-52). A model file has a handle when it is the one its manager
+// has registered for its namespace (`ModelFile._rustHandleId`), and a
+// declaration when its model file has one and it is that file's own
+// `getLocalType(name)`. A declaration view keeps its handle for as long as
+// its manager's model version holds, in a non-enumerable `_engineId` field.
+//
+// A model file outside the arena (one not registered in its manager, or a
+// stand-in such as a sinon stub instance) resolves no type: `isEnum`,
+// `isMap` and `isScalar` answer undefined for a field of one, and
+// `isAssignableTo` finds no type in one. A declaration outside the arena
+// has no answer: `isValidMapKeyScalar`, `ScalarDeclaration.validate`, the
+// subclass queries and `Decorator.validate` (with decorator validation on)
+// throw a TypeError for it (`notInArena`).
+// ---------------------------------------------------------------------------
+
+/** A view's arena handle, as its manager's engine held it at one version. */
+interface EngineId {
+    /** The manager's engine state when the handle was looked up. */
+    state: EngineState;
+    /** That state's model version then. */
+    version: number;
+    /** The manager's engine handle then. */
+    handle: EngineHandle;
+    /** The view's handle in it, or undefined when it has none. */
+    id: number | undefined;
+}
+
+/** An arena handle and the engine handle it belongs to. */
+interface ArenaRef {
+    handle: EngineHandle;
+    id: number;
+}
+
+/**
+ * The handle of a ModelFile view in its manager's engine handle: defined
+ * when the file is the one its manager registered for its namespace.
+ * @param {object} modelFile the ModelFile view
+ * @return {object|undefined} the engine handle and the file's handle
+ */
+function modelFileArenaRef(modelFile: any): ArenaRef | undefined {
+    if (typeof modelFile?._rustHandleId !== 'function') {
+        return undefined;
+    }
+    const id = modelFile._rustHandleId();
+    return id === undefined ? undefined : { handle: modelFile.modelManager.rustHandle, id };
+}
+
+/**
+ * A view's cached handle, or `lookup`'s, cached for the manager's current
+ * model version and engine handle.
+ * @param {object} view the declaration view
+ * @param {object} manager its ModelManager
+ * @param {function} lookup finds the handle, or undefined
+ * @return {object|undefined} the engine handle and the view's handle
+ */
+function cachedArenaRef(view: any, manager: any, lookup: () => number | undefined): ArenaRef | undefined {
+    const state: EngineState = manager._engine;
+    const handle: EngineHandle = manager.rustHandle;
+    let entry: EngineId | undefined = view._engineId;
+    if (!entry || entry.state !== state || entry.version !== state.version || entry.handle !== handle) {
+        entry = { state, version: state.version, handle, id: lookup() };
+        Object.defineProperty(view, '_engineId', { value: entry, writable: true, enumerable: false, configurable: true });
+    }
+    return entry.id === undefined ? undefined : { handle, id: entry.id };
+}
+
+/**
+ * The handle of a declaration view in its manager's engine handle: defined
+ * when its model file is registered (`modelFileArenaRef`) and the view is
+ * that file's own declaration of its name.
+ * @param {object} declaration the declaration view
+ * @return {object|undefined} the engine handle and the declaration's handle
+ */
+function declarationArenaRef(declaration: any): ArenaRef | undefined {
+    const modelFile = declaration?.modelFile;
+    if (modelFileArenaRef(modelFile) === undefined) {
+        return undefined;
+    }
+    const manager = modelFile.modelManager;
+    return cachedArenaRef(declaration, manager, () => (
+        typeof declaration.name === 'string' && modelFile.getLocalType(declaration.name) === declaration
+            ? manager.rustHandle.declarationId(declaration.fqn)
+            : undefined));
+}
+
+/**
+ * The error a BC-52 member raises for a declaration or model file that has
+ * no arena handle: one that is not part of a model file registered in its
+ * ModelManager (a detached ModelFile's, or a stand-in object such as a sinon
+ * stub instance).
+ * @param {string} member the member, e.g. `ModelUtil.isAssignableTo`
+ * @return {TypeError} the error
+ */
+function notInArena(member: string): TypeError {
+    return new TypeError(`${member} expects model elements of a ModelFile registered in its ModelManager`);
+}
+
+/**
+ * The views of declarations the engine named by fully qualified name, each
+ * looked up in the model file `manager` registered for its namespace, as
+ * `ModelFile.getType` maps the names `modelFileGetTypeName` returns.
+ * @param {object} manager the ModelManager
+ * @param {string[]} names the fully qualified names
+ * @return {object[]} the declaration views
+ */
+function declarationViews(manager: any, names: string[]): any[] {
+    return names.map((name) => manager.modelFiles[name.substring(0, name.lastIndexOf('.'))].getLocalType(name));
+}
+
 export {
+    modelFileArenaRef,
+    declarationArenaRef,
+    declarationViews,
+    notInArena,
     installLazyViewsCheck,
     materialise,
     buildDeferredParts,
