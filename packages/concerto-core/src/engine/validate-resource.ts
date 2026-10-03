@@ -73,6 +73,7 @@
 import { rust } from './index';
 import { EngineFastPathUnsupported, checkString, typedCtorName, modelClasses } from './serializer-codec';
 import { handleFor } from './serializer';
+import { classDeclarationGetIdentifierFieldName } from './views';
 import ValidationException from '../serializer/validationexception';
 
 // Types needed for TypeScript generation.
@@ -428,14 +429,17 @@ function writeTyped(v, seen: Set<object>): void {
     putU32(countAt, count);
 }
 
-// A class declaration view's identifying field never changes (a model
-// update replaces the views), so it is read once per view.
-const identifierFields = new WeakMap<object, string>();
-
 /**
  * The identifying field the engine uses for a Resource of `decl`: as the
  * Identifiable constructor computes `$identifierFieldName`,
  * `getIdentifierFieldName() || '$identifier'`.
+ *
+ * P5-98 (F-1): read through `views.classDeclarationGetIdentifierFieldName`,
+ * which caches the answer per view and checks the whole super type chain
+ * against the model epoch before reusing it. A memo of its own here, keyed
+ * by the view alone, went stale when a super type's model file was updated
+ * (the subclass's view, in another file, is not replaced), and the stale
+ * field then sent every later validation to the visitor.
  * @param {*} decl the Resource's `$classDeclaration`
  * @return {string} the field name
  */
@@ -443,12 +447,7 @@ function modelIdentifierField(decl): string {
     if (!decl || typeof decl !== 'object' || typeof decl.getIdentifierFieldName !== 'function') {
         throw new EngineFastPathUnsupported('class-declaration');
     }
-    let field = identifierFields.get(decl);
-    if (field === undefined) {
-        field = decl.getIdentifierFieldName() || '$identifier';
-        identifierFields.set(decl, field as string);
-    }
-    return field as string;
+    return classDeclarationGetIdentifierFieldName(decl) || '$identifier';
 }
 
 // ---------------------------------------------------------------------

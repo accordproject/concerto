@@ -23,6 +23,7 @@
 
 import { rust } from './index';
 import { encodeAst, encodeAstGeneration } from './ast-codec';
+import type { EngineErrorFlags } from './errors';
 
 // P5-06: the introspect modules the per-element views below construct
 // objects from, required once on first use (they cannot be imported at
@@ -1920,7 +1921,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         state.lazy = true;
         return true;
     } catch (e) {
-        if (checkedText === undefined && (e as { unreadableAst?: boolean } | null)?.unreadableAst) {
+        if (checkedText === undefined && (e as EngineErrorFlags | null)?.unreadableAst) {
             throw e;
         }
         if (checkedText !== undefined && shapePending.has(modelFile)) {
@@ -1929,7 +1930,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             // threw it before. Any other error is the load's, after the
             // check passed, or one thrown before the check ran, which then
             // runs now.
-            if ((e as { astShape?: boolean } | null)?.astShape) {
+            if ((e as EngineErrorFlags | null)?.astShape) {
                 throw e;
             }
             completeShapeCheck(modelFile, handle, astText(modelFile.ast, checkedText));

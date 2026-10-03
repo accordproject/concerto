@@ -69,6 +69,33 @@ const AST_SHAPE_CODES = new Set([
     'modelfile-load-nodenotobject',
 ]);
 
+/**
+ * The engine's internal signals on an `IllegalModelException` it built, for
+ * its own callers (`ModelFile.validate()`, engine/views.ts `stageModelFile`):
+ * not part of the exception's public shape.
+ */
+interface EngineErrorFlags {
+    /** The payload's `needsModelFile` (see {@link ErrorPayload}). */
+    needsModelFile?: boolean;
+    /** P5-61: an AST the engine's typed read cannot read. */
+    unreadableAst?: boolean;
+    /** P5-69 (BC-19-b): an error of BC-19's AST shape check. */
+    astShape?: boolean;
+}
+
+/**
+ * Sets one of the engine's internal flags on `err` as a non-enumerable own
+ * property (P5-98, E-12), so an engine-thrown exception has the same
+ * enumerable shape (what `JSON.stringify`, `Object.keys` or a deep equality
+ * sees) as the one TS 5.0.0 throws, as `details` below already is.
+ * @param {Error} err the exception
+ * @param {string} key the flag
+ * @param {boolean} value its value
+ */
+function setInternalFlag<K extends keyof EngineErrorFlags>(err: Error, key: K, value: EngineErrorFlags[K]): void {
+    Object.defineProperty(err, key, { value, enumerable: false, writable: true, configurable: true });
+}
+
 const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     IllegalModel: (p) => {
         const err = new IllegalModelException(p.message, p.modelFile, p.location);
@@ -76,7 +103,9 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
         // `IllegalModelException`'s constructor is public API TS callers
         // construct directly too, and does not itself need this internal
         // engine-to-caller signal.
-        (err as unknown as { needsModelFile?: boolean }).needsModelFile = p.needsModelFile;
+        if (p.needsModelFile !== undefined) {
+            setInternalFlag(err, 'needsModelFile', p.needsModelFile);
+        }
         // A validator error found while the model loads (BC-39) keeps its
         // errorType (`DefaultValidatorException`, `RegexValidatorException`).
         if (p.errorType) {
@@ -87,14 +116,14 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
         // throws when the shape check is off (engine/views.ts
         // `stageModelFile`).
         if (p.code === 'modelfile-load-unreadable') {
-            (err as unknown as { unreadableAst?: boolean }).unreadableAst = true;
+            setInternalFlag(err, 'unreadableAst', true);
         }
         // P5-69 (BC-19-b): an error of BC-19's AST shape check, which the
         // engine's folded load (`stageModelFileChecked`) throws before any
         // other, and the ModelFile constructor throws as the check's
         // (engine/views.ts `stageModelFile`).
         if (AST_SHAPE_CODES.has(p.code)) {
-            (err as unknown as { astShape?: boolean }).astShape = true;
+            setInternalFlag(err, 'astShape', true);
         }
         return err;
     },
@@ -152,3 +181,4 @@ function makeError(payload: ErrorPayload): Error {
 }
 
 export { makeError };
+export type { EngineErrorFlags };
