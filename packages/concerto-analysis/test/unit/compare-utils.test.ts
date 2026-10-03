@@ -3,7 +3,8 @@ import { getDeclarationType, getPropertyType, getValidatorType } from '../../src
 
 // This test suite should disappear once we port concerto-core to TypeScript because the error branches will be enforced by the transpiler.
 
-const modelManager = new ModelManager();
+// The stubs below are not valid metamodel ASTs, so skip BC-19's shape check (trusted-input escape hatch).
+const modelManager = new ModelManager({ metamodelValidation: false });
 
 // These stubs are deliberately incomplete ASTs - they carry no $class - because
 // the suite exists to reach error branches a well-formed model cannot.
@@ -18,8 +19,12 @@ const modelAst = {
     namespace: 'foo@1.0.0',
     properties: []
 };
+// The engine's typed read still rejects a Model AST with a `properties` key, so the file gets its own stub.
+const modelFileAst = {
+    namespace: 'foo@1.0.0'
+};
 
-const modelFile = new ModelFile(modelManager, asAst(modelAst), null, 'test.cto');
+const modelFile = new ModelFile(modelManager, asAst(modelFileAst), null, 'test.cto');
 
 const classDeclaration = new ClassDeclaration(modelFile, asAst(modelAst));
 const property = new Property(classDeclaration, asAst(propertyAst));

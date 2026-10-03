@@ -343,6 +343,11 @@ this.concertoData = result.resource;
   error when it is loaded, never a WebAssembly trap or a process crash, unless
   the loader can read it all the same (a node's `$class` naming the wrong type,
   say). The error's class and message are unspecified.
+- **Tests built from stub ASTs:** code or tests that build a `ModelFile` from a
+  partial or stub AST (one with no `$class`, say, to reach an error branch) must
+  use a `ModelManager` created with `metamodelValidation: false`. The same
+  trusted-input caveat applies: the stub must still be readable by the loader,
+  and how a malformed AST fails is unspecified.
 
 ---
 

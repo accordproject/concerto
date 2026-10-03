@@ -20,6 +20,23 @@ const asJson = process.argv.includes('--json');
 const loads = Number(loadsArg);
 const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const frame = (i) => d.ftbl[i].replace(/^0x[0-9A-F]+: /i, '');
+// A function name without its generic arguments, for a short label: every
+// `<...>` group is dropped by bracket depth (a `>` with no open `<`, as in
+// `->`, is kept). This is a display label for the console, not sanitisation.
+const withoutGenerics = (name) => {
+    let out = '';
+    let depth = 0;
+    for (const c of name) {
+        if (c === '<') {
+            depth++;
+        } else if (c === '>' && depth > 0) {
+            depth--;
+        } else if (depth === 0) {
+            out += c;
+        }
+    }
+    return out;
+};
 
 const KINDS = [
     ['serde_json::Value nodes (and their maps/strings)', /serde_json::value|ValueVisitor|serde_json::map::/],
@@ -51,7 +68,7 @@ for (const pp of d.pps) {
     // and the dependencies carry a path (`src/de.rs`, `library/alloc/...`).
     const originFrame = fs_.find((f) => /\(([a-z_0-9]+\.rs):\d+\)$/.test(f) && !/p590_typed_read\.rs|\((alloc|mod|raw|boxed|string|str|vec|slice|impls|de|macros|lib|function|map|inner|clone|borrow|fmt|iter|spec_from_iter_nested|spec_extend|rt|spec_from_elem|set_len_on_drop|cow|option|result)\.rs:/.test(f)) || '(none)';
     const m = /^(.*) \(([a-z_0-9]+\.rs:\d+)\)$/.exec(originFrame);
-    const origin = m ? `${m[2]} ${m[1].replace(/<[^<>]*>/g, '').replace(/<[^<>]*>/g, '').replace(/^.*::/, '').slice(0, 60)}` : originFrame;
+    const origin = m ? `${m[2]} ${withoutGenerics(m[1]).replace(/^.*::/, '').slice(0, 60)}` : originFrame;
     for (const [o, k] of [[kinds, kind], [origins, origin]]) {
         const e = o[k] || (o[k] = { blocks: 0, bytes: 0 });
         e.blocks += pp.tbk;
