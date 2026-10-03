@@ -48,7 +48,7 @@
 // concerto-core/tests/oracle/instances.rs) and here by
 // test-lifted/validate-instance.checks.js.
 
-import { asUnsupported, handleFor, optionsText } from './serializer';
+import { asUnsupported, handleFor } from './serializer';
 import { encodeValue } from './serializer-codec';
 import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import TypeNotFoundException from '../typenotfoundexception';
@@ -116,16 +116,19 @@ function documentOf(json: unknown): { object: any; text: string | undefined } {
 
 /**
  * The wire text of the merged `fromJSON` options (P5-101, E-7): the same
- * encoding `Serializer.fromJSON`'s fast path sends (`optionsText`), so the
- * engine reads them, and keeps the serializer it builds for them, as it does
- * for `fromJSON`. Options that encoding cannot carry (a value of a class it
- * does not know) are sent as `JSON.stringify` writes them, as before.
+ * encoding `Serializer.fromJSON`'s fast path sends (`encodeValue`, as
+ * `optionsText` writes it), so the engine reads them, and keeps the
+ * serializer it builds for them, as it does for `fromJSON` (its cache is
+ * keyed by this text). The merged object is new on every call, so it is not
+ * remembered here (`optionsText`'s cache is by object). Options that
+ * encoding cannot carry (a value of a class it does not know) are sent as
+ * `JSON.stringify` writes them, as before.
  * @param {object} merged the merged `fromJSON` options
  * @return {string} their text
  */
 function mergedText(merged: any): string {
     try {
-        return optionsText(merged);
+        return JSON.stringify(encodeValue(merged));
     } catch (err) {
         if (isFastPathUnsupported(err)) {
             return JSON.stringify(merged);

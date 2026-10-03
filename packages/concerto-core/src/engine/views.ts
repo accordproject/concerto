@@ -2198,7 +2198,6 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
     const handle = newModelManager.rustHandle;
     let allStaged = true;
     const models: any[] = ast.models;
-    const built: any[] = [];
     try {
         models.forEach((model: any, i: number) => {
             if (DCS_EXCLUDE_NS.includes(model.namespace)) {
@@ -2219,17 +2218,11 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
             } finally {
                 trustedAst = null;
             }
-            built.push(modelFile);
+            newModelManager.addModelFile(modelFile, null, null, true);
+            if (committedHandle(modelFile) !== handle) {
+                allStaged = false;
+            }
         });
-        // P5-101 (D-10, M5): added as one batch, so the files are
-        // registered from their stages in one engine call
-        // (`commitStagedAll`), where `addModelFile` crossed once per file.
-        // The batch adds them in the same order, with the same checks, and
-        // without validating them (`disableValidation`), as `fromAst` adds
-        // them; the files are built first, which reads nothing another
-        // result file's registration changes.
-        newModelManager.addModelFiles(built, null, true);
-        allStaged = built.every((modelFile) => committedHandle(modelFile) === handle);
     } finally {
         // A stage no ModelFile took (the loop threw first).
         models.forEach((model: any) => {
@@ -2497,57 +2490,6 @@ function commitStaged(modelFile: any, handle: any): number | undefined {
     }
     state!.committed = handle;
     return id;
-}
-
-/**
- * P5-101 (D-10, M5; accordproject/concerto-rust#455): `commitStaged` for
- * several files, in order, in one engine call (concerto-wasm
- * `commitStagedModelFiles`), for the batch `addModelFiles` (and the
- * DecoratorManager results it adds, `adoptStagedModels`). Returns the
- * files' handles, in order, or undefined, having changed nothing, when any
- * of them has no usable stage in `handle` (or there are fewer than two):
- * the caller then writes each file on its own, as before. A registration
- * error propagates, as `commitStaged`'s would, with every file the engine
- * registered before it marked as registered from its stage.
- * @param {object[]} modelFiles the ModelFiles being added
- * @param {object} handle the manager's rustHandle
- * @return {number[]|undefined} the registered files' handles, or undefined
- */
-function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | undefined {
-    if (modelFiles.length < 2 || typeof handle.commitStagedModelFiles !== 'function') {
-        return undefined;
-    }
-    const states: FileState[] = new Array(modelFiles.length);
-    const stages = new Uint32Array(modelFiles.length);
-    for (let i = 0; i < modelFiles.length; i++) {
-        const state = fileStates.get(modelFiles[i]);
-        const stage = state?.stage;
-        if (!stage || stage.handle !== handle) {
-            return undefined;
-        }
-        states[i] = state!;
-        stages[i] = stage.id;
-    }
-    let ids: ArrayLike<number> | undefined;
-    try {
-        ids = handle.commitStagedModelFiles(stages);
-    } catch (e) {
-        modelFiles.forEach((modelFile, i) => {
-            if (handle.modelFileId(modelFile.getNamespace()) !== undefined) {
-                takeStageOf(states[i], handle);
-                states[i].committed = handle;
-            }
-        });
-        throw e;
-    }
-    if (ids === undefined) {
-        return undefined;
-    }
-    for (const state of states) {
-        takeStageOf(state, handle);
-        state.committed = handle;
-    }
-    return ids;
 }
 
 /**
@@ -3697,7 +3639,6 @@ export {
     recordedImportNames,
     deferDeclarations,
     commitStaged,
-    commitStagedAll,
     validateAndCommitStaged,
     updateStaged,
     validateAstStaged,

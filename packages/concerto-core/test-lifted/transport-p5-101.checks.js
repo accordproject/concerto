@@ -22,9 +22,10 @@
  *   and the validation of a staged file in one engine call: the same
  *   outcomes, the same classes, and the metamodel registered (or not)
  *   afterwards as before.
- * - D-10, M5: `addModelFiles` (and the DecoratorManager results it adds)
- *   registers its staged files in one engine call: the same namespaces, the
- *   same types, the same rollback on an error.
+ * - D-4, D-10: every ModelFile is staged through the one staging binding
+ *   and read back from the one header format: `addModelFiles` of such
+ *   files gives the same namespaces, the same types, the same rollback on
+ *   an error.
  * - D-3, E-7: `toJSON` reuses the options' wire text and the engine's
  *   serializer for them; `validateMetaModel` runs through the engine's
  *   validate-only binding: the same results and error classes.
@@ -100,7 +101,7 @@ module.exports = [
     },
     {
         id: 'P5101-ADDS-001',
-        covers: 'P5-101 D-10/M5: addModelFiles registers a batch of staged files in one call: the same namespaces and types, and a failing batch rolls back',
+        covers: 'P5-101 D-4/D-10: addModelFiles of files staged through the one staging binding: the same namespaces and types, and a failing batch rolls back',
         run: (core) => {
             const mm = new core.ModelManager();
             mm.addModelFiles([modelFile(core, mm, USER), modelFile(core, mm, BASE)], null);

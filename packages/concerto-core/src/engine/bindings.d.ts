@@ -43,7 +43,6 @@ export interface EngineHandle {
     addModelWithDefinitions(ast: string, definitions: string | null | undefined, file_name: string | null | undefined, validate: boolean): number;
     checkAstShape(ast: string): void;
     commitStagedModelFile(stage: number): number | undefined;
-    commitStagedModelFiles(stages: Uint32Array): Uint32Array | undefined;
     dcsDecorateModels(target: EngineHandle, decorator_command_sets: any, options: any): any;
     dcsExtractDecorators(target: EngineHandle, options: any): any;
     dcsExtractNonVocabDecorators(target: EngineHandle, options: any): any;
@@ -275,7 +274,6 @@ export interface EngineViewsModule {
     builtDeclaration(modelFile: object, index: number, node: object): any;
     localType(modelFile: object, type: string): any;
     commitStaged(modelFile: object, handle: EngineHandle): number | undefined;
-    commitStagedAll(modelFiles: object[], handle: EngineHandle): ArrayLike<number> | undefined;
     validateAndCommitStaged(modelFile: object, handle: EngineHandle, metamodel?: boolean): number | undefined;
     dropStaged(modelFile: object, handle: EngineHandle): void;
     updateStaged(modelFile: object, handle: EngineHandle): number | undefined;

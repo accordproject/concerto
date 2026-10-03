@@ -529,48 +529,6 @@ class BaseModelManager {
     }
 
     /**
-     * P5-101 (D-10, M5; accordproject/concerto-rust#455): `_rustMirrorAdd`
-     * for each of `modelFiles`, in order, in one engine call when every one
-     * is written to rustHandle from its stage (engine/views.ts
-     * `commitStagedAll`); otherwise one write per file, as before. Adds each
-     * namespace written to `mirrored`, also when a write throws (the files
-     * the engine registered before the error), so the caller can undo them.
-     * @param {ModelFile[]} modelFiles - the model files being added
-     * @param {Set<string>} mirrored - the namespaces written, filled in
-     * @private
-     * @internal
-     */
-    /* istanbul ignore next */
-    _rustMirrorAddAll(modelFiles: ModelFileInstance[], mirrored: Set<string>) {
-        const handle = this.rustHandle;
-        if (modelFiles.every((m) => this._needsRustWrite(m.getNamespace()))) {
-            let ids;
-            try {
-                ids = engineViews().commitStagedAll(modelFiles, handle);
-            } catch (err) {
-                modelFiles.forEach((m) => {
-                    if (handle.modelFileId(m.getNamespace()) !== undefined) {
-                        mirrored.add(m.getNamespace());
-                    }
-                });
-                throw err;
-            }
-            if (ids !== undefined) {
-                modelFiles.forEach((m, i) => {
-                    this._modelFileIds.set(m.getNamespace(), ids[i]);
-                    mirrored.add(m.getNamespace());
-                });
-                return;
-            }
-        }
-        modelFiles.forEach((m) => {
-            if (this._rustMirrorAdd(m)) {
-                mirrored.add(m.getNamespace());
-            }
-        });
-    }
-
-    /**
      * P5-34 (I-5): `addModelFile`'s validation and rustHandle write in one
      * engine call, for a file staged in `rustHandle` whose `validate` is
      * `ModelFile`'s own (engine/views.ts `validateAndCommitStaged`); caches
@@ -991,7 +949,11 @@ class BaseModelManager {
             // rustHandle before validateModelFiles() below validates any of
             // them. Each write is a structural mirror write only (no
             // validation); validateModelFiles() decides pass/fail.
-            this._rustMirrorAddAll(newModelFiles, mirroredNamespaces);
+            newModelFiles.forEach((m) => {
+                if (this._rustMirrorAdd(m)) {
+                    mirroredNamespaces.add(m.getNamespace());
+                }
+            });
             this._mirrorPending = false;
 
             // re-validate all the model files

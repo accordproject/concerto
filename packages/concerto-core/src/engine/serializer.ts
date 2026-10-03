@@ -272,4 +272,4 @@ function validateMetaModel(input: unknown): void {
 
 // `handleFor` is also used by validate-resource.ts (P5-12c), so instance
 // validation uses the same rustHandle.
-export { asUnsupported, fastFromJson, fastToJson, handleFor, optionsText, validateMetaModel };
+export { asUnsupported, fastFromJson, fastToJson, handleFor, validateMetaModel };
