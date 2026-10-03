@@ -23,6 +23,11 @@ const frame = (i) => d.ftbl[i].replace(/^0x[0-9A-F]+: /i, '');
 // A function name without its generic arguments, for a short label: every
 // `<...>` group is dropped by bracket depth (a `>` with no open `<`, as in
 // `->`, is kept). This is a display label for the console, not sanitisation.
+// P5-112 changed it from two passes of `/<[^<>]*>/g`, which left a stray
+// `Foo>` on generics nested three deep: recorded results up to P5-109 label
+// e.g. `read_declaration<...ErrorBridge<MapAccess<StrRead>>>` at
+// typed_ast.rs:683 as `ErrorBridge>`, which now reads `read_declaration`.
+// Only those origin labels change (same file:line, blocks and bytes).
 const withoutGenerics = (name) => {
     let out = '';
     let depth = 0;
