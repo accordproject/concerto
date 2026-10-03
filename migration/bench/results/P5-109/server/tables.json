@@ -1,0 +1,400 @@
+{
+  "time": {
+    "concerto-core-test-data/n1": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 2.470297500000015,
+        "p95": 6.18692944999991,
+        "tput": 312.7234086258616,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "before (a) new ModelManager",
+        "p50": 4.817196500000023,
+        "p95": 9.557460400000005,
+        "tput": 175.4210573861128,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "before (b) filter(keepUserModels)",
+        "p50": null,
+        "p95": null,
+        "tput": null,
+        "rounds": 0
+      },
+      "now-a": {
+        "label": "now (a) new ModelManager",
+        "p50": 4.589210999999864,
+        "p95": 8.47210325000003,
+        "tput": 188.8249228202911,
+        "rounds": 3
+      },
+      "now-b-all": {
+        "label": "now (b) filter(() => true)",
+        "p50": 3.6860370000000557,
+        "p95": 6.272743399999929,
+        "tput": 250.56957188633857,
+        "rounds": 3
+      },
+      "now-c": {
+        "label": "now (c) fork",
+        "p50": 1.4081789999999614,
+        "p95": 2.2870716999999554,
+        "tput": 648.1389913845088,
+        "rounds": 3
+      }
+    },
+    "concerto-core-test-data/n16": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 44.83029099999999,
+        "p95": 62.39548960000003,
+        "tput": 335.5152083046589,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "before (a) new ModelManager",
+        "p50": 80.14987499999995,
+        "p95": 125.8425448999998,
+        "tput": 187.3762318505801,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "before (b) filter(keepUserModels)",
+        "p50": null,
+        "p95": null,
+        "tput": null,
+        "rounds": 0
+      },
+      "now-a": {
+        "label": "now (a) new ModelManager",
+        "p50": 72.54411949999997,
+        "p95": 116.37084119999992,
+        "tput": 195.4615206077449,
+        "rounds": 3
+      },
+      "now-b-all": {
+        "label": "now (b) filter(() => true)",
+        "p50": 62.61446150000006,
+        "p95": 81.65252810000001,
+        "tput": 245.84309669741916,
+        "rounds": 3
+      },
+      "now-c": {
+        "label": "now (c) fork",
+        "p50": 22.65317699999997,
+        "p95": 31.451237199999987,
+        "tput": 692.3922970539929,
+        "rounds": 3
+      }
+    },
+    "concerto-core-test-data/n64": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 170.13961199999994,
+        "p95": 207.56196689999993,
+        "tput": 353.7831472719659,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "before (a) new ModelManager",
+        "p50": 342.74974749999996,
+        "p95": 599.2508634999999,
+        "tput": 161.8552373660124,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "before (b) filter(keepUserModels)",
+        "p50": null,
+        "p95": null,
+        "tput": null,
+        "rounds": 0
+      },
+      "now-a": {
+        "label": "now (a) new ModelManager",
+        "p50": 338.4068759999999,
+        "p95": 544.49180795,
+        "tput": 169.77620148233495,
+        "rounds": 3
+      },
+      "now-b-all": {
+        "label": "now (b) filter(() => true)",
+        "p50": 238.08169750000013,
+        "p95": 259.2549270999999,
+        "tput": 261.71490498633716,
+        "rounds": 3
+      },
+      "now-c": {
+        "label": "now (c) fork",
+        "p50": 103.12176649999998,
+        "p95": 128.54379715,
+        "tput": 609.9028191673713,
+        "rounds": 3
+      }
+    },
+    "conformance/n1": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 1.0604350000000409,
+        "p95": 3.5362071499999987,
+        "tput": 748.9281032054081,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "before (a) new ModelManager",
+        "p50": 2.5202679999999873,
+        "p95": 4.237655099999971,
+        "tput": 345.693333438885,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "before (b) filter(keepUserModels)",
+        "p50": 6.860189999999989,
+        "p95": 11.838159949999772,
+        "tput": 123.73899940613045,
+        "rounds": 3
+      },
+      "now-a": {
+        "label": "now (a) new ModelManager",
+        "p50": 2.490374999999972,
+        "p95": 4.708881599999987,
+        "tput": 342.9654508565727,
+        "rounds": 3
+      },
+      "now-b-all": {
+        "label": "now (b) filter(() => true)",
+        "p50": 2.357554499999935,
+        "p95": 3.9091470499998726,
+        "tput": 384.2817430770083,
+        "rounds": 3
+      },
+      "now-c": {
+        "label": "now (c) fork",
+        "p50": 1.0092359999999303,
+        "p95": 1.5942231500000357,
+        "tput": 847.4779450432756,
+        "rounds": 3
+      }
+    },
+    "conformance/n16": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 19.96166649999998,
+        "p95": 32.97512074999999,
+        "tput": 692.597343842436,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "before (a) new ModelManager",
+        "p50": 44.50443400000006,
+        "p95": 64.07238309999997,
+        "tput": 341.99071485291444,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "before (b) filter(keepUserModels)",
+        "p50": 118.56286149999994,
+        "p95": 171.1573608500001,
+        "tput": 127.00327734465502,
+        "rounds": 3
+      },
+      "now-a": {
+        "label": "now (a) new ModelManager",
+        "p50": 44.149704999999926,
+        "p95": 59.761221600000056,
+        "tput": 340.0723510048065,
+        "rounds": 3
+      },
+      "now-b-all": {
+        "label": "now (b) filter(() => true)",
+        "p50": 42.09816749999999,
+        "p95": 54.98481590000001,
+        "tput": 363.3147600530538,
+        "rounds": 3
+      },
+      "now-c": {
+        "label": "now (c) fork",
+        "p50": 15.462056000000018,
+        "p95": 22.379295299999974,
+        "tput": 948.4495387144534,
+        "rounds": 3
+      }
+    },
+    "conformance/n64": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 101.19727950000004,
+        "p95": 132.52073429999996,
+        "tput": 589.8447053468157,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "before (a) new ModelManager",
+        "p50": 203.23699850000003,
+        "p95": 245.68844499999992,
+        "tput": 308.8572707514089,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "before (b) filter(keepUserModels)",
+        "p50": 532.2175855,
+        "p95": 803.7080952499996,
+        "tput": 111.67475341385959,
+        "rounds": 3
+      },
+      "now-a": {
+        "label": "now (a) new ModelManager",
+        "p50": 179.75465350000002,
+        "p95": 235.98570894999997,
+        "tput": 343.62628913990307,
+        "rounds": 3
+      },
+      "now-b-all": {
+        "label": "now (b) filter(() => true)",
+        "p50": 157.9177115,
+        "p95": 171.51378635000003,
+        "tput": 384.6947460317947,
+        "rounds": 3
+      },
+      "now-c": {
+        "label": "now (c) fork",
+        "p50": 64.84078249999999,
+        "p95": 80.32713975000001,
+        "tput": 942.1429607398876,
+        "rounds": 3
+      }
+    },
+    "synthetic-large/n1": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 2.3946450000000254,
+        "p95": 5.535210349999988,
+        "tput": 339.7251064474831,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "before (a) new ModelManager",
+        "p50": 13.818891000000008,
+        "p95": 24.47875575000003,
+        "tput": 63.05937639604001,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "before (b) filter(keepUserModels)",
+        "p50": 22.97047000000009,
+        "p95": 44.85804714999972,
+        "tput": 38.3053600831328,
+        "rounds": 3
+      },
+      "now-a": {
+        "label": "now (a) new ModelManager",
+        "p50": 12.431826000000115,
+        "p95": 21.06092270000006,
+        "tput": 69.99434278190527,
+        "rounds": 3
+      },
+      "now-b-all": {
+        "label": "now (b) filter(() => true)",
+        "p50": 7.865308999999911,
+        "p95": 12.429865899999925,
+        "tput": 113.5507826480881,
+        "rounds": 3
+      },
+      "now-c": {
+        "label": "now (c) fork",
+        "p50": 6.998210999999969,
+        "p95": 11.63262585000011,
+        "tput": 131.3191944308762,
+        "rounds": 3
+      }
+    },
+    "synthetic-large/n16": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 46.056850999999995,
+        "p95": 61.23723449999997,
+        "tput": 313.38311688779726,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "before (a) new ModelManager",
+        "p50": 258.55767900000006,
+        "p95": 471.0642177999999,
+        "tput": 57.200382576140676,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "before (b) filter(keepUserModels)",
+        "p50": 417.4086955,
+        "p95": 610.29992645,
+        "tput": 36.251307210658425,
+        "rounds": 3
+      },
+      "now-a": {
+        "label": "now (a) new ModelManager",
+        "p50": 223.9444995,
+        "p95": 395.5389649499999,
+        "tput": 61.31962466571699,
+        "rounds": 3
+      },
+      "now-b-all": {
+        "label": "now (b) filter(() => true)",
+        "p50": 136.63397550000002,
+        "p95": 154.58657745000002,
+        "tput": 115.97400177401721,
+        "rounds": 3
+      },
+      "now-c": {
+        "label": "now (c) fork",
+        "p50": 121.47714749999989,
+        "p95": 144.77146235,
+        "tput": 129.3668865212343,
+        "rounds": 3
+      }
+    },
+    "synthetic-large/n64": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 187.94562200000001,
+        "p95": 208.11642345,
+        "tput": 314.79540612348205,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "before (a) new ModelManager",
+        "p50": 1177.5077215,
+        "p95": 1710.3014696999996,
+        "tput": 47.14982782998332,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "before (b) filter(keepUserModels)",
+        "p50": 1961.5827679999998,
+        "p95": 3055.3444106499996,
+        "tput": 26.62189510408093,
+        "rounds": 3
+      },
+      "now-a": {
+        "label": "now (a) new ModelManager",
+        "p50": 1029.9014875,
+        "p95": 1622.76150235,
+        "tput": 53.64149689549515,
+        "rounds": 3
+      },
+      "now-b-all": {
+        "label": "now (b) filter(() => true)",
+        "p50": 507.03431250000006,
+        "p95": 552.31150825,
+        "tput": 114.20105784637832,
+        "rounds": 3
+      },
+      "now-c": {
+        "label": "now (c) fork",
+        "p50": 466.46000899999996,
+        "p95": 505.7803659000001,
+        "tput": 132.03281875343737,
+        "rounds": 3
+      }
+    }
+  }
+}
