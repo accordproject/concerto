@@ -35,6 +35,7 @@ import type { JsonPopulatorParameters } from './serializer/jsonpopulator';
 import type Resource from './model/resource';
 /* eslint-enable no-unused-vars */
 import { engineSerializer } from './engineloader';
+import { isFastPathUnsupported } from './engineutil';
 
 // P5-24 (BC-07, R1; accordproject/concerto-rust#328): `DateTime` strings are
 // strict whatever `strictQualifiedDateTimes` says, so an explicit `false` no
@@ -134,11 +135,12 @@ class Serializer {
         // (EngineFastPathUnsupported: a cycle or shared reference, a value
         // the wire codec cannot carry), exactly as calling the visitors directly still
         // does for callers/tests that need them.
+        // P5-101 (E-7): the options are merged once, for both paths.
+        options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
         try {
-            const merged = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
-            return engineSerializer().fastToJson(this.modelManager, resource, merged);
+            return engineSerializer().fastToJson(this.modelManager, resource, options);
         } catch (err) {
-            if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
+            if (!isFastPathUnsupported(err)) {
                 throw err;
             }
         }
@@ -152,7 +154,6 @@ class Serializer {
         const classDeclaration = this.modelManager.getType( resource.getFullyQualifiedType() );
 
         // validate the resource against the model
-        options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
         if(options.validate) {
             const validator = new ResourceValidator(options);
             classDeclaration.accept(validator, parameters);
@@ -208,7 +209,7 @@ class Serializer {
         try {
             return engineSerializer().fastFromJson(this.modelManager, jsonObject, options);
         } catch (err) {
-            if (!(err && err[Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported')] === true)) {
+            if (!isFastPathUnsupported(err)) {
                 throw err;
             }
         }

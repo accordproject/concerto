@@ -1,0 +1,22 @@
+13:52:02 round 1 ts-reference start load 1.31 1.12 1.18
+13:52:13 round 1 ts-reference end exit 0 load 1.41 1.15 1.19
+13:52:13 round 1 before start load 1.41 1.15 1.19
+13:52:31 round 1 before end exit 0 load 1.37 1.16 1.19
+13:52:31 round 1 after start load 1.37 1.16 1.19
+13:52:50 round 1 after end exit 0 load 1.72 1.25 1.22
+13:52:50 round 2 after start load 1.72 1.25 1.22
+13:53:08 round 2 after end exit 0 load 2.25 1.39 1.27
+13:53:08 round 2 before start load 2.25 1.39 1.27
+13:53:27 round 2 before end exit 0 load 2.44 1.50 1.30
+13:53:27 round 2 ts-reference start load 2.44 1.50 1.30
+13:53:38 round 2 ts-reference end exit 0 load 2.21 1.48 1.30
+13:53:38 round 3 ts-reference start load 2.21 1.48 1.30
+13:53:48 round 3 ts-reference end exit 0 load 2.03 1.46 1.29
+13:53:48 round 3 before start load 2.03 1.46 1.29
+13:54:06 round 3 before end exit 0 load 1.73 1.43 1.29
+13:54:06 round 3 after start load 1.73 1.43 1.29
+13:54:25 round 3 after end exit 0 load 1.84 1.47 1.30
+13:54:25 count before start
+13:54:31 count before end exit 0
+13:54:37 count after end exit 0
+13:54:37 done

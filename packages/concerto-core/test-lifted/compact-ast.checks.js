@@ -44,10 +44,17 @@
  *
  * P5-94 (accordproject/concerto-rust#444): the compact path's staging
  * result now comes back in a flat layout where the engine has the
- * `...CompactFlat` bindings. Each AST is also loaded a third time, with only
- * those hidden, so that the compact path with the object result runs too;
- * the flat and the object result must each give the text path's outcome,
- * and the check fails unless both ran.
+ * `...CompactFlat` bindings.
+ *
+ * P5-101 (D-4, D-10; accordproject/concerto-rust#455): the views stage
+ * every AST through one binding, `stageModelFileBytes`, its flag 2 telling
+ * the compact layout from the text as UTF-8, and read one result layout
+ * (the flat one), so there is no binding left to hide. The text path is run
+ * by a wrapper of that binding instead: it reads each compact AST back to
+ * the JSON text it stands for (`compactToText`) and stages that text, with
+ * the same flags otherwise, so the engine's text load gives its verdict for
+ * the very AST the compact load is given. The check fails unless the
+ * compact path ran.
  */
 
 const MODELS = [
@@ -208,36 +215,69 @@ function mutate(ast, next) {
 }
 
 /**
- * The compact staging bindings with the object result, and (P5-94) with
- * the flat one.
+ * The JSON text the compact layout (src/engine/wire.ts) stands for: what
+ * `JSON.stringify` writes for the document the bytes describe (P5-101).
+ * @param {Uint8Array} bytes the AST in the compact layout
+ * @returns {string} its JSON text
  */
-const OBJECT_BINDINGS = ['stageModelFileCheckedCompact', 'stageModelFileWithHeaderCompact'];
-const FLAT_BINDINGS = ['stageModelFileCheckedCompactFlat', 'stageModelFileWithHeaderCompactFlat'];
+function compactToText(bytes) {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const decoder = new TextDecoder();
+    let pos = 0;
+    const u32 = () => {
+        const n = view.getUint32(pos, true);
+        pos += 4;
+        return n;
+    };
+    const str = () => {
+        const n = u32();
+        const out = decoder.decode(bytes.subarray(pos, pos + n));
+        pos += n;
+        return out;
+    };
+    const value = () => {
+        const tag = bytes[pos++];
+        switch (tag) {
+        case 0: return null;
+        case 1: return false;
+        case 2: return true;
+        case 3: { const v = view.getFloat64(pos, true); pos += 8; return v; }
+        case 4: { const v = view.getInt32(pos, true); pos += 4; return v; }
+        case 5: return str();
+        case 6: { const n = u32(); const out = []; for (let i = 0; i < n; i++) { out.push(value()); } return out; }
+        case 7: { const n = u32(); const out = {}; for (let i = 0; i < n; i++) { const k = str(); Object.defineProperty(out, k, { value: value(), enumerable: true, writable: true, configurable: true }); } return out; }
+        default: throw new Error(`unknown tag ${tag}`);
+        }
+    };
+    return JSON.stringify(value());
+}
 
 /**
- * Loads `ast` in a fresh manager built with `options`, with the compact
- * staging bindings hidden when `mode` is `'text'`, and (P5-94) only the
- * flat ones hidden when it is `'object'`, and reports what happened.
+ * Loads `ast` in a fresh manager built with `options`, through the compact
+ * staging path, or with `mode` `'text'` through the text path (module doc),
+ * and reports what happened.
  * @param {object} core the core under test
  * @param {object} options the manager options
  * @param {Function} makeAst builds the AST (a fresh copy per load)
- * @param {string} mode `'flat'` (every binding), `'object'` or `'text'`
- * @param {object} counter counts the compact binding calls, by layout
+ * @param {string} mode `'compact'` or `'text'`
+ * @param {object} counter counts the compact staging calls
  * @returns {Array} the constructor's outcome, `addModelFile`'s, and the AST read back
  */
 function load(core, options, makeAst, mode, counter) {
     const mm = new core.ModelManager(options);
     const handle = mm.rustHandle;
-    if (handle) {
-        for (const binding of OBJECT_BINDINGS.concat(FLAT_BINDINGS)) {
-            const flat = FLAT_BINDINGS.includes(binding);
-            const hidden = mode === 'text' || (mode === 'object' && flat);
-            const original = handle[binding];
-            handle[binding] = hidden || typeof original !== 'function' ? undefined : function (...args) {
-                counter[flat ? 'flat' : 'object']++;
-                return original.apply(this, args);
-            };
-        }
+    const original = handle && handle.stageModelFileBytes;
+    if (typeof original === 'function') {
+        handle.stageModelFileBytes = function (bytes, definitions, fileName, flags) {
+            if ((flags & 2) === 0) {
+                return original.call(this, bytes, definitions, fileName, flags);
+            }
+            if (mode === 'text') {
+                return original.call(this, new TextEncoder().encode(compactToText(bytes)), definitions, fileName, flags & ~2);
+            }
+            counter.compact++;
+            return original.call(this, bytes, definitions, fileName, flags);
+        };
     }
     let file;
     const constructed = probe(() => {
@@ -264,7 +304,7 @@ function compare(core, seed, rounds) {
     const parser = new core.ModelManager({ strict: true });
     const bases = MODELS.map((cto) => parser.addCTOModel(cto, undefined, true).getAst());
     const next = random(seed);
-    const counter = { flat: 0, object: 0 };
+    const counter = { compact: 0 };
     const mismatches = [];
     bases.forEach((base, b) => {
         for (let round = 0; round < rounds; round++) {
@@ -282,19 +322,15 @@ function compare(core, seed, rounds) {
                 return ast;
             };
             for (const options of [{}, { metamodelValidation: false }]) {
-                const compact = load(core, options, makeAst, 'flat', counter);
-                const object = load(core, options, makeAst, 'object', counter);
+                const compact = load(core, options, makeAst, 'compact', counter);
                 const text = load(core, options, makeAst, 'text', counter);
                 if (JSON.stringify(compact) !== JSON.stringify(text)) {
                     mismatches.push({ base: b, round, options, compact, text });
                 }
-                if (JSON.stringify(object) !== JSON.stringify(text)) {
-                    mismatches.push({ base: b, round, options, object, text });
-                }
             }
         }
     });
-    if (new core.ModelManager().rustHandle && (counter.flat === 0 || counter.object === 0)) {
+    if (new core.ModelManager().rustHandle && counter.compact === 0) {
         throw new Error('the compact staging path never ran');
     }
     return mismatches;
