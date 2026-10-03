@@ -15,6 +15,8 @@
 import createDebug from 'debug';
 import { TypedStack, NullUtil as Util } from '@accordproject/concerto-util';
 import Relationship from '../model/relationship';
+import { resourceIdsFromURIs } from '../model/resourceid';
+import type ResourceId from '../model/resourceid';
 import ModelUtil from '../modelutil';
 import ValidationException from './validationexception';
 import dayjs from '../dayjs-setup';
@@ -230,8 +232,13 @@ class JSONPopulator {
         const relationship = getRelationshipMapValue(mapDeclaration);
 
         let map = new Map();
+        // P5-113: the map's URI values, read in one engine call on the first
+        // one (where its first `convertRelationship` used to run).
+        let ids: (ResourceId | undefined)[] | undefined;
+        let index = -1;
 
         objMap.forEach((value, key) => {
+            index++;
 
             if (key === '$class') {
                 map.set(key, value);
@@ -243,7 +250,12 @@ class JSONPopulator {
             }
 
             if (relationship) {
-                value = this.convertRelationship(relationship, value, parameters);
+                const id = typeof value === 'string'
+                    ? (ids ?? (ids = readRelationshipMapURIs(relationship, objMap)))[index]
+                    : undefined;
+                value = id
+                    ? relationshipFromId(parameters.modelManager, id)
+                    : this.convertRelationship(relationship, value, parameters);
             } else if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
                 value = this.processMapType(mapDeclaration, parameters, value, mapDeclaration.getValue().getType());
             }
@@ -575,6 +587,49 @@ function relationshipDefaults(relationshipDeclaration: RelationshipDeclaration |
     }
     let defaultType = ModelUtil.getShortName(typeFQN);
     return { defaultNamespace, defaultType };
+}
+
+/**
+ * A relationship-typed map's URI values, read in one engine call (P5-113,
+ * accordproject/concerto-rust#480) with the defaults `convertRelationship`
+ * reads each one with.
+ * @param {RelationshipMapValue} relationship - the map's relationship value
+ * @param {Map} objMap - the map's JSON entries
+ * @return {Array} per entry, its ResourceId, or `undefined` for a value that
+ * is not a string or does not parse (read the usual way, which throws)
+ * @private
+ */
+function readRelationshipMapURIs(relationship: RelationshipMapValue, objMap: Map<string, unknown>): (ResourceId | undefined)[] {
+    const { defaultNamespace, defaultType } = relationshipDefaults(relationship);
+    const uris: string[] = [];
+    const at: number[] = [];
+    let index = 0;
+    objMap.forEach((value, key) => {
+        if (typeof value === 'string' && key !== '$class') {
+            uris.push(value);
+            at.push(index);
+        }
+        index++;
+    });
+    const ids = resourceIdsFromURIs(uris, defaultNamespace, defaultType);
+    const result: (ResourceId | undefined)[] = new Array(index);
+    for (let i = 0; i < at.length; i++) {
+        result[at[i]] = ids[i];
+    }
+    return result;
+}
+
+/**
+ * `Relationship.fromURI` for a URI already read.
+ * @param {BaseModelManager} modelManager - the model manager
+ * @param {ResourceId} id - the URI's parts
+ * @return {Relationship} the relationship
+ * @private
+ */
+function relationshipFromId(modelManager: BaseModelManager, id: ResourceId): Relationship {
+    const fqt = ModelUtil.getFullyQualifiedName(id.namespace, id.type);
+    const classDeclaration = modelManager.getType(fqt);
+    return new Relationship(modelManager, classDeclaration, id.namespace, id.type, id.id);
 }
 
 export { JSONPopulator };

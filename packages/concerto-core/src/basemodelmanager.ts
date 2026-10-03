@@ -85,6 +85,7 @@ function managerReadMemo(state: EngineState): NonNullable<EngineState['readMemo'
             version: state.version,
             typeNames: new Map(),
             resolvedTypes: new Map(),
+            fileTypeNames: new Map(),
         };
     }
     return memo;
@@ -686,6 +687,39 @@ class BaseModelManager {
      */
     _rustHandleMatchesModelFiles() {
         return !this._mirrorPending;
+    }
+
+    /**
+     * `rustHandle.modelFileGetTypeName(id, type)` for the registered model
+     * file of `namespace` (handle `id`), as `ModelFile.getType` asks it.
+     * P5-113 (accordproject/concerto-rust#480): an answer the engine gave
+     * since the last model change is kept in the read memo
+     * (`EngineState.readMemo`, as `getType` keeps its own), so a run of
+     * instances of one type (a relationship-typed map's values, each one a
+     * Relationship whose constructor looks its type up) crosses into the
+     * engine once, not once per instance.
+     * @param {string} namespace - the model file's namespace
+     * @param {number} id - its rustHandle model file handle
+     * @param {string} type - the type name, as `ModelFile.getType` takes it
+     * @return {string|undefined} the engine's answer
+     * @private
+     * @internal
+     */
+    _modelFileTypeName(namespace: string, id: number, type: string): string | undefined {
+        const memo = managerReadMemo(this._engine);
+        let byType = memo.fileTypeNames.get(namespace);
+        if (byType === undefined) {
+            byType = new Map();
+            memo.fileTypeNames.set(namespace, byType);
+        }
+        if (byType.has(type)) {
+            return byType.get(type);
+        }
+        const name: string | undefined = this.rustHandle.modelFileGetTypeName(id, type);
+        if (memo.version === this._engine.version) {
+            byType.set(type, name);
+        }
+        return name;
     }
 
     /**

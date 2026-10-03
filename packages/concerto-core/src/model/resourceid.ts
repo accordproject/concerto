@@ -79,5 +79,41 @@ class ResourceId {
 
 }
 
+/**
+ * `ResourceId.fromURI` over many URIs at once, in one engine call (P5-113,
+ * accordproject/concerto-rust#480): a relationship-typed map's values are
+ * read with one crossing per map rather than one per value.
+ * @param {String[]} uris - Resource URIs, all read with the same legacy arguments.
+ * @param {String} [legacyNamespace] - Namespace to use for legacy resource identifiers.
+ * @param {String} [legacyType] - Type to use for legacy resource identifiers.
+ * @return {Array} one ResourceId per URI, or `undefined` where the URI does
+ * not parse (or has an empty part): the caller reads that one with
+ * `ResourceId.fromURI`, which throws its error at the same point.
+ * @internal
+ */
+export function resourceIdsFromURIs(uris: string[], legacyNamespace?: string, legacyType?: string): (ResourceId | undefined)[] {
+    const fields = rust.resourceIdsFromURIs(uris, legacyNamespace, legacyType);
+    const result: (ResourceId | undefined)[] = new Array(uris.length);
+    for (let i = 0, at = 0; i < uris.length; i++, at += 3) {
+        const namespace = fields[at], type = fields[at + 1], id = fields[at + 2];
+        // An empty part is left to `fromURI`, whose constructor throws for it.
+        result[i] = namespace && type && id ? new ResourceId(namespace, type, id) : undefined;
+    }
+    return result;
+}
+
+/**
+ * `ResourceId.prototype.toURI` over many identifiers at once, in one engine
+ * call (P5-113): a relationship-typed map's values are written with one
+ * crossing per map rather than one per value.
+ * @param {String[]} fields - Three slots per identifier: namespace, type and id.
+ * @return {Array} one URI per identifier, or `undefined` where it is not
+ * valid: the caller writes that one the usual way, which throws its error.
+ * @internal
+ */
+export function resourceIdsToURIs(fields: unknown[]): (string | undefined)[] {
+    return rust.resourceIdsToURIs(fields);
+}
+
 export { ResourceId };
 export default ResourceId;

@@ -13,6 +13,8 @@
  */
 
 import Resource from '../model/resource';
+import Identifiable from '../model/identifiable';
+import { resourceIdsToURIs } from '../model/resourceid';
 import Typed from '../model/typed';
 import ModelUtil from '../modelutil';
 import { NullUtil as Util } from '@accordproject/concerto-util';
@@ -100,8 +102,13 @@ class JSONGenerator {
         // P5-58 (BC-05, R1; DV-007): a relationship-typed value is written as
         // a relationship property is, not as an embedded concept.
         const relationship = getRelationshipMapValue(mapDeclaration);
+        // P5-113: the URIs of the values written as relationship text, made
+        // in one engine call on the first value.
+        let uris: (string | undefined)[] | undefined;
+        let index = -1;
 
         obj.forEach((value, key) => {
+            index++;
 
             // don't serialize System Properties, other than $class
             if(ModelUtil.isSystemProperty(key)) {
@@ -109,7 +116,8 @@ class JSONGenerator {
             }
 
             if (relationship) {
-                value = this.convertRelationship(relationship, value, parameters);
+                const uri = (uris ?? (uris = relationshipMapURIs(this, obj)))[index];
+                value = uri ?? this.convertRelationship(relationship, value, parameters);
             } else if (typeof value === 'object') {
                 // Key is always a string, but value might be a ValidatedResource.
                 // Resolve the declaration for the map value. Prefer the instance's
@@ -330,6 +338,43 @@ class JSONGenerator {
             return relationshipOrResource.toURI();
         }
     }
+}
+
+/**
+ * The URIs of a relationship-typed map's values that `convertRelationship`
+ * writes as `toURI()`, made in one engine call (P5-113,
+ * accordproject/concerto-rust#480): a relationship, or a resource when
+ * `convertResourcesToRelationships` allows it and
+ * `permitResourcesForRelationships` does not write it in full.
+ * @param {JSONGenerator} generator - the generator and its options
+ * @param {Map} obj - the map
+ * @return {Array} per entry, its URI, or `undefined` for a value written the
+ * usual way (or whose identifier is not valid, which throws there)
+ * @private
+ */
+function relationshipMapURIs(generator: JSONGenerator, obj: Map<string, unknown>): (string | undefined)[] {
+    const fields: unknown[] = [];
+    const at: number[] = [];
+    let index = 0;
+    if (!generator.convertResourcesToId) {
+        const resourcesAsText = generator.convertResourcesToRelationships && !generator.permitResourcesForRelationships;
+        obj.forEach((value, key) => {
+            if (value instanceof Identifiable && !ModelUtil.isSystemProperty(key) &&
+                (!(value instanceof Resource) || resourcesAsText)) {
+                fields.push(value.getNamespace(), value.getType(), value.getIdentifier());
+                at.push(index);
+            }
+            index++;
+        });
+    }
+    const result: (string | undefined)[] = new Array(index);
+    if (at.length > 0) {
+        const uris = resourceIdsToURIs(fields);
+        for (let i = 0; i < at.length; i++) {
+            result[at[i]] = uris[i];
+        }
+    }
+    return result;
 }
 
 export { JSONGenerator };

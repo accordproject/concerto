@@ -29,7 +29,7 @@
 // `Relationship`) except `$modelManager`/`$classDeclaration`/`$validator`,
 // which this codec never sends or expects. A dayjs crosses as `(epoch ms,
 // utcOffset minutes)` (PORTING.md 3.3), never a date object: D7 keeps dayjs
-// construction in TS, so `decodeValue` rebuilds one from that pair.
+// construction in TS, so `decodeTagged` rebuilds one from that pair.
 //
 // `encodeValue` throws `EngineFastPathUnsupported` for anything it cannot
 // express this way (a stubbed instance, a class other than the three
@@ -48,6 +48,8 @@ import type BaseModelManager from '../basemodelmanager';
 /* eslint-enable no-unused-vars */
 
 const TAG = '@@oracle';
+
+const hasOwn = Object.prototype.hasOwnProperty;
 
 /**
  * Throws `EngineFastPathUnsupported` for a string the engine cannot receive
@@ -76,18 +78,6 @@ function checkKey(key: string): void {
         throw new EngineFastPathUnsupported('proto-key');
     }
     checkString(key);
-}
-
-/**
- * `obj[key] = value` as an own, enumerable, writable, configurable data
- * property, whatever `key` is (`__proto__` included), so a decoded object
- * never gets a prototype from its data.
- * @param {object} obj the object
- * @param {string} key the key
- * @param {*} value the value
- */
-function setOwn(obj: object, key: string, value: unknown): void {
-    Object.defineProperty(obj, key, { value, enumerable: true, writable: true, configurable: true });
 }
 
 // The three own properties a "typed" value never carries across (they are
@@ -294,7 +284,9 @@ function writeWireValue(v, seen: Set<object>, depth: number): void {
         return;
     }
     if (typeof v === 'string') {
-        checkString(v);
+        // P5-113: `rawStr` throws `checkString`'s error for a lone
+        // surrogate (the only non-ASCII case it checks), so the string is
+        // not scanned twice.
         w.str(v);
         return;
     }
@@ -331,13 +323,19 @@ function writeWireValue(v, seen: Set<object>, depth: number): void {
         visit(v, seen);
         writeTagHead(2, 'map');
         w.rawStr('entries');
-        const entries = [...v.entries()];
-        w.array(entries.length);
-        for (const [k, x] of entries) {
+        // P5-113: the entries written as the map yields them, with no
+        // `[key, value]` array per entry, and their count patched in after
+        // (the map's own size, unless writing a value changed the map).
+        const countAt = w.pos + 1;
+        w.array(0);
+        let count = 0;
+        v.forEach((x, k) => {
             w.array(2);
             writeWireValue(k, seen, depth + 3);
             writeWireValue(x, seen, depth + 3);
-        }
+            count++;
+        });
+        w.putU32(countAt, count);
         return;
     }
     if (isDayjsLike(v)) {
@@ -395,11 +393,19 @@ function writeEntries(v, skip: Set<string> | undefined, seen: Set<object>, depth
     const w = valueWriter;
     const countAt = w.beginObject();
     let count = 0;
-    for (const key of Object.keys(v)) {
-        if (skip !== undefined && skip.has(key)) {
+    // P5-113 (accordproject/concerto-rust#480): `for...in` with an own
+    // check visits the keys `Object.keys` lists, in the same order, but
+    // reads each value through V8's enumeration cache, where `v[key]` for a
+    // key from `Object.keys` is a full property lookup (most of the encode
+    // of a large map: a 1,000-key object). `rawStr` throws `checkKey`'s
+    // error for a lone surrogate, so only `__proto__` is checked here.
+    for (const key in v) {
+        if (!hasOwn.call(v, key) || (skip !== undefined && skip.has(key))) {
             continue;
         }
-        checkKey(key);
+        if (key === '__proto__') {
+            throw new EngineFastPathUnsupported('proto-key');
+        }
         w.rawStr(key);
         writeWireValue(v[key], seen, depth + 1);
         count++;
@@ -545,17 +551,18 @@ function constructCached(Ctor, info: TypeInfo, modelManager: BaseModelManager, n
  * that every getter and later mutation (`setPropertyValue`, `toJSON`, ...)
  * behaves exactly as the visitor path's result would.
  *
- * With `types` (P5-16), the class lookups are made once per class and kept
- * there (`TypeCache`), and the node's fields are decoded in place
- * (`decodeParsed`): the node must then be fresh `JSON.parse` output that
- * nothing else holds.
+ * The class lookups are made once per class and kept in `types` (P5-16,
+ * `TypeCache`), and the node's fields are decoded in place
+ * (`decodeParsed`): the node must be fresh `JSON.parse` output that
+ * nothing else holds. (P5-113: every caller decodes such output, so the
+ * copying decode without `types` is gone.)
  * @param {object} node the wire node
  * @param {BaseModelManager} modelManager the model manager to resolve its class in
- * @param {Map} [types] the caller's `TypeCache`
+ * @param {Map} types the caller's `TypeCache`
  * @return {object} the materialised instance
  */
-function materializeTyped(node, modelManager: BaseModelManager, types?: TypeCache) {
-    const decode = types ? (v) => decodeParsed(v, modelManager, types) : (v) => decodeValue(v, modelManager);
+function materializeTyped(node, modelManager: BaseModelManager, types: TypeCache) {
+    const decode = (v) => decodeParsed(v, modelManager, types);
     const fields = node.fields || {};
     const identifierFieldName = fields.$identifierFieldName;
     const resource = newInstance(node.ctor, node.fqn, fields.$namespace, fields.$type,
@@ -589,7 +596,7 @@ function materializeTyped(node, modelManager: BaseModelManager, types?: TypeCach
 function materializeCompact(node, modelManager: BaseModelManager, types: TypeCache) {
     const decode = (v) => decodeParsed(v, modelManager, types);
     const [ctor, fqn, ns, type, , id, timestamp, fields] = node;
-    const resource = newInstance(ctor, fqn, decodeValue(ns, modelManager), decodeValue(type, modelManager),
+    const resource = newInstance(ctor, fqn, decodeTagged(ns), decodeTagged(type),
         decode(id), decode(timestamp), modelManager, types);
     for (const key of Object.keys(fields)) {
         setField(resource, key, decode(fields[key]));
@@ -600,7 +607,7 @@ function materializeCompact(node, modelManager: BaseModelManager, types: TypeCac
 /**
  * The Resource/ValidatedResource/Relationship (by `ctor`) of class `fqn`
  * that `materializeTyped` builds, before its fields are set: through its
- * constructor, or, when `types` already has this class, `constructCached`.
+ * constructor the first time, then (`types` has this class) `constructCached`.
  * @param {string} ctor the TS class name
  * @param {string} fqn the class's fully-qualified name
  * @param {string} ns the namespace
@@ -608,21 +615,21 @@ function materializeCompact(node, modelManager: BaseModelManager, types: TypeCac
  * @param {*} id the identifier
  * @param {*} timestamp the timestamp
  * @param {BaseModelManager} modelManager the model manager to resolve the class in
- * @param {Map} [types] the caller's `TypeCache`
+ * @param {Map} types the caller's `TypeCache`
  * @return {object} the instance
  */
-function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModelManager, types?: TypeCache) {
+function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModelManager, types: TypeCache) {
     const { Resource, ValidatedResource, Relationship, ResourceValidator } = modelClasses();
     const Ctor = ctor === 'ValidatedResource' ? ValidatedResource : ctor === 'Relationship' ? Relationship : Resource;
     const validator = ctor === 'ValidatedResource' ? new ResourceValidator({}) : undefined;
     // Looked up by the strings `JSON.parse` already made (no key is built),
     // and checked against the namespace and type it was learned for.
-    const last = types?.last;
-    const entry = last && last.fqn === fqn ? last.entry : types?.byFqn.get(fqn);
+    const last = types.last;
+    const entry = last && last.fqn === fqn ? last.entry : types.byFqn.get(fqn);
     const info = entry?.[ctor];
     if (info && info.ns === ns && info.type === type) {
         if (last?.entry !== entry) {
-            types!.last = { fqn, entry: entry! };
+            types.last = { fqn, entry: entry! };
         }
         return constructCached(Ctor, info, modelManager, ns, type, id, timestamp, Ctor === Relationship, validator);
     }
@@ -630,9 +637,6 @@ function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModel
     const resource = validator !== undefined
         ? new Ctor(modelManager, classDeclaration, ns, type, id, timestamp, validator)
         : new Ctor(modelManager, classDeclaration, ns, type, id, timestamp);
-    if (!types) {
-        return resource;
-    }
     const learned = { ctor, ns, type, classDeclaration, identifierFieldName: resource.$identifierFieldName };
     let learnedEntry = types.byFqn.get(fqn);
     if (!learnedEntry) {
@@ -649,29 +653,38 @@ function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModel
 }
 
 /**
- * `setOwn(resource, key, value)`: the model classes define methods only
- * (no accessors), so a plain assignment makes the same own, enumerable,
- * writable, configurable property, except for `__proto__`.
+ * `resource[key] = value` as an own, enumerable, writable, configurable
+ * data property, whatever `key` is: the model classes define methods only
+ * (no accessors), so a plain assignment makes one, except for `__proto__`,
+ * which is defined instead, so that a decoded object never gets a
+ * prototype from its data (P5-113: this is the only place left that
+ * needs it).
  * @param {object} resource the instance
  * @param {string} key the key
  * @param {*} value the value
  */
 function setField(resource, key: string, value: unknown): void {
     if (key === '__proto__') {
-        setOwn(resource, key, value);
+        Object.defineProperty(resource, key, { value, enumerable: true, writable: true, configurable: true });
     } else {
         resource[key] = value;
     }
 }
 
 /**
- * `decodeValue` over fresh `JSON.parse` output that nothing else holds
- * (P5-16): plain arrays are kept and only their tagged members replaced,
- * instead of being copied. The compact result's values are primitives,
+ * A wire value (module doc) as the JS runtime value it decodes to, over
+ * fresh `JSON.parse` output that nothing else holds (P5-16): plain arrays
+ * are kept and only their tagged members replaced, instead of being
+ * copied. The compact result's values are primitives,
  * arrays or tagged values (P5-103 removed the branch for an untagged
- * object, which only the removed `serializerFromJson` result had; one
- * would still be decoded, by `decodeValue`). `types` is
- * `materializeTyped`'s `TypeCache`.
+ * object, which only the removed `serializerFromJson` result had). P5-113
+ * (accordproject/concerto-rust#480): an untagged object, which
+ * `serializerToJson`'s result is made of, is kept the same way, only its
+ * object members decoded in place, instead of being copied key by key
+ * (the copy's `defineProperty` per key was most of the decode of a large
+ * map's toJSON). `JSON.parse` already made every key an own, enumerable,
+ * writable, configurable data property, `__proto__` included, as that
+ * copy did. `types` is `materializeTyped`'s `TypeCache`.
  * @param {*} v the parsed wire value
  * @param {BaseModelManager} modelManager the model manager, for a `"typed"` value
  * @param {Map} types the caller's `TypeCache`
@@ -693,28 +706,57 @@ function decodeParsed(v, modelManager: BaseModelManager, types: TypeCache) {
     if (v[TAG] === 'typed') {
         return materializeTyped(v, modelManager, types);
     }
-    return decodeValue(v, modelManager);
+    if (v[TAG] === 'map') {
+        return decodeParsedMap(v.entries, modelManager, types);
+    }
+    if (!hasOwn.call(v, TAG)) {
+        for (const key of Object.keys(v)) {
+            const item = v[key];
+            if (item !== null && typeof item === 'object') {
+                const decoded = decodeParsed(item, modelManager, types);
+                if (decoded !== item) {
+                    setField(v, key, decoded);
+                }
+            }
+        }
+        return v;
+    }
+    return decodeTagged(v);
 }
 
 /**
- * A wire value (module doc) as the JS runtime value it decodes to.
- * @param {*} v the wire value
+ * A `"map"` wire value's `entries` (fresh `JSON.parse` output) as a Map,
+ * its keys and values decoded by `decodeParsed`
+ * (P5-113, accordproject/concerto-rust#480): a `"typed"` value (a
+ * relationship-typed map's Relationship) then takes its class lookups from
+ * the caller's `TypeCache`, once per class rather than once per value, and
+ * no `[key, value]` pair is built per entry.
+ * @param {Array} entries the `[key, value]` wire pairs
  * @param {BaseModelManager} modelManager the model manager, for a `"typed"` value
+ * @param {Map} types the caller's `TypeCache`
+ * @return {Map} the decoded map
+ */
+function decodeParsedMap(entries, modelManager: BaseModelManager, types: TypeCache): Map<unknown, unknown> {
+    const out = new Map();
+    for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        out.set(decodeParsed(entry[0], modelManager, types), decodeParsed(entry[1], modelManager, types));
+    }
+    return out;
+}
+
+/**
+ * A wire value that is a primitive (itself) or one of the tagged values
+ * `decodeParsed` leaves to it (`"undefined"`, `"number"`, `"dayjs"`), as
+ * the JS runtime value it decodes to. P5-113: arrays, untagged objects,
+ * maps and `"typed"` values are `decodeParsed`'s alone, so this no longer
+ * copies them.
+ * @param {*} v the wire value
  * @return {*} the decoded value
  */
-function decodeValue(v, modelManager: BaseModelManager) {
+function decodeTagged(v) {
     if (v === null || typeof v !== 'object') {
         return v;
-    }
-    if (Array.isArray(v)) {
-        return v.map((item) => decodeValue(item, modelManager));
-    }
-    if (!Object.prototype.hasOwnProperty.call(v, TAG)) {
-        const out = {};
-        for (const key of Object.keys(v)) {
-            setOwn(out, key, decodeValue(v[key], modelManager));
-        }
-        return out;
     }
     switch (v[TAG]) {
     case 'undefined':
@@ -727,8 +769,6 @@ function decodeValue(v, modelManager: BaseModelManager) {
         case '-0': return -0;
         default: throw new EngineFastPathUnsupported(`unrecognised-wire-number:${v.value}`);
         }
-    case 'map':
-        return new Map(v.entries.map(([k, x]) => [decodeValue(k, modelManager), decodeValue(x, modelManager)]));
     case 'dayjs': {
         if (!v.valid) {
             return dayjs.utc(NaN);
@@ -739,13 +779,11 @@ function decodeValue(v, modelManager: BaseModelManager) {
         }
         return d;
     }
-    case 'typed':
-        return materializeTyped(v, modelManager);
     default:
         throw new EngineFastPathUnsupported(`unrecognised-wire-kind:${v[TAG]}`);
     }
 }
 
-export { typedCtorName, modelClasses, encodeValue, encodeBytes, decodeValue, materializeCompact, checkString };
+export { typedCtorName, modelClasses, encodeValue, encodeBytes, decodeParsed, materializeCompact, checkString };
 export type { TypeCache };
 export { newTypeCache };
