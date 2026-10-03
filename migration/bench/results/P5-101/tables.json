@@ -1,0 +1,339 @@
+{
+  "rounds": [
+    1,
+    2,
+    3
+  ],
+  "rows": [
+    {
+      "op": "to_json",
+      "set": "concerto-core-test-data",
+      "tsUs": 36.199212499999994,
+      "beforeUs": 68.39704166666665,
+      "afterUs": 59.60150833333333,
+      "xBefore": 2.002299357141601,
+      "xAfter": 1.646486324345684,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "to_json",
+      "set": "conformance",
+      "tsUs": 7.6044090909090905,
+      "beforeUs": 19.545034090909088,
+      "afterUs": 14.613500000000002,
+      "xBefore": 2.7046883685899923,
+      "xAfter": 1.9538007256555707,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "to_json",
+      "set": "synthetic-large",
+      "tsUs": 8.586054999999998,
+      "beforeUs": 33.967955,
+      "afterUs": 27.125953333333335,
+      "xBefore": 4.032781231301111,
+      "xAfter": 3.1509142944649056,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "modelfile_new",
+      "set": "concerto-core-test-data",
+      "tsUs": 27.08467142857143,
+      "beforeUs": 62.62032857142857,
+      "afterUs": 58.996514285714284,
+      "xBefore": 2.2829610612080695,
+      "xAfter": 2.1915279438501587,
+      "crossingsBefore": 1.0571428571428572,
+      "crossingsAfter": 1.0571428571428572
+    },
+    {
+      "op": "modelfile_new",
+      "set": "conformance",
+      "tsUs": 7.501597560975609,
+      "beforeUs": 27.8919756097561,
+      "afterUs": 28.439731707317076,
+      "xBefore": 3.760398409780703,
+      "xAfter": 3.79115668044693,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "modelfile_new",
+      "set": "synthetic-large",
+      "tsUs": 698.0085,
+      "beforeUs": 2431.272,
+      "afterUs": 2263.7285,
+      "xBefore": 3.483155291088862,
+      "xAfter": 3.26750963634397,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "add_model_file",
+      "set": "concerto-core-test-data",
+      "tsUs": 72.83449999999999,
+      "beforeUs": 99.57144285714287,
+      "afterUs": 100.44725714285715,
+      "xBefore": 1.3856129797201682,
+      "xAfter": 1.5072775706145303,
+      "crossingsBefore": 2.1428571428571423,
+      "crossingsAfter": 2.1428571428571423
+    },
+    {
+      "op": "add_model_file",
+      "set": "conformance",
+      "tsUs": 24.011999999999997,
+      "beforeUs": 43.11391463414634,
+      "afterUs": 43.027378048780484,
+      "xBefore": 1.954922778321527,
+      "xAfter": 1.7919114629677033,
+      "crossingsBefore": 2.073170731707317,
+      "crossingsAfter": 2.073170731707317
+    },
+    {
+      "op": "add_model_file",
+      "set": "synthetic-large",
+      "tsUs": 2263.3225,
+      "beforeUs": 7286.564,
+      "afterUs": 8369.285,
+      "xBefore": 2.973624969976302,
+      "xAfter": 3.6977872132672207,
+      "crossingsBefore": 5,
+      "crossingsAfter": 5
+    },
+    {
+      "op": "extract_cold",
+      "set": "concerto-core-test-data",
+      "tsUs": 8312.838,
+      "beforeUs": 10401.2055,
+      "afterUs": 11564.175500000001,
+      "xBefore": 1.2512219653504615,
+      "xAfter": 1.4993249315450703,
+      "crossingsBefore": 43,
+      "crossingsAfter": 43
+    },
+    {
+      "op": "extract_cold",
+      "set": "conformance",
+      "tsUs": 2969.896,
+      "beforeUs": 6743.0734999999995,
+      "afterUs": 8152.472,
+      "xBefore": 2.2653965801703615,
+      "xAfter": 3.0194793662645676,
+      "crossingsBefore": 48,
+      "crossingsAfter": 48
+    },
+    {
+      "op": "extract_cold",
+      "set": "synthetic-large",
+      "tsUs": 8813.912999999999,
+      "beforeUs": 21317.8005,
+      "afterUs": 18291.2425,
+      "xBefore": 2.4780318468083533,
+      "xAfter": 2.0351341355718975,
+      "crossingsBefore": 8,
+      "crossingsAfter": 8
+    },
+    {
+      "op": "validate",
+      "set": "concerto-core-test-data",
+      "tsUs": 15.746504166666668,
+      "beforeUs": 17.787983333333333,
+      "afterUs": 17.3523625,
+      "xBefore": 1.0813993072789658,
+      "xAfter": 1.1161643000496342,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "validate",
+      "set": "conformance",
+      "tsUs": 3.694204545454545,
+      "beforeUs": 3.5507045454545456,
+      "afterUs": 3.6577159090909093,
+      "xBefore": 0.9657451050085769,
+      "xAfter": 0.9901227352425483,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "validate",
+      "set": "synthetic-large",
+      "tsUs": 5.3193600000000005,
+      "beforeUs": 6.798573333333334,
+      "afterUs": 6.535155,
+      "xBefore": 1.2780810724097134,
+      "xAfter": 1.2165831896216641,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "from_json",
+      "set": "concerto-core-test-data",
+      "tsUs": 48.21430833333333,
+      "beforeUs": 47.96979999999999,
+      "afterUs": 44.215158333333335,
+      "xBefore": 0.9949287184285024,
+      "xAfter": 0.9533012009920707,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "from_json",
+      "set": "conformance",
+      "tsUs": 13.111420454545454,
+      "beforeUs": 11.658693181818181,
+      "afterUs": 10.843477272727272,
+      "xBefore": 0.8892013815159407,
+      "xAfter": 0.8355852097543943,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "from_json",
+      "set": "synthetic-large",
+      "tsUs": 17.107498333333332,
+      "beforeUs": 21.370195000000002,
+      "afterUs": 24.807965000000003,
+      "xBefore": 1.249171245474329,
+      "xAfter": 1.4649862593370273,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "add_cto_model",
+      "set": "concerto-core-test-data",
+      "tsUs": 477.6326142857143,
+      "beforeUs": 997.7924857142857,
+      "afterUs": 1014.7635428571426,
+      "xBefore": 2.1147415332267103,
+      "xAfter": 2.1507103342716203,
+      "crossingsBefore": 2.1428571428571423,
+      "crossingsAfter": 2.1428571428571423
+    },
+    {
+      "op": "add_cto_model",
+      "set": "conformance",
+      "tsUs": 145.89991463414637,
+      "beforeUs": 450.3288780487805,
+      "afterUs": 386.3370487804878,
+      "xBefore": 2.709097942433474,
+      "xAfter": 2.6479593887991872,
+      "crossingsBefore": 2.073170731707317,
+      "crossingsAfter": 2.073170731707317
+    },
+    {
+      "op": "add_cto_model",
+      "set": "synthetic-large",
+      "tsUs": 20645.953999999998,
+      "beforeUs": 27049.947,
+      "afterUs": 25995.752,
+      "xBefore": 1.3207627881459623,
+      "xAfter": 1.2692898027294093,
+      "crossingsBefore": 5,
+      "crossingsAfter": 5
+    },
+    {
+      "op": "validate_instance",
+      "set": "concerto-core-test-data",
+      "tsUs": 58.54206250000001,
+      "beforeUs": 35.062820833333326,
+      "afterUs": 35.21394166666666,
+      "xBefore": 0.5989338150382612,
+      "xAfter": 0.6015152210714588,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "validate_instance",
+      "set": "conformance",
+      "tsUs": 15.204556818181818,
+      "beforeUs": 10.245045454545455,
+      "afterUs": 9.404,
+      "xBefore": 0.6827278702825832,
+      "xAfter": 0.6184987903596485,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "validate_instance",
+      "set": "synthetic-large",
+      "tsUs": 22.371165,
+      "beforeUs": 17.103416666666668,
+      "afterUs": 16.634299999999996,
+      "xBefore": 0.755626822603956,
+      "xAfter": 0.7673038685781721,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "validate_instance_or_throw",
+      "set": "concerto-core-test-data",
+      "tsUs": 60.7898,
+      "beforeUs": 56.063112499999995,
+      "afterUs": 49.935737499999995,
+      "xBefore": 0.9222453849165484,
+      "xAfter": 0.8360328511275776,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "validate_instance_or_throw",
+      "set": "conformance",
+      "tsUs": 15.860568181818184,
+      "beforeUs": 14.403602272727273,
+      "afterUs": 13.102193181818182,
+      "xBefore": 0.908139109999785,
+      "xAfter": 0.8257688721203553,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "validate_instance_or_throw",
+      "set": "synthetic-large",
+      "tsUs": 21.85227,
+      "beforeUs": 24.780515,
+      "afterUs": 25.781018333333336,
+      "xBefore": 1.1143891814631413,
+      "xAfter": 1.154299225358891,
+      "crossingsBefore": 1,
+      "crossingsAfter": 1
+    },
+    {
+      "op": "extract_decorators",
+      "set": "concerto-core-test-data",
+      "tsUs": 6463.592000000001,
+      "beforeUs": 3896.0470000000005,
+      "afterUs": 3857.313,
+      "xBefore": 0.6039934904304344,
+      "xAfter": 0.5967754462224719,
+      "crossingsBefore": 43,
+      "crossingsAfter": 43
+    },
+    {
+      "op": "extract_decorators",
+      "set": "conformance",
+      "tsUs": 2495.7065,
+      "beforeUs": 1816.4795,
+      "afterUs": 1711.2865,
+      "xBefore": 0.7200903624960163,
+      "xAfter": 0.6487426329730457,
+      "crossingsBefore": 48,
+      "crossingsAfter": 48
+    },
+    {
+      "op": "extract_decorators",
+      "set": "synthetic-large",
+      "tsUs": 8459.4385,
+      "beforeUs": 4905.2625,
+      "afterUs": 4765.9785,
+      "xBefore": 0.5991058594547218,
+      "xAfter": 0.5625446480969666,
+      "crossingsBefore": 8,
+      "crossingsAfter": 8
+    }
+  ]
+}
