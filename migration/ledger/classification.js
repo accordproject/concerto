@@ -782,3 +782,31 @@ for (const [file, members] of Object.entries(P5_64)) {
         fr.m[k] = ov;
     }
 }
+
+// ---------------------------------------------------------------- P5-104
+// accordproject/concerto-rust#458 (review M7): src/engine/views.ts is split
+// into views.ts (snapshot materialisation), views-staging.ts (lazy views,
+// staging and prestaging), views-dcs.ts (the DecoratorManager entry points)
+// and views-lookups.ts (property lookups, identifier field names and arena
+// handles). Every moved member keeps the rule it had, now under the file
+// that declares it, and each new file takes views.ts's file-level rule. No
+// member was reclassified.
+{
+    const fs = require('fs');
+    const path = require('path');
+    const VIEWS = 'src/engine/views.ts';
+    const SPLIT = ['src/engine/views-staging.ts', 'src/engine/views-dcs.ts', 'src/engine/views-lookups.ts'];
+    const core = path.join(__dirname, '..', '..', 'packages', 'concerto-core');
+    const views = module.exports[VIEWS];
+    for (const file of SPLIT) {
+        const text = fs.readFileSync(path.join(core, file), 'utf8');
+        const fr = { c: views.c, t: views.t, p: views.p, r: views.r, m: {} };
+        for (const [k, ov] of Object.entries(views.m || {})) {
+            if (new RegExp('^(?:function|const|let) ' + k + '\\b', 'm').test(text)) {
+                fr.m[k] = ov;
+                delete views.m[k];
+            }
+        }
+        module.exports[file] = fr;
+    }
+}

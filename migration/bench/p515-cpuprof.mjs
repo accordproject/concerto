@@ -11,7 +11,7 @@
 //               copies in and out of WASM memory, object conversion
 //   core        WASM code (the Rust engine, and the glue compiled into it)
 //   decode      JSON.parse, and the serializer codec's decode side
-//   views       view materialisation: engine/views.js and introspect/*
+//   views       view materialisation: engine/views*.js and introspect/*
 //   ts-core     every other concerto-core dist/ module (TS logic that runs
 //               on both engines)
 //   cto-parser  concerto-cto (addCTOModel's parse, TS on both engines)
@@ -84,7 +84,7 @@ function stageOf(id) {
             }
             return 'encode';
         }
-        if (/\/engine\/views\.js$|\/introspect\//.test(url)) {
+        if (/\/engine\/views(-[a-z]+)?\.js$|\/introspect\//.test(url)) {
             return 'views';
         }
         return 'ts-core';

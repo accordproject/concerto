@@ -27,7 +27,7 @@
 //                  engine's staged header or result text)
 //   weak           FileSlot and WeakMap/WeakSet/FinalizationRegistry ops
 //                  of the lazy-view bookkeeping
-//   views          the rest of engine/views.js and introspect/*
+//   views          the rest of engine/views*.js and introspect/*
 //                  (process, _fromAstHeader, deferDeclarations, ...), by
 //                  function
 //   cto-parse      concerto-cto (addCTOModel's parse)
@@ -171,7 +171,7 @@ function bucketOf(node, stack, line) {
         return ['cto-parse', 'cto-parse'];
     }
     if (/concerto-core\/dist\//.test(u)) {
-        const views = /\/engine\/views\.js$|\/introspect\//.test(u);
+        const views = /\/engine\/views(-[a-z]+)?\.js$|\/introspect\//.test(u);
         const text = src === node ? lineText(u, line) : '';
         if (sfn === 'utf8Text' || /encodeInto|utf8Encoder/.test(text)) {
             return ['utf8-encode', 'utf8-encode'];
@@ -182,7 +182,7 @@ function bucketOf(node, stack, line) {
         if (views && (/JSON\.parse/.test(text) || /^(parse|JSONParse)$/.test(fn))) {
             return ['parse', `parse ${sfn}`];
         }
-        if (/\/engine\/views\.js$/.test(u) && (/^(get|set|has|add|delete)$/.test(sfn) && /fileStates|state\[this\.field\]|this\.set\(/.test(lineText(u, line)) || WEAK_NAMES.test(text) || /^Weak|FinalizationRegistry/.test(fn))) {
+        if (/\/engine\/views(-[a-z]+)?\.js$/.test(u) && (/^(get|set|has|add|delete)$/.test(sfn) && /fileStates|state\[this\.field\]|this\.set\(/.test(lineText(u, line)) || WEAK_NAMES.test(text) || /^Weak|FinalizationRegistry/.test(fn))) {
             return ['weak', `weak ${sfn}`];
         }
         if (views) {
