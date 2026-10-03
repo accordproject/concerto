@@ -1,0 +1,103 @@
+07:55:05 round 1 ts-ref modelfile_new start load 1.11 2.50 3.11
+07:55:06 round 1 ts-ref modelfile_new end load 1.11 2.50 3.11
+07:55:06 round 1 rust-engine-now modelfile_new start load 1.11 2.50 3.11
+07:55:07 round 1 rust-engine-now modelfile_new end load 1.11 2.50 3.11
+07:55:07 round 1 rust-engine-before modelfile_new start load 1.11 2.50 3.11
+07:55:07 round 1 rust-engine-before modelfile_new end load 1.11 2.48 3.10
+07:55:07 round 1 ts-ref add_model_file start load 1.11 2.48 3.10
+07:55:08 round 1 ts-ref add_model_file end load 1.11 2.48 3.10
+07:55:08 round 1 rust-engine-now add_model_file start load 1.11 2.48 3.10
+07:55:09 round 1 rust-engine-now add_model_file end load 1.11 2.48 3.10
+07:55:09 round 1 rust-engine-before add_model_file start load 1.11 2.48 3.10
+07:55:10 round 1 rust-engine-before add_model_file end load 1.11 2.48 3.10
+07:55:10 round 1 ts-ref add_cto_model start load 1.11 2.48 3.10
+07:55:13 round 1 ts-ref add_cto_model end load 1.10 2.45 3.09
+07:55:13 round 1 rust-engine-now add_cto_model start load 1.10 2.45 3.09
+07:55:16 round 1 rust-engine-now add_cto_model end load 1.10 2.45 3.09
+07:55:16 round 1 rust-engine-before add_cto_model start load 1.10 2.45 3.09
+07:55:19 round 1 rust-engine-before add_cto_model end load 1.09 2.43 3.08
+07:55:19 round 1 ts-ref mm_new start load 1.09 2.43 3.08
+07:55:19 round 1 ts-ref mm_new end load 1.09 2.43 3.08
+07:55:19 round 1 rust-engine-now mm_new start load 1.09 2.43 3.08
+07:55:19 round 1 rust-engine-now mm_new end load 1.09 2.43 3.08
+07:55:19 round 1 rust-engine-before mm_new start load 1.09 2.43 3.08
+07:55:20 round 1 rust-engine-before mm_new end load 1.09 2.43 3.08
+07:55:20 round 1 ts-ref dcs_decorate start load 1.09 2.43 3.08
+07:55:26 round 1 ts-ref dcs_decorate end load 1.08 2.40 3.06
+07:55:26 round 1 rust-engine-now dcs_decorate start load 1.08 2.40 3.06
+07:55:32 round 1 rust-engine-now dcs_decorate end load 1.07 2.36 3.04
+07:55:32 round 1 rust-engine-before dcs_decorate start load 1.07 2.36 3.04
+07:55:38 round 1 rust-engine-before dcs_decorate end load 1.06 2.34 3.03
+07:55:38 round 1 crate-now start load 1.06 2.34 3.03
+07:56:39 round 1 crate-now end load 1.22 2.14 2.92
+07:56:39 round 1 crate-before start load 1.22 2.14 2.92
+07:57:38 round 1 crate-before end load 1.55 2.04 2.83
+07:57:38 round 2 ts-ref modelfile_new start load 1.55 2.04 2.83
+07:57:39 round 2 ts-ref modelfile_new end load 1.55 2.04 2.83
+07:57:39 round 2 rust-engine-before modelfile_new start load 1.55 2.04 2.83
+07:57:40 round 2 rust-engine-before modelfile_new end load 1.55 2.04 2.83
+07:57:40 round 2 rust-engine-now modelfile_new start load 1.55 2.04 2.83
+07:57:41 round 2 rust-engine-now modelfile_new end load 1.55 2.04 2.83
+07:57:41 round 2 ts-ref add_model_file start load 1.55 2.04 2.83
+07:57:41 round 2 ts-ref add_model_file end load 1.55 2.04 2.83
+07:57:41 round 2 rust-engine-before add_model_file start load 1.55 2.04 2.83
+07:57:42 round 2 rust-engine-before add_model_file end load 1.51 2.02 2.82
+07:57:42 round 2 rust-engine-now add_model_file start load 1.51 2.02 2.82
+07:57:43 round 2 rust-engine-now add_model_file end load 1.51 2.02 2.82
+07:57:43 round 2 ts-ref add_cto_model start load 1.51 2.02 2.82
+07:57:45 round 2 ts-ref add_cto_model end load 1.51 2.02 2.82
+07:57:45 round 2 rust-engine-before add_cto_model start load 1.51 2.02 2.82
+07:57:48 round 2 rust-engine-before add_cto_model end load 1.47 2.01 2.81
+07:57:48 round 2 rust-engine-now add_cto_model start load 1.47 2.01 2.81
+07:57:51 round 2 rust-engine-now add_cto_model end load 1.47 2.01 2.81
+07:57:51 round 2 ts-ref mm_new start load 1.47 2.01 2.81
+07:57:52 round 2 ts-ref mm_new end load 1.47 2.01 2.81
+07:57:52 round 2 rust-engine-before mm_new start load 1.47 2.01 2.81
+07:57:52 round 2 rust-engine-before mm_new end load 1.43 1.99 2.80
+07:57:52 round 2 rust-engine-now mm_new start load 1.43 1.99 2.80
+07:57:53 round 2 rust-engine-now mm_new end load 1.43 1.99 2.80
+07:57:53 round 2 ts-ref dcs_decorate start load 1.43 1.99 2.80
+07:57:58 round 2 ts-ref dcs_decorate end load 1.39 1.97 2.79
+07:57:58 round 2 rust-engine-before dcs_decorate start load 1.39 1.97 2.79
+07:58:03 round 2 rust-engine-before dcs_decorate end load 1.36 1.96 2.78
+07:58:03 round 2 rust-engine-now dcs_decorate start load 1.36 1.96 2.78
+07:58:09 round 2 rust-engine-now dcs_decorate end load 1.33 1.94 2.77
+07:58:09 round 2 crate-before start load 1.33 1.94 2.77
+07:59:09 round 2 crate-before end load 1.73 1.91 2.71
+07:59:09 round 2 crate-now start load 1.73 1.91 2.71
+08:00:11 round 2 crate-now end load 1.44 1.79 2.61
+08:00:11 round 3 ts-ref modelfile_new start load 1.44 1.79 2.61
+08:00:12 round 3 ts-ref modelfile_new end load 1.44 1.79 2.61
+08:00:42 round 3 rust-engine-now modelfile_new start load 1.48 1.79 2.59
+08:00:43 round 3 rust-engine-now modelfile_new end load 1.44 1.78 2.58
+08:00:43 round 3 rust-engine-before modelfile_new start load 1.44 1.78 2.58
+08:00:43 round 3 rust-engine-before modelfile_new end load 1.44 1.78 2.58
+08:00:43 round 3 ts-ref add_model_file start load 1.44 1.78 2.58
+08:00:44 round 3 ts-ref add_model_file end load 1.44 1.78 2.58
+08:00:44 round 3 rust-engine-now add_model_file start load 1.44 1.78 2.58
+08:00:45 round 3 rust-engine-now add_model_file end load 1.44 1.78 2.58
+08:00:45 round 3 rust-engine-before add_model_file start load 1.44 1.78 2.58
+08:00:46 round 3 rust-engine-before add_model_file end load 1.44 1.78 2.58
+08:00:46 round 3 ts-ref add_cto_model start load 1.44 1.78 2.58
+08:00:48 round 3 ts-ref add_cto_model end load 1.65 1.81 2.59
+08:00:48 round 3 rust-engine-now add_cto_model start load 1.65 1.81 2.59
+08:00:51 round 3 rust-engine-now add_cto_model end load 1.65 1.81 2.59
+08:00:52 round 3 rust-engine-before add_cto_model start load 1.65 1.81 2.59
+08:00:54 round 3 rust-engine-before add_cto_model end load 1.76 1.83 2.59
+08:00:54 round 3 ts-ref mm_new start load 1.76 1.83 2.59
+08:00:55 round 3 ts-ref mm_new end load 1.76 1.83 2.59
+08:00:55 round 3 rust-engine-now mm_new start load 1.76 1.83 2.59
+08:00:55 round 3 rust-engine-now mm_new end load 1.76 1.83 2.59
+08:00:55 round 3 rust-engine-before mm_new start load 1.76 1.83 2.59
+08:00:55 round 3 rust-engine-before mm_new end load 1.76 1.83 2.59
+08:00:55 round 3 ts-ref dcs_decorate start load 1.76 1.83 2.59
+08:01:00 round 3 ts-ref dcs_decorate end load 1.69 1.82 2.58
+08:01:00 round 3 rust-engine-now dcs_decorate start load 1.69 1.82 2.58
+08:01:06 round 3 rust-engine-now dcs_decorate end load 1.64 1.81 2.57
+08:01:06 round 3 rust-engine-before dcs_decorate start load 1.64 1.81 2.57
+08:01:13 round 3 rust-engine-before dcs_decorate end load 1.94 1.86 2.58
+08:01:13 round 3 crate-now start load 1.94 1.86 2.58
+08:02:16 round 3 crate-now end load 1.53 1.75 2.50
+08:02:16 round 3 crate-before start load 1.53 1.75 2.50
+08:03:16 round 3 crate-before end load 1.36 1.66 2.42
+08:03:16 timed done
