@@ -466,7 +466,7 @@ x TS is against TS 5.0.0's approach (a) in the same round. Before (b) is P5-97's
   engine entries honour it (a dynamic `require`, which an ESM bundle
   cannot do), so every engine entry failed its run check. Re-run with the
   variable unset, every engine entry runs and prints the same output as
-  v5.0.0 (`bundle/bundle-run.log`). Sizes are the same in both runs.
+  v5.0.0 (`bundle/bundle-run.txt`). Sizes are the same in both runs.
 - **Server gate fix:** `p5109-server-run.sh` first used `pgrep -fl`, which
   prints only the process name, so its own command line matched the gate
   pattern and the gate never passed. It now lists full command lines and
