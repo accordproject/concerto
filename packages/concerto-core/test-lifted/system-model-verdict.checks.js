@@ -131,9 +131,11 @@ function countCalls(handle, names) {
 // P5-94: and so are `stageModelFileCheckedCompactFlat` and
 // `stageModelFileWithHeaderCompactFlat`, with their result in a flat layout.
 // P5-101 (D-10): the views stage through the one binding
-// `stageModelFileBytes`, whose flag 1 is the checked load.
-const LOADS = ['systemModelFileHeader', 'stageModelFileChecked', 'stageModelFileCheckedUtf8', 'stageModelFileWithHeader', 'stageModelFileWithHeaderUtf8', 'stageModelFile', 'checkAstShape',
-    'stageModelFileCheckedCompact', 'stageModelFileWithHeaderCompact', 'stageModelFileCheckedCompactFlat', 'stageModelFileWithHeaderCompactFlat', 'stageModelFileBytes'];
+// `stageModelFileBytes`, whose flag 1 is the checked load, and the verdict
+// and the shape check are free engine functions (D-7). P5-103 removed the
+// staging bindings above, and the handle's own `systemModelFileHeader` and
+// `checkAstShape`, so the one handle binding left to count is that one.
+const LOADS = ['stageModelFileBytes'];
 
 module.exports = [
     {
@@ -242,11 +244,10 @@ module.exports = [
                 const outcome = probe(() => {
                     new core.ModelFile(mm, copyOf(mm, ns), undefined, 'x.json');
                 });
-                return [outcome, counts.systemModelFileHeader, counts.stageModelFileChecked + counts.stageModelFileCheckedUtf8 + counts.stageModelFileCheckedCompact +
-                    counts.stageModelFileCheckedCompactFlat + counts.stageModelFileBytesChecked];
+                return [outcome, counts.stageModelFileBytesChecked];
             });
         },
-        expect: { ok: [['ok', 0, 1], ['ok', 0, 1]] },
+        expect: { ok: [['ok', 1], ['ok', 1]] },
         reference: { ok: 'no engine' },
     },
     {
@@ -288,9 +289,7 @@ module.exports = [
             return [counts, mm.getNamespaces()];
         }),
         expect: { ok: Array(2).fill([
-            { systemModelFileHeader: 0, stageModelFileChecked: 0, stageModelFileCheckedUtf8: 0, stageModelFileWithHeader: 0, stageModelFileWithHeaderUtf8: 0, stageModelFile: 0, checkAstShape: 0,
-                stageModelFileCheckedCompact: 0, stageModelFileWithHeaderCompact: 0, stageModelFileCheckedCompactFlat: 0, stageModelFileWithHeaderCompactFlat: 0,
-                stageModelFileBytes: 0, stageModelFileBytesChecked: 0 },
+            { stageModelFileBytes: 0, stageModelFileBytesChecked: 0 },
             ['concerto.decorator@1.0.0', 'concerto@1.0.0'],
         ]) },
         reference: { ok: ['no engine', 'no engine'] },

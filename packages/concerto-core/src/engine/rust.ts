@@ -12,12 +12,12 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // Loads the WASM engine (P4-02; P5-02 removed the CONCERTO_ENGINE=ts|rust
 // flag: the Rust engine is now the only path) and registers the host
-// functions it calls back: the error factory and semver.parse.
+// function it calls back: the error factory. P5-103 removed the
+// `semver.parse` callback with the `modelUtilParseNamespace` binding, its
+// only user.
 
-import semver from 'semver';
 import { makeError } from './errors';
 import type { EngineBindings, EngineInternals } from './bindings';
 
@@ -38,7 +38,7 @@ function loadRustEngine(): RustEngine {
     const env = typeof process === 'undefined' ? undefined : process.env;
     const name = env?.CONCERTO_ENGINE_MODULE || '@accordproject/concerto-engine';
     const engine = require(name) as RustEngine;
-    engine.setHost(makeError, (version: string) => semver.parse(version));
+    engine.setHost(makeError);
     return engine;
 }
 

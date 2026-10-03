@@ -111,7 +111,6 @@ module.exports = {
             'BaseModelManager._needsRustWrite': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (decides which namespaces are mirrored to rustHandle)' },
             'BaseModelManager._rustMirrorUpdate': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (the rustHandle write for a replaced model file: update, add or delete)' },
             // P5-10a lazy views (accordproject/concerto-rust#269).
-            'engineViews': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (requires engine/views once, on first use)' },
             'BaseModelManager._rustMirrorAdd': { c: 'TS', t: NONE, p: NONE, r: R.engineShim + ' (the rustHandle write for an added model file: registers the file Rust loaded at construction, or sends the AST)' },
         },
     },
@@ -132,17 +131,29 @@ module.exports = {
     },
     'src/decoratormodelhelper.ts': { c: 'RUST', t: ROOT, p: 'P2-08+P4-08' },
     // engine/ (P4-02; P5-02 removed the CONCERTO_ENGINE flag). The whole
-    // directory is `/* istanbul ignore file */` and excluded from the
-    // declaration build (PORTING.md 1.5), so it never moves nyc or the .d.ts
-    // snapshot. These files are the shim itself -- the loader, the handle
-    // registry, the error-payload mapper and the fast-path wire codec -- not
+    // directory is excluded from the declaration build (PORTING.md 1.5), so
+    // it never moves the .d.ts snapshot; since P5-103
+    // (accordproject/concerto-rust#457) it counts towards nyc like the rest
+    // of src/. These files are the shim itself -- the loader, the handle
+    // release, the error-payload mapper and the fast-path wire codecs -- not
     // TS logic superseded by Rust, so each is classified TS with a reason
     // naming what it does, per the maintainer's 2026-09-27 ruling on #73.
+    'src/engineutil.ts': { c: 'TS', t: NONE, p: NONE, r: 'the engine fast path\'s fallback signal (FAST_PATH_UNSUPPORTED, isFastPathUnsupported) and the optional-string argument coercion, shared by the public modules and src/engine/; no model logic' },
+    'src/engine/ast-codec.ts': { c: 'TS', t: NONE, p: NONE, r: 'binary AST writer for the staging binding (P5-92): writes a ModelFile\'s AST, as JSON.stringify would read it, in the engine\'s compact layout, and leaves an AST it cannot carry to the text path; pure transcoding, no model logic' },
+    'src/engine/util.ts': { c: 'TS', t: NONE, p: NONE, r: 'engine shim helpers: the EngineFastPathUnsupported fallback signal, the dayjs and typed-value duck checks, the lone-surrogate test; no model logic' },
+    'src/engine/wire.ts': { c: 'TS', t: NONE, p: NONE, r: 'the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic' },
+    'src/engine/validate-instance.ts': {
+        c: 'TS', t: NONE, p: NONE, r: 'validateInstance\'s shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine\'s diagnostics; the validation itself runs in Rust',
+        m: {
+            'validateInstance': { c: 'HYBRID', p: 'P5-89', r: 'one engine validateInstance call per document: the diagnostics come back from Rust, which validates; TS builds the result object and the lazily hydrated resource' },
+            'validateInstanceOrThrow': { c: 'HYBRID', p: 'P5-89', r: 'one engine validateInstance call per document in throw mode, or Serializer.fromJSON for a document of its own type; the validation itself runs in Rust' },
+        },
+    },
     'src/engineloader.ts': { c: 'TS', t: NONE, p: NONE, r: 'the one engine loader of the public modules (P5-100, E-3): requires src/engine/ modules once, through a non-literal specifier, and exposes the bindings and the engine modules typed; no model logic' },
-    'src/engine/errors.ts': { c: 'TS', t: NONE, p: NONE, r: 'JS error-class mapping for engine results: builds the TS exception (IllegalModelException/TypeNotFoundException/ValidationException/MetamodelException/BaseException/Error/TypeError/RangeError) for an engine error payload {kind, code, params, message, location}; Rust decides the kind and renders the message, this only picks the constructor' },
+    'src/engine/errors.ts': { c: 'TS', t: NONE, p: NONE, r: 'JS error-class mapping for engine results: builds the TS exception (IllegalModelException/TypeNotFoundException/ValidationException/MetamodelException/Error/TypeError) for an engine error payload {kind, code, params, message, location}; Rust decides the kind and renders the message, this only picks the constructor' },
     'src/engine/handles.ts': { c: 'TS', t: NONE, p: NONE, r: 'engine handle release bookkeeping (releaseHandle, withEngineCallbacks; P5-97); no model logic' },
     'src/engine/index.ts': { c: 'TS', t: NONE, p: NONE, r: 'engine loader entry point: requires rust.ts and re-exports the loaded engine; no model logic' },
-    'src/engine/rust.ts': { c: 'TS', t: NONE, p: NONE, r: 'loads the @accordproject/concerto-engine WASM module and registers its host callbacks (the error factory, semver.parse); no model logic' },
+    'src/engine/rust.ts': { c: 'TS', t: NONE, p: NONE, r: 'loads the @accordproject/concerto-engine WASM module and registers its host callback (the error factory; P5-103 removed semver.parse\'s); no model logic' },
     'src/engine/serializer-codec.ts': { c: 'TS', t: NONE, p: NONE, r: 'JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own' },
     'src/engine/validate-resource.ts': {
         c: 'TS', t: NONE, p: NONE, r: 'binary wire codec for one-call instance validation (P5-12c): writes a live JS value (numbers, strings, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) in the validator\'s value shape, and rejects shapes it cannot carry so the caller falls back to the TS visitor; pure transcoding, no validation logic of its own',
@@ -166,7 +177,11 @@ module.exports = {
             'stageModelFile': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: sends a ModelFile\'s AST to Rust once and keeps the loaded file staged; decides lazy vs eager)' },
             'decoratorFactories': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: no decorator factory applies while a lazily built file\'s views are built; factories keep the eager path)' },
             'materialise': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: builds a file\'s declaration views on first read through the ledgered view constructors, and caches them)' },
-            'defineLazyFields': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: installs the declarations/localTypes accessors)' },
+            // P5-100 (E-13): the prototype-level accessors' pending builders,
+            // which replaced `defineLazyFields`.
+            'buildModelFileDeclarations': { c: 'TS', p: 'P5-100', r: R.engineShim + ' (lazy views: the pending builder of a lazily built ModelFile\'s declarations, shared by every file; runs materialise)' },
+            'buildModelFileLocalTypes': { c: 'TS', p: 'P5-100', r: R.engineShim + ' (lazy views: the pending builder of a lazily built ModelFile\'s localTypes, shared by every file; runs materialise)' },
+            'deferModelFileFields': { c: 'TS', p: 'P5-100', r: R.engineShim + ' (lazy views: defers a ModelFile\'s declarations and localTypes through the ModelFile.prototype accessors and their pending builders)' },
             'deferDeclarations': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: defers a file\'s declaration views; the migration check mode builds them at once)' },
             'takeStage': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: stage bookkeeping)' },
             'commitStaged': { c: 'TS', p: 'P5-10a', r: R.engineShim + ' (lazy views: registers the staged file in rustHandle)' },
@@ -182,7 +197,6 @@ module.exports = {
             'defineOwn': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: stores a built part as a plain own field)' },
             'installLazyField': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: the prototype accessor over a deferred part)' },
             'deferField': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: defers a part to its first read)' },
-            'isPending': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: whether a part is still deferred)' },
             'withBatch': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: runs a deferred build with its file\'s snapshots)' },
             'batchOf': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: the current snapshots of a file)' },
             'decoratorModule': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (requires introspect/decorator once)' },
@@ -200,7 +214,6 @@ module.exports = {
             'classDeclarationGetProperties': { c: 'HYBRID', p: 'P5-14', r: R.engineShim + ' (property lookup cache: a copy of the cached list, else the Rust classDeclarationGetProperties binding, whose answer it caches)' },
             'propertiesOf': { c: 'HYBRID', p: 'P5-14', r: R.engineShim + ' (property lookup cache: the cached list, else the Rust classDeclarationGetProperties binding, recording the super type\'s call)' },
             'classDeclarationGetProperty': { c: 'HYBRID', p: 'P5-14', r: R.engineShim + ' (property lookup cache: a name lookup over the cached list, else the Rust classDeclarationGetProperty binding)' },
-            'invalidatePropertyLookups': { c: 'TS', p: 'P5-14', r: R.engineShim + ' (property lookup cache: dropped when a ModelManager changes its model files)' },
             'lookupCacheable': { c: 'TS', p: 'P5-14', r: R.engineShim + ' (property lookup cache: only views of engine-built files of a real ModelManager)' },
             'lookupValid': { c: 'TS', p: 'P5-14', r: R.engineShim + ' (property lookup cache: whether an entry still holds)' },
             'validLookup': { c: 'TS', p: 'P5-14', r: R.engineShim + ' (property lookup cache: a view\'s entry, if it still holds)' },
@@ -684,7 +697,6 @@ R.fb564 = R.visitorFallback.replace(' ' + R.p511, '') + ' ' + R.p564;
 const P5_64 = {
     'src/basemodelmanager.ts': {
         // P5-29 epoch-keyed memo for getNamespaces/getType/resolveType.
-        'managerReadMemoValid': { c: 'TS', t: NONE, p: NONE, r: R.shim564 + ' (P5-29 read memo: whether a manager\'s memo still holds for its rustHandle, model files and model generation)' },
         'managerReadMemo': { c: 'TS', t: NONE, p: NONE, r: R.shim564 + ' (P5-29 read memo: the manager\'s memo of getType/resolveType answers, rebuilt when it no longer holds)' },
         // P5-52 (BC-28, R1): options.regExp is retired.
         'warnRegExpOptionIgnored': { c: 'TS', t: NONE, p: NONE, r: 'JS process warning (P5-52, BC-28): options.regExp is ignored, regular expressions run in the engine; no model logic. ' + R.p564 },
@@ -712,23 +724,18 @@ const P5_64 = {
         // P5-27/P5-55 resident DCS manager: the handle cache around the
         // Rust DCS calls; the DCS work itself is the HYBRID entry points.
         'restoreAllUndefinedDecorators': { c: 'TS', r: R.shim564 + ' (restoreUndefinedDecorators over every model of an extract result)' },
-        'residentDcsAvailable': { c: 'TS', r: R.shim564 + ' (P5-27: whether the loaded engine has the DcsManagerHandle binding)' },
-        'dcsCacheable': { c: 'TS', r: R.shim564 + ' (P5-27: whether a manager\'s DCS handle may be kept resident)' },
+        'dcsCacheable': { c: 'TS', r: R.shim564 + ' (P5-55: whether a DCS operation may run on the manager\'s own rustHandle; P5-103 removed the resident DCS handle it also decided)' },
         'sourceDcsHandle': { c: 'TS', r: R.shim564 + ' (P5-55: the source manager\'s rustHandle when it can run a DCS operation itself)' },
         'assertDistinctHandles': { c: 'TS', r: R.shim564 + ' (P5-55: a guard that the result manager does not share the source handle)' },
-        'dcsManagerFor': { c: 'TS', r: R.shim564 + ' (P5-27: the resident DcsManagerHandle cache, keyed by handle, epoch and model files)' },
+        'dcsManagerFor': { c: 'TS', r: R.shim564 + ' (P5-27: a DcsManagerHandle built for one operation, for a manager its own rustHandle cannot stand for; P5-103 removed the resident cache)' },
         // P5-28 staged headers and P5-10a staging.
         'recordImportNames': { c: 'TS', r: R.shim564 + ' (lazy views: records the import names Rust computed at staging)' },
         'recordedImportNames': { c: 'TS', r: R.shim564 + ' (lazy views: reads the recorded import names)' },
-        'checkRecordedImportNames': { c: 'TS', r: R.shim564 + ' (migration check mode only: compares the recorded import names with a fresh Rust call and logs a mismatch)' },
         'readUnchecked': { c: 'TS', r: R.shim564 + ' (lazy views: reads a staged field without the check-mode comparison)' },
         'applyStagedFileHeader': { c: 'TS', r: R.shim564 + ' (P5-28: applies the header Rust computed at staging to the ModelFile view)' },
-        'checkStagedFileHeader': { c: 'TS', r: R.shim564 + ' (P5-28, migration check mode: compares the staged header with the Rust getters)' },
         'takePrestaged': { c: 'TS', r: R.shim564 + ' (P5-28: takes a stage made before the ModelFile view existed)' },
-        'applyStagedHeader': { c: 'TS', r: R.shim564 + ' (P5-28: applies a staged header, falling back to the header engine call)' },
         'adoptStagedModels': { c: 'TS', r: R.shim564 + ' (P5-27: registers the model files Rust staged for a DCS result manager)' },
         'validateAndCommitStaged': { c: 'TS', r: R.shim564 + ' (P5-28: validates and commits a staged file on its handle, mapping the error to the file)' },
-        'modelGeneration': { c: 'TS', r: R.shim564 + ' (the model generation counter the lookup memos key on)' },
         // P5-19 getIdentifierFieldName walk and memo.
         'identifierLevel': { c: 'TS', p: 'P5-19', r: R.shim564 + ' (P5-19 identifier memo: records one level of the walk the Rust binding reported)' },
         'identifierValid': { c: 'TS', p: 'P5-19', r: R.shim564 + ' (P5-19 identifier memo: whether an entry still holds)' },
@@ -736,9 +743,9 @@ const P5_64 = {
         // P5-49 (BC-19, R1): strict AST shape check at model load.
         'checkAstShape': { c: 'HYBRID', p: 'P5-49', r: 'P5-49 (BC-19): the AST shape check runs in Rust (rustHandle.checkAstShape); JS keeps the metamodelValidation opt-out and a per-namespace memo for files that are not mirrored. ' + R.p564 },
         // P5-27/P5-55 DCS entry points (like decoratorManagerExtract*).
-        'decoratorManagerValidate': { c: 'HYBRID', r: 'DecoratorManager.validate\'s Rust call: dcsValidate on the validation manager\'s handle (P5-55), else the stateless decoratorManagerValidate binding. ' + R.p564 },
+        'decoratorManagerValidate': { c: 'HYBRID', r: 'DecoratorManager.validate\'s Rust call: dcsValidate on the validation manager\'s handle (P5-55; P5-103 removed the stateless binding it fell back on). ' + R.p564 },
         'decoratorManagerExtractOnSource': { c: 'HYBRID', r: 'DecoratorManager.extract* on the source manager\'s rustHandle (P5-55): one Rust call extracts into a fresh result manager; JS restores `decorators: undefined` and adopts the staged files. ' + R.p564 },
-        'decoratorManagerExtractStaged': { c: 'HYBRID', r: 'DecoratorManager.extract* on a resident DcsManagerHandle (P5-27): one Rust call extracts into a fresh result manager; JS restores `decorators: undefined` and adopts the staged files. ' + R.p564 },
+        'decoratorManagerExtractStaged': { c: 'HYBRID', r: 'DecoratorManager.extract* on a DcsManagerHandle built for the call (P5-27): one Rust call extracts into a fresh result manager; JS restores `decorators: undefined` and adopts the staged files. ' + R.p564 },
     },
     'src/introspect/modelfile.ts': {
         'ModelFile._isConstructed': { c: 'TS', t: NONE, p: NONE, r: 'JS object-identity check (P5-34): whether the ModelFile constructor built this object; no model logic. ' + R.p564 },
@@ -764,7 +771,6 @@ const P5_64 = {
         'relationshipDefaults': { c: 'TS', r: R.fb564 + ' (P5-58: the default namespace and type of a relationship)' },
     },
     'src/serializer/resourcevalidator.ts': {
-        'isStrictDateTime': { c: 'TS', r: R.rvShell.replace(' ' + R.p511, '') + ' (P5-24: the strict DateTime check on the visitor path; Rust uses chrono on the fast path). ' + R.p564 },
     },
 };
 for (const [file, members] of Object.entries(P5_64)) {

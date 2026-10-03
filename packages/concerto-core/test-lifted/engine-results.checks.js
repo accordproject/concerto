@@ -19,13 +19,13 @@
  * cut the JS-side garbage of `addModelFile` and `extract_cold` keep the
  * results they replace.
  *
- * - The flat staging header (concerto-wasm `stageModelFileCheckedCompactFlat`
- *   and `...WithHeaderCompactFlat`, read by engine/views.ts
- *   `applyStagedFileHeader`): a ModelFile's version, `importShortNames`
- *   (in order), `importUriMap` and `getImports()` are the same with the
- *   flat result as with the object one (the flat bindings hidden on the
- *   manager's rustHandle), and as v5.0.0's, for plain, aliased and
- *   URI-carrying imports, with and without BC-19's shape check.
+ * - The flat staging header (concerto-wasm `stageModelFileBytes`, P5-101,
+ *   read by engine/views.ts `applyStagedFileHeader`): a ModelFile's
+ *   version, `importShortNames` (in order), `importUriMap` and
+ *   `getImports()` are v5.0.0's, for plain, aliased and URI-carrying
+ *   imports, with and without BC-19's shape check. (P5-103 removed the
+ *   checks of the object result, which P5-101 had already removed from the
+ *   engine.)
  * - The remembered text of the metamodel copy every `new ModelManager()`
  *   builds from one shared constant AST (engine/views.ts `stableAstText`):
  *   a change to that constant is seen by the next manager, which checks
@@ -44,11 +44,6 @@
  */
 
 const MM = 'concerto.metamodel@1.0.0';
-
-/**
- * The staging bindings with the flat result.
- */
-const FLAT_BINDINGS = ['stageModelFileCheckedCompactFlat', 'stageModelFileWithHeaderCompactFlat'];
 
 /**
  * The outcome of `fn`: its value, or the class of the error it threw.
@@ -104,21 +99,14 @@ const IMPORTERS = [
 
 /**
  * Loads every model in a fresh manager, the importers after their
- * dependencies, with the flat staging bindings hidden when `hideFlat`, and
- * reads each importer's header.
+ * dependencies, and reads each importer's header.
  * @param {object} core a loaded core
  * @param {object} options the manager options
- * @param {boolean} hideFlat whether to hide the flat staging bindings
  * @returns {Array} each importer's header reading, or the error class
  */
-function headers(core, options, hideFlat) {
+function headers(core, options) {
     const ModelFile = core.modelFileModule.ModelFile;
     const mm = new core.ModelManager(options);
-    if (hideFlat && mm.rustHandle) {
-        for (const binding of FLAT_BINDINGS) {
-            mm.rustHandle[binding] = undefined;
-        }
-    }
     return probe(() => {
         for (const ast of DEPENDENCIES) {
             mm.addModelFile(new ModelFile(mm, JSON.parse(JSON.stringify(ast)), undefined, 'dep.cto'));
@@ -234,25 +222,13 @@ module.exports = [
     {
         id: 'P594-HDR-001',
         covers: 'P5-94: a ModelFile\'s header from the flat staging result, with BC-19\'s shape check',
-        run: (core) => headers(core, {}, false),
-        expect: { ok: HEADERS },
-    },
-    {
-        id: 'P594-HDR-002',
-        covers: 'P5-94: a ModelFile\'s header from the object staging result (flat bindings hidden), with BC-19\'s shape check',
-        run: (core) => headers(core, {}, true),
+        run: (core) => headers(core, {}),
         expect: { ok: HEADERS },
     },
     {
         id: 'P594-HDR-003',
         covers: 'P5-94: a ModelFile\'s header from the flat staging result, with the shape check off',
-        run: (core) => headers(core, { metamodelValidation: false }, false),
-        expect: { ok: HEADERS },
-    },
-    {
-        id: 'P594-HDR-004',
-        covers: 'P5-94: a ModelFile\'s header from the object staging result (flat bindings hidden), with the shape check off',
-        run: (core) => headers(core, { metamodelValidation: false }, true),
+        run: (core) => headers(core, { metamodelValidation: false }),
         expect: { ok: HEADERS },
     },
     {

@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // The wire codec for the Serializer fast path (P4-10; PORTING.md section 5
 // row 6, D7). `Serializer.fromJSON`/`toJSON` cross the WASM boundary in one
 // call each, instead of per field through the TS visitors (which keep
@@ -89,23 +88,6 @@ function checkKey(key: string): void {
  */
 function setOwn(obj: object, key: string, value: unknown): void {
     Object.defineProperty(obj, key, { value, enumerable: true, writable: true, configurable: true });
-}
-
-/**
- * Throws `EngineFastPathUnsupported` unless `text`, the output of
- * `JSON.stringify`, is JSON the engine can read: `JSON.stringify` escapes
- * a lone surrogate as `\udXXX` and writes a valid pair as raw characters,
- * so any such escape not itself escaped (an odd run of backslashes before
- * it) is a lone surrogate. Used for text that was not built by
- * `encodeValue` (a model file's AST).
- * @param {string} text the JSON text
- * @return {string} `text`
- */
-function checkJsonText(text: string): string {
-    if (/(?:^|[^\\])(?:\\\\)*\\u[dD][89a-fA-F][0-9a-fA-F]{2}/.test(text)) {
-        throw new EngineFastPathUnsupported('lone-surrogate');
-    }
-    return text;
 }
 
 // The three own properties a "typed" value never carries across (they are
@@ -605,9 +587,6 @@ function materializeTyped(node, modelManager: BaseModelManager, types?: TypeCach
  * @return {object} the materialised instance
  */
 function materializeCompact(node, modelManager: BaseModelManager, types: TypeCache) {
-    if (!Array.isArray(node) || node.length !== 8) {
-        throw new EngineFastPathUnsupported('unrecognised-compact-result');
-    }
     const decode = (v) => decodeParsed(v, modelManager, types);
     const [ctor, fqn, ns, type, , id, timestamp, fields] = node;
     const resource = newInstance(ctor, fqn, decodeValue(ns, modelManager), decodeValue(type, modelManager),
@@ -687,10 +666,12 @@ function setField(resource, key: string, value: unknown): void {
 
 /**
  * `decodeValue` over fresh `JSON.parse` output that nothing else holds
- * (P5-16): plain arrays and objects are kept and only their tagged members
- * replaced, instead of being copied. `JSON.parse` already makes every key,
- * `__proto__` included, an own data property, as `decodeValue`'s copies
- * do. `types` is `materializeTyped`'s `TypeCache`.
+ * (P5-16): plain arrays are kept and only their tagged members replaced,
+ * instead of being copied. The compact result's values are primitives,
+ * arrays or tagged values (P5-103 removed the branch for an untagged
+ * object, which only the removed `serializerFromJson` result had; one
+ * would still be decoded, by `decodeValue`). `types` is
+ * `materializeTyped`'s `TypeCache`.
  * @param {*} v the parsed wire value
  * @param {BaseModelManager} modelManager the model manager, for a `"typed"` value
  * @param {Map} types the caller's `TypeCache`
@@ -705,18 +686,6 @@ function decodeParsed(v, modelManager: BaseModelManager, types: TypeCache) {
             const item = v[i];
             if (item !== null && typeof item === 'object') {
                 v[i] = decodeParsed(item, modelManager, types);
-            }
-        }
-        return v;
-    }
-    if (!Object.prototype.hasOwnProperty.call(v, TAG)) {
-        for (const key of Object.keys(v)) {
-            const item = v[key];
-            if (item !== null && typeof item === 'object') {
-                const decoded = decodeParsed(item, modelManager, types);
-                if (decoded !== item) {
-                    setOwn(v, key, decoded);
-                }
             }
         }
         return v;
@@ -777,6 +746,6 @@ function decodeValue(v, modelManager: BaseModelManager) {
     }
 }
 
-export { EngineFastPathUnsupported, typedCtorName, modelClasses, encodeValue, encodeBytes, decodeValue, decodeParsed, materializeCompact, checkString, checkJsonText };
+export { typedCtorName, modelClasses, encodeValue, encodeBytes, decodeValue, materializeCompact, checkString };
 export type { TypeCache };
 export { newTypeCache };

@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // A model's AST for the engine without `JSON.stringify` (P5-92,
 // accordproject/concerto-rust#438).
 //

@@ -110,8 +110,6 @@ concept DecoratorCommandSet {
  * @param {*} source the value to copy onto it
  * @returns {*} target
  */
-// Rust-mode only, so excluded from ts-mode coverage (PORTING.md 1.5; P4-09a).
-/* istanbul ignore next */
 function assignDeep(target, source) {
     if (Array.isArray(target) && Array.isArray(source)) {
         target.forEach((item, i) => assignDeep(item, source[i]));
@@ -164,9 +162,9 @@ class DecoratorManager {
         // The structural check only (src/dcs/mod.rs `validate`); the
         // validationModelManager above is still built the TS way (CTO
         // parsing is not ported) and returned unchanged. P5-27 (F6): the
-        // check runs against validationModelManager's own rustHandle when it
+        // check runs against validationModelManager's own rustHandle, which
         // mirrors its model files, instead of rebuilding them in Rust.
-        engineViews().decoratorManagerValidate(validationModelManager, decoratorCommandSet, modelFiles);
+        engineViews().decoratorManagerValidate(validationModelManager, decoratorCommandSet);
         return validationModelManager;
     }
 

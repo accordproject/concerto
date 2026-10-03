@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // Instance validation in one engine call per resource (task P5-12c,
 // accordproject/concerto-rust#293: the P5-12 spike's variant B on the P5-12b
 // transport, accordproject/concerto-rust#289 and #292).
@@ -107,16 +106,13 @@ const CODE_STALE = 4;
 
 /**
  * `Dayjs::to_iso_string` (concerto-core instance/dayjs.rs): `null` when the
- * date is invalid or out of the ECMAScript time range.
+ * date is invalid or out of the ECMAScript time range (a dayjs is valid
+ * only within it, since its Date is).
  * @param {*} d the dayjs
  * @return {string|null} the ISO text
  */
 function dayjsIso(d): string | null {
-    if (!d.isValid()) {
-        return null;
-    }
-    const ms = d.valueOf();
-    return Math.abs(ms) <= 8.64e15 ? new Date(ms).toISOString() : null;
+    return d.isValid() ? new Date(d.valueOf()).toISOString() : null;
 }
 
 /**
@@ -454,9 +450,7 @@ function validateProperty(resource, propName: string, value, rootId: string, fie
         throw err;
     }
     const fqn = resource.getFullyQualifiedType();
-    const slot = typeof handle.validatePropertyById === 'function'
-        ? propertySlot(resource.getModelManager(), handle, fqn, propName)
-        : undefined;
+    const slot = propertySlot(resource.getModelManager(), handle, fqn, propName);
     if (slot !== undefined) {
         // P5-101 (D-10): by the slot, and with a `Validation` error's
         // message in the same call (any other error is thrown by it).
@@ -503,7 +497,7 @@ function dropSlots(handle: object): void {
  * The `validatePropertyById` slot of property `propName` of type `fqn`,
  * looked up once per model version (`validationPropertySlot`); undefined
  * when the engine has none (the caller then crosses by name, which answers
- * `CODE_UNSUPPORTED` for it) or the manager keeps no engine state.
+ * `CODE_UNSUPPORTED` for it).
  * @param {object} modelManager the resource's model manager
  * @param {object} handle its rustHandle
  * @param {string} fqn the resource's type
@@ -511,10 +505,9 @@ function dropSlots(handle: object): void {
  * @return {Uint32Array | undefined} the slot
  */
 function propertySlot(modelManager, handle, fqn: string, propName: string): Uint32Array | undefined {
+    // A manager with a rustHandle is a BaseModelManager, with its engine
+    // state.
     const state = modelManager._engine;
-    if (state === undefined) {
-        return undefined;
-    }
     let slots = propertySlots.get(handle);
     if (slots === undefined || slots.version !== state.version) {
         slots = { version: state.version, byType: new Map() };

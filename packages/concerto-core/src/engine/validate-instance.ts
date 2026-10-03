@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-/* istanbul ignore file */
 // P5-89 (accordproject/concerto-rust#435; accordproject/concerto#1239,
 // #1325 and the instance side of #1273): `validateInstance` and
 // `validateInstanceOrThrow` on BaseModelManager and ClassDeclaration, over

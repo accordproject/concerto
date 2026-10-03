@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // P5-90 (accordproject/concerto-rust#436), Phase 0, measure only: the WASM
 // typed read alone, the engine call `new ModelFile` makes
-// (`ModelManagerHandle.stageModelFileCheckedUtf8`: BC-19's folded shape
-// check and the typed load, from the AST's UTF-8 bytes), timed straight on
+// (`ModelManagerHandle.stageModelFileCheckedUtf8`, since P5-103
+// `stageModelFileBytes` with flag 1: BC-19's folded shape check and the
+// typed load, from the AST's UTF-8 bytes), timed straight on
 // an engine module, with no concerto-core around it. Used to compare the
 // shipped engine with a throwaway build on another global allocator.
 //
@@ -65,11 +66,14 @@ for (const set of a.sets) {
     for (let s = 0; s < a.warmup + a.samples; s++) {
         const t0 = performance.now();
         for (let i = 0; i < fl.length; i++) {
-            ids[i] = h.stageModelFileCheckedUtf8(fl[i].bytes, undefined, fl[i].name);
+            // P5-103 removed `stageModelFileCheckedUtf8`: the one staging
+            // binding, from UTF-8 text, checked (flag 1), runs the same load
+            // and returns the stage in the flat layout (`[id, ...header]`).
+            ids[i] = h.stageModelFileBytes(fl[i].bytes, undefined, fl[i].name, 1);
         }
         const t1 = performance.now();
         for (let i = 0; i < fl.length; i++) {
-            ids[i] = JSON.parse(ids[i]).id;
+            ids[i] = JSON.parse(ids[i])[0];
         }
         const t2 = performance.now();
         for (let i = 0; i < fl.length; i++) {
