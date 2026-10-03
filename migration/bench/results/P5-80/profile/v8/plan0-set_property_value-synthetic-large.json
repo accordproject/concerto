@@ -1,0 +1,14 @@
+[
+  {
+    "file": "/home/user/wt/P5-80/prof/v8/plan0-set_property_value-synthetic-large/CPU.20261002.071550.7807.0.001.cpuprofile",
+    "samples": 9717,
+    "wasmShare": 0.32201296696511267,
+    "graphShare": 0.13852011937840897,
+    "buckets": {
+      "property lookup": 363,
+      "declaration lookup / type resolution": 736,
+      "identifier field": 217,
+      "super types / assignability": 30
+    }
+  }
+]

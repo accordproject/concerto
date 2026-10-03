@@ -1,0 +1,14 @@
+[
+  {
+    "file": "/home/user/wt/P5-80/prof/v8/plan1-from_json-concerto-core-test-data/CPU.20261002.071141.3353.0.001.cpuprofile",
+    "samples": 9524,
+    "wasmShare": 0.5895632087358252,
+    "graphShare": 0.07003359932801344,
+    "buckets": {
+      "identifier field": 86,
+      "validation plan (prototype)": 275,
+      "cached per-type facts": 16,
+      "declaration lookup / type resolution": 290
+    }
+  }
+]

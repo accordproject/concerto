@@ -1,0 +1,6 @@
+concerto-core-test-data	plan=false	model_bytes=903223	cache_bytes=951073	plans=0	plan_props=0
+concerto-core-test-data	plan=true	model_bytes=903223	cache_bytes=1182381	plans=120	plan_props=716
+conformance	plan=false	model_bytes=270156	cache_bytes=399403	plans=0	plan_props=0
+conformance	plan=true	model_bytes=270156	cache_bytes=428743	plans=44	plan_props=62
+synthetic-large	plan=false	model_bytes=1618767	cache_bytes=2000854	plans=0	plan_props=0
+synthetic-large	plan=true	model_bytes=1618767	cache_bytes=2559618	plans=300	plan_props=1799

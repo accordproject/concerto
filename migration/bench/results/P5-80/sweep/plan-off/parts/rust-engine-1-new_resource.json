@@ -1,0 +1,60 @@
+{
+  "tool": "p515-sweep",
+  "mode": "time",
+  "coreDist": "/home/user/wt/P5-80/concerto/packages/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "4578718b2",
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "loadavgEnd": [
+    1.95,
+    2.68,
+    4
+  ],
+  "samples": 30,
+  "warmup": 5,
+  "results": [
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "medianUs": 47.36366666666667,
+      "samples": 30,
+      "median_ms": 0.047363666666666665,
+      "mean_ms": 0.06395085888888889,
+      "stddev_ms": 0.03531228866704381,
+      "min_ms": 0.030416908333333333,
+      "max_ms": 0.142506525,
+      "cv": 0.5521784895555035
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "conformance",
+      "n": 44,
+      "medianUs": 9.873556818181818,
+      "samples": 30,
+      "median_ms": 0.009873556818181818,
+      "mean_ms": 0.044333975,
+      "stddev_ms": 0.07671532158293903,
+      "min_ms": 0.007997772727272727,
+      "max_ms": 0.2315661818181818,
+      "cv": 1.7303957423835565
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "synthetic-large",
+      "n": 300,
+      "medianUs": 5.382553333333333,
+      "samples": 30,
+      "median_ms": 0.005382553333333333,
+      "mean_ms": 0.008754412444444443,
+      "stddev_ms": 0.011539205207870664,
+      "min_ms": 0.005062676666666667,
+      "max_ms": 0.06138649666666667,
+      "cv": 1.318101618023886
+    }
+  ]
+}

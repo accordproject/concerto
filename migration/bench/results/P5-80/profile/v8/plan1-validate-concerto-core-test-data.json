@@ -1,0 +1,12 @@
+[
+  {
+    "file": "/home/user/wt/P5-80/prof/v8/plan1-validate-concerto-core-test-data/CPU.20261002.071156.3524.0.001.cpuprofile",
+    "samples": 10291,
+    "wasmShare": 0.5008259644349432,
+    "graphShare": 0.042269944611796714,
+    "buckets": {
+      "validation plan (prototype)": 178,
+      "declaration lookup / type resolution": 257
+    }
+  }
+]

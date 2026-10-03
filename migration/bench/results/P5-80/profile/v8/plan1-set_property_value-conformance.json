@@ -1,0 +1,12 @@
+[
+  {
+    "file": "/home/user/wt/P5-80/prof/v8/plan1-set_property_value-conformance/CPU.20261002.071612.7928.0.001.cpuprofile",
+    "samples": 7754,
+    "wasmShare": 0.22156306422491617,
+    "graphShare": 0.033015217952024764,
+    "buckets": {
+      "validation plan (prototype)": 79,
+      "declaration lookup / type resolution": 177
+    }
+  }
+]

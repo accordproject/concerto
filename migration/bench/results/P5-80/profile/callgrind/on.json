@@ -1,0 +1,203 @@
+[
+  {
+    "file": "prof/on/add_array_value-concerto-core-test-data.cg",
+    "total_ir": 32946608,
+    "summary_ir": 32946608,
+    "graph_ir": 894456,
+    "graph_share": 0.027148652146527497,
+    "buckets": {
+      "declaration lookup / type resolution": 768116,
+      "validation plan (prototype)": 126340
+    }
+  },
+  {
+    "file": "prof/on/add_array_value-conformance.cg",
+    "total_ir": 127537,
+    "summary_ir": 127537,
+    "graph_ir": 16720,
+    "graph_share": 0.13109921042520994,
+    "buckets": {
+      "declaration lookup / type resolution": 12240,
+      "validation plan (prototype)": 4480
+    }
+  },
+  {
+    "file": "prof/on/add_array_value-synthetic-large.cg",
+    "total_ir": 19177955,
+    "summary_ir": 19177955,
+    "graph_ir": 2575492,
+    "graph_share": 0.13429440208823099,
+    "buckets": {
+      "declaration lookup / type resolution": 1901252,
+      "validation plan (prototype)": 674240
+    }
+  },
+  {
+    "file": "prof/on/from_json-concerto-core-test-data.cg",
+    "total_ir": 108885484,
+    "summary_ir": 108885484,
+    "graph_ir": 10533057,
+    "graph_share": 0.09673518097233236,
+    "buckets": {
+      "validation plan (prototype)": 4118375,
+      "declaration lookup / type resolution": 3927791,
+      "identifier field": 1824491,
+      "cached per-type facts": 488520,
+      "property lookup": 173880
+    }
+  },
+  {
+    "file": "prof/on/from_json-conformance.cg",
+    "total_ir": 10963636,
+    "summary_ir": 10963636,
+    "graph_ir": 1329551,
+    "graph_share": 0.12126916654292426,
+    "buckets": {
+      "declaration lookup / type resolution": 523792,
+      "validation plan (prototype)": 426179,
+      "identifier field": 235220,
+      "cached per-type facts": 106560,
+      "property lookup": 37800
+    }
+  },
+  {
+    "file": "prof/on/from_json-synthetic-large.cg",
+    "total_ir": 188866287,
+    "summary_ir": 188866287,
+    "graph_ir": 19254394,
+    "graph_share": 0.10194722576401367,
+    "buckets": {
+      "declaration lookup / type resolution": 7329871,
+      "validation plan (prototype)": 6397812,
+      "identifier field": 4566711,
+      "cached per-type facts": 708000,
+      "property lookup": 252000
+    }
+  },
+  {
+    "file": "prof/on/new_resource-conformance.cg",
+    "total_ir": 3982618,
+    "summary_ir": 3982618,
+    "graph_ir": 1059648,
+    "graph_share": 0.2660681993603203,
+    "buckets": {
+      "identifier field": 537536,
+      "declaration lookup / type resolution": 470012,
+      "cached per-type facts": 52100
+    }
+  },
+  {
+    "file": "prof/on/new_resource-synthetic-large.cg",
+    "total_ir": 30297188,
+    "summary_ir": 30297188,
+    "graph_ir": 7765992,
+    "graph_share": 0.2563271548501465,
+    "buckets": {
+      "identifier field": 3739972,
+      "declaration lookup / type resolution": 3672020,
+      "cached per-type facts": 354000
+    }
+  },
+  {
+    "file": "prof/on/set_property_value-concerto-core-test-data.cg",
+    "total_ir": 40369781,
+    "summary_ir": 40369781,
+    "graph_ir": 5078452,
+    "graph_share": 0.12579835397174932,
+    "buckets": {
+      "declaration lookup / type resolution": 4091032,
+      "validation plan (prototype)": 987420
+    }
+  },
+  {
+    "file": "prof/on/set_property_value-conformance.cg",
+    "total_ir": 2180035,
+    "summary_ir": 2180035,
+    "graph_ir": 452980,
+    "graph_share": 0.20778565481746852,
+    "buckets": {
+      "declaration lookup / type resolution": 350980,
+      "validation plan (prototype)": 102000
+    }
+  },
+  {
+    "file": "prof/on/set_property_value-synthetic-large.cg",
+    "total_ir": 69326390,
+    "summary_ir": 69326390,
+    "graph_ir": 13805830,
+    "graph_share": 0.1991424910485026,
+    "buckets": {
+      "declaration lookup / type resolution": 11263380,
+      "validation plan (prototype)": 2542450
+    }
+  },
+  {
+    "file": "prof/on/to_json-concerto-core-test-data.cg",
+    "total_ir": 143426506,
+    "summary_ir": 143426506,
+    "graph_ir": 6433749,
+    "graph_share": 0.04485746170237181,
+    "buckets": {
+      "validation plan (prototype)": 3551747,
+      "declaration lookup / type resolution": 2708122,
+      "property lookup": 173880
+    }
+  },
+  {
+    "file": "prof/on/to_json-conformance.cg",
+    "total_ir": 10847836,
+    "summary_ir": 10847836,
+    "graph_ir": 938802,
+    "graph_share": 0.0865427906542835,
+    "buckets": {
+      "declaration lookup / type resolution": 507107,
+      "validation plan (prototype)": 393895,
+      "property lookup": 37800
+    }
+  },
+  {
+    "file": "prof/on/to_json-synthetic-large.cg",
+    "total_ir": 208012449,
+    "summary_ir": 208012449,
+    "graph_ir": 11174039,
+    "graph_share": 0.05371812626464486,
+    "buckets": {
+      "validation plan (prototype)": 5488450,
+      "declaration lookup / type resolution": 5433589,
+      "property lookup": 252000
+    }
+  },
+  {
+    "file": "prof/on/validate-concerto-core-test-data.cg",
+    "total_ir": 47211001,
+    "summary_ir": 47211001,
+    "graph_ir": 2796884,
+    "graph_share": 0.05924220924695073,
+    "buckets": {
+      "declaration lookup / type resolution": 1461734,
+      "validation plan (prototype)": 1335150
+    }
+  },
+  {
+    "file": "prof/on/validate-conformance.cg",
+    "total_ir": 4720689,
+    "summary_ir": 4720689,
+    "graph_ir": 520590,
+    "graph_share": 0.11027839368363389,
+    "buckets": {
+      "validation plan (prototype)": 269310,
+      "declaration lookup / type resolution": 251280
+    }
+  },
+  {
+    "file": "prof/on/validate-synthetic-large.cg",
+    "total_ir": 71462624,
+    "summary_ir": 71462624,
+    "graph_ir": 5623635,
+    "graph_share": 0.07869337403563574,
+    "buckets": {
+      "declaration lookup / type resolution": 3536315,
+      "validation plan (prototype)": 2087320
+    }
+  }
+]

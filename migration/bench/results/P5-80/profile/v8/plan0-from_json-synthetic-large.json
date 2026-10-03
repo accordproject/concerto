@@ -1,0 +1,16 @@
+[
+  {
+    "file": "/home/user/wt/P5-80/prof/v8/plan0-from_json-synthetic-large/CPU.20261002.071110.2699.0.001.cpuprofile",
+    "samples": 8633,
+    "wasmShare": 0.6098691069153249,
+    "graphShare": 0.13216726514537241,
+    "buckets": {
+      "cached per-type facts": 11,
+      "identifier field": 429,
+      "declaration lookup / type resolution": 450,
+      "property lookup": 232,
+      "validation plan (prototype)": 7,
+      "super types / assignability": 12
+    }
+  }
+]

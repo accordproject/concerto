@@ -1,0 +1,12 @@
+[
+  {
+    "file": "/home/user/wt/P5-80/prof/v8/plan1-new_resource-concerto-core-test-data/CPU.20261002.071151.3436.0.001.cpuprofile",
+    "samples": 9176,
+    "wasmShare": 0.15704010462074977,
+    "graphShare": 0.009263295553618133,
+    "buckets": {
+      "property lookup": 12,
+      "declaration lookup / type resolution": 73
+    }
+  }
+]
