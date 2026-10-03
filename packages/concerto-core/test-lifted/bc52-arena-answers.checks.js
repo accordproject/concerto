@@ -276,7 +276,7 @@ module.exports = [
         covers: 'P5-106: getAssignableClassDeclarations below a cyclic chain (validation disabled) is the BC-11 IllegalModelException; getDirectSubclasses answers',
         run: (core) => {
             const mm = new core.ModelManager();
-            mm.addCTOModel(`namespace org.acme.bc52.cycle@1.0.0\nconcept A extends C {}\nconcept B extends A {}\nconcept C extends B {}\n`, 'cycle.cto', true);
+            mm.addCTOModel('namespace org.acme.bc52.cycle@1.0.0\nconcept A extends C {}\nconcept B extends A {}\nconcept C extends B {}\n', 'cycle.cto', true);
             const a = mm.getModelFile('org.acme.bc52.cycle@1.0.0').getLocalType('A');
             return {
                 assignable: probe(() => names(a.getAssignableClassDeclarations())),

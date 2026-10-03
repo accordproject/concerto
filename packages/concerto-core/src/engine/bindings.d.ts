@@ -54,10 +54,12 @@ export interface EngineHandle {
     modelUtilIsValidMapKeyScalar(declaration: number): boolean | undefined;
     scalarDeclarationValidate(declaration: number): void;
     commitStagedModelFile(stage: number): number | undefined;
+    commitStagedModelFiles(stages: Uint32Array): boolean;
     dcsDecorateModels(target: EngineHandle, decorator_command_sets: any, options: any): any;
     dcsExtractDecorators(target: EngineHandle, options: any): any;
     dcsExtractNonVocabDecorators(target: EngineHandle, options: any): any;
     dcsExtractVocabularies(target: EngineHandle, options: any): any;
+    dcsExtract(target: EngineHandle, options: any, action: number): any;
     dcsValidate(decorator_command_set: any): void;
     deleteModelFile(namespace: string): void;
     derivesFrom(fqt1: string, fqt2: string): boolean;
@@ -84,18 +86,16 @@ export interface EngineHandle {
     serializerFromJson(json_text: string, options_text: string, env: any): string;
     serializerFromJsonCompact(json_text: string, options_text: string, env: any): string;
     serializerToJson(wire_text: string, options_text: string): string;
+    serializerToJsonBytes(bytes: Uint8Array, options_text: string): string;
+    serializerFromJsonCompactBytes(bytes: Uint8Array, options_text: string, env: any): string;
     setDangerouslyAllowReservedSystemTypeNamesInUserModels(allow: boolean): void;
     setDecoratorValidation(options: any): void;
-    stageModelFile(ast: string, definitions?: string | null, file_name?: string | null): number;
-    stageModelFileChecked(ast: string, definitions?: string | null, file_name?: string | null): string;
-    stageModelFileCheckedCompact(ast: Uint8Array, definitions?: string | null, file_name?: string | null): string;
-    stageModelFileWithHeader(ast: string, definitions?: string | null, file_name?: string | null): string;
-    stageModelFileWithHeaderCompact(ast: Uint8Array, definitions?: string | null, file_name?: string | null): string;
+    stageModelFileBytes(ast: Uint8Array, definitions: string | null | undefined, file_name: string | null | undefined, flags: number): string;
     systemModelFileHeader(ast: string): string | undefined;
     throwAlreadyExists(namespace: string, file_name?: string | null): void;
     updateExternalModels(sources: string, model_files: any): void;
     updateModelFile(ast: string, definitions: string | null | undefined, file_name: string | null | undefined, validate: boolean): number;
-    validateAndCommitStagedModelFile(stage: number): number | undefined;
+    validateAndCommitStagedModelFile(stage: number, metamodel?: boolean | null): number | undefined;
     validateAstValue(ast: string): void;
     validateAstStaged(stage: number): boolean;
     updateStagedModelFile(stage: number): number | undefined;
@@ -105,6 +105,8 @@ export interface EngineHandle {
     validateInstance(json_text: string, options_text: string, fqn: string | null | undefined, mode: number): string;
     validateModelFiles(model_files: any): void;
     validatePropertyBinary(bytes: Uint8Array, class_fqn: string, prop_name: string, root_id: string, flags: number): number;
+    validationPropertySlot(class_fqn: string, prop_name: string): Uint32Array | undefined;
+    validatePropertyById(bytes: Uint8Array, decl_id: number, prop_index: number, epoch: number, root_id: string, flags: number): number | string;
     validateResourceBinary(bytes: Uint8Array, root_id: string, flags: number): number;
 }
 
@@ -246,6 +248,10 @@ export interface EngineInternals {
     modelFileViewSnapshot(ast: string, namespace?: string | null): string | undefined;
     validateErrorMessage(): string;
     validateTakeError(): any;
+    /** P5-102: validates a metamodel instance (wire-encoded JSON text) on the engine's resident metamodel manager, validate-only. */
+    validateMetaModelInstance(jsonText: string, preset: 'strict' | 'default' | 'serializer'): void;
+    checkAstShape(ast: string): void;
+    systemModelFileHeader(ast: string): string | undefined;
 }
 
 /**
@@ -279,7 +285,8 @@ export interface EngineViewsModule {
     builtDeclaration(modelFile: object, index: number, node: object): any;
     localType(modelFile: object, type: string): any;
     commitStaged(modelFile: object, handle: EngineHandle): number | undefined;
-    validateAndCommitStaged(modelFile: object, handle: EngineHandle): number | undefined;
+    commitStagedAll(modelFiles: object[], handle: EngineHandle): ArrayLike<number> | undefined;
+    validateAndCommitStaged(modelFile: object, handle: EngineHandle, metamodel?: boolean): number | undefined;
     dropStaged(modelFile: object, handle: EngineHandle): void;
     updateStaged(modelFile: object, handle: EngineHandle): number | undefined;
     validateAstStaged(modelFile: object, handle: EngineHandle): boolean;
