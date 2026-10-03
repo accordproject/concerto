@@ -53,7 +53,7 @@ test('should detect a change of namespace', async () => {
     expect(results.result).toBe(CompareResult.ERROR);
 });
 
-['asset', 'concept', 'enum', 'event', 'participant', 'transaction', 'map', 'scalar'].forEach(type => {
+['asset', 'concept', 'enum', 'event', 'participant', 'transaction'].forEach(type => {
     test(`should detect a ${type} being added`, async () => {
         const [a, b] = await getModelFiles('empty.cto', `${type}-added.cto`);
         const results = new Compare().compare(a, b);
@@ -77,6 +77,61 @@ test('should detect a change of namespace', async () => {
         ]));
         expect(results.result).toBe(CompareResult.MAJOR);
     });
+});
+
+test('should detect a map being added', async () => {
+    const [a, b] = await getModelFiles('empty.cto', 'map-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'map-declaration-added',
+            message: 'The map "Thing" was added'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MINOR);
+});
+
+test('should detect a map being removed', async () => {
+    const [a, b] = await getModelFiles('map-added.cto', 'empty.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'map-declaration-removed',
+            message: 'The map "Thing" was removed'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a scalar being added', async () => {
+    const [a, b] = await getModelFiles('empty.cto', 'scalar-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-declaration-added',
+            message: 'The scalar "Thing" was added'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MINOR);
+});
+
+test('should detect a scalar being removed', async () => {
+    const [a, b] = await getModelFiles('scalar-added.cto', 'empty.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-declaration-removed',
+            message: 'The scalar "Thing" was removed'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should not emit class-declaration findings for map or scalar types', async () => {
+    const [a, b] = await getModelFiles('empty.cto', 'map-added.cto');
+    const results = new Compare().compare(a, b);
+    const classFindings = results.findings.filter(f => f.key.startsWith('class-declaration-'));
+    expect(classFindings).toHaveLength(0);
 });
 
 test('should detect a required field being added', async () => {
@@ -857,4 +912,14 @@ test('should not detect a size validator change when identical', async () => {
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual([]);
     expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should give correct CompareResult for map declaration add/remove rules', () => {
+    expect(defaultCompareConfig.rules['map-declaration-added']).toBe(CompareResult.MINOR);
+    expect(defaultCompareConfig.rules['map-declaration-removed']).toBe(CompareResult.MAJOR);
+});
+
+test('should give correct CompareResult for scalar declaration add/remove rules', () => {
+    expect(defaultCompareConfig.rules['scalar-declaration-added']).toBe(CompareResult.MINOR);
+    expect(defaultCompareConfig.rules['scalar-declaration-removed']).toBe(CompareResult.MAJOR);
 });
