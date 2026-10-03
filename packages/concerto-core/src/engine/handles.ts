@@ -69,4 +69,72 @@ function registryFor(manager: object): HandleRegistry {
     return registry;
 }
 
-export { HandleRegistry, registryFor };
+/**
+ * P5-97 (accordproject/concerto-rust#448): how many engine calls that call
+ * back into user code (`ModelFile.filter`'s predicate) are running. While
+ * one is, an engine handle it borrows cannot be freed: wasm-bindgen's
+ * `free()` panics on a borrowed object.
+ */
+let callbackDepth = 0;
+
+/**
+ * Handles `releaseHandle` was asked to free while an engine call with
+ * callbacks was running; freed when the outermost one returns.
+ */
+const pendingRelease: Array<{ free(): void }> = [];
+
+/**
+ * Frees `handle` (a concerto-wasm `ModelManagerHandle` the library created
+ * for itself and holds no other reference to), so its engine memory is
+ * released now rather than when the garbage collector runs its finalizer.
+ * Internal only (the maintainer ruled out a public release API): the
+ * library calls it for its own short-lived and replaced handles. Deferred
+ * while an engine call that runs user code is on the stack
+ * (`withEngineCallbacks`), since that call may borrow it; an error from
+ * `free()` is ignored, as the finalizer would have freed it anyway.
+ * @param {object} handle the handle
+ */
+function releaseHandle(handle: { free(): void } | undefined | null): void {
+    if (!handle || typeof handle.free !== 'function') {
+        return;
+    }
+    if (callbackDepth > 0) {
+        pendingRelease.push(handle);
+        return;
+    }
+    freeQuietly(handle);
+}
+
+/**
+ * `handle.free()`, ignoring any error.
+ * @param {object} handle the handle
+ */
+function freeQuietly(handle: { free(): void }): void {
+    try {
+        handle.free();
+    } catch (e) {
+        // already freed, or still in use: the finalizer frees it
+    }
+}
+
+/**
+ * Runs `fn`, an engine call that calls back into user code, deferring every
+ * `releaseHandle` made meanwhile until the outermost such call returns.
+ * @param {Function} fn the engine call
+ * @return {*} what `fn` returns
+ */
+function withEngineCallbacks<T>(fn: () => T): T {
+    callbackDepth++;
+    try {
+        return fn();
+    } finally {
+        callbackDepth--;
+        if (callbackDepth === 0 && pendingRelease.length > 0) {
+            for (const handle of pendingRelease.splice(0)) {
+                freeQuietly(handle);
+            }
+        }
+    }
+}
+
+export { HandleRegistry, registryFor, releaseHandle, withEngineCallbacks };

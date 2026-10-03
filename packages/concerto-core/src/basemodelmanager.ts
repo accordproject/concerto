@@ -1298,9 +1298,16 @@ class BaseModelManager {
         // this manager's validation options too (`_newRustHandle`), or
         // `fromAst` (which clears first) and the DecoratorManager paths
         // validate with the defaults, ignoring `decoratorValidation`.
+        const replaced = this.rustHandle;
         this.rustHandle = this._newRustHandle();
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
+        // P5-97 (accordproject/concerto-rust#448): the replaced handle is
+        // this manager's alone (a fork has a handle of its own), and nothing
+        // calls it again: its engine memory is released now, not when the
+        // garbage collector gets to its finalizer. Internal only: there is
+        // no public release API.
+        loadEngine('./engine/handles').releaseHandle(replaced);
         // P5-75: a new, empty namespace list for the new map, appended to
         // as the system models are registered again.
         startNamespaceList(this, []);
@@ -1632,6 +1639,79 @@ class BaseModelManager {
         return result;
     }
 
+
+    /**
+     * Returns a new ModelManager over the same model files as this one,
+     * with the same options and decorator factories, without loading or
+     * validating any model file again (P5-97,
+     * accordproject/concerto-rust#448). Unlike a `filter` that keeps every
+     * declaration, every model file is kept, including one with no
+     * declarations, and no predicate is called.
+     *
+     * The fork is independent of this manager from then on: model files
+     * added to, updated in or deleted from either one never reach the
+     * other. A server can therefore keep one base manager of its common
+     * models and fork it per request, each request adding its own models to
+     * its own fork. The engine shares the base's model files with every
+     * fork instead of copying them, and a fork starts with the base's warmed
+     * per-type caches. A fork's ModelFile views are its own; their
+     * declarations are built on first use. Memory is released by the
+     * garbage collector when a fork is no longer referenced.
+     * @returns {BaseModelManager} the fork, of this manager's own class
+     */
+    fork(): this {
+        // The batch `addModelFiles` is the only time `modelFiles` is ahead
+        // of rustHandle, and it never calls out.
+        /* istanbul ignore if */
+        if (this._mirrorPending) {
+            throw new Error('A ModelManager cannot be forked while model files are being added to it');
+        }
+        const fork = Object.create(Object.getPrototypeOf(this)) as this;
+        ModelFile._registerManager(fork);
+        fork.processFile = this.processFile;
+        fork.modelFiles = {};
+        fork.factory = new Factory(fork);
+        fork.options = this.options === undefined ? undefined : { ...this.options };
+        fork.serializer = new Serializer(fork.factory, fork, fork.options);
+        fork.decoratorFactories = this.decoratorFactories.slice();
+        fork.decoratorValidation = this.decoratorValidation;
+        fork._mirrorPending = false;
+        // The fork's engine handles are this manager's (`ModelManager::fork`).
+        fork._modelFileIds = new Map(this._modelFileIds);
+        fork._rustPreloaded = new Set(this._rustPreloaded);
+        fork.rustHandle = this.rustHandle.fork();
+        fork._buildingMetamodelCopy = false;
+        // `validateAst`'s cached metamodel copy, as a view of this manager's,
+        // built on first use (it is read only when a metamodel check fails).
+        const base = this;
+        Object.defineProperty(fork, 'metamodelModelFile', {
+            configurable: true,
+            enumerable: true,
+            get() {
+                const view = ModelFile._sharedView(fork, base.metamodelModelFile, base.metamodelModelFile.getDefinitions());
+                Object.defineProperty(fork, 'metamodelModelFile', { value: view, writable: true, enumerable: true, configurable: true });
+                return view;
+            },
+            set(value) {
+                Object.defineProperty(fork, 'metamodelModelFile', { value, writable: true, enumerable: true, configurable: true });
+            },
+        });
+        const handle = fork.rustHandle;
+        for (const namespace of Object.keys(this.modelFiles)) {
+            const source = this.modelFiles[namespace];
+            fork.modelFiles[namespace] = ModelFile._sharedView(fork, source, source.getDefinitions(), undefined, handle) as ModelFileInstance;
+        }
+        // A metamodel copy this manager registered (`addMetamodel`) is the
+        // same object as its view in the fork.
+        if (this.modelFiles[MetaModelNamespace] === this.metamodelModelFile) {
+            fork.metamodelModelFile = fork.modelFiles[MetaModelNamespace];
+        }
+        const namespaces = namespaceListOf(this);
+        if (namespaces) {
+            startNamespaceList(fork, namespaces.list.slice());
+        }
+        return fork;
+    }
 
     /**
      * A function type definition for use as an argument to the filter function

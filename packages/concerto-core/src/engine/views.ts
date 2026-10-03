@@ -1939,6 +1939,60 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
 }
 
 /**
+ * P5-97 (accordproject/concerto-rust#448): the ModelFile constructor's
+ * load step for a view of `source` (`ModelFile._sharedView`), in place of
+ * `checkAstShape` and `stageModelFile`: the view's AST is `source`'s own
+ * object, which the engine has already checked and loaded, and the
+ * engine-side file is the same one, shared. Records `stage`, the shared
+ * file's stage in the view's manager's rustHandle (registered from there
+ * by `commitStaged`, as any staged file), or `committed`, the rustHandle
+ * that already holds it; and `source`'s shape-check mark, when `source`
+ * still holds the AST it was checked with. Returns whether the declaration
+ * views are built lazily: when `source`'s were, or the view's manager has
+ * no decorator factories (as `stageModelFile` decides it for a new file);
+ * otherwise the constructor builds them now, with the factories.
+ * @param {object} modelFile the view being constructed
+ * @param {object} source the ModelFile it is a view of
+ * @param {object} [stage] the shared file's stage
+ * @param {object} [committed] the rustHandle that holds the shared file
+ * @return {boolean} true if the declarations may be built lazily
+ */
+function adoptSharedView(modelFile: any, source: any, stage?: Stage, committed?: object): boolean {
+    const state = fileState(modelFile);
+    if (stage !== undefined) {
+        state.stage = stage;
+        stageFinalizer?.register(modelFile, stage, stage);
+    }
+    if (committed !== undefined) {
+        state.committed = committed;
+    }
+    const sourceState = fileStates.get(source);
+    if (sourceState?.shapeChecked !== undefined && sourceState.shapeChecked === source.ast) {
+        state.shapeChecked = sourceState.shapeChecked;
+    }
+    const factories = modelFile.modelManager.getDecoratorFactories();
+    const lazy = sourceState?.lazy !== undefined || !(Array.isArray(factories) && factories.length > 0);
+    if (lazy) {
+        state.lazy = true;
+    }
+    return lazy;
+}
+
+/**
+ * P5-97: records for `modelFile` the `getImports()` names recorded for
+ * `source`, the view it copied its header from (`ModelFile._copyHeader`),
+ * when there are any.
+ * @param {object} modelFile the view
+ * @param {object} source the ModelFile it is a view of
+ */
+function copyImportNames(modelFile: any, source: any): void {
+    const names = recordedImportNames(source);
+    if (names !== undefined) {
+        recordImportNames(modelFile, names);
+    }
+}
+
+/**
  * P5-61: reads the AST of a ModelFile whose manager has decorator factories
  * and the shape check off, only to throw `stageModelFile`'s `unreadableAst`
  * error for an AST the engine cannot read. The staged file is dropped.
@@ -3763,6 +3817,8 @@ export {
     checkAstShape,
     markSystemModelAst,
     stageModelFile,
+    adoptSharedView,
+    copyImportNames,
     applyStagedHeader,
     applyStagedFileHeader,
     applyStagedHeaders,
