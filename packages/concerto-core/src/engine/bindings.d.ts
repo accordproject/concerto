@@ -246,6 +246,8 @@ export interface EngineInternals {
     modelFileViewSnapshot(ast: string, namespace?: string | null): string | undefined;
     validateErrorMessage(): string;
     validateTakeError(): any;
+    /** P5-102: validates a metamodel instance (wire-encoded JSON text) on the engine's resident metamodel manager, validate-only. */
+    validateMetaModelInstance(jsonText: string, preset: 'strict' | 'default' | 'serializer'): void;
     checkAstShape(ast: string): void;
     systemModelFileHeader(ast: string): string | undefined;
 }
