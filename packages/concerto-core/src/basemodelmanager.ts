@@ -529,6 +529,119 @@ class BaseModelManager {
     }
 
     /**
+     * P5-101 (D-10, M5; accordproject/concerto-rust#455): `_rustMirrorAdd`
+     * for each of `modelFiles`, in order, in one engine call when every one
+     * is written to rustHandle from its stage (engine/views.ts
+     * `commitStagedAll`); otherwise one write per file, as before. Adds each
+     * namespace written to `mirrored`, also when a write throws (the files
+     * the engine registered before the error), so the caller can undo them.
+     * @param {ModelFile[]} modelFiles - the model files being added
+     * @param {Set<string>} mirrored - the namespaces written, filled in
+     * @private
+     * @internal
+     */
+    /* istanbul ignore next */
+    _rustMirrorAddAll(modelFiles: ModelFileInstance[], mirrored: Set<string>) {
+        const handle = this.rustHandle;
+        if (modelFiles.every((m) => this._needsRustWrite(m.getNamespace()))) {
+            let ids;
+            try {
+                ids = engineViews().commitStagedAll(modelFiles, handle);
+            } catch (err) {
+                modelFiles.forEach((m) => {
+                    if (handle.modelFileId(m.getNamespace()) !== undefined) {
+                        mirrored.add(m.getNamespace());
+                    }
+                });
+                throw err;
+            }
+            if (ids !== undefined) {
+                modelFiles.forEach((m, i) => {
+                    this._modelFileIds.set(m.getNamespace(), ids[i]);
+                    mirrored.add(m.getNamespace());
+                });
+                return;
+            }
+        }
+        modelFiles.forEach((m) => {
+            if (this._rustMirrorAdd(m)) {
+                mirrored.add(m.getNamespace());
+            }
+        });
+    }
+
+    /**
+     * P5-101 (D-10, M5; accordproject/concerto-rust#455): `addModelFile(m,
+     * null, null, true)` for each of `modelFiles`, in order, for the
+     * DecoratorManager results (engine/views.ts `adoptStagedModels`, which
+     * decorateModels and every extract use), with the files registered in
+     * rustHandle from their stages in one engine call (`commitStagedAll`)
+     * where each `addModelFile` crossed once. Used only when every file
+     * passes `addModelFile`'s own checks (a ModelFile the constructor built,
+     * a version, a namespace this manager and the batch do not already
+     * hold) and is written to rustHandle from its stage; otherwise each file
+     * is added by `addModelFile`, as before, so its errors are thrown at the
+     * same file. A registration error leaves the files the engine registered
+     * before it in `modelFiles` too, as the same `addModelFile` calls would.
+     * @param {ModelFile[]} modelFiles - the model files being added
+     * @private
+     * @internal
+     */
+    /* istanbul ignore next */
+    _addStagedModelFiles(modelFiles: ModelFileInstance[]) {
+        const handle = this.rustHandle;
+        const namespaces = new Set<string>();
+        const batchable = modelFiles.length > 1 && modelFiles.every((m) => {
+            if (!ModelFile._isConstructed(m) || !m.getVersion()) {
+                return false;
+            }
+            const namespace = m.getNamespace();
+            if (this.modelFiles[namespace] || namespaces.has(namespace) || !this._needsRustWrite(namespace)) {
+                return false;
+            }
+            namespaces.add(namespace);
+            return true;
+        });
+        let ids: ArrayLike<number> | undefined;
+        if (batchable) {
+            try {
+                ids = engineViews().commitStagedAll(modelFiles, handle);
+            } catch (err) {
+                modelFiles.forEach((m) => {
+                    const id = handle.modelFileId(m.getNamespace());
+                    if (id !== undefined) {
+                        this._registerAdded(m, id);
+                    }
+                });
+                throw err;
+            }
+        }
+        if (ids === undefined) {
+            modelFiles.forEach((m) => this.addModelFile(m, null, null, true));
+            return;
+        }
+        modelFiles.forEach((m, i) => this._registerAdded(m, ids![i]));
+    }
+
+    /**
+     * What `addModelFile` does once a new file is written to rustHandle:
+     * caches its rustHandle handle, registers it in `modelFiles`, appends
+     * its namespace and moves the model version.
+     * @param {ModelFile} modelFile - the model file added
+     * @param {number} id - its rustHandle handle
+     * @private
+     * @internal
+     */
+    /* istanbul ignore next */
+    _registerAdded(modelFile: ModelFileInstance, id: number) {
+        const namespace = modelFile.getNamespace();
+        this._modelFileIds.set(namespace, id);
+        this.modelFiles[namespace] = modelFile;
+        noteNamespaceAdded(this, namespace);
+        this._engine.version++;
+    }
+
+    /**
      * P5-34 (I-5): `addModelFile`'s validation and rustHandle write in one
      * engine call, for a file staged in `rustHandle` whose `validate` is
      * `ModelFile`'s own (engine/views.ts `validateAndCommitStaged`); caches
@@ -949,11 +1062,7 @@ class BaseModelManager {
             // rustHandle before validateModelFiles() below validates any of
             // them. Each write is a structural mirror write only (no
             // validation); validateModelFiles() decides pass/fail.
-            newModelFiles.forEach((m) => {
-                if (this._rustMirrorAdd(m)) {
-                    mirroredNamespaces.add(m.getNamespace());
-                }
-            });
+            this._rustMirrorAddAll(newModelFiles, mirroredNamespaces);
             this._mirrorPending = false;
 
             // re-validate all the model files

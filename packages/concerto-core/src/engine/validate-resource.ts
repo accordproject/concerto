@@ -39,6 +39,14 @@
 //      property TS found): as for a value TS cannot encode at all, the
 //      caller runs the `ResourceValidator` visitor instead.
 //
+// P5-101 (D-10, accordproject/concerto-rust#455): a property is checked by
+// its slot (`validatePropertyById`: the declaration's handle and the
+// property's index in its validation plan, looked up once per model
+// version, `propertySlot`), so neither the type's name nor the property's
+// crosses, and that call returns a `Validation` error's message itself (a
+// string in place of code 1) and throws any other error itself (code 2),
+// with no `validateErrorMessage`/`validateTakeError` crossing.
+//
 // Both functions return `false` only in that last case, when the value
 // cannot cross (`EngineFastPathUnsupported`: a lone surrogate, a function,
 // a symbol, a BigInt, a class instance that is not a Resource or a dayjs, a
@@ -94,6 +102,8 @@ const PRIVATE_ONLY = new Set([
 const CODE_VALID = 0;
 const CODE_VALIDATION = 1;
 const CODE_UNSUPPORTED = 3;
+/** `validatePropertyById`: the slot is not one of the handle's epoch. */
+const CODE_STALE = 4;
 
 /**
  * `Dayjs::to_iso_string` (concerto-core instance/dayjs.rs): `null` when the
@@ -443,9 +453,85 @@ function validateProperty(resource, propName: string, value, rootId: string, fie
         }
         throw err;
     }
-    const code = handle.validatePropertyBinary(writer.bytes(), resource.getFullyQualifiedType(), propName, rootId, flags);
+    const fqn = resource.getFullyQualifiedType();
+    const slot = typeof handle.validatePropertyById === 'function'
+        ? propertySlot(resource.getModelManager(), handle, fqn, propName)
+        : undefined;
+    if (slot !== undefined) {
+        // P5-101 (D-10): by the slot, and with a `Validation` error's
+        // message in the same call (any other error is thrown by it).
+        const result = handle.validatePropertyById(writer.bytes(), slot[0], slot[1], slot[2], rootId, flags);
+        if (typeof result === 'string') {
+            writer.release();
+            throw new ValidationException(result);
+        }
+        if (result !== CODE_STALE) {
+            writer.release();
+            return result === CODE_VALID;
+        }
+        dropSlots(handle);
+    }
+    const code = handle.validatePropertyBinary(writer.bytes(), fqn, propName, rootId, flags);
     writer.release();
     return outcome(code);
+}
+
+/**
+ * P5-101 (D-10, accordproject/concerto-rust#455): the `validatePropertyById`
+ * slots (`[declId, propIndex, epoch]`) of one rustHandle, by type and
+ * property name, for the model version they were looked up at
+ * (`EngineState.version`, which every change of the manager's model files
+ * or rustHandle moves). A slot of another epoch is also refused by the
+ * engine (`CODE_STALE`), and the slots are then looked up again.
+ */
+interface PropertySlots {
+    version: number;
+    byType: Map<string, Map<string, Uint32Array | null>>;
+}
+
+const propertySlots = new WeakMap<object, PropertySlots>();
+
+/**
+ * Forgets `handle`'s slots.
+ * @param {object} handle the rustHandle
+ */
+function dropSlots(handle: object): void {
+    propertySlots.delete(handle);
+}
+
+/**
+ * The `validatePropertyById` slot of property `propName` of type `fqn`,
+ * looked up once per model version (`validationPropertySlot`); undefined
+ * when the engine has none (the caller then crosses by name, which answers
+ * `CODE_UNSUPPORTED` for it) or the manager keeps no engine state.
+ * @param {object} modelManager the resource's model manager
+ * @param {object} handle its rustHandle
+ * @param {string} fqn the resource's type
+ * @param {string} propName the property
+ * @return {Uint32Array | undefined} the slot
+ */
+function propertySlot(modelManager, handle, fqn: string, propName: string): Uint32Array | undefined {
+    const state = modelManager._engine;
+    if (state === undefined) {
+        return undefined;
+    }
+    let slots = propertySlots.get(handle);
+    if (slots === undefined || slots.version !== state.version) {
+        slots = { version: state.version, byType: new Map() };
+        propertySlots.set(handle, slots);
+    }
+    let byName = slots.byType.get(fqn);
+    if (byName === undefined) {
+        byName = new Map();
+        slots.byType.set(fqn, byName);
+    }
+    let slot = byName.get(propName);
+    if (slot === undefined) {
+        const found: Uint32Array | null = handle.validationPropertySlot(fqn, propName) ?? null;
+        byName.set(propName, found);
+        slot = found;
+    }
+    return slot ?? undefined;
 }
 
 export { validateResource, validateProperty };

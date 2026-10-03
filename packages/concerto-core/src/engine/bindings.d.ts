@@ -43,6 +43,7 @@ export interface EngineHandle {
     addModelWithDefinitions(ast: string, definitions: string | null | undefined, file_name: string | null | undefined, validate: boolean): number;
     checkAstShape(ast: string): void;
     commitStagedModelFile(stage: number): number | undefined;
+    commitStagedModelFiles(stages: Uint32Array): boolean;
     dcsDecorateModels(target: EngineHandle, decorator_command_sets: any, options: any): any;
     dcsExtractDecorators(target: EngineHandle, options: any): any;
     dcsExtractNonVocabDecorators(target: EngineHandle, options: any): any;
@@ -74,6 +75,8 @@ export interface EngineHandle {
     serializerFromJson(json_text: string, options_text: string, env: any): string;
     serializerFromJsonCompact(json_text: string, options_text: string, env: any): string;
     serializerToJson(wire_text: string, options_text: string): string;
+    serializerToJsonBytes(bytes: Uint8Array, options_text: string): string;
+    serializerFromJsonCompactBytes(bytes: Uint8Array, options_text: string, env: any): string;
     setDangerouslyAllowReservedSystemTypeNamesInUserModels(allow: boolean): void;
     setDecoratorValidation(options: any): void;
     stageModelFileBytes(ast: Uint8Array, definitions: string | null | undefined, file_name: string | null | undefined, flags: number): string;
@@ -91,6 +94,8 @@ export interface EngineHandle {
     validateInstance(json_text: string, options_text: string, fqn: string | null | undefined, mode: number): string;
     validateModelFiles(model_files: any): void;
     validatePropertyBinary(bytes: Uint8Array, class_fqn: string, prop_name: string, root_id: string, flags: number): number;
+    validationPropertySlot(class_fqn: string, prop_name: string): Uint32Array | undefined;
+    validatePropertyById(bytes: Uint8Array, decl_id: number, prop_index: number, epoch: number, root_id: string, flags: number): number | string;
     validateResourceBinary(bytes: Uint8Array, root_id: string, flags: number): number;
 }
 
@@ -241,6 +246,8 @@ export interface EngineInternals {
     modelFileViewSnapshot(ast: string, namespace?: string | null): string | undefined;
     validateErrorMessage(): string;
     validateTakeError(): any;
+    checkAstShape(ast: string): void;
+    systemModelFileHeader(ast: string): string | undefined;
 }
 
 /**
@@ -274,6 +281,7 @@ export interface EngineViewsModule {
     builtDeclaration(modelFile: object, index: number, node: object): any;
     localType(modelFile: object, type: string): any;
     commitStaged(modelFile: object, handle: EngineHandle): number | undefined;
+    commitStagedAll(modelFiles: object[], handle: EngineHandle): ArrayLike<number> | undefined;
     validateAndCommitStaged(modelFile: object, handle: EngineHandle, metamodel?: boolean): number | undefined;
     dropStaged(modelFile: object, handle: EngineHandle): void;
     updateStaged(modelFile: object, handle: EngineHandle): number | undefined;

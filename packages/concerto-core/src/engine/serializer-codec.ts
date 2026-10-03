@@ -41,6 +41,7 @@
 
 import dayjs from '../dayjs-setup';
 import { EngineFastPathUnsupported, isDayjsLike, isTypedLike, hasLoneSurrogate } from './util';
+import { WireWriter } from './wire';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -210,6 +211,218 @@ function encodeValue(v, seen: Set<object> = new Set()) {
         return out;
     }
     throw new EngineFastPathUnsupported(`unsupported-value:${typeof v}`);
+}
+
+// ---------------------------------------------------------------------
+// P5-101 (E-7, F-8; accordproject/concerto-rust#455): the same wire value,
+// written straight from the live object in the compact binary layout
+// (wire.ts) instead of built as a tagged object tree and then
+// `JSON.stringify`d. The engine reads the bytes as it reads that text
+// (concerto-wasm `parse_wire_bytes`).
+// ---------------------------------------------------------------------
+
+/** The one writer of the Serializer fast path's binary input. */
+const valueWriter = new WireWriter(64 * 1024);
+
+/** Set while `valueWriter` is being written (a getter may re-enter). */
+let valueWriterBusy = false;
+
+/**
+ * How deep the binary write nests before it leaves the value to the text
+ * path, as ast-codec.ts does: below the engine's JSON reader's limit (128),
+ * so a value that text rejects for its depth is still sent, and rejected,
+ * as text.
+ */
+const MAX_BINARY_DEPTH = 100;
+
+/** Thrown inside `encodeBytes` to leave a value to the text path. */
+class TextPathOnly extends Error {
+}
+
+/**
+ * `encodeValue(v)`'s wire value in the compact binary layout: a view of the
+ * writer's buffer, valid until the next call. Undefined when the value is
+ * left to the text path (`JSON.stringify(encodeValue(v))`), which then
+ * throws what it always threw: a value `encodeValue` cannot express
+ * (`EngineFastPathUnsupported`), one nested deeper than
+ * `MAX_BINARY_DEPTH`, a non-finite number where `encodeValue` would not
+ * tag one, or a call made while the writer is in use. Any other error (a
+ * throwing getter) propagates, as from `encodeValue`, which reads the same
+ * properties in the same order.
+ * @param {*} v the value
+ * @return {Uint8Array | undefined} its bytes
+ */
+function encodeBytes(v: unknown): Uint8Array | undefined {
+    if (valueWriterBusy) {
+        return undefined;
+    }
+    valueWriterBusy = true;
+    try {
+        valueWriter.begin();
+        writeWireValue(v, new Set(), 0);
+        return valueWriter.bytes();
+    } catch (err) {
+        if (err instanceof TextPathOnly || err instanceof EngineFastPathUnsupported) {
+            return undefined;
+        }
+        throw err;
+    } finally {
+        valueWriter.release();
+        valueWriterBusy = false;
+    }
+}
+
+/**
+ * A one-key-or-more tagged object's head: the object header with `count`
+ * entries, and its `TAG` entry.
+ * @param {number} count the entries, the tag's included
+ * @param {string} kind the tag's value
+ */
+function writeTagHead(count: number, kind: string): void {
+    const at = valueWriter.beginObject();
+    valueWriter.putU32(at, count);
+    valueWriter.rawStr(TAG);
+    valueWriter.str(kind);
+}
+
+/**
+ * A finite number `encodeValue` writes as itself.
+ * @param {number} n the number
+ */
+function writeNumber(n: number): void {
+    if (!Number.isFinite(n)) {
+        throw new TextPathOnly();
+    }
+    valueWriter.num(n);
+}
+
+/**
+ * `encodeValue(v, seen)`, written to `valueWriter` (`encodeBytes`).
+ * @param {*} v the value
+ * @param {Set<object>} seen the objects already visited on this encode
+ * @param {number} depth how deep `v` is
+ */
+function writeWireValue(v, seen: Set<object>, depth: number): void {
+    if (depth >= MAX_BINARY_DEPTH) {
+        throw new TextPathOnly();
+    }
+    const w = valueWriter;
+    if (v === undefined) {
+        writeTagHead(1, 'undefined');
+        return;
+    }
+    if (typeof v === 'string') {
+        checkString(v);
+        w.str(v);
+        return;
+    }
+    if (v === null || typeof v === 'boolean') {
+        w.literal(v);
+        return;
+    }
+    if (typeof v === 'number') {
+        if (!Number.isFinite(v) || Object.is(v, -0)) {
+            writeTagHead(2, 'number');
+            w.rawStr('value');
+            w.str(Object.is(v, -0) ? '-0' : String(v));
+            return;
+        }
+        w.num(v);
+        return;
+    }
+    if (Array.isArray(v)) {
+        visit(v, seen);
+        const n = v.length;
+        w.array(n);
+        for (let i = 0; i < n; i++) {
+            // A hole (`encodeValue`'s `map` keeps it) is `null` in
+            // `JSON.stringify`'s text.
+            if (i in v) {
+                writeWireValue(v[i], seen, depth + 1);
+            } else {
+                w.literal(null);
+            }
+        }
+        return;
+    }
+    if (v instanceof Map) {
+        visit(v, seen);
+        writeTagHead(2, 'map');
+        w.rawStr('entries');
+        const entries = [...v.entries()];
+        w.array(entries.length);
+        for (const [k, x] of entries) {
+            w.array(2);
+            writeWireValue(k, seen, depth + 3);
+            writeWireValue(x, seen, depth + 3);
+        }
+        return;
+    }
+    if (isDayjsLike(v)) {
+        if (v.isValid()) {
+            writeTagHead(4, 'dayjs');
+            w.rawStr('valid');
+            w.literal(true);
+            w.rawStr('ms');
+            writeNumber(v.valueOf());
+            w.rawStr('utcOffset');
+            writeNumber(v.utcOffset());
+        } else {
+            writeTagHead(2, 'dayjs');
+            w.rawStr('valid');
+            w.literal(false);
+        }
+        return;
+    }
+    if (isTypedLike(v)) {
+        visit(v, seen);
+        const ctorName = typedCtorName(v);
+        writeTagHead(4, 'typed');
+        w.rawStr('ctor');
+        w.str(ctorName);
+        w.rawStr('fqn');
+        w.str(v.getFullyQualifiedType());
+        w.rawStr('fields');
+        writeEntries(v, TYPED_SKIP, seen, depth + 1);
+        return;
+    }
+    if (typeof v === 'function' || typeof v === 'symbol') {
+        throw new EngineFastPathUnsupported(`unsupported-value:${typeof v}`);
+    }
+    if (typeof v === 'object') {
+        const proto = Object.getPrototypeOf(v);
+        if (proto !== Object.prototype && proto !== null) {
+            throw new EngineFastPathUnsupported(`instance:${(v.constructor && v.constructor.name) || 'Object'}`);
+        }
+        visit(v, seen);
+        writeEntries(v, undefined, seen, depth);
+        return;
+    }
+    throw new EngineFastPathUnsupported(`unsupported-value:${typeof v}`);
+}
+
+/**
+ * The object of `v`'s own enumerable keys (less `skip`) and their values,
+ * as `encodeValue` and `encodeTyped` build it.
+ * @param {object} v the object
+ * @param {Set<string>|undefined} skip the keys left out
+ * @param {Set<object>} seen the objects already visited on this encode
+ * @param {number} depth how deep `v` is
+ */
+function writeEntries(v, skip: Set<string> | undefined, seen: Set<object>, depth: number): void {
+    const w = valueWriter;
+    const countAt = w.beginObject();
+    let count = 0;
+    for (const key of Object.keys(v)) {
+        if (skip !== undefined && skip.has(key)) {
+            continue;
+        }
+        checkKey(key);
+        w.rawStr(key);
+        writeWireValue(v[key], seen, depth + 1);
+        count++;
+    }
+    w.putU32(countAt, count);
 }
 
 let modelClassesCache: any;
@@ -564,6 +777,6 @@ function decodeValue(v, modelManager: BaseModelManager) {
     }
 }
 
-export { EngineFastPathUnsupported, typedCtorName, modelClasses, encodeValue, decodeValue, decodeParsed, materializeCompact, checkString, checkJsonText };
+export { EngineFastPathUnsupported, typedCtorName, modelClasses, encodeValue, encodeBytes, decodeValue, decodeParsed, materializeCompact, checkString, checkJsonText };
 export type { TypeCache };
 export { newTypeCache };

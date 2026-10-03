@@ -592,13 +592,12 @@ function decoratorManagerValidate(validationModelManager: any, decoratorCommandS
  * shape check: every source model was checked (`dcsSourceShapeChecked`) and
  * everything the commands add passes it (`dcsCommandsShapeChecked`).
  * @param {object} modelManager the input ModelManager
- * @param {object} handle an engine handle, for `checkAstShape`
  * @param {object[]} decoratorCommandSets the decorator command sets
  * @param {object} [options] the decorateModels options
  * @return {boolean} true if the result models may skip the check
  */
-function decorateResultTrusted(modelManager: any, handle: any, decoratorCommandSets: any[], options?: any): boolean {
-    return dcsSourceShapeChecked(modelManager) && dcsCommandsShapeChecked(handle, decoratorCommandSets, options);
+function decorateResultTrusted(modelManager: any, decoratorCommandSets: any[], options?: any): boolean {
+    return dcsSourceShapeChecked(modelManager) && dcsCommandsShapeChecked(decoratorCommandSets, options);
 }
 
 /**
@@ -632,7 +631,7 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
         assertDistinctHandles(source, target);
         const result = source.dcsDecorateModels(target, decoratorCommandSets, options ?? {});
         adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation,
-            decorateResultTrusted(modelManager, target, decoratorCommandSets, options));
+            decorateResultTrusted(modelManager, decoratorCommandSets, options));
         return decoratedModelManager;
     }
     if (residentDcsAvailable()) {
@@ -646,7 +645,7 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
             decoratedModelManager.clearModelFiles();
             const result = dcs.decorateModels(decoratedModelManager.rustHandle, decoratorCommandSets, options ?? {});
             adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation,
-                decorateResultTrusted(modelManager, decoratedModelManager.rustHandle, decoratorCommandSets, options));
+                decorateResultTrusted(modelManager, decoratorCommandSets, options));
             return decoratedModelManager;
         } finally {
             if (!resident) {
@@ -1508,21 +1507,21 @@ function shapeCheckPassed(modelFile: any, text: string | undefined, state: FileS
 /**
  * P5-73 (accordproject/concerto-rust#414): the engine's precomputed verdict
  * for a fixed system model's ModelFile (`systemModelAsts`): the header text
- * `rustHandle.systemModelFileHeader` returns when the AST's text is exactly
+ * the engine's `systemModelFileHeader` returns when the AST's text is exactly
  * one of the fixed system models, whose load and shape check the engine ran
  * once. A pending shape check is then complete, as `shapeCheckPassed` would
  * record it, but not remembered by namespace. Undefined, with nothing
  * recorded, for any other file or text, which is then loaded and checked
  * as before.
  * @param {object} modelFile the ModelFile being constructed
- * @param {object} handle the manager's rustHandle
  * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
  * already computed it
  * @return {string | undefined} the header's JSON text, or undefined
  */
-function systemModelVerdict(modelFile: any, handle: any, checkedText?: string): string | undefined {
+function systemModelVerdict(modelFile: any, checkedText?: string): string | undefined {
     const ast = modelFile.ast;
-    if (!systemModelAsts.has(ast) || typeof handle.systemModelFileHeader !== 'function') {
+    // P5-101 (D-7): a free engine function, which reads no handle.
+    if (!systemModelAsts.has(ast) || typeof rust.systemModelFileHeader !== 'function') {
         return undefined;
     }
     // P5-94: the engine's header for a text it gave one for is remembered
@@ -1536,7 +1535,7 @@ function systemModelVerdict(modelFile: any, handle: any, checkedText?: string): 
     if (known !== undefined && known.text === text && known.header !== undefined) {
         header = known.header;
     } else {
-        const answer = handle.systemModelFileHeader(text);
+        const answer = rust.systemModelFileHeader(text);
         if (typeof answer !== 'string') {
             return undefined;
         }
@@ -1559,16 +1558,16 @@ function systemModelVerdict(modelFile: any, handle: any, checkedText?: string): 
  * (`rustHandle.checkAstShape`, which runs the same fold over its own parse
  * of the text). Nothing when the file is not pending.
  * @param {object} modelFile the ModelFile being constructed
- * @param {object} handle the manager's rustHandle
  * @param {string} text the AST's JSON text
  * @param {object} [state] `modelFile`'s `fileStates` record (P5-91)
  * @throws {IllegalModelException} if the AST does not have the metamodel's shape
  */
-function completeShapeCheck(modelFile: any, handle: any, text: string, state: FileState | undefined = fileStates.get(modelFile)): void {
+function completeShapeCheck(modelFile: any, text: string, state: FileState | undefined = fileStates.get(modelFile)): void {
     if (state === undefined || state.shapePending === undefined) {
         return;
     }
-    handle.checkAstShape(text);
+    // P5-101 (D-7): a free engine function, which reads no handle.
+    rust.checkAstShape(text);
     shapeCheckPassed(modelFile, text, state);
 }
 
@@ -1616,7 +1615,7 @@ function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | u
         return undefined;
     }
     const manager = modelFile.modelManager;
-    const systemHeader = systemModelVerdict(modelFile, manager.rustHandle, checkedText);
+    const systemHeader = systemModelVerdict(modelFile, checkedText);
     if (systemHeader === undefined) {
         return undefined;
     }
@@ -1718,7 +1717,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             if (checkedText === undefined) {
                 readUnchecked(modelFile, handle);
             } else {
-                completeShapeCheck(modelFile, handle, astText(modelFile.ast, checkedText));
+                completeShapeCheck(modelFile, astText(modelFile.ast, checkedText));
             }
             return false;
         }
@@ -1730,7 +1729,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         // P5-69: a prestaged AST is not loaded again, so it is checked on
         // its own first.
         if (checkedText !== undefined && prestage !== undefined) {
-            completeShapeCheck(modelFile, handle, astText(ast, checkedText), state);
+            completeShapeCheck(modelFile, astText(ast, checkedText), state);
         }
         // P5-27 (F6): a DecoratorManager result model Rust has already
         // loaded, and staged in this handle (`adoptStagedModels`), is used
@@ -1765,7 +1764,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             if (accepted.checked) {
                 shapeCheckPassed(modelFile, text, state);
             } else {
-                completeShapeCheck(modelFile, handle, text as string, state);
+                completeShapeCheck(modelFile, text as string, state);
             }
             if (accepted.header !== null) {
                 state.stagedHeader = accepted.header;
@@ -1785,7 +1784,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         // P5-92: there is text whenever there are no bytes.
         const jsonText = text as string;
         if (compact === undefined && !checked) {
-            completeShapeCheck(modelFile, handle, jsonText, state);
+            completeShapeCheck(modelFile, jsonText, state);
         }
         const staged: StagedHeader = JSON.parse(handle.stageModelFileBytes(
             compact ?? utf8Text(jsonText), definitions, fileName,
@@ -1825,7 +1824,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             if ((e as EngineErrorFlags | null)?.astShape) {
                 throw e;
             }
-            completeShapeCheck(modelFile, handle, astText(modelFile.ast, checkedText));
+            completeShapeCheck(modelFile, astText(modelFile.ast, checkedText));
         }
         return false;
     }
@@ -2198,6 +2197,7 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
     const handle = newModelManager.rustHandle;
     let allStaged = true;
     const models: any[] = ast.models;
+    const built: any[] = [];
     try {
         models.forEach((model: any, i: number) => {
             if (DCS_EXCLUDE_NS.includes(model.namespace)) {
@@ -2218,11 +2218,18 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
             } finally {
                 trustedAst = null;
             }
-            newModelManager.addModelFile(modelFile, null, null, true);
-            if (committedHandle(modelFile) !== handle) {
-                allStaged = false;
-            }
+            built.push(modelFile);
         });
+        // P5-101 (D-10, M5): the files are registered from their stages in
+        // one engine call (`commitStagedAll`, through the manager's
+        // `_addStagedModelFiles`), where `addModelFile` crossed once per
+        // file: in the same order, with `addModelFile`'s checks, and without
+        // validating them (`disableValidation`), as `fromAst` adds them. The
+        // files are built first, which reads nothing another result file's
+        // registration changes; a construction error leaves the manager,
+        // which the caller then drops, with fewer files added.
+        newModelManager._addStagedModelFiles(built);
+        allStaged = built.every((modelFile) => committedHandle(modelFile) === handle);
     } finally {
         // A stage no ModelFile took (the loop threw first).
         models.forEach((model: any) => {
@@ -2320,12 +2327,11 @@ function dcsSourceShapeChecked(modelManager: any): boolean {
  * argument is an object; anything else fails the check or throws here, and
  * either way the answer is false, so the caller then checks each result
  * model as before.
- * @param {object} handle an engine handle, for `checkAstShape`
  * @param {object[]} decoratorCommandSets the decorator command sets
  * @param {object} [options] the decorateModels options
  * @return {boolean} true if the added nodes have the metamodel's shape
  */
-function dcsCommandsShapeChecked(handle: any, decoratorCommandSets: any[], options?: any): boolean {
+function dcsCommandsShapeChecked(decoratorCommandSets: any[], options?: any): boolean {
     const defaultNamespace = options?.defaultNamespace;
     const decorators: any[] = [];
     const imports: any[] = [];
@@ -2350,7 +2356,7 @@ function dcsCommandsShapeChecked(handle: any, decoratorCommandSets: any[], optio
                 }
             }
         }
-        handle.checkAstShape(JSON.stringify({
+        rust.checkAstShape(JSON.stringify({
             $class: 'concerto.metamodel@1.0.0.Model',
             namespace: 'concerto.dcs.shapecheck@1.0.0',
             imports,
@@ -2490,6 +2496,70 @@ function commitStaged(modelFile: any, handle: any): number | undefined {
     }
     state!.committed = handle;
     return id;
+}
+
+/**
+ * The stage ids `commitStagedAll` hands the engine, which overwrites them
+ * with the files' handles: one buffer, grown on demand and reused, since a
+ * new `Uint32Array` per call (an off-heap backing store) cost about 1 ms of
+ * garbage collection on an extract of 47 files (P5-101, M5).
+ */
+let commitBuffer = new Uint32Array(64);
+
+/**
+ * P5-101 (D-10, M5; accordproject/concerto-rust#455): `commitStaged` for
+ * several files, in order, in one engine call (concerto-wasm
+ * `commitStagedModelFiles`), for the batch `addModelFiles` and the
+ * DecoratorManager results (`adoptStagedModels`). Returns the
+ * files' handles, in order (a view of a reused buffer, valid until the
+ * next call), or undefined, having changed nothing, when any of them has no
+ * usable stage in `handle` (or there are fewer than two): the caller then
+ * writes each file on its own, as before. A registration error propagates,
+ * as `commitStaged`'s would, with every file the engine registered before
+ * it marked as registered from its stage.
+ * @param {object[]} modelFiles the ModelFiles being added
+ * @param {object} handle the manager's rustHandle
+ * @return {ArrayLike<number>|undefined} the registered files' handles, or undefined
+ */
+function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | undefined {
+    const n = modelFiles.length;
+    if (n < 2 || typeof handle.commitStagedModelFiles !== 'function') {
+        return undefined;
+    }
+    const states: FileState[] = new Array(n);
+    if (commitBuffer.length < n) {
+        commitBuffer = new Uint32Array(Math.max(n, commitBuffer.length * 2));
+    }
+    const ids = commitBuffer.subarray(0, n);
+    for (let i = 0; i < n; i++) {
+        const state = fileStates.get(modelFiles[i]);
+        const stage = state?.stage;
+        if (!stage || stage.handle !== handle) {
+            return undefined;
+        }
+        states[i] = state!;
+        ids[i] = stage.id;
+    }
+    let committed: boolean;
+    try {
+        committed = handle.commitStagedModelFiles(ids);
+    } catch (e) {
+        modelFiles.forEach((modelFile, i) => {
+            if (handle.modelFileId(modelFile.getNamespace()) !== undefined) {
+                takeStageOf(states[i], handle);
+                states[i].committed = handle;
+            }
+        });
+        throw e;
+    }
+    if (!committed) {
+        return undefined;
+    }
+    for (const state of states) {
+        takeStageOf(state, handle);
+        state.committed = handle;
+    }
+    return ids;
 }
 
 /**
@@ -3639,6 +3709,7 @@ export {
     recordedImportNames,
     deferDeclarations,
     commitStaged,
+    commitStagedAll,
     validateAndCommitStaged,
     updateStaged,
     validateAstStaged,
