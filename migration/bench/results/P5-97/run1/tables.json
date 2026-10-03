@@ -1,0 +1,936 @@
+{
+  "time": {
+    "concerto-core-test-data/n1": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 2.329625999999962,
+        "p95": 4.314725250000003,
+        "tput": 380.7136517376756,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "head (a) new + reload",
+        "p50": 4.549239499999999,
+        "p95": 7.861059749999976,
+        "tput": 200.80085928792036,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "head (b) filter",
+        "p50": null,
+        "p95": null,
+        "tput": null,
+        "rounds": 0
+      },
+      "after-a": {
+        "label": "P5-97 (a) new + reload",
+        "p50": 4.330437500000016,
+        "p95": 6.899679399999995,
+        "tput": 209.1804337954237,
+        "rounds": 3
+      },
+      "after-b": {
+        "label": "P5-97 (b) filter",
+        "p50": null,
+        "p95": null,
+        "tput": null,
+        "rounds": 0
+      },
+      "after-c": {
+        "label": "P5-97 (c) fork",
+        "p50": 1.475345500000003,
+        "p95": 2.4945627499999934,
+        "tput": 616.3333572337137,
+        "rounds": 3
+      }
+    },
+    "concerto-core-test-data/n16": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 42.93583299999989,
+        "p95": 66.88067530000001,
+        "tput": 335.2400311247573,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "head (a) new + reload",
+        "p50": 79.16641049999998,
+        "p95": 107.9393954000004,
+        "tput": 191.47133868834052,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "head (b) filter",
+        "p50": null,
+        "p95": null,
+        "tput": null,
+        "rounds": 0
+      },
+      "after-a": {
+        "label": "P5-97 (a) new + reload",
+        "p50": 77.41339149999999,
+        "p95": 117.67007309999991,
+        "tput": 190.74031067344055,
+        "rounds": 3
+      },
+      "after-b": {
+        "label": "P5-97 (b) filter",
+        "p50": null,
+        "p95": null,
+        "tput": null,
+        "rounds": 0
+      },
+      "after-c": {
+        "label": "P5-97 (c) fork",
+        "p50": 24.72168449999998,
+        "p95": 33.307801399999875,
+        "tput": 636.5011329043883,
+        "rounds": 3
+      }
+    },
+    "concerto-core-test-data/n64": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 166.4192365,
+        "p95": 196.9564493,
+        "tput": 361.73948301439276,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "head (a) new + reload",
+        "p50": 331.7191805,
+        "p95": 570.4528185999998,
+        "tput": 171.64672865827018,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "head (b) filter",
+        "p50": null,
+        "p95": null,
+        "tput": null,
+        "rounds": 0
+      },
+      "after-a": {
+        "label": "P5-97 (a) new + reload",
+        "p50": 350.41482199999996,
+        "p95": 578.4610450999999,
+        "tput": 165.00849547063973,
+        "rounds": 3
+      },
+      "after-b": {
+        "label": "P5-97 (b) filter",
+        "p50": null,
+        "p95": null,
+        "tput": null,
+        "rounds": 0
+      },
+      "after-c": {
+        "label": "P5-97 (c) fork",
+        "p50": 105.85452450000003,
+        "p95": 120.0075956,
+        "tput": 618.5569331491997,
+        "rounds": 3
+      }
+    },
+    "conformance/n1": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 1.0203239999999596,
+        "p95": 1.9004180499999872,
+        "tput": 842.3298105521288,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "head (a) new + reload",
+        "p50": 2.45955349999997,
+        "p95": 4.279194150000038,
+        "tput": 353.6696722308223,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "head (b) filter",
+        "p50": 6.682070500000009,
+        "p95": 9.79457484999992,
+        "tput": 134.506377846717,
+        "rounds": 3
+      },
+      "after-a": {
+        "label": "P5-97 (a) new + reload",
+        "p50": 2.4862329999998565,
+        "p95": 3.6794647499999478,
+        "tput": 360.42250207029156,
+        "rounds": 3
+      },
+      "after-b": {
+        "label": "P5-97 (b) filter",
+        "p50": 2.356901000000107,
+        "p95": 4.21554720000002,
+        "tput": 375.85986777460334,
+        "rounds": 3
+      },
+      "after-c": {
+        "label": "P5-97 (c) fork",
+        "p50": 1.0300439999999185,
+        "p95": 1.8667697500000595,
+        "tput": 808.0261838784018,
+        "rounds": 3
+      }
+    },
+    "conformance/n16": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 19.81690850000001,
+        "p95": 33.27078749999999,
+        "tput": 723.7147521220796,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "head (a) new + reload",
+        "p50": 44.47413199999994,
+        "p95": 61.99549380000008,
+        "tput": 347.48221100654854,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "head (b) filter",
+        "p50": 113.44527100000028,
+        "p95": 164.2367283999999,
+        "tput": 130.4463601485274,
+        "rounds": 3
+      },
+      "after-a": {
+        "label": "P5-97 (a) new + reload",
+        "p50": 51.943764000000044,
+        "p95": 65.1257956999999,
+        "tput": 300.9201105577176,
+        "rounds": 3
+      },
+      "after-b": {
+        "label": "P5-97 (b) filter",
+        "p50": 38.566326999999944,
+        "p95": 49.86500980000003,
+        "tput": 404.0405579023135,
+        "rounds": 3
+      },
+      "after-c": {
+        "label": "P5-97 (c) fork",
+        "p50": 15.989092999999968,
+        "p95": 21.86590959999997,
+        "tput": 964.8025834943292,
+        "rounds": 3
+      }
+    },
+    "conformance/n64": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 76.64494249999996,
+        "p95": 111.97113329999999,
+        "tput": 696.7388283890338,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "head (a) new + reload",
+        "p50": 181.4539845,
+        "p95": 227.86832445000016,
+        "tput": 333.91630138637237,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "head (b) filter",
+        "p50": 510.11598049999975,
+        "p95": 716.1299446499999,
+        "tput": 116.78822303167712,
+        "rounds": 3
+      },
+      "after-a": {
+        "label": "P5-97 (a) new + reload",
+        "p50": 179.99439650000005,
+        "p95": 221.80443405000005,
+        "tput": 344.0979851633242,
+        "rounds": 3
+      },
+      "after-b": {
+        "label": "P5-97 (b) filter",
+        "p50": 161.52308800000003,
+        "p95": 183.12520659999984,
+        "tput": 388.77348525953175,
+        "rounds": 3
+      },
+      "after-c": {
+        "label": "P5-97 (c) fork",
+        "p50": 67.37163800000002,
+        "p95": 85.92593569999998,
+        "tput": 926.0648656671374,
+        "rounds": 3
+      }
+    },
+    "synthetic-large/n1": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 2.231582000000003,
+        "p95": 4.509282600000014,
+        "tput": 381.4679095220069,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "head (a) new + reload",
+        "p50": 13.75855150000018,
+        "p95": 24.034362549999887,
+        "tput": 64.38154703704431,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "head (b) filter",
+        "p50": 22.851011000000085,
+        "p95": 45.640981149999966,
+        "tput": 39.17190469176106,
+        "rounds": 3
+      },
+      "after-a": {
+        "label": "P5-97 (a) new + reload",
+        "p50": 13.970482500000003,
+        "p95": 21.72679209999997,
+        "tput": 63.939183585680105,
+        "rounds": 3
+      },
+      "after-b": {
+        "label": "P5-97 (b) filter",
+        "p50": 9.204262000000085,
+        "p95": 13.699875199999976,
+        "tput": 101.2054921497487,
+        "rounds": 3
+      },
+      "after-c": {
+        "label": "P5-97 (c) fork",
+        "p50": 8.487620500000048,
+        "p95": 12.542959700000061,
+        "tput": 110.59213425580752,
+        "rounds": 3
+      }
+    },
+    "synthetic-large/n16": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 42.97437700000003,
+        "p95": 62.77140399999999,
+        "tput": 324.68907687414776,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "head (a) new + reload",
+        "p50": 247.4586190000001,
+        "p95": 404.7935195999999,
+        "tput": 58.07545382020933,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "head (b) filter",
+        "p50": 411.0455444999998,
+        "p95": 614.8649540499999,
+        "tput": 36.26207339025045,
+        "rounds": 3
+      },
+      "after-a": {
+        "label": "P5-97 (a) new + reload",
+        "p50": 249.4099369999999,
+        "p95": 383.94256264999996,
+        "tput": 57.45262125636838,
+        "rounds": 3
+      },
+      "after-b": {
+        "label": "P5-97 (b) filter",
+        "p50": 153.38270700000004,
+        "p95": 167.49558829999992,
+        "tput": 102.91674155403366,
+        "rounds": 3
+      },
+      "after-c": {
+        "label": "P5-97 (c) fork",
+        "p50": 139.62998850000008,
+        "p95": 158.43373200000005,
+        "tput": 112.68612677446185,
+        "rounds": 3
+      }
+    },
+    "synthetic-large/n64": {
+      "ts5-a": {
+        "label": "TS 5.0.0 (a)",
+        "p50": 162.87206749999996,
+        "p95": 177.72249090000003,
+        "tput": 359.5219603311666,
+        "rounds": 3
+      },
+      "before-a": {
+        "label": "head (a) new + reload",
+        "p50": 1064.64437,
+        "p95": 1621.4119073999998,
+        "tput": 51.015695163293806,
+        "rounds": 3
+      },
+      "before-b": {
+        "label": "head (b) filter",
+        "p50": 1709.0926285,
+        "p95": 2366.9397928000003,
+        "tput": 30.826012619610175,
+        "rounds": 3
+      },
+      "after-a": {
+        "label": "P5-97 (a) new + reload",
+        "p50": 1031.9239774999999,
+        "p95": 1573.1451131,
+        "tput": 52.599304125092644,
+        "rounds": 3
+      },
+      "after-b": {
+        "label": "P5-97 (b) filter",
+        "p50": 585.9595274999999,
+        "p95": 647.55854155,
+        "tput": 102.81113941944248,
+        "rounds": 3
+      },
+      "after-c": {
+        "label": "P5-97 (c) fork",
+        "p50": 555.6787360000001,
+        "p95": 586.4540471,
+        "tput": 112.3424395039109,
+        "rounds": 3
+      }
+    }
+  },
+  "memory": {
+    "concerto-core-test-data/ts5-a": {
+      "set": "concerto-core-test-data",
+      "approach": "a",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 35,
+      "held": 100,
+      "before": {
+        "wasmBytes": null,
+        "rss": 74080256,
+        "heapUsed": 9686392,
+        "external": 2010225,
+        "arrayBuffers": 16875
+      },
+      "after": {
+        "wasmBytes": null,
+        "rss": 128049152,
+        "heapUsed": 40771608,
+        "external": 2010265,
+        "arrayBuffers": 16875
+      },
+      "wasmBytesPerManager": 0,
+      "rssBytesPerManager": 539688.96,
+      "heapBytesPerManager": 310852.16,
+      "heldCheck": 100
+    },
+    "concerto-core-test-data/before-a": {
+      "set": "concerto-core-test-data",
+      "approach": "a",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/before/concerto/packages/concerto-core/dist",
+      "engineModule": "/home/user/wt/P5-97/before/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+      "node": "v22.22.2",
+      "platformModels": 35,
+      "held": 100,
+      "before": {
+        "wasmBytes": 12713984,
+        "rss": 226058240,
+        "heapUsed": 26187200,
+        "external": 14895930,
+        "arrayBuffers": 188596
+      },
+      "after": {
+        "wasmBytes": 52953088,
+        "rss": 270696448,
+        "heapUsed": 26501608,
+        "external": 55131438,
+        "arrayBuffers": 188596
+      },
+      "wasmBytesPerManager": 402391.04,
+      "rssBytesPerManager": 446382.08,
+      "heapBytesPerManager": 3144.08,
+      "heldCheck": 100
+    },
+    "concerto-core-test-data/after-a": {
+      "set": "concerto-core-test-data",
+      "approach": "a",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/packages/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 35,
+      "held": 100,
+      "before": {
+        "wasmBytes": 12976128,
+        "rss": 226418688,
+        "heapUsed": 26303960,
+        "external": 15158074,
+        "arrayBuffers": 188596
+      },
+      "after": {
+        "wasmBytes": 54394880,
+        "rss": 272683008,
+        "heapUsed": 26584304,
+        "external": 56573230,
+        "arrayBuffers": 188596
+      },
+      "wasmBytesPerManager": 414187.52,
+      "rssBytesPerManager": 462643.2,
+      "heapBytesPerManager": 2803.44,
+      "heldCheck": 100
+    },
+    "concerto-core-test-data/after-c": {
+      "set": "concerto-core-test-data",
+      "approach": "c",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/packages/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 35,
+      "held": 100,
+      "before": {
+        "wasmBytes": 4128768,
+        "rss": 203595776,
+        "heapUsed": 26905352,
+        "external": 6310714,
+        "arrayBuffers": 188596
+      },
+      "after": {
+        "wasmBytes": 8323072,
+        "rss": 217489408,
+        "heapUsed": 32529760,
+        "external": 10505058,
+        "arrayBuffers": 188596
+      },
+      "wasmBytesPerManager": 41943.04,
+      "rssBytesPerManager": 138936.32,
+      "heapBytesPerManager": 56244.08,
+      "heldCheck": 100
+    },
+    "conformance/ts5-a": {
+      "set": "conformance",
+      "approach": "a",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 41,
+      "held": 100,
+      "before": {
+        "wasmBytes": null,
+        "rss": 72916992,
+        "heapUsed": 9060320,
+        "external": 2010225,
+        "arrayBuffers": 16875
+      },
+      "after": {
+        "wasmBytes": null,
+        "rss": 112476160,
+        "heapUsed": 25514512,
+        "external": 2010265,
+        "arrayBuffers": 16875
+      },
+      "wasmBytesPerManager": 0,
+      "rssBytesPerManager": 395591.68,
+      "heapBytesPerManager": 164541.92,
+      "heldCheck": 100
+    },
+    "conformance/before-a": {
+      "set": "conformance",
+      "approach": "a",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/before/concerto/packages/concerto-core/dist",
+      "engineModule": "/home/user/wt/P5-97/before/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+      "node": "v22.22.2",
+      "platformModels": 41,
+      "held": 100,
+      "before": {
+        "wasmBytes": 5111808,
+        "rss": 198328320,
+        "heapUsed": 25781552,
+        "external": 7293754,
+        "arrayBuffers": 188596
+      },
+      "after": {
+        "wasmBytes": 17891328,
+        "rss": 224821248,
+        "heapUsed": 33295488,
+        "external": 20073314,
+        "arrayBuffers": 188596
+      },
+      "wasmBytesPerManager": 127795.2,
+      "rssBytesPerManager": 264929.28,
+      "heapBytesPerManager": 75139.36,
+      "heldCheck": 100
+    },
+    "conformance/before-b": {
+      "set": "conformance",
+      "approach": "b",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/before/concerto/packages/concerto-core/dist",
+      "engineModule": "/home/user/wt/P5-97/before/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+      "node": "v22.22.2",
+      "platformModels": 41,
+      "held": 100,
+      "before": {
+        "wasmBytes": 14548992,
+        "rss": 227610624,
+        "heapUsed": 26177992,
+        "external": 16730938,
+        "arrayBuffers": 188596
+      },
+      "after": {
+        "wasmBytes": 65142784,
+        "rss": 294637568,
+        "heapUsed": 34971600,
+        "external": 67321134,
+        "arrayBuffers": 188596
+      },
+      "wasmBytesPerManager": 505937.92,
+      "rssBytesPerManager": 670269.44,
+      "heapBytesPerManager": 87936.08,
+      "heldCheck": 100
+    },
+    "conformance/after-a": {
+      "set": "conformance",
+      "approach": "a",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/packages/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 41,
+      "held": 100,
+      "before": {
+        "wasmBytes": 5242880,
+        "rss": 197890048,
+        "heapUsed": 25897672,
+        "external": 7424826,
+        "arrayBuffers": 188596
+      },
+      "after": {
+        "wasmBytes": 18350080,
+        "rss": 207945728,
+        "heapUsed": 33414152,
+        "external": 20532066,
+        "arrayBuffers": 188596
+      },
+      "wasmBytesPerManager": 131072,
+      "rssBytesPerManager": 100556.8,
+      "heapBytesPerManager": 75164.8,
+      "heldCheck": 100
+    },
+    "conformance/after-b": {
+      "set": "conformance",
+      "approach": "b",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/packages/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 41,
+      "held": 100,
+      "before": {
+        "wasmBytes": 3080192,
+        "rss": 192573440,
+        "heapUsed": 26273592,
+        "external": 5262138,
+        "arrayBuffers": 188596
+      },
+      "after": {
+        "wasmBytes": 6356992,
+        "rss": 209612800,
+        "heapUsed": 32923776,
+        "external": 8538978,
+        "arrayBuffers": 188596
+      },
+      "wasmBytesPerManager": 32768,
+      "rssBytesPerManager": 170393.6,
+      "heapBytesPerManager": 66501.84,
+      "heldCheck": 100
+    },
+    "conformance/after-c": {
+      "set": "conformance",
+      "approach": "c",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/packages/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 41,
+      "held": 100,
+      "before": {
+        "wasmBytes": 2818048,
+        "rss": 189939712,
+        "heapUsed": 26098688,
+        "external": 4999994,
+        "arrayBuffers": 188596
+      },
+      "after": {
+        "wasmBytes": 5308416,
+        "rss": 206716928,
+        "heapUsed": 32304616,
+        "external": 7490402,
+        "arrayBuffers": 188596
+      },
+      "wasmBytesPerManager": 24903.68,
+      "rssBytesPerManager": 167772.16,
+      "heapBytesPerManager": 62059.28,
+      "heldCheck": 100
+    },
+    "synthetic-large/ts5-a": {
+      "set": "synthetic-large",
+      "approach": "a",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 1,
+      "held": 100,
+      "before": {
+        "wasmBytes": null,
+        "rss": 85925888,
+        "heapUsed": 9858128,
+        "external": 2010225,
+        "arrayBuffers": 16875
+      },
+      "after": {
+        "wasmBytes": null,
+        "rss": 139251712,
+        "heapUsed": 51937016,
+        "external": 2010265,
+        "arrayBuffers": 16875
+      },
+      "wasmBytesPerManager": 0,
+      "rssBytesPerManager": 533258.24,
+      "heapBytesPerManager": 420788.88,
+      "heldCheck": 100
+    },
+    "synthetic-large/before-a": {
+      "set": "synthetic-large",
+      "approach": "a",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/before/concerto/packages/concerto-core/dist",
+      "engineModule": "/home/user/wt/P5-97/before/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+      "node": "v22.22.2",
+      "platformModels": 1,
+      "held": 100,
+      "before": {
+        "wasmBytes": 44761088,
+        "rss": 244400128,
+        "heapUsed": 26436368,
+        "external": 47139642,
+        "arrayBuffers": 385204
+      },
+      "after": {
+        "wasmBytes": 99745792,
+        "rss": 295084032,
+        "heapUsed": 22220776,
+        "external": 102120750,
+        "arrayBuffers": 385204
+      },
+      "wasmBytesPerManager": 549847.04,
+      "rssBytesPerManager": 506839.04,
+      "heapBytesPerManager": -42155.92,
+      "heldCheck": 100
+    },
+    "synthetic-large/before-b": {
+      "set": "synthetic-large",
+      "approach": "b",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/before/concerto/packages/concerto-core/dist",
+      "engineModule": "/home/user/wt/P5-97/before/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+      "node": "v22.22.2",
+      "platformModels": 1,
+      "held": 100,
+      "before": {
+        "wasmBytes": 58654720,
+        "rss": 268333056,
+        "heapUsed": 27724792,
+        "external": 61033274,
+        "arrayBuffers": 385204
+      },
+      "after": {
+        "wasmBytes": 314179584,
+        "rss": 542175232,
+        "heapUsed": 53867328,
+        "external": 316554542,
+        "arrayBuffers": 385204
+      },
+      "wasmBytesPerManager": 2555248.64,
+      "rssBytesPerManager": 2738421.76,
+      "heapBytesPerManager": 261425.36,
+      "heldCheck": 100
+    },
+    "synthetic-large/after-a": {
+      "set": "synthetic-large",
+      "approach": "a",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/packages/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 1,
+      "held": 100,
+      "before": {
+        "wasmBytes": 42729472,
+        "rss": 245387264,
+        "heapUsed": 26552528,
+        "external": 45108026,
+        "arrayBuffers": 385204
+      },
+      "after": {
+        "wasmBytes": 102432768,
+        "rss": 300400640,
+        "heapUsed": 22303232,
+        "external": 104807726,
+        "arrayBuffers": 385204
+      },
+      "wasmBytesPerManager": 597032.96,
+      "rssBytesPerManager": 550133.76,
+      "heapBytesPerManager": -42492.96,
+      "heldCheck": 100
+    },
+    "synthetic-large/after-b": {
+      "set": "synthetic-large",
+      "approach": "b",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/packages/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 1,
+      "held": 100,
+      "before": {
+        "wasmBytes": 8323072,
+        "rss": 215838720,
+        "heapUsed": 27884192,
+        "external": 10701626,
+        "arrayBuffers": 385204
+      },
+      "after": {
+        "wasmBytes": 13238272,
+        "rss": 230256640,
+        "heapUsed": 30087848,
+        "external": 15616866,
+        "arrayBuffers": 385204
+      },
+      "wasmBytesPerManager": 49152,
+      "rssBytesPerManager": 144179.2,
+      "heapBytesPerManager": 22036.56,
+      "heldCheck": 100
+    },
+    "synthetic-large/after-c": {
+      "set": "synthetic-large",
+      "approach": "c",
+      "mode": "memory",
+      "coreVersion": "5.0.0",
+      "coreDist": "/home/user/wt/P5-97/concerto/packages/concerto-core/dist",
+      "engineModule": "@accordproject/concerto-engine",
+      "node": "v22.22.2",
+      "platformModels": 1,
+      "held": 100,
+      "before": {
+        "wasmBytes": 8192000,
+        "rss": 210837504,
+        "heapUsed": 27668472,
+        "external": 10570554,
+        "arrayBuffers": 385204
+      },
+      "after": {
+        "wasmBytes": 12779520,
+        "rss": 215031808,
+        "heapUsed": 29558496,
+        "external": 15158114,
+        "arrayBuffers": 385204
+      },
+      "wasmBytesPerManager": 45875.2,
+      "rssBytesPerManager": 41943.04,
+      "heapBytesPerManager": 18900.24,
+      "heldCheck": 100
+    }
+  },
+  "gc": {
+    "extract_cold/concerto-core-test-data": {
+      "before": 33.9,
+      "after": 34.5
+    },
+    "extract_cold/conformance": {
+      "before": 19.1,
+      "after": 18.8
+    },
+    "extract_cold/synthetic-large": {
+      "before": 44.2,
+      "after": 42.6
+    },
+    "add_model_file/concerto-core-test-data": {
+      "before": 24.7,
+      "after": 24.6
+    },
+    "add_model_file/conformance": {
+      "before": 23.5,
+      "after": 22.9
+    },
+    "add_model_file/synthetic-large": {
+      "before": 18,
+      "after": 17.3
+    }
+  },
+  "soak": {
+    "conformance": {
+      "seconds": 1200,
+      "requests": 1697280,
+      "slopeMbPerMin": 0.2563393628061536,
+      "wasmGrows": true,
+      "rssHalves": [
+        406794240,
+        437735424
+      ],
+      "wasm": [
+        65536000,
+        65798144,
+        74448896
+      ],
+      "rss": [
+        406532096,
+        406794240,
+        437735424
+      ],
+      "plateau": false
+    },
+    "synthetic-large": {
+      "seconds": 600,
+      "requests": 68800,
+      "slopeMbPerMin": 0.43146609198125147,
+      "wasmGrows": false,
+      "rssHalves": [
+        354263040,
+        354344960
+      ],
+      "wasm": [
+        34603008,
+        34603008,
+        34603008
+      ],
+      "rss": [
+        349437952,
+        346570752,
+        351907840
+      ],
+      "plateau": true
+    }
+  }
+}
