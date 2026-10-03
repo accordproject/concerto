@@ -45,27 +45,17 @@ import Serializer from '../serializer';
 import type BaseModelManager from '../basemodelmanager';
 import type { SerializerOptions } from '../types';
 import type { TypeCache } from './serializer-codec';
+import type { EngineHandle } from './bindings';
 /* eslint-enable no-unused-vars */
 
 interface CachedHandle {
-    // The model manager's `rustHandle` when the entry was made: a
-    // `clearModelFiles` replaces it.
-    handle: any;
-    // The exact ModelFile *instances* (not just their namespaces) the
-    // entry was made for, in `getModelFiles()` order. `updateModelFile`
-    // (and a clear() plus re-add under the same namespaces) replaces the
-    // object in `BaseModelManager#modelFiles` in place, keeping the
-    // namespace list identical -- so identity of the ModelFile instances,
-    // not just of the namespace strings, is what "the models changed"
-    // has to mean for the class lookups below.
-    modelFiles: unknown[];
+    // The model manager's `rustHandle`.
+    handle: EngineHandle;
     // P5-16: the class lookups `materializeTyped` makes for the fast path's
     // results (`TypeCache` in serializer-codec.ts), valid exactly as long
-    // as the ModelFile instances they came from are registered.
+    // as the model files they came from are registered.
     types: TypeCache;
 }
-
-const handles = new WeakMap<BaseModelManager, CachedHandle>();
 
 /**
  * The model manager's `rustHandle` (concerto-wasm `ModelManagerHandle`),
@@ -73,36 +63,42 @@ const handles = new WeakMap<BaseModelManager, CachedHandle>();
  * @param {BaseModelManager} modelManager the model manager
  * @return {object} the handle
  */
-function handleFor(modelManager: BaseModelManager): any {
+function handleFor(modelManager: BaseModelManager): EngineHandle {
     return cachedHandleFor(modelManager).handle;
 }
 
 /**
- * `handleFor`'s cache entry: the handle and the `TypeCache` that goes with
- * it (P5-16).
+ * `handleFor`'s answer, with the `TypeCache` that goes with it (P5-16),
+ * kept in the manager's engine state (`EngineState.serializerCache`) for
+ * its current model version (P5-100, F-3: every change of the manager's
+ * model files, or of its rustHandle, moves the version, so the cache no
+ * longer compares the ModelFile instances on every call).
  * @param {BaseModelManager} modelManager the model manager
  * @return {object} the cache entry
  */
 function cachedHandleFor(modelManager: BaseModelManager): CachedHandle {
     // P5-52 (BC-28, R1): `options.regExp` is ignored, so a model manager
     // built with one no longer leaves the fast path.
-    const handle = (modelManager as any).rustHandle;
+    const handle = modelManager.rustHandle;
     if (!handle || typeof handle.serializerToJson !== 'function') {
         throw new EngineFastPathUnsupported('no-rust-handle');
     }
     // The batch `addModelFiles` registers its files in `modelFiles` before
     // it mirrors them (P5-34): until then rustHandle is behind.
-    if ((modelManager as any)._mirrorPending) {
+    if (modelManager._mirrorPending) {
         throw new EngineFastPathUnsupported('mirror-pending');
     }
-    const modelFiles = modelManager.getModelFiles(false);
-    const cached = handles.get(modelManager);
-    if (cached && cached.handle === handle && cached.modelFiles.length === modelFiles.length &&
-        cached.modelFiles.every((mf, i) => mf === modelFiles[i])) {
+    const state = modelManager._engine;
+    if (state === undefined) {
+        // Not a BaseModelManager's own state: nothing is kept.
+        return { handle, types: newTypeCache() };
+    }
+    const cached = state.serializerCache as (CachedHandle & { version: number }) | undefined;
+    if (cached !== undefined && cached.version === state.version && cached.handle === handle) {
         return cached;
     }
-    const entry = { handle, modelFiles, types: newTypeCache() };
-    handles.set(modelManager, entry);
+    const entry = { version: state.version, handle, types: newTypeCache() };
+    state.serializerCache = entry;
     return entry;
 }
 
@@ -252,7 +248,7 @@ let metaModelOptions: unknown;
  */
 function validateMetaModel(input: unknown): void {
     if (!metaModelHandle) {
-        const handle = new (rust as any).ModelManagerHandle();
+        const handle = new rust.ModelManagerHandle();
         handle.addModel(checkJsonText(JSON.stringify(MetaModelUtil.metaModelAst)), 'concerto.metamodel');
         metaModelHandle = handle;
     }

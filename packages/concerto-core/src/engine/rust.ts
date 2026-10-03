@@ -19,15 +19,15 @@
 
 import semver from 'semver';
 import { makeError } from './errors';
+import type { EngineBindings, EngineInternals } from './bindings';
 
 /**
- * The bindings of the concerto-wasm module (concerto-rust concerto-wasm/src/lib.rs).
- * Every converted member is bound; the P0-04b trial units (ModelUtil,
- * NumberValidator, ScalarDeclaration) were only the first three.
+ * The bindings of the concerto-wasm module (concerto-rust
+ * concerto-wasm/src/lib.rs): the ones the public classes call
+ * (`EngineBindings`) and the ones only src/engine/ calls (`EngineInternals`),
+ * both in bindings.d.ts (P5-100, E-10).
  */
-export interface RustEngine {
-    [binding: string]: (...args: any[]) => any;
-}
+export type RustEngine = EngineBindings & EngineInternals;
 
 /**
  * Loads the engine module (CONCERTO_ENGINE_MODULE, or the package

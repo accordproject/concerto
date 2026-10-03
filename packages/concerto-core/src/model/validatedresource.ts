@@ -19,26 +19,7 @@ import Resource from './resource';
 /* eslint-disable no-unused-vars */
 import type ResourceValidator from '../serializer/resourcevalidator';
 /* eslint-enable no-unused-vars */
-
-// P5-12c (accordproject/concerto-rust#293): `validate`, `setPropertyValue`
-// and `addArrayValue` validate in one Rust engine call each
-// (src/engine/validate-resource.ts). The `ResourceValidator` visitor below
-// runs only when the engine cannot take the value
-// (`EngineFastPathUnsupported`), or, in `setPropertyValue`, for a string,
-// number or boolean on a plain primitive field with no validator, where the
-// visitor is the cheaper path (validate-resource.ts, `visitorIsCheaper`). See serializer.ts's identical preamble for
-// why `loadEngine` takes a non-literal specifier.
-import { createRequire } from 'module';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-// Memoised per specifier (P5-06), as in serializer.ts.
-/* istanbul ignore next */
-const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    engineModules[specifier] ??
-    (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
+import { engineValidateResource } from '../engineloader';
 
 /**
  * ValidatedResource is a Resource that can validate that property
@@ -93,7 +74,7 @@ class ValidatedResource extends Resource {
         // }
 
         const rootResourceIdentifier = this.getFullyQualifiedIdentifier();
-        if (!loadEngine('../engine/validate-resource').validateProperty(this, propName, value, rootResourceIdentifier, field)) {
+        if (!engineValidateResource().validateProperty(this, propName, value, rootResourceIdentifier, field)) {
             const parameters:any = {};
             parameters.stack = new TypedStack(value);
             parameters.modelManager = this.getModelManager();
@@ -131,7 +112,7 @@ class ValidatedResource extends Resource {
         }
         newArray.push(value);
         const rootResourceIdentifier = this.getFullyQualifiedIdentifier();
-        if (!loadEngine('../engine/validate-resource').validateProperty(this, propName, newArray, rootResourceIdentifier)) {
+        if (!engineValidateResource().validateProperty(this, propName, newArray, rootResourceIdentifier)) {
             const parameters = {
                 stack: new TypedStack(newArray),
                 modelManager: this.getModelManager(),
@@ -150,7 +131,7 @@ class ValidatedResource extends Resource {
     validate() {
         const classDeclaration = this.getClassDeclaration();
         const rootResourceIdentifier = this.getFullyQualifiedIdentifier();
-        if (loadEngine('../engine/validate-resource').validateResource(this, rootResourceIdentifier)) {
+        if (engineValidateResource().validateResource(this, rootResourceIdentifier)) {
             return;
         }
         const parameters:any = {};

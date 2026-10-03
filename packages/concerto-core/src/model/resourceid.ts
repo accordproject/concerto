@@ -11,20 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Same non-literal
-// loadEngine as src/modelutil.ts: a bundler must never see a specifier it
-// would resolve (PORTING.md 1.5).
-import { createRequire } from 'module';
-import type { EngineBindings } from '../engine/bindings';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier);
-/* istanbul ignore next */
-const rust: EngineBindings = loadEngine('../engine').rust;
+import { rust } from '../engineloader';
 
 /**
  * All the identifying properties of a resource.

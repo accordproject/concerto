@@ -22,7 +22,8 @@
 // ...) read it unchanged, without a boundary call per getter.
 
 import { rust } from './index';
-import { encodeAst, encodeAstGeneration } from './ast-codec';
+import { encodeAst, encodeAstCount } from './ast-codec';
+import type { EngineState } from './bindings';
 
 // P5-06: the introspect modules the per-element views below construct
 // objects from, required once on first use (they cannot be imported at
@@ -88,7 +89,7 @@ function scalarDeclarationProcess(declaration: any): void {
     // the binding succeeds, with a StringValidator's own snapshot too),
     // else the binding.
     const precomputed = batchOf(declaration.modelFile)?.scalars.get(declaration.ast);
-    const snapshot = precomputed ?? rust!.scalarDeclarationProcess(declaration);
+    const snapshot = precomputed ?? rust.scalarDeclarationProcess(declaration);
     declaration.superType = null;
     declaration.superTypeDeclaration = null;
     declaration.idField = null;
@@ -216,7 +217,7 @@ function beginModelFile(modelFile: any, ast: any): Batch | null {
     const saved = batch;
     // P5-10b: a lazily built file whose snapshot was already computed for a
     // declaration built on its own reuses it.
-    const deferred = deferredFiles.get(modelFile);
+    const deferred = fileStates.get(modelFile)?.deferred;
     if (deferred && deferred.batch !== undefined) {
         batch = deferred.batch;
         return saved;
@@ -240,10 +241,11 @@ function computeBatch(modelFile: any, ast: any): Batch | null {
     try {
         const namespace = modelFile.namespace;
         if (ast && Array.isArray(ast.declarations)) {
-            const text = rust!.modelFileViewSnapshot(
-                JSON.stringify(ast),
-                typeof namespace === 'string' ? namespace : undefined,
-            );
+            const ns = typeof namespace === 'string' ? namespace : undefined;
+            // P5-100 (E-6): read from the file the engine already holds,
+            // when it holds this one, rather than from the AST sent again.
+            const text = (ast === modelFile.ast ? heldViewSnapshot(modelFile, ns) : undefined) ??
+                rust.modelFileViewSnapshot(JSON.stringify(ast), ns);
             if (typeof text === 'string') {
                 const snapshots = JSON.parse(text);
                 const next: Batch = {
@@ -316,6 +318,39 @@ function computeBatch(modelFile: any, ast: any): Batch | null {
 }
 
 /**
+ * P5-100 (E-6, accordproject/concerto-rust#454): `modelFileViewSnapshot`
+ * of `modelFile`'s AST as the engine already holds it: its staged copy, or
+ * the file registered from that stage while its manager still holds it, so
+ * that building the views does not send and parse the AST again. As
+ * everywhere the engine's copy stands for the view's (`commitStaged`,
+ * `validateLoaded`), the AST is taken to be unchanged since it was staged.
+ * Undefined when the engine holds no such copy (or has no such binding);
+ * the caller then sends the AST, as before.
+ * @param {object} modelFile the ModelFile
+ * @param {string} [namespace] its namespace
+ * @return {string|undefined} the snapshot text
+ */
+function heldViewSnapshot(modelFile: any, namespace: string | undefined): string | undefined {
+    const state = fileStates.get(modelFile);
+    if (state === undefined) {
+        return undefined;
+    }
+    const stage = state.stage;
+    if (stage !== undefined) {
+        return typeof stage.handle.stagedModelFileViewSnapshot === 'function'
+            ? stage.handle.stagedModelFileViewSnapshot(stage.id, namespace) : undefined;
+    }
+    const committed: any = state.committed;
+    const manager = modelFile.modelManager;
+    if (committed === undefined || namespace === undefined || manager?.rustHandle !== committed ||
+        manager.modelFiles?.[namespace] !== modelFile || typeof committed.modelFileViewSnapshotOf !== 'function') {
+        return undefined;
+    }
+    const id = manager._rustModelFileId(namespace);
+    return id === undefined ? undefined : committed.modelFileViewSnapshotOf(id, namespace);
+}
+
+/**
  * Ends the construction `beginModelFile` started: drops every snapshot not
  * taken, so none can outlive it.
  * @param {object} saved what `beginModelFile` returned
@@ -372,7 +407,7 @@ function declarationIsValidIdentifier(view: any): boolean {
     // BC-01 (R1) changed only `ModelUtil.isValidIdentifier`, which now answers
     // false for a non-string. `Declaration.process` keeps testing
     // `String(this.ast.name)`, as TS 5.0.0's `ID_REGEX.test` did.
-    return rust!.modelUtilIsValidIdentifier(String(view.ast.name));
+    return rust.modelUtilIsValidIdentifier(String(view.ast.name));
 }
 
 /**
@@ -388,7 +423,7 @@ function declarationFullyQualifiedName(view: any): string {
     if (entry && entry.owner === view && view.name === entry.name && namespace === batch!.namespace) {
         return entry.fqn;
     }
-    return rust!.modelUtilGetFullyQualifiedName(namespace, view.name);
+    return rust.modelUtilGetFullyQualifiedName(namespace, view.name);
 }
 
 /**
@@ -404,7 +439,7 @@ function classDeclarationProcess(view: any): any {
     if (entry && entry.owner === view && entry.cd && view.name === entry.name && view.fqn === entry.fqn) {
         return { ...entry.cd };
     }
-    return rust!.classDeclarationProcess(view);
+    return rust.classDeclarationProcess(view);
 }
 
 /**
@@ -439,7 +474,7 @@ function propertyProcess(property: any): void {
         entry.parent = property.parent;
         snapshot = entry.p;
     } else {
-        snapshot = rust!.propertyProcess(property);
+        snapshot = rust.propertyProcess(property);
     }
     property.name = snapshot.name;
     if ('type' in snapshot) {
@@ -474,7 +509,7 @@ function fieldProcess(field: any): void {
     if (entry && entry.owner === field && entry.f && sameType(field.type, 'type' in entry.p ? entry.p.type : undefined)) {
         snapshot = entry.f;
     } else {
-        snapshot = rust!.fieldProcess(field);
+        snapshot = rust.fieldProcess(field);
     }
     const kind = snapshot.validator?.kind;
     // P5-10b: in a lazily built file, a validator whose construction is
@@ -517,7 +552,7 @@ function fieldProcess(field: any): void {
  */
 function fieldGetScalarField(field: any): any {
     const { Field } = fieldModule();
-    const fieldAst = rust!.fieldGetScalarField(field);
+    const fieldAst = rust.fieldGetScalarField(field);
     const scalarField = new Field(field.getParent(), fieldAst);
     scalarField.array = field.isArray();
     return scalarField;
@@ -546,7 +581,7 @@ function decoratorManagerValidate(validationModelManager: any, decoratorCommandS
         handle.dcsValidate(decoratorCommandSet);
         return;
     }
-    rust!.decoratorManagerValidate(decoratorCommandSet, modelFiles?.map((mf: any) => mf.getAst()));
+    rust.decoratorManagerValidate(decoratorCommandSet, modelFiles?.map((mf: any) => mf.getAst()));
 }
 
 /**
@@ -617,7 +652,7 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
         }
     }
     const ast = modelManager.getAst(!options?.disableMetamodelResolution, false);
-    const decoratedAst = rust!.decoratorManagerDecorateModels(ast.models, decoratorCommandSets, options ?? {});
+    const decoratedAst = rust.decoratorManagerDecorateModels(ast.models, decoratorCommandSets, options ?? {});
     const newModelManager = new ModelManager({
         decoratorValidation: modelManager.getDecoratorValidation()
     });
@@ -875,15 +910,37 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
 // `options.regExp` is ignored, so no custom regex engine runs during
 // construction; every `regex=` is compiled and evaluated by the engine.)
 //
-// CONCERTO_LAZY_VIEWS_CHECK=1 is a migration diagnostic, not an option: it
-// keeps the lazy path but builds the declaration views, and every part
-// P5-10b defers (`buildDeferredParts`), at construction too, and reports on stderr any model Rust accepted whose TS construction throws
-// (an under-rejection, which would move an error from construction to the
-// first read) or mutates the AST.
+// The lazy-views check (CONCERTO_LAZY_VIEWS_CHECK=1) is a migration
+// diagnostic, not an option. P5-100 (E-15, accordproject/concerto-rust#454)
+// moved it out of this module into the fuzz harness
+// (migration/fuzz/lib/lazy-views-check.js), which installs it with
+// `installLazyViewsCheck`: it keeps the lazy path but builds the
+// declaration views, and every part P5-10b defers (`buildDeferredParts`), at
+// construction too, and reports on stderr any model Rust accepted whose TS
+// construction throws (an under-rejection, which would move an error from
+// construction to the first read) or mutates the AST.
 // ---------------------------------------------------------------------------
 
-const lazyEnv = typeof process === 'undefined' ? undefined : process.env;
-const lazyViewsCheck = lazyEnv?.CONCERTO_LAZY_VIEWS_CHECK === '1';
+/** The hook the fuzz harness installs (see above). */
+interface LazyViewsCheck {
+    /** After `applyStagedFileHeader` applied a staged header. */
+    stagedFileHeader(modelFile: any, ast: any): void;
+    /** After a staged header recorded the import names. */
+    importNames(modelFile: any): void;
+    /** After `deferDeclarations` deferred the declaration views. */
+    deferred(modelFile: any): void;
+}
+
+/** The installed check, or null (always, outside the fuzz harness). */
+let lazyViewsCheck: LazyViewsCheck | null = null;
+
+/**
+ * Installs (or, with null, removes) the fuzz harness's lazy-views check.
+ * @param {object|null} check the check
+ */
+function installLazyViewsCheck(check: LazyViewsCheck | null): void {
+    lazyViewsCheck = check;
+}
 
 /**
  * P5-76 (accordproject/concerto-rust#418): the per-ModelFile state of the
@@ -892,14 +949,24 @@ const lazyViewsCheck = lazyEnv?.CONCERTO_LAZY_VIEWS_CHECK === '1';
  * staged header, the shape-check marks, the lazy mark, the import names
  * and the deferred declarations), which was about a sixth of the TS-API
  * `modelfile_new` profile on conformance; one WeakMap entry, with a record
- * of a fixed shape, does the same job. Each `FileSlot` below keeps the
- * WeakMap/WeakSet interface of the collection it replaces, keyed weakly by
- * the ModelFile as before, so its readers and writers are unchanged. An
- * absent entry is `undefined` in the record (no slot ever stores
- * `undefined` as a value).
+ * of a fixed shape, does the same job. An absent entry is
+ * `undefined` in the record (no field ever stores `undefined` as a value).
+ * P5-100 (E-5, accordproject/concerto-rust#454) removed the `FileSlot`
+ * shims that gave each field the WeakMap/WeakSet interface of the
+ * collection it replaced: the readers and writers use the fields.
  */
 interface FileState {
+    /**
+     * The staged load of each lazily built ModelFile, until it is committed or
+     * dropped.
+     */
     stage: Stage | undefined;
+    /**
+     * P5-28: the staged header of each lazily built ModelFile, from
+     * `stageModelFile` until its constructor applies it (`applyStagedFileHeader`).
+     * Never set for a ModelFile that took a P5-27 prestage (`takePrestaged`),
+     * whose header is its record's `prestageHeader`.
+     */
     stagedHeader: StagedHeader | undefined;
     /**
      * P5-32 `getImports()` names (`recordImportNames`), with the `imports`
@@ -908,8 +975,28 @@ interface FileState {
     importNames: string[] | undefined;
     importNamesFor: any[] | undefined;
     importNamesLength: number | undefined;
+    /**
+     * P5-10b: the lazily built ModelFiles. Their manager had no decorator
+     * factories when each was constructed (factories keep the eager path), so
+     * none applies to their elements' decorators: a factory added after
+     * construction would not have applied to the views the eager constructor
+     * built.
+     */
     lazy: true | undefined;
+    /**
+     * P5-68 (BC-19-a, R1): every ModelFile whose AST passed `checkAstShape`,
+     * or was let through it as engine-written (`trustedAst`), with that AST
+     * object. `dcsSourceShapeChecked` reads it: a DecoratorManager result is
+     * built from checked models only when every model file of the source
+     * manager is here, with the AST it still holds.
+     */
     shapeChecked: object | undefined;
+    /**
+     * P5-69 (BC-19-b, R1): every ModelFile whose AST `checkAstShape` has left
+     * for `stageModelFile` to check, folded into the engine's one load of the
+     * AST (`stageModelFileChecked`). `stageModelFile` completes the check on
+     * every path, and removes the file.
+     */
     shapePending: true | undefined;
     deferred: DeferredFile | undefined;
     /**
@@ -971,68 +1058,6 @@ function fileState(modelFile: object): FileState {
 }
 
 /**
- * One field of the per-ModelFile record (`fileStates`), with the interface
- * of the WeakMap (`get`, `set`, `has`, `delete`) or WeakSet (`add`, `has`,
- * `delete`) it replaces.
- */
-class FileSlot<K extends keyof FileState> {
-    private readonly field: K;
-
-    /**
-     * @param {string} field the record field this slot reads and writes
-     */
-    constructor(field: K) {
-        this.field = field;
-    }
-
-    /**
-     * @param {*} modelFile the ModelFile
-     * @return {*} the value, or undefined
-     */
-    get(modelFile: any): FileState[K] {
-        return fileStates.get(modelFile)?.[this.field];
-    }
-
-    /**
-     * @param {*} modelFile the ModelFile
-     * @return {boolean} true if a value is set
-     */
-    has(modelFile: any): boolean {
-        const state = fileStates.get(modelFile);
-        return state !== undefined && state[this.field] !== undefined;
-    }
-
-    /**
-     * @param {object} modelFile the ModelFile
-     * @param {*} value the value
-     */
-    set(modelFile: object, value: NonNullable<FileState[K]>): void {
-        fileState(modelFile)[this.field] = value;
-    }
-
-    /**
-     * WeakSet's `add`, for the slots that hold a mark.
-     * @param {object} modelFile the ModelFile
-     */
-    add(this: FileSlot<'lazy' | 'shapePending'>, modelFile: object): void {
-        this.set(modelFile, true);
-    }
-
-    /**
-     * @param {*} modelFile the ModelFile
-     * @return {boolean} true if a value was set
-     */
-    delete(modelFile: any): boolean {
-        const state = fileStates.get(modelFile);
-        if (state === undefined || state[this.field] === undefined) {
-            return false;
-        }
-        state[this.field] = undefined;
-        return true;
-    }
-}
-
-/**
  * A ModelFile's staged load: the rustHandle it was staged in and its stage id.
  */
 interface Stage {
@@ -1040,11 +1065,6 @@ interface Stage {
     id: number;
 }
 
-/**
- * The staged load of each lazily built ModelFile, until it is committed or
- * dropped.
- */
-const stages = new FileSlot('stage');
 
 /**
  * The rustHandle `modelFile` was registered in from its stage, or undefined
@@ -1142,13 +1162,6 @@ type StagedHeader = ObjectHeader | FlatHeader;
 const IMPLICIT_SHORT_NAMES = ['Concept', 'Asset', 'Transaction', 'Participant', 'Event'];
 const IMPLICIT_NAMES = IMPLICIT_SHORT_NAMES.map((name) => `concerto@1.0.0.${name}`);
 
-/**
- * P5-28: the staged header of each lazily built ModelFile, from
- * `stageModelFile` until its constructor applies it (`applyStagedFileHeader`).
- * Never set for a ModelFile that took a P5-27 prestage (`takePrestaged`),
- * whose header is its record's `prestageHeader`.
- */
-const stagedFileHeaders = new FileSlot('stagedHeader');
 
 /**
  * P5-32 (accordproject/concerto-rust#342): each ModelFile's `getImports()`
@@ -1194,35 +1207,6 @@ function recordedImportNames(modelFile: any): string[] | undefined {
     return state.importNames.slice();
 }
 
-/**
- * CONCERTO_LAZY_VIEWS_CHECK=1 (P5-32): reports on stderr when the import
- * names a staged header recorded differ from each import's
- * `importFullyQualifiedNames`, which is what `getImports` computes otherwise.
- * @param {object} modelFile the ModelFile a staged header was just applied to
- */
-function checkRecordedImportNames(modelFile: any): void {
-    let names: string[] = [];
-    try {
-        for (const imp of modelFile.imports) {
-            names = names.concat(rust!.modelUtilImportFullyQualifiedNames(imp));
-        }
-    } catch (e: any) {
-        process.stderr.write(`LAZY-CHECK import-names error: ${modelFile.namespace} ${e?.name}: ${e?.message}\n`);
-        return;
-    }
-    if (JSON.stringify(names) !== JSON.stringify(recordedImportNames(modelFile))) {
-        process.stderr.write(`LAZY-CHECK import-names mismatch: ${modelFile.namespace}\n`);
-    }
-}
-
-/**
- * P5-10b: the lazily built ModelFiles. Their manager had no decorator
- * factories when each was constructed (factories keep the eager path), so
- * none applies to their elements' decorators: a factory added after
- * construction would not have applied to the views the eager constructor
- * built.
- */
-const lazyFiles = new FileSlot('lazy');
 
 /**
  * P5-49 (BC-19 with BC-17 and BC-20, R1): for the namespaces a manager
@@ -1281,14 +1265,6 @@ function shapeMemoised(manager: any, namespace: unknown): namespace is string {
     return typeof namespace === 'string' && !FIXED_SYSTEM_NAMESPACES.has(namespace) && !manager._needsRustWrite(namespace);
 }
 
-/**
- * P5-68 (BC-19-a, R1): every ModelFile whose AST passed `checkAstShape`,
- * or was let through it as engine-written (`trustedAst`), with that AST
- * object. `dcsSourceShapeChecked` reads it: a DecoratorManager result is
- * built from checked models only when every model file of the source
- * manager is here, with the AST it still holds.
- */
-const shapeChecked = new FileSlot('shapeChecked');
 
 /**
  * P5-68 (BC-19-a, R1): the one AST the next `new ModelFile(manager, ast)`
@@ -1301,13 +1277,6 @@ const shapeChecked = new FileSlot('shapeChecked');
  */
 let trustedAst: object | null = null;
 
-/**
- * P5-69 (BC-19-b, R1): every ModelFile whose AST `checkAstShape` has left
- * for `stageModelFile` to check, folded into the engine's one load of the
- * AST (`stageModelFileChecked`). `stageModelFile` completes the check on
- * every path, and removes the file.
- */
-const shapePending = new FileSlot('shapePending');
 
 /**
  * P5-49 (BC-19 with BC-17 and BC-20, R1): the strict AST shape check at
@@ -1353,7 +1322,7 @@ function checkAstShape(modelFile: any): CheckedAst | undefined {
     // manager, from models that all passed this check (`adoptStagedModels`).
     if (ast === trustedAst) {
         trustedAst = null;
-        shapeChecked.set(modelFile, ast);
+        fileState(modelFile).shapeChecked = ast;
         return undefined;
     }
     if (manager.options?.metamodelValidation === false) {
@@ -1366,8 +1335,8 @@ function checkAstShape(modelFile: any): CheckedAst | undefined {
     if (compactStageable(manager, ast, 'stageModelFileCheckedCompact') && !hasDecoratorFactories(manager)) {
         const bytes = encodeAst(ast);
         if (bytes !== undefined) {
-            shapePending.add(modelFile);
-            return { bytes, generation: encodeAstGeneration(), text: undefined };
+            fileState(modelFile).shapePending = true;
+            return { bytes, encodeCount: encodeAstCount(), text: undefined };
         }
     }
     // P5-94: the text of a fixed system model's AST, or of an AST of a
@@ -1376,10 +1345,10 @@ function checkAstShape(modelFile: any): CheckedAst | undefined {
     const text = systemModelAsts.has(ast) || shapeMemoised(manager, ast.namespace) ? stableAstText(ast) : JSON.stringify(ast);
     const namespace = ast.namespace;
     if (shapeMemoised(manager, namespace) && shapeCheckedUnmirrored.get(namespace) === text) {
-        shapeChecked.set(modelFile, ast);
+        fileState(modelFile).shapeChecked = ast;
         return text;
     }
-    shapePending.add(modelFile);
+    fileState(modelFile).shapePending = true;
     return text;
 }
 
@@ -1478,12 +1447,12 @@ function stableAstText(ast: any): string {
  * P5-92 (accordproject/concerto-rust#438): an AST `checkAstShape` wrote in
  * the compact binary layout (`encodeAst`) for the engine to load without
  * its JSON text: the bytes (a view of `encodeAst`'s reused buffer, valid
- * while `encodeAst` has not run again, `generation`), and the JSON text,
+ * while `encodeAst` has not run again, `encodeCount`), and the JSON text,
  * once a path needs it (`astText`).
  */
 interface CompactAst {
     bytes: Uint8Array;
-    generation: number;
+    encodeCount: number;
     text: string | undefined;
 }
 
@@ -1532,7 +1501,7 @@ function hasDecoratorFactories(manager: any): boolean {
  * @return {Uint8Array | undefined} the bytes
  */
 function compactBytes(checked: CheckedAst | undefined): Uint8Array | undefined {
-    return typeof checked === 'object' && checked.generation === encodeAstGeneration() ? checked.bytes : undefined;
+    return typeof checked === 'object' && checked.encodeCount === encodeAstCount() ? checked.bytes : undefined;
 }
 
 /**
@@ -1615,9 +1584,10 @@ function systemModelVerdict(modelFile: any, handle: any, checkedText?: string): 
             known.header = header;
         }
     }
-    if (shapePending.has(modelFile)) {
-        shapePending.delete(modelFile);
-        shapeChecked.set(modelFile, ast);
+    const pending = fileStates.get(modelFile);
+    if (pending?.shapePending !== undefined) {
+        pending.shapePending = undefined;
+        pending.shapeChecked = ast;
     }
     return header;
 }
@@ -1923,7 +1893,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         if (checkedText === undefined && (e as { unreadableAst?: boolean } | null)?.unreadableAst) {
             throw e;
         }
-        if (checkedText !== undefined && shapePending.has(modelFile)) {
+        if (checkedText !== undefined && fileStates.get(modelFile)?.shapePending !== undefined) {
             // P5-69: the shape check's own error, from the folded load
             // (`astShape`, engine/errors.ts), is thrown, as `checkAstShape`
             // threw it before. Any other error is the load's, after the
@@ -2088,37 +2058,10 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
     }
     recordImportNames(modelFile, names, state);
     if (lazyViewsCheck) {
-        checkStagedFileHeader(modelFile, ast);
-        checkRecordedImportNames(modelFile);
+        lazyViewsCheck.stagedFileHeader(modelFile, ast);
+        lazyViewsCheck.importNames(modelFile);
     }
     return true;
-}
-
-/**
- * CONCERTO_LAZY_VIEWS_CHECK=1 (P5-28): runs `modelFileFromAstHeader` over
- * the JS values, on a scratch object inheriting from `modelFile`, and
- * reports on stderr any field `applyStagedFileHeader` set differently, or an
- * error it threw.
- * @param {object} modelFile the ModelFile `applyStagedFileHeader` just set
- * @param {object} ast its AST
- */
-function checkStagedFileHeader(modelFile: any, ast: any): void {
-    const scratch = Object.create(modelFile);
-    scratch.importShortNames = new Map();
-    scratch.importUriMap = {};
-    try {
-        rust!.modelFileFromAstHeader(scratch, ast);
-    } catch (e: any) {
-        process.stderr.write(`LAZY-CHECK header under-rejection: ${modelFile.namespace} ${e?.name}: ${e?.message}\n`);
-        return;
-    }
-    const fields = (view: any) => JSON.stringify([
-        view.namespace, view.version === undefined ? '<undefined>' : view.version, view.imports,
-        [...view.importShortNames], Object.entries(view.importUriMap),
-    ]);
-    if (fields(scratch) !== fields(modelFile)) {
-        process.stderr.write(`LAZY-CHECK header-mismatch: ${modelFile.namespace}\n`);
-    }
 }
 
 /**
@@ -2135,7 +2078,7 @@ function materialise(modelFile: any): void {
     });
     field('declarations', []);
     field('localTypes', null);
-    const deferred = deferredFiles.get(modelFile);
+    const deferred = fileStates.get(modelFile)?.deferred;
     if (deferred) {
         deferred.building = true;
     }
@@ -2152,7 +2095,10 @@ function materialise(modelFile: any): void {
             deferred.building = false;
         }
     }
-    deferredFiles.delete(modelFile);
+    const settled = fileStates.get(modelFile);
+    if (settled !== undefined) {
+        settled.deferred = undefined;
+    }
     const localTypes = new Map();
     const namespace = modelFile.getNamespace();
     for (const declaration of modelFile.declarations) {
@@ -2292,26 +2238,13 @@ function settleDeclarationFields(modelFile: any): void {
 
 /**
  * Called at the end of the ModelFile constructor when `stageModelFile`
- * returned true: defers the declaration views (or, with
- * CONCERTO_LAZY_VIEWS_CHECK=1, builds them now and reports any divergence).
+ * returned true: defers the declaration views (or, with the fuzz harness's
+ * lazy-views check installed, lets it build them now).
  * @param {object} modelFile the ModelFile
  */
 function deferDeclarations(modelFile: any): void {
     defineLazyFields(modelFile);
-    if (lazyViewsCheck) {
-        const before = JSON.stringify(modelFile.ast);
-        try {
-            materialise(modelFile);
-            // P5-10b: and every part built on first read.
-            buildDeferredParts(modelFile);
-        } catch (e: any) {
-            process.stderr.write(`LAZY-CHECK under-rejection: ${modelFile.namespace} ${e?.name}: ${e?.message}\n`);
-            throw e;
-        }
-        if (JSON.stringify(modelFile.ast) !== before) {
-            process.stderr.write(`LAZY-CHECK ast-mutated: ${modelFile.namespace}\n`);
-        }
-    }
+    lazyViewsCheck?.deferred(modelFile);
 }
 
 // ---------------------------------------------------------------------------
@@ -2431,9 +2364,7 @@ function applyStagedHeader(modelFile: any, ast: any, state: FileState | undefine
     }
     // P5-32: one `set` per imported name, as for `applyStagedFileHeader`.
     recordImportNames(modelFile, names, state);
-    if (lazyViewsCheck) {
-        checkRecordedImportNames(modelFile);
-    }
+    lazyViewsCheck?.importNames(modelFile);
     return true;
 }
 
@@ -2530,7 +2461,8 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
  */
 interface DcsResident {
     handle: any;
-    epoch: number;
+    /** The source manager's model version (`EngineState.version`) then. */
+    version: number;
     files: any[];
     asts: any[];
     /** `getAst(resolve, false).models`, as the manager was built from them. */
@@ -2538,11 +2470,9 @@ interface DcsResident {
     dcs: any;
 }
 
-/**
- * The resident DCS input managers, by source ModelManager: index 0 for
- * `getAst(false, false)`, 1 for `getAst(true, false)`.
- */
-const dcsResidents = new WeakMap<object, Array<DcsResident | undefined>>();
+// The resident DCS input managers of a source ModelManager are kept in its
+// engine state (`EngineState.dcsResidents`, P5-100): index 0 for
+// `getAst(false, false)`, 1 for `getAst(true, false)`.
 
 /**
  * Whether the engine has the resident DCS manager (concerto-wasm
@@ -2551,15 +2481,15 @@ const dcsResidents = new WeakMap<object, Array<DcsResident | undefined>>();
  * @return {boolean} true if it does
  */
 function residentDcsAvailable(): boolean {
-    return typeof (rust as any).DcsManagerHandle === 'function';
+    return typeof rust.DcsManagerHandle === 'function';
 }
 
 /**
  * Whether the resident DCS input manager of `modelManager` may be kept:
  * `getAst` is BaseModelManager's own, over `getModelFiles` and
  * `resolveMetaModel` also its own, over the manager's rustHandle, which
- * mirrors every model file (P5-34) and whose epoch moves on every model
- * change.
+ * mirrors every model file (P5-34), and the manager has its engine state,
+ * whose model version moves on every model change (P5-100).
  * @param {object} modelManager the source ModelManager
  * @return {boolean} true if it may be kept
  */
@@ -2567,7 +2497,7 @@ function dcsCacheable(modelManager: any): boolean {
     const { default: BaseModelManager } = require('../basemodelmanager');
     const proto = BaseModelManager.prototype;
     const handle = modelManager?.rustHandle;
-    return !!handle && typeof handle.epoch === 'function' &&
+    return !!handle && modelManager._engine !== undefined &&
         modelManager.getAst === proto.getAst &&
         modelManager.getModelFiles === proto.getModelFiles &&
         modelManager.resolveMetaModel === proto.resolveMetaModel;
@@ -2591,7 +2521,7 @@ function dcsSourceShapeChecked(modelManager: any): boolean {
     const { default: ModelFile } = require('../introspect/modelfile');
     const getAst = ModelFile.prototype.getAst;
     return modelManager.getModelFiles(false).every((f: any) =>
-        shapeChecked.get(f) === f.ast && f.getAst === getAst);
+        fileStates.get(f)?.shapeChecked === f.ast && f.getAst === getAst);
 }
 
 /**
@@ -2704,29 +2634,25 @@ function dcsManagerFor(modelManager: any, resolve: boolean): any {
     const cacheable = dcsCacheable(modelManager);
     const slot = resolve ? 1 : 0;
     let handle: any;
-    let epoch = 0;
+    let version = 0;
     let files: any[] = [];
     if (cacheable) {
         handle = modelManager.rustHandle;
-        epoch = handle.epoch();
+        version = modelManager._engine.version;
         files = modelManager.getModelFiles(false);
-        const resident = dcsResidents.get(modelManager)?.[slot];
-        if (resident && resident.handle === handle && resident.epoch === epoch &&
+        const resident: DcsResident | undefined = modelManager._engine.dcsResidents?.[slot];
+        if (resident && resident.handle === handle && resident.version === version &&
             resident.files.length === files.length &&
             resident.files.every((f: any, i: number) => f === files[i] && resident.asts[i] === f.ast)) {
             return { dcs: resident.dcs, resident: true, sourceModels: resident.sourceModels };
         }
     }
     const models = modelManager.getAst(resolve, false).models;
-    const dcs = new (rust as any).DcsManagerHandle(models);
+    const dcs = new rust.DcsManagerHandle!(models);
     if (cacheable) {
-        let residents = dcsResidents.get(modelManager);
-        if (!residents) {
-            residents = [];
-            dcsResidents.set(modelManager, residents);
-        }
+        const residents: Array<DcsResident | undefined> = modelManager._engine.dcsResidents ??= [];
         residents[slot]?.dcs.free();
-        residents[slot] = { handle, epoch, files, asts: files.map((f: any) => f.ast), sourceModels: models, dcs };
+        residents[slot] = { handle, version, files, asts: files.map((f: any) => f.ast), sourceModels: models, dcs };
     }
     return { dcs, resident: cacheable, sourceModels: models };
 }
@@ -2832,6 +2758,99 @@ function dropStaged(modelFile: any, handle: any): void {
 }
 
 /**
+ * P5-100 (E-6): `BaseModelManager.updateModelFile`'s rustHandle write from
+ * `modelFile`'s stage (concerto-wasm `updateStagedModelFile`): replaces the
+ * file registered under its namespace with the one Rust loaded at
+ * construction. Returns undefined when there is no usable stage (not
+ * staged, staged in another handle, evicted, or an engine without the
+ * binding); the caller then sends the AST as before. An error propagates,
+ * as `updateModelFile`'s would.
+ * @param {object} modelFile the ModelFile replacing the registered one
+ * @param {object} handle the manager's rustHandle
+ * @return {number|undefined} the registered file's handle, or undefined
+ */
+function updateStaged(modelFile: any, handle: any): number | undefined {
+    if (typeof handle.updateStagedModelFile !== 'function') {
+        return undefined;
+    }
+    const state = fileStates.get(modelFile);
+    const stage = state === undefined ? undefined : takeStageOf(state, handle);
+    if (!stage) {
+        return undefined;
+    }
+    const id = handle.updateStagedModelFile(stage.id);
+    if (id === undefined) {
+        return undefined;
+    }
+    state!.committed = handle;
+    return id;
+}
+
+/**
+ * P5-100 (E-6): `BaseModelManager.validateAst`'s check over `modelFile`'s
+ * staged copy (concerto-wasm `validateAstStaged`), without sending the AST.
+ * Returns false when there is no usable stage; the caller then sends the
+ * AST as before. Throws what the check throws.
+ * @param {object} modelFile the ModelFile
+ * @param {object} handle the manager's rustHandle
+ * @return {boolean} true if checked
+ */
+function validateAstStaged(modelFile: any, handle: any): boolean {
+    const stage = fileStates.get(modelFile)?.stage;
+    if (!stage || stage.handle !== handle || typeof handle.validateAstStaged !== 'function') {
+        return false;
+    }
+    return handle.validateAstStaged(stage.id) === true;
+}
+
+/**
+ * P5-100 (E-6): `BaseModelManager.updateExternalModels`'s rustHandle update
+ * from the downloaded files' stages (concerto-wasm
+ * `updateExternalModelsStaged`), without sending their ASTs. Returns false,
+ * having changed nothing, unless every file is staged in `handle` (and the
+ * engine has the binding and still holds every stage); the caller then
+ * sends the ASTs as before. Throws what that update throws; either way the
+ * stages are consumed.
+ * @param {object[]} modelFiles the downloaded files' ModelFiles, in order
+ * @param {object} handle the manager's rustHandle
+ * @param {object} next the manager's model files once updated, by namespace
+ * @return {boolean} true if updated
+ */
+function updateExternalStaged(modelFiles: any[], handle: any, next: object): boolean {
+    if (typeof handle.updateExternalModelsStaged !== 'function') {
+        return false;
+    }
+    const states: FileState[] = [];
+    const ids: number[] = [];
+    for (const modelFile of modelFiles) {
+        const state = fileStates.get(modelFile);
+        const stage = state?.stage;
+        if (!stage || stage.handle !== handle) {
+            return false;
+        }
+        states.push(state!);
+        ids.push(stage.id);
+    }
+    let updated: boolean;
+    try {
+        updated = handle.updateExternalModelsStaged(Uint32Array.from(ids), next) === true;
+    } catch (e) {
+        // The engine consumed the stages.
+        for (const state of states) {
+            takeStageOf(state, handle);
+        }
+        throw e;
+    }
+    if (updated) {
+        for (const state of states) {
+            takeStageOf(state, handle);
+            state.committed = handle;
+        }
+    }
+    return updated;
+}
+
+/**
  * `ModelFile.validate()`'s Rust call without sending the AST again:
  * validates the staged file, or the file registered from it. Returns false
  * when neither applies; the caller then calls `modelFileValidateDetached`
@@ -2878,7 +2897,6 @@ interface DeferredFile {
     batch: Batch | null | undefined;
 }
 
-const deferredFiles = new FileSlot('deferred');
 
 /**
  * The metamodel classes `ModelFile._declarationView` builds a view for.
@@ -2936,7 +2954,7 @@ function declarationIndex(ast: any, namespace: string): Map<string, number> | nu
  * @return {object|null|undefined} the declaration view, null, or undefined
  */
 function localType(modelFile: any, type: string): any {
-    const deferred = deferredFiles.get(modelFile);
+    const deferred = fileStates.get(modelFile)?.deferred;
     if (!deferred) {
         return undefined;
     }
@@ -2984,7 +3002,7 @@ function localType(modelFile: any, type: string): any {
  * @return {object|undefined} the view
  */
 function builtDeclaration(modelFile: any, index: number, node: any): any {
-    const cached = deferredFiles.get(modelFile)?.built?.get(index);
+    const cached = fileStates.get(modelFile)?.deferred?.built?.get(index);
     return cached && cached.node === node ? cached.view : undefined;
 }
 
@@ -3214,7 +3232,7 @@ function deferDecorators(element: any): boolean {
         // The caller's own call raises it, at the same point.
         return false;
     }
-    if (!lazyFiles.has(modelFile)) {
+    if (fileStates.get(modelFile)?.lazy === undefined) {
         return false;
     }
     const snapshot = batchOf(modelFile)?.decorators.get(nodes);
@@ -3232,7 +3250,7 @@ function deferDecorators(element: any): boolean {
  * @return {object[]|undefined} the decorator factories that apply
  */
 function decoratorFactories(modelFile: any): any[] | undefined {
-    if (lazyFiles.has(modelFile)) {
+    if (fileStates.get(modelFile)?.lazy !== undefined) {
         return [];
     }
     return modelFile.getModelManager()?.getDecoratorFactories();
@@ -3245,7 +3263,7 @@ function decoratorFactories(modelFile: any): any[] | undefined {
  */
 function inLazyFile(element: any): boolean {
     const modelFile = element.modelFile ?? element.parent?.modelFile;
-    return modelFile !== undefined && lazyFiles.has(modelFile);
+    return modelFile !== undefined && fileStates.get(modelFile)?.lazy !== undefined;
 }
 
 /**
@@ -3317,8 +3335,8 @@ function sizeValidatorFromSnapshot(property: any, ast: any, snapshot: any): any 
 function mapDeclarationProcess(view: any, buildKey: () => any, buildValue: () => any): void {
     const current = batchOf(view.modelFile);
     if (!current || !current.maps.has(view.ast)) {
-        rust!.mapDeclarationProcess(view);
-    } else if (lazyFiles.has(view.modelFile)) {
+        rust.mapDeclarationProcess(view);
+    } else if (fileStates.get(view.modelFile)?.lazy !== undefined) {
         deferField(view, 'key', () => withBatch(current, buildKey));
         deferField(view, 'value', () => withBatch(current, buildValue));
         return;
@@ -3334,7 +3352,7 @@ function mapDeclarationProcess(view: any, buildKey: () => any, buildValue: () =>
  */
 function mapKeyTypeProcess(view: any): string {
     const type = batchOf(view.modelFile)?.mapTypes.get(view.ast);
-    return type !== undefined ? type : rust!.mapKeyTypeProcess(view);
+    return type !== undefined ? type : rust.mapKeyTypeProcess(view);
 }
 
 /**
@@ -3344,14 +3362,15 @@ function mapKeyTypeProcess(view: any): string {
  */
 function mapValueTypeProcess(view: any): string {
     const type = batchOf(view.modelFile)?.mapTypes.get(view.ast);
-    return type !== undefined ? type : rust!.mapValueTypeProcess(view);
+    return type !== undefined ? type : rust.mapValueTypeProcess(view);
 }
 
 /**
  * Builds every deferred part of a lazily built file's views: its
  * decorators, and each declaration's, property's and map type's
  * decorators, validators and map types. Used by
- * CONCERTO_LAZY_VIEWS_CHECK=1, which reports any that throws.
+ * the fuzz harness's lazy-views check (`installLazyViewsCheck`), which
+ * reports any that throws.
  * @param {object} modelFile the ModelFile
  */
 function buildDeferredParts(modelFile: any): void {
@@ -3388,14 +3407,10 @@ function buildDeferredParts(modelFile: any): void {
 // back through this module and is recorded, so the entry knows which view
 // supplied the inherited part and which of that view's entries it copied.
 // An entry is reused only while:
-// - no model file was added, updated or deleted in the view's ModelManager
-//   since it was built (`invalidatePropertyLookups(manager)`, called by
-//   BaseModelManager where it changes its `modelFiles` map in place: `addModelFile`,
-//   `updateModelFile`, `deleteModelFile`, `addModelFiles`), and the view's
-//   manager still holds the same `modelFiles` map (`clearModelFiles` and the
-//   roll-back of a failed `addModelFiles` or `updateExternalModels` replace
-//   the whole map). These are the points where TS 5.0.0 could resolve a
-//   super type differently;
+// - the view's ModelManager is the one it was built for, at the same model
+//   version (`EngineState.version`, P5-100: moved by BaseModelManager at
+//   every change of its `modelFiles` map or rustHandle, the points where
+//   TS 5.0.0 could resolve a super type differently);
 // - the view's own properties array, its length, its `superType` and its
 //   `modelFile` are the ones it was built from;
 // - the super type's view still holds the entry it was built from, and
@@ -3413,47 +3428,21 @@ function buildDeferredParts(modelFile: any): void {
 // ---------------------------------------------------------------------------
 
 /**
- * Each ModelManager's model epoch, bumped whenever its model files change
- * (F-2, accordproject/concerto-rust#448: per manager, so that one manager's
- * change, a fork's for instance, keeps every other manager's cached
- * answers; a view's answers depend on its own manager's models only).
- */
-const managerGenerations = new WeakMap<object, number>();
-
-/**
- * `manager`'s model epoch: 0 until its model files first change.
+ * `manager`'s engine state (`BaseModelManager._engine`, P5-100), or
+ * undefined for anything else.
  * @param {object} manager the ModelManager
- * @return {number} its epoch
+ * @return {object|undefined} its engine state
  */
-function generationOf(manager: any): number {
-    return (typeof manager === 'object' && manager !== null ? managerGenerations.get(manager) : undefined) ?? 0;
-}
-
-/**
- * Drops every cached property lookup of `manager`'s views: called by
- * BaseModelManager whenever it adds, replaces or deletes a model file in
- * its `modelFiles` map. (A manager that replaces the whole map is caught by
- * `lookupValid`.)
- * @param {object} manager the ModelManager whose model files changed
- */
-function invalidatePropertyLookups(manager: object): void {
-    managerGenerations.set(manager, generationOf(manager) + 1);
-}
-
-/**
- * The model epoch `invalidatePropertyLookups` moves for `manager` (P5-29):
- * BaseModelManager keys its getNamespaces/getType/resolveType memo on it.
- * @param {object} manager the ModelManager
- * @return {number} its current epoch
- */
-function modelGeneration(manager: object): number {
-    return generationOf(manager);
+function engineStateOf(manager: any): EngineState | undefined {
+    return typeof manager === 'object' && manager !== null ? manager._engine : undefined;
 }
 
 /** One ClassDeclaration view's cached `getProperties()` list. */
 interface PropertyLookup {
-    /** Its manager's epoch (`generationOf`) when it was built. */
-    generation: number;
+    /** Its manager's engine state when it was built. */
+    state: EngineState | undefined;
+    /** That state's model version then. */
+    version: number;
     /** The own properties array (`getOwnProperties()`, `properties`) it was built from. */
     own: any[];
     /** That array's length then. */
@@ -3462,8 +3451,6 @@ interface PropertyLookup {
     superType: any;
     /** The view's `modelFile` then. */
     modelFile: any;
-    /** Its manager's `modelFiles` map then. */
-    modelFiles: any;
     /** The super type's view that supplied the inherited part, or null. */
     superView: any;
     /** That view's entry the inherited part was copied from, or null. */
@@ -3503,9 +3490,9 @@ function lookupCacheable(view: any): boolean {
  * @return {boolean} true if it may be reused
  */
 function lookupValid(view: any, entry: PropertyLookup): boolean {
-    if (entry.generation !== generationOf(view.modelFile?.modelManager) || view.superType !== entry.superType ||
-        view.modelFile !== entry.modelFile || view.properties !== entry.own ||
-        view.modelFile.modelManager?.modelFiles !== entry.modelFiles) {
+    const state = engineStateOf(view.modelFile?.modelManager);
+    if (state !== entry.state || state === undefined || entry.version !== state.version || view.superType !== entry.superType ||
+        view.modelFile !== entry.modelFile || view.properties !== entry.own) {
         return false;
     }
     const own = view.getOwnProperties();
@@ -3542,18 +3529,17 @@ function validLookup(view: any): PropertyLookup | undefined {
  * exactly one recorded `getProperties()` call of a cached view.
  * @param {object} view the ClassDeclaration view
  * @param {any[]} own the own properties array before the call
- * @param {object} state the view's `superType`, `modelFile` and manager's
- * `modelFiles`, and that manager's epoch, before the call
+ * @param {object} state the view's `superType` and `modelFile`, and its
+ * manager's engine state and that state's model version, before the call
  * @param {any[]} list what the binding returned
  * @param {object[]} calls the `getProperties()` calls it made
  * @return {object|undefined} the entry
  */
-function newLookup(view: any, own: any, state: { superType: any; modelFile: any; modelFiles: any; generation: number },
+function newLookup(view: any, own: any, state: { superType: any; modelFile: any; engine: EngineState | undefined; version: number },
     list: any, calls: LookupCall[]): PropertyLookup | undefined {
     if (!Array.isArray(own) || view.properties !== own || view.superType !== state.superType ||
-        view.modelFile !== state.modelFile || !Array.isArray(list) ||
-        state.generation !== generationOf(view.modelFile.modelManager) ||
-        view.modelFile.modelManager?.modelFiles !== state.modelFiles) {
+        view.modelFile !== state.modelFile || !Array.isArray(list) || state.engine === undefined ||
+        state.engine !== engineStateOf(view.modelFile.modelManager) || state.version !== state.engine.version) {
         return undefined;
     }
     const ownLength = own.length;
@@ -3587,12 +3573,12 @@ function newLookup(view: any, own: any, state: { superType: any; modelFile: any;
         }
     }
     return {
-        generation: state.generation,
+        state: state.engine,
+        version: state.version,
         own,
         ownLength,
         superType: state.superType,
         modelFile: state.modelFile,
-        modelFiles: state.modelFiles,
         superView,
         superEntry,
         list: list.slice(),
@@ -3621,24 +3607,25 @@ function classDeclarationGetProperties(view: any): any[] {
  */
 function propertiesOf(view: any): any[] {
     if (!lookupCacheable(view)) {
-        return rust!.classDeclarationGetProperties(view);
+        return rust.classDeclarationGetProperties(view);
     }
     const cached = validLookup(view);
     if (cached !== undefined) {
         return cached.list.slice();
     }
     const own = view.properties;
+    const engine = engineStateOf(view.modelFile.modelManager);
     const state = {
         superType: view.superType,
         modelFile: view.modelFile,
-        modelFiles: view.modelFile.modelManager.modelFiles,
-        generation: generationOf(view.modelFile.modelManager),
+        engine,
+        version: engine?.version ?? 0,
     };
     const calls: LookupCall[] = [];
     lookupFrames.push(calls);
     let list;
     try {
-        list = rust!.classDeclarationGetProperties(view);
+        list = rust.classDeclarationGetProperties(view);
     } finally {
         lookupFrames.pop();
     }
@@ -3689,7 +3676,7 @@ function classDeclarationGetProperty(view: any, name: any): any {
             return property === undefined ? null : property;
         }
     }
-    return rust!.classDeclarationGetProperty(view, name);
+    return rust.classDeclarationGetProperty(view, name);
 }
 
 // ---------------------------------------------------------------------------
@@ -3706,9 +3693,8 @@ function classDeclarationGetProperty(view: any, name: any): any {
 // comment in concerto-wasm). Its answer is kept only when it did, for views
 // of model files built for a real BaseModelManager (as P5-14's property
 // lookups), and is reused only while:
-// - no model file was added, updated or deleted in any manager on the way
-//   since (its epoch, bumped by `invalidatePropertyLookups`), and each still
-//   holds the same `modelFiles` map;
+// - each manager on the way is at the model version it was at
+//   (`EngineState.version`, P5-100);
 // - every declaration in the chain still has the `idField`, `superType`,
 //   `superTypeDeclaration` and `modelFile` it had, and its model file the
 //   same manager.
@@ -3727,9 +3713,9 @@ interface IdentifierLevel {
     superTypeDeclaration: any;
     modelFile: any;
     manager: any;
-    modelFiles: any;
-    /** The manager's epoch (`generationOf`) then. */
-    generation: number;
+    /** The manager's engine state then, and its model version. */
+    state: EngineState;
+    version: number;
 }
 
 /** One ClassDeclaration view's cached `getIdentifierFieldName()` answer. */
@@ -3751,6 +3737,10 @@ function identifierLevel(view: any): IdentifierLevel | undefined {
         return undefined;
     }
     const manager = view.modelFile.modelManager;
+    const state = engineStateOf(manager);
+    if (state === undefined) {
+        return undefined;
+    }
     return {
         view,
         idField: view.idField,
@@ -3758,8 +3748,8 @@ function identifierLevel(view: any): IdentifierLevel | undefined {
         superTypeDeclaration: view.superTypeDeclaration,
         modelFile: view.modelFile,
         manager,
-        modelFiles: manager.modelFiles,
-        generation: generationOf(manager),
+        state,
+        version: state.version,
     };
 }
 
@@ -3771,9 +3761,9 @@ function identifierLevel(view: any): IdentifierLevel | undefined {
 function identifierValid(entry: IdentifierEntry): boolean {
     for (const level of entry.levels) {
         const view = level.view;
-        if (level.generation !== generationOf(level.manager) || view.idField !== level.idField || view.superType !== level.superType ||
+        if (level.version !== level.state.version || view.idField !== level.idField || view.superType !== level.superType ||
             view.superTypeDeclaration !== level.superTypeDeclaration || view.modelFile !== level.modelFile ||
-            level.modelFile.modelManager !== level.manager || level.manager.modelFiles !== level.modelFiles) {
+            level.modelFile.modelManager !== level.manager || level.manager._engine !== level.state) {
             return false;
         }
     }
@@ -3798,11 +3788,11 @@ function classDeclarationGetIdentifierFieldName(view: any): any {
             identifierEntries.delete(view);
         }
     }
-    const manager = view.modelFile?.modelManager;
-    const generation = generationOf(manager);
-    const result = rust!.classDeclarationGetIdentifierFieldNameWalk(view);
+    const state = engineStateOf(view.modelFile?.modelManager);
+    const version = state?.version;
+    const result = rust.classDeclarationGetIdentifierFieldNameWalk(view);
     const value = result[0];
-    if (cacheable && result[1] === true && generation === generationOf(manager)) {
+    if (cacheable && result[1] === true && state !== undefined && version === state.version) {
         const levels: IdentifierLevel[] = [];
         for (let n = 2; n < result.length; n++) {
             const level = identifierLevel(result[n]);
@@ -3817,9 +3807,10 @@ function classDeclarationGetIdentifierFieldName(view: any): any {
 }
 
 export {
+    installLazyViewsCheck,
+    materialise,
+    buildDeferredParts,
     classDeclarationGetIdentifierFieldName,
-    invalidatePropertyLookups,
-    modelGeneration,
     classDeclarationGetProperties,
     classDeclarationGetProperty,
     localType,
@@ -3846,6 +3837,9 @@ export {
     settleDeclarationFields,
     commitStaged,
     validateAndCommitStaged,
+    updateStaged,
+    validateAstStaged,
+    updateExternalStaged,
     dropStaged,
     validateLoaded,
     beginModelFile,

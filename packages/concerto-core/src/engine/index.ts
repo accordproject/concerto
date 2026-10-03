@@ -25,9 +25,26 @@
 // compiles it into dist/engine/, and scripts/build-esm.js builds it into
 // dist/esm*/engine/ in a pass of its own, with the public modules it imports
 // kept external, so the `require` calls here never put esbuild's `__require`
-// shim into the public modules' shared chunks. The views load it through a
-// non-literal `loadEngine`, so a bundle of dist/ leaves it out unless
-// something actually calls in.
+// shim into the public modules' shared chunks. The public modules load it
+// through a non-literal specifier (src/engineloader.ts, P5-100), so a bundle
+// of dist/ leaves it out unless something actually calls in.
+//
+// Boundary placement rule (P5-100, M2; accordproject/concerto-rust#454). A
+// call from TypeScript into the engine costs more than a small amount of
+// work, so concerto-core does not cross the boundary for per-item pure work
+// over data TypeScript already holds: a predicate or a string operation over
+// a value the view already has (a declaration's `$class`, a type name, a
+// primitive field value) runs in TypeScript, with the engine's semantics,
+// and the Rust function stays for the engine's own use. Work that needs the
+// engine's state, or that would take many crossings, is batched or
+// snapshotted instead: one call answers for a whole file, document or walk
+// (`modelFileViewSnapshot`, `serializerFromJson`,
+// `classDeclarationGetIdentifierFieldNameWalk`), and its answer is kept for
+// as long as it holds (`EngineState` in `bindings.d.ts`, keyed on the
+// manager's model version). Data the engine already holds is not sent back
+// to it: a staged or loaded model file is referred to by its id, and its AST
+// is sent only where the engine no longer holds it. This is a placement rule for crossings, not a rule against porting
+// logic to Rust.
 
 import type { RustEngine } from './rust';
 

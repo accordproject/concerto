@@ -29,41 +29,20 @@ import type Resource from '../model/resource';
 import type { ValidateInstanceOptions, ValidationResult } from '../types';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
+import { rust, engineValidateInstance, engineViews } from '../engineloader';
 
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
-// `never` so that a view leaves the member's inferred return type, and so
-// the .d.ts, exactly as the TS body used to make it.
-//
-// dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
-// with no .d.ts, since it is not public API (tsconfig.build.internal.json;
-// OD-11). A ts-mode bundle of dist/ must still leave it out, so a bundler
-// must never see a specifier it would resolve: `loadEngine` takes a
-// non-literal one (esbuild, rollup and browserify leave it alone) and never
-// names the bare `require` (esbuild's ESM output would add its `__require`
-// shim, which webpack reports as a critical dependency), and webpack folds
-// the `typeof __webpack_require__` test and keeps only the dead-in-Node
-// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
-// bundles exactly as before (PORTING.md 1.5).
-//
-// rust mode works through the CommonJS dist/ only. Through the public ESM and
-// browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
-// not supported yet and is deferred to a follow-up: there `module.require`
-// does not exist, and the relative specifier does not match the flattened
-// chunks' location.
-import { createRequire } from 'module';
-import type { EngineBindings } from '../engine/bindings';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-// P5-10a: memoised per specifier (see introspect/property.ts).
-const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    engineModules[specifier] ??
-    (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
-/* istanbul ignore next */
-const rust: EngineBindings = loadEngine('../engine').rust;
+/**
+ * P5-100 (E-1, M2): the declaration kind a metamodel `$class` names, as
+ * the engine's `ClassDeclaration::is_kind` compares it: whatever follows
+ * the last `.`. A pure predicate over a string the view already holds, so
+ * it runs here rather than crossing into the engine on every call.
+ * @param {string} type - the declaration's `$class` (`this.type`)
+ * @return {string} its short name
+ * @private
+ */
+function declarationKindOf(type: string): string {
+    return type.substring(type.lastIndexOf('.') + 1);
+}
 
 /**
  * ClassDeclaration defines the structure (model/schema) of composite data.
@@ -131,7 +110,7 @@ class ClassDeclaration extends Declaration {
         // P5-10a: the `classDeclarationProcess` binding, read from the
         // file's view snapshot while its declarations are built
         // (engine/views.ts).
-        const decision = loadEngine('../engine/views').classDeclarationProcess(this) as {
+        const decision = engineViews().classDeclarationProcess(this) as {
             superType: string | null;
             idField: string | null;
             addIdentifierField: boolean;
@@ -369,7 +348,7 @@ class ClassDeclaration extends Declaration {
         // (engine/views.ts). P5-36 (BC-50): the walk always inlines the
         // ClassDeclaration methods it reaches, so replacing them at runtime
         // does not change the answer.
-        return loadEngine('../engine/views').classDeclarationGetIdentifierFieldName(this) as string | null;
+        return engineViews().classDeclarationGetIdentifierFieldName(this) as string | null;
     }
 
     /**
@@ -452,7 +431,7 @@ class ClassDeclaration extends Declaration {
     getProperty(name: string): Property | null {
         // P5-14: the `classDeclarationGetProperty` binding, answered from
         // the view's cached property list when it has one (engine/views.ts).
-        return loadEngine('../engine/views').classDeclarationGetProperty(this, name) as Property | null;
+        return engineViews().classDeclarationGetProperty(this, name) as Property | null;
     }
 
     /**
@@ -470,7 +449,7 @@ class ClassDeclaration extends Declaration {
      * throws
      */
     validateInstance(json: object | string, options?: ValidateInstanceOptions): ValidationResult<Resource> {
-        return loadEngine('../engine/validate-instance').validateInstance(this.modelFile.getModelManager(), json, options, this.getFullyQualifiedName());
+        return engineValidateInstance().validateInstance(this.modelFile.getModelManager(), json, options, this.getFullyQualifiedName());
     }
 
     /**
@@ -485,7 +464,7 @@ class ClassDeclaration extends Declaration {
      * not this type or a subtype of it
      */
     validateInstanceOrThrow(json: object | string, options?: ValidateInstanceOptions): Resource | null {
-        return loadEngine('../engine/validate-instance').validateInstanceOrThrow(this.modelFile.getModelManager(), json, options, this.getFullyQualifiedName());
+        return engineValidateInstance().validateInstanceOrThrow(this.modelFile.getModelManager(), json, options, this.getFullyQualifiedName());
     }
 
     /**
@@ -496,7 +475,7 @@ class ClassDeclaration extends Declaration {
     getProperties(): Property[] {
         // P5-14: the `classDeclarationGetProperties` binding, cached per view
         // (engine/views.ts).
-        return loadEngine('../engine/views').classDeclarationGetProperties(this) as Property[];
+        return engineViews().classDeclarationGetProperties(this) as Property[];
     }
 
     /**
@@ -514,7 +493,11 @@ class ClassDeclaration extends Declaration {
      * @return {String} the string representation of the class
      */
     toString(): string {
-        return rust.classDeclarationToString(this.getFullyQualifiedName(), this.superType, this.abstract);
+        // P5-100 (E-1, M2): built here, as the engine's
+        // `ClassDeclaration::to_string` builds it: a `ClassDeclaration`
+        // receiver is never an enum (`EnumDeclaration` overrides this).
+        const superType = this.superType === null || this.superType === undefined ? '' : ` super=${this.superType}`;
+        return `ClassDeclaration {id=${this.getFullyQualifiedName()}${superType} enum=false abstract=${this.abstract}}`;
     }
 
     /**
@@ -523,7 +506,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isAsset(): boolean {
-        return rust.classDeclarationIsKind(this.type, 'AssetDeclaration');
+        return declarationKindOf(this.type) === 'AssetDeclaration';
     }
 
     /**
@@ -532,7 +515,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isParticipant(): boolean {
-        return rust.classDeclarationIsKind(this.type, 'ParticipantDeclaration');
+        return declarationKindOf(this.type) === 'ParticipantDeclaration';
     }
 
     /**
@@ -541,7 +524,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isTransaction(): boolean {
-        return rust.classDeclarationIsKind(this.type, 'TransactionDeclaration');
+        return declarationKindOf(this.type) === 'TransactionDeclaration';
     }
 
     /**
@@ -550,7 +533,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isEvent(): boolean {
-        return rust.classDeclarationIsKind(this.type, 'EventDeclaration');
+        return declarationKindOf(this.type) === 'EventDeclaration';
     }
 
     /**
@@ -559,7 +542,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isConcept(): boolean {
-        return rust.classDeclarationIsKind(this.type, 'ConceptDeclaration');
+        return declarationKindOf(this.type) === 'ConceptDeclaration';
     }
 
     /**
@@ -568,7 +551,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isEnum(): boolean {
-        return rust.classDeclarationIsKind(this.type, 'EnumDeclaration');
+        return declarationKindOf(this.type) === 'EnumDeclaration';
     }
 
     /**
@@ -577,7 +560,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isMapDeclaration(): boolean {
-        return rust.classDeclarationIsKind(this.type, 'MapDeclaration');
+        return declarationKindOf(this.type) === 'MapDeclaration';
     }
 
     /**

@@ -74,11 +74,21 @@ const coreVersion = require(path.join(args.coreDist, '..', 'package.json')).vers
 // misses the getNamespaces/getType/resolveType memo, without timing a model
 // load. The views built by the first pass are kept, as after a real change
 // elsewhere. A dist without the module (TS 5.0.0) keeps nothing between
-// reads, so the step is a no-op there.
+// reads, so the step is a no-op there. The epoch is per manager since
+// P5-97 (accordproject/concerto-rust#448: `invalidatePropertyLookups(mm)`),
+// and since P5-100 (accordproject/concerto-rust#454) it is the manager's own
+// model version, `mm._engine.version`, which every model change moves.
 const viewsPath = path.join(args.coreDist, 'engine', 'views.js');
-const bumpModelEpoch = fs.existsSync(viewsPath) && typeof require(viewsPath).invalidatePropertyLookups === 'function'
+const invalidatePropertyLookups = fs.existsSync(viewsPath) && typeof require(viewsPath).invalidatePropertyLookups === 'function'
     ? require(viewsPath).invalidatePropertyLookups
-    : () => {};
+    : null;
+function bumpModelEpoch(mm) {
+    if (mm._engine && typeof mm._engine.version === 'number') {
+        mm._engine.version++;
+    } else if (invalidatePropertyLookups) {
+        invalidatePropertyLookups(mm);
+    }
+}
 
 // P5-56: the generated synthetic-large model gives its EnumDeclaration an
 // `isAbstract: false`, a key the metamodel does not declare for enums. TS
@@ -435,7 +445,7 @@ const OPS = {
         setup: (d) => ({ mm: managerOf(d.models), items: d.pairs.map((p) => p[0]) }),
         n: (c) => c.items.length,
         run: (c) => {
-            bumpModelEpoch();
+            bumpModelEpoch(c.mm);
             for (const fqn of c.items) {
                 c.mm.getType(fqn);
             }
@@ -446,7 +456,7 @@ const OPS = {
         setup: (d) => ({ mm: managerOf(d.models), items: d.pairs.map((p) => p[0]) }),
         n: (c) => c.items.length,
         run: (c) => {
-            bumpModelEpoch();
+            bumpModelEpoch(c.mm);
             for (const fqn of c.items) {
                 c.mm.resolveType('p515', fqn);
             }
@@ -457,7 +467,7 @@ const OPS = {
         setup: (d) => ({ mm: managerOf(d.models) }),
         n: () => 1,
         run: (c) => {
-            bumpModelEpoch();
+            bumpModelEpoch(c.mm);
             return c.mm.getNamespaces();
         },
     },

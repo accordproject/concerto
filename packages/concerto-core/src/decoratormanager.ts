@@ -22,28 +22,8 @@ import { jsonToYaml, yamlToJson } from './dcsconverter';
 /* eslint-disable no-unused-vars */
 import type ModelFile from './introspect/modelfile';
 /* eslint-enable no-unused-vars */
+import { rust, engineViews } from './engineloader';
 
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
-// `never` so that a view leaves the member's inferred return type, and so
-// the .d.ts, exactly as the TS body used to make it.
-// See src/modelutil.ts for why this is loaded this way (dist/, bundler and
-// CJS/ESM notes); the same considerations apply here unchanged.
-import { createRequire } from 'module';
-import type { EngineBindings, EngineViews } from './engine/bindings';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-// P5-06: memoised per specifier, so a call site on a per-element or
-// per-instance path (propertyProcess, fastFromJson, ...) resolves the module
-// once rather than on every call.
-/* istanbul ignore next */
-const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    engineModules[specifier] ??
-    (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
-const rust: EngineBindings = loadEngine('./engine').rust;
 // The engine bindings (`rust`) and the rust-mode view functions
 // (src/engine/views.ts) are typed by src/engine/bindings.d.ts (P5-84).
 
@@ -186,7 +166,7 @@ class DecoratorManager {
         // parsing is not ported) and returned unchanged. P5-27 (F6): the
         // check runs against validationModelManager's own rustHandle when it
         // mirrors its model files, instead of rebuilding them in Rust.
-        (loadEngine('./engine/views') as EngineViews).decoratorManagerValidate(validationModelManager, decoratorCommandSet, modelFiles);
+        engineViews().decoratorManagerValidate(validationModelManager, decoratorCommandSet, modelFiles);
         return validationModelManager;
     }
 
@@ -265,7 +245,7 @@ class DecoratorManager {
                 }
             });
         }
-        return (loadEngine('./engine/views') as EngineViews).decoratorManagerDecorateModels(modelManager, decoratorCommandSets, options);
+        return engineViews().decoratorManagerDecorateModels(modelManager, decoratorCommandSets, options);
     }
     /**
      * @typedef ExtractDecoratorsResult
@@ -288,7 +268,7 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractDecorators(modelManager, options);
+        return engineViews().decoratorManagerExtractDecorators(modelManager, options);
     }
     /**
      * Extracts all the vocab decorator commands from all the models in modelManager
@@ -304,7 +284,7 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractVocabularies(modelManager, options);
+        return engineViews().decoratorManagerExtractVocabularies(modelManager, options);
     }
     /**
      * Extracts all the non-vocab decorator commands from all the models in modelManager
@@ -320,7 +300,7 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        return (loadEngine('./engine/views') as EngineViews).decoratorManagerExtractNonVocabDecorators(modelManager, options);
+        return engineViews().decoratorManagerExtractNonVocabDecorators(modelManager, options);
     }
     /**
      * Compares two arrays. If the first argument is falsy

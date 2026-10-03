@@ -21,40 +21,7 @@ import type { IDecorator, IRange } from '@accordproject/concerto-metamodel';
 /* eslint-disable no-unused-vars */
 import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
-
-// The Rust engine (src/engine/index.ts) is the only path (P5-02: the
-// CONCERTO_ENGINE=ts|rust flag from P4-02 is gone). Its bindings are typed
-// `never` so that a view leaves the member's inferred return type, and so
-// the .d.ts, exactly as the TS body used to make it.
-//
-// dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
-// with no .d.ts, since it is not public API (tsconfig.build.internal.json;
-// OD-11). A bundler must never see a specifier it would resolve: `loadEngine`
-// takes a non-literal one (esbuild, rollup and browserify leave it alone) and
-// never names the bare `require` (esbuild's ESM output would add its
-// `__require` shim, which webpack reports as a critical dependency), and
-// webpack folds the `typeof __webpack_require__` test and keeps only the
-// dead-in-Node `__non_webpack_require__` branch, so it neither resolves nor
-// warns.
-//
-// rust mode works through the CommonJS dist/ only. Through the public ESM and
-// browser entry points (dist/esm/index.mjs, dist/esm-browser/index.mjs) it is
-// not supported yet and is deferred to a follow-up: there `module.require`
-// does not exist, and the relative specifier does not match the flattened
-// chunks' location.
-import { createRequire } from 'module';
-import type { EngineBindings } from '../engine/bindings';
-declare const __webpack_require__: unknown;
-declare const __non_webpack_require__: NodeRequire;
-// P5-10a: memoised per specifier (see introspect/property.ts).
-const engineModules: { [specifier: string]: any } = {};
-/* istanbul ignore next */
-const loadEngine = (specifier: string) =>
-    engineModules[specifier] ??
-    (engineModules[specifier] =
-        typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : typeof module !== 'undefined' && typeof module.require === 'function' ? module.require(specifier) : typeof (globalThis as any).module?.require === 'function' ? (globalThis as any).module.require(specifier) : createRequire(__filename)(specifier));
-/* istanbul ignore next */
-const rust: EngineBindings = loadEngine('../engine').rust;
+import { rust, engineViews } from '../engineloader';
 
 /**
  * The shape shared by every metamodel AST node that the introspect classes
@@ -132,7 +99,7 @@ class Decorated {
     process() {
         // P5-10b: in a lazily built file, the decorators are built on first
         // read (engine/views.ts `deferDecorators`).
-        const views = loadEngine('../engine/views');
+        const views = engineViews();
         if (views.deferDecorators(this)) {
             return;
         }
@@ -215,7 +182,7 @@ class Decorated {
     }
 }
 
-loadEngine('../engine/views').installLazyField(Decorated.prototype, 'decorators', () => []);
+engineViews().installLazyField(Decorated.prototype, 'decorators', () => []);
 
 export { Decorated };
 export default Decorated;
