@@ -34,11 +34,9 @@
 // cached per model manager, until the set of `ModelFile` *instances* or
 // the rustHandle changes.
 
-import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 import { rust } from './index';
-import { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, newTypeCache, checkJsonText } from './serializer-codec';
+import { EngineFastPathUnsupported, encodeValue, decodeValue, decodeParsed, materializeCompact, newTypeCache } from './serializer-codec';
 import Factory from '../factory';
-import Serializer from '../serializer';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -223,49 +221,26 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
 }
 
 /**
- * The engine-side model manager `validateMetaModel` validates against: the
- * metamodel alone, as `newMetaModelManager()` holds it (P5-11,
- * accordproject/concerto-rust#287). Built on first use and kept: the
- * metamodel is fixed, and `serializerFromJson` does not change a handle.
- */
-let metaModelHandle: any;
-
-/**
- * The options `validateMetaModel`'s Serializer uses: a Serializer's own
- * defaults (`new Serializer(factory, modelManager)` with no options).
- */
-let metaModelOptions: unknown;
-
-/**
  * `validateMetaModel(input)` (introspect/metamodel.ts) in one engine call
  * (P5-11, accordproject/concerto-rust#287): validates the metamodel
  * instance `input` as `Serializer.fromJSON` does for a Serializer over
  * `newMetaModelManager()`, without building that model manager, its Factory
- * and its Serializer on every call. Throws what the fast path throws, and
+ * and its Serializer on every call. P5-102 (F-7,
+ * accordproject/concerto-rust#456): the engine runs it on its one resident
+ * metamodel manager (`validateMetaModelInstance`, with the `'serializer'`
+ * preset: a Serializer's own defaults), so this module keeps no metamodel
+ * handle of its own. Throws what the fast path throws, and
  * `EngineFastPathUnsupported` for an input it cannot cross, which the
  * caller then validates through its TS body.
  * @param {object} input the metamodel instance in JSON
  */
 function validateMetaModel(input: unknown): void {
-    if (!metaModelHandle) {
-        const handle = new rust.ModelManagerHandle();
-        handle.addModel(checkJsonText(JSON.stringify(MetaModelUtil.metaModelAst)), 'concerto.metamodel');
-        metaModelHandle = handle;
-    }
-    if (metaModelOptions === undefined) {
-        // Serializer's constructor only checks that both are given.
-        metaModelOptions = new Serializer({} as any, {} as any).defaultOptions;
-    }
     const env = {
         newId: () => Factory.newId(),
         nowMs: () => Date.now(),
     };
     try {
-        metaModelHandle.serializerFromJson(
-            JSON.stringify(encodeValue(input)),
-            JSON.stringify(encodeValue(metaModelOptions)),
-            env,
-        );
+        rust.validateMetaModelInstance(JSON.stringify(encodeValue(input)), 'serializer', env);
     } catch (err) {
         throw asUnsupported(err);
     }
