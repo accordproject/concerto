@@ -75,6 +75,63 @@ checkSchema(concertino); // null, or the errors
 
 `convertToConcertino` and `convertToMetamodel` imported on their own leave the schema checks out of a bundle.
 
+### Querying a Concertino document
+
+The `./runtime` subpath is a small introspection layer over a Concertino document: plain functions, so a bundler keeps only the ones an app calls. It needs neither concerto-core nor the Rust engine.
+
+```javascript
+const { load, getProperties, getIdentifierFieldName, getSuperTypes, propertyKind } = require('@accordproject/concertino/runtime');
+
+const model = load(concertino); // a Concertino document, e.g. built ahead of time
+getProperties(model, 'org.example.models@1.0.0.Person').map((p) => p.name);
+getIdentifierFieldName(model, 'org.example.models@1.0.0.Person'); // null: not identified
+```
+
+`load` adds the system model (`concerto@1.0.0.Concept`, `Asset`, `Participant`, `Transaction` and `Event`), which Concertino does not hold, so the implicit super type and the `$identifier` of an asset or participant declared without `extends` or `identified by` are answered as concerto-core answers them.
+
+| function | concerto-core equivalent |
+|---|---|
+| `getType`, `getNamespaces`, `getDeclarationNames` | `ModelManager.getType`, `getNamespaces`, `ModelFile.getAllDeclarations` |
+| `kindOf`, `isClass`, `isEnum`, `isMap`, `isScalar`, `isAbstract`, `isTransaction`, `isEvent` | the `Declaration` predicates |
+| `getSuperTypes`, `derivesFrom`, `isAssignableTo`, `getAssignableTypes` | `getAllSuperTypeDeclarations`, `ModelManager.derivesFrom`, `ModelUtil.isAssignableTo`, `getAssignableClassDeclarations` |
+| `getProperties`, `getProperty`, `propertyKind` | `getProperties` (`getOwnProperties` with `own`), `getProperty` |
+| `getIdentifierFieldName`, `isIdentified`, `isSystemIdentified` | the `ClassDeclaration` methods of the same names |
+| `getEnumValues`, `getMapTypes` | the enum's values, `MapDeclaration.getKey` / `getValue` |
+| `getDecorators`, `getVocabulary`, `getNamespaceDecorators` | decorators of a declaration, property or enum value; `@Term` vocabulary; model-level decorators |
+
+Differences from concerto-core: `getSuperTypes` leaves out `concerto@1.0.0.Concept` (every class derives from it, and `derivesFrom` says so), `isClass` is false for enums, type names are always fully qualified (map key and value types included), the system properties `$identifier` and `$timestamp` can come in another order, and Concertino lists `$timestamp` as an own property of transactions and events.
+
+### Validating instances
+
+The `./validate` subpath validates plain JSON instances against a Concertino document, as `Serializer.fromJSON` (then `Serializer.toJSON`) does in concerto-core, again with no dependency on concerto-core or the engine.
+
+```javascript
+const { load } = require('@accordproject/concertino/runtime');
+const { validate, normalise, check, toJSON, InstanceError } = require('@accordproject/concertino/validate');
+
+const model = load(concertino);
+check(model, json);              // { ok: true }, or { ok: false, error }
+normalise(model, json);          // the JSON Serializer.toJSON(Serializer.fromJSON(json)) gives
+const instance = validate(model, json); // throws an InstanceError, or returns the populated instance
+toJSON(model, instance);
+```
+
+It follows the Rust engine's plain-JSON route step for step (concerto-core 5 on the engine, including its breaking changes: strict ISO 8601 DateTimes naming a real instant, integral Integer and Long values, relationship map values), so it accepts and rejects the same instances and reports the first error concerto-core reports. An `InstanceError` carries the class of the exception concerto-core throws in its `errorClass` (and `name`): `ValidationException`, `TypeNotFoundException`, `Error` or `TypeError`. Messages are not the same as concerto-core's.
+
+The options are the Serializer's `validate`, `utcOffset`, `strictQualifiedDateTimes` and `acceptResourcesForRelationships`, plus `newId` and `now` for generated identifiers and timestamps. Not covered: instance generation (`Factory`), `rejectUnknownKeys`, `rejectRequiredNull`, and the Serializer's `toJSON` options for relationships.
+
+### Bundle sizes
+
+Each subpath bundled for the browser on its own (esbuild: ESM, browser platform, minified, es2022; `node scripts/bundleSizes.js` after a build). None contains `new Function`, so all run under a strict Content-Security-Policy.
+
+| subpath | raw (KiB) | gzip (KiB) |
+|---|---:|---:|
+| `.` (every export) | 118.1 | 14.8 |
+| `./schema` | 102.5 | 10.7 |
+| `./runtime` | 4.2 | 1.6 |
+| `./validate` | 18.6 | 6.2 |
+| `./validate` and `load` from `./runtime` | 18.8 | 6.2 |
+
 ## Model Size
 
 Despite the denormalization of metadata, the JSON serialization of Concertino models are often smaller in size than their Concerto AST equivalents due to a flatter, dictionary-like design and the removal of type-discriminators (i.e. `$class` properties).
