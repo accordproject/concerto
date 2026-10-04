@@ -48,6 +48,12 @@ class WireWriter {
     pos = 0;
     /** Writes begun so far: a result is valid while this is unchanged. */
     count = 0;
+    /**
+     * Set from `begin` to `release`. A write reads the caller's objects,
+     * whose getters may start another write on the same writer: that one is
+     * refused, so it cannot overwrite the bytes in progress.
+     */
+    private busy = false;
     private readonly initial: number;
 
     constructor(initial: number) {
@@ -55,10 +61,19 @@ class WireWriter {
         this.buf = new Uint8Array(initial);
     }
 
-    /** Starts a new write, over the previous one. */
-    begin(): void {
+    /**
+     * Starts a new write, over the previous one; false, changing nothing,
+     * while another write is in progress (the caller then takes its other
+     * path, and must not `release`).
+     */
+    begin(): boolean {
+        if (this.busy) {
+            return false;
+        }
+        this.busy = true;
         this.count++;
         this.pos = 0;
+        return true;
     }
 
     /** What has been written since `begin`, valid until the next `begin`. */
@@ -68,6 +83,12 @@ class WireWriter {
 
     /** Ends a write: a buffer grown past `KEPT` goes back to its initial size. */
     release(): void {
+        this.busy = false;
+        this.shrink();
+    }
+
+    /** A buffer grown past `KEPT` goes back to its initial size. */
+    private shrink(): void {
         if (this.buf.length > KEPT) {
             this.buf = new Uint8Array(this.initial);
         }
@@ -174,11 +195,14 @@ class WireWriter {
      * JSON text, valid until the next write.
      */
     utf8(text: string): Uint8Array {
-        this.begin();
+        // Encoding a string reads no getter, so no other write can start
+        // meanwhile: a writer used only for this needs no `begin`.
+        this.count++;
+        this.pos = 0;
         this.ensure(text.length * 3);
         this.pos = encoder.encodeInto(text, this.buf).written;
         const out = this.bytes();
-        this.release();
+        this.shrink();
         return out;
     }
 

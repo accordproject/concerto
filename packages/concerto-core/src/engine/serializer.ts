@@ -167,4 +167,4 @@ function validateMetaModel(input: unknown): void {
     }
 }
 
-export { asUnsupported, fastFromJson, fastToJson, handleFor, validateMetaModel };
+export { asUnsupported, fastFromJson, fastToJson, handleFor, optionsText, validateMetaModel };

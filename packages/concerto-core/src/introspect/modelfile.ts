@@ -1203,51 +1203,36 @@ class ModelFile extends Decorated {
             };
             const handles = engineHandles();
             const target: EngineHandle | undefined = modelManager.rustHandle;
-            if (target && target !== manager.rustHandle) {
-                // A file the filter keeps exactly as it is (every
-                // declaration kept, every import unchanged) is staged,
-                // shared, in `modelManager`'s own rustHandle (staging
-                // registers nothing there), and its view is built from this
-                // file's own AST and header: no JSON round trip. Any other
-                // result comes back as its AST, as `modelFileSnapshot`
-                // returned it, with no scratch handle.
-                const result: string | undefined = handles.withEngineCallbacks(
-                    () => manager.rustHandle.modelFileFilterStaged(id, wrappedPredicate, target));
-                if (result === undefined) {
-                    return null;
-                }
-                const filtered = JSON.parse(result);
-                if (filtered.stage !== undefined) {
-                    // As TS 5.0.0's filtered file, the view has its own
-                    // shallow copy of the AST (a new declarations array and
-                    // copies of the imports), not this file's AST object.
-                    const ast = {
-                        ...this.ast,
-                        declarations: this.ast.declarations.slice(),
-                        imports: this.ast.imports?.map(imp => ({...imp})),
-                    };
-                    return ModelFile._sharedView(modelManager, this, undefined, { handle: target, id: filtered.stage }, undefined, ast);
-                }
-                return new ModelFile(modelManager, filtered.ast, undefined, this.fileName);
+            // A file the filter keeps exactly as it is (every declaration
+            // kept, every import unchanged) is staged, shared, in
+            // `modelManager`'s own rustHandle (staging registers nothing
+            // there), and its view is built from this file's own AST and
+            // header: no JSON round trip. Any other result comes back as its
+            // AST. With no distinct target (the result manager is this
+            // file's own, or has no handle) every result comes back as its
+            // AST; nothing is registered anywhere, as `filter`'s result is
+            // returned detached (`BaseModelManager.filter` adds it later).
+            const staged = target !== undefined && target !== manager.rustHandle;
+            const result: string | undefined = handles.withEngineCallbacks(
+                () => staged
+                    ? manager.rustHandle.modelFileFilterStaged(id, wrappedPredicate, target)
+                    : manager.rustHandle.modelFileFilterAst(id, wrappedPredicate));
+            if (result === undefined) {
+                return null;
             }
-            // A scratch handle, never `modelManager`'s own: `filter`'s result
-            // is returned detached (`BaseModelManager.filter` adds it later),
-            // so writing into the manager's mirror here would register a
-            // namespace ahead of `modelFiles`. Freed once its last use
-            // returns.
-            const scratch = new rust.ModelManagerHandle();
-            let filteredSnapshot;
-            try {
-                const filteredId = handles.withEngineCallbacks(
-                    () => manager.rustHandle.modelFileFilter(id, wrappedPredicate, scratch));
-                if (filteredId === undefined) {
-                    return null;
-                }
-                filteredSnapshot = JSON.parse(scratch.modelFileSnapshot(filteredId));
-            } finally {
-                handles.releaseHandle(scratch);
+            const filtered = JSON.parse(result);
+            if (filtered.stage !== undefined) {
+                // As TS 5.0.0's filtered file, the view has its own
+                // shallow copy of the AST (a new declarations array and
+                // copies of the imports), not this file's AST object.
+                const ast = {
+                    ...this.ast,
+                    declarations: this.ast.declarations.slice(),
+                    imports: this.ast.imports?.map(imp => ({...imp})),
+                };
+                return ModelFile._sharedView(modelManager, this, undefined, { handle: target as EngineHandle, id: filtered.stage }, undefined, ast);
             }
-            return new ModelFile(modelManager, filteredSnapshot.ast, undefined, this.fileName);
+            return new ModelFile(modelManager, filtered.ast, undefined, this.fileName);
         }
         const declarations: AstNode[] = [];
         for (const declaration of this.declarations) {

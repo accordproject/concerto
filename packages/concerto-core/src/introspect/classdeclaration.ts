@@ -261,7 +261,10 @@ class ClassDeclaration extends Declaration {
                 if(this.superType) {
                     const superType = this.getModelFile().getType(this.superType);
                     if (superType && superType.isIdentified() ) {
-                        if (rust.classDeclarationIdentifierRedeclareConflict(this.isSystemIdentified(), superType.isSystemIdentified(), superType.isExplicitlyIdentified())) {
+                        // A system-identified class needs a system-identified
+                        // super type; any other may not redeclare an
+                        // explicit identifier.
+                        if (this.isSystemIdentified() ? !superType.isSystemIdentified() : superType.isExplicitlyIdentified()) {
                             throw new IllegalModelException(`Super class ${superType.getFullyQualifiedName()} has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
                         }
                     }

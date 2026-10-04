@@ -17,6 +17,7 @@ import ModelUtil from './modelutil';
 import semver from 'semver';
 
 import { jsonToYaml, yamlToJson } from './dcsconverter';
+import IllegalModelException from './introspect/illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -28,6 +29,57 @@ import { rust, engineViews } from './engineloader';
 // src/engine/bindings.d.ts.
 
 const DCS_VERSION = '0.4.0';
+
+/**
+ * TS 5.0.0's `DecoratorManager.applyDecorator`: applies a decorator to a
+ * decorated model element's AST, in place.
+ * @param {*} decorated the AST to apply the decorator to
+ * @param {string} type the command type
+ * @param {*} newDecorator the decorator to add
+ */
+function applyDecorator(decorated, type, newDecorator) {
+    if (type === 'UPSERT') {
+        let updated = false;
+        if (decorated.decorators) {
+            for (let n = 0; n < decorated.decorators.length; n++) {
+                const decorator = decorated.decorators[n];
+                if (decorator.name === newDecorator.name) {
+                    decorated.decorators[n] = newDecorator;
+                    updated = true;
+                }
+            }
+        }
+        if (!updated) {
+            decorated.decorators
+                ? decorated.decorators.push(newDecorator)
+                : (decorated.decorators = [newDecorator]);
+        }
+    } else if (type === 'APPEND') {
+        decorated.decorators
+            ? decorated.decorators.push(newDecorator)
+            : (decorated.decorators = [newDecorator]);
+        checkForDuplicateDecorators(decorated);
+    } else {
+        throw new Error(`Unknown command type ${type}`);
+    }
+}
+
+/**
+ * TS 5.0.0's `DecoratorManager.checkForDuplicateDecorators`.
+ * @param {*} decoratedAst the AST of the decorated element
+ * @throws {IllegalModelException} if it has two decorators of one name
+ */
+function checkForDuplicateDecorators(decoratedAst) {
+    const uniqueDecoratorNames = new Set();
+    decoratedAst.decorators.forEach(d => {
+        const decoratorName = d.name;
+        if (!uniqueDecoratorNames.has(decoratorName)) {
+            uniqueDecoratorNames.add(decoratorName);
+        } else {
+            throw new IllegalModelException(`Duplicate decorator ${decoratorName}`, undefined, decoratedAst.location);
+        }
+    });
+}
 
 const DCS_MODEL = `concerto version ">3.0.0"
 namespace org.accordproject.decoratorcommands@0.4.0
@@ -332,9 +384,16 @@ class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property, command) {
-        // The binding mutates a detached clone; the result is copied back
-        // onto `property`, which TS 5.0.0 mutated in place.
-        Object.assign(property, rust.decoratorManagerExecutePropertyCommand(property, command));
+        // TS 5.0.0's body: pure work over the caller's own objects, which it
+        // changes in place (only the `decorators` array, pushing
+        // `command.decorator` itself), so it stays in TS.
+        const { target, decorator, type } = command;
+        if (target.properties || target.property || target.type) {
+            if (this.falsyOrEqual(target.property ? target.property : target.properties, [property.name]) &&
+                this.falsyOrEqual(target.type, [property.$class])) {
+                applyDecorator(property, type, decorator);
+            }
+        }
     }
 
     /**

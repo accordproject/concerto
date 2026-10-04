@@ -244,7 +244,7 @@ function outcome(code: number): boolean {
         throw new ValidationException(rust.validateErrorMessage());
     }
     if (code === CODE_UNSUPPORTED) {
-        rust.validateErrorMessage();
+        // The engine keeps no error for this code.
         return false;
     }
     throw rust.validateTakeError();
@@ -264,17 +264,31 @@ function validateResource(resource, rootId: string): boolean {
     try {
         checkString(rootId);
         handle = handleFor(resource.getModelManager());
-        writer.begin();
-        writeTyped(resource, new Set<object>([resource]));
     } catch (err) {
-        writer.release();
         if (err instanceof EngineFastPathUnsupported) {
             return false;
         }
         throw err;
     }
-    const code = handle.validateResourceBinary(writer.bytes(), rootId, flags);
-    writer.release();
+    // A getter read mid-write may validate another value: the writer
+    // refuses that nested write, which runs the visitor.
+    if (!writer.begin()) {
+        return false;
+    }
+    let code;
+    try {
+        try {
+            writeTyped(resource, new Set<object>([resource]));
+        } catch (err) {
+            if (err instanceof EngineFastPathUnsupported) {
+                return false;
+            }
+            throw err;
+        }
+        code = handle.validateResourceBinary(writer.bytes(), rootId, flags);
+    } finally {
+        writer.release();
+    }
     return outcome(code);
 }
 
@@ -315,59 +329,67 @@ function validateProperty(resource, propName: string, value, rootId: string, fie
         checkString(propName);
         checkString(rootId);
         handle = handleFor(resource.getModelManager());
-        writer.begin();
-        writeValue(value, new Set<object>());
     } catch (err) {
-        writer.release();
         if (err instanceof EngineFastPathUnsupported) {
             return false;
         }
         throw err;
     }
-    const fqn = resource.getFullyQualifiedType();
-    const slot = propertySlot(resource.getModelManager(), handle, fqn, propName);
-    if (slot !== undefined) {
-        // By slot; this call returns a `Validation` message and throws any other error.
-        const result = handle.validatePropertyById(writer.bytes(), slot[0], slot[1], slot[2], rootId, flags);
-        if (typeof result === 'string') {
-            writer.release();
-            throw new ValidationException(result);
-        }
-        if (result !== CODE_STALE) {
-            writer.release();
-            return result === CODE_VALID;
-        }
-        dropSlots(handle);
+    // As in `validateResource`: a nested write runs the visitor. The writer
+    // is released however the engine calls end.
+    if (!writer.begin()) {
+        return false;
     }
-    const code = handle.validatePropertyBinary(writer.bytes(), fqn, propName, rootId, flags);
-    writer.release();
+    let byId;
+    let code;
+    try {
+        try {
+            writeValue(value, new Set<object>());
+        } catch (err) {
+            if (err instanceof EngineFastPathUnsupported) {
+                return false;
+            }
+            throw err;
+        }
+        const fqn = resource.getFullyQualifiedType();
+        const modelManager = resource.getModelManager();
+        const slot = propertySlot(modelManager, handle, fqn, propName);
+        if (slot !== undefined) {
+            // By slot; this call returns a `Validation` message and throws any other error.
+            byId = handle.validatePropertyById(writer.bytes(), slot[0], slot[1], slot[2], rootId, flags);
+            if (byId === CODE_STALE) {
+                dropSlots(modelManager);
+                byId = undefined;
+            }
+        }
+        if (byId === undefined) {
+            code = handle.validatePropertyBinary(writer.bytes(), fqn, propName, rootId, flags);
+        }
+    } finally {
+        writer.release();
+    }
+    if (typeof byId === 'string') {
+        throw new ValidationException(byId);
+    }
+    if (byId !== undefined) {
+        return byId === CODE_VALID;
+    }
     return outcome(code);
 }
 
 /**
- * One rustHandle's `validatePropertyById` slots (`[declId, propIndex, epoch]`)
- * by type and property, for one model version. The engine refuses a slot of
- * another epoch (`CODE_STALE`), which is then looked up again.
+ * The slot of `fqn.propName`, looked up once per model version; undefined if
+ * none. The slots are kept in the manager's engine state
+ * (`EngineState.propertySlots`) for its current handle and version; the
+ * engine refuses a slot of another epoch (`CODE_STALE`), and the caller then
+ * drops them (`dropSlots`).
  */
-interface PropertySlots {
-    version: number;
-    byType: Map<string, Map<string, Uint32Array | null>>;
-}
-
-const propertySlots = new WeakMap<object, PropertySlots>();
-
-/** Forgets `handle`'s slots. */
-function dropSlots(handle: object): void {
-    propertySlots.delete(handle);
-}
-
-/** The slot of `fqn.propName`, looked up once per model version; undefined if none. */
 function propertySlot(modelManager, handle, fqn: string, propName: string): Uint32Array | undefined {
     const state = modelManager._engine;
-    let slots = propertySlots.get(handle);
-    if (slots === undefined || slots.version !== state.version) {
-        slots = { version: state.version, byType: new Map() };
-        propertySlots.set(handle, slots);
+    let slots = state.propertySlots;
+    if (slots === undefined || slots.version !== state.version || slots.handle !== handle) {
+        slots = { version: state.version, handle, byType: new Map() };
+        state.propertySlots = slots;
     }
     let byName = slots.byType.get(fqn);
     if (byName === undefined) {
@@ -381,6 +403,11 @@ function propertySlot(modelManager, handle, fqn: string, propName: string): Uint
         slot = found;
     }
     return slot ?? undefined;
+}
+
+/** Forgets `modelManager`'s slots. */
+function dropSlots(modelManager): void {
+    modelManager._engine.propertySlots = undefined;
 }
 
 export { validateResource, validateProperty };

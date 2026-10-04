@@ -481,6 +481,9 @@ const P5_11 = {
         'DecoratorManager.canMigrate': { c: 'TS', r: 'JS-side helper: a semver comparison of the command set\'s namespace version. ' + R.p511 },
         'intersect': { c: 'TS', r: 'TS 5.0.0\'s string-array intersection, the helper of falsyOrEqual (P5-116 R2E-1)' },
         'DecoratorManager.falsyOrEqual': { c: 'TS', r: 'TS 5.0.0\'s body restored for parity (substring match on a string values, TypeError on undefined values): pure work over data TS holds, so no engine crossing (P5-116 R2E-1)' },
+        'DecoratorManager.executePropertyCommand': { c: 'TS', r: 'TS 5.0.0\'s body restored for parity: it changes the caller\'s property AST in place (only its decorators array, pushing the command\'s own decorator object); pure work over data TS holds, so no engine crossing (P5-117 R2E-2)' },
+        'applyDecorator': { c: 'TS', r: 'TS 5.0.0\'s DecoratorManager.applyDecorator, the helper of executePropertyCommand: an in-place UPSERT or APPEND on the caller\'s AST (P5-117 R2E-2)' },
+        'checkForDuplicateDecorators': { c: 'TS', r: 'TS 5.0.0\'s DecoratorManager.checkForDuplicateDecorators, the helper of executePropertyCommand\'s APPEND (P5-117 R2E-2)' },
     },
     'src/decoratormodelhelper.ts': {
         'getDecoratorModel': { c: 'TS', r: R.fixedData },
@@ -728,7 +731,6 @@ const P5_64 = {
         'restoreAllUndefinedDecorators': { c: 'TS', r: R.shim564 + ' (restoreUndefinedDecorators over every model of an extract result)' },
         'dcsCacheable': { c: 'TS', r: R.shim564 + ' (P5-55: whether a DCS operation may run on the manager\'s own rustHandle; P5-103 removed the resident DCS handle it also decided)' },
         'sourceDcsHandle': { c: 'TS', r: R.shim564 + ' (P5-55: the source manager\'s rustHandle when it can run a DCS operation itself)' },
-        'assertDistinctHandles': { c: 'TS', r: R.shim564 + ' (P5-55: a guard that the result manager does not share the source handle)' },
         'dcsManagerFor': { c: 'TS', r: R.shim564 + ' (P5-27: a DcsManagerHandle built for one operation, for a manager its own rustHandle cannot stand for; P5-103 removed the resident cache)' },
         // P5-28 staged headers and P5-10a staging.
         'recordImportNames': { c: 'TS', r: R.shim564 + ' (lazy views: records the import names Rust computed at staging)' },

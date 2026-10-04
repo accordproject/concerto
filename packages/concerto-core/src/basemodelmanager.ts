@@ -66,6 +66,7 @@ function newEngineState(): EngineState {
         readMemo: undefined,
         namespaces: undefined,
         serializerCache: undefined,
+        propertySlots: undefined,
     };
 }
 
@@ -1298,9 +1299,13 @@ class BaseModelManager {
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
         // The replaced handle is this manager's alone (a fork has a handle
-        // of its own), and nothing calls it again: its engine memory is
-        // released now, not when the garbage collector gets to its
-        // finalizer. Internal only: there is no public release API.
+        // of its own), and the manager never calls it again: its engine
+        // memory is released now, not when the garbage collector gets to its
+        // finalizer. Internal only: there is no public release API. A
+        // ModelFile staged in it before the clear, or a view sharing such a
+        // stage, may still reach it through its stage: the view snapshot
+        // (`heldViewSnapshot`) and the stage finalizer guard that call, and
+        // the commit paths never take a stage of another handle.
         engineHandles().releaseHandle(replaced);
         // A new, empty namespace list, appended to as the system models are
         // registered again; a new map and handle are a model change.
@@ -1659,6 +1664,8 @@ class BaseModelManager {
         fork.factory = new Factory(fork);
         fork.options = this.options === undefined ? undefined : { ...this.options };
         fork.serializer = new Serializer(fork.factory, fork, fork.options);
+        // The serializer's defaults too, as `setDefaultOptions` left them.
+        fork.serializer.defaultOptions = Object.assign({}, this.serializer.defaultOptions);
         fork.decoratorFactories = this.decoratorFactories.slice();
         fork.decoratorValidation = this.decoratorValidation;
         fork._mirrorPending = false;
@@ -1669,14 +1676,21 @@ class BaseModelManager {
         fork._rustPreloaded = new Set(this._rustPreloaded);
         fork.rustHandle = this.rustHandle.fork();
         fork._buildingMetamodelCopy = false;
-        // `validateAst`'s cached metamodel copy, as a view of this manager's,
-        // built on first use (it is read only when a metamodel check fails).
-        const base = this;
+        // `validateAst`'s cached metamodel copy, built as the constructor
+        // builds it, on first use (it is read only when a metamodel check
+        // fails). It is built from the metamodel AST, not from this
+        // manager's copy, so the fork never keeps this manager reachable.
         Object.defineProperty(fork, 'metamodelModelFile', {
             configurable: true,
             enumerable: true,
             get() {
-                const view = ModelFile._sharedView(fork, base.metamodelModelFile, base.metamodelModelFile.getDefinitions());
+                let view;
+                fork._buildingMetamodelCopy = true;
+                try {
+                    view = new ModelFile(fork, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace);
+                } finally {
+                    fork._buildingMetamodelCopy = false;
+                }
                 Object.defineProperty(fork, 'metamodelModelFile', { value: view, writable: true, enumerable: true, configurable: true });
                 return view;
             },
@@ -1690,8 +1704,11 @@ class BaseModelManager {
             fork.modelFiles[namespace] = ModelFile._sharedView(fork, source, source.getDefinitions(), undefined, handle) as ModelFileInstance;
         }
         // A metamodel copy this manager registered (`addMetamodel`) is the
-        // same object as its view in the fork.
-        if (this.modelFiles[MetaModelNamespace] === this.metamodelModelFile) {
+        // same object as its view in the fork. A copy this manager has not
+        // built yet (a fork's, still an accessor) is registered nowhere, and
+        // is left unbuilt.
+        const copy = Object.getOwnPropertyDescriptor(this, 'metamodelModelFile');
+        if (copy !== undefined && 'value' in copy && this.modelFiles[MetaModelNamespace] === copy.value) {
             fork.metamodelModelFile = fork.modelFiles[MetaModelNamespace];
         }
         const namespaces = namespaceListOf(this);

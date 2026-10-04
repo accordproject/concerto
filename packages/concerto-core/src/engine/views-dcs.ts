@@ -43,12 +43,12 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
     const source = sourceDcsHandle(modelManager);
     if (source) {
         // The source handle resolves its models itself; nothing is copied.
+        // A new manager holds only the system models, which
+        // `adoptStagedModels` skips, so it needs no clearing.
         const decoratedModelManager = new ModelManager({
             decoratorValidation: modelManager.getDecoratorValidation()
         });
-        decoratedModelManager.clearModelFiles();
         const target = decoratedModelManager.rustHandle;
-        assertDistinctHandles(source, target);
         const result = source.dcsDecorateModels(target, decoratorCommandSets, options ?? {});
         adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation,
             decorateResultTrusted(modelManager, decoratorCommandSets, options));
@@ -59,7 +59,6 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
         const decoratedModelManager = new ModelManager({
             decoratorValidation: modelManager.getDecoratorValidation()
         });
-        decoratedModelManager.clearModelFiles();
         const result = dcs.decorateModels(decoratedModelManager.rustHandle, decoratorCommandSets, options ?? {});
         adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation,
             decorateResultTrusted(modelManager, decoratorCommandSets, options));
@@ -133,9 +132,7 @@ const EXTRACT_ACTION: { [binding: string]: number } = {
 function decoratorManagerExtractOnSource(binding: string, source: any, modelManager: any, options: any): any {
     const { default: ModelManager } = require('../modelmanager');
     const updatedModelManager = new ModelManager();
-    updatedModelManager.clearModelFiles();
     const target = updatedModelManager.rustHandle;
-    assertDistinctHandles(source, target);
     const result = source.dcsExtract(target, options, EXTRACT_ACTION[binding]);
     const { staged, validated } = result;
     delete result.staged;
@@ -154,8 +151,7 @@ function decoratorManagerExtractStaged(binding: string, modelManager: any, optio
     const { dcs, sourceModels } = dcsManagerFor(modelManager, true);
     try {
         const updatedModelManager = new ModelManager();
-        updatedModelManager.clearModelFiles();
-        const result = dcs.extract(updatedModelManager.rustHandle, options, EXTRACT_ACTION[binding]);
+            const result = dcs.extract(updatedModelManager.rustHandle, options, EXTRACT_ACTION[binding]);
         const { staged, validated } = result;
         delete result.staged;
         delete result.validated;
@@ -286,14 +282,6 @@ function sourceDcsHandle(modelManager: any): any {
         return undefined;
     }
     return modelManager.rustHandle;
-}
-
-/** The source and target handles are borrowed at once, so they must differ. */
-function assertDistinctHandles(source: any, target: any): void {
-    /* istanbul ignore next: the result manager is always built for the call, so its handle is never the source's */
-    if (source === target) {
-        throw new Error('DecoratorManager: the result ModelManager must not share the source ModelManager\'s engine handle');
-    }
 }
 
 /**

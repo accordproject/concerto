@@ -37,7 +37,7 @@ without a ledger rebuild fails the build.
 
 ## Method
 
-* **Scope.** 731 members in 74 files. Nested closures count
+* **Scope.** 733 members in 74 files. Nested closures count
   as part of the member that encloses them. `index.ts`, `types.ts` and
   `dayjs-setup.ts` have no members: they hold re-exports, types and a dayjs
   plugin setup only.
@@ -130,25 +130,25 @@ without a ledger rebuild fails the build.
 
 | | members | loc | weight | share of weight |
 |---|---|---|---|---|
-| RUST | 74 | 962 | 1120 | 13.2% |
-| HYBRID | 86 | 1877 | 2064 | 24.3% |
-| PARTIAL | 49 | 470 | 518 | 6.1% |
-| TS | 522 | 5028 | 4808.5 | 56.5% |
-| **total** | 731 | 8337 | 8510.5 | 100% |
+| RUST | 68 | 870 | 980 | 11.3% |
+| HYBRID | 86 | 1897 | 2100.5 | 24.2% |
+| PARTIAL | 54 | 601 | 704 | 8.1% |
+| TS | 525 | 5101 | 4887 | 56.4% |
+| **total** | 733 | 8469 | 8671.5 | 100% |
 
-* **RUST+HYBRID weighted share (new D1 denominator): 37.8%**, HYBRID at full weight
+* **RUST+HYBRID weighted share (new D1 denominator): 35.9%**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. **NOT met.**
   PARTIAL rows (section 5b) are not in the numerator.
   Denominator excludes constant markers and `accept()` visitor entry points
   (60 members, weight 90) as not-logic, per the maintainer's
-  decision on open question 2 below. New total weight: 8420.5 (was 8510.5).
+  decision on open question 2 below. New total weight: 8581.5 (was 8671.5).
   D1 stays as defined, with the 70% bar, by maintainer decision (accordproject/concerto-rust#276,
   2026-09-28): the proposed D1′ was not adopted, and the gate reports §0.4 as FAIL at this figure.
-* **Old figure (previous denominator, all 731 members): 37.4%.**
-* RUST only (new denominator): 13.3%.
-* For comparison only, not the D1 figure: counting PARTIAL *read* rows (30 members,
-  weight 126) as Rust gives 39.3%; counting every PARTIAL row (49 members,
-  weight 518) gives 44.0%. That is how the ledger counted them before
+* **Old figure (previous denominator, all 733 members): 35.5%.**
+* RUST only (new denominator): 11.4%.
+* For comparison only, not the D1 figure: counting PARTIAL *read* rows (33 members,
+  weight 132) as Rust gives 37.4%; counting every PARTIAL row (54 members,
+  weight 704) gives 44.1%. That is how the ledger counted them before
   accordproject/concerto-rust#261 (then 78.9%, which also counted three `rustHandle`
   plumbing helpers as RUST; they are now TS, engine shim). After #261 and before P5-11 the
   figure was 57.4% (61.5% at #261 itself): P5-11 reclassified TS 128 PARTIAL rows and 57 HYBRID
@@ -166,33 +166,33 @@ By weight category:
 
 | category | members | loc | weight | RUST w | HYBRID w | PARTIAL w | TS w |
 |---|---|---|---|---|---|---|---|
-| glue (x0.5) | 351 | 1242 | 621 | 46 | 48.5 | 30.5 | 496 |
-| logic (x1) | 306 | 5506 | 5506 | 462 | 1309 | 252 | 3483 |
-| validation (x1.5) | 74 | 1589 | 2383.5 | 612 | 706.5 | 235.5 | 829.5 |
+| glue (x0.5) | 349 | 1237 | 618.5 | 38.5 | 48.5 | 35.5 | 496 |
+| logic (x1) | 309 | 5590 | 5590 | 496 | 1296 | 253 | 3545 |
+| validation (x1.5) | 75 | 1642 | 2463 | 445.5 | 756 | 415.5 | 846 |
 
 ## 2. By planned task
 
 | task | members | weight | of which HYBRID |
 |---|---|---|---|
 | P1-05 | 6 | 22.5 | 0 |
-| P2-01 | 25 | 158.5 | 0 |
+| P2-01 | 25 | 176 | 0 |
 | P2-02 | 20 | 68.5 | 1 |
-| P2-03 | 46 | 434 | 0 |
-| P2-04 | 29 | 120.5 | 0 |
+| P2-03 | 46 | 438.5 | 0 |
+| P2-04 | 29 | 121 | 0 |
 | P2-05 | 6 | 28 | 0 |
 | P2-06 | 22 | 63.5 | 0 |
-| P2-07 | 12 | 138.5 | 1 |
-| P2-08 | 105 | 1699 | 6 |
+| P2-07 | 12 | 147.5 | 1 |
+| P2-08 | 105 | 1701 | 6 |
 | P3-01 | 44 | 1454.5 | 8 |
 | P3-04 | 4 | 106 | 0 |
 | P4-02 | 6 | 22.5 | 0 |
-| P4-03 | 25 | 158.5 | 0 |
+| P4-03 | 25 | 176 | 0 |
 | P4-04 | 20 | 68.5 | 1 |
-| P4-05 | 20 | 195.5 | 1 |
-| P4-06 | 119 | 1434 | 59 |
-| P4-07 | 134 | 1263 | 59 |
-| P4-08 | 109 | 1805 | 6 |
-| P4-09 | 13 | 133 | 1 |
+| P4-05 | 20 | 204.5 | 1 |
+| P4-06 | 118 | 1434.5 | 59 |
+| P4-07 | 133 | 1259.5 | 59 |
+| P4-08 | 109 | 1807 | 6 |
+| P4-09 | 15 | 185 | 1 |
 | P4-10 | 51 | 1553.5 | 11 |
 | P5-100 | 3 | 6 | 0 |
 | P5-10a | 8 | 83.5 | 0 |
@@ -210,42 +210,42 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | file | n | R / H / P / T | weight | weight R / H / P / T | R+H | tasks |
 |---|---|---|---|---|---|---|
 | astmodelmanager.ts | 2 | 0 / 0 / 0 / 2 | 8.5 | 0 / 0 / 0 / 8.5 | 0.0% | - |
-| basemodelmanager.ts | 69 | 18 / 3 / 7 / 41 | 973.5 | 444.5 / 148 / 42.5 / 338.5 | 60.9% | P2-08+P4-08, P3-04+P4-08 |
+| basemodelmanager.ts | 69 | 18 / 3 / 7 / 41 | 990.5 | 460.5 / 148 / 43.5 / 338.5 | 61.4% | P2-08+P4-08, P3-04+P4-08 |
 | datetimeutil.ts | 2 | 0 / 0 / 0 / 2 | 24 | 0 / 0 / 0 / 24 | 0.0% | - |
 | dcsconverter.ts | 9 | 0 / 0 / 0 / 9 | 120 | 0 / 0 / 0 / 120 | 0.0% | - |
-| decoratormanager.ts | 14 | 2 / 1 / 4 / 7 | 134.5 | 9.5 / 27 / 54 / 44 | 27.1% | P4-09 |
+| decoratormanager.ts | 16 | 1 / 1 / 4 / 10 | 186.5 | 7 / 27 / 54 / 98.5 | 18.2% | P4-09 |
 | decoratormodelhelper.ts | 1 | 0 / 0 / 0 / 1 | 12 | 0 / 0 / 0 / 12 | 0.0% | P2-08+P4-08 |
-| engine/ast-codec.ts | 4 | 0 / 0 / 0 / 4 | 77.5 | 0 / 0 / 0 / 77.5 | 0.0% | - |
+| engine/ast-codec.ts | 4 | 0 / 0 / 0 / 4 | 81.5 | 0 / 0 / 0 / 81.5 | 0.0% | - |
 | engine/errors.ts | 2 | 0 / 0 / 0 / 2 | 17.5 | 0 / 0 / 0 / 17.5 | 0.0% | - |
 | engine/handles.ts | 3 | 0 / 0 / 0 / 3 | 27 | 0 / 0 / 0 / 27 | 0.0% | - |
 | engine/index.ts | 1 | 0 / 0 / 0 / 1 | 1.5 | 0 / 0 / 0 / 1.5 | 0.0% | - |
 | engine/rust.ts | 1 | 0 / 0 / 0 / 1 | 7 | 0 / 0 / 0 / 7 | 0.0% | - |
-| engine/serializer-codec.ts | 21 | 0 / 0 / 0 / 21 | 426 | 0 / 0 / 0 / 426 | 0.0% | - |
+| engine/serializer-codec.ts | 21 | 0 / 0 / 0 / 21 | 425 | 0 / 0 / 0 / 425 | 0.0% | - |
 | engine/serializer.ts | 7 | 0 / 3 / 0 / 4 | 99 | 0 / 42.5 / 0 / 56.5 | 42.9% | P4-10 |
 | engine/util.ts | 3 | 0 / 0 / 0 / 3 | 14.5 | 0 / 0 / 0 / 14.5 | 0.0% | - |
-| engine/validate-instance.ts | 13 | 0 / 2 / 0 / 11 | 231 | 0 / 102 / 0 / 129 | 44.2% | - |
-| engine/validate-resource.ts | 12 | 0 / 2 / 0 / 10 | 308 | 0 / 94.5 / 0 / 213.5 | 30.7% | - |
-| engine/views-dcs.ts | 17 | 0 / 11 / 0 / 6 | 196 | 0 / 144 / 0 / 52 | 73.5% | P4-06+P4-07 |
+| engine/validate-instance.ts | 13 | 0 / 2 / 0 / 11 | 246 | 0 / 102 / 0 / 144 | 41.5% | - |
+| engine/validate-resource.ts | 12 | 0 / 2 / 0 / 10 | 357.5 | 0 / 144 / 0 / 213.5 | 40.3% | - |
+| engine/views-dcs.ts | 16 | 0 / 11 / 0 / 5 | 186 | 0 / 140 / 0 / 46 | 75.3% | P4-06+P4-07 |
 | engine/views-lookups.ts | 16 | 0 / 10 / 0 / 6 | 203 | 0 / 122.5 / 0 / 80.5 | 60.3% | P4-06+P4-07, P5-14, P5-19 |
 | engine/views-staging.ts | 62 | 0 / 29 / 0 / 33 | 868 | 0 / 413 / 0 / 455 | 47.6% | P4-06+P4-07, P5-10a, P5-100, P5-10b |
-| engine/views.ts | 20 | 0 / 9 / 0 / 11 | 262 | 0 / 149 / 0 / 113 | 56.9% | P4-06+P4-07, P5-10b |
-| engine/wire.ts | 15 | 0 / 0 / 0 / 15 | 96.5 | 0 / 0 / 0 / 96.5 | 0.0% | - |
+| engine/views.ts | 20 | 0 / 9 / 0 / 11 | 268 | 0 / 155 / 0 / 113 | 57.8% | P4-06+P4-07, P5-10b |
+| engine/wire.ts | 16 | 0 / 0 / 0 / 16 | 108.5 | 0 / 0 / 0 / 108.5 | 0.0% | - |
 | engineloader.ts | 6 | 0 / 0 / 0 / 6 | 15.5 | 0 / 0 / 0 / 15.5 | 0.0% | - |
 | engineutil.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | - |
 | factory.ts | 9 | 0 / 0 / 0 / 9 | 143.5 | 0 / 0 / 0 / 143.5 | 0.0% | - |
 | globalize.ts | 3 | 0 / 0 / 0 / 3 | 16.5 | 0 / 0 / 0 / 16.5 | 0.0% | - |
 | introspect/assetdeclaration.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | P2-03+P4-06 |
-| introspect/classdeclaration.ts | 33 | 6 / 0 / 17 / 10 | 369 | 156 / 0 / 187.5 / 25.5 | 42.3% | P2-03+P4-06 |
+| introspect/classdeclaration.ts | 33 | 5 / 0 / 18 / 10 | 373.5 | 13.5 / 0 / 334.5 / 25.5 | 3.6% | P2-03+P4-06 |
 | introspect/collectionsizevalidator.ts | 5 | 3 / 0 / 0 / 2 | 11 | 8 / 0 / 0 / 3 | 72.7% | P2-02+P4-04 |
 | introspect/conceptdeclaration.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | P2-03+P4-06 |
 | introspect/declaration.ts | 22 | 2 / 0 / 1 / 19 | 78 | 23 / 0 / 25.5 / 29.5 | 29.5% | P2-03+P4-05 |
-| introspect/decorated.ts | 7 | 1 / 1 / 0 / 5 | 77.5 | 24 / 33 / 0 / 20.5 | 73.5% | P2-07+P4-05 |
+| introspect/decorated.ts | 7 | 0 / 1 / 1 / 5 | 86.5 | 0 / 33 / 33 / 20.5 | 38.2% | P2-07+P4-05 |
 | introspect/decorator.ts | 9 | 1 / 0 / 1 / 7 | 67 | 2.5 / 0 / 31.5 / 33 | 3.7% | P2-07+P4-05 |
 | introspect/decoratorfactory.ts | 1 | 0 / 0 / 0 / 1 | 1.5 | 0 / 0 / 0 / 1.5 | 0.0% | - |
 | introspect/enumdeclaration.ts | 3 | 0 / 0 / 1 / 2 | 4.5 | 0 / 0 / 1.5 / 3 | 0.0% | P2-04+P4-06 |
 | introspect/enumvaluedeclaration.ts | 3 | 0 / 0 / 0 / 3 | 7.5 | 0 / 0 / 0 / 7.5 | 0.0% | P2-04+P4-07 |
 | introspect/eventdeclaration.ts | 3 | 0 / 0 / 0 / 3 | 4.5 | 0 / 0 / 0 / 4.5 | 0.0% | P2-03+P4-06 |
-| introspect/field.ts | 8 | 1 / 0 / 2 / 5 | 31.5 | 1.5 / 0 / 11.5 / 18.5 | 4.8% | P2-04+P4-07 |
+| introspect/field.ts | 8 | 0 / 0 / 3 / 5 | 32 | 0 / 0 / 13.5 / 18.5 | 0.0% | P2-04+P4-07 |
 | introspect/identifieddeclaration.ts | 1 | 0 / 0 / 0 / 1 | 2 | 0 / 0 / 0 / 2 | 0.0% | P2-03+P4-06 |
 | introspect/illegalmodelexception.ts | 1 | 0 / 0 / 0 / 1 | 10 | 0 / 0 / 0 / 10 | 0.0% | P1-05+P4-02 |
 | introspect/introspector.ts | 5 | 0 / 0 / 0 / 5 | 19 | 0 / 0 / 0 / 19 | 0.0% | P2-08+P4-08 |
@@ -253,12 +253,12 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | introspect/mapkeytype.ts | 10 | 1 / 0 / 1 / 8 | 20.5 | 4.5 / 0 / 2.5 / 13.5 | 22.0% | P2-06+P4-07 |
 | introspect/mapvaluetype.ts | 10 | 1 / 0 / 1 / 8 | 20.5 | 4.5 / 0 / 2.5 / 13.5 | 22.0% | P2-06+P4-07 |
 | introspect/metamodel.ts | 3 | 1 / 0 / 0 / 2 | 70 | 45 / 0 / 0 / 25 | 64.3% | P3-04+P4-08 |
-| introspect/modelfile.ts | 56 | 10 / 3 / 4 / 39 | 886 | 271 / 296.5 / 57.5 / 261 | 64.1% | P2-08+P4-08 |
-| introspect/numbervalidator.ts | 6 | 4 / 0 / 0 / 2 | 12.5 | 9.5 / 0 / 0 / 3 | 76.0% | P2-02+P4-04 |
+| introspect/modelfile.ts | 56 | 10 / 3 / 4 / 39 | 871 | 271 / 281.5 / 57.5 / 261 | 63.4% | P2-08+P4-08 |
+| introspect/numbervalidator.ts | 6 | 3 / 0 / 1 / 2 | 12.5 | 8 / 0 / 1.5 / 3 | 64.0% | P2-02+P4-04 |
 | introspect/participantdeclaration.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | P2-03+P4-06 |
 | introspect/property.ts | 15 | 1 / 0 / 1 / 13 | 71 | 7.5 / 0 / 16 / 47.5 | 10.6% | P2-04+P4-07 |
 | introspect/relationshipdeclaration.ts | 4 | 1 / 0 / 0 / 3 | 12 | 7.5 / 0 / 0 / 4.5 | 62.5% | P2-04+P4-07 |
-| introspect/scalardeclaration.ts | 18 | 1 / 0 / 2 / 15 | 46 | 1.5 / 0 / 22 / 22.5 | 3.3% | P2-05+P4-07 |
+| introspect/scalardeclaration.ts | 18 | 0 / 0 / 3 / 15 | 46 | 0 / 0 / 23.5 / 22.5 | 0.0% | P2-05+P4-07 |
 | introspect/stringvalidator.ts | 7 | 2 / 1 / 0 / 4 | 40.5 | 6 / 15 / 0 / 19.5 | 51.9% | P2-02+P4-04 |
 | introspect/transactiondeclaration.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | P2-03+P4-06 |
 | introspect/validator.ts | 6 | 0 / 0 / 0 / 6 | 10 | 0 / 0 / 0 / 10 | 0.0% | P2-02+P4-04 |
@@ -271,7 +271,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | model/validatedresource.ts | 4 | 0 / 3 / 0 / 1 | 75 | 0 / 73 / 0 / 2 | 97.3% | P5-12c |
 | modelloader.ts | 3 | 0 / 0 / 0 / 3 | 56 | 0 / 0 / 0 / 56 | 0.0% | - |
 | modelmanager.ts | 3 | 0 / 0 / 0 / 3 | 18.5 | 0 / 0 / 0 / 18.5 | 0.0% | P2-08+P4-08 |
-| modelutil.ts | 20 | 14 / 0 / 6 / 0 | 128.5 | 79 / 0 / 49.5 / 0 | 61.5% | P2-01+P4-03 |
+| modelutil.ts | 20 | 14 / 0 / 6 / 0 | 146 | 96.5 / 0 / 49.5 / 0 | 66.1% | P2-01+P4-03 |
 | rootmodelhelper.ts | 1 | 0 / 0 / 0 / 1 | 16 | 0 / 0 / 0 / 16 | 0.0% | P2-08+P4-08 |
 | securityexception.ts | 1 | 0 / 0 / 0 / 1 | 1.5 | 0 / 0 / 0 / 1.5 | 0.0% | P1-05+P4-02 |
 | serializer.ts | 5 | 0 / 2 / 0 / 3 | 142 | 0 / 116 / 0 / 26 | 81.7% | P3-01+P4-10 |
@@ -286,26 +286,26 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 4. TS items (stay in TypeScript) with reasons
 
-522 members, weight 4808.5 (56.5%).
+525 members, weight 4887 (56.4%).
 
 ### 4a. Grouped by reason
 
 | reason | n | weight | members |
 |---|---|---|---|
 | ResourceValidator visitor: the fallback path behind EngineFastPathUnsupported of ValidatedResource.validate/setPropertyValue/addArrayValue, which validate in one Rust call since P5-12c (accordproject/concerto-rust#293; the entry point moved by maintainer decision on #289), and the Serializer visitor fallback; W tests drive visitX directly. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 18 | 535.5 | `serializer/resourcevalidator.ts` ResourceValidator.visitEnumDeclaration; `serializer/resourcevalidator.ts` ResourceValidator.checkMapType; `serializer/resourcevalidator.ts` ResourceValidator.visitMapDeclaration; `serializer/resourcevalidator.ts` ResourceValidator.visitClassDeclaration; `serializer/resourcevalidator.ts` ResourceValidator.visitField; `serializer/resourcevalidator.ts` ResourceValidator.checkEnum; `serializer/resourcevalidator.ts` ResourceValidator.checkArray; `serializer/resourcevalidator.ts` ResourceValidator.visitRelationshipDeclaration; `serializer/resourcevalidator.ts` ResourceValidator.checkRelationship; `serializer/resourcevalidator.ts` ResourceValidator.reportFieldTypeViolation; `serializer/resourcevalidator.ts` ResourceValidator.reportNotResouceViolation; `serializer/resourcevalidator.ts` ResourceValidator.reportNotRelationshipViolation; `serializer/resourcevalidator.ts` ResourceValidator.reportMissingRequiredProperty; `serializer/resourcevalidator.ts` ResourceValidator.reportEmptyIdentifier; `serializer/resourcevalidator.ts` ResourceValidator.reportInvalidEnumValue; `serializer/resourcevalidator.ts` ResourceValidator.reportAbstractClass; `serializer/resourcevalidator.ts` ResourceValidator.reportUndeclaredField; `serializer/resourcevalidator.ts` ResourceValidator.reportInvalidFieldAssignment |
-| JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own | 21 | 426 | `engine/serializer-codec.ts` checkString; `engine/serializer-codec.ts` checkKey; `engine/serializer-codec.ts` encodeTyped; `engine/serializer-codec.ts` visit; `engine/serializer-codec.ts` encodeValue; `engine/serializer-codec.ts` encodeBytes; `engine/serializer-codec.ts` writeTagHead; `engine/serializer-codec.ts` writeNumber; `engine/serializer-codec.ts` writeWireValue; `engine/serializer-codec.ts` writeEntries; `engine/serializer-codec.ts` modelClasses; `engine/serializer-codec.ts` typedCtorName; `engine/serializer-codec.ts` newTypeCache; `engine/serializer-codec.ts` constructCached; `engine/serializer-codec.ts` materializeTyped; `engine/serializer-codec.ts` materializeCompact; `engine/serializer-codec.ts` newInstance; `engine/serializer-codec.ts` setField; `engine/serializer-codec.ts` decodeParsed; `engine/serializer-codec.ts` decodeParsedMap; `engine/serializer-codec.ts` decodeTagged |
+| JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own | 21 | 425 | `engine/serializer-codec.ts` checkString; `engine/serializer-codec.ts` checkKey; `engine/serializer-codec.ts` encodeTyped; `engine/serializer-codec.ts` visit; `engine/serializer-codec.ts` encodeValue; `engine/serializer-codec.ts` encodeBytes; `engine/serializer-codec.ts` writeTagHead; `engine/serializer-codec.ts` writeNumber; `engine/serializer-codec.ts` writeWireValue; `engine/serializer-codec.ts` writeEntries; `engine/serializer-codec.ts` modelClasses; `engine/serializer-codec.ts` typedCtorName; `engine/serializer-codec.ts` newTypeCache; `engine/serializer-codec.ts` constructCached; `engine/serializer-codec.ts` materializeTyped; `engine/serializer-codec.ts` materializeCompact; `engine/serializer-codec.ts` newInstance; `engine/serializer-codec.ts` setField; `engine/serializer-codec.ts` decodeParsed; `engine/serializer-codec.ts` decodeParsedMap; `engine/serializer-codec.ts` decodeTagged |
 | visitor fallback path: runs only when Serializer.fromJSON/toJSON hit EngineFastPathUnsupported (a lone surrogate, a cycle or a wire shape the codec rejects) or when a caller drives the visitor directly; the fast path runs the same work in Rust in one call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 11 | 399 | `serializer/jsongenerator.ts` JSONGenerator.visitMapDeclaration; `serializer/jsongenerator.ts` JSONGenerator.visitClassDeclaration; `serializer/jsongenerator.ts` JSONGenerator.visitField; `serializer/jsongenerator.ts` JSONGenerator.visitRelationshipDeclaration; `serializer/jsongenerator.ts` JSONGenerator.getRelationshipText; `serializer/jsonpopulator.ts` JSONPopulator.visitClassDeclaration; `serializer/jsonpopulator.ts` JSONPopulator.visitMapDeclaration; `serializer/jsonpopulator.ts` JSONPopulator.processMapType; `serializer/jsonpopulator.ts` JSONPopulator.visitField; `serializer/jsonpopulator.ts` JSONPopulator.convertItem; `serializer/jsonpopulator.ts` JSONPopulator.visitRelationshipDeclaration |
-| binary wire codec for one-call instance validation (P5-12c): writes a live JS value (numbers, strings, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) in the validator's value shape, and rejects shapes it cannot carry so the caller falls back to the TS visitor; pure transcoding, no validation logic of its own | 8 | 182 | `engine/validate-resource.ts` dayjsIso; `engine/validate-resource.ts` visit; `engine/validate-resource.ts` writeValue; `engine/validate-resource.ts` writeTyped; `engine/validate-resource.ts` modelIdentifierField; `engine/validate-resource.ts` flagsOf; `engine/validate-resource.ts` dropSlots; `engine/validate-resource.ts` propertySlot |
+| binary wire codec for one-call instance validation (P5-12c): writes a live JS value (numbers, strings, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) in the validator's value shape, and rejects shapes it cannot carry so the caller falls back to the TS visitor; pure transcoding, no validation logic of its own | 8 | 182 | `engine/validate-resource.ts` dayjsIso; `engine/validate-resource.ts` visit; `engine/validate-resource.ts` writeValue; `engine/validate-resource.ts` writeTyped; `engine/validate-resource.ts` modelIdentifierField; `engine/validate-resource.ts` flagsOf; `engine/validate-resource.ts` propertySlot; `engine/validate-resource.ts` dropSlots |
 | Factory generate path (D7): builds TS Resource objects via Factory and a JS value generator | 7 | 148 | `serializer/instancegenerator.ts` InstanceGenerator.visit; `serializer/instancegenerator.ts` InstanceGenerator.visitClassDeclaration; `serializer/instancegenerator.ts` InstanceGenerator.visitField; `serializer/instancegenerator.ts` InstanceGenerator.getFieldValue; `serializer/instancegenerator.ts` InstanceGenerator.visitRelationshipDeclaration; `serializer/instancegenerator.ts` InstanceGenerator.visitMapDeclaration; `serializer/instancegenerator.ts` InstanceGenerator.generateRandomId |
+| validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust | 11 | 144 | `engine/validate-instance.ts` fromJsonOptions; `engine/validate-instance.ts` documentOf; `engine/validate-instance.ts` mergedText; `engine/validate-instance.ts` engineCall; `engine/validate-instance.ts` routedDiagnostics; `engine/validate-instance.ts` routed; `engine/validate-instance.ts` valueAt; `engine/validate-instance.ts` redactedMessage; `engine/validate-instance.ts` finish; `engine/validate-instance.ts` withDetails; `engine/validate-instance.ts` withClass |
 | D7: Factory stays TS (uuid/dayjs, constructs dynamic TS Resource objects); model queries it makes go through Rust-backed views | 9 | 143.5 | `factory.ts` Factory.newId; `factory.ts` Factory.constructor; `factory.ts` Factory.newResource; `factory.ts` Factory.newConcept; `factory.ts` Factory.newRelationship; `factory.ts` Factory.newTransaction; `factory.ts` Factory.newEvent; `factory.ts` Factory.initializeNewObject; `factory.ts` Factory.parseGenerateOptions |
 | sample-data generation: Math.random, randexp over JS RegExp and dayjs; output is non-deterministic and tied to Factory generate options (D7) | 31 | 134.5 | `serializer/valuegenerator.ts` generateSentence; `serializer/valuegenerator.ts` randomNumberInRangeWithPrecision; `serializer/valuegenerator.ts` getRange; `serializer/valuegenerator.ts` generateString; `serializer/valuegenerator.ts` getString; `serializer/valuegenerator.ts` isLengthInRange; `serializer/valuegenerator.ts` getRegexString; `serializer/valuegenerator.ts` EmptyValueGenerator.constructor; `serializer/valuegenerator.ts` EmptyValueGenerator.getDateTime; `serializer/valuegenerator.ts` EmptyValueGenerator.getInteger; `serializer/valuegenerator.ts` EmptyValueGenerator.getLong; `serializer/valuegenerator.ts` EmptyValueGenerator.getDouble; `serializer/valuegenerator.ts` EmptyValueGenerator.getString; `serializer/valuegenerator.ts` EmptyValueGenerator.getEnum; `serializer/valuegenerator.ts` EmptyValueGenerator.getMap; `serializer/valuegenerator.ts` EmptyValueGenerator.getArray; `serializer/valuegenerator.ts` EmptyValueGenerator.getRegex; `serializer/valuegenerator.ts` EmptyValueGenerator.getRange; `serializer/valuegenerator.ts` SampleValueGenerator.constructor; `serializer/valuegenerator.ts` SampleValueGenerator.getInteger; `serializer/valuegenerator.ts` SampleValueGenerator.getLong; `serializer/valuegenerator.ts` SampleValueGenerator.getDouble; `serializer/valuegenerator.ts` SampleValueGenerator.getBoolean; `serializer/valuegenerator.ts` SampleValueGenerator.getString; `serializer/valuegenerator.ts` SampleValueGenerator.getEnum; `serializer/valuegenerator.ts` SampleValueGenerator.getMap; `serializer/valuegenerator.ts` SampleValueGenerator.getArray; `serializer/valuegenerator.ts` SampleValueGenerator.getRegex; `serializer/valuegenerator.ts` SampleValueGenerator.getRange; `serializer/valuegenerator.ts` ValueGeneratorFactory.empty; `serializer/valuegenerator.ts` ValueGeneratorFactory.sample |
-| validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust | 11 | 129 | `engine/validate-instance.ts` fromJsonOptions; `engine/validate-instance.ts` documentOf; `engine/validate-instance.ts` mergedText; `engine/validate-instance.ts` engineCall; `engine/validate-instance.ts` routedDiagnostics; `engine/validate-instance.ts` routed; `engine/validate-instance.ts` valueAt; `engine/validate-instance.ts` redactedMessage; `engine/validate-instance.ts` finish; `engine/validate-instance.ts` withDetails; `engine/validate-instance.ts` withClass |
 | YAML (de)serialisation via the `yaml` npm lib (failsafe schema, exact text output); pure data reshaping that only feeds it, no model semantics | 9 | 120 | `dcsconverter.ts` handleTarget; `dcsconverter.ts` handleArguments; `dcsconverter.ts` handleDecorator; `dcsconverter.ts` handleCommands; `dcsconverter.ts` jsonToYaml; `dcsconverter.ts` restoreArguments; `dcsconverter.ts` restoreDecorator; `dcsconverter.ts` restoreCommands; `dcsconverter.ts` yamlToJson |
 | D7: Resource/Typed dynamic objects stay TS (user-visible JS objects with arbitrary properties and dayjs values) | 27 | 117.5 | `model/identifiable.ts` Identifiable.constructor; `model/identifiable.ts` Identifiable.getTimestamp; `model/identifiable.ts` Identifiable.getIdentifier; `model/identifiable.ts` Identifiable.setIdentifier; `model/identifiable.ts` Identifiable.getFullyQualifiedIdentifier; `model/identifiable.ts` Identifiable.toString; `model/identifiable.ts` Identifiable.toURI; `model/relationship.ts` Relationship.constructor; `model/relationship.ts` Relationship.toString; `model/relationship.ts` Relationship.fromURI; `model/resource.ts` Resource.constructor; `model/resource.ts` Resource.toString; `model/resource.ts` Resource.isConcept; `model/resource.ts` Resource.isIdentifiable; `model/resource.ts` Resource.toJSON; `model/typed.ts` Typed.constructor; `model/typed.ts` Typed.getModelManager; `model/typed.ts` Typed.getType; `model/typed.ts` Typed.getFullyQualifiedType; `model/typed.ts` Typed.getNamespace; `model/typed.ts` Typed.getClassDeclaration; `model/typed.ts` Typed.setPropertyValue; `model/typed.ts` Typed.addArrayValue; `model/typed.ts` Typed.assignFieldDefaults; `model/typed.ts` Typed.instanceOf; `model/typed.ts` Typed.toJSON; `model/validatedresource.ts` ValidatedResource.constructor |
-| the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic | 15 | 96.5 | `engine/wire.ts` WireWriter.constructor; `engine/wire.ts` WireWriter.begin; `engine/wire.ts` WireWriter.bytes; `engine/wire.ts` WireWriter.release; `engine/wire.ts` WireWriter.ensure; `engine/wire.ts` WireWriter.putU32; `engine/wire.ts` WireWriter.tag; `engine/wire.ts` WireWriter.literal; `engine/wire.ts` WireWriter.rawStr; `engine/wire.ts` WireWriter.str; `engine/wire.ts` WireWriter.num; `engine/wire.ts` WireWriter.array; `engine/wire.ts` WireWriter.beginObject; `engine/wire.ts` WireWriter.utf8; `engine/wire.ts` WireWriter.markerHead |
+| the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic | 16 | 108.5 | `engine/wire.ts` WireWriter.constructor; `engine/wire.ts` WireWriter.begin; `engine/wire.ts` WireWriter.bytes; `engine/wire.ts` WireWriter.release; `engine/wire.ts` WireWriter.shrink; `engine/wire.ts` WireWriter.ensure; `engine/wire.ts` WireWriter.putU32; `engine/wire.ts` WireWriter.tag; `engine/wire.ts` WireWriter.literal; `engine/wire.ts` WireWriter.rawStr; `engine/wire.ts` WireWriter.str; `engine/wire.ts` WireWriter.num; `engine/wire.ts` WireWriter.array; `engine/wire.ts` WireWriter.beginObject; `engine/wire.ts` WireWriter.utf8; `engine/wire.ts` WireWriter.markerHead |
 | JS view-class factory (`new AssetDeclaration(...)` by AST $class); Rust staging has already rejected an unknown $class, and the injected default super type mirrors Rust implicit_super_type for 4 fixed cases. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 1 | 96 | `introspect/modelfile.ts` ModelFile._declarationView |
+| binary AST writer for the staging binding (P5-92): writes a ModelFile's AST, as JSON.stringify would read it, in the engine's compact layout, and leaves an AST it cannot carry to the text path; pure transcoding, no model logic | 4 | 81.5 | `engine/ast-codec.ts` omitted; `engine/ast-codec.ts` writeValue; `engine/ast-codec.ts` encodeAst; `engine/ast-codec.ts` encodeAstCount |
 | constant-return member (type/kind marker or fixed default, body is `return <literal>`); stays as-is on the TS class, nothing to port | 53 | 79.5 | `basemodelmanager.ts` BaseModelManager.isModelManager; `basemodelmanager.ts` BaseModelManager.isAliasedTypeEnabled; `decoratormanager.ts` DecoratorManager.isNamespaceTargetEnabled; `introspect/assetdeclaration.ts` AssetDeclaration.declarationKind; `introspect/classdeclaration.ts` ClassDeclaration.isClassDeclaration; `introspect/conceptdeclaration.ts` ConceptDeclaration.declarationKind; `introspect/declaration.ts` Declaration.isIdentified; `introspect/declaration.ts` Declaration.isSystemIdentified; `introspect/declaration.ts` Declaration.getIdentifierFieldName; `introspect/declaration.ts` Declaration.getType; `introspect/declaration.ts` Declaration.toString; `introspect/declaration.ts` Declaration.isEnum; `introspect/declaration.ts` Declaration.isClassDeclaration; `introspect/declaration.ts` Declaration.isScalarDeclaration; `introspect/declaration.ts` Declaration.isMapDeclaration; `introspect/declaration.ts` Declaration.isAsset; `introspect/declaration.ts` Declaration.isParticipant; `introspect/declaration.ts` Declaration.isTransaction; `introspect/declaration.ts` Declaration.isEvent; `introspect/declaration.ts` Declaration.isConcept; `introspect/decorator.ts` Decorator.isDecorator; `introspect/enumdeclaration.ts` EnumDeclaration.declarationKind; `introspect/enumvaluedeclaration.ts` EnumValueDeclaration.isEnumValue; `introspect/eventdeclaration.ts` EventDeclaration.declarationKind; `introspect/field.ts` Field.isField; `introspect/mapdeclaration.ts` MapDeclaration.declarationKind; `introspect/mapdeclaration.ts` MapDeclaration.isMapDeclaration; `introspect/mapkeytype.ts` MapKeyType.isKey; `introspect/mapkeytype.ts` MapKeyType.isValue; `introspect/mapvaluetype.ts` MapValueType.isKey; `introspect/mapvaluetype.ts` MapValueType.isValue; `introspect/modelfile.ts` ModelFile.isModelFile; `introspect/participantdeclaration.ts` ParticipantDeclaration.declarationKind; `introspect/relationshipdeclaration.ts` RelationshipDeclaration.isRelationship; `introspect/scalardeclaration.ts` ScalarDeclaration.isIdentified; `introspect/scalardeclaration.ts` ScalarDeclaration.isSystemIdentified; `introspect/scalardeclaration.ts` ScalarDeclaration.getIdentifierFieldName; `introspect/scalardeclaration.ts` ScalarDeclaration.getSuperType; `introspect/scalardeclaration.ts` ScalarDeclaration.getSuperTypeDeclaration; `introspect/scalardeclaration.ts` ScalarDeclaration.isAbstract; `introspect/scalardeclaration.ts` ScalarDeclaration.isScalarDeclaration; `introspect/scalardeclaration.ts` ScalarDeclaration.isAsset; `introspect/scalardeclaration.ts` ScalarDeclaration.isParticipant; `introspect/scalardeclaration.ts` ScalarDeclaration.isTransaction; `introspect/scalardeclaration.ts` ScalarDeclaration.isEvent; `introspect/scalardeclaration.ts` ScalarDeclaration.isConcept; `introspect/transactiondeclaration.ts` TransactionDeclaration.declarationKind; `introspect/validator.ts` Validator.compatibleWith; `model/identifiable.ts` Identifiable.isRelationship; `model/identifiable.ts` Identifiable.isResource; `model/relationship.ts` Relationship.isRelationship; `model/resource.ts` Resource.isResource; `serializer/valuegenerator.ts` EmptyValueGenerator.getBoolean |
-| binary AST writer for the staging binding (P5-92): writes a ModelFile's AST, as JSON.stringify would read it, in the engine's compact layout, and leaves an AST it cannot carry to the text path; pure transcoding, no model logic | 4 | 77.5 | `engine/ast-codec.ts` omitted; `engine/ast-codec.ts` writeValue; `engine/ast-codec.ts` encodeAst; `engine/ast-codec.ts` encodeAstCount |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: reads a file's one-call Rust view snapshot into per-node lookups) | 1 | 75 | `engine/views.ts` computeBatch |
 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 43 | 65 | `basemodelmanager.ts` BaseModelManager.getDecoratorValidation; `introspect/classdeclaration.ts` ClassDeclaration.isAbstract; `introspect/classdeclaration.ts` ClassDeclaration.isExplicitlyIdentified; `introspect/classdeclaration.ts` ClassDeclaration.getOwnProperties; `introspect/collectionsizevalidator.ts` CollectionSizeValidator.getMinSize; `introspect/collectionsizevalidator.ts` CollectionSizeValidator.getMaxSize; `introspect/declaration.ts` Declaration.getModelFile; `introspect/declaration.ts` Declaration.getName; `introspect/declaration.ts` Declaration.getFullyQualifiedName; `introspect/decorator.ts` Decorator.getParent; `introspect/decorator.ts` Decorator.getName; `introspect/decorator.ts` Decorator.getArguments; `introspect/field.ts` Field.getValidator; `introspect/field.ts` Field.getDefaultValue; `introspect/introspector.ts` Introspector.getModelManager; `introspect/mapdeclaration.ts` MapDeclaration.getKey; `introspect/mapdeclaration.ts` MapDeclaration.getValue; `introspect/mapkeytype.ts` MapKeyType.getParent; `introspect/mapkeytype.ts` MapKeyType.getType; `introspect/mapvaluetype.ts` MapValueType.getParent; `introspect/mapvaluetype.ts` MapValueType.getType; `introspect/modelfile.ts` ModelFile.isExternal; `introspect/modelfile.ts` ModelFile.getModelManager; `introspect/modelfile.ts` ModelFile.getNamespace; `introspect/modelfile.ts` ModelFile.getName; `introspect/modelfile.ts` ModelFile.getAllDeclarations; `introspect/modelfile.ts` ModelFile.getDefinitions; `introspect/modelfile.ts` ModelFile.getAst; `introspect/modelfile.ts` ModelFile.getConcertoVersion; `introspect/numbervalidator.ts` NumberValidator.getLowerBound; `introspect/numbervalidator.ts` NumberValidator.getUpperBound; `introspect/property.ts` Property.getParent; `introspect/property.ts` Property.getName; `introspect/property.ts` Property.getType; `introspect/property.ts` Property.isOptional; `introspect/property.ts` Property.isArray; `introspect/property.ts` Property.getSizeValidator; `introspect/scalardeclaration.ts` ScalarDeclaration.getType; `introspect/scalardeclaration.ts` ScalarDeclaration.getValidator; `introspect/scalardeclaration.ts` ScalarDeclaration.getDefaultValue; `introspect/stringvalidator.ts` StringValidator.getMinLength; `introspect/stringvalidator.ts` StringValidator.getMaxLength; `introspect/validator.ts` Validator.getFieldOrScalarDeclaration |
 | async file/URL loading orchestration (fs, FileLoader, concerto-cto Parser); all model work goes through the ledgered ModelManager methods it calls | 3 | 56 | `modelloader.ts` ModelLoader.addModel; `modelloader.ts` ModelLoader.loadModelManager; `modelloader.ts` ModelLoader.loadModelManagerFromModelFiles |
@@ -322,6 +322,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: builds a file's declaration views on first read through the ledgered view constructors, and caches them) | 1 | 29 | `engine/views-staging.ts` materialise |
 | engine handle release bookkeeping (releaseHandle, withEngineCallbacks; P5-97); no model logic | 3 | 27 | `engine/handles.ts` releaseHandle; `engine/handles.ts` freeQuietly; `engine/handles.ts` withEngineCallbacks |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (property lookup cache: builds an entry from the binding's answer) | 1 | 27 | `engine/views-lookups.ts` newLookup |
+| TS 5.0.0's DecoratorManager.applyDecorator, the helper of executePropertyCommand: an in-place UPSERT or APPEND on the caller's AST (P5-117 R2E-2) | 1 | 26 | `decoratormanager.ts` applyDecorator |
 | processFile callback is the pluggable parse seam: CTO text is parsed by concerto-cto in JS (tests stub Parser.parse); the resulting AST is what crosses into Rust | 3 | 25 | `astmodelmanager.ts` astProcessFile; `basemodelmanager.ts` defaultProcessFile; `modelmanager.ts` ctoProcessFile |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (the rustHandle write for a replaced model file: update, add or delete) | 1 | 25 | `basemodelmanager.ts` BaseModelManager._rustMirrorUpdate |
 | takes a JS predicate callback over Declaration views; Rust does the AST copy and import pruning; this member only runs the JS predicate and forwards to ModelFile.filter, where the Rust work is counted. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 1 | 25 | `basemodelmanager.ts` BaseModelManager.filter |
@@ -349,6 +350,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | JS error-class mapping for engine results: builds the TS exception (IllegalModelException/TypeNotFoundException/ValidationException/MetamodelException/Error/TypeError) for an engine error payload {kind, code, params, message, location}; Rust decides the kind and renders the message, this only picks the constructor | 2 | 17.5 | `engine/errors.ts` setInternalFlag; `engine/errors.ts` makeError |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: Decorated.process's decorator loop on first read; no decorator factory applies in a lazily built file) | 1 | 17 | `engine/views-staging.ts` buildDecorators |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (finds the precomputed Rust snapshot entry of a declaration view) | 1 | 17 | `engine/views.ts` declarationEntry |
+| TS 5.0.0's DecoratorManager.checkForDuplicateDecorators, the helper of executePropertyCommand's APPEND (P5-117 R2E-2) | 1 | 16.5 | `decoratormanager.ts` checkForDuplicateDecorators |
 | public helper over messages/en.json used by M tests and remaining TS throw sites; the templates themselves are ported to the Rust catalogue (P1-05) but this function stays | 3 | 16.5 | `globalize.ts` messageFormatter; `globalize.ts` formatMessage; `globalize.ts` Globalize |
 | JS module-interop guard (`getDecoratorModel || module`) around adding the fixed decorator model; Rust mirrors the system models itself. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 1 | 16 | `basemodelmanager.ts` BaseModelManager.addDecoratorModel |
 | merges the result of the RUST decoratorManagerMigrateTo into the caller's object in place, to preserve JS object identity (a JS-only concern). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 1 | 16 | `decoratormanager.ts` assignDeep |
@@ -375,6 +377,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | JS process warning (P5-24): strictQualifiedDateTimes: false is ignored; no model logic. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) | 1 | 13 | `serializer.ts` warnLenientDateTimesIgnored |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-29 read memo: the manager's memo of getType/resolveType answers, rebuilt when it no longer holds) | 1 | 12 | `basemodelmanager.ts` managerReadMemo |
 | forward/orchestration over members counted elsewhere: the logic is in the callee(s) it calls, which is where any Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (orchestrates the RUST addModelFile and validateModelFiles) | 1 | 12 | `basemodelmanager.ts` BaseModelManager.fromAst |
+| TS 5.0.0's body restored for parity: it changes the caller's property AST in place (only its decorators array, pushing the command's own decorator object); pure work over data TS holds, so no engine crossing (P5-117 R2E-2) | 1 | 12 | `decoratormanager.ts` DecoratorManager.executePropertyCommand |
 | routing decision (P5-12c): a string, number or boolean set on a plain primitive field with no validator stays on the ResourceValidator visitor, which is cheaper there than an engine call; reads the field's shape only, no validation logic of its own | 1 | 12 | `engine/validate-resource.ts` visitorIsCheaper |
 | forward/orchestration over members counted elsewhere: the logic is in the callee(s) it calls, which is where any Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (resolves the type through ModelFile.resolveType/getType, then the RUST fieldGetScalarField) | 1 | 12 | `introspect/field.ts` Field.isTypeScalar |
 | forward/orchestration over members counted elsewhere: the logic is in the callee(s) it calls, which is where any Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (getType, the RUST getAssignableClassDeclarations and an isAbstract filter) | 1 | 11 | `basemodelmanager.ts` BaseModelManager.getAssignableConcreteTypes |
@@ -413,7 +416,6 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (decides which namespaces are mirrored to rustHandle) | 1 | 6 | `basemodelmanager.ts` BaseModelManager._needsRustWrite |
 | TS 5.0.0's string-array intersection, the helper of falsyOrEqual (P5-116 R2E-1) | 1 | 6 | `decoratormanager.ts` intersect |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-55: the source manager's rustHandle when it can run a DCS operation itself) | 1 | 6 | `engine/views-dcs.ts` sourceDcsHandle |
-| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-55: a guard that the result manager does not share the source handle) | 1 | 6 | `engine/views-dcs.ts` assertDistinctHandles |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (lazy views: records the import names Rust computed at staging) | 1 | 6 | `engine/views-staging.ts` recordImportNames |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: drops a stage that will not be registered) | 1 | 6 | `engine/views-staging.ts` dropStaged |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: no decorator factory applies while a lazily built file's views are built; factories keep the eager path) | 1 | 6 | `engine/views-staging.ts` decoratorFactories |
@@ -533,17 +535,20 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | dcsconverter.ts | (function) | restoreDecorator | function | 7 | 7 | YAML (de)serialisation via the `yaml` npm lib (failsafe schema, exact text output); pure data reshaping that only feeds it, no model semantics |
 | dcsconverter.ts | (function) | restoreCommands | function | 11 | 11 | YAML (de)serialisation via the `yaml` npm lib (failsafe schema, exact text output); pure data reshaping that only feeds it, no model semantics |
 | dcsconverter.ts | (function) | yamlToJson | function | 12 | 12 | YAML (de)serialisation via the `yaml` npm lib (failsafe schema, exact text output); pure data reshaping that only feeds it, no model semantics |
+| decoratormanager.ts | (function) | applyDecorator | function | 26 | 26 | TS 5.0.0's DecoratorManager.applyDecorator, the helper of executePropertyCommand: an in-place UPSERT or APPEND on the caller's AST (P5-117 R2E-2) |
+| decoratormanager.ts | (function) | checkForDuplicateDecorators | function | 11 | 16.5 | TS 5.0.0's DecoratorManager.checkForDuplicateDecorators, the helper of executePropertyCommand's APPEND (P5-117 R2E-2) |
 | decoratormanager.ts | (function) | intersect | function | 6 | 6 | TS 5.0.0's string-array intersection, the helper of falsyOrEqual (P5-116 R2E-1) |
 | decoratormanager.ts | (function) | assignDeep | function | 16 | 16 | merges the result of the RUST decoratorManagerMigrateTo into the caller's object in place, to preserve JS object identity (a JS-only concern). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
 | decoratormanager.ts | DecoratorManager | canMigrate | static | 9 | 9 | JS-side helper: a semver comparison of the command set's namespace version. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
 | decoratormanager.ts | DecoratorManager | falsyOrEqual | static | 7 | 7 | TS 5.0.0's body restored for parity (substring match on a string values, TypeError on undefined values): pure work over data TS holds, so no engine crossing (P5-116 R2E-1) |
+| decoratormanager.ts | DecoratorManager | executePropertyCommand | static | 12 | 12 | TS 5.0.0's body restored for parity: it changes the caller's property AST in place (only its decorators array, pushing the command's own decorator object); pure work over data TS holds, so no engine crossing (P5-117 R2E-2) |
 | decoratormanager.ts | DecoratorManager | isNamespaceTargetEnabled | static | 3 | 1.5 | constant-return member (type/kind marker or fixed default, body is `return <literal>`); stays as-is on the TS class, nothing to port |
 | decoratormanager.ts | DecoratorManager | jsonToYaml | static | 4 | 2 | YAML (de)serialisation via the `yaml` npm lib (failsafe schema, exact text output); pure data reshaping that only feeds it, no model semantics (forwards to dcsconverter; P5-11: no engine call of its own) |
 | decoratormanager.ts | DecoratorManager | yamlToJson | static | 5 | 2.5 | YAML (de)serialisation via the `yaml` npm lib (failsafe schema, exact text output); pure data reshaping that only feeds it, no model semantics (forwards to dcsconverter; P5-11: no engine call of its own) |
 | decoratormodelhelper.ts | (function) | getDecoratorModel | function | 12 | 12 | fixed-data builder: returns or adds a fixed system model/field definition (rootmodel.json/decoratormodel.json are duplicated in concerto-rust src/); no model logic to port. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
 | engine/ast-codec.ts | (function) | omitted | function | 4 | 2 | binary AST writer for the staging binding (P5-92): writes a ModelFile's AST, as JSON.stringify would read it, in the engine's compact layout, and leaves an AST it cannot carry to the text path; pure transcoding, no model logic |
 | engine/ast-codec.ts | (function) | writeValue | function | 59 | 59 | binary AST writer for the staging binding (P5-92): writes a ModelFile's AST, as JSON.stringify would read it, in the engine's compact layout, and leaves an AST it cannot carry to the text path; pure transcoding, no model logic |
-| engine/ast-codec.ts | (function) | encodeAst | function | 15 | 15 | binary AST writer for the staging binding (P5-92): writes a ModelFile's AST, as JSON.stringify would read it, in the engine's compact layout, and leaves an AST it cannot carry to the text path; pure transcoding, no model logic |
+| engine/ast-codec.ts | (function) | encodeAst | function | 19 | 19 | binary AST writer for the staging binding (P5-92): writes a ModelFile's AST, as JSON.stringify would read it, in the engine's compact layout, and leaves an AST it cannot carry to the text path; pure transcoding, no model logic |
 | engine/ast-codec.ts | (function) | encodeAstCount | function | 3 | 1.5 | binary AST writer for the staging binding (P5-92): writes a ModelFile's AST, as JSON.stringify would read it, in the engine's compact layout, and leaves an AST it cannot carry to the text path; pure transcoding, no model logic |
 | engine/errors.ts | (function) | setInternalFlag | function | 3 | 1.5 | JS error-class mapping for engine results: builds the TS exception (IllegalModelException/TypeNotFoundException/ValidationException/MetamodelException/Error/TypeError) for an engine error payload {kind, code, params, message, location}; Rust decides the kind and renders the message, this only picks the constructor |
 | engine/errors.ts | (function) | makeError | function | 16 | 16 | JS error-class mapping for engine results: builds the TS exception (IllegalModelException/TypeNotFoundException/ValidationException/MetamodelException/Error/TypeError) for an engine error payload {kind, code, params, message, location}; Rust decides the kind and renders the message, this only picks the constructor |
@@ -557,7 +562,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/serializer-codec.ts | (function) | encodeTyped | function | 12 | 12 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
 | engine/serializer-codec.ts | (function) | visit | function | 6 | 6 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
 | engine/serializer-codec.ts | (function) | encodeValue | function | 56 | 56 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
-| engine/serializer-codec.ts | (function) | encodeBytes | function | 19 | 19 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
+| engine/serializer-codec.ts | (function) | encodeBytes | function | 18 | 18 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
 | engine/serializer-codec.ts | (function) | writeTagHead | function | 6 | 6 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
 | engine/serializer-codec.ts | (function) | writeNumber | function | 6 | 6 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
 | engine/serializer-codec.ts | (function) | writeWireValue | function | 101 | 101 | JSON wire codec for the Serializer fast path: encodes/decodes JS runtime values (numbers, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) to and from the plain-JSON shape the engine call can carry, and rejects shapes it cannot (cycles, lone surrogates, `__proto__`) so the caller falls back to the TS visitor path; pure wire-format transcoding, no validation or population logic of its own |
@@ -581,11 +586,11 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/util.ts | (function) | isTypedLike | function | 6 | 6 | engine shim helpers: the EngineFastPathUnsupported fallback signal, the dayjs and typed-value duck checks, the lone-surrogate test; no model logic |
 | engine/util.ts | (function) | hasLoneSurrogate | function | 3 | 1.5 | engine shim helpers: the EngineFastPathUnsupported fallback signal, the dayjs and typed-value duck checks, the lone-surrogate test; no model logic |
 | engine/validate-instance.ts | (function) | fromJsonOptions | function | 11 | 11 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
-| engine/validate-instance.ts | (function) | documentOf | function | 13 | 13 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
-| engine/validate-instance.ts | (function) | mergedText | function | 10 | 10 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
-| engine/validate-instance.ts | (function) | engineCall | function | 10 | 10 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
+| engine/validate-instance.ts | (function) | documentOf | function | 17 | 17 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
+| engine/validate-instance.ts | (function) | mergedText | function | 7 | 7 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
+| engine/validate-instance.ts | (function) | engineCall | function | 14 | 14 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
 | engine/validate-instance.ts | (function) | routedDiagnostics | function | 20 | 20 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
-| engine/validate-instance.ts | (function) | routed | function | 23 | 23 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
+| engine/validate-instance.ts | (function) | routed | function | 33 | 33 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
 | engine/validate-instance.ts | (function) | valueAt | function | 14 | 14 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
 | engine/validate-instance.ts | (function) | redactedMessage | function | 4 | 2 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
 | engine/validate-instance.ts | (function) | finish | function | 14 | 14 | validateInstance's shim (P5-89, accordproject/concerto#1239): encodes the document and options for one engine call, routes a document the engine cannot read through Serializer.fromJSON, and applies includeActual/redactMessages to the engine's diagnostics; the validation itself runs in Rust |
@@ -599,13 +604,12 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/validate-resource.ts | (function) | flagsOf | function | 10 | 10 | binary wire codec for one-call instance validation (P5-12c): writes a live JS value (numbers, strings, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) in the validator's value shape, and rejects shapes it cannot carry so the caller falls back to the TS visitor; pure transcoding, no validation logic of its own |
 | engine/validate-resource.ts | (function) | outcome | function | 13 | 19.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (maps a result code to the exception the error factory builds, or to the visitor fallback) |
 | engine/validate-resource.ts | (function) | visitorIsCheaper | function | 12 | 12 | routing decision (P5-12c): a string, number or boolean set on a plain primitive field with no validator stays on the ResourceValidator visitor, which is cheaper there than an engine call; reads the field's shape only, no validation logic of its own |
-| engine/validate-resource.ts | (function) | dropSlots | function | 3 | 1.5 | binary wire codec for one-call instance validation (P5-12c): writes a live JS value (numbers, strings, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) in the validator's value shape, and rejects shapes it cannot carry so the caller falls back to the TS visitor; pure transcoding, no validation logic of its own |
 | engine/validate-resource.ts | (function) | propertySlot | function | 20 | 20 | binary wire codec for one-call instance validation (P5-12c): writes a live JS value (numbers, strings, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) in the validator's value shape, and rejects shapes it cannot carry so the caller falls back to the TS visitor; pure transcoding, no validation logic of its own |
+| engine/validate-resource.ts | (function) | dropSlots | function | 3 | 1.5 | binary wire codec for one-call instance validation (P5-12c): writes a live JS value (numbers, strings, Maps, dayjs, typed Resource/ValidatedResource/Relationship instances) in the validator's value shape, and rejects shapes it cannot carry so the caller falls back to the TS visitor; pure transcoding, no validation logic of its own |
 | engine/views-dcs.ts | (function) | restoreUndefinedDecorators | function | 19 | 19 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (restores `decorators: undefined` on the Rust extract result so the JS object shape matches the input) |
 | engine/views-dcs.ts | (function) | restoreAllUndefinedDecorators | function | 10 | 10 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (restoreUndefinedDecorators over every model of an extract result) |
 | engine/views-dcs.ts | (function) | dcsCacheable | function | 9 | 9 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-55: whether a DCS operation may run on the manager's own rustHandle; P5-103 removed the resident DCS handle it also decided) |
 | engine/views-dcs.ts | (function) | sourceDcsHandle | function | 6 | 6 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-55: the source manager's rustHandle when it can run a DCS operation itself) |
-| engine/views-dcs.ts | (function) | assertDistinctHandles | function | 6 | 6 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-55: a guard that the result manager does not share the source handle) |
 | engine/views-dcs.ts | (function) | dcsManagerFor | function | 4 | 2 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-27: a DcsManagerHandle built for one operation, for a manager its own rustHandle cannot stand for; P5-103 removed the resident cache) |
 | engine/views-lookups.ts | (function) | lookupCacheable | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (property lookup cache: only views of engine-built files of a real ModelManager) |
 | engine/views-lookups.ts | (function) | lookupValid | function | 15 | 15 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (property lookup cache: whether an entry still holds) |
@@ -658,9 +662,10 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/views.ts | (function) | withBatch | function | 9 | 9 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: runs a deferred build with its file's snapshots) |
 | engine/views.ts | (function) | batchOf | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: the current snapshots of a file) |
 | engine/wire.ts | WireWriter | constructor | ctor | 4 | 2 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
-| engine/wire.ts | WireWriter | begin | method | 4 | 2 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
+| engine/wire.ts | WireWriter | begin | method | 9 | 9 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | bytes | method | 3 | 1.5 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
-| engine/wire.ts | WireWriter | release | method | 5 | 2.5 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
+| engine/wire.ts | WireWriter | release | method | 4 | 2 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
+| engine/wire.ts | WireWriter | shrink | method | 5 | 2.5 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | ensure | method | 13 | 13 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | putU32 | method | 7 | 7 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | tag | method | 4 | 2 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
@@ -670,7 +675,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/wire.ts | WireWriter | num | method | 13 | 13 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | array | method | 6 | 6 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | beginObject | method | 6 | 6 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
-| engine/wire.ts | WireWriter | utf8 | method | 8 | 8 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
+| engine/wire.ts | WireWriter | utf8 | method | 11 | 11 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | markerHead | method | 7 | 7 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engineloader.ts | (function) | loadEngine | function | 8 | 8 | the one engine loader of the public modules (P5-100, E-3): requires src/engine/ modules once, through a non-literal specifier, and exposes the bindings and the engine modules typed; no model logic |
 | engineloader.ts | (function) | engineViews | function | 3 | 1.5 | the one engine loader of the public modules (P5-100, E-3): requires src/engine/ modules once, through a non-literal specifier, and exposes the bindings and the engine modules typed; no model logic |
@@ -1004,7 +1009,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 5. HYBRID items with reasons
 
-86 members, weight 2064 (24.3%).
+86 members, weight 2100.5 (24.2%).
 
 | file | class | member | weight | what stays in JS |
 |---|---|---|---|---|
@@ -1017,14 +1022,14 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/serializer.ts | (function) | validateMetaModel | 10.5 | JSON envelope building, the ModelManagerHandle cache and the fallback decision stay JS; the actual population (fromJSON) and generation (toJSON) logic runs in Rust via one serializerFromJson/serializerToJson call per document (the P4-10 fast path) |
 | engine/validate-instance.ts | (function) | validateInstance | 48 | one engine validateInstance call per document: the diagnostics come back from Rust, which validates; TS builds the result object and the lazily hydrated resource |
 | engine/validate-instance.ts | (function) | validateInstanceOrThrow | 54 | one engine validateInstance call per document in throw mode, or Serializer.fromJSON for a document of its own type; the validation itself runs in Rust |
-| engine/validate-resource.ts | (function) | validateResource | 33 | one validateResourceBinary call per ValidatedResource.validate(): the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust |
-| engine/validate-resource.ts | (function) | validateProperty | 61.5 | one validatePropertyBinary call per ValidatedResource.setPropertyValue/addArrayValue: the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust |
+| engine/validate-resource.ts | (function) | validateResource | 54 | one validateResourceBinary call per ValidatedResource.validate(): the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust |
+| engine/validate-resource.ts | (function) | validateProperty | 90 | one validatePropertyBinary call per ValidatedResource.setPropertyValue/addArrayValue: the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust |
 | engine/views-dcs.ts | (function) | decoratorManagerValidate | 1.5 | DecoratorManager.validate's Rust call: dcsValidate on the validation manager's handle (P5-55; P5-103 removed the stateless binding it fell back on). Classified at the P5-64 re-audit (accordproject/concerto-rust#401) |
 | engine/views-dcs.ts | (function) | decorateResultTrusted | 1.5 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
-| engine/views-dcs.ts | (function) | decoratorManagerDecorateModels | 30 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views-dcs.ts | (function) | decoratorManagerDecorateModels | 29 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-dcs.ts | (function) | decoratorManagerExtract | 7 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
-| engine/views-dcs.ts | (function) | decoratorManagerExtractOnSource | 17 | DecoratorManager.extract* on the source manager's rustHandle (P5-55): one Rust call extracts into a fresh result manager; JS restores `decorators: undefined` and adopts the staged files. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) |
-| engine/views-dcs.ts | (function) | decoratorManagerExtractStaged | 20 | DecoratorManager.extract* on a DcsManagerHandle built for the call (P5-27): one Rust call extracts into a fresh result manager; JS restores `decorators: undefined` and adopts the staged files. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) |
+| engine/views-dcs.ts | (function) | decoratorManagerExtractOnSource | 15 | DecoratorManager.extract* on the source manager's rustHandle (P5-55): one Rust call extracts into a fresh result manager; JS restores `decorators: undefined` and adopts the staged files. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) |
+| engine/views-dcs.ts | (function) | decoratorManagerExtractStaged | 19 | DecoratorManager.extract* on a DcsManagerHandle built for the call (P5-27): one Rust call extracts into a fresh result manager; JS restores `decorators: undefined` and adopts the staged files. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) |
 | engine/views-dcs.ts | (function) | decoratorManagerExtractDecorators | 8 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-dcs.ts | (function) | decoratorManagerExtractVocabularies | 7 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-dcs.ts | (function) | decoratorManagerExtractNonVocabDecorators | 7 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
@@ -1071,7 +1076,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/views-staging.ts | (function) | mapValueTypeProcess | 2 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views.ts | (function) | scalarDeclarationProcess | 29 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views.ts | (function) | beginModelFile | 14 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
-| engine/views.ts | (function) | heldViewSnapshot | 18 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views.ts | (function) | heldViewSnapshot | 24 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views.ts | (function) | declarationIsValidIdentifier | 9 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views.ts | (function) | declarationFullyQualifiedName | 8 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views.ts | (function) | classDeclarationProcess | 7 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
@@ -1081,7 +1086,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | introspect/decorated.ts | Decorated | process | 33 | decorator objects may be produced by user DecoratorFactory subclasses (JS callbacks); Rust supplies the decorator ASTs and order |
 | introspect/modelfile.ts | ModelFile | constructor | 148.5 | argument checks and view-field set-up stay JS; the AST shape check (P5-49), staging and the header come from Rust (checkAstShape, stageModelFile, _fromAstHeader). P5-35 (BC-47) removed the collaborator-context fallback over stub ModelManagers: a manager the BaseModelManager constructor did not build is a TypeError. Reason updated at the P5-64 re-audit (accordproject/concerto-rust#401) |
 | introspect/modelfile.ts | ModelFile | _fromAstDeclarations | 18 | reads the file's one-call Rust view snapshot (modelFileViewSnapshot) around the declaration views it builds |
-| introspect/modelfile.ts | ModelFile | filter | 130 | takes a JS predicate callback over Declaration views; Rust does the AST copy and import pruning |
+| introspect/modelfile.ts | ModelFile | filter | 115 | takes a JS predicate callback over Declaration views; Rust does the AST copy and import pruning |
 | introspect/stringvalidator.ts | StringValidator | constructor | 15 | Rust stringValidatorNew checks the pattern and length bounds (regular expressions run in the engine since P5-52, BC-28); JS builds the RegExp object getRegex returns. Reason updated at the P5-64 re-audit (accordproject/concerto-rust#401) |
 | model/validatedresource.ts | ValidatedResource | setPropertyValue | 23 | the undeclared-field check and the assignment stay TS (D7); the value is validated by one Rust call (validatePropertyBinary, src/engine/validate-resource.ts), with the ResourceValidator visitor behind EngineFastPathUnsupported, and for a string, number or boolean on a plain primitive field with no validator, where the visitor is cheaper (visitorIsCheaper) |
 | model/validatedresource.ts | ValidatedResource | addArrayValue | 32 | the undeclared-field and not-an-array checks, the array copy and the assignment stay TS (D7); the new array is validated by one Rust call (validatePropertyBinary, src/engine/validate-resource.ts), with the ResourceValidator visitor behind EngineFastPathUnsupported |
@@ -1097,7 +1102,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 5b. PARTIAL items (no engine call)
 
-49 members, weight 518 (6.1%). Set automatically by the engine-call
+54 members, weight 704 (8.1%). Set automatically by the engine-call
 scan (see Method); accordproject/concerto-rust#261. 0 of them (weight
 0) are **port candidates, deferred by maintainer decision**
 (accordproject/concerto-rust#276, 2026-09-28). The P5-11 evaluation recommended moving 14 rows
@@ -1109,7 +1114,7 @@ A row marked **undecided** has not been evaluated.
 
 ### PARTIAL *logic*: unconverted TS bodies
 
-19 members, weight 392. The TS body is still the live path, including which
+21 members, weight 572. The TS body is still the live path, including which
 exception is thrown.
 
 | file | class | member | loc | weight | planned task | P5-11 |
@@ -1119,10 +1124,12 @@ exception is thrown.
 | decoratormanager.ts | DecoratorManager | decorateModels | 30 | 30 | P4-09 | **undecided** |
 | introspect/classdeclaration.ts | (function) | declarationKindOf | 6 | 6 | P2-03+P4-06 | **undecided** |
 | introspect/classdeclaration.ts | ClassDeclaration | process | 78 | 117 | P2-03+P4-06 | **undecided** |
+| introspect/classdeclaration.ts | ClassDeclaration | validate | 98 | 147 | P2-03+P4-06 | **undecided** |
 | introspect/classdeclaration.ts | ClassDeclaration | getAssignableClassDeclarations | 13 | 13 | P2-03+P4-06 | **undecided** |
 | introspect/classdeclaration.ts | ClassDeclaration | getDirectSubclasses | 9 | 9 | P2-03+P4-06 | **undecided** |
 | introspect/classdeclaration.ts | ClassDeclaration | toString | 6 | 6 | P2-03+P4-06 | **undecided** |
 | introspect/declaration.ts | Declaration | process | 17 | 25.5 | P2-03+P4-05 | **undecided** |
+| introspect/decorated.ts | Decorated | validate | 22 | 33 | P2-07+P4-05 | **undecided** |
 | introspect/decorator.ts | Decorator | validate | 21 | 31.5 | P2-07+P4-05 | **undecided** |
 | introspect/field.ts | Field | getScalarField | 9 | 9 | P2-04+P4-07 | **undecided** |
 | introspect/modelfile.ts | ModelFile | _sharedView | 9 | 9 | P2-08+P4-08 | **undecided** |
@@ -1136,11 +1143,11 @@ exception is thrown.
 
 ### PARTIAL *read*: straight-line reads and forwards
 
-30 members, weight 126.
+33 members, weight 132.
 
 | file | class | member | loc | weight | planned task | P5-11 |
 |---|---|---|---|---|---|---|
-| basemodelmanager.ts | (function) | newEngineState | 8 | 8 | P2-08+P4-08 | **undecided** |
+| basemodelmanager.ts | (function) | newEngineState | 9 | 9 | P2-08+P4-08 | **undecided** |
 | basemodelmanager.ts | (function) | namespaceListOf | 3 | 1.5 | P2-08+P4-08 | **undecided** |
 | basemodelmanager.ts | BaseModelManager | _registerAdded | 7 | 7 | P2-08+P4-08 | **undecided** |
 | basemodelmanager.ts | BaseModelManager | validateInstance | 3 | 4.5 | P2-08+P4-08 | **undecided** |
@@ -1162,11 +1169,14 @@ exception is thrown.
 | introspect/classdeclaration.ts | ClassDeclaration | isMapDeclaration | 3 | 1.5 | P2-03+P4-06 | **undecided** |
 | introspect/enumdeclaration.ts | EnumDeclaration | toString | 3 | 1.5 | P2-04+P4-06 | **undecided** |
 | introspect/field.ts | Field | process | 5 | 2.5 | P2-04+P4-07 | **undecided** |
+| introspect/field.ts | Field | toString | 4 | 2 | P2-04+P4-07 | **undecided** |
 | introspect/mapdeclaration.ts | MapDeclaration | process | 14 | 14 | P2-06+P4-07 | **undecided** |
 | introspect/mapkeytype.ts | MapKeyType | process | 5 | 2.5 | P2-06+P4-07 | **undecided** |
 | introspect/mapvaluetype.ts | MapValueType | process | 5 | 2.5 | P2-06+P4-07 | **undecided** |
 | introspect/modelfile.ts | ModelFile | _copyHeader | 10 | 10 | P2-08+P4-08 | **undecided** |
+| introspect/numbervalidator.ts | NumberValidator | toString | 3 | 1.5 | P2-02+P4-04 | **undecided** |
 | introspect/scalardeclaration.ts | ScalarDeclaration | process | 5 | 2.5 | P2-05+P4-07 | **undecided** |
+| introspect/scalardeclaration.ts | ScalarDeclaration | toString | 3 | 1.5 | P2-05+P4-07 | **undecided** |
 | modelutil.ts | ModelUtil | isEnum | 3 | 1.5 | P2-01+P4-03 | **undecided** |
 | modelutil.ts | ModelUtil | isMap | 3 | 1.5 | P2-01+P4-03 | **undecided** |
 | modelutil.ts | ModelUtil | isScalar | 3 | 1.5 | P2-01+P4-03 | **undecided** |
@@ -1330,8 +1340,8 @@ fallback (plan section 3): `ModelFile`'s is HYBRID, and the others are TS view g
 
 Kept for history; every question below has a maintainer decision now, linked from each item.
 
-1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 37.8%
-   (old figure, previous denominator: 37.4%). See section 1.
+1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 35.9%
+   (old figure, previous denominator: 35.5%). See section 1.
 2. **Constant markers and `accept()` count as TS. Settled: excluded from the D1
    denominator.** They are not "logic". 60 members, weight 90,
    removed from the denominator (section 1).

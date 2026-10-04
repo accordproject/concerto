@@ -239,7 +239,13 @@ function heldViewSnapshot(modelFile: any, namespace: string | undefined): string
     }
     const stage = state.stage;
     if (stage !== undefined) {
-        return stage.handle.stagedModelFileViewSnapshot(stage.id, namespace);
+        try {
+            return stage.handle.stagedModelFileViewSnapshot(stage.id, namespace);
+        } catch (e) {
+            // The stage's handle was released since (`clearModelFiles` frees
+            // the handle it replaces): the snapshot of the AST text answers.
+            return undefined;
+        }
     }
     const committed: any = state.committed;
     const manager = modelFile.modelManager;
