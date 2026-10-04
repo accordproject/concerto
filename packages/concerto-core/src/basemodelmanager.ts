@@ -202,7 +202,9 @@ const RUST_PRELOADED_NS = ['concerto.decorator@1.0.0', 'concerto@1.0.0'];
  * another manager's copy, so a fork does not keep its source reachable),
  * not staged (`_buildingMetamodelCopy`), and with none of the manager's
  * decorator factories, which v5.0.0's constructor had not been given yet.
- * The constructor and `fork()` both install it.
+ * The constructor and `fork()` both install it. A shared
+ * `MetaModelUtil.metaModelAst` changed into an invalid model therefore
+ * throws at the first read, not in the constructor (BC-55).
  * @param {BaseModelManager} manager the manager
  * @private
  */
