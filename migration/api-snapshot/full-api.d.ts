@@ -73,8 +73,8 @@ declare class BaseModelManager {
      * @param {boolean} [options.metamodelValidation] - Unless false, every ModelFile built for this
      * manager has its AST checked against the Concerto metamodel when it is constructed (at model
      * load: fromAst, addModel, addCTOModel, addModelFiles, updateModelFile), and a malformed AST is an
-     * IllegalModelException (BC-19, on by default since R1). When true, addModelFile also runs
-     * validateAst on each new file, as before. false is an escape hatch for trusted input only: the
+     * IllegalModelException (BC-19, on by default). When true, addModelFile also runs
+     * validateAst on each new file. false is an escape hatch for trusted input only: the
      * shape check is skipped, and code downstream of the load may assume a well-formed AST. A
      * malformed AST still throws an error when it is loaded, never a WASM trap or a process crash,
      * unless the loader can read it all the same (a node's $class naming the wrong type, say); the
@@ -121,10 +121,6 @@ declare class BaseModelManager {
      * @throws {IllegalModelException}
      */
     validateModelFile(modelFile: any, fileName?: any): void;
-    /**
-     * Adds decorator types
-     * @private
-     */
     /**
      * Adds decorator types
      * @private
@@ -422,8 +418,7 @@ declare class BaseModelManager {
     /**
      * Returns a new ModelManager over the same model files as this one,
      * with the same options and decorator factories, without loading or
-     * validating any model file again (P5-97,
-     * accordproject/concerto-rust#448). Unlike a `filter` that keeps every
+     * validating any model file again. Unlike a `filter` that keeps every
      * declaration, every model file is kept, including one with no
      * declarations, and no predicate is called.
      *
@@ -455,9 +450,7 @@ declare class BaseModelManager {
      * decorator and root models, and the metamodel under `addMetamodel`)
      * are kept whole: the predicate is not called on their declarations
      * (an import of one is always kept), and this manager's copies are not
-     * added again (BC-53, P5-108,
-     * accordproject/concerto-rust#466; v5.0.0 re-added the decorator
-     * model and threw).
+     * added again (BC-53; v5.0.0 re-added the decorator model and threw).
      *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @param {Object} [options] - options for the filter method
@@ -474,11 +467,12 @@ import dayjs from './dayjs-setup';
 /**
  * Ensures there is a proper current time
  *
- * P5-67 (BC-51, R1): a given `currentTime` must be a strict `DateTime`
- * string (`YYYY-MM-DDTHH:mm:ss`, an optional fraction, then `Z` or
- * `±HH:mm`, naming a real instant), as for every other `DateTime` string;
- * the lenient dayjs and V8 forms are rejected with the same error an
- * unparseable one throws. An omitted (falsy) `currentTime` still means now.
+ * BC-51: a given `currentTime` must be a strict `DateTime` string
+ * (`YYYY-MM-DDTHH:mm:ss`, an optional fraction, then `Z` or `±HH:mm`,
+ * naming a real instant), as for every other `DateTime` string; the
+ * lenient dayjs and V8 forms are rejected with the same error an
+ * unparseable one throws. An omitted (falsy) `currentTime` still means
+ * now.
  *
  * @param {string} [currentTime] - the definition of 'now', a strict
  * `DateTime` string
@@ -3002,7 +2996,8 @@ declare class Validator {
     constructor(field: ValidatedElement, validator: ValidatorAst | undefined);
     /**
      * Reports an instance value that fails the validator (BC-39: a
-     * ValidationException, keeping the errorType; 5.0.0 threw a BaseException).
+     * ValidationException; keeping the errorType; 5.0.0 threw a
+     * BaseException).
      * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
      * @param {string} errorType the type of error
@@ -4004,7 +3999,7 @@ declare class JSONGenerator {
      * One relationship value: a resource written in full when
      * `permitResourcesForRelationships` allows it and it is not already being
      * written, otherwise its relationship text. A relationship-typed map value
-     * is written here too (P5-58, BC-05).
+     * is written here too (BC-05).
      * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
      * @param {Identifiable} obj - the relationship or the resource
      * @param {Object} parameters  - the parameter
@@ -4123,7 +4118,6 @@ declare class JSONPopulator {
      */
     visitField(field: any, parameters: JsonPopulatorParameters): any;
     /**
-     *
      * @param {Field} field - the field of the item being converted
      * @param {Object} jsonItem - the JSON object of the item being converted
      * @param {Object} parameters - the parameters
@@ -4151,7 +4145,7 @@ declare class JSONPopulator {
      * One relationship value (visitRelationshipDeclaration's non-array
      * branch): a URI string becomes a Relationship, and an object an embedded
      * resource when `acceptResourcesForRelationships` allows it. A
-     * relationship-typed map value is read here too (P5-58, BC-05).
+     * relationship-typed map value is read here too (BC-05).
      * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
      * @param {Object} jsonObj - the JSON value
      * @param {Object} parameters  - the parameter
@@ -4166,14 +4160,14 @@ export default JSONPopulator;
 // ==== serializer/relationshipmapvalue.d.ts ====
 import type MapDeclaration from '../introspect/mapdeclaration';
 /**
- * The relationship a map holds when its value type is a relationship
- * (`map M { o String --> T }`), with the members of a
- * RelationshipDeclaration that the serializer's relationship code reads
- * (P5-58, BC-05, R1; DV-007). JSONPopulator, JSONGenerator and
- * ResourceValidator hand it to their relationship-property code, so a map
- * value is read, written and validated as a `--> T` property is, under the
- * same `acceptResourcesForRelationships`, `convertResourcesToRelationships`
- * and `permitResourcesForRelationships` options.
+ * The relationship a map holds when its value type is a relationship (`map
+ * M { o String --> T }`), with the members of a RelationshipDeclaration
+ * that the serializer's relationship code reads (BC-05; DV-007).
+ * JSONPopulator, JSONGenerator and ResourceValidator hand it to their
+ * relationship-property code, so a map value is read, written and validated
+ * as a `--> T` property is, under the same
+ * `acceptResourcesForRelationships`, `convertResourcesToRelationships` and
+ * `permitResourcesForRelationships` options.
  * @private
  */
 export interface RelationshipMapValue {
@@ -4640,10 +4634,10 @@ export interface ModelManagerOptions {
     regExp?: RegExp;
     /**
      * The strict AST shape check at model load (BC-19, with BC-17, BC-18
-     * and BC-20; on by default since R1): unless this is `false`, a
+     * and BC-20; on by default): unless this is `false`, a
      * ModelFile whose AST does not have the Concerto metamodel's shape is
      * rejected with an IllegalModelException when it is constructed. `true`
-     * also runs `validateAst` in `addModelFile`, as before. `false` is an
+     * also runs `validateAst` in `addModelFile`. `false` is an
      * escape hatch for trusted input only: the shape check is skipped, and
      * code downstream of the load may assume a well-formed AST. A malformed
      * AST still throws an error when it is loaded, never a WASM trap or a
