@@ -12,26 +12,19 @@
  * limitations under the License.
  */
 
-// The wire codec of the Serializer fast path: `Serializer.fromJSON`/`toJSON`
-// cross in one call each instead of per field through the TS visitors.
-//
-// Plain JSON crosses unchanged. Anything else is a one-key object tagged
-// `@@oracle` (concerto-wasm's `WIRE_TAG`), so a value JSON cannot hold (a
-// non-finite number or `-0`, `undefined`, a `Map`, a dayjs, a
-// `Resource`/`ValidatedResource`/`Relationship`) round-trips. A `"typed"`
-// value's `fields` holds every own property of the object, `$`-prefixed ones
-// included, except `$modelManager`/`$classDeclaration`/`$validator`. A dayjs
-// crosses as `(epoch ms, utcOffset minutes)`, and is rebuilt in TS.
-//
-// `encodeValue` throws `EngineFastPathUnsupported` for anything it cannot
-// express (another class, a function, a symbol, or an object reached twice);
-// the caller then falls back to the TS visitors.
+// The wire codec of the Serializer fast path: `fromJSON`/`toJSON` cross in
+// one call each instead of per field. Plain JSON crosses unchanged; anything
+// else is a one-key object tagged `@@oracle` (`WIRE_TAG`): a non-finite
+// number or `-0`, `undefined`, a `Map`, a dayjs (epoch ms and utcOffset), or
+// a Resource/ValidatedResource/Relationship, whose `"typed"` `fields` hold
+// every own property except `$modelManager`/`$classDeclaration`/`$validator`.
+// Anything else (another class, a function, a symbol, an object reached
+// twice) throws `EngineFastPathUnsupported`, and the TS visitors run.
 
 import dayjs from '../dayjs-setup';
 import { EngineFastPathUnsupported, isDayjsLike, isTypedLike, hasLoneSurrogate } from './util';
 import { WireWriter } from './wire';
 
-// Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type BaseModelManager from '../basemodelmanager';
 /* eslint-enable no-unused-vars */
@@ -40,11 +33,7 @@ const TAG = '@@oracle';
 
 const hasOwn = Object.prototype.hasOwnProperty;
 
-/**
- * Throws `EngineFastPathUnsupported` for a string with a lone surrogate,
- * which the engine cannot receive unchanged.
- * @param {string} s the string (a value, an object key or a map key)
- */
+/** Throws `EngineFastPathUnsupported` for a string with a lone surrogate. */
 function checkString(s: string): void {
     if (hasLoneSurrogate(s)) {
         throw new EngineFastPathUnsupported('lone-surrogate');
@@ -52,9 +41,8 @@ function checkString(s: string): void {
 }
 
 /**
- * Throws `EngineFastPathUnsupported` for an object key the codec cannot
- * carry: a lone surrogate, or `__proto__` (`out['__proto__'] = x` would set
- * the prototype, losing the key), so the TS path treats it instead.
+ * Throws `EngineFastPathUnsupported` for a key the codec cannot carry: a lone
+ * surrogate, or `__proto__` (assigning it would set the prototype).
  */
 function checkKey(key: string): void {
     if (key === '__proto__') {
@@ -63,14 +51,10 @@ function checkKey(key: string): void {
     checkString(key);
 }
 
-// The handles a "typed" value never carries (`$validator` is rebuilt on
-// decode from the serializer's options).
+// `$validator` is rebuilt on decode from the serializer's options.
 const TYPED_SKIP = new Set(['$modelManager', '$classDeclaration', '$validator']);
 
-/**
- * A live Resource/ValidatedResource/Relationship in the `"typed"` wire
- * shape (module doc).
- */
+/** A live Resource/ValidatedResource/Relationship in the `"typed"` wire shape. */
 function encodeTyped(v, seen: Set<object>) {
     const ctorName = typedCtorName(v);
     const fields = {};
@@ -85,12 +69,9 @@ function encodeTyped(v, seen: Set<object>) {
 }
 
 /**
- * Marks `v` as visited on this encode. A cycle would recurse forever, and a
- * value shared between two places (which `toJSON`'s `deduplicateResources`
- * relies on) would cross as two copies, so either throws
+ * Marks `v` visited on this encode. A cycle, or a value shared between two
+ * places (which `deduplicateResources` relies on), throws
  * `EngineFastPathUnsupported`.
- * @param {object} v the object or array about to be encoded
- * @param {Set<object>} seen the objects already visited on this encode
  */
 function visit(v: object, seen: Set<object>): void {
     if (seen.has(v)) {
@@ -99,10 +80,7 @@ function visit(v: object, seen: Set<object>): void {
     seen.add(v);
 }
 
-/**
- * A JS runtime value as the wire value the engine reads (module doc).
- * @param {Set<object>} [seen] the objects already visited on this encode (see `visit`)
- */
+/** A JS runtime value as the wire value the engine reads. */
 function encodeValue(v, seen: Set<object> = new Set()) {
     if (v === undefined) {
         return { [TAG]: 'undefined' };
@@ -160,11 +138,8 @@ function encodeValue(v, seen: Set<object> = new Set()) {
     throw new EngineFastPathUnsupported(`unsupported-value:${typeof v}`);
 }
 
-// ---------------------------------------------------------------------
-// The same wire value written straight from the live object in the compact
-// binary layout (wire.ts), which the engine reads as it reads the text
-// (`parse_wire_bytes`).
-// ---------------------------------------------------------------------
+// The same wire value written from the live object in the compact binary
+// layout (wire.ts), which the engine reads as it reads the text.
 
 /** The one writer of the Serializer fast path's binary input. */
 const valueWriter = new WireWriter(64 * 1024);
@@ -172,11 +147,7 @@ const valueWriter = new WireWriter(64 * 1024);
 /** Set while `valueWriter` is being written (a getter may re-enter). */
 let valueWriterBusy = false;
 
-/**
- * How deep the binary write nests before it leaves the value to the text
- * path: below the engine's JSON limit (128), so a value too deep is rejected
- * as text.
- */
+/** How deep the binary write nests before leaving the value to the text path (engine limit 128). */
 const MAX_BINARY_DEPTH = 100;
 
 /** Thrown inside `encodeBytes` to leave a value to the text path. */
@@ -184,12 +155,9 @@ class TextPathOnly extends Error {
 }
 
 /**
- * `encodeValue(v)`'s wire value in the compact binary layout: a view of the
- * writer's buffer, valid until the next call. Undefined when the value is
- * left to the text path, which throws what it always threw (a value
- * `encodeValue` cannot express, one nested deeper than `MAX_BINARY_DEPTH`,
- * or a call while the writer is in use). Any other error (a throwing getter)
- * propagates, as from `encodeValue`.
+ * `encodeValue(v)` in the compact binary layout, valid until the next call.
+ * Undefined when the value is left to the text path, which throws what it
+ * always threw; any other error (a throwing getter) propagates.
  */
 function encodeBytes(v: unknown): Uint8Array | undefined {
     if (valueWriterBusy) {
@@ -211,11 +179,7 @@ function encodeBytes(v: unknown): Uint8Array | undefined {
     }
 }
 
-/**
- * A one-key-or-more tagged object's head: the object header with `count`
- * entries, and its `TAG` entry.
- * @param {number} count the entries, the tag's included
- */
+/** A tagged object's head: the header with `count` entries (tag included) and the tag. */
 function writeTagHead(count: number, kind: string): void {
     const at = valueWriter.beginObject();
     valueWriter.putU32(at, count);
@@ -231,11 +195,7 @@ function writeNumber(n: number): void {
     valueWriter.num(n);
 }
 
-/**
- * `encodeValue(v, seen)`, written to `valueWriter` (`encodeBytes`).
- * @param {Set<object>} seen the objects already visited on this encode
- * @param {number} depth how deep `v` is
- */
+/** `encodeValue(v, seen)`, written to `valueWriter`. */
 function writeWireValue(v, seen: Set<object>, depth: number): void {
     if (depth >= MAX_BINARY_DEPTH) {
         throw new TextPathOnly();
@@ -246,8 +206,7 @@ function writeWireValue(v, seen: Set<object>, depth: number): void {
         return;
     }
     if (typeof v === 'string') {
-        // `rawStr` throws for a lone surrogate, so the string is scanned
-        // once.
+        // `rawStr` throws for a lone surrogate, so the string is scanned once.
         w.str(v);
         return;
     }
@@ -283,8 +242,7 @@ function writeWireValue(v, seen: Set<object>, depth: number): void {
         visit(v, seen);
         writeTagHead(2, 'map');
         w.rawStr('entries');
-        // No `[key, value]` array per entry; the count is patched in after
-        // (a value's getter may change the map).
+        // The count is patched in after: a value's getter may change the map.
         const countAt = w.pos + 1;
         w.array(0);
         let count = 0;
@@ -340,19 +298,13 @@ function writeWireValue(v, seen: Set<object>, depth: number): void {
     throw new EngineFastPathUnsupported(`unsupported-value:${typeof v}`);
 }
 
-/**
- * The object of `v`'s own enumerable keys (less `skip`) and their values,
- * as `encodeValue` and `encodeTyped` build it.
- * @param {Set<object>} seen the objects already visited on this encode
- * @param {number} depth how deep `v` is
- */
+/** The object of `v`'s own enumerable keys (less `skip`) and their values. */
 function writeEntries(v, skip: Set<string> | undefined, seen: Set<object>, depth: number): void {
     const w = valueWriter;
     const countAt = w.beginObject();
     let count = 0;
-    // `for...in` with an own check visits `Object.keys` order but reads each
-    // value through V8's enumeration cache. `rawStr` checks lone surrogates,
-    // so only `__proto__` is checked here.
+    // `for...in` with an own check visits `Object.keys` order through V8's
+    // enumeration cache; `rawStr` checks lone surrogates.
     for (const key in v) {
         if (!hasOwn.call(v, key) || (skip !== undefined && skip.has(key))) {
             continue;
@@ -370,9 +322,8 @@ function writeEntries(v, skip: Set<string> | undefined, seen: Set<object>, depth
 let modelClassesCache: any;
 
 /**
- * The public model classes `materializeTyped` constructs, required on first
- * use (a late require avoids a load-order cycle) and cached.
- * @return {object} `{Resource, ValidatedResource, Relationship, ResourceValidator}`
+ * The public model classes `materializeTyped` constructs, required late to
+ * avoid a load-order cycle.
  */
 function modelClasses(): any {
     if (!modelClassesCache) {
@@ -391,10 +342,9 @@ function modelClasses(): any {
 }
 
 /**
- * The wire name (`ctor`) of a Resource/ValidatedResource/Relationship, by
- * constructor identity, never `constructor.name` (a minifier renames it).
- * Any other class, a subclass included, throws `EngineFastPathUnsupported`.
- * @return {string} `'Resource'`, `'ValidatedResource'` or `'Relationship'`
+ * The wire name of a Resource/ValidatedResource/Relationship, by constructor
+ * identity (a minifier renames `constructor.name`). Any other class throws
+ * `EngineFastPathUnsupported`.
  */
 function typedCtorName(v): string {
     const ctor = v.constructor;
@@ -412,10 +362,8 @@ function typedCtorName(v): string {
 }
 
 /**
- * What `materializeTyped` needs about an instance's class, kept per class
- * (checked against the constructor, namespace and type) while the model files
- * are unchanged: the class declaration `getType(fqn)` answers, and the
- * `$identifierFieldName` the constructor computes.
+ * What `materializeTyped` needs about a class, kept while the model files
+ * are unchanged: its class declaration and `$identifierFieldName`.
  */
 interface TypeInfo {
     ctor: string;
@@ -425,27 +373,19 @@ interface TypeInfo {
     identifierFieldName: string;
 }
 
-/**
- * The `TypeInfo`s by fully-qualified name and then TS class, and the entry
- * found last, so a run of one class skips the hash lookup.
- */
+/** `TypeInfo`s by fqn and TS class, and the last one found (a run of one class skips the lookup). */
 interface TypeCache {
     byFqn: Map<string, Record<string, TypeInfo>>;
     last: { fqn: string; entry: Record<string, TypeInfo> } | undefined;
 }
 
-/** A new, empty `TypeCache`. */
 function newTypeCache(): TypeCache {
     return { byFqn: new Map(), last: undefined };
 }
 
 /**
- * `new Ctor(modelManager, classDeclaration, ns, type, id, timestamp[,
- * validator])`, the own properties set in the constructors' order, but with
- * `$identifierFieldName` from `info`.
- * @param {Function} Ctor Resource, ValidatedResource or Relationship
- * @param {object} info the class's `TypeInfo`
- * @param {boolean} isRelationship whether `Ctor` is Relationship
+ * `new Ctor(...)`, setting the own properties in the constructors' order,
+ * with `$identifierFieldName` from `info`.
  */
 function constructCached(Ctor, info: TypeInfo, modelManager: BaseModelManager, ns, type, id, timestamp, isRelationship: boolean, validator?) {
     const resource = Object.create(Ctor.prototype);
@@ -469,13 +409,9 @@ function constructCached(Ctor, info: TypeInfo, modelManager: BaseModelManager, n
 }
 
 /**
- * A `"typed"` wire node materialised into a real
- * Resource/ValidatedResource/Relationship, so every getter and later mutation
- * behaves as on the visitor path's result. Class lookups come from `types`;
- * the fields are decoded in place, so `node` must be fresh `JSON.parse`
- * output nothing else holds.
- * @param {BaseModelManager} modelManager the model manager to resolve its class in
- * @param {Map} types the caller's `TypeCache`
+ * A `"typed"` wire node as a real Resource/ValidatedResource/Relationship,
+ * which behaves as the visitor path's result. Decoded in place, so `node`
+ * must be fresh `JSON.parse` output.
  */
 function materializeTyped(node, modelManager: BaseModelManager, types: TypeCache) {
     const decode = (v) => decodeParsed(v, modelManager, types);
@@ -497,12 +433,8 @@ function materializeTyped(node, modelManager: BaseModelManager, types: TypeCache
 }
 
 /**
- * `materializeTyped` for `serializerFromJsonCompact`'s result: `[ctor, fqn,
- * $namespace, $type, $identifierFieldName, $identifier, $timestamp,
- * fields]`, each in its wire encoding, `fields` without what
- * `materializeTyped` skips. Decoded in place.
- * @param {BaseModelManager} modelManager the model manager to resolve its class in
- * @param {Map} types the caller's `TypeCache`
+ * `materializeTyped` for `serializerFromJsonCompact`'s `[ctor, fqn,
+ * $namespace, $type, $identifierFieldName, $identifier, $timestamp, fields]`.
  */
 function materializeCompact(node, modelManager: BaseModelManager, types: TypeCache) {
     const decode = (v) => decodeParsed(v, modelManager, types);
@@ -515,19 +447,12 @@ function materializeCompact(node, modelManager: BaseModelManager, types: TypeCac
     return resource;
 }
 
-/**
- * The instance of class `fqn` that `materializeTyped` builds, before its
- * fields are set: through its constructor the first time, then
- * `constructCached`.
- * @param {BaseModelManager} modelManager the model manager to resolve the class in
- * @param {Map} types the caller's `TypeCache`
- */
+/** A new instance of `fqn`: by its constructor the first time, then `constructCached`. */
 function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModelManager, types: TypeCache) {
     const { Resource, ValidatedResource, Relationship, ResourceValidator } = modelClasses();
     const Ctor = ctor === 'ValidatedResource' ? ValidatedResource : ctor === 'Relationship' ? Relationship : Resource;
     const validator = ctor === 'ValidatedResource' ? new ResourceValidator({}) : undefined;
-    // Looked up by the strings `JSON.parse` made, and checked against the
-    // namespace and type it was learned for.
+    // Checked against the namespace and type it was learned for.
     const last = types.last;
     const entry = last && last.fqn === fqn ? last.entry : types.byFqn.get(fqn);
     const info = entry?.[ctor];
@@ -549,15 +474,11 @@ function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModel
     }
     learnedEntry[ctor] = learned;
     types.last = { fqn, entry: learnedEntry };
-    // The first instance is rebuilt as every later one is, so they share
-    // one V8 object layout.
+    // Rebuilt as every later instance is, so they share one object layout.
     return constructCached(Ctor, learned, modelManager, ns, type, id, timestamp, Ctor === Relationship, validator);
 }
 
-/**
- * `resource[key] = value` as an own enumerable data property; `__proto__` is
- * defined instead, so decoded data never sets a prototype.
- */
+/** Sets an own enumerable data property; `__proto__` is defined, never setting a prototype. */
 function setField(resource, key: string, value: unknown): void {
     if (key === '__proto__') {
         Object.defineProperty(resource, key, { value, enumerable: true, writable: true, configurable: true });
@@ -568,11 +489,7 @@ function setField(resource, key: string, value: unknown): void {
 
 /**
  * A wire value as the runtime value it decodes to, over fresh `JSON.parse`
- * output nothing else holds: arrays and untagged objects are kept and only
- * their tagged members replaced in place (`JSON.parse` already made every key
- * an own data property, `__proto__` included).
- * @param {BaseModelManager} modelManager the model manager, for a `"typed"` value
- * @param {Map} types the caller's `TypeCache`
+ * output: only tagged members are replaced in place.
  */
 function decodeParsed(v, modelManager: BaseModelManager, types: TypeCache) {
     if (v === null || typeof v !== 'object') {
@@ -608,13 +525,7 @@ function decodeParsed(v, modelManager: BaseModelManager, types: TypeCache) {
     return decodeTagged(v);
 }
 
-/**
- * A `"map"` wire value's `entries` as a Map, each key and value decoded by
- * `decodeParsed` (so a `"typed"` value takes its class from `types`).
- * @param {Array} entries the `[key, value]` wire pairs
- * @param {BaseModelManager} modelManager the model manager, for a `"typed"` value
- * @param {Map} types the caller's `TypeCache`
- */
+/** A `"map"` wire value's `entries` as a Map, each key and value decoded. */
 function decodeParsedMap(entries, modelManager: BaseModelManager, types: TypeCache): Map<unknown, unknown> {
     const out = new Map();
     for (let i = 0; i < entries.length; i++) {
@@ -624,10 +535,7 @@ function decodeParsedMap(entries, modelManager: BaseModelManager, types: TypeCac
     return out;
 }
 
-/**
- * A primitive (itself) or an `"undefined"`, `"number"` or `"dayjs"` tagged
- * value, as the runtime value it decodes to.
- */
+/** A primitive, or an `"undefined"`, `"number"` or `"dayjs"` tagged value, decoded. */
 function decodeTagged(v) {
     if (v === null || typeof v !== 'object') {
         return v;

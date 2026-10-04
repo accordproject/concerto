@@ -13,11 +13,9 @@
  */
 
 // The engine bindings and views the public classes call, with their real
-// signatures, so a public method returning a binding's result has a real
-// type and a misspelt or missing binding is a compile error. Imported with
-// `import type` only: it adds nothing to the JavaScript build, and the public
-// declaration build (which excludes src/engine) and API snapshot do not see
-// it.
+// signatures. Imported with `import type` only, so it adds nothing to the
+// JavaScript build, and the public declarations and API snapshot do not
+// see it.
 
 import type ModelManager from '../modelmanager';
 import type ClassDeclaration from '../introspect/classdeclaration';
@@ -95,38 +93,23 @@ export interface EngineHandle {
 
 /** One BaseModelManager's engine state (`BaseModelManager._engine`). */
 export interface EngineState {
-    /**
-     * The model version, moved by every change of the manager's
-     * `modelFiles` or `rustHandle`. Every cached answer here and in the views
-     * is valid only for the version it was made at.
-     */
+    /** The model version, moved by every change; every cached answer is valid only at its version. */
     version: number;
-    /** `getType`'s and `resolveType`'s engine answers, by argument. */
     readMemo: {
         version: number;
-        /** `rustHandle.getTypeName(name)`, by name. */
         typeNames: Map<string, string>;
-        /** `rustHandle.resolveType(context, type)`, by type (the context only words an error). */
+        /** `resolveType` answers by type (the context only words an error). */
         resolvedTypes: Map<string, string>;
-        /**
-         * `rustHandle.modelFileGetTypeName(id, type)` (`ModelFile.getType`),
-         * by the model file's namespace and then by type.
-         */
+        /** `ModelFile.getType` answers, by namespace and then type. */
         fileTypeNames: Map<string, Map<string, string | undefined>>;
     } | undefined;
-    /**
-     * The namespaces, in `getNamespaces()` order, updated in place by every
-     * mutator; undefined when the next `getNamespaces()` must ask the engine.
-     */
+    /** The namespaces in `getNamespaces()` order, or undefined when the engine must be asked. */
     namespaces: string[] | undefined;
     /** The class lookups of the serializer fast path (engine/serializer.ts). */
     serializerCache: { version: number; handle: EngineHandle; types: unknown } | undefined;
 }
 
-/**
- * The concerto-wasm bindings the public classes call, as
- * `loadEngine('./engine').rust` exposes them.
- */
+/** The concerto-wasm bindings the public classes call. */
 export interface EngineBindings {
     // ModelUtil
     modelUtilGetShortName(fqn: string): string;
@@ -190,8 +173,7 @@ export interface EngineBindings {
     // ResourceId
     resourceIdFromURI(uri: string, legacyNamespace?: string, legacyType?: string): { namespace: string, type: string, id: string };
     resourceIdToURI(namespace: string, type: string, id: string): string;
-    // Many at once, for a relationship-typed map; flat, with `undefined`
-    // where one fails (the caller then makes the single call).
+    // Many at once, flat, with `undefined` where one fails.
     resourceIdsFromURIs(uris: string[], legacyNamespace?: string, legacyType?: string): (string | undefined)[];
     resourceIdsToURIs(fields: unknown[]): (string | undefined)[];
 }
@@ -203,10 +185,7 @@ export interface EngineDcsHandle {
     extract(target: EngineHandle, options: any, action: number): any;
 }
 
-/**
- * The bindings only src/engine/ calls: with `EngineBindings`, the type of
- * `rust` in src/engine/index.ts.
- */
+/** The bindings only src/engine/ calls. */
 export interface EngineInternals {
     setHost(errorFactory: Function): void;
     DcsManagerHandle: new (models: any) => EngineDcsHandle;
@@ -224,26 +203,20 @@ export interface EngineInternals {
     modelFileViewSnapshot(ast: string, namespace?: string | null): string | undefined;
     validateErrorMessage(): string;
     validateTakeError(): any;
-    /** Validates a metamodel instance (wire-encoded JSON text) on the engine's resident metamodel manager, validate-only. */
+    /** Validates a wire-encoded metamodel instance on the engine's resident metamodel manager. */
     validateMetaModelInstance(jsonText: string, preset: 'strict' | 'default' | 'serializer'): void;
     checkAstShape(ast: string): void;
     systemModelFileHeader(ast: string): string | undefined;
 }
 
-/**
- * The DecoratorManager.extract* result shapes as concerto-core 5.0.0
- * declared them (`never[]`, inferred from its `[]` initialisers).
- */
+/** The extract* result shapes as concerto-core 5.0.0 declared them (`never[]`). */
 export interface ExtractDecoratorsResult {
     modelManager: ModelManager;
     decoratorCommandSet: never[];
     vocabularies: never[];
 }
 
-/**
- * The view functions (src/engine/views.ts) the public modules call, as
- * src/engineloader.ts's `engineViews()` exposes them.
- */
+/** The view functions the public modules call, through `engineViews()`. */
 export interface EngineViewsModule {
     // ModelFile load path
     markSystemModelAst(ast: object): void;

@@ -20,9 +20,8 @@
 //   count, then the items), 7 an object (u32 LE count, then a u32 LE key
 //   length, the UTF-8 key and the value per entry).
 //
-// ast-codec.ts and validate-resource.ts each own a `WireWriter`. Its buffer
-// is reused across writes, grows on demand, and shrinks back once a write has
-// grown it past `KEPT`; each result is valid until that writer's next write.
+// Each writer's buffer is reused, grows on demand, and shrinks back past
+// `KEPT`; each result is valid until that writer's next write.
 
 import { EngineFastPathUnsupported, hasLoneSurrogate } from './util';
 
@@ -45,17 +44,12 @@ const OBJECT = 7;
 
 /** A writer of the compact layout (module doc) over a reused buffer. */
 class WireWriter {
-    /** The buffer; grown on demand. */
     buf: Uint8Array;
-    /** Where the next byte goes. */
     pos = 0;
-    /** How many writes have begun: a result is valid while this is unchanged. */
+    /** Writes begun so far: a result is valid while this is unchanged. */
     count = 0;
-    /** The size the buffer starts at, and goes back to (`release`). */
     private readonly initial: number;
 
-    /**
-     */
     constructor(initial: number) {
         this.initial = initial;
         this.buf = new Uint8Array(initial);
@@ -67,28 +61,19 @@ class WireWriter {
         this.pos = 0;
     }
 
-    /**
-     * What has been written since `begin`: a view of the buffer, valid until
-     * the next `begin`.
-     */
+    /** What has been written since `begin`, valid until the next `begin`. */
     bytes(): Uint8Array {
         return this.buf.subarray(0, this.pos);
     }
 
-    /**
-     * Ends a write: a buffer grown past `KEPT` goes back to its initial
-     * size (a view `bytes` returned keeps the old one alive while needed).
-     */
+    /** Ends a write: a buffer grown past `KEPT` goes back to its initial size. */
     release(): void {
         if (this.buf.length > KEPT) {
             this.buf = new Uint8Array(this.initial);
         }
     }
 
-    /**
-     * Grows the buffer to hold `n` more bytes.
-     * @param {number} n bytes needed
-     */
+    /** Grows the buffer to hold `n` more bytes. */
     ensure(n: number): void {
         const need = this.pos + n;
         if (need <= this.buf.length) {
@@ -103,10 +88,7 @@ class WireWriter {
         this.buf = next;
     }
 
-    /**
-     * Writes a u32 at `at` (already reserved).
-     * @param {number} at offset
-     */
+    /** Writes a u32 at `at`, already reserved. */
     putU32(at: number, n: number): void {
         const buf = this.buf;
         buf[at] = n & 0xff;
@@ -115,9 +97,6 @@ class WireWriter {
         buf[at + 3] = (n >>> 24) & 0xff;
     }
 
-    /**
-     * @param {number} tag a tag byte (module doc)
-     */
     tag(tag: number): void {
         this.ensure(1);
         this.buf[this.pos++] = tag;
@@ -128,10 +107,7 @@ class WireWriter {
         this.tag(v === null ? NULL : v ? TRUE : FALSE);
     }
 
-    /**
-     * A length-prefixed UTF-8 string (no tag). A lone surrogate, which
-     * `encodeInto` would write as U+FFFD, throws `EngineFastPathUnsupported`.
-     */
+    /** A length-prefixed UTF-8 string (no tag); a lone surrogate throws `EngineFastPathUnsupported`. */
     rawStr(s: string): void {
         const n = s.length;
         this.ensure(4 + n * 3);
@@ -162,10 +138,7 @@ class WireWriter {
         this.rawStr(s);
     }
 
-    /**
-     * A finite number: an `i32` when it is one (`-0` as `0`, which is how
-     * both `JSON.stringify` and the validator spell it), else a double.
-     */
+    /** A finite number: an `i32` when it is one (`-0` as `0`, as `JSON.stringify` spells it), else a double. */
     num(v: number): void {
         this.ensure(9);
         if ((v | 0) === v) {
@@ -188,11 +161,7 @@ class WireWriter {
         this.pos += 4;
     }
 
-    /**
-     * An object header, its entry count patched in later (`putU32` at the
-     * offset returned).
-     * @return {number} where the count goes
-     */
+    /** An object header; returns where its entry count is patched in later. */
     beginObject(): number {
         this.ensure(5);
         this.buf[this.pos++] = OBJECT;
@@ -201,14 +170,11 @@ class WireWriter {
     }
 
     /**
-     * A whole write of `text` as plain UTF-8 bytes (no tag, no length), for
-     * bindings that take JSON text as UTF-8, which crosses in one copy: a
-     * view of the buffer, valid until the next write. `JSON.stringify`
-     * output has no lone surrogate.
+     * `text` as plain UTF-8 bytes (no tag, no length), for bindings that take
+     * JSON text, valid until the next write.
      */
     utf8(text: string): Uint8Array {
         this.begin();
-        // At most three bytes per UTF-16 code unit.
         this.ensure(text.length * 3);
         this.pos = encoder.encodeInto(text, this.buf).written;
         const out = this.bytes();

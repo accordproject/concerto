@@ -12,29 +12,20 @@
  * limitations under the License.
  */
 
-// Engine handle release. Per-manager state lives in
-// `BaseModelManager._engine`.
+// Engine handle release.
 
 /**
- * How many engine calls that call back into user code
- * (`ModelFile.filter`'s predicate) are running. While one is, an engine
- * handle it borrows cannot be freed: wasm-bindgen's `free()` panics on a
- * borrowed object.
+ * How many engine calls that call back into user code are running; a handle
+ * they borrow cannot be freed (wasm-bindgen's `free()` panics).
  */
 let callbackDepth = 0;
 
-/**
- * Handles `releaseHandle` was asked to free while an engine call with
- * callbacks was running; freed when the outermost one returns.
- */
+/** Handles whose release waits for the outermost callback call to return. */
 const pendingRelease: Array<{ free(): void }> = [];
 
 /**
- * Frees `handle`, a `ModelManagerHandle` the library created for itself and
- * holds no other reference to, now rather than at finalization. Internal
- * only: there is no public release API. Deferred while an engine call that
- * runs user code is on the stack (`withEngineCallbacks`), since that call
- * may borrow it; an error from `free()` is ignored.
+ * Frees a `ModelManagerHandle` the library alone holds, now rather than at
+ * finalization; deferred while a callback call may borrow it. Internal only.
  */
 function releaseHandle(handle: { free(): void }): void {
     if (callbackDepth > 0) {
@@ -53,11 +44,7 @@ function freeQuietly(handle: { free(): void }): void {
     }
 }
 
-/**
- * Runs `fn`, an engine call that calls back into user code, deferring every
- * `releaseHandle` made meanwhile until the outermost such call returns.
- * @return {*} what `fn` returns
- */
+/** Runs `fn`, deferring every `releaseHandle` until the outermost such call returns. */
 function withEngineCallbacks<T>(fn: () => T): T {
     callbackDepth++;
     try {

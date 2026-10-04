@@ -14,6 +14,14 @@
 
 // Lazy views, and the staging and prestaging of model files in a manager's
 // rustHandle.
+//
+// A ModelFile's AST crosses into the engine once, at construction
+// (`stageModelFile`), and is loaded with every construction-time check into
+// the handle's staging slot. On success the header is set and `declarations`
+// and `localTypes` become accessors built on first use from one snapshot per
+// file; `commitStaged` and `validateLoaded` reuse the loaded file. When the
+// load fails, or the manager has decorator factories (BC-24), the ModelFile
+// is built eagerly, so a TS error is thrown at the same point.
 
 import { rust } from './index';
 import { encodeAst, encodeAstCount } from './ast-codec';
@@ -23,31 +31,7 @@ import type { EngineErrorFlags } from './errors';
 import { batchOf, collectionSizeValidatorModule, computeBatch, numberValidatorModule, stringValidatorModule, withBatch } from './views';
 import type { Batch } from './views';
 
-// ---------------------------------------------------------------------------
-// Lazy views.
-//
-// A ModelFile's AST crosses into the engine once, when the ModelFile is
-// constructed (`stageModelFile`): the engine loads it, with every
-// construction-time check, into its manager handle's staging slot. When that
-// load succeeds, the ModelFile sets its namespace, version, imports and model
-// decorators, and its `declarations` and `localTypes` become accessors that
-// build the declaration and property views on first use
-// (`deferDeclarations`, `materialise`), from one snapshot per file.
-// Registering the file (`commitStaged`) and validating it (`validateLoaded`)
-// reuse the loaded file instead of sending the AST again.
-//
-// When the load fails, or the manager has decorator factories (user code
-// that runs, and may throw, during construction; BC-24 keeps them eager),
-// the ModelFile is built eagerly, so a TS error is thrown by the TS code at
-// the same point.
-//
-// The fuzz harness's lazy-views check (`installLazyViewsCheck`) keeps the
-// lazy path but also builds every deferred part at construction, and reports
-// any model the engine accepted whose TS construction throws or mutates the
-// AST.
-// ---------------------------------------------------------------------------
-
-/** The hook the fuzz harness installs (see above). */
+/** The hook the fuzz harness installs to build every deferred part eagerly. */
 interface LazyViewsCheck {
     /** After `applyStagedFileHeader` applied a staged header. */
     stagedFileHeader(modelFile: any, ast: any): void;
@@ -66,53 +50,32 @@ function installLazyViewsCheck(check: LazyViewsCheck | null): void {
     lazyViewsCheck = check;
 }
 
-/**
- * The per-ModelFile state of the lazy load path, one fixed-shape record per
- * ModelFile in one WeakMap. An absent field is `undefined` (no field stores
- * `undefined` as a value).
- */
+/** The per-ModelFile state of the lazy load path; an absent field is `undefined`. */
 interface FileState {
     /** The staged load, until it is committed or dropped. */
     stage: Stage | undefined;
-    /**
-     * The staged header, from `stageModelFile` (or `takePrestaged`) until the
-     * constructor applies it (`applyStagedFileHeader`).
-     */
+    /** The staged header, until `applyStagedFileHeader` applies it. */
     stagedHeader: StagedHeader | undefined;
-    /**
-     * `getImports()` names (`recordImportNames`), with the `imports` array,
-     * and its length, they were recorded for.
-     */
+    /** `getImports()` names, with the `imports` array and length they were recorded for. */
     importNames: string[] | undefined;
     importNamesFor: any[] | undefined;
     importNamesLength: number | undefined;
     /**
-     * Set for a lazily built ModelFile. Its manager had no decorator
-     * factories at construction, so none applies to its elements: a factory
-     * added later would not have applied to eagerly built views either.
+     * Set for a lazily built ModelFile. Its manager had no decorator factories
+     * at construction, so none applies to its elements.
      */
     lazy: true | undefined;
-    /**
-     * BC-19: the AST object that passed `checkAstShape`, or was let through
-     * as engine-written (`trustedAst`). `dcsSourceShapeChecked` reads it.
-     */
+    /** BC-19: the AST that passed `checkAstShape`, or was engine-written (`trustedAst`). */
     shapeChecked: object | undefined;
-    /**
-     * BC-19: the shape check is left for `stageModelFile` to complete, folded
-     * into the engine's load of the AST (`stageModelFileBytes`).
-     */
+    /** BC-19: the shape check is pending, folded into `stageModelFileBytes`. */
     shapePending: true | undefined;
     deferred: DeferredFile | undefined;
-    /**
-     * The rustHandle the ModelFile was registered in from its stage
-     * (`commitStaged`, `validateAndCommitStaged`).
-     */
+    /** The rustHandle the ModelFile was registered in from its stage. */
     committed: object | undefined;
 }
 
 const fileStates = new WeakMap<object, FileState>();
 
-/** `modelFile`'s record, created (with every field absent) when it has none. */
 function fileState(modelFile: object): FileState {
     let state = fileStates.get(modelFile);
     if (state === undefined) {
@@ -133,25 +96,20 @@ function fileState(modelFile: object): FileState {
     return state;
 }
 
-/** A ModelFile's staged load: the rustHandle it was staged in and its stage id. */
+/** A staged load: the rustHandle and its stage id. */
 interface Stage {
     handle: any;
     id: number;
 }
 
-
-/**
- * The rustHandle `modelFile` was registered in from its stage, or undefined
- * (a field of its `fileStates` record, `committed`).
- */
+/** The rustHandle `modelFile` was registered in from its stage, or undefined. */
 function committedHandle(modelFile: any): object | undefined {
     return fileStates.get(modelFile)?.committed;
 }
 
 /**
- * Drops the stage of a ModelFile garbage-collected before it is committed or
- * dropped (constructed but never added), so its loaded file does not wait
- * for the staging slot's eviction. Best effort: the handle may be gone too.
+ * Drops the stage of a ModelFile collected before it is committed, so its
+ * loaded file does not wait for eviction. Best effort: the handle may be gone.
  */
 const FinalizationRegistryCtor = (globalThis as any).FinalizationRegistry;
 const stageFinalizer: { register(target: object, held: Stage, token: object): void; unregister(token: object): void } | null =
@@ -166,19 +124,12 @@ const stageFinalizer: { register(target: object, held: Stage, token: object): vo
         : null;
 
 /**
- * For ASTs of namespaces the manager never writes into rustHandle (the
- * metamodel copy), the verdict of the engine's last error-free load, by AST
- * object. Such a file is never committed, so a repeat of the same text needs
- * only the verdict: `new ModelManager()` builds the metamodel's ModelFile
- * from the same constant AST every time.
+ * For ASTs of namespaces the manager never writes (the metamodel copy), the
+ * verdict of the engine's last error-free load, by AST object: such a file is
+ * never committed, so a repeat needs only the verdict.
  */
 const acceptedUnmirrored = new WeakMap<object, AcceptedUnmirrored>();
 
-/**
- * An `acceptedUnmirrored` verdict: the text, definitions and file name the
- * engine loaded, the header it read, and whether the load ran the shape
- * check.
- */
 interface AcceptedUnmirrored {
     text: string;
     definitions: string | undefined;
@@ -188,32 +139,19 @@ interface AcceptedUnmirrored {
 }
 
 /**
- * The header of a ModelFile's AST as the engine read it when staging (what
- * `modelFileFromAstHeader` would set), in the flat layout every staging path
- * returns: `[id, namespace, version, system, n, key_1, name_1, ..., key_n,
- * name_n, uriKey_1, uri_1, ...]`, where the `n` pairs are the
- * `importShortNames.set` calls without the implicit system import's five
- * (`IMPLICIT_SHORT_NAMES`), which every non-system header ends with, and the
- * pairs after them are the `importUriMap` assignments. A fixed system model's
- * header has id 0. `applyStagedFileHeader` is its one reader.
+ * The header the engine read when staging, flat: `[id, namespace, version,
+ * system, n, key_1, name_1, ..., key_n, name_n, uriKey_1, uri_1, ...]`. The
+ * `n` pairs are the `importShortNames` entries without the implicit system
+ * import's five (`IMPLICIT_SHORT_NAMES`); the pairs after them are
+ * `importUriMap`. A fixed system model's header has id 0.
  */
 type StagedHeader = any[];
 
-/**
- * The implicit system import's short and fully-qualified names, in the order
- * every non-system header ends with them.
- */
+/** The implicit system import's names, in the order every non-system header ends with. */
 const IMPLICIT_SHORT_NAMES = ['Concept', 'Asset', 'Transaction', 'Participant', 'Event'];
 const IMPLICIT_NAMES = IMPLICIT_SHORT_NAMES.map((name) => `concerto@1.0.0.${name}`);
 
-
-/**
- * Records `names` as `modelFile.getImports()` for its current `imports`
- * array (by `applyStagedFileHeader`, else by `ModelFile.getImports`'s first
- * answer).
- * @param {string[]} names its imports' fully-qualified names, in order
- * @param {object} [state] `modelFile`'s `fileStates` record
- */
+/** Records `names` as `modelFile.getImports()` for its current `imports` array. */
 function recordImportNames(modelFile: any, names: string[], state: FileState = fileState(modelFile)): void {
     const imports = modelFile.imports;
     state.importNamesFor = imports;
@@ -221,12 +159,7 @@ function recordImportNames(modelFile: any, names: string[], state: FileState = f
     state.importNames = names;
 }
 
-/**
- * `modelFile.getImports()` as recorded (`recordImportNames`), as a fresh
- * array, or undefined when nothing is recorded for its current `imports`
- * array.
- * @return {string[] | undefined} a copy of the recorded names, or undefined
- */
+/** A copy of the recorded `getImports()` names, or undefined if stale or absent. */
 function recordedImportNames(modelFile: any): string[] | undefined {
     const state = fileStates.get(modelFile);
     const imports = modelFile.imports;
@@ -237,84 +170,51 @@ function recordedImportNames(modelFile: any): string[] | undefined {
     return state.importNames.slice();
 }
 
-
 /**
- * BC-19: for the metamodel copy every manager builds (a namespace it never
- * writes into rustHandle), the JSON text that last passed `checkAstShape`,
- * by namespace, so `new ModelManager()` and `clearModelFiles()` do not check
- * it again. The fixed system models take the engine's precomputed verdict
- * instead (`systemModelAsts`).
+ * BC-19: for the metamodel copy every manager builds, the JSON text that last
+ * passed `checkAstShape`, by namespace, so it is not checked again. The fixed
+ * system models use the engine's precomputed verdict instead.
  */
 const shapeCheckedUnmirrored = new Map<string, string>();
 
-/**
- * The namespaces of the two fixed system models, never answered by
- * `shapeCheckedUnmirrored`: any AST of them but their own is always checked.
- */
 const FIXED_SYSTEM_NAMESPACES = new Set(['concerto@1.0.0', 'concerto.decorator@1.0.0']);
 
 /**
- * The AST objects of the fixed system models, which `BaseModelManager`
- * builds a ModelFile for on every `new ModelManager()` and
- * `clearModelFiles()`. For such a file `stageModelFile` asks the engine for
- * its precomputed verdict (`systemModelFileHeader`), given only when the
- * text is exactly a fixed system model's; any other text is loaded and
- * checked. So a mark lets no AST skip the check.
+ * The fixed system models' ASTs, which every `new ModelManager()` builds. For
+ * these `stageModelFile` asks the engine for its precomputed verdict, given
+ * only when the text is exactly a system model's, so a mark lets no AST skip
+ * the check.
  */
 const systemModelAsts = new WeakSet<object>();
 
-/**
- * Marks `ast` as a fixed system model's AST (`systemModelAsts`).
- * @param {object} ast the AST the system model's ModelFile is built from
- */
 function markSystemModelAst(ast: object): void {
     systemModelAsts.add(ast);
 }
 
-/**
- * Whether the shape check of `namespace` is remembered by namespace: one
- * `manager` never writes into rustHandle, other than the fixed system ones.
- * @return {boolean} true if the check is remembered by namespace
- */
+/** Whether `namespace`'s shape check is remembered by namespace (`shapeCheckedUnmirrored`). */
 function shapeMemoised(manager: any, namespace: unknown): namespace is string {
     return typeof namespace === 'string' && !FIXED_SYSTEM_NAMESPACES.has(namespace) && !manager._needsRustWrite(namespace);
 }
 
-
 /**
- * BC-19: the one AST the next `new ModelFile(manager, ast)` takes without
- * `checkAstShape`: set by `adoptStagedModels` for a DecoratorManager result
- * the engine just wrote from checked models, immediately before it
- * constructs that ModelFile, and cleared when the constructor returns or
- * throws. Private, so a ModelFile user code constructs is always checked.
+ * BC-19: the one AST the next `new ModelFile` takes unchecked, set by
+ * `adoptStagedModels` for an engine-written result and cleared when the
+ * constructor returns or throws. Private, so a user-built ModelFile is
+ * always checked.
  */
 let trustedAst: object | null = null;
 
-
 /**
- * BC-19 (with BC-17 and BC-20): the strict AST shape check at model load,
- * called by the ModelFile constructor before `stageModelFile`, unless the
- * manager was built with `metamodelValidation: false`. An AST without the
- * metamodel's shape (a non-array `decorators`, a non-string name, an empty
- * super type name, anything the metamodel check rejects) throws an
- * `IllegalModelException`. Undefined, with no check, when the check is off
- * or for the one engine-written AST (`trustedAst`).
- *
- * The check is folded into the engine's load of the AST in
- * `stageModelFile`, which parses it once: this marks the file pending
- * (`shapePending`), and `stageModelFile` checks it on every path, before any
- * other error. A namespace remembered by its text (`shapeMemoised`) is not
- * checked again. An AST loaded into a manager that writes it
- * (`compactStageable`) is written in the compact layout (`encodeAst`)
- * instead of `JSON.stringify`d; its JSON text is computed only where a path
- * needs it (`astText`).
- * @return {string | object | undefined} the AST's JSON text, or the AST in
- * the compact layout (`CompactAst`), when it is checked
+ * BC-19 (with BC-17, BC-20): the strict AST shape check, called by the
+ * ModelFile constructor unless `metamodelValidation` is false. A malformed
+ * AST throws `IllegalModelException`. The check is folded into the
+ * engine's load in `stageModelFile`; this only marks the file pending and
+ * returns the AST's JSON text, or its compact bytes for a manager that
+ * writes it. Undefined when the check is off or for `trustedAst`.
  */
 function checkAstShape(modelFile: any): CheckedAst | undefined {
     const manager = modelFile.modelManager;
     const ast = modelFile.ast;
-    // BC-19: an AST the engine just wrote from checked models.
     if (ast === trustedAst) {
         trustedAst = null;
         fileState(modelFile).shapeChecked = ast;
@@ -323,8 +223,7 @@ function checkAstShape(modelFile: any): CheckedAst | undefined {
     if (manager.options?.metamodelValidation === false) {
         return undefined;
     }
-    // With decorator factories the eager path checks the JSON text itself,
-    // so no compact bytes are written.
+    // With decorator factories the eager path checks the JSON text itself.
     if (compactStageable(manager, ast) && !hasDecoratorFactories(manager)) {
         const bytes = encodeAst(ast);
         if (bytes !== undefined) {
@@ -332,8 +231,6 @@ function checkAstShape(modelFile: any): CheckedAst | undefined {
             return { bytes, encodeCount: encodeAstCount(), text: undefined };
         }
     }
-    // The text of a fixed system model's AST, or of a remembered namespace's,
-    // is remembered with its compact bytes (`stableAstText`).
     const text = systemModelAsts.has(ast) || shapeMemoised(manager, ast.namespace) ? stableAstText(ast) : JSON.stringify(ast);
     const namespace = ast.namespace;
     if (shapeMemoised(manager, namespace) && shapeCheckedUnmirrored.get(namespace) === text) {
@@ -344,10 +241,7 @@ function checkAstShape(modelFile: any): CheckedAst | undefined {
     return text;
 }
 
-/**
- * An AST's JSON text, remembered with its compact bytes and, for a fixed
- * system model, the engine's header for it and its parse.
- */
+/** An AST's JSON text with its compact bytes and, for a system model, the engine's header. */
 interface KnownText {
     text: string;
     bytes: Uint8Array;
@@ -355,22 +249,11 @@ interface KnownText {
     parsedHeader: StagedHeader | null | undefined;
 }
 
-/**
- * The remembered text of each AST of a namespace the manager never writes,
- * by AST object.
- */
 const knownTextsByAst = new WeakMap<object, KnownText>();
 
-/**
- * The remembered text of the fixed system models' ASTs, by namespace (each
- * manager builds them from fresh objects).
- */
+/** The same for the fixed system models, by namespace (each manager builds fresh objects). */
 const knownSystemTexts = new Map<string, KnownText>();
 
-/**
- * Whether two byte arrays are equal.
- * @return {boolean} true if they have the same bytes
- */
 function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
     const n = a.length;
     if (n !== b.length) {
@@ -385,14 +268,10 @@ function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
 }
 
 /**
- * `JSON.stringify(ast)` for a fixed system model's AST or the metamodel
- * copy's, without building the string again while the AST has the compact
- * bytes it had when its text was remembered: equal bytes mean the same
- * text.
+ * `JSON.stringify(ast)` for a library-owned AST, reused while its compact
+ * bytes are unchanged: equal bytes mean the same text.
  */
 function stableAstText(ast: any): string {
-    // Only the library's own ASTs come here, which `encodeAst` always
-    // writes.
     const system = systemModelAsts.has(ast);
     const namespace = system ? ast.namespace : undefined;
     const known = system ? knownSystemTexts.get(namespace) : knownTextsByAst.get(ast);
@@ -400,7 +279,6 @@ function stableAstText(ast: any): string {
     if (known !== undefined && sameBytes(bytes, known.bytes)) {
         return known.text;
     }
-    // `JSON.stringify` does not touch the writer, so `bytes` still holds.
     const text = JSON.stringify(ast);
     const entry: KnownText = { text, bytes: bytes.slice(), header: undefined, parsedHeader: undefined };
     if (system) {
@@ -411,61 +289,36 @@ function stableAstText(ast: any): string {
     return text;
 }
 
-/**
- * An AST `checkAstShape` wrote in the compact layout: the bytes (valid while
- * `encodeAst` has not run again, `encodeCount`), and the JSON text once a
- * path needs it.
- */
+/** An AST in the compact layout; `bytes` is valid while `encodeCount` is current. */
 interface CompactAst {
     bytes: Uint8Array;
     encodeCount: number;
     text: string | undefined;
 }
 
-/**
- * What `checkAstShape` hands `stageModelFile` for a checked AST: its JSON
- * text, or the AST in the compact layout.
- */
 type CheckedAst = string | CompactAst;
 
 /**
- * Whether a ModelFile's AST may cross in the compact layout
- * (`stageModelFileBytes`): it is loaded into a manager that writes its
- * namespace, and is neither a fixed system model's (verdict looked up by
- * text) nor a staged DecoratorManager result (`prestaged`).
- * @return {boolean} true if the AST may cross in the compact layout
+ * Whether an AST may cross in the compact layout: its manager writes the
+ * namespace, and it is neither a fixed system model's nor prestaged.
  */
 function compactStageable(manager: any, ast: any): boolean {
     return !systemModelAsts.has(ast) &&
         !prestaged.has(ast) && manager._needsRustWrite(ast.namespace);
 }
 
-/**
- * Whether `manager` has decorator factories, which keep
- * `stageLoadedModelFile` on its eager path.
- * @return {boolean} true if it has decorator factories
- */
+/** Whether `manager` has decorator factories (which keep the eager path). */
 function hasDecoratorFactories(manager: any): boolean {
     const factories = manager.getDecoratorFactories();
     return Array.isArray(factories) && factories.length > 0;
 }
 
-/**
- * The bytes of an AST `checkAstShape` wrote in the compact layout, while
- * they are still `encodeAst`'s current output; otherwise undefined, and
- * the caller sends the AST's JSON text.
- * @param {string | object | undefined} checked what `checkAstShape` returned
- */
+/** The compact bytes `checkAstShape` wrote, while still current; else undefined. */
 function compactBytes(checked: CheckedAst | undefined): Uint8Array | undefined {
     return typeof checked === 'object' && checked.encodeCount === encodeAstCount() ? checked.bytes : undefined;
 }
 
-/**
- * The JSON text of a checked AST: the text `checkAstShape` computed, or,
- * for an AST it wrote in the compact layout, `JSON.stringify(ast)`,
- * computed once, on the paths that still need it.
- * @param {string | object} checked what `checkAstShape` returned
- */
+/** The JSON text of a checked AST, computed once when it was sent compact. */
 function astText(ast: any, checked: CheckedAst): string {
     if (typeof checked === 'string') {
         return checked;
@@ -475,12 +328,9 @@ function astText(ast: any, checked: CheckedAst): string {
 
 /**
  * BC-19: records that a pending ModelFile's AST passed the shape check.
- * `text` is computed only for a namespace remembered by its text
- * (`shapeMemoised`); it is undefined for an AST read in the compact layout.
- * @param {object} [state] `modelFile`'s `fileStates` record
+ * `text` is undefined for an AST read in the compact layout.
  */
 function shapeCheckPassed(modelFile: any, text: string | undefined, state: FileState | undefined = fileStates.get(modelFile)): void {
-    // `state` is `modelFile`'s record, when the caller has it.
     if (state === undefined || state.shapePending === undefined) {
         return;
     }
@@ -495,26 +345,18 @@ function shapeCheckPassed(modelFile: any, text: string | undefined, state: FileS
 }
 
 /**
- * The engine's precomputed verdict for a fixed system model's ModelFile: the
- * header text `systemModelFileHeader` returns when the AST's text is exactly
- * a fixed system model's. A pending shape check is then complete, but not
- * remembered by namespace. Undefined, recording nothing, for any other text.
- * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
- * already computed it
- * @return {string | undefined} the header's JSON text, or undefined
+ * The engine's precomputed header for a fixed system model's text, which
+ * also completes a pending shape check; undefined for any other text.
  */
 function systemModelVerdict(modelFile: any, checkedText?: string): string | undefined {
-    // The caller has checked this is a fixed system model's AST.
     const ast = modelFile.ast;
-    // The header is a fixed function of the text, so it is remembered with
-    // it (`knownSystemTexts`) and the text is not sent again.
+    // The header is a fixed function of the text, so it is remembered with it.
     const text = checkedText ?? stableAstText(ast);
     const known = knownSystemTexts.get(ast.namespace);
     let header: string;
     if (known !== undefined && known.text === text && known.header !== undefined) {
         header = known.header;
     } else {
-        // A free engine function, which reads no handle.
         const answer = rust.systemModelFileHeader(text);
         if (typeof answer !== 'string') {
             return undefined;
@@ -533,27 +375,20 @@ function systemModelVerdict(modelFile: any, checkedText?: string): string | unde
 }
 
 /**
- * BC-19: the shape check of a pending ModelFile on its own, for a path that
- * does not load the AST with the check. Nothing when the file is not
- * pending.
- * @param {object} [state] `modelFile`'s `fileStates` record
+ * BC-19: the shape check on its own, for a path that does not load the AST.
  * @throws {IllegalModelException} if the AST does not have the metamodel's shape
  */
 function completeShapeCheck(modelFile: any, text: string, state: FileState | undefined = fileStates.get(modelFile)): void {
     if (state === undefined || state.shapePending === undefined) {
         return;
     }
-    // A free engine function, which reads no handle.
     rust.checkAstShape(text);
     shapeCheckPassed(modelFile, text, state);
 }
 
 /**
- * The ModelFile constructor's staging step: `stageSystemModelFile` for a
- * fixed system model, else `stageLoadedModelFile`. Kept apart so the user
- * files' path is not trained on the system models.
- * @param {string | object} [checkedText] the AST's JSON text, or the AST in
- * the compact layout, when `checkAstShape` checks it
+ * The ModelFile constructor's staging step, split so the user files' path
+ * is not trained on the system models.
  * @return {boolean} true if the declarations may be built lazily
  */
 function stageModelFile(modelFile: any, checkedText?: CheckedAst): boolean {
@@ -566,14 +401,8 @@ function stageModelFile(modelFile: any, checkedText?: CheckedAst): boolean {
 const parsedSystemHeaders = new Map<string, StagedHeader>();
 
 /**
- * `stageModelFile` for a fixed system model's ModelFile with an engine
- * verdict: neither loaded nor checked again, and never committed, so only
- * the header is needed. With decorator factories the file is built eagerly.
- * Undefined for any other file or text.
- * @param {string} [checkedText] the AST's JSON text, when `checkAstShape`
- * already computed it
- * @return {boolean | undefined} true if the declarations may be built
- * lazily, false for the eager path, undefined if there is no verdict
+ * `stageModelFile` for a fixed system model with an engine verdict: only the
+ * header is needed. False with decorator factories; undefined without a verdict.
  */
 function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | undefined {
     if (!systemModelAsts.has(modelFile.ast)) {
@@ -588,8 +417,7 @@ function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | u
     if (Array.isArray(factories) && factories.length > 0) {
         return false;
     }
-    // The parsed header is shared: it is only read. Its id slot is 0
-    // (nothing is staged); a fixed system model always has a header.
+    // Shared and read-only; id 0, as nothing is staged.
     let header = parsedSystemHeaders.get(systemHeader);
     if (header === undefined) {
         header = JSON.parse(systemHeader) as StagedHeader;
@@ -602,9 +430,8 @@ function stageSystemModelFile(modelFile: any, checkedText?: string): boolean | u
 }
 
 /**
- * The writer `utf8Text` encodes into, reused across calls. A JS string
- * crosses into WASM one UTF-16 code unit at a time, so the staging binding
- * takes JSON text as UTF-8 bytes, copied in one go.
+ * The reused writer for `utf8Text`: a JS string crosses into WASM one UTF-16
+ * unit at a time, so staging takes UTF-8 bytes, copied in one go.
  */
 const utf8Writer = new WireWriter(64 * 1024);
 
@@ -612,39 +439,24 @@ const utf8Writer = new WireWriter(64 * 1024);
 const STAGE_CHECKED = 1;
 const STAGE_COMPACT = 2;
 
-/**
- * The UTF-8 bytes of `text`: a view of a reused buffer, valid until the next
- * call (the binding copies it before it returns).
- */
+/** The UTF-8 bytes of `text`, in a buffer reused by the next call. */
 function utf8Text(text: string): Uint8Array {
     return utf8Writer.utf8(text);
 }
 
 /**
- * Called by the ModelFile constructor before `process()` and `fromAst`'s
- * header part: loads the AST into the manager's rustHandle staging slot,
- * once. True when the ModelFile may be built lazily: the manager has no
- * decorator factories and the engine loaded the AST. On any other failure
- * the caller builds the ModelFile eagerly, which throws the TS error itself.
- *
- * With the shape check off, an AST the engine cannot read at all is thrown
- * here (`unreadableAst`), even with decorator factories, so a malformed AST
- * never reaches the eager walk. With the check pending, it runs first,
- * folded into the load or on its own (`completeShapeCheck`), and its error
- * is thrown. The AST crosses in the compact layout where it can, else as
- * JSON text (`astText`), with the same verdict and error either way.
- * @param {string | object} [checkedText] the AST's JSON text, or the AST in
- * the compact layout, when `checkAstShape` checks it
- * @return {boolean} true if the declarations may be built lazily
+ * Loads the AST into the manager's staging slot, once. True when the
+ * ModelFile may be built lazily; on any other failure the caller builds it
+ * eagerly, which throws the TS error itself. An AST the engine cannot read
+ * at all with the check off is thrown here (`unreadableAst`), and a pending
+ * shape check's error is thrown before any other.
  */
 function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean {
-    // BC-47: the ModelFile constructor accepts only a BaseModelManager,
-    // which always has a rustHandle.
+    // BC-47: a BaseModelManager always has a rustHandle.
     const manager = modelFile.modelManager;
     const handle = manager.rustHandle;
     try {
-        // Decorator factories are user code that runs (and may throw)
-        // during construction, so they keep the eager path (BC-24).
+        // BC-24: decorator factories keep the eager path.
         const factories = manager.getDecoratorFactories();
         if (Array.isArray(factories) && factories.length > 0) {
             if (checkedText === undefined) {
@@ -657,18 +469,15 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         const ast = modelFile.ast;
         const state = fileState(modelFile);
         const prestage = prestaged.get(ast);
-        // A prestaged AST is not loaded again, so it is checked on its own.
+        // A prestaged result is not loaded again, so it is checked on its own.
         if (checkedText !== undefined && prestage !== undefined) {
             completeShapeCheck(modelFile, astText(ast, checkedText), state);
         }
-        // A DecoratorManager result the engine already staged in this
-        // handle is used as it is.
         if (prestage !== undefined) {
             takePrestaged(modelFile, handle, ast, prestage, state);
             state.lazy = true;
             return true;
         }
-        // The compact layout where it can be, else the JSON text.
         let compact = compactBytes(checkedText);
         if (checkedText === undefined && compactStageable(manager, ast)) {
             compact = encodeAst(ast);
@@ -682,8 +491,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         const accepted = unmirrored ? acceptedUnmirrored.get(ast) : undefined;
         if (accepted !== undefined && accepted.text === text && accepted.definitions === definitions &&
             accepted.fileName === fileName) {
-            // A verdict from a load without the check does not vouch for
-            // the shape.
+            // A verdict from an unchecked load does not vouch for the shape.
             if (accepted.checked) {
                 shapeCheckPassed(modelFile, text, state);
             } else {
@@ -695,10 +503,8 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             state.lazy = true;
             return true;
         }
-        // Staged, with its header read, in one call from one decode of the
-        // AST, with the shape check folded in when it is pending.
+        // Staged, with its header read and any pending check folded in, in one call.
         const checked = state.shapePending !== undefined;
-        // There is text whenever there are no bytes.
         const jsonText = text as string;
         if (compact === undefined && !checked) {
             completeShapeCheck(modelFile, jsonText, state);
@@ -732,9 +538,8 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
             throw e;
         }
         if (checkedText !== undefined && fileStates.get(modelFile)?.shapePending !== undefined) {
-            // The folded shape check's own error (`astShape`) is thrown;
-            // any other error came from the load after the check passed, or
-            // before it ran, in which case it runs now.
+            // The folded check's own error is thrown; after any other error, the
+            // check runs now if it had not.
             if ((e as EngineErrorFlags | null)?.astShape) {
                 throw e;
             }
@@ -745,16 +550,10 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
 }
 
 /**
- * The ModelFile constructor's load step for a view of `source`
- * (`ModelFile._sharedView`), in place of `checkAstShape` and
- * `stageModelFile`: the view shares `source`'s AST object and engine-side
- * file. Records the shared file's `stage` in the view's manager's rustHandle,
- * or the rustHandle that already holds it (`committed`), and `source`'s
- * shape-check mark while it still holds that AST. Lazy when `source` was, or
- * when the view's manager has no decorator factories.
- * @param {object} source the ModelFile it is a view of
- * @param {object} [committed] the rustHandle that holds the shared file
- * @return {boolean} true if the declarations may be built lazily
+ * The load step for a view of `source` (`ModelFile._sharedView`), which
+ * shares its AST and engine-side file: records the shared stage or
+ * committing handle, and `source`'s shape-check mark. Lazy when `source` was
+ * or the manager has no decorator factories.
  */
 function adoptSharedView(modelFile: any, source: any, stage?: Stage, committed?: object): boolean {
     const state = fileState(modelFile);
@@ -777,12 +576,7 @@ function adoptSharedView(modelFile: any, source: any, stage?: Stage, committed?:
     return lazy;
 }
 
-/**
- * Records for `modelFile` the `getImports()` names recorded for `source`,
- * the view it copied its header from (`ModelFile._copyHeader`), when
- * there are any.
- * @param {object} source the ModelFile it is a view of
- */
+/** Copies `source`'s recorded `getImports()` names to `modelFile`. */
 function copyImportNames(modelFile: any, source: any): void {
     const names = recordedImportNames(source);
     if (names !== undefined) {
@@ -791,9 +585,8 @@ function copyImportNames(modelFile: any, source: any): void {
 }
 
 /**
- * Reads the AST of a ModelFile whose manager has decorator factories and
- * the shape check off, only to throw `stageModelFile`'s `unreadableAst`
- * error for an AST the engine cannot read. The staged file is dropped.
+ * With decorator factories and the shape check off, reads the AST only to
+ * throw `unreadableAst` for one the engine cannot read.
  */
 function readUnchecked(modelFile: any, handle: any): void {
     const staged = JSON.parse(handle.stageModelFileBytes(utf8Text(JSON.stringify(modelFile.ast)),
@@ -801,17 +594,9 @@ function readUnchecked(modelFile: any, handle: any): void {
     handle.dropStagedModelFile(staged[0]);
 }
 
-
 /**
- * `ModelFile._fromAstHeader(ast)` from the header `stageModelFile` read,
- * without an engine call: sets `namespace`, `version` and `imports` (a copy
- * of `ast.imports` plus the implicit system import for a non-system file),
- * and fills `importShortNames` and `importUriMap`. False, changing nothing,
- * when there is no staged header; the caller then calls
- * `modelFileFromAstHeader`.
- * @param {object} ast the AST its header is read from
- * @param {object} [state] `modelFile`'s `fileStates` record
- * @return {boolean} true if the header was set
+ * `ModelFile._fromAstHeader(ast)` from the staged header, without an engine
+ * call. False, changing nothing, when there is no staged header.
  */
 function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | undefined = fileStates.get(modelFile)): boolean {
     const header = state?.stagedHeader;
@@ -819,7 +604,6 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
         return false;
     }
     state!.stagedHeader = undefined;
-    // Read from this AST by the load that staged it moments ago.
     const astImports = ast.imports;
     modelFile.namespace = ast.namespace;
     modelFile.version = header[2];
@@ -833,7 +617,6 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
         });
     }
     modelFile.imports = imports;
-    // Indexed loops: no iterator garbage per entry.
     const shortNames = modelFile.importShortNames;
     const uriMap = modelFile.importUriMap;
     const n: number = header[4];
@@ -862,13 +645,10 @@ function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | unde
 }
 
 /**
- * Builds a lazily built ModelFile's declaration views as its constructor
- * would have (`fromAst`'s declarations part, then `localTypes`), as plain
- * own fields; if that throws, both are deferred again, so every later access
- * throws again.
+ * Builds a lazy file's `declarations` and `localTypes` as its constructor
+ * would; if that throws, both are deferred again so every access throws.
  */
 function materialise(modelFile: any): void {
-    // Only for a file `deferDeclarations` deferred.
     const thunks = pendingFields.get(modelFile)!;
     thunks.delete('declarations');
     thunks.delete('localTypes');
@@ -878,13 +658,12 @@ function materialise(modelFile: any): void {
     const deferred = state.deferred!;
     deferred.building = true;
     try {
-        // `fromAst`'s declarations part (declarations is an optional field).
         if (modelFile.ast.declarations) {
             modelFile._fromAstDeclarations(modelFile.ast);
         }
     } catch (e) {
-        // Defensive: the engine's load rejects every model whose
-        // declarations' TS construction throws (the fuzz harness checks it).
+        // Defensive: the engine's load rejects every model whose declarations'
+        // TS construction throws (the fuzz harness checks it).
         deferModelFileFields(modelFile);
         throw e;
     } finally {
@@ -900,9 +679,7 @@ function materialise(modelFile: any): void {
 }
 
 /**
- * The pending builder of a lazily built ModelFile's `declarations`
- * (`deferModelFileFields`), shared by every file: `installLazyField` calls
- * it with the file as `this`.
+ * The pending builder of a lazy file's `declarations`, called with the file as `this`.
  * @this {object} the ModelFile
  */
 function buildModelFileDeclarations(this: any): any {
@@ -911,8 +688,7 @@ function buildModelFileDeclarations(this: any): any {
 }
 
 /**
- * The pending builder of a lazily built ModelFile's `localTypes`,
- * as `buildModelFileDeclarations`.
+ * The pending builder of a lazy file's `localTypes`.
  * @this {object} the ModelFile
  */
 function buildModelFileLocalTypes(this: any): any {
@@ -920,100 +696,57 @@ function buildModelFileLocalTypes(this: any): any {
     return this.localTypes;
 }
 
-/**
- * Defers a ModelFile's `declarations` and `localTypes` through the
- * prototype-level accessors (`installLazyField` on `ModelFile.prototype`)
- * and pending builders the other lazy parts use. Until a file is staged, a
- * read gives `[]` or `null` and a write stores a plain own field; an eagerly
- * built file keeps them as plain own fields.
- */
+/** Defers a ModelFile's `declarations` and `localTypes` (`installLazyField`). */
 function deferModelFileFields(modelFile: any): void {
     deferField(modelFile, 'declarations', buildModelFileDeclarations);
     deferField(modelFile, 'localTypes', buildModelFileLocalTypes);
 }
 
-/**
- * Called at the end of the ModelFile constructor when `stageModelFile`
- * returned true: defers the declaration views (or, with the fuzz harness's
- * lazy-views check installed, lets it build them now).
- */
+/** Defers the declaration views of a file `stageModelFile` staged. */
 function deferDeclarations(modelFile: any): void {
-    // No `built` map until a view is built on its own.
     fileState(modelFile).deferred = { byName: undefined, built: undefined, building: false, batch: undefined };
     deferModelFileFields(modelFile);
     lazyViewsCheck?.deferred(modelFile);
 }
 
-/**
- * A result model's stage in a new ModelManager's rustHandle, and its
- * `StagedHeader` when it has one.
- */
+/** A result model's stage in a new manager's rustHandle, with its header. */
 interface Prestage {
     handle: any;
     id: number;
     header: StagedHeader | undefined;
 }
 
-/**
- * The stage of each DecoratorManager result model not yet built, by AST
- * object: set by `adoptStagedModels` just before it constructs the
- * ModelFile from that AST.
- */
+/** The stage of each DecoratorManager result model not yet built, by AST object. */
 const prestaged = new WeakMap<object, Prestage>();
 
 /**
- * Called by `stageModelFile` when `ast` has a prestage: makes that stage the
- * ModelFile's own, as if `stageModelFile` had just staged
- * `JSON.stringify(ast)`. `adoptStagedModels` builds each result's ModelFile
- * in the manager it prestaged it in, as `fromAst` builds it, so the
- * prestage is always this file's.
- * @param {object} prestage the AST's prestage (`prestaged`), which the
- * caller has looked up
- * @param {object} state the ModelFile's `fileStates` record
+ * Makes a prestaged AST's stage the ModelFile's own, as if `stageModelFile`
+ * had just staged it.
  */
 function takePrestaged(modelFile: any, handle: any, ast: any, prestage: Prestage, state: FileState): void {
     prestaged.delete(ast);
     const stage = { handle, id: prestage.id };
     state.stage = stage;
     stageFinalizer?.register(modelFile, stage, stage);
-    // Applied as any staged file's header.
     if (prestage.header) {
         state.stagedHeader = prestage.header;
     }
 }
 
-/**
- * `ModelFile._fromAstHeader`'s staged header, a DecoratorManager result's
- * included.
- * @param {object} ast the AST its header is read from
- * @return {boolean} true if a staged header was applied
- */
+/** `ModelFile._fromAstHeader`'s staged header. */
 function applyStagedHeaders(modelFile: any, ast: any): boolean {
     return applyStagedFileHeader(modelFile, ast);
 }
 
-/**
- * TS `EXCLUDE_NS` (basemodelmanager.ts): the system namespaces `fromAst`
- * skips.
- */
+/** TS `EXCLUDE_NS` (basemodelmanager.ts): the system namespaces `fromAst` skips. */
 const DCS_EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
 
 /**
- * `newModelManager.fromAst(ast, { disableValidation })`, after its
- * `clearModelFiles()`, for a result the engine staged: `staged[i]` is
- * `[stageId, header]` for `ast.models[i]`, or null. The same ModelFiles are
- * constructed and added, in the same order, with the same errors.
- * `validateModelFiles()` runs as in `fromAst`, unless the engine `validated`
- * the result and every file was registered from its stage (the rustHandle
- * then holds exactly the files validated, under the same options).
- * @param {object} newModelManager the new ModelManager, cleared
- * @param {object} ast the result's `{ $class, models }` AST
- * @param {Array} staged the stage of each model, or null
- * @param {boolean} validated whether Rust validated the result
- * @param {boolean} [disableValidation] fromAst's `disableValidation` option
- * @param {boolean} [trusted] BC-19: every result model is an AST the engine
- * just wrote from nodes that passed `checkAstShape`, so each ModelFile skips
- * the check (`trustedAst`)
+ * `newModelManager.fromAst(ast, { disableValidation })` for a result the
+ * engine staged (`staged[i]` is `[stageId, ...header]`), with the same files,
+ * order and errors. Validation is skipped only when the engine `validated`
+ * the result and every file was registered from its stage. With `trusted`
+ * (BC-19), every model is engine-written, so the shape check is skipped.
  */
 function adoptStagedModels(newModelManager: any, ast: any, staged: any[], validated: boolean, disableValidation?: boolean, trusted?: boolean): void {
     const { default: ModelFile } = require('../introspect/modelfile');
@@ -1026,8 +759,7 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
             if (DCS_EXCLUDE_NS.includes(model.namespace)) {
                 return;
             }
-            // `[stageId, ...header]` or `[stageId]`; only the system models
-            // (skipped above) are null.
+            // Only the system models, skipped above, have no stage.
             const entry = staged[i];
             prestaged.set(model, { handle, id: entry[0], header: entry.length > 1 ? entry : undefined });
             let modelFile;
@@ -1041,14 +773,12 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
             }
             built.push(modelFile);
         });
-        // Registered from their stages in one engine call, in order, with
-        // `addModelFile`'s checks and without validation, as `fromAst` adds
-        // them. A construction error leaves the manager, which the caller
-        // drops, with fewer files added.
+        // Registered in one call, in order, with `addModelFile`'s checks, as
+        // `fromAst` adds them.
         newModelManager._addStagedModelFiles(built);
         allStaged = built.every((modelFile) => committedHandle(modelFile) === handle);
     } finally {
-        // A stage no ModelFile took (the loop threw first).
+        // Drop any stage no ModelFile took.
         models.forEach((model: any) => {
             const prestage = prestaged.get(model);
             if (prestage !== undefined) {
@@ -1068,10 +798,6 @@ function takeStage(modelFile: any, handle: any): Stage | undefined {
     return state === undefined ? undefined : takeStageOf(state, handle);
 }
 
-/**
- * `takeStage` over the file's record, already looked up.
- * @param {object} state the ModelFile's `fileStates` record
- */
 function takeStageOf(state: FileState, handle: any): Stage | undefined {
     const stage = state.stage;
     if (!stage || stage.handle !== handle) {
@@ -1083,12 +809,8 @@ function takeStageOf(state: FileState, handle: any): Stage | undefined {
 }
 
 /**
- * Registers `modelFile` in `handle` from the file the engine loaded at
- * construction. Undefined when there is no usable stage (not staged, staged
- * elsewhere, or evicted); the caller then sends the AST. A registration
- * error propagates.
- * @return {number|undefined} the registered file's handle (the
- * manager caches it), or undefined if the file was not registered
+ * Registers `modelFile` in `handle` from its stage and returns its handle id.
+ * Undefined when there is no usable stage; the caller then sends the AST.
  */
 function commitStaged(modelFile: any, handle: any): number | undefined {
     const state = fileStates.get(modelFile);
@@ -1104,20 +826,13 @@ function commitStaged(modelFile: any, handle: any): number | undefined {
     return id;
 }
 
-/**
- * The stage ids `commitStagedAll` hands the engine, which overwrites them
- * with the files' handles: one reused buffer, since a new `Uint32Array` per
- * call costs garbage collection.
- */
+/** The stage ids for `commitStagedAll`, overwritten with handle ids; reused to save garbage. */
 let commitBuffer = new Uint32Array(64);
 
 /**
- * `commitStaged` for several files in one engine call, for the batch
- * `addModelFiles` and DecoratorManager results. Returns the files' handles in
- * order (a view of a reused buffer, valid until the next call), or
- * undefined, changing nothing, when any file has no usable stage in `handle`
- * or there are fewer than two: the caller then writes each on its own.
- * @return {ArrayLike<number>|undefined} the registered files' handles, or undefined
+ * `commitStaged` for several files in one call. Returns their handle ids (a
+ * view valid until the next call), or undefined, changing nothing, when any
+ * file has no usable stage or there are fewer than two.
  */
 function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | undefined {
     const n = modelFiles.length;
@@ -1138,9 +853,8 @@ function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | un
         states[i] = state!;
         ids[i] = stage.id;
     }
-    // The engine's only registration error, a namespace already
-    // registered, is rejected by both callers before they get here, so the
-    // call cannot fail part way.
+    // Both callers reject an already-registered namespace, the only
+    // registration error, so the call cannot fail part way.
     const committed: boolean = handle.commitStagedModelFiles(ids);
     if (!committed) {
         return undefined;
@@ -1153,15 +867,10 @@ function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | un
 }
 
 /**
- * `BaseModelManager.addModelFile`'s validation and registration of a staged
- * file in one engine call. Undefined, changing nothing, when there is no
- * usable stage; the caller then validates and registers the file itself. A
- * validation error is thrown as `ModelFile.validate()` throws it, and leaves
- * the file staged. With `metamodel`, `validateAst`'s check runs first in the
- * same call, and its error (marked `metamodelCheck`) is thrown unwrapped.
- * @param {boolean} [metamodel] whether to run the metamodel check first
- * @return {number|undefined} the registered file's handle, or undefined if
- * the file was not registered
+ * `addModelFile`'s validation and registration of a staged file in one call;
+ * undefined when there is no usable stage. A validation error is thrown as
+ * `ModelFile.validate()` throws it; with `metamodel`, `validateAst`'s error
+ * (`metamodelCheck`) is thrown unwrapped.
  */
 function validateAndCommitStaged(modelFile: any, handle: any, metamodel?: boolean): number | undefined {
     const state = fileStates.get(modelFile);
@@ -1186,10 +895,7 @@ function validateAndCommitStaged(modelFile: any, handle: any, metamodel?: boolea
     return id;
 }
 
-/**
- * Drops `modelFile`'s stage when it will not be registered from it in
- * `handle`.
- */
+/** Drops `modelFile`'s stage in `handle`. */
 function dropStaged(modelFile: any, handle: any): void {
     const stage = takeStage(modelFile, handle);
     if (stage) {
@@ -1198,12 +904,8 @@ function dropStaged(modelFile: any, handle: any): void {
 }
 
 /**
- * `BaseModelManager.updateModelFile`'s rustHandle write from `modelFile`'s
- * stage, replacing the file registered under its namespace. Undefined when
- * there is no usable stage; the caller then sends the AST. An error
- * propagates.
- * @param {object} modelFile the ModelFile replacing the registered one
- * @return {number|undefined} the registered file's handle, or undefined
+ * `updateModelFile`'s write from `modelFile`'s stage; undefined when there is
+ * no usable stage.
  */
 function updateStaged(modelFile: any, handle: any): number | undefined {
     const state = fileStates.get(modelFile);
@@ -1219,12 +921,7 @@ function updateStaged(modelFile: any, handle: any): number | undefined {
     return id;
 }
 
-/**
- * `BaseModelManager.validateAst`'s check over `modelFile`'s staged copy
- * (concerto-wasm `validateAstStaged`), without sending the AST. Returns
- * false when there is no usable stage; the caller then sends the AST as
- * before. Throws what the check throws.
- */
+/** `validateAst` over the staged copy; false when there is no usable stage. */
 function validateAstStaged(modelFile: any, handle: any): boolean {
     const stage = fileStates.get(modelFile)?.stage;
     if (!stage || stage.handle !== handle) {
@@ -1234,14 +931,9 @@ function validateAstStaged(modelFile: any, handle: any): boolean {
 }
 
 /**
- * `BaseModelManager.updateExternalModels`'s rustHandle update from the
- * downloaded files' stages (concerto-wasm `updateExternalModelsStaged`),
- * without sending their ASTs. Returns false, having changed nothing, unless
- * every file is staged in `handle` (and the engine still holds every
- * stage); the caller then sends the ASTs. Throws what that update
- * throws; either way the stages are consumed.
- * @param {object[]} modelFiles the downloaded files' ModelFiles, in order
- * @param {object} next the manager's model files once updated, by namespace
+ * `updateExternalModels` from the downloaded files' stages; false, changing
+ * nothing, unless every file is staged in `handle`. The stages are consumed
+ * either way.
  */
 function updateExternalStaged(modelFiles: any[], handle: any, next: object): boolean {
     const states: FileState[] = [];
@@ -1275,9 +967,8 @@ function updateExternalStaged(modelFiles: any[], handle: any, next: object): boo
 }
 
 /**
- * `ModelFile.validate()`'s Rust call without sending the AST again:
- * validates the staged file, or the file registered from it. Returns false
- * when neither applies; the caller then calls `modelFileValidateDetached`. Throws what that binding throws.
+ * `ModelFile.validate()` over the staged or registered file; false when
+ * neither applies.
  */
 function validateLoaded(modelFile: any, handle: any): boolean {
     const state = fileStates.get(modelFile);
@@ -1295,28 +986,18 @@ function validateLoaded(modelFile: any, handle: any): boolean {
     return false;
 }
 
-/**
- * A lazily built file whose declaration views are not all built yet
- * (its `declarations`/`localTypes` accessors are still installed).
- */
+/** A lazy file whose declaration views are not all built. */
 interface DeferredFile {
     /**
-     * Each declaration's index in `ast.declarations`, by the key its view
-     * has in `localTypes`, or null when a declaration cannot be told apart
-     * without building every view; undefined until first needed.
+     * Each declaration's index by `localTypes` key, null when a declaration
+     * cannot be indexed, undefined until needed.
      */
     byName: Map<string, number> | null | undefined;
-    /**
-     * The declaration views built on their own, by index, with their AST
-     * node; undefined until the first.
-     */
+    /** The declaration views built on their own, by index, with their AST node. */
     built: Map<number, { node: any; view: any }> | undefined;
-    /** True while a declaration view of the file is being built. */
     building: boolean;
-    /** The file's view snapshots, once computed. */
     batch: Batch | null | undefined;
 }
-
 
 /** The metamodel classes `ModelFile._declarationView` builds a view for. */
 const DECLARATION_CLASSES = new Set([
@@ -1326,10 +1007,8 @@ const DECLARATION_CLASSES = new Set([
 ].map((name) => `concerto.metamodel@1.0.0.${name}`));
 
 /**
- * The `localTypes` key of each declaration of `ast`, or null when one is
- * not a plain declaration node with a string name and a known class (then
- * every view is built, which raises any error there).
- * @return {Map|null} the index of each declaration, by key
+ * The `localTypes` key of each declaration, or null when one is not a plain
+ * declaration with a string name and known class (every view is then built).
  */
 function declarationIndex(ast: any, namespace: string): Map<string, number> | null {
     const declarations = ast?.declarations;
@@ -1346,23 +1025,16 @@ function declarationIndex(ast: any, namespace: string): Map<string, number> | nu
             !DECLARATION_CLASSES.has(node.$class)) {
             return null;
         }
-        // `localTypes` is filled in order: a later declaration of the same
-        // name replaces an earlier one.
+        // A later declaration of the same name replaces an earlier one.
         byName.set(namespace + '.' + node.name, i);
     }
     return byName;
 }
 
 /**
- * `ModelFile.getLocalType` for a lazily built file whose views are not all
- * built (the ModelManager-level lookups resolve through it): builds only the
- * view asked for, once, with the file's view snapshots, and returns it (the
- * same view `declarations` then holds), or null when the file declares no
- * such type. Undefined when the caller must answer itself (not lazy, all
- * built, or not indexable). While a view of the file is being built, throws
- * what `getLocalType` throws during construction.
- * @param {string} type the short or fully qualified name
- * @return {object|null|undefined} the declaration view, null, or undefined
+ * `ModelFile.getLocalType` for a lazy file: builds only the view asked for,
+ * once. Null when the file declares no such type; undefined when the caller
+ * must answer itself. Throws as `getLocalType` does during construction.
  */
 function localType(modelFile: any, type: string): any {
     const deferred = fileStates.get(modelFile)?.deferred;
@@ -1403,30 +1075,17 @@ function localType(modelFile: any, type: string): any {
     return view;
 }
 
-/**
- * The view of declaration `index` of a lazily built file, if `localType`
- * already built it from `node`, for `ModelFile._fromAstDeclarationViews` to
- * reuse, else undefined.
- */
+/** The view `localType` already built for declaration `index` from `node`, if any. */
 function builtDeclaration(modelFile: any, index: number, node: any): any {
     const cached = fileStates.get(modelFile)?.deferred?.built?.get(index);
     return cached && cached.node === node ? cached.view : undefined;
 }
 
-// ---------------------------------------------------------------------------
-// Lazy views, part 2: parts of a lazily built file's views built on first
-// read: decorators, validators (`validator`, `sizeValidator`), a
-// MapDeclaration's `key` and `value`, and a ModelFile's `declarations` and
-// `localTypes` (built by `materialise`).
-//
-// Each is deferred only when the view snapshot proves building it cannot
-// throw, and is then built from the snapshot without another engine call;
-// anything else is built at the same point as TS 5.0.0 builds it. The fields
-// are prototype accessors (`installLazyField`) over a pending builder: an
-// unread part is never built, an element outside a lazy file stores a plain
-// own field, the first read replaces the accessor with a plain own field,
-// and a builder that throws stays pending, so every later read throws again.
-// ---------------------------------------------------------------------------
+// Lazily built parts of a lazy file's views: decorators, validators, a
+// MapDeclaration's `key` and `value`. Each is deferred only when the view
+// snapshot proves building it cannot throw; anything else is built where TS
+// 5.0.0 builds it. A read replaces the prototype accessor with an own field;
+// a builder that throws stays pending, so every later read throws again.
 
 /** The pending builders of each element's deferred parts, by field name. */
 const pendingFields = new WeakMap<object, Map<string, (this: any) => any>>();
@@ -1437,13 +1096,9 @@ function defineOwn(target: any, key: string, value: any): void {
 }
 
 /**
- * Installs the accessor for field `key` on `proto`: a read builds a deferred
- * value (or returns and keeps `initial()` for a field never set), and a
- * write stores a plain own field. A builder is called with the element as
- * `this`. With `buildOnWrite`, a write to a pending field builds it first
- * (`declarations` and `localTypes` are built together).
- * @param {Function} [initial] the value of a field never set
- * @param {boolean} [buildOnWrite] build a pending value before a write
+ * Installs the accessor for `key` on `proto`: a read builds the deferred
+ * value (or keeps `initial()`), a write stores an own field. With
+ * `buildOnWrite`, a write to a pending field builds it first.
  */
 function installLazyField(proto: object, key: string, initial?: () => any, buildOnWrite?: boolean): void {
     Object.defineProperty(proto, key, {
@@ -1489,8 +1144,7 @@ function installLazyField(proto: object, key: string, initial?: () => any, build
 
 /** Defers `target`'s field `key`: `build` makes its value on first read. */
 function deferField(target: any, key: string, build: (this: any) => any): void {
-    // An own field left by an earlier read, when the element runs
-    // `process()` again.
+    // Clear an own field left by an earlier `process()`.
     delete target[key];
     let thunks = pendingFields.get(target);
     if (!thunks) {
@@ -1507,11 +1161,7 @@ function decoratorModule(): any {
     return decoratorCache ?? (decoratorCache = require('../introspect/decorator'));
 }
 
-/**
- * A Decorator rebuilt from its `decoratorProcess` snapshot: the fields its
- * constructor and `process()` set, in the same order.
- * @param {object} entry the snapshot `{n, a}`
- */
+/** A Decorator rebuilt from its `decoratorProcess` snapshot `{n, a}`. */
 function decoratorFromSnapshot(element: any, ast: any, entry: any): any {
     const { Decorator } = decoratorModule();
     const decorator = Object.create(Decorator.prototype);
@@ -1524,11 +1174,7 @@ function decoratorFromSnapshot(element: any, ast: any, entry: any): any {
     return decorator;
 }
 
-/**
- * `Decorated.process`'s decorator loop for a deferred `decorators`: each
- * Decorator rebuilt from its snapshot, or constructed where there is none,
- * into the element's own `decorators` list as it is filled.
- */
+/** `Decorated.process`'s decorator loop for a deferred `decorators`. */
 function buildDecorators(element: any, nodes: any[], snapshot: any[] | undefined): any[] {
     const list: any[] = [];
     defineOwn(element, 'decorators', list);
@@ -1548,9 +1194,8 @@ function buildDecorators(element: any, nodes: any[], snapshot: any[] | undefined
 }
 
 /**
- * `Decorated.process` for an element of a lazily built file: defers its
- * `decorators` when building them cannot throw (every node is an object).
- * False when the caller builds them now.
+ * Defers an element's `decorators` when its file is lazy and every node is
+ * an object; false when the caller builds them now.
  */
 function deferDecorators(element: any): boolean {
     const nodes = element.ast.decorators;
@@ -1578,11 +1223,7 @@ function deferDecorators(element: any): boolean {
     return true;
 }
 
-/**
- * `Decorated.process`'s `getDecoratorFactories()`: none for a lazily built
- * file, whose manager had none at construction.
- * @param {object} modelFile the ModelFile of the element being processed
- */
+/** `getDecoratorFactories()` for an element: none for a lazy file. */
 function decoratorFactories(modelFile: any): any[] | undefined {
     if (fileStates.get(modelFile)?.lazy !== undefined) {
         return [];
@@ -1596,11 +1237,7 @@ function inLazyFile(element: any): boolean {
     return modelFile !== undefined && fileStates.get(modelFile)?.lazy !== undefined;
 }
 
-/**
- * A NumberValidator rebuilt from its snapshot: the fields the Validator and
- * NumberValidator constructors set.
- * @param {object} snapshot `{lowerBound, upperBound}`
- */
+/** A NumberValidator rebuilt from its snapshot `{lowerBound, upperBound}`. */
 function numberValidatorFromSnapshot(element: any, snapshot: any): any {
     const { NumberValidator } = numberValidatorModule();
     const validator = Object.create(NumberValidator.prototype);
@@ -1611,12 +1248,7 @@ function numberValidatorFromSnapshot(element: any, snapshot: any): any {
     return validator;
 }
 
-/**
- * A StringValidator rebuilt from its `stringValidatorNew` snapshot: the
- * fields its constructor sets, in the same order.
- * @param {object} regexAst the `validator` AST it was built from
- * @param {object} snapshot `{minLength, maxLength}`
- */
+/** A StringValidator rebuilt from its snapshot `{minLength, maxLength}`. */
 function stringValidatorFromSnapshot(element: any, regexAst: any, snapshot: any): any {
     const { StringValidator } = stringValidatorModule();
     const validator = Object.create(StringValidator.prototype);
@@ -1628,12 +1260,7 @@ function stringValidatorFromSnapshot(element: any, regexAst: any, snapshot: any)
     return validator;
 }
 
-/**
- * A CollectionSizeValidator rebuilt from its `collectionSizeValidatorNew`
- * snapshot: the fields its constructor sets, in the same order.
- * @param {object} ast the `sizeValidator` AST it was built from
- * @param {object} snapshot `{minSize, maxSize}`
- */
+/** A CollectionSizeValidator rebuilt from its snapshot `{minSize, maxSize}`. */
 function sizeValidatorFromSnapshot(property: any, ast: any, snapshot: any): any {
     const { default: CollectionSizeValidator } = collectionSizeValidatorModule();
     const validator = Object.create(CollectionSizeValidator.prototype);
@@ -1645,12 +1272,9 @@ function sizeValidatorFromSnapshot(property: any, ast: any, snapshot: any): any 
 }
 
 /**
- * `MapDeclaration.process`'s key and value types. When the view snapshot has
- * the map, the check is not run again and, in a lazily built file, `key` and
- * `value` are built on first read; otherwise the `mapDeclarationProcess`
- * binding runs and the types are built now.
- * @param {Function} buildKey builds its MapKeyType
- * @param {Function} buildValue builds its MapValueType
+ * `MapDeclaration.process`'s key and value types: deferred in a lazy file
+ * when the snapshot has the map; else built now, after the
+ * `mapDeclarationProcess` check when the snapshot lacks it.
  */
 function mapDeclarationProcess(view: any, buildKey: () => any, buildValue: () => any): void {
     const current = batchOf(view.modelFile);
@@ -1677,10 +1301,7 @@ function mapValueTypeProcess(view: any): string {
     return type !== undefined ? type : rust.mapValueTypeProcess(view);
 }
 
-/**
- * Builds every deferred part of a lazily built file's views, for the fuzz
- * harness's lazy-views check.
- */
+/** Builds every deferred part of a lazy file, for the fuzz harness. */
 /* istanbul ignore next: called by the fuzz harness's hook only (migration/fuzz/lib/lazy-views-check.js) */
 function buildDeferredParts(modelFile: any): void {
     const touch = (element: any, keys: string[]) => {

@@ -12,25 +12,16 @@
  * limitations under the License.
  */
 
-// The engine loader. The public classes delegate their converted members to
-// the Rust engine through this directory. It is left out of the declaration
-// build (tsconfig.build.json), so the .d.ts snapshot does not see it, but it
-// ships as JavaScript (dist/engine/, and dist/esm*/engine/ in an esbuild pass
-// of its own so its `require` calls stay out of the public chunks). The
-// public modules load it through a non-literal specifier
-// (src/engineloader.ts), so a bundle of dist/ leaves it out unless something
-// calls in.
+// The engine loader. This directory is left out of the declaration build,
+// but ships as JavaScript (dist/engine/, and its own esbuild pass under
+// dist/esm*/engine/). The public modules load it through a non-literal
+// specifier (src/engineloader.ts), so a bundle leaves it out unless called.
 //
-// Boundary placement rule: a crossing costs more than a small amount of
-// work, so per-item pure work over data TypeScript already holds (a predicate
-// over a `$class`, a type name, a primitive value) runs in TypeScript with
-// the engine's semantics. Work that needs engine state or many crossings is
-// batched or snapshotted: one call per file, document or walk
-// (`modelFileViewSnapshot`, `serializerFromJsonCompact`,
-// `classDeclarationGetIdentifierFieldNameWalk`), cached for as long as it
-// holds (`EngineState`, keyed on the manager's model version). Data the
-// engine already holds is referred to by id, not sent again. This is a
-// costing rule for crossings, not a rule against porting logic to Rust.
+// Boundary rule: per-item pure work over data TypeScript already holds runs
+// in TypeScript with the engine's semantics. Work that needs engine state or
+// many crossings is batched to one call per file, document or walk, cached
+// per model version (`EngineState`); data the engine holds is referred to
+// by id. This costs crossings; it is not a rule against porting to Rust.
 
 import type { RustEngine } from './rust';
 

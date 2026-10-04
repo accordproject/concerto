@@ -18,42 +18,31 @@ import { rust } from './index';
 import { adoptStagedModels, fileStates } from './views-staging';
 
 /**
- * DecoratorManager.validate's structural check (`serializer.fromJSON(
- * decoratorCommandSet)`), once `DecoratorManager.validate` has built `validationModelManager`
- * (and thrown any model error): run on that manager's rustHandle, which
- * mirrors its model files, so nothing is sent again.
- * @param {object} validationModelManager the validation ModelManager, built
+ * DecoratorManager.validate's structural check, run on the validation
+ * manager's rustHandle, which already mirrors its model files.
  */
 function decoratorManagerValidate(validationModelManager: any, decoratorCommandSet: any): void {
     validationModelManager.rustHandle.dcsValidate(decoratorCommandSet);
 }
 
 /**
- * BC-19-a: whether a `decorateModels` result may skip the AST shape check:
- * every source model was checked (`dcsSourceShapeChecked`) and everything
- * the commands add passes it (`dcsCommandsShapeChecked`).
- * @return {boolean} true if the result models may skip the check
+ * BC-19: whether a `decorateModels` result may skip the AST shape check:
+ * every source model and everything the commands add was checked.
  */
 function decorateResultTrusted(modelManager: any, decoratorCommandSets: any[], options?: any): boolean {
     return dcsSourceShapeChecked(modelManager) && dcsCommandsShapeChecked(decoratorCommandSets, options);
 }
 
 /**
- * DecoratorManager.decorateModels, after the public method's
- * `skipValidationAndResolution` handling: on the source manager's own
- * rustHandle (`sourceDcsHandle`), else on a DCS input manager built from
- * `getAst(!options.disableMetamodelResolution, false)`'s models (the engine
- * has its own system models). The result is staged into a new
- * ModelManager's rustHandle (`adoptStagedModels`).
- * @param {object[]} decoratorCommandSets the decorator command sets, as an array
- * @return {object} a new ModelManager with the decorations applied
+ * DecoratorManager.decorateModels: on the source manager's rustHandle, else
+ * on a DCS input manager built from `getAst`'s models. The result is staged
+ * into a new ModelManager (`adoptStagedModels`).
  */
 function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets: any[], options?: any): any {
     const { default: ModelManager } = require('../modelmanager');
     const source = sourceDcsHandle(modelManager);
     if (source) {
-        // On the source manager's own rustHandle, which resolves its
-        // models itself; nothing is copied.
+        // The source handle resolves its models itself; nothing is copied.
         const decoratedModelManager = new ModelManager({
             decoratorValidation: modelManager.getDecoratorValidation()
         });
@@ -65,8 +54,6 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
             decorateResultTrusted(modelManager, decoratorCommandSets, options));
         return decoratedModelManager;
     }
-    // A DCS input manager, and the result staged into the new manager's
-    // rustHandle (see `adoptStagedModels`).
     const { dcs } = dcsManagerFor(modelManager, !options?.disableMetamodelResolution);
     try {
         const decoratedModelManager = new ModelManager({
@@ -83,12 +70,9 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
 }
 
 /**
- * Restores a `decorators` field the TS extractor leaves present but
- * `undefined` (`filterOutDecorators` assigns `decl.decorators = undefined`)
- * where the engine's extractor removes the key: on a node whose source
- * counterpart had a truthy `decorators` and whose result has none.
- * @param {object} sourceNode the pre-extraction AST node (declaration,
- * property, or map key/value type)
+ * Restores a `decorators` field that TS `filterOutDecorators` leaves present
+ * but `undefined` where the engine removes the key: on a node whose source
+ * had truthy `decorators` and whose result has none.
  */
 function restoreUndefinedDecorators(sourceNode: any, resultNode: any): void {
     if (!sourceNode || !resultNode || typeof resultNode !== 'object') {
@@ -110,17 +94,11 @@ function restoreUndefinedDecorators(sourceNode: any, resultNode: any): void {
     }
 }
 
-/**
- * `restoreUndefinedDecorators` over every result model and its declarations,
- * matched by namespace: the results also carry the engine's own system
- * namespaces, which `sourceModels` does not.
- * @param {object[]} resultModels the extracted models, re-shaped in place
- */
+/** `restoreUndefinedDecorators` over every result model, matched by namespace. */
 function restoreAllUndefinedDecorators(sourceModels: any[], resultModels: any[]): void {
     const sourceByNamespace = new Map<string, any>(sourceModels.map((m: any) => [m.namespace, m]));
     resultModels.forEach((resultModel: any) => {
         const sourceModel = sourceByNamespace.get(resultModel.namespace);
-        // A model can carry decorators, as well as its declarations.
         restoreUndefinedDecorators(sourceModel, resultModel);
         (resultModel.declarations || []).forEach((resultDecl: any, j: number) => {
             restoreUndefinedDecorators(sourceModel?.declarations?.[j], resultDecl);
@@ -129,14 +107,9 @@ function restoreAllUndefinedDecorators(sourceModels: any[], resultModels: any[])
 }
 
 /**
- * The three DecoratorManager.extract* methods, after the public methods' option
- * defaults: on the source manager's own rustHandle, else on a DCS input
- * manager. The engine returns the stripped models, staged into a new
- * ModelManager, and the extracted command sets and vocabularies; each caller
- * returns the fields TS 5.0.0 returns, in the same order.
- * @param {string} binding the extract method (an `EXTRACT_ACTION` key)
- * @param {object} options the extract options, defaults applied
- * @return {object} the binding's result, with `modelManager` materialised
+ * The three DecoratorManager.extract* methods, on the source rustHandle or a
+ * DCS input manager. The stripped models are staged into a new
+ * ModelManager; each caller returns the fields TS 5.0.0 returns.
  */
 function decoratorManagerExtract(binding: string, modelManager: any, options: any): any {
     const source = sourceDcsHandle(modelManager);
@@ -146,10 +119,7 @@ function decoratorManagerExtract(binding: string, modelManager: any, options: an
     return decoratorManagerExtractStaged(binding, modelManager, options);
 }
 
-/**
- * The extract action of each DecoratorManager.extract* method, for the one
- * extract binding (`DcsManagerHandle.extract`, `ModelManagerHandle.dcsExtract`).
- */
+/** The extract action of each extract* method, for the one extract binding. */
 const EXTRACT_ACTION: { [binding: string]: number } = {
     decoratorManagerExtractDecorators: 0,
     decoratorManagerExtractVocabularies: 1,
@@ -157,13 +127,8 @@ const EXTRACT_ACTION: { [binding: string]: number } = {
 };
 
 /**
- * `decoratorManagerExtract` on the source manager's own rustHandle
- * (`dcsExtract`), staged as `decoratorManagerExtractStaged` stages it. The
- * source models are read only for `restoreUndefinedDecorators`, unresolved
- * (`getAst(false, false)`), since it reads nothing resolution changes.
- * @param {string} binding the extract method (an `EXTRACT_ACTION` key)
- * @param {object} options the extract options, defaults applied
- * @return {object} the result, with `modelManager` materialised
+ * `decoratorManagerExtract` on the source rustHandle. The source models are
+ * read unresolved, only for `restoreUndefinedDecorators`.
  */
 function decoratorManagerExtractOnSource(binding: string, source: any, modelManager: any, options: any): any {
     const { default: ModelManager } = require('../modelmanager');
@@ -183,14 +148,7 @@ function decoratorManagerExtractOnSource(binding: string, source: any, modelMana
     return result;
 }
 
-/**
- * `decoratorManagerExtract` on a DCS input manager (`dcsManagerFor`, from
- * `getAst(true, false)`'s models), staged into the new ModelManager's
- * rustHandle.
- * @param {string} binding the extract method (an `EXTRACT_ACTION` key)
- * @param {object} options the extract options, defaults applied
- * @return {object} the result, with `modelManager` materialised
- */
+/** `decoratorManagerExtract` on a DCS input manager, staged into the new ModelManager. */
 function decoratorManagerExtractStaged(binding: string, modelManager: any, options: any): any {
     const { default: ModelManager } = require('../modelmanager');
     const { dcs, sourceModels } = dcsManagerFor(modelManager, true);
@@ -212,11 +170,7 @@ function decoratorManagerExtractStaged(binding: string, modelManager: any, optio
     }
 }
 
-/**
- * DecoratorManager.extractDecorators (see decoratorManagerExtract).
- * @param {object} options the extract options, defaults applied
- * @return {object} `{modelManager, decoratorCommandSet, vocabularies}`
- */
+/** DecoratorManager.extractDecorators: `{modelManager, decoratorCommandSet, vocabularies}`. */
 function decoratorManagerExtractDecorators(modelManager: any, options: any): any {
     const result = decoratorManagerExtract('decoratorManagerExtractDecorators', modelManager, options);
     return {
@@ -226,11 +180,7 @@ function decoratorManagerExtractDecorators(modelManager: any, options: any): any
     };
 }
 
-/**
- * DecoratorManager.extractVocabularies (see decoratorManagerExtract).
- * @param {object} options the extract options, defaults applied
- * @return {object} `{modelManager, vocabularies}`
- */
+/** DecoratorManager.extractVocabularies: `{modelManager, vocabularies}`. */
 function decoratorManagerExtractVocabularies(modelManager: any, options: any): any {
     const result = decoratorManagerExtract('decoratorManagerExtractVocabularies', modelManager, options);
     return {
@@ -239,11 +189,7 @@ function decoratorManagerExtractVocabularies(modelManager: any, options: any): a
     };
 }
 
-/**
- * DecoratorManager.extractNonVocabDecorators (see decoratorManagerExtract).
- * @param {object} options the extract options, defaults applied
- * @return {object} `{modelManager, decoratorCommandSet}`
- */
+/** DecoratorManager.extractNonVocabDecorators: `{modelManager, decoratorCommandSet}`. */
 function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: any): any {
     const result = decoratorManagerExtract('decoratorManagerExtractNonVocabDecorators', modelManager, options);
     return {
@@ -252,23 +198,16 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
     };
 }
 
-// ---------------------------------------------------------------------------
-// Staged-handle results. Each operation runs on the source manager's own
-// rustHandle (`sourceDcsHandle`), else on a `DcsManagerHandle` built for the
-// call (`dcsManagerFor`), and stages the result's model files into the new
-// ModelManager's rustHandle, returning their stage ids and headers with the
-// result AST. `adoptStagedModels` then does what `fromAst` does, but each
-// ModelFile takes its stage and header instead of crossing again, and
-// `validateModelFiles` is skipped when the engine validated exactly those
-// files under the new manager's options. Every error is thrown by the same
-// code at the same point of the call.
-// ---------------------------------------------------------------------------
+// Staged-handle results: each operation runs on the source rustHandle,
+// else on a `DcsManagerHandle` built for the call, and stages the result's
+// files into the new manager's rustHandle. `adoptStagedModels` then does
+// what `fromAst` does without sending them again, skipping
+// `validateModelFiles` when the engine validated exactly those files. Every
+// error is thrown at the same point as in TS.
 
 /**
- * Whether a DecoratorManager operation may read `modelManager`'s models from
- * its rustHandle: `getAst`, `getModelFiles` and `resolveMetaModel` are
- * BaseModelManager's own, and the manager has its engine state.
- * @return {boolean} true if it may be
+ * Whether an operation may read `modelManager`'s models from its rustHandle:
+ * `getAst`, `getModelFiles` and `resolveMetaModel` are BaseModelManager's own.
  */
 function dcsCacheable(modelManager: any): boolean {
     const { default: BaseModelManager } = require('../basemodelmanager');
@@ -281,12 +220,9 @@ function dcsCacheable(modelManager: any): boolean {
 }
 
 /**
- * BC-19: whether every model a DecoratorManager operation reads from
- * `modelManager` passed `checkAstShape`: `dcsCacheable` holds, and every
- * model file was checked with the AST object it holds now and reads it with
- * ModelFile's own `getAst`. A manager built with `metamodelValidation:
- * false`, or holding a file one built, never qualifies.
- * @return {boolean} true if every source model was checked
+ * BC-19: whether every source model passed `checkAstShape` with the AST it
+ * holds now and reads it with ModelFile's own `getAst`. A manager built with
+ * `metamodelValidation: false`, or holding such a file, never qualifies.
  */
 function dcsSourceShapeChecked(modelManager: any): boolean {
     if (!dcsCacheable(modelManager)) {
@@ -299,13 +235,10 @@ function dcsSourceShapeChecked(modelManager: any): boolean {
 }
 
 /**
- * BC-19: whether everything `decorateModels` adds passes `checkAstShape`:
- * each command's decorator, and the `ImportType` nodes the engine declares
- * for it and its type-reference arguments (`dcs::synthetic_decorator_imports`),
- * checked together as one synthetic model. A superset of what the engine
- * adds. Anything malformed answers false, and the caller checks each result
- * model instead.
- * @return {boolean} true if the added nodes have the metamodel's shape
+ * BC-19: whether everything `decorateModels` adds (each decorator and the
+ * imports the engine declares for it) passes `checkAstShape`, checked as one
+ * synthetic model. False on anything malformed; the caller then checks each
+ * result model.
  */
 function dcsCommandsShapeChecked(decoratorCommandSets: any[], options?: any): boolean {
     const defaultNamespace = options?.defaultNamespace;
@@ -319,7 +252,6 @@ function dcsCommandsShapeChecked(decoratorCommandSets: any[], options?: any): bo
     };
     try {
         for (const commandSet of decoratorCommandSets) {
-            // `decoratorCommandSets.flatMap(commandSet => commandSet.commands)`.
             const commands = commandSet.commands;
             for (const command of Array.isArray(commands) ? commands : [commands]) {
                 const decorator = command.decorator;
@@ -346,12 +278,8 @@ function dcsCommandsShapeChecked(decoratorCommandSets: any[], options?: any): bo
 }
 
 /**
- * The source ModelManager's own rustHandle, when the operation can run on
- * it (`dcsDecorateModels`, `dcsExtract`): `dcsCacheable` holds and the
- * handle mirrors the model files, so it holds exactly the models
- * `getAst(resolve, false)` reads and resolves them itself. Otherwise
- * undefined, and the caller takes a `DcsManagerHandle`.
- * @return {object|undefined} the rustHandle, or undefined
+ * The source manager's rustHandle, when it mirrors the model files and so
+ * holds exactly what `getAst(resolve, false)` reads; otherwise undefined.
  */
 function sourceDcsHandle(modelManager: any): any {
     if (!dcsCacheable(modelManager) || modelManager._mirrorPending) {
@@ -360,11 +288,7 @@ function sourceDcsHandle(modelManager: any): any {
     return modelManager.rustHandle;
 }
 
-/**
- * The operations on the source handle borrow it and the new manager's
- * handle at once, so the two must differ, or wasm-bindgen's borrow check
- * would panic.
- */
+/** The source and target handles are borrowed at once, so they must differ. */
 function assertDistinctHandles(source: any, target: any): void {
     /* istanbul ignore next: the result manager is always built for the call, so its handle is never the source's */
     if (source === target) {
@@ -373,12 +297,8 @@ function assertDistinctHandles(source: any, target: any): void {
 }
 
 /**
- * The DCS input manager for `modelManager.getAst(resolve, false).models`,
- * for a manager whose operations cannot run on its own rustHandle: built
- * for one operation, which frees it.
- * @param {boolean} resolve getAst's `resolve` argument
- * @return {object} `{dcs, sourceModels}`: the DcsManagerHandle and the
- * models it was built from (read only)
+ * A DCS input manager for `getAst(resolve, false).models`, built for one
+ * operation, which frees it. Returns `{dcs, sourceModels}`.
  */
 function dcsManagerFor(modelManager: any, resolve: boolean): any {
     const models = modelManager.getAst(resolve, false).models;

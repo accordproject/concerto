@@ -12,21 +12,18 @@
  * limitations under the License.
  */
 
-// Serializer.fromJSON/toJSON's fast path: one engine call
-// (`serializerFromJsonCompact`/`serializerToJson`) on the model manager's own
-// `rustHandle`, rather than per field through the TS visitors
-// (JSONPopulator, JSONGenerator, ResourceValidator), which stay the fallback.
-// `serializer.ts` falls back on `EngineFastPathUnsupported`: for a value the
-// wire cannot carry, a model manager without a rustHandle, or one whose
-// mutators have written `modelFiles` ahead of it (`_mirrorPending`). The
-// class lookups the results need (`TypeCache`) are cached per model version.
+// Serializer.fromJSON/toJSON's fast path: one engine call on the manager's
+// `rustHandle` rather than the TS visitors (JSONPopulator, JSONGenerator,
+// ResourceValidator), which stay the fallback on `EngineFastPathUnsupported`:
+// a value the wire cannot carry, a manager without a rustHandle, or one
+// whose mirror is behind (`_mirrorPending`). The result's class lookups
+// (`TypeCache`) are cached per model version.
 
 import { rust } from './index';
 import { encodeValue, encodeBytes, decodeParsed, materializeCompact, newTypeCache } from './serializer-codec';
 import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import Factory from '../factory';
 
-// Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type BaseModelManager from '../basemodelmanager';
 import type { SerializerOptions } from '../types';
@@ -35,37 +32,26 @@ import type { EngineHandle } from './bindings';
 /* eslint-enable no-unused-vars */
 
 interface CachedHandle {
-    // The model manager's `rustHandle`.
     handle: EngineHandle;
-    // The class lookups `materializeTyped` makes for the results, valid as
-    // long as the model files they came from are registered.
+    // Valid while the model files they came from are registered.
     types: TypeCache;
 }
 
-/**
- * The model manager's `rustHandle` (concerto-wasm `ModelManagerHandle`),
- * which mirrors every model it holds.
- */
+/** The manager's `rustHandle`, which mirrors every model it holds. */
 function handleFor(modelManager: BaseModelManager): EngineHandle {
     return cachedHandleFor(modelManager).handle;
 }
 
-/**
- * `handleFor`'s answer with its `TypeCache`, kept in the manager's engine
- * state (`EngineState.serializerCache`) for its current model version.
- */
+/** `handleFor` with its `TypeCache`, kept in the engine state for the current model version. */
 function cachedHandleFor(modelManager: BaseModelManager): CachedHandle {
-    // BC-28: `options.regExp` is ignored, so it does not leave the fast
-    // path.
+    // BC-28: `options.regExp` is ignored, so it does not leave the fast path.
     const handle = modelManager.rustHandle;
-        // A model manager that is not a BaseModelManager (the Serializer
-        // accepts any object with the methods it calls) has no engine
-        // mirror: the visitor path serves it.
+        // A non-BaseModelManager (the Serializer accepts any duck type) has no
+        // engine mirror: the visitor path serves it.
     if (!handle) {
         throw new EngineFastPathUnsupported('no-rust-handle');
     }
-    // The batch `addModelFiles` registers its files in `modelFiles` before
-    // it mirrors them: until then rustHandle is behind.
+    // `addModelFiles` registers its files before it mirrors them.
     if (modelManager._mirrorPending) {
         throw new EngineFastPathUnsupported('mirror-pending');
     }
@@ -84,11 +70,8 @@ function cachedHandleFor(modelManager: BaseModelManager): CachedHandle {
 }
 
 /**
- * An engine call's error as `EngineFastPathUnsupported` when it is a
- * fallback signal (`isFastPathUnsupported`: the codec's own throws, or the
- * engine's flag for a value its wire codec could not decode).
- * @param {*} err the error the engine call threw
- * @return {Error} an `EngineFastPathUnsupported` to fall back on, or `err` unchanged
+ * An engine error as `EngineFastPathUnsupported` when it is a fallback
+ * signal (`isFastPathUnsupported`), else `err` unchanged.
  */
 function asUnsupported(err) {
     if (err instanceof EngineFastPathUnsupported) {
@@ -100,27 +83,18 @@ function asUnsupported(err) {
     return err;
 }
 
-/**
- * The `env` of every `serializerFromJson` call: the identifier and clock stay
- * with the caller (`Factory.newId`, `Date.now`). Stateless, so shared.
- */
+/** The `env` of every `serializerFromJson` call: id and clock stay with the caller. Shared. */
 const fromJsonEnv = {
     newId: () => Factory.newId(),
     nowMs: () => Date.now(),
 };
 
-/**
- * The options objects `optionsText` has encoded: each one's own keys and
- * values at the time, and its wire text. A WeakMap, so it never keeps a
- * caller's options object alive.
- */
+/** Each options object `optionsText` encoded, with its own keys, values and wire text. */
 const encodedOptions = new WeakMap<object, { keys: string[]; values: unknown[]; text: string }>();
 
 /**
  * `JSON.stringify(encodeValue(options))`, reused while `options` is the same
- * object with the same own keys and primitive values (`Serializer.fromJSON`
- * passes its `defaultOptions` object when a call gives none). An object with
- * a non-primitive value is encoded every call.
+ * object with the same own keys and primitive values.
  */
 function optionsText(options: SerializerOptions): string {
     const isObject = options !== null && typeof options === 'object';
@@ -150,8 +124,7 @@ function fastFromJson(modelManager: BaseModelManager, jsonObject: unknown, optio
     const { handle } = cached;
     let text;
     try {
-        // The document in the compact binary layout where it can be, else
-        // as text.
+        // Compact binary where it can be, else text.
         const bytes = encodeBytes(jsonObject);
         text = bytes !== undefined
             ? handle.serializerFromJsonCompactBytes(bytes, optionsText(options), fromJsonEnv)
@@ -169,8 +142,7 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
     const { handle } = cached;
     let text;
     try {
-        // The options' wire text is cached (`optionsText`), so the engine
-        // reuses the serializer it built for them.
+        // Cached options text lets the engine reuse its serializer for them.
         const bytes = encodeBytes(resource);
         text = bytes !== undefined
             ? handle.serializerToJsonBytes(bytes, optionsText(options))
@@ -183,12 +155,9 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
 }
 
 /**
- * `validateMetaModel(input)` (introspect/metamodel.ts) in one engine call,
- * on the engine's resident metamodel manager with the Serializer's default
- * options, validate-only: it throws what `Serializer.fromJSON` over
- * `newMetaModelManager()` throws, in the same cases and with the same class,
- * without building the resource. Throws `EngineFastPathUnsupported` for an
- * input it cannot cross; the caller then validates through its visitor path.
+ * `validateMetaModel(input)` in one engine call, validate-only: throws what
+ * `Serializer.fromJSON` over `newMetaModelManager()` throws, with the same
+ * class. Throws `EngineFastPathUnsupported` for an input it cannot cross.
  */
 function validateMetaModel(input: unknown): void {
     try {
@@ -198,6 +167,4 @@ function validateMetaModel(input: unknown): void {
     }
 }
 
-// validate-resource.ts uses `handleFor` too, so instance validation shares
-// the rustHandle.
 export { asUnsupported, fastFromJson, fastToJson, handleFor, validateMetaModel };
