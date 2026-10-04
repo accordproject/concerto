@@ -33,6 +33,9 @@
  * - R2E-3: a fork keeps the base's serializer defaults, and its metamodel
  *   copy is its own; v5.0.0 has no `fork` (`reference` is `'no fork'`).
  * - The filter of a file into its own manager (no scratch handle).
+ * - R2A-8: `ModelFile.filter` calls the predicate once per occurrence of
+ *   a name its imports bring in, a name imported twice twice, whether the
+ *   file is kept whole or an import is pruned.
  *
  * Only public members are used. A throw is reduced to its class (error
  * parity: messages may differ). `expect` is the frozen v5.0.0 reference's
@@ -423,6 +426,57 @@ concept C { o String s }
                 none: null,
                 registered: true,
             },
+        },
+    },
+    {
+        id: 'R2A-8-01',
+        covers: 'ModelFile.filter calls the predicate once per occurrence of a name imported more than once',
+        run: (core) => {
+            const lib = 'namespace a@1.0.0\nconcept X {}\nconcept Y {}\n';
+            const forms = [
+                'import a@1.0.0.{X, X}',
+                'import a@1.0.0.X\nimport a@1.0.0.{X}',
+                'import a@1.0.0.{X, Y, X}',
+            ];
+            return forms.map((imports) => {
+                const mm = new core.ModelManager();
+                mm.addCTOModel(lib, 'a.cto');
+                mm.addCTOModel(`namespace b@1.0.0\n${imports}\nconcept Z {}\nconcept W {}\n`, 'b.cto');
+                const mf = mm.getModelFile('b@1.0.0');
+                return [() => true, (fqn) => fqn !== 'a@1.0.0.X', (fqn) => fqn !== 'b@1.0.0.W'].map((keep) => {
+                    const calls = [];
+                    const filtered = mf.filter((d) => {
+                        calls.push(d.getFullyQualifiedName());
+                        return keep(d.getFullyQualifiedName());
+                    }, mm);
+                    return {
+                        calls,
+                        declarations: filtered.getAllDeclarations().map((d) => d.getName()),
+                        imports: filtered.getAst().imports
+                            .filter((i) => i.namespace === 'a@1.0.0')
+                            .map((i) => i.types || i.name),
+                    };
+                });
+            });
+        },
+        expect: {
+            ok: [
+                [
+                    { calls: ['b@1.0.0.Z', 'b@1.0.0.W', 'a@1.0.0.X', 'a@1.0.0.X'], declarations: ['Z', 'W'], imports: [['X', 'X']] },
+                    { calls: ['b@1.0.0.Z', 'b@1.0.0.W', 'a@1.0.0.X', 'a@1.0.0.X'], declarations: ['Z', 'W'], imports: [] },
+                    { calls: ['b@1.0.0.Z', 'b@1.0.0.W', 'a@1.0.0.X', 'a@1.0.0.X'], declarations: ['Z'], imports: [['X', 'X']] },
+                ],
+                [
+                    { calls: ['b@1.0.0.Z', 'b@1.0.0.W', 'a@1.0.0.X', 'a@1.0.0.X'], declarations: ['Z', 'W'], imports: ['X', ['X']] },
+                    { calls: ['b@1.0.0.Z', 'b@1.0.0.W', 'a@1.0.0.X', 'a@1.0.0.X'], declarations: ['Z', 'W'], imports: [] },
+                    { calls: ['b@1.0.0.Z', 'b@1.0.0.W', 'a@1.0.0.X', 'a@1.0.0.X'], declarations: ['Z'], imports: ['X', ['X']] },
+                ],
+                [
+                    { calls: ['b@1.0.0.Z', 'b@1.0.0.W', 'a@1.0.0.X', 'a@1.0.0.Y', 'a@1.0.0.X'], declarations: ['Z', 'W'], imports: [['X', 'Y', 'X']] },
+                    { calls: ['b@1.0.0.Z', 'b@1.0.0.W', 'a@1.0.0.X', 'a@1.0.0.Y', 'a@1.0.0.X'], declarations: ['Z', 'W'], imports: [['Y']] },
+                    { calls: ['b@1.0.0.Z', 'b@1.0.0.W', 'a@1.0.0.X', 'a@1.0.0.Y', 'a@1.0.0.X'], declarations: ['Z'], imports: [['X', 'Y', 'X']] },
+                ],
+            ],
         },
     },
 ];
