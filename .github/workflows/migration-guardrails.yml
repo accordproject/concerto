@@ -69,6 +69,12 @@ jobs:
       - name: Check the seam ledger against the source (members, engine calls)
         run: node migration/ledger/extract-members.js --check migration/ledger/SEAM_LEDGER.tsv
 
+      # Rule 6 scans the concerto-rust checkout the engine action pins
+      # (.github/actions/concerto-engine/action.yml), so that pin must be a
+      # concerto-rust commit that has the comment policy pass: merge the
+      # concerto-rust comment-policy PR first, then bump the pin, before a PR
+      # into main runs this job. concerto-rust's own CI runs the same check on
+      # its PRs (its comment-policy job).
       - name: Run migration guardrails
         run: |
           node migration/bin/check-guardrails.mjs --base-ref "origin/${{ github.base_ref }}" --rust-root ../concerto-rust
