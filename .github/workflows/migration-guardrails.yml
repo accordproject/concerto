@@ -21,17 +21,20 @@ name: migration-guardrails
 #     RUST row that makes no engine call, or a PARTIAL row that now does
 #     (migration/ledger/extract-members.js --check, accordproject/concerto-rust#261)
 #   - adds a source comment, in packages/concerto-core/src or in the pinned
-#     concerto-rust checkout's concerto-*/src, that names a migration task id
-#     or a bare or concerto-rust issue number (the comment policy,
+#     concerto-rust checkout's concerto-*/src, that names a migration task id,
+#     a bare or short cross-repo issue number, or a concerto-rust issue or PR
+#     (number or URL) (the comment policy,
 #     migration/guardrails/comment-policy.mjs, accordproject/concerto-rust#459)
 #
 # This is intentionally separate from the package's own CI so it keeps
 # working (and stays easy to find) regardless of how that pipeline evolves
 # during the migration.
 
+# PRs into main, and into the Rust migration's integration branch; the
+# guards diff against the PR's own base branch (`--base-ref` below).
 on:
   pull_request:
-    branches: [main]
+    branches: [main, claude/tender-pascal-ocwf9q]
 
 permissions:
   contents: read
@@ -71,10 +74,14 @@ jobs:
 
       # Rule 6 scans the concerto-rust checkout the engine action pins
       # (.github/actions/concerto-engine/action.yml), so that pin must be a
-      # concerto-rust commit that has the comment policy pass: merge the
-      # concerto-rust comment-policy PR first, then bump the pin, before a PR
-      # into main runs this job. concerto-rust's own CI runs the same check on
-      # its PRs (its comment-policy job).
+      # concerto-rust commit that passes the comment policy: a change that
+      # tightens the policy lands in concerto-rust first, and the pin is
+      # bumped past it in the same concerto PR as the policy change.
+      # concerto-rust's own CI runs the same check on its PRs (its
+      # comment-policy job).
+      # It also runs when the ledger check above fails, so a stale ledger
+      # cannot hide the other guards' results; the job still fails.
       - name: Run migration guardrails
+        if: success() || failure()
         run: |
           node migration/bin/check-guardrails.mjs --base-ref "origin/${{ github.base_ref }}" --rust-root ../concerto-rust

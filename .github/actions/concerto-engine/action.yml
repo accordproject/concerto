@@ -19,13 +19,14 @@ runs:
     # The concerto-rust commit the engine is built from. Bump it (to a commit
     # of concerto-rust's integration branch, claude/tender-pascal-ocwf9q) when
     # concerto-core needs a newer engine. The guardrails' comment policy
-    # (rule 6) scans this checkout too, so the pin must also include the
-    # concerto-rust comment policy pass before a PR into main runs it.
+    # (rule 6) scans this checkout too, so the pin must be a commit that
+    # passes the policy concerto's guardrails enforce: bump it together with
+    # any change that tightens that policy.
     - name: Check out concerto-rust
       uses: actions/checkout@v4
       with:
         repository: accordproject/concerto-rust
-        ref: 2e2ac75768b838538e964fe4fc013b903529686f
+        ref: 9b921efe92a7c3bdea86e495a0895cf92c1b720d
         path: .concerto-rust
 
     # actions/checkout only writes inside the workspace; the engine link

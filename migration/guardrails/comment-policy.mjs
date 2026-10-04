@@ -2,15 +2,21 @@
 // history of the migration. A comment in packages/concerto-core/src (and,
 // with a concerto-rust checkout, in its concerto-*/src crates) may not name
 // a migration task id (`P5-105`), a concerto-rust issue or PR
-// (`concerto-rust#459`), or a bare issue number (`#459`). BC-nn and DV-nn
-// rows, which document current differences from TS 5.0.0, and full-form
-// upstream links (`accordproject/concerto#1273`) are allowed.
+// (`concerto-rust#459`, `concerto-rust/pull/481`, `concerto-rust/issues/32`),
+// a short cross-repository issue number (`concerto#1514`) or a bare issue
+// number (`#459`, `#32`). BC-nn and DV-nn rows, which document current
+// differences from TS 5.0.0, and full-form upstream links
+// (`accordproject/concerto#1273`) are allowed.
 //
 // Only comment text is checked: string literals, template literals and
 // regular expressions are skipped, so a test title or an error message
-// keeps whatever text it needs.
+// keeps whatever text it needs. The one exception is the value of a Rust
+// `#[doc = "..."]` attribute, which is a doc comment and is checked.
 //
-// Run on its own: node migration/guardrails/comment-policy.mjs [--rust-root <dir>]
+// Run on its own:
+//   node migration/guardrails/comment-policy.mjs [--rust-root <dir>] [--rust-only]
+// --rust-only checks only the concerto-rust checkout, not concerto-core's
+// src/ (concerto-rust's CI uses it).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,12 +24,27 @@ import { fileURLToPath } from 'node:url';
 /** The forbidden references, each with the name a violation reports. */
 export const RULES = [
     { name: 'task id', re: /\bP\d+-\d+[a-z]?\b/g },
-    { name: 'concerto-rust issue or PR', re: /concerto-rust#\d+/g },
-    // `#123` not preceded by a word character, `/` or `-`, so
+    { name: 'concerto-rust issue or PR', re: /concerto-rust(?:#|\/(?:pull|issues)\/)\d+/g },
+    // A short cross-repository form such as `concerto#1514`: only the full
+    // `accordproject/concerto#1514` names an upstream issue.
+    { name: 'short cross-repo issue number', re: /(?<![\w/-])concerto#\d+/g },
+    // `#123` not preceded by a word character, `/`, `#` or `-`, so
     // `accordproject/concerto#1273` and `concerto-rust#459` (reported by the
     // rule above) are not bare.
-    { name: 'bare issue number', re: /(?<![\w/#-])#\d{3,4}\b/g },
+    { name: 'bare issue number', re: /(?<![\w/#-])#\d+\b/g },
 ];
+
+/**
+ * Whether the Rust string literal starting at `at` is the value of a doc
+ * attribute (`#[doc = "..."]` or `#![doc = "..."]`), which is a doc comment
+ * written another way.
+ * @param {string} text the source text
+ * @param {number} at the index of the literal (its `"` or its `b`/`c`/`r` prefix)
+ * @return {boolean} true for a doc attribute's value
+ */
+function isDocAttr(text, at) {
+    return /#!?\[\s*doc\s*=\s*b?$/.test(text.slice(Math.max(0, at - 40), at));
+}
 
 /**
  * The comments of `text`, as `{ line, text }` per comment line.
@@ -80,13 +101,18 @@ export function commentLines(text, lang) {
             advance(k);
             continue;
         }
-        if (lang === 'rs' && c === 'r' && (d === '"' || d === '#') && !/[\w]/.test(text[i - 1] ?? '')) {
-            // A raw string: r"...", r#"..."#, ...
-            const m = /^r(#*)"/.exec(text.slice(i, i + 260));
+        if (lang === 'rs' && (c === 'r' || ((c === 'b' || c === 'c') && d === 'r')) && !/[\w]/.test(text[i - 1] ?? '')) {
+            // A raw string: r"...", r#"..."#, and the raw byte and C string
+            // forms br"..." and cr"...", which have no escapes either.
+            const m = /^[bc]?r(#*)"/.exec(text.slice(i, i + 260));
             if (m) {
                 const close = '"' + m[1];
                 const e = text.indexOf(close, i + m[0].length);
-                advance(e === -1 ? n : e + close.length);
+                const end = e === -1 ? n : e + close.length;
+                if (isDocAttr(text, i)) {
+                    push(i, end, line);
+                }
+                advance(end);
                 prev = '"';
                 continue;
             }
@@ -112,7 +138,11 @@ export function commentLines(text, lang) {
                 }
                 k++;
             }
-            advance(Math.min(k + 1, n));
+            const end = Math.min(k + 1, n);
+            if (lang === 'rs' && isDocAttr(text, i)) {
+                push(i, end, line);
+            }
+            advance(end);
             prev = '"';
             continue;
         }
@@ -200,14 +230,18 @@ function walk(dir, exts) {
 }
 
 /**
- * The violations under concerto-core's src/ and, when `rustRoot` is given,
- * under each concerto-* crate's src/ there.
+ * The violations under concerto-core's src/ (unless `rustOnly`) and, when
+ * `rustRoot` is given, under each concerto-* crate's src/ there.
  * @param {string} repoRoot the concerto checkout
  * @param {string} [rustRoot] a concerto-rust checkout
+ * @param {{rustOnly?: boolean}} [options] rustOnly: check only `rustRoot`
  * @return {string[]} one `file:line: rule 'match': text` line per violation
  */
-export function checkCommentPolicy(repoRoot, rustRoot) {
-    const roots = [{ dir: path.join(repoRoot, 'packages/concerto-core/src'), base: repoRoot, lang: 'ts', exts: ['.ts', '.js'] }];
+export function checkCommentPolicy(repoRoot, rustRoot, { rustOnly = false } = {}) {
+    if (rustOnly && !rustRoot) {
+        throw new Error('--rust-only needs --rust-root');
+    }
+    const roots = rustOnly ? [] : [{ dir: path.join(repoRoot, 'packages/concerto-core/src'), base: repoRoot, lang: 'ts', exts: ['.ts', '.js'] }];
     if (rustRoot) {
         for (const ent of fs.readdirSync(rustRoot, { withFileTypes: true })) {
             const src = path.join(rustRoot, ent.name, 'src');
@@ -231,7 +265,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const i = process.argv.indexOf('--rust-root');
     const rustRoot = i !== -1 ? path.resolve(process.argv[i + 1]) : undefined;
     const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-    const violations = checkCommentPolicy(repoRoot, rustRoot);
+    const violations = checkCommentPolicy(repoRoot, rustRoot, { rustOnly: process.argv.includes('--rust-only') });
     if (violations.length > 0) {
         console.error(`${violations.length} comment(s) break the comment policy (migration/guardrails/comment-policy.mjs):`);
         violations.forEach((v) => console.error(`    ${v}`));

@@ -20,7 +20,7 @@
  * lifted checks over managers that are not engine-backed.
  *
  * - The eager constructor (`fromAst`): a manager with a decorator factory
- *   builds each ModelFile eagerly (engine/views.ts `stageModelFile` keeps
+ *   builds each ModelFile eagerly (engine/views-staging.ts `stageModelFile` keeps
  *   factories on the eager path), so the header is read by the engine's
  *   `modelFileFromAstHeader` from `fromAst`, and a ModelFile built that way
  *   and never added has no recorded import names: `getImports()` takes its

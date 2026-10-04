@@ -146,7 +146,7 @@ function nullFactory(core, onNew) {
 module.exports = [
     {
         id: 'P5103-LAZY-001',
-        covers: 'views.ts installLazyField: the lazy accessors read on the class prototypes give undefined, as the class fields (never on a prototype) did',
+        covers: 'views-staging.ts installLazyField: the lazy accessors read on the class prototypes give undefined, as the class fields (never on a prototype) did',
         run: (core) => [
             core.Field.prototype.validator,
             core.ScalarDeclaration.prototype.validator,
@@ -161,7 +161,7 @@ module.exports = [
     },
     {
         id: 'P5103-LAZY-002',
-        covers: 'views.ts installLazyField: a lazy field of an object that never ran its constructor reads undefined',
+        covers: 'views-staging.ts installLazyField: a lazy field of an object that never ran its constructor reads undefined',
         run: (core) => [
             Object.create(core.Field.prototype).validator,
             Object.create(core.ScalarDeclaration.prototype).validator,
@@ -172,7 +172,7 @@ module.exports = [
     },
     {
         id: 'P5103-LAZY-003',
-        covers: 'views.ts buildModelFileLocalTypes, materialise: a lazily built file\'s localTypes read before its declarations, and its declarations written before they are read',
+        covers: 'views-staging.ts buildModelFileLocalTypes, materialise: a lazily built file\'s localTypes read before its declarations, and its declarations written before they are read',
         run: (core) => {
             const mm = managerOf(core, SHAPES);
             const first = mm.getModelFile('org.p5103.shapes@1.0.0');
@@ -188,7 +188,7 @@ module.exports = [
     },
     {
         id: 'P5103-LAZY-004',
-        covers: 'views.ts declarationIndex: a model with no declarations key, read by type name',
+        covers: 'views-staging.ts declarationIndex: a model with no declarations key, read by type name',
         run: (core) => {
             const mm = new core.ModelManager();
             mm.fromAst({ $class: `${MM}.Models`, models: [{ $class: `${MM}.Model`, namespace: 'org.p5103.empty@1.0.0', imports: [] }] });
@@ -199,7 +199,7 @@ module.exports = [
     },
     {
         id: 'P5103-LOAD-001',
-        covers: 'views.ts readUnchecked: a manager with decorator factories and the shape check off loads a valid model, and rejects an unreadable one',
+        covers: 'views-staging.ts readUnchecked: a manager with decorator factories and the shape check off loads a valid model, and rejects an unreadable one',
         run: (core) => {
             const mm = new core.ModelManager({ metamodelValidation: false });
             mm.addDecoratorFactory(nullFactory(core));
@@ -214,7 +214,7 @@ module.exports = [
     },
     {
         id: 'P5103-LOAD-002',
-        covers: 'views.ts stableAstText, systemModelVerdict: many managers built in a row, with and without the metamodel, reuse the system models\' verdicts',
+        covers: 'views-staging.ts stableAstText, systemModelVerdict: many managers built in a row, with and without the metamodel, reuse the system models\' verdicts',
         run: (core) => {
             const out = [];
             for (let i = 0; i < 3; i++) {
@@ -229,7 +229,7 @@ module.exports = [
     },
     {
         id: 'P5103-PROPS-001',
-        covers: 'views.ts lookupValid, newLookup: getProperties after the own properties array changes, and after the super type\'s',
+        covers: 'views-lookups.ts lookupValid, newLookup: getProperties after the own properties array changes, and after the super type\'s',
         run: (core) => {
             const mm = managerOf(core, SHAPES);
             const uses = mm.getType('org.p5103.shapes@1.0.0.Uses');
@@ -327,7 +327,7 @@ module.exports = [
     },
     {
         id: 'P5103-LOAD-003',
-        covers: 'views.ts stageLoadedModelFile: an AST of a namespace the manager never writes, loaded first without the shape check, then with it',
+        covers: 'views-staging.ts stageLoadedModelFile: an AST of a namespace the manager never writes, loaded first without the shape check, then with it',
         run: (core) => {
             const root = JSON.parse(JSON.stringify(new core.ModelManager().getModelFile('concerto@1.0.0').getAst()));
             const unchecked = new core.ModelManager({ metamodelValidation: false });
@@ -341,7 +341,7 @@ module.exports = [
     },
     {
         id: 'P5103-STAGE-001',
-        covers: 'views.ts commitStaged, commitStagedAll, validateAndCommitStaged, updateStaged, validateAstStaged: files whose stage the engine evicted (more files built than its staging slot keeps) are added, in a batch, updated and checked from their ASTs instead',
+        covers: 'views-staging.ts commitStaged, commitStagedAll, validateAndCommitStaged, updateStaged, validateAstStaged: files whose stage the engine evicted (more files built than its staging slot keeps) are added, in a batch, updated and checked from their ASTs instead',
         run: (core) => {
             const out = [];
             for (const options of [{}, { metamodelValidation: true }]) {
@@ -369,7 +369,7 @@ module.exports = [
     },
     {
         id: 'P5103-STAGE-002',
-        covers: 'views.ts commitStagedAll: a batch larger than its id buffer, and a batch built by a manager with decorator factories (built eagerly, not staged)',
+        covers: 'views-staging.ts commitStagedAll: a batch larger than its id buffer, and a batch built by a manager with decorator factories (built eagerly, not staged)',
         run: (core) => {
             const big = new core.ModelManager();
             const files = [];
@@ -387,7 +387,7 @@ module.exports = [
     },
     {
         id: 'P5103-STAGE-003',
-        covers: 'views.ts commitStagedAll: a batch whose registration fails part way (a namespace already registered) keeps what the engine registered',
+        covers: 'views-staging.ts commitStagedAll: a batch whose registration fails part way (a namespace already registered) keeps what the engine registered',
         run: (core) => {
             const mm = new core.ModelManager();
             mm.addCTOModel('namespace org.p5103.dup@1.0.0\nconcept D {}', 'd.cto');
@@ -603,7 +603,7 @@ event Ev {
     },
     {
         id: 'P5103-DECL-001',
-        covers: 'views.ts propertiesOf, identifierLevel: a ClassDeclaration built directly from an AST node (not by a ModelFile) reads its properties and identifier through the engine on every call',
+        covers: 'views-lookups.ts propertiesOf, identifierLevel: a ClassDeclaration built directly from an AST node (not by a ModelFile) reads its properties and identifier through the engine on every call',
         run: (core) => {
             const mm = managerOf(core, SHAPES);
             const file = mm.getModelFile('org.p5103.shapes@1.0.0');
@@ -624,7 +624,7 @@ event Ev {
     },
     {
         id: 'P5103-VALIDATE-001',
-        covers: 'views.ts validateLoaded: ModelFile.validate() on a file registered from its stage, and after its manager validated it',
+        covers: 'views-staging.ts validateLoaded: ModelFile.validate() on a file registered from its stage, and after its manager validated it',
         run: (core) => {
             const mm = managerOf(core, SHAPES);
             const file = mm.getModelFile('org.p5103.shapes@1.0.0');
@@ -682,7 +682,7 @@ concept Sys identified {
     },
     {
         id: 'P5103-LOAD-004',
-        covers: 'views.ts, ModelFile.getLocalType: a decorator factory that looks a local type up while the file is being built gets the error TS gives before the local types exist',
+        covers: 'views-staging.ts localType, ModelFile.getLocalType: a decorator factory that looks a local type up while the file is being built gets the error TS gives before the local types exist',
         run: (core) => {
             const seen = [];
             const mm = new core.ModelManager();
@@ -780,7 +780,7 @@ concept Plain {
     {
         id: 'P5103-EXT-001',
         async: true,
-        covers: 'views.ts updateExternalStaged, basemodelmanager.ts updateExternalModels: downloaded files registered from their stages, and (a manager with decorator factories builds them eagerly, unstaged) from their ASTs',
+        covers: 'views-staging.ts updateExternalStaged, basemodelmanager.ts updateExternalModels: downloaded files registered from their stages, and (a manager with decorator factories builds them eagerly, unstaged) from their ASTs',
         run: async (core) => {
             const out = [];
             for (const factories of [false, true]) {
@@ -809,7 +809,7 @@ concept Plain {
     },
     {
         id: 'P5103-UPDATE-001',
-        covers: 'views.ts updateStaged: updateModelFile in a manager with decorator factories (an eagerly built file, never staged)',
+        covers: 'views-staging.ts updateStaged: updateModelFile in a manager with decorator factories (an eagerly built file, never staged)',
         run: (core) => {
             const mm = new core.ModelManager();
             mm.addDecoratorFactory(nullFactory(core));
@@ -882,7 +882,7 @@ concept Plain {
     },
     {
         id: 'P5103-DCS-002',
-        covers: 'views.ts adoptStagedModels: a DecoratorManager result with more model files than the new manager\'s staging slot keeps (some stages evicted, those files added from their ASTs, and the result validated)',
+        covers: 'views-staging.ts adoptStagedModels: a DecoratorManager result with more model files than the new manager\'s staging slot keeps (some stages evicted, those files added from their ASTs, and the result validated)',
         run: (core) => {
             const mm = new core.ModelManager();
             for (let i = 0; i < 270; i++) {
@@ -924,7 +924,7 @@ concept Plain {
     {
         id: 'P5103-EXT-002',
         async: true,
-        covers: 'views.ts updateExternalStaged, dropStaged: more downloaded files than the staging slot keeps (stages the engine evicted), added from their ASTs, the others\' stages dropped',
+        covers: 'views-staging.ts updateExternalStaged, dropStaged: more downloaded files than the staging slot keeps (stages the engine evicted), added from their ASTs, the others\' stages dropped',
         run: async (core) => {
             const mm = new core.ModelManager();
             const asts = [];
@@ -938,7 +938,7 @@ concept Plain {
     },
     {
         id: 'P5103-LOAD-005',
-        covers: 'views.ts stableAstText, sameBytes: a new manager whose metamodel AST (the shared constant) changed since the last one was built',
+        covers: 'views-staging.ts stableAstText, sameBytes: a new manager whose metamodel AST (the shared constant) changed since the last one was built',
         run: (core) => {
             const metamodel = require(require.resolve('@accordproject/concerto-metamodel', { paths: [core.root] }));
             const ast = metamodel.MetaModelUtil.metaModelAst;

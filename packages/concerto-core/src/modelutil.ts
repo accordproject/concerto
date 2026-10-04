@@ -198,7 +198,7 @@ class ModelUtil {
      */
     static isAssignableTo(modelFile, typeName, property): any {
         // BC-52: the type is resolved by the engine from its arena, by the
-        // handle of `modelFile` (engine/views.ts, "Arena handles of views");
+        // handle of `modelFile` (engine/views-lookups.ts, "Arena handles of views");
         // a replaced `getType` or `getAllSuperTypeDeclarations` method is
         // not called. The property's own type is still read through
         // `getFullyQualifiedTypeName` (the serializer passes a relationship

@@ -59,7 +59,7 @@ class MapDeclaration extends Declaration {
         super.process();
 
         // The `mapDeclarationProcess` check, then the key and value types,
-        // which a lazily built file builds on first read (engine/views.ts
+        // which a lazily built file builds on first read (engine/views-staging.ts
         // `mapDeclarationProcess`).
         const key = this.ast.key;
         const value = this.ast.value;

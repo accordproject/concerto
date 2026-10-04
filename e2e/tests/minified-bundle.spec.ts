@@ -157,9 +157,12 @@ import { ModelManager, Factory, Serializer } from '${posix(path.join(CORE_ESM_BR
 import { BaseException } from '${posix(UTIL_ESM_BROWSER_INDEX)}';
 
 const calls = globalThis.__engineCalls;
+// Each fast path has a text binding and a bytes binding; engine/serializer.ts
+// calls the bytes one when the engine has it.
+const callsOf = (...names) => names.reduce((n, name) => n + (calls['ModelManagerHandle.' + name] || 0), 0);
 const fastPathCalls = () => ({
-    fromJson: (calls['ModelManagerHandle.serializerFromJson'] || 0) + (calls['ModelManagerHandle.serializerFromJsonCompact'] || 0),
-    toJson: calls['ModelManagerHandle.serializerToJson'] || 0,
+    fromJson: callsOf('serializerFromJson', 'serializerFromJsonCompact', 'serializerFromJsonCompactBytes'),
+    toJson: callsOf('serializerToJson', 'serializerToJsonBytes'),
     validate: calls['ModelManagerHandle.validateResourceBinary'] || 0,
 });
 const delta = (before) => {
