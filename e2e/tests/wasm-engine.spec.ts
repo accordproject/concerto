@@ -137,6 +137,15 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
                 // does, not by its (possibly renamed) constructor.name.
                 lowerBound: validator?.getLowerBound?.(),
                 upperBound: validator?.getUpperBound?.(),
+                // P5-110 (accordproject/concerto-rust#477): the engine's
+                // `#[wasm_bindgen(start)]` seeds the hasher of untrusted keys
+                // from crypto.getRandomValues when the module is
+                // instantiated. Read from the SAME engine module instance
+                // src/engine/rust.ts got from the bundler stand-in, taken
+                // from its registry rather than through `require` so the
+                // read is not counted in viewEngineRequests.
+                hashSeed: (globalThis as any).__concertoBundler.bundled
+                    .get('@accordproject/concerto-engine').hashSeed(),
             };
         }, server.baseUrl);
 
@@ -153,6 +162,7 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
             scalarType: 'Integer',
             lowerBound: 0,
             upperBound: null,
+            hashSeed: { source: 'crypto', probe: expect.stringMatching(/^[0-9a-f]{16}$/) },
         });
     });
 });
