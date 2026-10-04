@@ -32,8 +32,7 @@ const engineMemo: { [binding: string]: Map<string, unknown> } = {};
 const ENGINE_MEMO_LIMIT = 4096;
 
 /** The members memoised by `memoisedEngineCall`, all `(...strings) => value`. */
-type MemoisedBinding = 'modelUtilCapitalizeFirstLetter' | 'modelUtilIsValidIdentifier' | 'modelUtilGetFullyQualifiedName' |
-    'modelUtilRemoveNamespaceVersionFromFullyQualifiedName';
+type MemoisedBinding = 'modelUtilIsValidIdentifier' | 'modelUtilGetFullyQualifiedName';
 
 /**
  * `rust[binding](...args)`, memoised under `key` (see engineMemo).
@@ -65,6 +64,9 @@ function memoisedEngineCall<B extends MemoisedBinding>(binding: B, key: string, 
 // into the engine for it. Any other argument, and every error, still goes
 // to the engine.
 const PRIMITIVE_TYPES = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
+// A strict SemVer `major.minor.patch` with no prerelease or build part,
+// each component at most 19 digits (so it fits the engine's u64).
+const PLAIN_VERSION = /^(0|[1-9]\d{0,18})\.(0|[1-9]\d{0,18})\.(0|[1-9]\d{0,18})$/;
 const PRIVATE_RESERVED_PROPERTIES = [
     '$classDeclaration', '$namespace', '$type', '$modelManager', '$validator',
     '$identifierFieldName', '$imports', '$superTypes', '$id',
@@ -226,7 +228,9 @@ class ModelUtil {
      * @private
      */
     static capitalizeFirstLetter(string): string {
-        return typeof string === 'string' ? memoisedEngineCall('modelUtilCapitalizeFirstLetter', string, string) : rust.modelUtilCapitalizeFirstLetter(string);
+        // A lone high surrogate from `charAt(0)` is left as it is by
+        // `toUpperCase`, as the engine leaves a non-BMP first character.
+        return typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : rust.modelUtilCapitalizeFirstLetter(string);
     }
 
     /**
@@ -287,7 +291,22 @@ class ModelUtil {
      * @returns {string} the fully qualified name minus the namespace version
      */
     static removeNamespaceVersionFromFullyQualifiedName(fqn): string {
-        return typeof fqn === 'string' ? memoisedEngineCall('modelUtilRemoveNamespaceVersionFromFullyQualifiedName', fqn, fqn) : rust.modelUtilRemoveNamespaceVersionFromFullyQualifiedName(fqn);
+        if (typeof fqn === 'string' && fqn !== '') {
+            if (PRIMITIVE_TYPES.includes(fqn)) {
+                return fqn;
+            }
+            // `name@major.minor.patch`, a version strict SemVer accepts with
+            // no prerelease or build part (each component fits a u64): the
+            // engine's answer, without crossing. Anything else, and every
+            // error, goes to the engine.
+            const dot = Math.max(fqn.lastIndexOf('.'), 0);
+            const parts = fqn.substring(0, dot).split('@');
+            if (parts.length === 2 && PLAIN_VERSION.test(parts[1])) {
+                const shortName = fqn.substring(fqn.lastIndexOf('.') + 1);
+                return parts[0] === '' ? shortName : parts[0] + '.' + shortName;
+            }
+        }
+        return rust.modelUtilRemoveNamespaceVersionFromFullyQualifiedName(fqn);
     }
 
     /**

@@ -16,7 +16,7 @@
 
 import { rust } from './index';
 import type { EngineHandle, EngineState } from './bindings';
-import { modelFileModule } from './views';
+import { modelFileModule } from './views-modules';
 
 // Property lookups: a ClassDeclaration view's `getProperties()` list and
 // `getProperty()`'s name index are cached per view of a constructed file. A

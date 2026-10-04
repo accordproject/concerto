@@ -82,7 +82,7 @@ class NumberValidator extends Validator{
      * @private
      */
     toString(): string {
-        return rust.numberValidatorToString(this);
+        return 'NumberValidator lower: ' + this.lowerBound + ' upper: ' + this.upperBound;
     }
 
     /**

@@ -19,7 +19,7 @@ import Declaration from './declaration';
 import type Validator from './validator';
 import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
-import { rust, engineViews } from '../engineloader';
+import { engineViews } from '../engineloader';
 
 /**
  * ScalarDeclaration defines the structure (model/schema) of composite data.
@@ -158,7 +158,7 @@ class ScalarDeclaration extends Declaration {
      * @return {String} the string representation of the class
      */
     toString(): string {
-        return rust.scalarDeclarationToString(this);
+        return 'ScalarDeclaration {id=' + this.getFullyQualifiedName() + '}';
     }
 
     /**
@@ -232,7 +232,7 @@ class ScalarDeclaration extends Declaration {
 
 }
 
-// Built on first read in a lazily built file (engine/views.ts).
+// Built on first read in a lazily built file (engine/views-lazy.ts).
 engineViews().installLazyField(ScalarDeclaration.prototype, 'validator');
 
 export { ScalarDeclaration };

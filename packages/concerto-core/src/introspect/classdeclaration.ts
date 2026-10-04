@@ -114,7 +114,7 @@ class ClassDeclaration extends Declaration {
 
         // The `classDeclarationProcess` binding, read from the file's
         // view snapshot while its declarations are built
-        // (engine/views.ts).
+        // (engine/views-construct.ts).
         const decision = engineViews().classDeclarationProcess(this) as {
             superType: string | null;
             idField: string | null;
@@ -261,7 +261,10 @@ class ClassDeclaration extends Declaration {
                 if(this.superType) {
                     const superType = this.getModelFile().getType(this.superType);
                     if (superType && superType.isIdentified() ) {
-                        if (rust.classDeclarationIdentifierRedeclareConflict(this.isSystemIdentified(), superType.isSystemIdentified(), superType.isExplicitlyIdentified())) {
+                        // A system-identified class needs a system-identified
+                        // super type; any other may not redeclare an
+                        // explicit identifier.
+                        if (this.isSystemIdentified() ? !superType.isSystemIdentified() : superType.isExplicitlyIdentified()) {
                             throw new IllegalModelException(`Super class ${superType.getFullyQualifiedName()} has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
                         }
                     }

@@ -112,7 +112,11 @@ function writeValue(v: any, depth: number): void {
  * @throws {*} whatever reading the AST throws (a getter's error)
  */
 function encodeAst(ast: object): Uint8Array | undefined {
-    writer.begin();
+    // A getter read mid-write may encode another AST: that one is sent as
+    // text instead.
+    if (!writer.begin()) {
+        return undefined;
+    }
     let out: Uint8Array | undefined;
     try {
         writeValue(ast, 0);

@@ -15,7 +15,9 @@
 // The DecoratorManager entry points.
 
 import { rust } from './index';
-import { adoptStagedModels, fileStates } from './views-staging';
+import { adoptStagedModels } from './views-staging';
+import { baseModelManagerModule, modelFileModule, modelManagerModule } from './views-modules';
+import { isShapeChecked } from './views-state';
 
 /**
  * DecoratorManager.validate's structural check, run on the validation
@@ -39,16 +41,16 @@ function decorateResultTrusted(modelManager: any, decoratorCommandSets: any[], o
  * into a new ModelManager (`adoptStagedModels`).
  */
 function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets: any[], options?: any): any {
-    const { default: ModelManager } = require('../modelmanager');
+    const { default: ModelManager } = modelManagerModule();
     const source = sourceDcsHandle(modelManager);
     if (source) {
         // The source handle resolves its models itself; nothing is copied.
+        // A new manager holds only the system models, which
+        // `adoptStagedModels` skips, so it needs no clearing.
         const decoratedModelManager = new ModelManager({
             decoratorValidation: modelManager.getDecoratorValidation()
         });
-        decoratedModelManager.clearModelFiles();
         const target = decoratedModelManager.rustHandle;
-        assertDistinctHandles(source, target);
         const result = source.dcsDecorateModels(target, decoratorCommandSets, options ?? {});
         adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation,
             decorateResultTrusted(modelManager, decoratorCommandSets, options));
@@ -59,7 +61,6 @@ function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets:
         const decoratedModelManager = new ModelManager({
             decoratorValidation: modelManager.getDecoratorValidation()
         });
-        decoratedModelManager.clearModelFiles();
         const result = dcs.decorateModels(decoratedModelManager.rustHandle, decoratorCommandSets, options ?? {});
         adoptStagedModels(decoratedModelManager, result.ast, result.staged, result.validated, options?.disableMetamodelValidation,
             decorateResultTrusted(modelManager, decoratorCommandSets, options));
@@ -131,11 +132,9 @@ const EXTRACT_ACTION: { [binding: string]: number } = {
  * read unresolved, only for `restoreUndefinedDecorators`.
  */
 function decoratorManagerExtractOnSource(binding: string, source: any, modelManager: any, options: any): any {
-    const { default: ModelManager } = require('../modelmanager');
+    const { default: ModelManager } = modelManagerModule();
     const updatedModelManager = new ModelManager();
-    updatedModelManager.clearModelFiles();
     const target = updatedModelManager.rustHandle;
-    assertDistinctHandles(source, target);
     const result = source.dcsExtract(target, options, EXTRACT_ACTION[binding]);
     const { staged, validated } = result;
     delete result.staged;
@@ -150,12 +149,11 @@ function decoratorManagerExtractOnSource(binding: string, source: any, modelMana
 
 /** `decoratorManagerExtract` on a DCS input manager, staged into the new ModelManager. */
 function decoratorManagerExtractStaged(binding: string, modelManager: any, options: any): any {
-    const { default: ModelManager } = require('../modelmanager');
+    const { default: ModelManager } = modelManagerModule();
     const { dcs, sourceModels } = dcsManagerFor(modelManager, true);
     try {
         const updatedModelManager = new ModelManager();
-        updatedModelManager.clearModelFiles();
-        const result = dcs.extract(updatedModelManager.rustHandle, options, EXTRACT_ACTION[binding]);
+            const result = dcs.extract(updatedModelManager.rustHandle, options, EXTRACT_ACTION[binding]);
         const { staged, validated } = result;
         delete result.staged;
         delete result.validated;
@@ -210,7 +208,7 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
  * `getAst`, `getModelFiles` and `resolveMetaModel` are BaseModelManager's own.
  */
 function dcsCacheable(modelManager: any): boolean {
-    const { default: BaseModelManager } = require('../basemodelmanager');
+    const { default: BaseModelManager } = baseModelManagerModule();
     const proto = BaseModelManager.prototype;
     const handle = modelManager?.rustHandle;
     return !!handle && modelManager._engine !== undefined &&
@@ -228,10 +226,10 @@ function dcsSourceShapeChecked(modelManager: any): boolean {
     if (!dcsCacheable(modelManager)) {
         return false;
     }
-    const { default: ModelFile } = require('../introspect/modelfile');
+    const { default: ModelFile } = modelFileModule();
     const getAst = ModelFile.prototype.getAst;
     return modelManager.getModelFiles(false).every((f: any) =>
-        fileStates.get(f)?.shapeChecked === f.ast && f.getAst === getAst);
+        isShapeChecked(f) && f.getAst === getAst);
 }
 
 /**
@@ -286,14 +284,6 @@ function sourceDcsHandle(modelManager: any): any {
         return undefined;
     }
     return modelManager.rustHandle;
-}
-
-/** The source and target handles are borrowed at once, so they must differ. */
-function assertDistinctHandles(source: any, target: any): void {
-    /* istanbul ignore next: the result manager is always built for the call, so its handle is never the source's */
-    if (source === target) {
-        throw new Error('DecoratorManager: the result ModelManager must not share the source ModelManager\'s engine handle');
-    }
 }
 
 /**

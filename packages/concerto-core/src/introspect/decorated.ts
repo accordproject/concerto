@@ -21,7 +21,7 @@ import type { IDecorator, IRange } from '@accordproject/concerto-metamodel';
 /* eslint-disable no-unused-vars */
 import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
-import { rust, engineViews } from '../engineloader';
+import { engineViews } from '../engineloader';
 
 /**
  * The shape shared by every metamodel AST node that the introspect classes
@@ -98,7 +98,7 @@ class Decorated {
      */
     process() {
         // In a lazily built file, the decorators are built on first read
-        // (engine/views-staging.ts `deferDecorators`).
+        // (engine/views-lazy.ts `deferDecorators`).
         const views = engineViews();
         if (views.deferDecorators(this)) {
             return;
@@ -108,7 +108,7 @@ class Decorated {
         if(this.ast.decorators) {
             const modelFile = this.getModelFile();
             // `modelFile.getModelManager()?.getDecoratorFactories()`, except
-            // for a lazily built file (engine/views-staging.ts `decoratorFactories`).
+            // for a lazily built file (engine/views-lazy.ts `decoratorFactories`).
             const factories = views.decoratorFactories(modelFile);
             const hasFactories = factories && factories.length > 0;
             for(let n=0; n < this.ast.decorators.length; n++ ) {
@@ -145,14 +145,20 @@ class Decorated {
                 this.decorators[n].validate();
             }
 
-            const duplicateName = rust.decoratedFindDuplicateName(this.decorators.map(d => d.getName())) as string | null;
-            if (duplicateName !== null) {
-                throw new IllegalModelException(
-                    `Duplicate decorator ${duplicateName}`,
-                    this.getModelFile(),
-                    this.ast.location,
-                );
-            }
+            // check we don't have this decorator twice
+            const uniqueDecoratorNames = new Set();
+            this.decorators.forEach(d => {
+                const decoratorName = d.getName();
+                if (!uniqueDecoratorNames.has(decoratorName)) {
+                    uniqueDecoratorNames.add(decoratorName);
+                } else {
+                    throw new IllegalModelException(
+                        `Duplicate decorator ${decoratorName}`,
+                        this.getModelFile(),
+                        this.ast.location,
+                    );
+                }
+            });
         }
     }
 

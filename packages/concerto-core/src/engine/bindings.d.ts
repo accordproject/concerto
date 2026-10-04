@@ -52,7 +52,7 @@ export interface EngineHandle {
     getNamespaces(): string[];
     getTypeName(qualified_name: string): string;
     isAssignableTo(fqn: string, base_fqn: string): boolean;
-    modelFileFilter(model_file: number, predicate: Function, target: EngineHandle): number | undefined;
+    modelFileFilterAst(model_file: number, predicate: Function): string | undefined;
     modelFileFilterStaged(model_file: number, predicate: Function, target: EngineHandle): string | undefined;
     modelFileGetFullyQualifiedTypeName(model_file: number, type_name: string): string | undefined;
     modelFileGetImports(model_file: number): Array<any>;
@@ -84,6 +84,7 @@ export interface EngineHandle {
     stagedModelFileViewSnapshot(stage: number, namespace?: string | null): string | undefined;
     modelFileViewSnapshotOf(model_file: number, namespace?: string | null): string | undefined;
     validateInstance(json_text: string, options_text: string, fqn: string | null | undefined, mode: number): string;
+    validateInstanceBytes(bytes: Uint8Array, options_text: string, fqn: string | null | undefined, mode: number): string;
     validateModelFiles(model_files: any): void;
     validatePropertyBinary(bytes: Uint8Array, class_fqn: string, prop_name: string, root_id: string, flags: number): number;
     validationPropertySlot(class_fqn: string, prop_name: string): Uint32Array | undefined;
@@ -107,6 +108,11 @@ export interface EngineState {
     namespaces: string[] | undefined;
     /** The class lookups of the serializer fast path (engine/serializer.ts). */
     serializerCache: { version: number; handle: EngineHandle; types: unknown } | undefined;
+    /**
+     * The `validatePropertyById` slots of `handle` (engine/validate-resource.ts),
+     * `[declId, propIndex, epoch]` by type and property, for one model version.
+     */
+    propertySlots: { version: number; handle: EngineHandle; byType: Map<string, Map<string, Uint32Array | null>> } | undefined;
 }
 
 /** The concerto-wasm bindings the public classes call. */
@@ -129,8 +135,6 @@ export interface EngineBindings {
 
     // DecoratorManager
     decoratorManagerMigrateTo(decoratorCommandSet: object): object;
-    /** The property's decorators after the command, to assign onto it. */
-    decoratorManagerExecutePropertyCommand(property: object, command: object): object;
 
     // ModelManager / ModelFile
     ModelManagerHandle: new () => EngineHandle;
@@ -139,19 +143,15 @@ export interface EngineBindings {
     modelFileFromAstHeader(modelFile: object, ast: object): void;
 
     // Introspection
-    decoratedFindDuplicateName(names: string[]): string | null;
     /** The decorator's processed arguments, to assign onto it. */
     decoratorProcess(ast: object, decorator: object): object;
     declarationValidate(declaration: object): void;
     declarationIsReservedSystemTypeImport(modelFile: object, typeName: string): boolean;
     classDeclarationResolveSuperType(classDeclaration: object): ClassDeclaration | null;
-    classDeclarationIdentifierRedeclareConflict(systemIdentified: boolean, superSystemIdentified: boolean, superExplicitlyIdentified: boolean): boolean;
     classDeclarationGetSuperType(classDeclaration: object): string | null;
     classDeclarationGetSuperTypeDeclaration(classDeclaration: object): ClassDeclaration | null;
     classDeclarationGetAllSuperTypeDeclarations(classDeclaration: object): ClassDeclaration[];
     classDeclarationGetNestedProperty(classDeclaration: object, propertyPath: string): Property;
-    scalarDeclarationToString(scalarDeclaration: object): string;
-    fieldToString(field: object): string;
     propertyValidate(property: object, classDeclaration: object): void;
     relationshipDeclarationValidate(relationship: object, classDeclaration: object): void;
     mapKeyTypeValidate(mapKeyType: object): void;
@@ -160,7 +160,6 @@ export interface EngineBindings {
     // Validators: `*New` returns the validator's fields, to assign onto it.
     numberValidatorNew(validator: object, ast: object): object;
     numberValidatorValidate(validator: object, identifier: string | null, value: unknown): void;
-    numberValidatorToString(validator: object): string;
     numberValidatorCompatibleWith(validator: object, other: unknown, ctor: Function): boolean;
     stringValidatorNew(validator: object, ast: unknown, lengthAst: unknown): object;
     stringValidatorValidate(validator: object, identifier: string | null, value: unknown): void;

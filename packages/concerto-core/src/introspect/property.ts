@@ -211,7 +211,7 @@ class Property extends Decorated {
     }
 }
 
-// Built on first read in a lazily built file (engine/views.ts).
+// Built on first read in a lazily built file (engine/views-lazy.ts).
 engineViews().installLazyField(Property.prototype, 'sizeValidator');
 
 export { Property };

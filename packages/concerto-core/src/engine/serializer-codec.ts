@@ -144,9 +144,6 @@ function encodeValue(v, seen: Set<object> = new Set()) {
 /** The one writer of the Serializer fast path's binary input. */
 const valueWriter = new WireWriter(64 * 1024);
 
-/** Set while `valueWriter` is being written (a getter may re-enter). */
-let valueWriterBusy = false;
-
 /** How deep the binary write nests before leaving the value to the text path (engine limit 128). */
 const MAX_BINARY_DEPTH = 100;
 
@@ -160,12 +157,12 @@ class TextPathOnly extends Error {
  * always threw; any other error (a throwing getter) propagates.
  */
 function encodeBytes(v: unknown): Uint8Array | undefined {
-    if (valueWriterBusy) {
+    // A getter read mid-write may re-enter: the writer refuses the nested
+    // write, which takes the text path.
+    if (!valueWriter.begin()) {
         return undefined;
     }
-    valueWriterBusy = true;
     try {
-        valueWriter.begin();
         writeWireValue(v, new Set(), 0);
         return valueWriter.bytes();
     } catch (err) {
@@ -175,7 +172,6 @@ function encodeBytes(v: unknown): Uint8Array | undefined {
         throw err;
     } finally {
         valueWriter.release();
-        valueWriterBusy = false;
     }
 }
 

@@ -63,7 +63,7 @@ class Declaration extends Decorated {
         // `modelUtilIsValidIdentifier` and
         // `modelUtilGetFullyQualifiedName`, read from the
         // file's view snapshot while its declarations are
-        // built (engine/views.ts).
+        // built (engine/views-construct.ts).
         const views = engineViews();
         if (!views.declarationIsValidIdentifier(this)) {
             throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);

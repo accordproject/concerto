@@ -20,7 +20,7 @@ import type ClassDeclaration from './classdeclaration';
 import type Validator from './validator';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
-import { rust, engineViews } from '../engineloader';
+import { engineViews } from '../engineloader';
 
 /**
  * Class representing the definition of a Field. A Field is owned
@@ -81,7 +81,8 @@ class Field extends Property {
      * @return {String} the string version of the property.
      */
     toString(): string {
-        return rust.fieldToString(this);
+        return 'Field {name=' + this.name + ', type=' + this.getFullyQualifiedTypeName() +
+            ', array=' + this.array + ', optional=' + this.optional + '}';
     }
 
     /**
@@ -127,7 +128,7 @@ class Field extends Property {
     }
 }
 
-// Built on first read in a lazily built file (engine/views.ts).
+// Built on first read in a lazily built file (engine/views-lazy.ts).
 engineViews().installLazyField(Field.prototype, 'validator');
 
 export { Field };

@@ -22,8 +22,8 @@
 // built on first read; `validateInstanceOrThrow` throws with the
 // diagnostics as `details`.
 
-import { asUnsupported, handleFor } from './serializer';
-import { encodeValue } from './serializer-codec';
+import { asUnsupported, handleFor, optionsText } from './serializer';
+import { encodeBytes, encodeValue } from './serializer-codec';
 import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import TypeNotFoundException from '../typenotfoundexception';
 
@@ -55,36 +55,41 @@ function fromJsonOptions(modelManager: BaseModelManager, options: ValidateInstan
 }
 
 /**
- * The document object (JSON text is parsed first) and its wire text
- * (`encodeValue`, as `fromJSON` sends it); `text` is undefined for a
+ * The document object (JSON text is parsed first) and its wire encoding, as
+ * `fromJSON`'s fast path sends it: the compact binary layout where it can
+ * (`encodeBytes`, copied, as the writer's bytes last only until its next
+ * write), else the wire text (`encodeValue`); `wire` is undefined for a
  * document that must be routed.
  */
-function documentOf(json: unknown): { object: any; text: string | undefined } {
+function documentOf(json: unknown): { object: any; wire: Uint8Array | string | undefined } {
     const object = typeof json === 'string' ? JSON.parse(json) : json;
+    const bytes = encodeBytes(object);
+    if (bytes !== undefined) {
+        return { object, wire: bytes.slice() };
+    }
     let encoded;
     try {
         encoded = encodeValue(object);
     } catch (err) {
         if (isFastPathUnsupported(err)) {
-            return { object, text: undefined };
+            return { object, wire: undefined };
         }
         throw err;
     }
-    return { object, text: JSON.stringify(encoded) };
+    return { object, wire: JSON.stringify(encoded) };
 }
 
 /**
- * The merged options' wire text, as the fast path encodes them, so the
- * engine reuses its serializer; else `JSON.stringify` text.
+ * The merged options' wire text, as `fromJSON`'s fast path encodes them
+ * (`optionsText`), so the engine reuses its serializer. Options it cannot
+ * encode throw `EngineFastPathUnsupported`, and the document is routed to
+ * `fromJSON`, as the fast path routes them.
  */
 function mergedText(merged: any): string {
     try {
-        return JSON.stringify(encodeValue(merged));
+        return optionsText(merged);
     } catch (err) {
-        if (isFastPathUnsupported(err)) {
-            return JSON.stringify(merged);
-        }
-        throw err;
+        throw asUnsupported(err);
     }
 }
 
@@ -97,7 +102,11 @@ const UNSUPPORTED = Symbol('unsupported');
  */
 function engineCall(modelManager: BaseModelManager, doc, merged: any, fqn: string | undefined, mode: number): string | typeof UNSUPPORTED {
     try {
-        return handleFor(modelManager).validateInstance(doc.text, mergedText(merged), fqn, mode);
+        const handle = handleFor(modelManager);
+        const options = mergedText(merged);
+        return typeof doc.wire === 'string'
+            ? handle.validateInstance(doc.wire, options, fqn, mode)
+            : handle.validateInstanceBytes(doc.wire, options, fqn, mode);
     } catch (err) {
         if (asUnsupported(err) instanceof EngineFastPathUnsupported) {
             return UNSUPPORTED;
@@ -141,7 +150,17 @@ function routed(modelManager: BaseModelManager, doc, merged: any, fqn?: string):
     if (fqn !== undefined && typeof $class === 'string' && $class !== '' && $class !== fqn) {
         const handle = handleFor(modelManager);
         const skeleton = JSON.stringify({ $class });
-        const options = mergedText(merged);
+        // Only the `$class` is checked here, which no option changes: options
+        // the fast path cannot encode are left out.
+        let options;
+        try {
+            options = mergedText(merged);
+        } catch (err) {
+            if (!(err instanceof EngineFastPathUnsupported)) {
+                throw err;
+            }
+            options = 'null';
+        }
         const first = JSON.parse(handle.validateInstance(skeleton, options, fqn, FIRST)).diagnostics[0];
         if (first && first.path === '' && (first.code === 'NOT_ASSIGNABLE' || first.code === 'TYPE_NOT_FOUND')) {
             try {
@@ -217,7 +236,7 @@ function withClass(object: any, fqn?: string): any {
 function validateInstance(modelManager: BaseModelManager, json: unknown, options: ValidateInstanceOptions = {}, fqn?: string): ValidationResult<any> {
     const doc = documentOf(json);
     const merged = fromJsonOptions(modelManager, options);
-    const out = doc.text === undefined ? UNSUPPORTED : engineCall(modelManager, doc, merged, fqn, options.collectAll === false ? FIRST : ALL);
+    const out = doc.wire === undefined ? UNSUPPORTED : engineCall(modelManager, doc, merged, fqn, options.collectAll === false ? FIRST : ALL);
     if (out === UNSUPPORTED) {
         const { resource, error } = routed(modelManager, doc, merged, fqn);
         if (error !== undefined) {
@@ -258,7 +277,7 @@ function validateInstanceOrThrow(modelManager: BaseModelManager, json: unknown, 
         }
         return options.hydrate === false ? null : resource;
     };
-    if (doc.text === undefined) {
+    if (doc.wire === undefined) {
         return viaFromJson();
     }
     const object = doc.object;
