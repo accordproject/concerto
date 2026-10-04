@@ -155,6 +155,7 @@ globalThis.__bundleRegistry.set(${JSON.stringify(specifier)}, m);
 ${steps.join('\n')}
 import { ModelManager, Factory, Serializer } from '${posix(path.join(CORE_ESM_BROWSER_DIR, 'index.mjs'))}';
 import { BaseException } from '${posix(UTIL_ESM_BROWSER_INDEX)}';
+import { ValidationException } from '${posix(path.join(CORE_ESM_BROWSER_DIR, 'serializer', 'validationexception.mjs'))}';
 
 const calls = globalThis.__engineCalls;
 // Each fast path has a text binding and a bytes binding; engine/serializer.ts
@@ -174,7 +175,11 @@ const errorOf = (fn) => {
         fn();
         return null;
     } catch (err) {
-        return { baseException: Object.getPrototypeOf(err) === BaseException.prototype, message: String(err && err.message) };
+        return {
+            baseException: Object.getPrototypeOf(err) === BaseException.prototype,
+            validationException: Object.getPrototypeOf(err) === ValidationException.prototype,
+            message: String(err && err.message),
+        };
     }
 };
 
@@ -325,9 +330,9 @@ test.describe('concerto-core in a minified production bundle (no keepNames)', ()
         expect(result.roundTrip).toEqual({ equal: true, calls: { fromJson: 1, toJson: 1, validate: 0 } });
 
         expect(result.invalid.calls).toEqual({ fromJson: 0, toJson: 0, validate: 1 });
-        // The class TS throws here is concerto-util's BaseException itself
-        // (checked by identity: its name is minified too).
-        expect(result.invalid.error?.baseException).toBe(true);
+        // BC-39: an instance validator error is a ValidationException (TS 5.0.0
+        // threw a bare BaseException). Checked by identity: its name is minified too.
+        expect(result.invalid.error?.validationException).toBe(true);
         expect(result.invalid.error?.message).toMatch(/Value 'not valid!' failed to match validation regex/);
 
         expect(result.fallbackErrors).toEqual([null, null]);
