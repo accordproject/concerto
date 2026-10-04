@@ -20,7 +20,7 @@
 import { rust } from './index';
 import { batchOf, computeBatch, withBatch } from './views-batch';
 import { collectionSizeValidatorModule, decoratorModule, numberValidatorModule, stringValidatorModule } from './views-modules';
-import { fileState, fileStates } from './views-state';
+import { deferredOf, fileState, isLazy, stateOf } from './views-state';
 
 /** The hook the fuzz harness installs to build every deferred part eagerly. */
 interface LazyViewsCheck {
@@ -56,7 +56,7 @@ function materialise(modelFile: any): void {
     thunks.delete('localTypes');
     defineOwn(modelFile, 'declarations', []);
     defineOwn(modelFile, 'localTypes', null);
-    const state = fileStates.get(modelFile)!;
+    const state = stateOf(modelFile)!;
     const deferred = state.deferred!;
     deferred.building = true;
     try {
@@ -149,7 +149,7 @@ function declarationIndex(ast: any, namespace: string): Map<string, number> | nu
  * must answer itself. Throws as `getLocalType` does during construction.
  */
 function localType(modelFile: any, type: string): any {
-    const deferred = fileStates.get(modelFile)?.deferred;
+    const deferred = deferredOf(modelFile);
     if (!deferred) {
         return undefined;
     }
@@ -189,7 +189,7 @@ function localType(modelFile: any, type: string): any {
 
 /** The view `localType` already built for declaration `index` from `node`, if any. */
 function builtDeclaration(modelFile: any, index: number, node: any): any {
-    const cached = fileStates.get(modelFile)?.deferred?.built?.get(index);
+    const cached = deferredOf(modelFile)?.built?.get(index);
     return cached && cached.node === node ? cached.view : undefined;
 }
 
@@ -320,7 +320,7 @@ function deferDecorators(element: any): boolean {
         // The caller's own call raises it, at the same point.
         return false;
     }
-    if (fileStates.get(modelFile)?.lazy === undefined) {
+    if (!isLazy(modelFile)) {
         return false;
     }
     const snapshot = batchOf(modelFile)?.decorators.get(nodes);
@@ -330,7 +330,7 @@ function deferDecorators(element: any): boolean {
 
 /** `getDecoratorFactories()` for an element: none for a lazy file. */
 function decoratorFactories(modelFile: any): any[] | undefined {
-    if (fileStates.get(modelFile)?.lazy !== undefined) {
+    if (isLazy(modelFile)) {
         return [];
     }
     return modelFile.getModelManager()?.getDecoratorFactories();
@@ -339,7 +339,7 @@ function decoratorFactories(modelFile: any): any[] | undefined {
 /** Whether `element`'s model file is lazily built. */
 function inLazyFile(element: any): boolean {
     const modelFile = element.modelFile ?? element.parent?.modelFile;
-    return modelFile !== undefined && fileStates.get(modelFile)?.lazy !== undefined;
+    return modelFile !== undefined && isLazy(modelFile);
 }
 
 /** A NumberValidator rebuilt from its snapshot `{lowerBound, upperBound}`. */
@@ -385,7 +385,7 @@ function mapDeclarationProcess(view: any, buildKey: () => any, buildValue: () =>
     const current = batchOf(view.modelFile);
     if (!current || !current.maps.has(view.ast)) {
         rust.mapDeclarationProcess(view);
-    } else if (fileStates.get(view.modelFile)?.lazy !== undefined) {
+    } else if (isLazy(view.modelFile)) {
         deferField(view, 'key', () => withBatch(current, buildKey));
         deferField(view, 'value', () => withBatch(current, buildValue));
         return;

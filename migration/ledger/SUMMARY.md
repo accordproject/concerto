@@ -37,7 +37,7 @@ without a ledger rebuild fails the build.
 
 ## Method
 
-* **Scope.** 735 members in 78 files. Nested closures count
+* **Scope.** 743 members in 78 files. Nested closures count
   as part of the member that encloses them. `index.ts`, `types.ts` and
   `dayjs-setup.ts` have no members: they hold re-exports, types and a dayjs
   plugin setup only.
@@ -131,24 +131,24 @@ without a ledger rebuild fails the build.
 | | members | loc | weight | share of weight |
 |---|---|---|---|---|
 | RUST | 68 | 870 | 980 | 11.3% |
-| HYBRID | 86 | 1897 | 2100.5 | 24.2% |
+| HYBRID | 86 | 1893 | 2096.5 | 24.1% |
 | PARTIAL | 54 | 601 | 704 | 8.1% |
-| TS | 527 | 5109 | 4892 | 56.4% |
-| **total** | 735 | 8477 | 8676.5 | 100% |
+| TS | 535 | 5133 | 4904 | 56.5% |
+| **total** | 743 | 8497 | 8684.5 | 100% |
 
-* **RUST+HYBRID weighted share (new D1 denominator): 35.9%**, HYBRID at full weight
+* **RUST+HYBRID weighted share (new D1 denominator): 35.8%**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. **NOT met.**
   PARTIAL rows (section 5b) are not in the numerator.
   Denominator excludes constant markers and `accept()` visitor entry points
   (60 members, weight 90) as not-logic, per the maintainer's
-  decision on open question 2 below. New total weight: 8586.5 (was 8676.5).
+  decision on open question 2 below. New total weight: 8594.5 (was 8684.5).
   D1 stays as defined, with the 70% bar, by maintainer decision (accordproject/concerto-rust#276,
   2026-09-28): the proposed D1′ was not adopted, and the gate reports §0.4 as FAIL at this figure.
-* **Old figure (previous denominator, all 735 members): 35.5%.**
+* **Old figure (previous denominator, all 743 members): 35.4%.**
 * RUST only (new denominator): 11.4%.
 * For comparison only, not the D1 figure: counting PARTIAL *read* rows (33 members,
-  weight 132) as Rust gives 37.4%; counting every PARTIAL row (54 members,
-  weight 704) gives 44.1%. That is how the ledger counted them before
+  weight 132) as Rust gives 37.3%; counting every PARTIAL row (54 members,
+  weight 704) gives 44.0%. That is how the ledger counted them before
   accordproject/concerto-rust#261 (then 78.9%, which also counted three `rustHandle`
   plumbing helpers as RUST; they are now TS, engine shim). After #261 and before P5-11 the
   figure was 57.4% (61.5% at #261 itself): P5-11 reclassified TS 128 PARTIAL rows and 57 HYBRID
@@ -166,8 +166,8 @@ By weight category:
 
 | category | members | loc | weight | RUST w | HYBRID w | PARTIAL w | TS w |
 |---|---|---|---|---|---|---|---|
-| glue (x0.5) | 351 | 1243 | 621.5 | 38.5 | 48.5 | 35.5 | 499 |
-| logic (x1) | 309 | 5592 | 5592 | 496 | 1296 | 253 | 3547 |
+| glue (x0.5) | 359 | 1267 | 633.5 | 38.5 | 48.5 | 35.5 | 511 |
+| logic (x1) | 309 | 5588 | 5588 | 496 | 1292 | 253 | 3547 |
 | validation (x1.5) | 75 | 1642 | 2463 | 445.5 | 756 | 415.5 | 846 |
 
 ## 2. By planned task
@@ -189,14 +189,14 @@ By weight category:
 | P4-03 | 25 | 176 | 0 |
 | P4-04 | 20 | 68.5 | 1 |
 | P4-05 | 20 | 204.5 | 1 |
-| P4-06 | 118 | 1436.5 | 59 |
-| P4-07 | 133 | 1261.5 | 59 |
+| P4-06 | 118 | 1432.5 | 59 |
+| P4-07 | 133 | 1257.5 | 59 |
 | P4-08 | 109 | 1807 | 6 |
 | P4-09 | 15 | 185 | 1 |
 | P4-10 | 51 | 1553.5 | 11 |
 | P5-100 | 3 | 6 | 0 |
 | P5-10a | 8 | 83.5 | 0 |
-| P5-10b | 20 | 306.5 | 0 |
+| P5-10b | 28 | 318.5 | 0 |
 | P5-12c | 3 | 73 | 3 |
 | P5-14 | 4 | 54.5 | 0 |
 | P5-19 | 2 | 26 | 0 |
@@ -225,14 +225,14 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/util.ts | 3 | 0 / 0 / 0 / 3 | 14.5 | 0 / 0 / 0 / 14.5 | 0.0% | - |
 | engine/validate-instance.ts | 13 | 0 / 2 / 0 / 11 | 246 | 0 / 102 / 0 / 144 | 41.5% | - |
 | engine/validate-resource.ts | 12 | 0 / 2 / 0 / 10 | 357.5 | 0 / 144 / 0 / 213.5 | 40.3% | - |
-| engine/views-batch.ts | 7 | 0 / 2 / 0 / 5 | 126.5 | 0 / 38 / 0 / 88.5 | 30.0% | P4-06+P4-07, P5-10b |
+| engine/views-batch.ts | 7 | 0 / 2 / 0 / 5 | 122.5 | 0 / 34 / 0 / 88.5 | 27.8% | P4-06+P4-07, P5-10b |
 | engine/views-construct.ts | 9 | 0 / 7 / 0 / 2 | 136.5 | 0 / 117 / 0 / 19.5 | 85.7% | P4-06+P4-07 |
 | engine/views-dcs.ts | 16 | 0 / 11 / 0 / 5 | 186 | 0 / 140 / 0 / 46 | 75.3% | P4-06+P4-07 |
 | engine/views-lazy.ts | 25 | 0 / 4 / 0 / 21 | 279 | 0 / 17.5 / 0 / 261.5 | 6.3% | P5-10b, P4-06+P4-07, P5-10a, P5-100 |
 | engine/views-lookups.ts | 16 | 0 / 10 / 0 / 6 | 203 | 0 / 122.5 / 0 / 80.5 | 60.3% | P4-06+P4-07, P5-14, P5-19 |
-| engine/views-modules.ts | 6 | 0 / 0 / 0 / 6 | 9 | 0 / 0 / 0 / 9 | 0.0% | P4-06+P4-07, P5-10b |
+| engine/views-modules.ts | 9 | 0 / 0 / 0 / 9 | 13.5 | 0 / 0 / 0 / 13.5 | 0.0% | P4-06+P4-07, P5-10b |
 | engine/views-staging.ts | 35 | 0 / 23 / 0 / 12 | 569.5 | 0 / 375 / 0 / 194.5 | 65.8% | P4-06+P4-07, P5-10a |
-| engine/views-state.ts | 2 | 0 / 2 / 0 / 0 | 20.5 | 0 / 20.5 / 0 / 0 | 100.0% | P4-06+P4-07 |
+| engine/views-state.ts | 7 | 0 / 2 / 0 / 5 | 28 | 0 / 20.5 / 0 / 7.5 | 73.2% | P4-06+P4-07, P5-10b |
 | engine/wire.ts | 16 | 0 / 0 / 0 / 16 | 108.5 | 0 / 0 / 0 / 108.5 | 0.0% | - |
 | engineloader.ts | 6 | 0 / 0 / 0 / 6 | 15.5 | 0 / 0 / 0 / 15.5 | 0.0% | - |
 | engineutil.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | - |
@@ -290,7 +290,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 4. TS items (stay in TypeScript) with reasons
 
-527 members, weight 4892 (56.4%).
+535 members, weight 4904 (56.5%).
 
 ### 4a. Grouped by reason
 
@@ -468,6 +468,14 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (requires introspect/field once) | 1 | 1.5 | `engine/views-modules.ts` fieldModule |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (requires introspect/modelfile once) | 1 | 1.5 | `engine/views-modules.ts` modelFileModule |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (requires introspect/decorator once) | 1 | 1.5 | `engine/views-modules.ts` decoratorModule |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (requires the modelmanager module once; P5-117) | 1 | 1.5 | `engine/views-modules.ts` modelManagerModule |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (requires the basemodelmanager module once; P5-117) | 1 | 1.5 | `engine/views-modules.ts` baseModelManagerModule |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (BaseModelManager's EXCLUDE_NS, the one list of the system namespaces; P5-117) | 1 | 1.5 | `engine/views-modules.ts` excludedNamespaces |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: a ModelFile's load-path state, for the staging and lazy-parts modules; P5-117) | 1 | 1.5 | `engine/views-state.ts` stateOf |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: a ModelFile's staged load; P5-117) | 1 | 1.5 | `engine/views-state.ts` stageOf |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: a ModelFile's deferred declaration views; P5-117) | 1 | 1.5 | `engine/views-state.ts` deferredOf |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: whether a ModelFile is lazily built; P5-117) | 1 | 1.5 | `engine/views-state.ts` isLazy |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (BC-19: whether a ModelFile's AST passed the shape check; P5-117) | 1 | 1.5 | `engine/views-state.ts` isShapeChecked |
 | trivial accessor or filter over lazily built views: the state it reads was computed by Rust at load; a crossing costs more than it saves. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (the decorators, built by Rust decoratorProcess snapshots or user DecoratorFactory callbacks) | 1 | 1.5 | `introspect/decorated.ts` Decorated.getDecorators |
 | abstract user extension point: users subclass DecoratorFactory in JS | 1 | 1.5 | `introspect/decoratorfactory.ts` DecoratorFactory.newDecorator |
 | forward/orchestration over members counted elsewhere: the logic is in the callee(s) it calls, which is where any Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (super.process; the override is in the BC-37 api-snapshot) | 1 | 1.5 | `introspect/eventdeclaration.ts` EventDeclaration.process |
@@ -657,6 +665,9 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/views-modules.ts | (function) | fieldModule | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (P5-11: reclassified from HYBRID; it makes no engine call of its own) (requires introspect/field once) |
 | engine/views-modules.ts | (function) | modelFileModule | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (requires introspect/modelfile once) |
 | engine/views-modules.ts | (function) | decoratorModule | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (requires introspect/decorator once) |
+| engine/views-modules.ts | (function) | modelManagerModule | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (requires the modelmanager module once; P5-117) |
+| engine/views-modules.ts | (function) | baseModelManagerModule | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (requires the basemodelmanager module once; P5-117) |
+| engine/views-modules.ts | (function) | excludedNamespaces | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (BaseModelManager's EXCLUDE_NS, the one list of the system namespaces; P5-117) |
 | engine/views-staging.ts | (function) | recordImportNames | function | 6 | 6 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (lazy views: records the import names Rust computed at staging) |
 | engine/views-staging.ts | (function) | recordedImportNames | function | 9 | 9 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (lazy views: reads the recorded import names) |
 | engine/views-staging.ts | (function) | stageModelFile | function | 5 | 2.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: sends a ModelFile's AST to Rust once and keeps the loaded file staged; decides lazy vs eager) |
@@ -669,6 +680,11 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/views-staging.ts | (function) | validateAndCommitStaged | function | 22 | 33 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-28: validates and commits a staged file on its handle, mapping the error to the file) |
 | engine/views-staging.ts | (function) | dropStaged | function | 6 | 6 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: drops a stage that will not be registered) |
 | engine/views-staging.ts | (function) | validateLoaded | function | 15 | 22.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: validates the staged or registered file without sending the AST again) |
+| engine/views-state.ts | (function) | stateOf | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: a ModelFile's load-path state, for the staging and lazy-parts modules; P5-117) |
+| engine/views-state.ts | (function) | stageOf | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: a ModelFile's staged load; P5-117) |
+| engine/views-state.ts | (function) | deferredOf | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: a ModelFile's deferred declaration views; P5-117) |
+| engine/views-state.ts | (function) | isLazy | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: whether a ModelFile is lazily built; P5-117) |
+| engine/views-state.ts | (function) | isShapeChecked | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (BC-19: whether a ModelFile's AST passed the shape check; P5-117) |
 | engine/wire.ts | WireWriter | constructor | ctor | 4 | 2 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | begin | method | 9 | 9 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | bytes | method | 3 | 1.5 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
@@ -1017,7 +1033,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 5. HYBRID items with reasons
 
-86 members, weight 2100.5 (24.2%).
+86 members, weight 2096.5 (24.1%).
 
 | file | class | member | weight | what stays in JS |
 |---|---|---|---|---|
@@ -1033,7 +1049,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/validate-resource.ts | (function) | validateResource | 54 | one validateResourceBinary call per ValidatedResource.validate(): the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust |
 | engine/validate-resource.ts | (function) | validateProperty | 90 | one validatePropertyBinary call per ValidatedResource.setPropertyValue/addArrayValue: the result code maps to the TS exception class, or to the visitor fallback; the validation itself runs in Rust |
 | engine/views-batch.ts | (function) | beginModelFile | 14 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
-| engine/views-batch.ts | (function) | heldViewSnapshot | 24 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views-batch.ts | (function) | heldViewSnapshot | 20 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-construct.ts | (function) | scalarDeclarationProcess | 29 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-construct.ts | (function) | declarationIsValidIdentifier | 9 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-construct.ts | (function) | declarationFullyQualifiedName | 8 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
@@ -1348,8 +1364,8 @@ fallback (plan section 3): `ModelFile`'s is HYBRID, and the others are TS view g
 
 Kept for history; every question below has a maintainer decision now, linked from each item.
 
-1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 35.9%
-   (old figure, previous denominator: 35.5%). See section 1.
+1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 35.8%
+   (old figure, previous denominator: 35.4%). See section 1.
 2. **Constant markers and `accept()` count as TS. Settled: excluded from the D1
    denominator.** They are not "logic". 60 members, weight 90,
    removed from the denominator (section 1).

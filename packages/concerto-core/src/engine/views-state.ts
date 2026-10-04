@@ -75,6 +75,35 @@ function committedHandle(modelFile: any): object | undefined {
 }
 
 /**
+ * `modelFile`'s state, or undefined when it has none: for the staging and
+ * lazy-parts modules, which own its fields. The other views read it through
+ * the accessors below.
+ */
+function stateOf(modelFile: object): FileState | undefined {
+    return fileStates.get(modelFile);
+}
+
+/** `modelFile`'s staged load, until it is committed or dropped. */
+function stageOf(modelFile: object): Stage | undefined {
+    return fileStates.get(modelFile)?.stage;
+}
+
+/** `modelFile`'s deferred declaration views, while it has some. */
+function deferredOf(modelFile: object): DeferredFile | undefined {
+    return fileStates.get(modelFile)?.deferred;
+}
+
+/** Whether `modelFile` is lazily built. */
+function isLazy(modelFile: object): boolean {
+    return fileStates.get(modelFile)?.lazy !== undefined;
+}
+
+/** BC-19: whether the AST `modelFile` holds now passed the shape check. */
+function isShapeChecked(modelFile: any): boolean {
+    return fileStates.get(modelFile)?.shapeChecked === modelFile.ast;
+}
+
+/**
  * The header the engine read when staging, flat: `[id, namespace, version,
  * system, n, key_1, name_1, ..., key_n, name_n, uriKey_1, uri_1, ...]`. The
  * `n` pairs are the `importShortNames` entries without the implicit system
@@ -98,8 +127,12 @@ interface DeferredFile {
 
 export {
     committedHandle,
+    deferredOf,
     fileState,
-    fileStates,
+    isLazy,
+    isShapeChecked,
+    stageOf,
+    stateOf,
 };
 
 export type {

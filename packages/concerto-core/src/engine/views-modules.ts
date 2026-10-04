@@ -55,11 +55,35 @@ function decoratorModule(): any {
     return decoratorCache ?? (decoratorCache = require('../introspect/decorator'));
 }
 
+let modelManagerCache: any;
+let baseModelManagerCache: any;
+
+/** The modelmanager module, required once. */
+function modelManagerModule(): any {
+    return modelManagerCache ?? (modelManagerCache = require('../modelmanager'));
+}
+
+/** The basemodelmanager module, required once. */
+function baseModelManagerModule(): any {
+    return baseModelManagerCache ?? (baseModelManagerCache = require('../basemodelmanager'));
+}
+
+/**
+ * The system namespaces `fromAst` skips, as BaseModelManager holds them
+ * (`EXCLUDE_NS`): a new manager already has them.
+ */
+function excludedNamespaces(): readonly string[] {
+    return baseModelManagerModule().EXCLUDE_NS;
+}
+
 export {
+    baseModelManagerModule,
     collectionSizeValidatorModule,
     decoratorModule,
+    excludedNamespaces,
     fieldModule,
     modelFileModule,
+    modelManagerModule,
     numberValidatorModule,
     stringValidatorModule,
 };

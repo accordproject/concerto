@@ -16,7 +16,8 @@
 
 import { rust } from './index';
 import { adoptStagedModels } from './views-staging';
-import { fileStates } from './views-state';
+import { baseModelManagerModule, modelFileModule, modelManagerModule } from './views-modules';
+import { isShapeChecked } from './views-state';
 
 /**
  * DecoratorManager.validate's structural check, run on the validation
@@ -40,7 +41,7 @@ function decorateResultTrusted(modelManager: any, decoratorCommandSets: any[], o
  * into a new ModelManager (`adoptStagedModels`).
  */
 function decoratorManagerDecorateModels(modelManager: any, decoratorCommandSets: any[], options?: any): any {
-    const { default: ModelManager } = require('../modelmanager');
+    const { default: ModelManager } = modelManagerModule();
     const source = sourceDcsHandle(modelManager);
     if (source) {
         // The source handle resolves its models itself; nothing is copied.
@@ -131,7 +132,7 @@ const EXTRACT_ACTION: { [binding: string]: number } = {
  * read unresolved, only for `restoreUndefinedDecorators`.
  */
 function decoratorManagerExtractOnSource(binding: string, source: any, modelManager: any, options: any): any {
-    const { default: ModelManager } = require('../modelmanager');
+    const { default: ModelManager } = modelManagerModule();
     const updatedModelManager = new ModelManager();
     const target = updatedModelManager.rustHandle;
     const result = source.dcsExtract(target, options, EXTRACT_ACTION[binding]);
@@ -148,7 +149,7 @@ function decoratorManagerExtractOnSource(binding: string, source: any, modelMana
 
 /** `decoratorManagerExtract` on a DCS input manager, staged into the new ModelManager. */
 function decoratorManagerExtractStaged(binding: string, modelManager: any, options: any): any {
-    const { default: ModelManager } = require('../modelmanager');
+    const { default: ModelManager } = modelManagerModule();
     const { dcs, sourceModels } = dcsManagerFor(modelManager, true);
     try {
         const updatedModelManager = new ModelManager();
@@ -207,7 +208,7 @@ function decoratorManagerExtractNonVocabDecorators(modelManager: any, options: a
  * `getAst`, `getModelFiles` and `resolveMetaModel` are BaseModelManager's own.
  */
 function dcsCacheable(modelManager: any): boolean {
-    const { default: BaseModelManager } = require('../basemodelmanager');
+    const { default: BaseModelManager } = baseModelManagerModule();
     const proto = BaseModelManager.prototype;
     const handle = modelManager?.rustHandle;
     return !!handle && modelManager._engine !== undefined &&
@@ -225,10 +226,10 @@ function dcsSourceShapeChecked(modelManager: any): boolean {
     if (!dcsCacheable(modelManager)) {
         return false;
     }
-    const { default: ModelFile } = require('../introspect/modelfile');
+    const { default: ModelFile } = modelFileModule();
     const getAst = ModelFile.prototype.getAst;
     return modelManager.getModelFiles(false).every((f: any) =>
-        fileStates.get(f)?.shapeChecked === f.ast && f.getAst === getAst);
+        isShapeChecked(f) && f.getAst === getAst);
 }
 
 /**

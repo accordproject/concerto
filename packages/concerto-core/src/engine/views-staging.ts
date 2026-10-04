@@ -29,7 +29,8 @@ import { optionalString } from './util';
 import { WireWriter } from './wire';
 import type { EngineErrorFlags } from './errors';
 import { installedLazyViewsCheck } from './views-lazy';
-import { committedHandle, fileState, fileStates } from './views-state';
+import { excludedNamespaces, modelFileModule } from './views-modules';
+import { committedHandle, fileState, stateOf } from './views-state';
 import type { FileState, Stage, StagedHeader } from './views-state';
 
 /**
@@ -79,7 +80,7 @@ function recordImportNames(modelFile: any, names: string[], state: FileState = f
 
 /** A copy of the recorded `getImports()` names, or undefined if stale or absent. */
 function recordedImportNames(modelFile: any): string[] | undefined {
-    const state = fileStates.get(modelFile);
+    const state = stateOf(modelFile);
     const imports = modelFile.imports;
     if (state === undefined || state.importNames === undefined || state.importNamesFor !== imports ||
         state.importNamesLength !== imports.length) {
@@ -248,7 +249,7 @@ function astText(ast: any, checked: CheckedAst): string {
  * BC-19: records that a pending ModelFile's AST passed the shape check.
  * `text` is undefined for an AST read in the compact layout.
  */
-function shapeCheckPassed(modelFile: any, text: string | undefined, state: FileState | undefined = fileStates.get(modelFile)): void {
+function shapeCheckPassed(modelFile: any, text: string | undefined, state: FileState | undefined = stateOf(modelFile)): void {
     if (state === undefined || state.shapePending === undefined) {
         return;
     }
@@ -284,7 +285,7 @@ function systemModelVerdict(modelFile: any, checkedText?: string): string | unde
             known.header = header;
         }
     }
-    const pending = fileStates.get(modelFile);
+    const pending = stateOf(modelFile);
     if (pending?.shapePending !== undefined) {
         pending.shapePending = undefined;
         pending.shapeChecked = ast;
@@ -296,7 +297,7 @@ function systemModelVerdict(modelFile: any, checkedText?: string): string | unde
  * BC-19: the shape check on its own, for a path that does not load the AST.
  * @throws {IllegalModelException} if the AST does not have the metamodel's shape
  */
-function completeShapeCheck(modelFile: any, text: string, state: FileState | undefined = fileStates.get(modelFile)): void {
+function completeShapeCheck(modelFile: any, text: string, state: FileState | undefined = stateOf(modelFile)): void {
     if (state === undefined || state.shapePending === undefined) {
         return;
     }
@@ -456,7 +457,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         if (checkedText === undefined && (e as EngineErrorFlags | null)?.unreadableAst) {
             throw e;
         }
-        if (checkedText !== undefined && fileStates.get(modelFile)?.shapePending !== undefined) {
+        if (checkedText !== undefined && stateOf(modelFile)?.shapePending !== undefined) {
             // The folded check's own error is thrown; after any other error, the
             // check runs now if it had not.
             if ((e as EngineErrorFlags | null)?.astShape) {
@@ -483,7 +484,7 @@ function adoptSharedView(modelFile: any, source: any, stage?: Stage, committed?:
     if (committed !== undefined) {
         state.committed = committed;
     }
-    const sourceState = fileStates.get(source);
+    const sourceState = stateOf(source);
     // The view's AST is `source`'s, or `filter`'s equal shallow copy of it.
     if (sourceState?.shapeChecked !== undefined && sourceState.shapeChecked === source.ast) {
         state.shapeChecked = modelFile.ast;
@@ -518,7 +519,7 @@ function readUnchecked(modelFile: any, handle: any): void {
  * `ModelFile._fromAstHeader(ast)` from the staged header, without an engine
  * call. False, changing nothing, when there is no staged header.
  */
-function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | undefined = fileStates.get(modelFile)): boolean {
+function applyStagedFileHeader(modelFile: any, ast: any, state: FileState | undefined = stateOf(modelFile)): boolean {
     const header = state?.stagedHeader;
     if (header === undefined) {
         return false;
@@ -594,8 +595,6 @@ function applyStagedHeaders(modelFile: any, ast: any): boolean {
     return applyStagedFileHeader(modelFile, ast);
 }
 
-/** TS `EXCLUDE_NS` (basemodelmanager.ts): the system namespaces `fromAst` skips. */
-const DCS_EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
 
 /**
  * `newModelManager.fromAst(ast, { disableValidation })` for a result the
@@ -605,14 +604,14 @@ const DCS_EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'
  * (BC-19), every model is engine-written, so the shape check is skipped.
  */
 function adoptStagedModels(newModelManager: any, ast: any, staged: any[], validated: boolean, disableValidation?: boolean, trusted?: boolean): void {
-    const { default: ModelFile } = require('../introspect/modelfile');
+    const { default: ModelFile } = modelFileModule();
     const handle = newModelManager.rustHandle;
     let allStaged = true;
     const models: any[] = ast.models;
     const built: any[] = [];
     try {
         models.forEach((model: any, i: number) => {
-            if (DCS_EXCLUDE_NS.includes(model.namespace)) {
+            if (excludedNamespaces().includes(model.namespace)) {
                 return;
             }
             // Only the system models, skipped above, have no stage.
@@ -650,7 +649,7 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
 
 /** Forgets `modelFile`'s stage, returning it if it was staged in `handle`. */
 function takeStage(modelFile: any, handle: any): Stage | undefined {
-    const state = fileStates.get(modelFile);
+    const state = stateOf(modelFile);
     return state === undefined ? undefined : takeStageOf(state, handle);
 }
 
@@ -669,7 +668,7 @@ function takeStageOf(state: FileState, handle: any): Stage | undefined {
  * Undefined when there is no usable stage; the caller then sends the AST.
  */
 function commitStaged(modelFile: any, handle: any): number | undefined {
-    const state = fileStates.get(modelFile);
+    const state = stateOf(modelFile);
     const stage = state === undefined ? undefined : takeStageOf(state, handle);
     if (!stage) {
         return undefined;
@@ -701,7 +700,7 @@ function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | un
     }
     const ids = commitBuffer.subarray(0, n);
     for (let i = 0; i < n; i++) {
-        const state = fileStates.get(modelFiles[i]);
+        const state = stateOf(modelFiles[i]);
         const stage = state?.stage;
         if (!stage || stage.handle !== handle) {
             return undefined;
@@ -729,7 +728,7 @@ function commitStagedAll(modelFiles: any[], handle: any): ArrayLike<number> | un
  * (`metamodelCheck`) is thrown unwrapped.
  */
 function validateAndCommitStaged(modelFile: any, handle: any, metamodel?: boolean): number | undefined {
-    const state = fileStates.get(modelFile);
+    const state = stateOf(modelFile);
     const stage = state?.stage;
     if (!stage || stage.handle !== handle) {
         return undefined;
@@ -764,7 +763,7 @@ function dropStaged(modelFile: any, handle: any): void {
  * no usable stage.
  */
 function updateStaged(modelFile: any, handle: any): number | undefined {
-    const state = fileStates.get(modelFile);
+    const state = stateOf(modelFile);
     const stage = state === undefined ? undefined : takeStageOf(state, handle);
     if (!stage) {
         return undefined;
@@ -779,7 +778,7 @@ function updateStaged(modelFile: any, handle: any): number | undefined {
 
 /** `validateAst` over the staged copy; false when there is no usable stage. */
 function validateAstStaged(modelFile: any, handle: any): boolean {
-    const stage = fileStates.get(modelFile)?.stage;
+    const stage = stateOf(modelFile)?.stage;
     if (!stage || stage.handle !== handle) {
         return false;
     }
@@ -795,7 +794,7 @@ function updateExternalStaged(modelFiles: any[], handle: any, next: object): boo
     const states: FileState[] = [];
     const ids: number[] = [];
     for (const modelFile of modelFiles) {
-        const state = fileStates.get(modelFile);
+        const state = stateOf(modelFile);
         const stage = state?.stage;
         if (!stage || stage.handle !== handle) {
             return false;
@@ -827,7 +826,7 @@ function updateExternalStaged(modelFiles: any[], handle: any, next: object): boo
  * neither applies.
  */
 function validateLoaded(modelFile: any, handle: any): boolean {
-    const state = fileStates.get(modelFile);
+    const state = stateOf(modelFile);
     const stage = state?.stage;
     if (stage && stage.handle === handle) {
         return handle.modelFileValidateStaged(stage.id);

@@ -17,7 +17,7 @@
 // the batch the views under construction read.
 
 import { rust } from './index';
-import { fileStates } from './views-state';
+import { committedHandle, deferredOf, stageOf } from './views-state';
 
 /**
  * One property's snapshots: `p` (`propertyProcess`) and `f` (`fieldProcess`).
@@ -77,7 +77,7 @@ let batch: Batch | null = null;
 function beginModelFile(modelFile: any, ast: any): Batch | null {
     const saved = batch;
     // A lazy file reuses a snapshot already computed for a declaration.
-    const deferred = fileStates.get(modelFile)?.deferred;
+    const deferred = deferredOf(modelFile);
     if (deferred && deferred.batch !== undefined) {
         batch = deferred.batch;
         return saved;
@@ -171,11 +171,7 @@ function computeBatch(modelFile: any, ast: any): Batch | null {
  * committed), taking the AST to be unchanged; undefined if it holds none.
  */
 function heldViewSnapshot(modelFile: any, namespace: string | undefined): string | undefined {
-    const state = fileStates.get(modelFile);
-    if (state === undefined) {
-        return undefined;
-    }
-    const stage = state.stage;
+    const stage = stageOf(modelFile);
     if (stage !== undefined) {
         try {
             return stage.handle.stagedModelFileViewSnapshot(stage.id, namespace);
@@ -185,7 +181,7 @@ function heldViewSnapshot(modelFile: any, namespace: string | undefined): string
             return undefined;
         }
     }
-    const committed: any = state.committed;
+    const committed: any = committedHandle(modelFile);
     const manager = modelFile.modelManager;
     if (committed === undefined || namespace === undefined || manager?.rustHandle !== committed ||
         manager.modelFiles?.[namespace] !== modelFile) {

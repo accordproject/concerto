@@ -37,7 +37,7 @@ import { checkString, typedCtorName, modelClasses } from './serializer-codec';
 import { EngineFastPathUnsupported, isDayjsLike, isTypedLike } from './util';
 import { WireWriter } from './wire';
 import { handleFor } from './serializer';
-import { classDeclarationGetIdentifierFieldName } from './views';
+import { classDeclarationGetIdentifierFieldName } from './views-lookups';
 import ValidationException from '../serializer/validationexception';
 
 /* eslint-disable no-unused-vars */

@@ -152,9 +152,14 @@ const DEFAULT_DECORATOR_VALIDATION = {
     invalidDecorator: undefined, // 'error' | 'warn' ...
 };
 
-// these namespaces are internal and excluded by default by getModelFiles
-// and ignored by fromAst
-const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
+/**
+ * These namespaces are internal: excluded by default by getModelFiles and
+ * ignored by fromAst. The engine's views read the same list
+ * (engine/views-modules.ts `excludedNamespaces`).
+ * @private
+ * @internal
+ */
+export const EXCLUDE_NS: readonly string[] = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
 
 // BC-28: the `regExp` option (an alternative regular expression engine such
 // as XRegExp) is ignored, with one warning per process: every `regex=` is
