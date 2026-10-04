@@ -69,6 +69,18 @@
       "import": "./dist/esm/schema.mjs",
       "require": "./dist/schema.js"
     },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "browser": "./dist/esm-browser/runtime.mjs",
+      "import": "./dist/esm/runtime.mjs",
+      "require": "./dist/runtime.js"
+    },
+    "./validate": {
+      "types": "./dist/validate.d.ts",
+      "browser": "./dist/esm-browser/validate.mjs",
+      "import": "./dist/esm/validate.mjs",
+      "require": "./dist/validate.js"
+    },
     "./package.json": "./package.json",
     "./dist/*": "./dist/*"
   },

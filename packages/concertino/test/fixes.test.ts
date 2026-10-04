@@ -170,11 +170,27 @@ describe('entry points', () => {
         for (const entry of [
             'export { ConcertinoConverter } from "./index";',
             'export { isValid, checkSchema } from "./schema";',
+            'export * from "./runtime";',
+            'export * from "./validate";',
         ]) {
             const code = await bundle(entry);
             expect(code).not.toMatch(/new Function/);
             expect(code).not.toMatch(/require\(/);
         }
+    });
+
+    it('should keep the runtime and validate subpaths free of the converter, the schema checks and concerto-core', async () => {
+        for (const entry of ['export * from "./runtime";', 'export * from "./runtime"; export * from "./validate";']) {
+            const code = await bundle(entry);
+            expect(code).not.toMatch(/must NOT have additional properties|concertino\.schema\.json/);
+            expect(code).not.toMatch(/concerto-core|concerto\.metamodel@1\.0\.0/);
+        }
+    });
+
+    it('should list every subpath in the bundle size script', () => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { subpaths } = require('../scripts/bundleSizes.js');
+        expect(subpaths()).toStrictEqual(['.', './schema', './runtime', './validate']);
     });
 });
 
