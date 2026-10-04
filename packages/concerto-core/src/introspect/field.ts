@@ -128,7 +128,7 @@ class Field extends Property {
     }
 }
 
-// Built on first read in a lazily built file (engine/views.ts).
+// Built on first read in a lazily built file (engine/views-lazy.ts).
 engineViews().installLazyField(Field.prototype, 'validator');
 
 export { Field };

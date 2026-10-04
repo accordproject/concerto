@@ -15,7 +15,8 @@
 // The DecoratorManager entry points.
 
 import { rust } from './index';
-import { adoptStagedModels, fileStates } from './views-staging';
+import { adoptStagedModels } from './views-staging';
+import { fileStates } from './views-state';
 
 /**
  * DecoratorManager.validate's structural check, run on the validation

@@ -199,6 +199,8 @@ module.exports = {
             'deferField': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: defers a part to its first read)' },
             'withBatch': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: runs a deferred build with its file\'s snapshots)' },
             'batchOf': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: the current snapshots of a file)' },
+            'currentBatch': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: the current snapshots, whichever file\'s, for the construction views; P5-117)' },
+            'installedLazyViewsCheck': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (the fuzz harness\'s hook, read by the staging module; P5-117)' },
             'decoratorModule': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (requires introspect/decorator once)' },
             'decoratorFromSnapshot': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: rebuilds a Decorator from its Rust decoratorProcess snapshot)' },
             'buildDecorators': { c: 'TS', p: 'P5-10b', r: R.engineShim + ' (lazy views: Decorated.process\'s decorator loop on first read; no decorator factory applies in a lazily built file)' },
@@ -799,7 +801,13 @@ for (const [file, members] of Object.entries(P5_64)) {
     const fs = require('fs');
     const path = require('path');
     const VIEWS = 'src/engine/views.ts';
-    const SPLIT = ['src/engine/views-staging.ts', 'src/engine/views-dcs.ts', 'src/engine/views-lookups.ts'];
+    // P5-117 (accordproject/concerto-rust#487, R2E-7/R2F-11): views.ts is
+    // now a barrel only; the shared lazy requires, the per-file state, the
+    // batch, the lazy parts and the construction views are leaf-first
+    // modules of their own, with no import cycle.
+    const SPLIT = ['src/engine/views-staging.ts', 'src/engine/views-dcs.ts', 'src/engine/views-lookups.ts',
+        'src/engine/views-modules.ts', 'src/engine/views-state.ts', 'src/engine/views-batch.ts',
+        'src/engine/views-lazy.ts', 'src/engine/views-construct.ts'];
     const core = path.join(__dirname, '..', '..', 'packages', 'concerto-core');
     const views = module.exports[VIEWS];
     for (const file of SPLIT) {

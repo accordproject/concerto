@@ -232,7 +232,7 @@ class ScalarDeclaration extends Declaration {
 
 }
 
-// Built on first read in a lazily built file (engine/views.ts).
+// Built on first read in a lazily built file (engine/views-lazy.ts).
 engineViews().installLazyField(ScalarDeclaration.prototype, 'validator');
 
 export { ScalarDeclaration };

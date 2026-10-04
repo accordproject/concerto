@@ -114,7 +114,7 @@ class ClassDeclaration extends Declaration {
 
         // The `classDeclarationProcess` binding, read from the file's
         // view snapshot while its declarations are built
-        // (engine/views.ts).
+        // (engine/views-construct.ts).
         const decision = engineViews().classDeclarationProcess(this) as {
             superType: string | null;
             idField: string | null;
