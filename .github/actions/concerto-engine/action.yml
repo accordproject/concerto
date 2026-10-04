@@ -26,7 +26,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: accordproject/concerto-rust
-        ref: 9b921efe92a7c3bdea86e495a0895cf92c1b720d
+        ref: e5ad3dc7d5df019e69fd8d3f3297ca2ae210037a
         path: .concerto-rust
 
     # actions/checkout only writes inside the workspace; the engine link
