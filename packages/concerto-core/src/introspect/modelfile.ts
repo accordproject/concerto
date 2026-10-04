@@ -848,7 +848,10 @@ class ModelFile extends Decorated {
      * @return {object} The definitions for this model.
      */
     getAst(): IModel {
-        // a ModelFile is always constructed from a metamodel Model node
+        // a ModelFile is always constructed from a metamodel Model node. A
+        // view of a file `filter` kept whole has TS 5.0.0's filtered form as
+        // its `ast`, built on first read (engine/views-staging.ts
+        // `installFilteredAst`).
         return this.ast as IModel;
     }
 
