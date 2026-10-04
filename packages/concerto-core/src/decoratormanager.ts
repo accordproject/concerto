@@ -25,9 +25,6 @@ import type ModelFile from './introspect/modelfile';
 /* eslint-enable no-unused-vars */
 import { rust, engineViews } from './engineloader';
 
-// The engine bindings (`rust`) and views are typed by
-// src/engine/bindings.d.ts.
-
 const DCS_VERSION = '0.4.0';
 
 /**
@@ -161,13 +158,8 @@ function intersect(a, b) {
 
 /**
  * Copies every own field of `source` onto `target`, recursing into matching
- * nested objects and arrays so nested references already held by a caller
- * (for example a DecoratorCommandSet an outer scope kept a reference to) end
- * up mutated in place rather than replaced. Not a DecoratorManager member,
- * so it stays out of the public API (`migration/api-snapshot`) as even a
- * `@private` static would not. The binding computes the migrated value
- * without mutating the JS object it was given; this mutates it in place, as
- * TS 5.0.0's `migrateTo` did.
+ * objects and arrays, so references a caller holds are mutated in place, as
+ * TS's `migrateTo` did. Not a member, to stay out of the public API.
  * @param {*} target the object (or array) to mutate in place
  * @param {*} source the value to copy onto it
  * @returns {*} target
@@ -221,9 +213,7 @@ class DecoratorManager {
             DCS_MODEL,
             'decoratorcommands@0.3.0.cto'
         );
-        // The structural check only, on validationModelManager's own
-        // rustHandle, which mirrors its model files. validationModelManager
-        // is built from CTO in TS and returned unchanged.
+        // The structural check only; validationModelManager is returned unchanged.
         engineViews().decoratorManagerValidate(validationModelManager, decoratorCommandSet);
         return validationModelManager;
     }
@@ -235,9 +225,7 @@ class DecoratorManager {
      * @returns {object} the migrated DecoratorCommandSet object
      */
     static migrateTo(decoratorCommandSet, version) {
-        // decoratormanager.ts's own callers (e.g. decorateModels's migrate
-        // step) rely on decoratorCommandSet being mutated in place, not just
-        // on the return value.
+        // Callers rely on the in-place mutation, not just the return value.
         assignDeep(decoratorCommandSet, rust.decoratorManagerMigrateTo(decoratorCommandSet));
         return decoratorCommandSet;
     }
@@ -251,10 +239,8 @@ class DecoratorManager {
      */
     static canMigrate(decoratorCommandSet, DCS_VERSION) {
         const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
-        // BC-41: a namespace version is strict SemVer 2.0.0, whose
-        // components go up to 2^64-1, beyond node-semver's
-        // Number.MAX_SAFE_INTEGER, so its major and minor (the first two
-        // dot-separated parts, always plain digits) are compared exactly.
+        // BC-41: strict SemVer components may exceed Number.MAX_SAFE_INTEGER,
+        // so major and minor are compared as BigInts.
         const [major, minor] = inputVersion!.split('.', 2).map(BigInt);
         return (major === BigInt(semver.major(DCS_VERSION)) && (minor < BigInt(semver.minor(DCS_VERSION))));
     }
@@ -291,11 +277,7 @@ class DecoratorManager {
             options.disableMetamodelValidation = true;
         }
 
-        // Only the migrate step of the old migrateAndValidate call mutated
-        // its decoratorCommandSets argument (validate only threw); run it
-        // here so decoratorCommandSet (this method's own argument, still
-        // referenced by the caller) ends up migrated in place exactly as
-        // before.
+        // Migrate in place, as the caller still references decoratorCommandSet.
         if (options?.migrate) {
             decoratorCommandSets.forEach((commandSet, index) => {
                 if (this.canMigrate(commandSet, DCS_VERSION)) {
@@ -384,9 +366,7 @@ class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property, command) {
-        // TS 5.0.0's body: pure work over the caller's own objects, which it
-        // changes in place (only the `decorators` array, pushing
-        // `command.decorator` itself), so it stays in TS.
+        // Stays in TS: it mutates the caller's `decorators` array in place.
         const { target, decorator, type } = command;
         if (target.properties || target.property || target.type) {
             if (this.falsyOrEqual(target.property ? target.property : target.properties, [property.name]) &&

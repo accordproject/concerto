@@ -69,9 +69,8 @@ class ScalarDeclaration extends Declaration {
     validate() {
         super.validate();
 
-        // BC-52: answered by the engine from its arena, by this
-        // declaration's handle; a replaced `getModelFile` or
-        // `getAllDeclarations` method is not called.
+        // BC-52: answered by the engine; a replaced `getModelFile` or
+        // `getAllDeclarations` is not called.
         const views = engineViews();
         const ref = views.declarationArenaRef(this);
         if (ref === undefined) {

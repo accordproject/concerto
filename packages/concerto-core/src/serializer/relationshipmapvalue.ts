@@ -18,14 +18,8 @@ import type MapDeclaration from '../introspect/mapdeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
- * The relationship a map holds when its value type is a relationship (`map
- * M { o String --> T }`), with the members of a RelationshipDeclaration
- * that the serializer's relationship code reads (BC-05; DV-007).
- * JSONPopulator, JSONGenerator and ResourceValidator hand it to their
- * relationship-property code, so a map value is read, written and validated
- * as a `--> T` property is, under the same
- * `acceptResourcesForRelationships`, `convertResourcesToRelationships` and
- * `permitResourcesForRelationships` options.
+ * BC-05, DV-007: a relationship-typed map value (`map M { o String --> T }`),
+ * shaped so the serializer treats it as a `--> T` property.
  * @private
  */
 export interface RelationshipMapValue {
@@ -45,12 +39,10 @@ export interface RelationshipMapValue {
  */
 export function getRelationshipMapValue(mapDeclaration: MapDeclaration): RelationshipMapValue | null {
     const value = mapDeclaration.getValue();
-    // The value node's metamodel `$class`, by its short name.
     if (String(value.ast.$class).split('.').pop() !== 'RelationshipMapValueType') {
         return null;
     }
-    // Resolved on first use, in the map's own model file (honouring its
-    // imports), as a relationship property's type is.
+    // Resolved on first use, as a relationship property's type is.
     let typeName: string | undefined;
     const getFullyQualifiedTypeName = (): string =>
         typeName ?? (typeName = mapDeclaration.getModelFile().getFullyQualifiedTypeName(value.getType()) as string);

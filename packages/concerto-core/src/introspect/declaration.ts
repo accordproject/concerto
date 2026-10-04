@@ -60,17 +60,12 @@ class Declaration extends Decorated {
     process() {
         super.process();
 
-        // `modelUtilIsValidIdentifier` and
-        // `modelUtilGetFullyQualifiedName`, read from the
-        // file's view snapshot while its declarations are
-        // built (engine/views-construct.ts).
+        // Read from the file's view snapshot (engine/views-construct.ts).
         const views = engineViews();
         if (!views.declarationIsValidIdentifier(this)) {
             throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
         }
-        // `declarationIsValidIdentifier` is a plain boolean function, not a
-        // type predicate, so `this.ast.name` is not narrowed from
-        // `string | undefined` by the check above.
+        // Not a type predicate, so `this.ast.name` is not narrowed.
         this.name = this.ast.name as string;
         this.fqn = views.declarationFullyQualifiedName(this);
     }
@@ -87,11 +82,7 @@ class Declaration extends Decorated {
     validate(...args: any[]) {
         super.validate(...args);
         // Check for clashes against imported types (accordproject/concerto#648).
-        // The rule runs in the engine (`declarationValidate`) over
-        // this view's collaborators (`getModelFile().isImportedType`, the
-        // manager's `dangerouslyAllowReservedSystemTypeNamesInUserModels`
-        // option and `isReservedSystemTypeImport`), and throws the
-        // IllegalModelException TS throws.
+        // Run by the engine, with TS's IllegalModelException.
         rust.declarationValidate(this);
     }
 
@@ -103,11 +94,7 @@ class Declaration extends Decorated {
      * @returns {boolean} true if the resolved import is a reserved system type
      */
     private isReservedSystemTypeImport(modelFile: ModelFile, typeName: string): boolean {
-        // Decided in Rust (concerto-wasm
-        // `declarationIsReservedSystemTypeImport`) over
-        // `modelFile.getType(typeName)` and the declaration it resolves to:
-        // a concept, asset, transaction, participant or event of a system
-        // model file.
+        // A concept, asset, transaction, participant or event of a system model.
         return rust.declarationIsReservedSystemTypeImport(modelFile, typeName);
     }
 

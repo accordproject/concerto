@@ -80,15 +80,11 @@ class ResourceId {
 }
 
 /**
- * `ResourceId.fromURI` over many URIs at once, in one engine call: a
- * relationship-typed map's values are read with one crossing per map
- * rather than one per value.
+ * `ResourceId.fromURI` over many URIs in one engine call.
  * @param {String[]} uris - Resource URIs, all read with the same legacy arguments.
  * @param {String} [legacyNamespace] - Namespace to use for legacy resource identifiers.
  * @param {String} [legacyType] - Type to use for legacy resource identifiers.
- * @return {Array} one ResourceId per URI, or `undefined` where the URI does
- * not parse (or has an empty part): the caller reads that one with
- * `ResourceId.fromURI`, which throws its error at the same point.
+ * @return {Array} one ResourceId per URI, or `undefined` to read it with `fromURI`
  * @internal
  */
 export function resourceIdsFromURIs(uris: string[], legacyNamespace?: string, legacyType?: string): (ResourceId | undefined)[] {
@@ -103,12 +99,9 @@ export function resourceIdsFromURIs(uris: string[], legacyNamespace?: string, le
 }
 
 /**
- * `ResourceId.prototype.toURI` over many identifiers at once, in one engine
- * call: a relationship-typed map's values are written with one crossing per
- * map rather than one per value.
+ * `ResourceId.prototype.toURI` over many identifiers in one engine call.
  * @param {String[]} fields - Three slots per identifier: namespace, type and id.
- * @return {Array} one URI per identifier, or `undefined` where it is not
- * valid: the caller writes that one the usual way, which throws its error.
+ * @return {Array} one URI per identifier, or `undefined` to write it the usual way
  * @internal
  */
 export function resourceIdsToURIs(fields: unknown[]): (string | undefined)[] {

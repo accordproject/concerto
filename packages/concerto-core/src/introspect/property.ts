@@ -79,14 +79,7 @@ class Property extends Decorated {
     process() {
         super.process();
 
-        // A nullish `this.ast.name` is a TS-only quirk: `ID_REGEX.test(null)`
-        // (or `undefined`) coerces its argument to the string "null" (or
-        // "undefined"), which is itself a valid identifier, so
-        // `ModelUtil.isValidIdentifier` passes; it is the later
-        // `if(!this.name)` check, on the nullish value itself, that
-        // throws. `propertyProcess` reads `this.ast.name` as a string, so
-        // this one case is kept here rather than round-tripped through
-        // the engine.
+        // Kept in TS: `isValidIdentifier` passes a nullish name ("null").
         if (this.ast.name === null || this.ast.name === undefined) {
             throw new Error('No name for type ' + JSON.stringify(this.ast));
         }

@@ -48,11 +48,8 @@ function newMetaModelManager() {
  * @return {object} the validated metamodel instance in JSON
  */
 function validateMetaModel(input) {
-    // Validated in one engine call against a metamodel model manager the
-    // engine keeps (engine/serializer.ts `validateMetaModel`), rather than
-    // building a metamodel ModelManager, its Factory and its Serializer on
-    // every call. An input the engine cannot cross (EngineFastPathUnsupported)
-    // is validated below, through the Serializer's own fallback path.
+    // One engine call against the engine's own metamodel manager; an input
+    // the engine cannot carry is validated below, through the Serializer.
     try {
         engineSerializer().validateMetaModel(input);
         return input;
@@ -69,9 +66,7 @@ function validateMetaModel(input) {
         // validate the metaModel
         serializer.fromJSON(input);
     } finally {
-        // The manager is this function's own and nothing built from it
-        // escapes, so its engine handle is released here rather than left
-        // to the garbage collector.
+        // Released now: the manager is this function's own and nothing escapes.
         engineHandles().releaseHandle(metaModelManager.rustHandle);
     }
 

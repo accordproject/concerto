@@ -12,30 +12,18 @@
  * limitations under the License.
  */
 
-// The engine helpers the public modules share with src/engine/, in a module
-// with no imports, so a public module reaches them without loading the
-// engine (engineloader.ts loads engine modules only through its non-literal
-// `require`). Nothing here is exported from index.ts, and every export is
-// `@internal`.
+// Engine helpers shared by public modules and src/engine/, with no imports,
+// so they never load the engine. Every export is `@internal`.
 
 /**
- * The brand of a fast-path fallback signal: a registered symbol, set to
- * `true` on `EngineFastPathUnsupported` (engine/serializer-codec.ts) and on
- * an engine error whose payload says the wire codec could not carry the
- * value (`fastPathUnsupported`; engine/errors.ts). A registered symbol
- * rather than a class test, which a minifier or a second copy of the module
- * would break.
+ * The brand of a fast-path fallback signal; a registered symbol survives
+ * minifiers and duplicate module copies.
  * @internal
  */
 export const FAST_PATH_UNSUPPORTED: unique symbol = Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported') as any;
 
 /**
- * Whether `err` tells a fast path's caller to run its TS path instead: an
- * `EngineFastPathUnsupported`, or an engine error flagged the same way. The
- * test for an error the engine may have thrown, so the decision never
- * depends on an error's message text (error parity lets messages change);
- * a caller that catches only its own internal throw may test
- * `instanceof EngineFastPathUnsupported` instead.
+ * Whether `err` tells a fast path's caller to run its TS path instead.
  * @param {*} err the error caught
  * @return {boolean} true to fall back
  * @internal
@@ -45,12 +33,7 @@ export function isFastPathUnsupported(err: unknown): boolean {
 }
 
 /**
- * `v` when it is a string, else `undefined`: how a `ModelFile`'s
- * `definitions` or `fileName` crosses to the engine's `Option<String>`
- * parameters. The `ModelFile` constructor rejects only a *truthy*
- * non-string, so `0`, `false` and `NaN` are stored as they are; only a
- * genuine string is forwarded, anything else is `undefined`, as TS 5.0.0
- * (which makes no engine call) sees it.
+ * `v` when it is a string, else `undefined`, for an `Option<String>` parameter.
  * @param {*} v the value
  * @return {string|undefined} the string, or undefined
  * @internal
