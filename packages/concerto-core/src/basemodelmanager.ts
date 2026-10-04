@@ -55,9 +55,8 @@ import { optionalString } from './engineutil';
 import type { EngineHandle, EngineState } from './engine/bindings';
 
 /**
- * A new manager's engine state record (`BaseModelManager._engine`,
- * `EngineState` in src/engine/bindings.d.ts).
- * @return {EngineState} the record, with model version 0 and nothing cached
+ * A new manager's engine state: model version 0, nothing cached.
+ * @return {EngineState} the record
  * @private
  */
 function newEngineState(): EngineState {
@@ -71,8 +70,7 @@ function newEngineState(): EngineState {
 }
 
 /**
- * `manager`'s read memo (`EngineState.readMemo`), started afresh when its
- * model version has moved since it was made.
+ * The read memo, started afresh when the model version has moved.
  * @param {object} state - the manager's engine state
  * @return {object} its current memo
  * @private
@@ -91,9 +89,7 @@ function managerReadMemo(state: EngineState): NonNullable<EngineState['readMemo'
 }
 
 /**
- * `manager`'s namespace list (`EngineState.namespaces`), or undefined when
- * it has none, or while a batch is being added (`_mirrorPending`, when
- * `modelFiles` is ahead of rustHandle).
+ * The cached namespace list, if any and not mid-batch.
  * @param {object} manager - the BaseModelManager
  * @return {string[]|undefined} its list
  * @private
@@ -103,9 +99,7 @@ function namespaceListOf(manager: { _engine: EngineState; _mirrorPending: boolea
 }
 
 /**
- * Appends `namespace`, just registered as a new key of `manager`'s
- * `modelFiles`, to its namespace list, if it has one. A change made while a
- * batch is being added (`_mirrorPending`) drops the list instead.
+ * Appends a new namespace to the cached list (dropped mid-batch).
  * @param {object} manager - the BaseModelManager
  * @param {string} namespace - the namespace added
  * @private
@@ -120,9 +114,7 @@ function noteNamespaceAdded(manager: { _engine: EngineState; _mirrorPending: boo
 }
 
 /**
- * Removes `namespace`, just deleted from `manager`'s `modelFiles`, from its
- * namespace list, if it has one (and drops the list if `namespace` is
- * missing from it, or while a batch is being added).
+ * Removes a deleted namespace from the cached list.
  * @param {object} manager - the BaseModelManager
  * @param {string} namespace - the namespace (key) removed
  * @private
@@ -153,18 +145,13 @@ const DEFAULT_DECORATOR_VALIDATION = {
 };
 
 /**
- * These namespaces are internal: excluded by default by getModelFiles and
- * ignored by fromAst. The engine's views read the same list
- * (engine/views-modules.ts `excludedNamespaces`).
+ * Internal namespaces: excluded by default by getModelFiles, ignored by fromAst.
  * @private
  * @internal
  */
 export const EXCLUDE_NS: readonly string[] = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
 
-// BC-28: the `regExp` option (an alternative regular expression engine such
-// as XRegExp) is ignored, with one warning per process: every `regex=` is
-// compiled and evaluated by the Concerto engine, which cannot call a JS
-// constructor.
+// BC-28: the `regExp` option is ignored, with one warning per process.
 let regExpOptionWarned = false;
 
 /**
@@ -185,26 +172,12 @@ function warnRegExpOptionIgnored() {
     }
 }
 
-// The system namespaces a new rustHandle loads itself (concerto-wasm
-// `ModelManagerHandle::new`), which `addDecoratorModel` and `addRootModel`
-// then register in `modelFiles` as views of those copies
-// (`_adoptPreloadedModel`).
+// The system namespaces a new rustHandle loads itself.
 const RUST_PRELOADED_NS = ['concerto.decorator@1.0.0', 'concerto@1.0.0'];
 
 /**
- * Installs `manager.metamodelModelFile`, `validateAst`'s cached copy of the
- * metamodel, as an accessor that builds it on first read: it is read only
- * after a failed metamodel check (`_mirrorMetamodelLeak`), under
- * `addMetamodel`, and by `fork()`. The property keeps v5.0.0's shape: an
- * enumerable own property, a metamodel ModelFile of `manager`, replaced by
- * a plain data property once built or assigned. The copy is built as
- * v5.0.0's constructor built it: from the metamodel AST (never from
- * another manager's copy, so a fork does not keep its source reachable),
- * not staged (`_buildingMetamodelCopy`), and with none of the manager's
- * decorator factories, which v5.0.0's constructor had not been given yet.
- * The constructor and `fork()` both install it. A shared
- * `MetaModelUtil.metaModelAst` changed into an invalid model therefore
- * throws at the first read, not in the constructor (BC-55).
+ * Makes `metamodelModelFile` build on first read (BC-55: an invalid
+ * metamodel AST throws there, not in the constructor).
  * @param {BaseModelManager} manager the manager
  * @private
  */
@@ -236,10 +209,7 @@ function installLazyMetamodelCopy(manager: BaseModelManager): void {
 }
 
 /**
- * A type name argument for an engine read, whose binding takes a `&str` (a
- * JS non-string traps the engine). A non-string gets the error TS 5.0.0's
- * `ModelUtil.getNamespace` call threw first for it: an `Error` for null or
- * undefined (`FQN is invalid.`), and a `TypeError` otherwise.
+ * A type name for a `&str` binding; a non-string throws as TS did.
  * @param {*} name the type name argument
  * @return {string} the name as a string
  * @private
@@ -268,13 +238,7 @@ function typeNameArgument(name: unknown): string {
  * @memberof module:concerto-core
  */
 class BaseModelManager {
-    /**
-     * The registered model files, by namespace. Internal and read-only
-     * (BC-48): every change goes through this manager's own methods, which
-     * keep `rustHandle` mirroring it. Use `getModelFile`, `getModelFiles`
-     * and `getNamespaces` to read it.
-     * @internal
-     */
+    /** The model files by namespace; read-only (BC-48). @internal */
      modelFiles: Record<string, ModelFileInstance>;
      processFile: (fileName: string | null, modelInput: string | unknown) => ModelFileSource;
      factory: Factory;
@@ -283,58 +247,17 @@ class BaseModelManager {
      options: ModelManagerOptions | undefined;
      decoratorValidation: NonNullable<ModelManagerOptions['decoratorValidation']>;
      metamodelModelFile!: ModelFileInstance;
-    /**
-     * A live concerto-wasm ModelManagerHandle, mirroring `modelFiles`:
-     * every addModelFile/updateModelFile/deleteModelFile call this manager
-     * makes is written to it, except the registration of the decorator/root
-     * system models, which its own constructor already loads
-     * (`_needsRustWrite`). Always set by the end of the constructor.
-     * @internal
-     */
+    /** The engine handle mirroring `modelFiles`. @internal */
      rustHandle: EngineHandle;
-    /**
-     * True only while `metamodelModelFile` is built (on first read,
-     * `installLazyMetamodelCopy`), the cached copy of the metamodel
-     * `validateAst` registers when rustHandle
-     * keeps its own copy after a failed check. `_needsRustWrite` answers
-     * false for the metamodel namespace while it is set, so
-     * engine/views-staging.ts `stageModelFile` keeps no engine stage for that copy
-     * in every new manager. Every other metamodel file, a user's included,
-     * is mirrored.
-     * @internal
-     */
+    /** True while `metamodelModelFile` is built: that copy is never mirrored. @internal */
      _buildingMetamodelCopy?: boolean;
-    /**
-     * True only while one of this manager's own mutators has written
-     * `modelFiles` ahead of `rustHandle`: the batch `addModelFiles` adds
-     * before it mirrors them. Reads never compare the two maps; this flag is
-     * the whole mirror check (`_rustHandleMatchesModelFiles`).
-     * @internal
-     */
+    /** True while `addModelFiles` has `modelFiles` ahead of `rustHandle`. @internal */
      _mirrorPending: boolean;
-    /**
-     * The rustHandle model file handle of each namespace, cached when the
-     * file is committed (or on first read), for `ModelFile`'s reads
-     * (`_rustModelFileId`). Cleared whenever the engine rebuilds its model
-     * file arena (an update or a delete) or rustHandle is replaced.
-     * @internal
-     */
+    /** Engine file handles by namespace; cleared when the arena is rebuilt. @internal */
      _modelFileIds: Map<string, number>;
-    /**
-     * The system namespaces the current rustHandle loaded itself
-     * (`RUST_PRELOADED_NS`) that `modelFiles` does not hold yet. Registering
-     * one writes nothing to rustHandle; every other add, update and delete,
-     * a system namespace's included, is mirrored.
-     * @internal
-     */
+    /** Preloaded system namespaces not yet in `modelFiles`. @internal */
      _rustPreloaded: Set<string>;
-    /**
-     * This manager's engine state: its model version, moved by every
-     * change of `modelFiles` or `rustHandle` and the key of every cached
-     * answer, and those cached answers (`EngineState` in
-     * src/engine/bindings.d.ts).
-     * @internal
-     */
+    /** The model version, which keys every cached answer, and the caches. @internal */
      _engine: EngineState;
     /**
      * Create the ModelManager.
@@ -358,8 +281,7 @@ class BaseModelManager {
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
     */
     constructor(options?: ModelManagerOptions, processFile?: (fileName: string | null, modelInput: string | unknown) => ModelFileSource) {
-        // BC-47: a ModelFile may be built only for a manager whose
-        // constructor ran; registered before this constructor builds any.
+        // BC-47: a ModelFile may be built only for a constructed manager.
         ModelFile._registerManager(this);
         this._engine = newEngineState();
         this.processFile = processFile ? processFile : defaultProcessFile;
@@ -376,23 +298,15 @@ class BaseModelManager {
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
         this.rustHandle = this._newRustHandle();
-        // The namespace list starts empty with the map; the system models
-        // below are appended as they are registered.
         this._engine.namespaces = [];
         this.addDecoratorModel();
         this.addRootModel();
 
-        // A copy of the Metamodel ModelFile for use when validating the
-        // structure of ModelFiles later, built on first read
-        // (`installLazyMetamodelCopy`).
+        // A copy of the Metamodel ModelFile, built on first read.
         this._buildingMetamodelCopy = false;
         installLazyMetamodelCopy(this);
 
         if(options?.addMetamodel) {
-            // Built now, by this read, and mirrored into rustHandle by
-            // `addModelFile` like any other namespace: rustHandle's own
-            // constructor loads only `concerto@1.0.0` and
-            // `concerto.decorator@1.0.0`.
             this.addModelFile(this.metamodelModelFile);
         }
     }
@@ -417,11 +331,7 @@ class BaseModelManager {
         }
 
         const {rootModelAst, rootModelCto, rootModelFile} = getRootModel();
-        // The engine's precomputed verdict applies to this AST while it is
-        // exactly the fixed root model (engine/views-staging.ts `systemModelAsts`).
         engineViews().markSystemModelAst(rootModelAst);
-        // The copy rustHandle loaded itself is adopted as a view
-        // (`_adoptPreloadedModel`), unless the helper was replaced.
         if (getRootModel === fixedGetRootModel && this._adoptPreloadedModel(rootModelAst, rootModelCto, rootModelFile)) {
             return;
         }
@@ -481,12 +391,7 @@ class BaseModelManager {
         }
         const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
 
-        // The engine's precomputed verdict applies to this AST while it is
-        // exactly the fixed decorator model (engine/views-staging.ts
-        // `systemModelAsts`).
         engineViews().markSystemModelAst(decoratorModelAst);
-        // The copy rustHandle loaded itself is adopted as a view
-        // (`_adoptPreloadedModel`), unless the helper was replaced.
         if (getDecoratorModel === fixedGetDecoratorModel &&
             this._adoptPreloadedModel(decoratorModelAst, decoratorModelCto, decoratorModelFile)) {
             return;
@@ -497,17 +402,8 @@ class BaseModelManager {
     }
 
     /**
-     * Registers the fixed decorator or root model, `ast` as its helper
-     * returned it, as a view of the copy the current rustHandle loaded
-     * itself (`ModelFile._systemView`): no ModelFile is built from the AST,
-     * and nothing is staged, dropped or written to rustHandle. Only for a
-     * namespace rustHandle loaded and `modelFiles` does not hold yet
-     * (`_rustPreloaded`), and only while `addModelFile` is this class's own:
-     * an override (a subclass's, or a spy on the instance) is called for
-     * the system models as v5.0.0 called it. False, changing nothing,
-     * otherwise, and the caller adds the model with `addModelFile` as any
-     * other file, which throws for a namespace already declared, as v5.0.0
-     * did.
+     * Registers a system model as a view of rustHandle's preloaded copy.
+     * False when not preloaded or `addModelFile` is overridden.
      * @param {object} ast the fixed system model's AST
      * @param {string} cto the model's CTO text
      * @param {string} fileName the model's file name
@@ -527,26 +423,13 @@ class BaseModelManager {
         }
         this.modelFiles[namespace] = m;
         this._rustPreloaded.delete(namespace);
-        // A new key, appended to the namespace list, and a model change, as
-        // `addModelFile` notes them.
         noteNamespaceAdded(this, namespace);
         this._engine.version++;
         return true;
     }
 
     /**
-     * Whether a namespace needs to be written into `rustHandle`: every
-     * namespace but a system model the current `rustHandle` loaded itself
-     * and `modelFiles` does not hold yet (`_rustPreloaded`: the decorator
-     * and root models `addDecoratorModel`/`addRootModel` register). The
-     * metamodel namespace is written like any other, so a manager a user
-     * adds the metamodel to (`newMetaModelManager`, or `addModelFile` of a
-     * metamodel ModelFile) keeps rustHandle in parity and answers its reads
-     * from Rust. The only metamodel copy that is never written is
-     * `validateAst`'s own (`metamodelModelFile`): it is not staged while it
-     * is built (`_buildingMetamodelCopy`), and `validateAst`
-     * registers it in `this.modelFiles` only when rustHandle already holds
-     * its own copy.
+     * Whether a namespace needs writing to `rustHandle`.
      * @param {string} namespace - the namespace being added, updated or removed
      * @return {boolean} true if `namespace` needs writing to `rustHandle`
      * @private
@@ -560,13 +443,7 @@ class BaseModelManager {
     }
 
     /**
-     * Throws the BC-46 `TypeError` unless `modelFile` is a ModelFile the
-     * ModelFile constructor built: only such a file was loaded by the
-     * engine, so only it can be mirrored into `rustHandle`. A duck-typed
-     * object, `Object.create(ModelFile .prototype)` or a sinon stub
-     * instance is rejected. v5.0.0 threw a `TypeError` for almost every
-     * such value too (calling a method it lacks), and accepted a duck-typed
-     * object.
+     * BC-46: a `TypeError` unless the ModelFile constructor built `modelFile`.
      * @param {*} modelFile - the argument
      * @param {string} method - the method it was passed to
      * @private
@@ -579,12 +456,7 @@ class BaseModelManager {
     }
 
     /**
- * The rustHandle write for a model file being added: registers the file the
- * engine loaded when the `ModelFile` was constructed (`commitStaged`), or
- * else sends its AST, and caches the file's handle (`_modelFileIds`). A
- * namespace `_needsRustWrite` excludes is not written (rustHandle loaded it
- * itself); its stage, if any, is dropped. Any error the write throws
- * propagates.
+     * Writes an added model file to rustHandle and caches its handle.
      * @param {ModelFile} modelFile - the model file being added
      * @return {boolean} true if the namespace was written to rustHandle
      * @private
@@ -611,12 +483,7 @@ class BaseModelManager {
     }
 
     /**
- * `_rustMirrorAdd` for each of `modelFiles`, in order: in one engine call
- * when every one is written from its stage (`commitStagedAll`), else one
- * write per file. Adds each namespace written to `mirrored`, so the caller
- * can undo them. The one call cannot fail part way: its only registration
- * error, a namespace already registered, is rejected by `addModelFiles`
- * first.
+     * `_rustMirrorAdd` for each file, in one engine call when all are staged.
      * @param {ModelFile[]} modelFiles - the model files being added
      * @param {Set<string>} mirrored - the namespaces written, filled in
      * @private
@@ -642,19 +509,12 @@ class BaseModelManager {
     }
 
     /**
- * `addModelFile(m, null, null, true)` for each of `modelFiles`, in order, for
- * the DecoratorManager results (`adoptStagedModels`), registered from their
- * stages in one engine call (`commitStagedAll`). Every file passes
- * `addModelFile`'s checks by construction: `adoptStagedModels` built each,
- * with a versioned namespace no other result file has, into this new,
- * cleared manager. With one file, or a file without a usable stage, each
- * file is added by `addModelFile`.
+     * `addModelFile(m, null, null, true)` per file, in one engine call if possible.
      * @param {ModelFile[]} modelFiles - the model files being added
      * @private
      * @internal
      */
     _addStagedModelFiles(modelFiles: ModelFileInstance[]) {
-        // `commitStagedAll` answers undefined for fewer than two files.
         const ids = engineViews().commitStagedAll(modelFiles, this.rustHandle);
         if (ids === undefined) {
             modelFiles.forEach((m) => this.addModelFile(m, null, null, true));
@@ -664,9 +524,7 @@ class BaseModelManager {
     }
 
     /**
-     * What `addModelFile` does once a new file is written to rustHandle:
-     * caches its rustHandle handle, registers it in `modelFiles`, appends
-     * its namespace and moves the model version.
+     * Registers a file already written to rustHandle.
      * @param {ModelFile} modelFile - the model file added
      * @param {number} id - its rustHandle handle
      * @private
@@ -681,14 +539,7 @@ class BaseModelManager {
     }
 
     /**
-     * `addModelFile`'s validation and rustHandle write in one engine call,
- * for a file staged in `rustHandle` whose `validate` is `ModelFile`'s own
- * (`validateAndCommitStaged`); caches the file's handle. False, changing
- * nothing, for any other file: the caller then calls `modelFile.validate()`
- * and `_rustMirrorAdd`. A validation error propagates as
- * `modelFile.validate()` throws it. With `metamodel`, `validateAst`'s check
- * runs first in the same call, its error thrown as `validateAst` throws it,
- * after the same metamodel mirroring (`_mirrorMetamodelLeak`).
+     * Validates and writes a staged file in one engine call, else false.
      * @param {ModelFile} modelFile - the model file being added
      * @param {boolean} [metamodel] - whether to run the metamodel check too
      * @return {boolean} true if the file was validated and written
@@ -720,21 +571,13 @@ class BaseModelManager {
     }
 
     /**
-     * The rustHandle write for a model file replacing the one registered
-     * for its namespace: rustHandle holds every registered namespace, so it
-     * is always an update, which rebuilds the engine's model file arena, so
-     * every cached handle is dropped (`_modelFileIds`). Any error the write
-     * throws propagates.
+     * Writes a replacing model file to rustHandle.
      * @param {ModelFile} modelFile - the model file replacing the registered one
      * @private
      * @internal
      */
     _rustMirrorUpdate(modelFile) {
         const namespace = modelFile.getNamespace();
-        // The file Rust loaded when the ModelFile was constructed
-        // replaces the registered one (engine/views-staging.ts
-        // `updateStaged`); only a file with no usable stage sends
-        // its AST.
         const staged = engineViews().updateStaged(modelFile, this.rustHandle);
         if (staged !== undefined) {
             this._modelFileIds.clear();
@@ -742,9 +585,6 @@ class BaseModelManager {
             return;
         }
         engineViews().dropStaged(modelFile, this.rustHandle);
-        // TS has already validated (or was asked not to); the mirror call
-        // only needs to keep rustHandle's state in sync, so it never
-        // re-validates itself.
         const id = this.rustHandle.updateModelFile(
             JSON.stringify(modelFile.getAst()),
             optionalString(modelFile.getDefinitions()),
@@ -756,12 +596,7 @@ class BaseModelManager {
     }
 
     /**
-     * Whether `rustHandle` currently mirrors `this.modelFiles`: true except
-     * while one of this manager's own mutators has written `modelFiles`
-     * ahead of it (`_mirrorPending`). `modelFiles` is internal and read-only
-     * (BC-48), and only ModelFiles the ModelFile constructor built are
-     * accepted (BC-46), so every mutator keeps the two in step; this is a
-     * flag read, not a comparison of the two maps.
+     * Whether `rustHandle` mirrors `modelFiles`: true except mid-batch.
      * @return {boolean} true if rustHandle mirrors the namespaces TS has
      * @private
      * @internal
@@ -771,10 +606,7 @@ class BaseModelManager {
     }
 
     /**
- * `rustHandle.modelFileGetTypeName(id, type)` for the registered model file
- * of `namespace`, as `ModelFile.getType` asks it, kept in the read memo
- * until the next model change, so a run of instances of one type crosses
- * once.
+     * `rustHandle.modelFileGetTypeName`, memoised until the next model change.
      * @param {string} namespace - the model file's namespace
      * @param {number} id - its rustHandle model file handle
      * @param {string} type - the type name, as `ModelFile.getType` takes it
@@ -800,10 +632,7 @@ class BaseModelManager {
     }
 
     /**
-     * The rustHandle handle of the model file for `namespace`: the one
-     * cached when the file was committed, or else
-     * `rustHandle.modelFileId(namespace)`, then cached until the engine
-     * rebuilds its arena (`_modelFileIds`).
+     * The engine handle of the model file for `namespace`, cached.
      * @param {string} namespace - the namespace to look up
      * @return {number|undefined} its model file handle, or undefined
      * @private
@@ -830,10 +659,6 @@ class BaseModelManager {
         const fileName = modelFile.getName();
         if (!this._mirrorPending && typeof namespace === 'string' &&
             (typeof fileName === 'string' || fileName === undefined || fileName === null)) {
-            // The plain Error is raised by the engine (`throwAlreadyExists`),
-            // naming the file rustHandle holds under the namespace. A batch
-            // not yet mirrored (`_mirrorPending`) and a file name the binding
-            // cannot take keep the TS message below.
             this.rustHandle.throwAlreadyExists(namespace, fileName ?? undefined);
         }
         const existingModelFileName = this.modelFiles[modelFile.getNamespace()].getName();
@@ -868,15 +693,9 @@ class BaseModelManager {
         }
 
         if (!this.modelFiles[modelFile.getNamespace()]) {
-            // Mirrored before `modelFiles` changes, so an error leaves both
-            // unchanged.
+            // Mirrored first, so an error leaves both unchanged.
             let mirrored = false;
             if (!disableValidation) {
-                // Structural validation against the metamodel, then
-                // semantic validation, by the engine. A staged file is
-                // validated and written to rustHandle in one engine call,
-                // the metamodel check included; any other file is checked by
-                // `validateAst` and its own `validate()`, then written.
                 const metamodel = !!this.options?.metamodelValidation;
                 mirrored = this._rustValidateAndMirrorAdd(modelFile, metamodel);
                 if (!mirrored) {
@@ -890,10 +709,7 @@ class BaseModelManager {
                 this._rustMirrorAdd(modelFile);
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
-            // A new key, appended to the namespace list.
             noteNamespaceAdded(this, modelFile.getNamespace());
-            // A model change moves the model version, which every cached
-            // answer of this manager's is keyed on.
             this._engine.version++;
         } else {
             this._throwAlreadyExists(modelFile);
@@ -910,21 +726,9 @@ class BaseModelManager {
      * @private
      */
     validateAst(modelFile) {
-        // Delegates to rustHandle.validateAstValue (concerto-wasm), which
-        // runs the same version check plus structural (metamodel) check
-        // over the AST alone -- it needs no registered model file, so it
-        // never needs `this.modelFiles`/`rustHandle` parity the way a read
-        // over `this.modelFiles` would, and it builds no engine-side
-        // ModelFile either (the check never reads one, and its constructor
-        // would reject a malformed AST with an IllegalModelException before
-        // the check could throw TS's MetamodelException). A thrown error
-        // already arrives as the mapped `MetamodelException` (or other TS
-        // exception class, src/engine/errors.ts) via the host error
-        // factory, so it propagates unchanged.
+        // Checks the AST alone, so a malformed AST is a MetamodelException.
         const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
         try {
-            // Over the copy Rust staged when the ModelFile was constructed,
-            // when it has one, rather than the AST sent again.
             if (!engineViews().validateAstStaged(modelFile, this.rustHandle)) {
                 this.rustHandle.validateAstValue(JSON.stringify(modelFile.getAst()));
             }
@@ -935,14 +739,7 @@ class BaseModelManager {
     }
 
     /**
-     * After a failed metamodel check (`validateAst`): the engine registers
-     * its copy of the metamodel only when the structural check fails after
-     * the version check passed (a version mismatch returns before it is
-     * inserted). So `this.modelFiles` takes the metamodel only when
-     * rustHandle now holds `MetaModelNamespace`, keeping the two in step.
-     * This writes only `this.modelFiles`: it is the one metamodel copy not
-     * mirrored through `_rustMirrorAdd`, and `metamodelModelFile` was never
-     * staged (`_buildingMetamodelCopy`), so there is no stage to drop.
+     * After a failed metamodel check, mirrors the engine's metamodel registration.
      * @param {boolean} alreadyHasMetamodel - whether the manager held the
      * metamodel before the check
      * @private
@@ -1029,19 +826,10 @@ class BaseModelManager {
         if (!this.modelFiles[namespace]) {
             throw new Error('Model file does not exist');
         } else {
-            // Mirrored first, so a mirror error leaves both unchanged.
-            // rustHandle holds every registered namespace, the system models
-            // included. `this.modelFiles[namespace]` above coerces
-            // `namespace` to a string key (matching v5.0.0, which deletes
-            // cleanly for a non-string whose string form is a loaded
-            // namespace), but `rustHandle.deleteModelFile` takes a WASM
-            // `&str`, and a non-string traps the engine, so its string form
-            // is sent. The delete rebuilds the engine's model file arena, so
-            // every cached handle is dropped.
+            // Mirrored first. A non-string is sent as its string form.
             this.rustHandle.deleteModelFile(typeof namespace === 'string' ? namespace : String(namespace));
             this._modelFileIds.clear();
             delete this.modelFiles[namespace];
-            // The key TS deletes is `namespace`'s string form.
             noteNamespaceRemoved(this, String(namespace));
             this._engine.version++;
         }
@@ -1061,13 +849,9 @@ class BaseModelManager {
         Object.assign(originalModelFiles, this.modelFiles);
         let newModelFiles: ModelFileInstance[] = [];
         const mirroredNamespaces = new Set<string>();
-        // The namespace list before the batch, appended to once the batch
-        // has succeeded, or kept for the restored map if it fails.
         const namespaces = namespaceListOf(this);
 
         try {
-            // Every file is added to `modelFiles` before any is mirrored
-            // (below): until then, rustHandle is behind (`_mirrorPending`).
             this._mirrorPending = true;
             // create the model files
             for (let n = 0; n < modelFiles.length; n++) {
@@ -1098,16 +882,7 @@ class BaseModelManager {
                 }
             }
 
-            // Mirror the newly added files into rustHandle *before*
-            // validating: this method adds every file to this.modelFiles
-            // directly, in whatever order the caller gave, precisely so
-            // cross-file dependency order does not matter (see the method
-            // doc), and a file in this batch may import from *another* file
-            // in the very same batch, so every one of them must already be
-            // visible to rustHandle before validateModelFiles() below
-            // validates any of them. Each write is a structural mirror
-            // write only (no validation); validateModelFiles() decides
-            // pass/fail.
+            // Mirror all before validating: files may import one another.
             this._rustMirrorAddAll(newModelFiles, mirroredNamespaces);
             this._mirrorPending = false;
 
@@ -1116,7 +891,6 @@ class BaseModelManager {
                 this.validateModelFiles();
             }
 
-            // The batch's namespaces, in the order `modelFiles` took them.
             if (namespaces && namespaceListOf(this) === namespaces) {
                 newModelFiles.forEach((m) => namespaces.push(m.getNamespace()));
             }
@@ -1127,19 +901,7 @@ class BaseModelManager {
             this.modelFiles = {};
             Object.assign(this.modelFiles, originalModelFiles);
             this._engine.version++;
-            // Undo any rustHandle mirroring this batch made: a
-            // partially-mirrored or now-invalid batch must not leave
-            // rustHandle out of sync with `this.modelFiles`, which the lines
-            // above already rolled back. Only namespaces this batch actually
-            // mirrored (`mirroredNamespaces`) are deleted here: the failure
-            // that landed us in this catch can happen before the mirror loop
-            // above ever runs (a duplicate namespace via
-            // `_throwAlreadyExists`, an unversioned namespace, or a parse
-            // error on a later file in the batch), in which case
-            // `newModelFiles` can contain namespaces that were never mirrored
-            // at all, and calling `deleteModelFile` on those would throw
-            // (rustHandle never heard of them). A delete of a namespace this
-            // batch did mirror propagates its error.
+            // Undo only this batch's mirror writes.
             newModelFiles.forEach((m) => {
                 if (!mirroredNamespaces.has(m.getNamespace())) {
                     return;
@@ -1147,9 +909,6 @@ class BaseModelManager {
                 this.rustHandle.deleteModelFile(m.getNamespace());
                 this._modelFileIds.clear();
             });
-            // Both are back as they were before the batch (a failed delete
-            // above propagates first, dropping the list), so the list from
-            // before the batch holds for the restored map.
             this._engine.namespaces = namespaces;
             throw err;
         } finally {
@@ -1162,11 +921,6 @@ class BaseModelManager {
      * Validates all models files in this model manager
      */
     validateModelFiles() {
-        // Every model file is validated in one Rust call (concerto-wasm
-        // `validateModelFiles`) rather than one `modelFile.validate()`
-        // crossing per file; the first error found is thrown naming the
-        // ModelFile of this manager it was found in, as that file's own
-        // validate() does. rustHandle mirrors every model file.
         this.rustHandle.validateModelFiles(this.modelFiles);
     }
 
@@ -1193,25 +947,16 @@ class BaseModelManager {
         try {
             const externalModels = await downloader.downloadExternalDependencies(this.getModelFiles(), options);
 
-            // Every downloaded file's view is built first, so a file
-            // the ModelFile constructor rejects fails the update before
-            // anything changed.
+            // Every view is built first, so a rejected file changes nothing.
             const views: ModelFileInstance[] = externalModels.map((file) =>
                 new ModelFile(this, file.ast as AstNode, file.definitions, file.fileName));
 
-            // rustHandle adds each file (or replaces the file under its
-            // namespace) and validates every model file, in one call that
-            // leaves it unchanged when it fails (concerto-wasm
-            // `updateExternalModels`). Only then do the views replace
-            // this.modelFiles' entries, so a failure leaves both unchanged.
+            // One engine call that changes nothing on failure.
             try {
                 const next: Record<string, ModelFileInstance> = Object.assign({}, this.modelFiles);
                 views.forEach((mf) => {
                     next[mf.getNamespace()] = mf;
                 });
-                // From the files Rust loaded when each view was constructed
-                // (engine/views-staging.ts `updateExternalStaged`); otherwise every
-                // AST is sent.
                 if (!engineViews().updateExternalStaged(views, this.rustHandle, next)) {
                     const sources = views.map((mf) => ({
                         ast: mf.getAst(),
@@ -1221,14 +966,10 @@ class BaseModelManager {
                     this.rustHandle.updateExternalModels(JSON.stringify(sources), next);
                 }
             } finally {
-                // A stage the update did not consume is dropped; an update
-                // rebuilds rustHandle's model file arena.
                 views.forEach((mf) => engineViews().dropStaged(mf, this.rustHandle));
                 this._modelFileIds.clear();
             }
             views.forEach((mf) => {
-                // A namespace new to `modelFiles` is appended to the
-                // namespace list; a replaced one keeps its place.
                 const isNew = !Object.prototype.hasOwnProperty.call(this.modelFiles, mf.getNamespace());
                 this.modelFiles[mf.getNamespace()] = mf;
                 if (isNew) {
@@ -1241,9 +982,6 @@ class BaseModelManager {
             // Restore original files
             this.modelFiles = {};
             Object.assign(this.modelFiles, originalModelFiles);
-            // The map was replaced, so the namespace list is dropped (the
-            // next getNamespaces asks the engine) and the model version
-            // moves.
             this._engine.namespaces = undefined;
             this._engine.version++;
             throw err;
@@ -1342,20 +1080,12 @@ class BaseModelManager {
      * @private
      */
     resolveType(context, type): any {
-        // The engine answers every call. A non-string `type` throws the
-        // error TS 5.0.0 threw (`typeNameArgument`); a non-string `context`
-        // only words the error, so its string form is sent.
         const typeName = typeNameArgument(type);
-        // A type the engine resolved since the last model change is answered
-        // from the memo (`EngineState.readMemo`), without crossing into the
-        // engine.
         const memo = managerReadMemo(this._engine);
         const resolved = memo.resolvedTypes.get(typeName);
         if (resolved !== undefined) {
             return resolved;
         }
-        // The engine's answer is final, including any error it
-        // throws.
         const result: string = this.rustHandle.resolveType(typeof context === 'string' ? context : String(context), typeName);
         if (memo.version === this._engine.version) {
             memo.resolvedTypes.set(typeName, result);
@@ -1364,23 +1094,13 @@ class BaseModelManager {
     }
 
     /**
-     * A new concerto-wasm ModelManagerHandle, told this manager's validation
-     * options (`decoratorValidation`,
-     * `dangerouslyAllowReservedSystemTypeNamesInUserModels`) that differ from
-     * a new handle's defaults before
-     * addDecoratorModel/addRootModel mirror anything into it, so the engine's
-     * validation reads the same options TS 5.0.0's did. The constructor and
-     * `clearModelFiles` both build rustHandle here.
+     * A new engine handle with this manager's validation options.
      * @return {object} the handle
      * @private
      * @internal
      */
     _newRustHandle(): EngineHandle {
         const handle = new rust.ModelManagerHandle();
-        // A new handle has both options off (concerto-wasm handle.rs), so
-        // a setter is called only to turn one on. The engine reads each
-        // decorator validation level by truthiness (`level_option`); a value
-        // other than an object is passed on as it is.
         if (this.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels) {
             handle.setDangerouslyAllowReservedSystemTypeNamesInUserModels(true);
         }
@@ -1397,26 +1117,12 @@ class BaseModelManager {
      */
     clearModelFiles() {
         this.modelFiles = {};
-        // rustHandle has no bulk clear, so it is replaced as in the
-        // constructor, with this manager's validation options
-        // (`_newRustHandle`). addDecoratorModel/addRootModel below
-        // re-populate this.modelFiles with views of the copies the fresh
-        // handle loaded itself (`_adoptPreloadedModel`).
         const replaced = this.rustHandle;
         this.rustHandle = this._newRustHandle();
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
-        // The replaced handle is this manager's alone (a fork has a handle
-        // of its own), and the manager never calls it again: its engine
-        // memory is released now, not when the garbage collector gets to its
-        // finalizer. Internal only: there is no public release API. A
-        // ModelFile staged in it before the clear, or a view sharing such a
-        // stage, may still reach it through its stage: the view snapshot
-        // (`heldViewSnapshot`) and the stage finalizer guard that call, and
-        // the commit paths never take a stage of another handle.
+        // Safe: the handle is this manager's alone; staged files keep snapshots.
         engineHandles().releaseHandle(replaced);
-        // A new, empty namespace list, appended to as the system models are
-        // registered again; a new map and handle are a model change.
         this._engine.namespaces = [];
         this._engine.version++;
         this.addDecoratorModel();
@@ -1441,10 +1147,7 @@ class BaseModelManager {
      * @private
      */
     getModelFileByFileName(fileName): ModelFile {
-        // Only a string or undefined crosses the boundary: the binding's
-        // `Option<String>` turns a JS null into None (which would match an
-        // unnamed file, where TS's `=== null` does not), and a number or
-        // object traps the engine. Any other argument takes the TS path.
+        // Only a string or undefined crosses (null would match an unnamed file).
         if (typeof fileName === 'string' || fileName === undefined) {
             const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
             return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
@@ -1457,11 +1160,6 @@ class BaseModelManager {
      * @return {string[]} namespaces - the namespaces that have been registered.
      */
     getNamespaces(): string[] {
-        // Answered from this manager's namespace list, which every model
-        // change updates in place (`NamespaceList`), so only a manager
-        // without one asks the engine, and then keeps its answer. Each
-        // call gets its own copy, so changing the returned array reaches
-        // neither the list nor the engine.
         const list = namespaceListOf(this);
         if (list) {
             return list.slice();
@@ -1481,19 +1179,10 @@ class BaseModelManager {
      * @throws {TypeNotFoundException} - if the type cannot be found or is a primitive type.
      */
     getType(qualifiedName): any {
-        // A non-string name throws the error TS 5.0.0 threw
-        // (`typeNameArgument`).
         const name = typeNameArgument(qualifiedName);
-        // The fully-qualified name the engine answered since the last model
-        // change is kept (`EngineState.readMemo`); it is still mapped to its
-        // view below on every call.
         const memo = managerReadMemo(this._engine);
         let fqn = memo.typeNames.get(name);
         if (fqn === undefined) {
-            // Resolved in Rust (concerto-wasm `getTypeName`), which
-            // throws the TypeNotFoundException TS throws. Rust answers
-            // with the declaration's fully-qualified name, mapped here to
-            // its view in the model file of its namespace.
             fqn = this.rustHandle.getTypeName(name) as string;
             if (memo.version === this._engine.version) {
                 memo.typeNames.set(name, fqn);
@@ -1643,12 +1332,7 @@ class BaseModelManager {
      * qualified type name, false otherwise.
      */
     derivesFrom(fqt1, fqt2): boolean {
-        // The binding's `&str` parameters cannot take a non-string (a JS
-        // non-string traps the engine). A non-string `fqt1` throws what
-        // `getType` throws for it. A non-string `fqt2` is no type's name: as
-        // TS's walk, the answer is false, unless the walk of `fqt1`'s super
-        // types throws, so the engine walks it against '', which no
-        // declaration is named (as `isAssignableTo` does).
+        // A non-string `fqt2` names no type, so '' is walked.
         return this.rustHandle.derivesFrom(typeNameArgument(fqt1), typeof fqt2 === 'string' ? fqt2 : '');
     }
 
@@ -1677,12 +1361,7 @@ class BaseModelManager {
      * @returns {boolean} True if fqn is assignable to baseFqn
      */
     isAssignableTo(fqn: string, baseFqn: string): boolean {
-        // The binding's `&str` parameters cannot take a non-string (a JS
-        // non-string traps the engine). TS 5.0.0 answered false for a
-        // non-string `fqn` (`getType` throws, and is caught). A non-string
-        // `baseFqn` is no type's name: as TS's walk, the answer is false,
-        // unless the walk of `fqn`'s super types throws, so the engine walks
-        // it against '', which no declaration is named.
+        // As TS, false for a non-string `fqn`; '' for a non-string `baseFqn`.
         if (typeof fqn !== 'string') {
             return false;
         }
@@ -1707,13 +1386,7 @@ class BaseModelManager {
      */
     fromAst(ast: IModels, options?: { disableValidation?: boolean }) {
         this.clearModelFiles();
-        // Each file is added as `addModelFile(modelFile, null, null, true)`
-        // adds it, in order. While `addModelFile` is this class's own, a run
-        // of files that pass its checks (a versioned namespace not yet
-        // registered, written to rustHandle) is committed from their stages
-        // in one engine call (`_addStagedModelFiles`). The run is committed
-        // before any other file is added and before an error propagates, so
-        // the files registered when one throws are those v5.0.0 had added.
+        // Runs commit in one engine call, so a throw leaves what TS had added.
         const batching = this.addModelFile === BaseModelManager.prototype.addModelFile;
         let run: ModelFileInstance[] = [];
         const runNamespaces = new Set<string>();
@@ -1790,8 +1463,6 @@ class BaseModelManager {
      * @returns {BaseModelManager} the fork, of this manager's own class
      */
     fork(): this {
-        // The batch `addModelFiles` is the only time `modelFiles` is ahead
-        // of rustHandle, and it never calls out.
         if (this._mirrorPending) {
             throw new Error('A ModelManager cannot be forked while model files are being added to it');
         }
@@ -1802,30 +1473,22 @@ class BaseModelManager {
         fork.factory = new Factory(fork);
         fork.options = this.options === undefined ? undefined : { ...this.options };
         fork.serializer = new Serializer(fork.factory, fork, fork.options);
-        // The serializer's defaults too, as `setDefaultOptions` left them.
         fork.serializer.defaultOptions = Object.assign({}, this.serializer.defaultOptions);
         fork.decoratorFactories = this.decoratorFactories.slice();
         fork.decoratorValidation = this.decoratorValidation;
         fork._mirrorPending = false;
-        // The fork's own engine state, nothing cached yet.
         fork._engine = newEngineState();
-        // The fork's engine handles are this manager's (`ModelManager::fork`).
         fork._modelFileIds = new Map(this._modelFileIds);
         fork._rustPreloaded = new Set(this._rustPreloaded);
         fork.rustHandle = this.rustHandle.fork();
         fork._buildingMetamodelCopy = false;
-        // `validateAst`'s cached metamodel copy, built on first use as the
-        // constructor's is (`installLazyMetamodelCopy`).
         installLazyMetamodelCopy(fork);
         const handle = fork.rustHandle;
         for (const namespace of Object.keys(this.modelFiles)) {
             const source = this.modelFiles[namespace];
             fork.modelFiles[namespace] = ModelFile._sharedView(fork, source, source.getDefinitions(), undefined, handle) as ModelFileInstance;
         }
-        // A metamodel copy this manager registered (`addMetamodel`) is the
-        // same object as its view in the fork. A copy this manager has not
-        // built yet (a fork's, still an accessor) is registered nowhere, and
-        // is left unbuilt.
+        // A registered metamodel copy stays the fork's registered view.
         const copy = Object.getOwnPropertyDescriptor(this, 'metamodelModelFile');
         if (copy !== undefined && 'value' in copy && this.modelFiles[MetaModelNamespace] === copy.value) {
             fork.metamodelModelFile = fork.modelFiles[MetaModelNamespace];
@@ -1862,16 +1525,12 @@ class BaseModelManager {
     filter(predicate, options?){
         const modelManager = new BaseModelManager({...this.options}, this.processFile);
         const filteredModels: ModelFileInstance[] = [];
-        // BC-53: a declaration of a file the new manager holds from its
-        // constructor is kept without asking `predicate`, so an import of
-        // one (a user type extending `Decorator`) is never pruned while the
-        // file it names stays whole.
+        // BC-53: the new manager's own system declarations are always kept.
         const keep = (declaration) =>
             modelManager.modelFiles[declaration.getNamespace()] !== undefined || predicate(declaration);
 
         for (const modelFile of Object.values(this.modelFiles) as ModelFileInstance[]) {
-            // BC-53: skip every file the new manager's constructor already
-            // added, not only the system root model.
+            // BC-53: skip every file the new manager already holds.
             if (modelFile.isSystemModelFile() || modelManager.modelFiles[modelFile.getNamespace()] !== undefined) {
                 continue;
             }

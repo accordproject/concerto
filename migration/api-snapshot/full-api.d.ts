@@ -1546,9 +1546,7 @@ declare class Decorator {
     getParent(): Decorated;
     /**
     * Handles a validation error, logging and throwing as required. Called
-    * back by the Rust engine's decoratorValidate binding (concerto-wasm
-    * src/lib.rs `handle_error`) for every non-fatal-or-fatal validation
-    * outcome, so this is a live collaborator, not TS-only fallback logic.
+    * back by the engine's decoratorValidate binding.
     * @param {string} level the log level
     * @param {string | Error} err the message to log, or the error that was caught
     * @private
@@ -3996,10 +3994,7 @@ declare class JSONGenerator {
      */
     visitRelationshipDeclaration(relationshipDeclaration: any, parameters: any): any;
     /**
-     * One relationship value: a resource written in full when
-     * `permitResourcesForRelationships` allows it and it is not already being
-     * written, otherwise its relationship text. A relationship-typed map value
-     * is written here too (BC-05).
+     * One relationship value, or a relationship-typed map value (BC-05).
      * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
      * @param {Identifiable} obj - the relationship or the resource
      * @param {Object} parameters  - the parameter
@@ -4142,10 +4137,7 @@ declare class JSONPopulator {
      */
     visitRelationshipDeclaration(relationshipDeclaration: any, parameters: JsonPopulatorParameters): any;
     /**
-     * One relationship value (visitRelationshipDeclaration's non-array
-     * branch): a URI string becomes a Relationship, and an object an embedded
-     * resource when `acceptResourcesForRelationships` allows it. A
-     * relationship-typed map value is read here too (BC-05).
+     * One relationship value, or a relationship-typed map value (BC-05).
      * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
      * @param {Object} jsonObj - the JSON value
      * @param {Object} parameters  - the parameter
@@ -4160,14 +4152,8 @@ export default JSONPopulator;
 // ==== serializer/relationshipmapvalue.d.ts ====
 import type MapDeclaration from '../introspect/mapdeclaration';
 /**
- * The relationship a map holds when its value type is a relationship (`map
- * M { o String --> T }`), with the members of a RelationshipDeclaration
- * that the serializer's relationship code reads (BC-05; DV-007).
- * JSONPopulator, JSONGenerator and ResourceValidator hand it to their
- * relationship-property code, so a map value is read, written and validated
- * as a `--> T` property is, under the same
- * `acceptResourcesForRelationships`, `convertResourcesToRelationships` and
- * `permitResourcesForRelationships` options.
+ * BC-05, DV-007: a relationship-typed map value (`map M { o String --> T }`),
+ * shaped so the serializer treats it as a `--> T` property.
  * @private
  */
 export interface RelationshipMapValue {
@@ -4178,8 +4164,7 @@ export interface RelationshipMapValue {
     toString(): string;
 }
 /**
- * The relationship a map's values hold, or `null` when the map's value type
- * is not a relationship.
+ * The relationship a map's values hold, or `null` if they are not relationships.
  * @param {MapDeclaration} mapDeclaration - the map declaration
  * @return {RelationshipMapValue|null} the relationship, or null
  * @private
