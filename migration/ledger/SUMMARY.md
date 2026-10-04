@@ -37,7 +37,7 @@ without a ledger rebuild fails the build.
 
 ## Method
 
-* **Scope.** 750 members in 78 files. Nested closures count
+* **Scope.** 752 members in 78 files. Nested closures count
   as part of the member that encloses them. `index.ts`, `types.ts` and
   `dayjs-setup.ts` have no members: they hold re-exports, types and a dayjs
   plugin setup only.
@@ -130,25 +130,25 @@ without a ledger rebuild fails the build.
 
 | | members | loc | weight | share of weight |
 |---|---|---|---|---|
-| RUST | 69 | 869 | 979 | 11.1% |
-| HYBRID | 90 | 1967 | 2173 | 24.6% |
+| RUST | 69 | 869 | 979 | 11.0% |
+| HYBRID | 92 | 1980 | 2184 | 24.6% |
 | PARTIAL | 56 | 639 | 742 | 8.4% |
-| TS | 535 | 5184 | 4957 | 56.0% |
-| **total** | 750 | 8659 | 8851 | 100% |
+| TS | 535 | 5189 | 4963.5 | 56.0% |
+| **total** | 752 | 8677 | 8868.5 | 100% |
 
 * **RUST+HYBRID weighted share (new D1 denominator): 36.0%**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. **NOT met.**
   PARTIAL rows (section 5b) are not in the numerator.
   Denominator excludes constant markers and `accept()` visitor entry points
   (60 members, weight 90) as not-logic, per the maintainer's
-  decision on open question 2 below. New total weight: 8761 (was 8851).
+  decision on open question 2 below. New total weight: 8778.5 (was 8868.5).
   D1 stays as defined, with the 70% bar, by maintainer decision (accordproject/concerto-rust#276,
   2026-09-28): the proposed D1′ was not adopted, and the gate reports §0.4 as FAIL at this figure.
-* **Old figure (previous denominator, all 750 members): 35.6%.**
+* **Old figure (previous denominator, all 752 members): 35.7%.**
 * RUST only (new denominator): 11.2%.
 * For comparison only, not the D1 figure: counting PARTIAL *read* rows (33 members,
   weight 132) as Rust gives 37.5%; counting every PARTIAL row (56 members,
-  weight 742) gives 44.4%. That is how the ledger counted them before
+  weight 742) gives 44.5%. That is how the ledger counted them before
   accordproject/concerto-rust#261 (then 78.9%, which also counted three `rustHandle`
   plumbing helpers as RUST; they are now TS, engine shim). After #261 and before P5-11 the
   figure was 57.4% (61.5% at #261 itself): P5-11 reclassified TS 128 PARTIAL rows and 57 HYBRID
@@ -166,8 +166,8 @@ By weight category:
 
 | category | members | loc | weight | RUST w | HYBRID w | PARTIAL w | TS w |
 |---|---|---|---|---|---|---|---|
-| glue (x0.5) | 359 | 1265 | 632.5 | 38.5 | 49.5 | 35.5 | 509 |
-| logic (x1) | 316 | 5745 | 5745 | 495 | 1357 | 291 | 3602 |
+| glue (x0.5) | 359 | 1266 | 633 | 38.5 | 51.5 | 35.5 | 507.5 |
+| logic (x1) | 318 | 5762 | 5762 | 495 | 1366 | 291 | 3610 |
 | validation (x1.5) | 75 | 1649 | 2473.5 | 445.5 | 766.5 | 415.5 | 846 |
 
 ## 2. By planned task
@@ -182,21 +182,21 @@ By weight category:
 | P2-05 | 6 | 28 | 0 |
 | P2-06 | 22 | 63.5 | 0 |
 | P2-07 | 12 | 147.5 | 1 |
-| P2-08 | 108 | 1795 | 6 |
+| P2-08 | 108 | 1796 | 6 |
 | P3-01 | 44 | 1454.5 | 8 |
 | P3-04 | 4 | 106 | 0 |
 | P4-02 | 6 | 22.5 | 0 |
 | P4-03 | 25 | 176 | 0 |
 | P4-04 | 20 | 68.5 | 1 |
 | P4-05 | 20 | 204.5 | 1 |
-| P4-06 | 122 | 1497 | 63 |
-| P4-07 | 137 | 1322 | 63 |
-| P4-08 | 112 | 1901 | 6 |
+| P4-06 | 124 | 1508 | 65 |
+| P4-07 | 139 | 1333 | 65 |
+| P4-08 | 112 | 1902 | 6 |
 | P4-09 | 15 | 185 | 1 |
 | P4-10 | 51 | 1553.5 | 11 |
 | P5-100 | 3 | 6 | 0 |
 | P5-10a | 8 | 83.5 | 0 |
-| P5-10b | 28 | 318.5 | 0 |
+| P5-10b | 28 | 324 | 0 |
 | P5-12c | 3 | 73 | 3 |
 | P5-14 | 4 | 54.5 | 0 |
 | P5-19 | 2 | 26 | 0 |
@@ -231,8 +231,8 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/views-lazy.ts | 25 | 0 / 4 / 0 / 21 | 279 | 0 / 17.5 / 0 / 261.5 | 6.3% | P5-10b, P4-06+P4-07, P5-10a, P5-100 |
 | engine/views-lookups.ts | 16 | 0 / 10 / 0 / 6 | 203 | 0 / 122.5 / 0 / 80.5 | 60.3% | P4-06+P4-07, P5-14, P5-19 |
 | engine/views-modules.ts | 9 | 0 / 0 / 0 / 9 | 13.5 | 0 / 0 / 0 / 13.5 | 0.0% | P4-06+P4-07, P5-10b |
-| engine/views-staging.ts | 39 | 0 / 27 / 0 / 12 | 633 | 0 / 438.5 / 0 / 194.5 | 69.3% | P4-06+P4-07, P5-10a |
-| engine/views-state.ts | 7 | 0 / 2 / 0 / 5 | 29 | 0 / 21.5 / 0 / 7.5 | 74.1% | P4-06+P4-07, P5-10b |
+| engine/views-staging.ts | 40 | 0 / 28 / 0 / 12 | 642 | 0 / 447.5 / 0 / 194.5 | 69.7% | P4-06+P4-07, P5-10a |
+| engine/views-state.ts | 8 | 0 / 3 / 0 / 5 | 36.5 | 0 / 23.5 / 0 / 13 | 64.4% | P4-06+P4-07, P5-10b |
 | engine/wire.ts | 16 | 0 / 0 / 0 / 16 | 108.5 | 0 / 0 / 0 / 108.5 | 0.0% | - |
 | engineloader.ts | 6 | 0 / 0 / 0 / 6 | 15.5 | 0 / 0 / 0 / 15.5 | 0.0% | - |
 | engineutil.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | - |
@@ -257,7 +257,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | introspect/mapkeytype.ts | 10 | 1 / 0 / 1 / 8 | 20.5 | 4.5 / 0 / 2.5 / 13.5 | 22.0% | P2-06+P4-07 |
 | introspect/mapvaluetype.ts | 10 | 1 / 0 / 1 / 8 | 20.5 | 4.5 / 0 / 2.5 / 13.5 | 22.0% | P2-06+P4-07 |
 | introspect/metamodel.ts | 3 | 1 / 0 / 0 / 2 | 70 | 45 / 0 / 0 / 25 | 64.3% | P3-04+P4-08 |
-| introspect/modelfile.ts | 57 | 10 / 3 / 5 / 39 | 899.5 | 271 / 294 / 69.5 / 265 | 62.8% | P2-08+P4-08 |
+| introspect/modelfile.ts | 57 | 10 / 3 / 5 / 39 | 900.5 | 271 / 294 / 69.5 / 266 | 62.7% | P2-08+P4-08 |
 | introspect/numbervalidator.ts | 6 | 3 / 0 / 1 / 2 | 12.5 | 8 / 0 / 1.5 / 3 | 64.0% | P2-02+P4-04 |
 | introspect/participantdeclaration.ts | 2 | 0 / 0 / 0 / 2 | 3 | 0 / 0 / 0 / 3 | 0.0% | P2-03+P4-06 |
 | introspect/property.ts | 15 | 1 / 0 / 1 / 13 | 71 | 7.5 / 0 / 16 / 47.5 | 10.6% | P2-04+P4-07 |
@@ -290,7 +290,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 4. TS items (stay in TypeScript) with reasons
 
-535 members, weight 4957 (56.0%).
+535 members, weight 4963.5 (56.0%).
 
 ### 4a. Grouped by reason
 
@@ -311,7 +311,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | binary AST writer for the staging binding (P5-92): writes a ModelFile's AST, as JSON.stringify would read it, in the engine's compact layout, and leaves an AST it cannot carry to the text path; pure transcoding, no model logic | 4 | 81.5 | `engine/ast-codec.ts` omitted; `engine/ast-codec.ts` writeValue; `engine/ast-codec.ts` encodeAst; `engine/ast-codec.ts` encodeAstCount |
 | constant-return member (type/kind marker or fixed default, body is `return <literal>`); stays as-is on the TS class, nothing to port | 53 | 79.5 | `basemodelmanager.ts` BaseModelManager.isModelManager; `basemodelmanager.ts` BaseModelManager.isAliasedTypeEnabled; `decoratormanager.ts` DecoratorManager.isNamespaceTargetEnabled; `introspect/assetdeclaration.ts` AssetDeclaration.declarationKind; `introspect/classdeclaration.ts` ClassDeclaration.isClassDeclaration; `introspect/conceptdeclaration.ts` ConceptDeclaration.declarationKind; `introspect/declaration.ts` Declaration.isIdentified; `introspect/declaration.ts` Declaration.isSystemIdentified; `introspect/declaration.ts` Declaration.getIdentifierFieldName; `introspect/declaration.ts` Declaration.getType; `introspect/declaration.ts` Declaration.toString; `introspect/declaration.ts` Declaration.isEnum; `introspect/declaration.ts` Declaration.isClassDeclaration; `introspect/declaration.ts` Declaration.isScalarDeclaration; `introspect/declaration.ts` Declaration.isMapDeclaration; `introspect/declaration.ts` Declaration.isAsset; `introspect/declaration.ts` Declaration.isParticipant; `introspect/declaration.ts` Declaration.isTransaction; `introspect/declaration.ts` Declaration.isEvent; `introspect/declaration.ts` Declaration.isConcept; `introspect/decorator.ts` Decorator.isDecorator; `introspect/enumdeclaration.ts` EnumDeclaration.declarationKind; `introspect/enumvaluedeclaration.ts` EnumValueDeclaration.isEnumValue; `introspect/eventdeclaration.ts` EventDeclaration.declarationKind; `introspect/field.ts` Field.isField; `introspect/mapdeclaration.ts` MapDeclaration.declarationKind; `introspect/mapdeclaration.ts` MapDeclaration.isMapDeclaration; `introspect/mapkeytype.ts` MapKeyType.isKey; `introspect/mapkeytype.ts` MapKeyType.isValue; `introspect/mapvaluetype.ts` MapValueType.isKey; `introspect/mapvaluetype.ts` MapValueType.isValue; `introspect/modelfile.ts` ModelFile.isModelFile; `introspect/participantdeclaration.ts` ParticipantDeclaration.declarationKind; `introspect/relationshipdeclaration.ts` RelationshipDeclaration.isRelationship; `introspect/scalardeclaration.ts` ScalarDeclaration.isIdentified; `introspect/scalardeclaration.ts` ScalarDeclaration.isSystemIdentified; `introspect/scalardeclaration.ts` ScalarDeclaration.getIdentifierFieldName; `introspect/scalardeclaration.ts` ScalarDeclaration.getSuperType; `introspect/scalardeclaration.ts` ScalarDeclaration.getSuperTypeDeclaration; `introspect/scalardeclaration.ts` ScalarDeclaration.isAbstract; `introspect/scalardeclaration.ts` ScalarDeclaration.isScalarDeclaration; `introspect/scalardeclaration.ts` ScalarDeclaration.isAsset; `introspect/scalardeclaration.ts` ScalarDeclaration.isParticipant; `introspect/scalardeclaration.ts` ScalarDeclaration.isTransaction; `introspect/scalardeclaration.ts` ScalarDeclaration.isEvent; `introspect/scalardeclaration.ts` ScalarDeclaration.isConcept; `introspect/transactiondeclaration.ts` TransactionDeclaration.declarationKind; `introspect/validator.ts` Validator.compatibleWith; `model/identifiable.ts` Identifiable.isRelationship; `model/identifiable.ts` Identifiable.isResource; `model/relationship.ts` Relationship.isRelationship; `model/resource.ts` Resource.isResource; `serializer/valuegenerator.ts` EmptyValueGenerator.getBoolean |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: reads a file's one-call Rust view snapshot into per-node lookups) | 1 | 75 | `engine/views-batch.ts` computeBatch |
-| trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 43 | 69 | `basemodelmanager.ts` BaseModelManager.getDecoratorValidation; `introspect/classdeclaration.ts` ClassDeclaration.isAbstract; `introspect/classdeclaration.ts` ClassDeclaration.isExplicitlyIdentified; `introspect/classdeclaration.ts` ClassDeclaration.getOwnProperties; `introspect/collectionsizevalidator.ts` CollectionSizeValidator.getMinSize; `introspect/collectionsizevalidator.ts` CollectionSizeValidator.getMaxSize; `introspect/declaration.ts` Declaration.getModelFile; `introspect/declaration.ts` Declaration.getName; `introspect/declaration.ts` Declaration.getFullyQualifiedName; `introspect/decorator.ts` Decorator.getParent; `introspect/decorator.ts` Decorator.getName; `introspect/decorator.ts` Decorator.getArguments; `introspect/field.ts` Field.getValidator; `introspect/field.ts` Field.getDefaultValue; `introspect/introspector.ts` Introspector.getModelManager; `introspect/mapdeclaration.ts` MapDeclaration.getKey; `introspect/mapdeclaration.ts` MapDeclaration.getValue; `introspect/mapkeytype.ts` MapKeyType.getParent; `introspect/mapkeytype.ts` MapKeyType.getType; `introspect/mapvaluetype.ts` MapValueType.getParent; `introspect/mapvaluetype.ts` MapValueType.getType; `introspect/modelfile.ts` ModelFile.isExternal; `introspect/modelfile.ts` ModelFile.getModelManager; `introspect/modelfile.ts` ModelFile.getNamespace; `introspect/modelfile.ts` ModelFile.getName; `introspect/modelfile.ts` ModelFile.getAllDeclarations; `introspect/modelfile.ts` ModelFile.getDefinitions; `introspect/modelfile.ts` ModelFile.getAst; `introspect/modelfile.ts` ModelFile.getConcertoVersion; `introspect/numbervalidator.ts` NumberValidator.getLowerBound; `introspect/numbervalidator.ts` NumberValidator.getUpperBound; `introspect/property.ts` Property.getParent; `introspect/property.ts` Property.getName; `introspect/property.ts` Property.getType; `introspect/property.ts` Property.isOptional; `introspect/property.ts` Property.isArray; `introspect/property.ts` Property.getSizeValidator; `introspect/scalardeclaration.ts` ScalarDeclaration.getType; `introspect/scalardeclaration.ts` ScalarDeclaration.getValidator; `introspect/scalardeclaration.ts` ScalarDeclaration.getDefaultValue; `introspect/stringvalidator.ts` StringValidator.getMinLength; `introspect/stringvalidator.ts` StringValidator.getMaxLength; `introspect/validator.ts` Validator.getFieldOrScalarDeclaration |
+| trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 43 | 70 | `basemodelmanager.ts` BaseModelManager.getDecoratorValidation; `introspect/classdeclaration.ts` ClassDeclaration.isAbstract; `introspect/classdeclaration.ts` ClassDeclaration.isExplicitlyIdentified; `introspect/classdeclaration.ts` ClassDeclaration.getOwnProperties; `introspect/collectionsizevalidator.ts` CollectionSizeValidator.getMinSize; `introspect/collectionsizevalidator.ts` CollectionSizeValidator.getMaxSize; `introspect/declaration.ts` Declaration.getModelFile; `introspect/declaration.ts` Declaration.getName; `introspect/declaration.ts` Declaration.getFullyQualifiedName; `introspect/decorator.ts` Decorator.getParent; `introspect/decorator.ts` Decorator.getName; `introspect/decorator.ts` Decorator.getArguments; `introspect/field.ts` Field.getValidator; `introspect/field.ts` Field.getDefaultValue; `introspect/introspector.ts` Introspector.getModelManager; `introspect/mapdeclaration.ts` MapDeclaration.getKey; `introspect/mapdeclaration.ts` MapDeclaration.getValue; `introspect/mapkeytype.ts` MapKeyType.getParent; `introspect/mapkeytype.ts` MapKeyType.getType; `introspect/mapvaluetype.ts` MapValueType.getParent; `introspect/mapvaluetype.ts` MapValueType.getType; `introspect/modelfile.ts` ModelFile.isExternal; `introspect/modelfile.ts` ModelFile.getModelManager; `introspect/modelfile.ts` ModelFile.getNamespace; `introspect/modelfile.ts` ModelFile.getName; `introspect/modelfile.ts` ModelFile.getAllDeclarations; `introspect/modelfile.ts` ModelFile.getDefinitions; `introspect/modelfile.ts` ModelFile.getAst; `introspect/modelfile.ts` ModelFile.getConcertoVersion; `introspect/numbervalidator.ts` NumberValidator.getLowerBound; `introspect/numbervalidator.ts` NumberValidator.getUpperBound; `introspect/property.ts` Property.getParent; `introspect/property.ts` Property.getName; `introspect/property.ts` Property.getType; `introspect/property.ts` Property.isOptional; `introspect/property.ts` Property.isArray; `introspect/property.ts` Property.getSizeValidator; `introspect/scalardeclaration.ts` ScalarDeclaration.getType; `introspect/scalardeclaration.ts` ScalarDeclaration.getValidator; `introspect/scalardeclaration.ts` ScalarDeclaration.getDefaultValue; `introspect/stringvalidator.ts` StringValidator.getMinLength; `introspect/stringvalidator.ts` StringValidator.getMaxLength; `introspect/validator.ts` Validator.getFieldOrScalarDeclaration |
 | async file/URL loading orchestration (fs, FileLoader, concerto-cto Parser); all model work goes through the ledgered ModelManager methods it calls | 3 | 56 | `modelloader.ts` ModelLoader.addModel; `modelloader.ts` ModelLoader.loadModelManager; `modelloader.ts` ModelLoader.loadModelManagerFromModelFiles |
 | visitor fallback path: runs only when Serializer.fromJSON/toJSON hit EngineFastPathUnsupported (a lone surrogate, a cycle or a wire shape the codec rejects) or when a caller drives the visitor directly; the fast path runs the same work in Rust in one call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (Rust serializer.rs carries the same checks and messages) | 2 | 48 | `serializer/jsonpopulator.ts` getAssignableProperties; `serializer/jsonpopulator.ts` validateProperties |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-28: applies the header Rust computed at staging to the ModelFile view) | 1 | 46 | `engine/views-staging.ts` applyStagedFileHeader |
@@ -416,6 +416,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | JS argument guard (P5-34): a non-string type name goes through ModelUtil.getNamespace for its TypeError; the lookup itself is counted in the RUST getType/resolveType. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) | 1 | 7 | `basemodelmanager.ts` typeNameArgument |
 | TS 5.0.0's body restored for parity (substring match on a string values, TypeError on undefined values): pure work over data TS holds, so no engine crossing (P5-116 R2E-1) | 1 | 7 | `decoratormanager.ts` DecoratorManager.falsyOrEqual |
 | loads the @accordproject/concerto-engine WASM module and registers its host callback (the error factory; P5-103 removed semver.parse's); no model logic | 1 | 7 | `engine/rust.ts` loadRustEngine |
+| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (BC-19: whether a ModelFile's AST passed the shape check; P5-117) | 1 | 7 | `engine/views-state.ts` isShapeChecked |
 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). P5-32 made it field-backed (`this.importUriMap`, written by Rust at construction; a copy for a registered file). Classified at the P5-64 re-audit (accordproject/concerto-rust#401) | 1 | 7 | `introspect/modelfile.ts` ModelFile.getExternalImports |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (decides which namespaces are mirrored to rustHandle) | 1 | 6 | `basemodelmanager.ts` BaseModelManager._needsRustWrite |
 | TS 5.0.0's string-array intersection, the helper of falsyOrEqual (P5-116 R2E-1) | 1 | 6 | `decoratormanager.ts` intersect |
@@ -475,7 +476,6 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: a ModelFile's staged load; P5-117) | 1 | 1.5 | `engine/views-state.ts` stageOf |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: a ModelFile's deferred declaration views; P5-117) | 1 | 1.5 | `engine/views-state.ts` deferredOf |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: whether a ModelFile is lazily built; P5-117) | 1 | 1.5 | `engine/views-state.ts` isLazy |
-| engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (BC-19: whether a ModelFile's AST passed the shape check; P5-117) | 1 | 1.5 | `engine/views-state.ts` isShapeChecked |
 | trivial accessor or filter over lazily built views: the state it reads was computed by Rust at load; a crossing costs more than it saves. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (the decorators, built by Rust decoratorProcess snapshots or user DecoratorFactory callbacks) | 1 | 1.5 | `introspect/decorated.ts` Decorated.getDecorators |
 | abstract user extension point: users subclass DecoratorFactory in JS | 1 | 1.5 | `introspect/decoratorfactory.ts` DecoratorFactory.newDecorator |
 | forward/orchestration over members counted elsewhere: the logic is in the callee(s) it calls, which is where any Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (super.process; the override is in the BC-37 api-snapshot) | 1 | 1.5 | `introspect/eventdeclaration.ts` EventDeclaration.process |
@@ -684,7 +684,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/views-state.ts | (function) | stageOf | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: a ModelFile's staged load; P5-117) |
 | engine/views-state.ts | (function) | deferredOf | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: a ModelFile's deferred declaration views; P5-117) |
 | engine/views-state.ts | (function) | isLazy | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: whether a ModelFile is lazily built; P5-117) |
-| engine/views-state.ts | (function) | isShapeChecked | function | 3 | 1.5 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (BC-19: whether a ModelFile's AST passed the shape check; P5-117) |
+| engine/views-state.ts | (function) | isShapeChecked | function | 7 | 7 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (BC-19: whether a ModelFile's AST passed the shape check; P5-117) |
 | engine/wire.ts | WireWriter | constructor | ctor | 4 | 2 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | begin | method | 9 | 9 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
 | engine/wire.ts | WireWriter | bytes | method | 3 | 1.5 | the reusable binary writer the wire codecs write into (P5-12c, P5-92, P5-101); pure byte encoding, no model logic |
@@ -850,7 +850,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | introspect/modelfile.ts | ModelFile | getDeclarations | method | 11 | 11 | takes a JS class constructor and filters the lazily built declaration views with instanceof (a JS-only concern); no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
 | introspect/modelfile.ts | ModelFile | getAllDeclarations | method | 3 | 1.5 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
 | introspect/modelfile.ts | ModelFile | getDefinitions | method | 3 | 1.5 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
-| introspect/modelfile.ts | ModelFile | getAst | method | 6 | 6 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
+| introspect/modelfile.ts | ModelFile | getAst | method | 7 | 7 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
 | introspect/modelfile.ts | ModelFile | getConcertoVersion | method | 3 | 1.5 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
 | introspect/modelfile.ts | ModelFile | _declarationView | method | 64 | 96 | JS view-class factory (`new AssetDeclaration(...)` by AST $class); Rust staging has already rejected an unknown $class, and the injected default super type mirrors Rust implicit_super_type for 4 fixed cases. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
 | introspect/numbervalidator.ts | NumberValidator | getLowerBound | method | 3 | 1.5 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
@@ -1033,7 +1033,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 5. HYBRID items with reasons
 
-90 members, weight 2173 (24.6%).
+92 members, weight 2184 (24.6%).
 
 | file | class | member | weight | what stays in JS |
 |---|---|---|---|---|
@@ -1097,7 +1097,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/views-staging.ts | (function) | stageSystemModelFile | 24 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-staging.ts | (function) | utf8Text | 1.5 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-staging.ts | (function) | stageLoadedModelFile | 97 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
-| engine/views-staging.ts | (function) | adoptSharedView | 30 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views-staging.ts | (function) | adoptSharedView | 28 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-staging.ts | (function) | systemViewHeader | 14 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-staging.ts | (function) | adoptSystemView | 14 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-staging.ts | (function) | copyImportNames | 6 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
@@ -1108,9 +1108,11 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine/views-staging.ts | (function) | validateAstStaged | 10.5 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-staging.ts | (function) | updateExternalStaged | 30 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-staging.ts | (function) | defaultSuperType | 1.5 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
-| engine/views-staging.ts | (function) | filteredViewAst | 25 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views-staging.ts | (function) | filteredForm | 18 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views-staging.ts | (function) | installFilteredAst | 18 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-state.ts | (function) | fileState | 20 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | engine/views-state.ts | (function) | committedHandle | 1.5 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
+| engine/views-state.ts | (function) | ownAst | 2 | per-declaration/property Rust-call result materialisation: calls the Rust engine to compute the value (a ScalarDeclaration's type/validator/default, and similar snapshots), then assigns the returned fields onto the TS view object so its existing getters read them unchanged; the computation itself is Rust |
 | introspect/decorated.ts | Decorated | process | 33 | decorator objects may be produced by user DecoratorFactory subclasses (JS callbacks); Rust supplies the decorator ASTs and order |
 | introspect/modelfile.ts | ModelFile | constructor | 159 | argument checks and view-field set-up stay JS; the AST shape check (P5-49), staging and the header come from Rust (checkAstShape, stageModelFile, _fromAstHeader). P5-35 (BC-47) removed the collaborator-context fallback over stub ModelManagers: a manager the BaseModelManager constructor did not build is a TypeError. Reason updated at the P5-64 re-audit (accordproject/concerto-rust#401) |
 | introspect/modelfile.ts | ModelFile | _fromAstDeclarations | 18 | reads the file's one-call Rust view snapshot (modelFileViewSnapshot) around the declaration views it builds |
@@ -1371,7 +1373,7 @@ fallback (plan section 3): `ModelFile`'s is HYBRID, and the others are TS view g
 Kept for history; every question below has a maintainer decision now, linked from each item.
 
 1. **Does HYBRID count toward D1? Settled: yes, at full weight.** New D1 figure: 36.0%
-   (old figure, previous denominator: 35.6%). See section 1.
+   (old figure, previous denominator: 35.7%). See section 1.
 2. **Constant markers and `accept()` count as TS. Settled: excluded from the D1
    denominator.** They are not "logic". 60 members, weight 90,
    removed from the denominator (section 1).

@@ -30,7 +30,7 @@ import { WireWriter } from './wire';
 import type { EngineErrorFlags } from './errors';
 import { installedLazyViewsCheck } from './views-lazy';
 import { excludedNamespaces, modelFileModule } from './views-modules';
-import { committedHandle, fileState, stateOf } from './views-state';
+import { committedHandle, fileState, ownAst, stateOf } from './views-state';
 import type { FileState, Stage, StagedHeader } from './views-state';
 
 /**
@@ -486,17 +486,15 @@ function adoptSharedView(modelFile: any, source: any, stage?: Stage, committed?:
     }
     const sourceState = stateOf(source);
     // The view's AST is `source`'s, or `filter`'s equal shallow copy of it.
-    if (sourceState?.shapeChecked !== undefined && sourceState.shapeChecked === source.ast) {
+    if (sourceState?.shapeChecked !== undefined && sourceState.shapeChecked === ownAst(source, sourceState)) {
         state.shapeChecked = modelFile.ast;
     }
     // R2A-4: a staged view is `filter`'s, of a file it kept whole, which the
-    // engine shares: its `getAst()` is TS 5.0.0's filtered form, built on
-    // first read (`filteredViewAst`). A fork's view, of `source`'s own AST
-    // object, reads it as `source` does.
+    // engine shares: its `ast`, and so `getAst()`, is TS 5.0.0's filtered
+    // form, built on first read. A fork's view takes `source.ast`, which is
+    // already that form.
     if (stage !== undefined) {
-        state.filteredAst = { ast: undefined };
-    } else if (modelFile.ast === source.ast) {
-        state.filteredAst = sourceState?.filteredAst;
+        installFilteredAst(modelFile, state);
     }
     const factories = modelFile.modelManager.getDecoratorFactories();
     const lazy = sourceState?.lazy !== undefined || !(Array.isArray(factories) && factories.length > 0);
@@ -900,41 +898,56 @@ function defaultSuperType(node: any): string | undefined {
 }
 
 /**
- * `ModelFile.getAst()`: the view's AST, or, for a view of a file
- * `ModelFile.filter` kept whole (R2A-4, `adoptSharedView`), TS 5.0.0's
- * filtered form of it. TS 5.0.0 builds a filtered file from each kept
+ * TS 5.0.0's filtered form of `ast`, the AST of a file `ModelFile.filter`
+ * kept whole (R2A-4). TS 5.0.0 builds a filtered file from each kept
  * declaration's own `ast`, so an asset, participant, transaction or event
- * with no super type has the default one its view was given. The engine
- * shares the source's file instead, so the form is built here on the first
- * read, a copy with a new declarations array, and kept: the view's own
- * `ast`, which its declaration views and lookups are built from, is not
- * changed. A view no declaration of which takes a default super type
- * reads its own `ast`.
+ * with no super type has the default one its view was given: a copy with a
+ * new declarations array. `ast` itself when no declaration takes one.
  */
-function filteredViewAst(modelFile: any): object {
-    const form = stateOf(modelFile)?.filteredAst;
-    if (form === undefined) {
-        return modelFile.ast;
+function filteredForm(ast: any): object {
+    // `filter` stages only a file with declarations, so `declarations` is
+    // an array of declaration nodes.
+    const declarations: any[] = ast.declarations;
+    if (!declarations.some((node) => defaultSuperType(node) !== undefined)) {
+        return ast;
     }
-    if (form.ast === undefined) {
-        // `filter` stages only a file with declarations, so `declarations`
-        // is an array of declaration nodes.
-        const ast = modelFile.ast;
-        const declarations: any[] = ast.declarations;
-        form.ast = declarations.some((node) => defaultSuperType(node) !== undefined)
-            ? {
-                ...ast,
-                declarations: declarations.map((node) => {
-                    const name = defaultSuperType(node);
-                    return name === undefined ? node : {
-                        ...node,
-                        superType: { $class: 'concerto.metamodel@1.0.0.TypeIdentified', name },
-                    };
-                }),
+    return {
+        ...ast,
+        declarations: declarations.map((node) => {
+            const name = defaultSuperType(node);
+            return name === undefined ? node : {
+                ...node,
+                superType: { $class: 'concerto.metamodel@1.0.0.TypeIdentified', name },
+            };
+        }),
+    };
+}
+
+/**
+ * R2A-4: makes the public `ast` of `modelFile`, a view of a file
+ * `ModelFile.filter` kept whole, read TS 5.0.0's filtered form of the AST it
+ * was constructed with (`filteredForm`), as TS 5.0.0's filtered file's
+ * `ast` and `getAst()` are. The form is built on the first read of `ast`,
+ * by the caller or by the view itself, and kept. Assigning `ast` replaces
+ * it with a plain field again.
+ */
+function installFilteredAst(modelFile: any, state: FileState): void {
+    const form = { raw: modelFile.ast, ast: undefined as object | undefined };
+    state.filteredAst = form;
+    Object.defineProperty(modelFile, 'ast', {
+        configurable: true,
+        enumerable: true,
+        get(): object {
+            if (form.ast === undefined) {
+                form.ast = filteredForm(form.raw);
             }
-            : ast;
-    }
-    return form.ast as object;
+            return form.ast;
+        },
+        set(value: object): void {
+            state.filteredAst = undefined;
+            Object.defineProperty(modelFile, 'ast', { configurable: true, enumerable: true, writable: true, value });
+        },
+    });
 }
 
 /**
@@ -968,7 +981,6 @@ export {
     commitStagedAll,
     copyImportNames,
     dropStaged,
-    filteredViewAst,
     markSystemModelAst,
     recordImportNames,
     recordedImportNames,

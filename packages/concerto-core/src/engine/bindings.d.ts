@@ -221,7 +221,6 @@ export interface EngineViewsModule {
     checkAstShape(modelFile: object): string | object | undefined;
     stageModelFile(modelFile: object, checkedText?: string | object): boolean;
     adoptSharedView(modelFile: object, source: object, stage?: object, committed?: object): boolean;
-    filteredViewAst(modelFile: object): object;
     systemViewHeader(ast: object): unknown[] | undefined;
     adoptSystemView(modelFile: object, header: unknown[]): boolean;
     copyImportNames(modelFile: object, source: object): void;

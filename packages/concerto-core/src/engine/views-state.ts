@@ -40,11 +40,12 @@ interface FileState {
     /** The rustHandle the ModelFile was registered in from its stage. */
     committed: object | undefined;
     /**
-     * R2A-4: set for a view of a file `ModelFile.filter` kept whole, whose
-     * `getAst()` is TS 5.0.0's filtered form (`filteredViewAst`), built on
-     * the first read and kept in `ast`. A fork's view of it shares it.
+     * R2A-4: set for a view of a file `ModelFile.filter` kept whole. `raw`
+     * is the AST the view was constructed with; its `ast` (and so
+     * `getAst()`) reads TS 5.0.0's filtered form of it (`installFilteredAst`),
+     * built on the first read and kept in `ast`.
      */
-    filteredAst: { ast: object | undefined } | undefined;
+    filteredAst: { raw: object; ast: object | undefined } | undefined;
 }
 
 const fileStates = new WeakMap<object, FileState>();
@@ -107,7 +108,21 @@ function isLazy(modelFile: object): boolean {
 
 /** BC-19: whether the AST `modelFile` holds now passed the shape check. */
 function isShapeChecked(modelFile: any): boolean {
-    return fileStates.get(modelFile)?.shapeChecked === modelFile.ast;
+    const state = fileStates.get(modelFile);
+    if (state?.shapeChecked === undefined) {
+        return false;
+    }
+    return state.shapeChecked === ownAst(modelFile, state);
+}
+
+/**
+ * The AST `modelFile`, whose state is `state`, was constructed with: for a
+ * view of a file `ModelFile.filter` kept whole (R2A-4), the AST its filtered
+ * form is built from, without building it; otherwise its `ast`.
+ */
+function ownAst(modelFile: any, state: FileState): any {
+    const form = state.filteredAst;
+    return form !== undefined ? form.raw : modelFile.ast;
 }
 
 /**
@@ -138,6 +153,7 @@ export {
     fileState,
     isLazy,
     isShapeChecked,
+    ownAst,
     stageOf,
     stateOf,
 };

@@ -23,9 +23,9 @@
  * declaration's `ast`, so an asset, participant, transaction or event with
  * no super type has the default one (`TypeIdentified`) its view was given,
  * where the source file's AST has none. The engine now shares the source's
- * file (a staged share, not a new load), and the view's `getAst()`, the
- * manager's `getAst()` and what `DecoratorManager.decorateModels` reads give
- * that form.
+ * file (a staged share, not a new load), and the view's public `ast` and
+ * `getAst()`, the manager's `getAst()` and what
+ * `DecoratorManager.decorateModels` reads give that form.
  *
  * `shared` counts the files the engine filter staged shared; it is 'no
  * engine' for v5.0.0, so a check that reports it has a `reference` that
@@ -128,6 +128,20 @@ const TAGGED = (name) => ({ $class: `${MM}.TypeIdentified`, name });
 
 const ALL = [['A', TAGGED('Asset')], ['P', TAGGED('Participant')], ['T', TAGGED('Transaction')], ['E', TAGGED('Event')], ['C', null]];
 
+/** P5123-005's result, the same for v5.0.0. */
+const AST_005 = {
+    before: ALL,
+    sameBefore: true,
+    after: ALL,
+    sameAfter: true,
+    added: ALL,
+    addedSame: true,
+    declAst: 'Asset',
+    sourceAst: [['A', null], ['P', null], ['T', null], ['E', null], ['C', null]],
+    sourceSame: true,
+    assigned: true,
+};
+
 module.exports = [
     {
         id: 'P5123-001',
@@ -223,6 +237,7 @@ module.exports = [
             return {
                 shared,
                 filtered: superTypes(mf.getAst()),
+                filteredAst: mf.ast === mf.getAst(),
                 managerAst: superTypes(modelOf(filtered.getAst(), 'a@1.0.0')),
                 again: superTypes(again.getModelFile('a@1.0.0').getAst()),
                 fork: superTypes(fork.getModelFile('a@1.0.0').getAst()),
@@ -233,6 +248,7 @@ module.exports = [
         expect: { ok: {
             shared: 2,
             filtered: ALL,
+            filteredAst: true,
             managerAst: ALL,
             again: ALL,
             fork: ALL,
@@ -261,5 +277,36 @@ module.exports = [
             shared: NO_ENGINE,
             some: ALL.slice(0, 4),
         } },
+    },
+    {
+        id: 'P5123-005',
+        covers: 'the public ast of a file ModelFile.filter kept whole is TS 5.0.0\'s filtered form, the same object as getAst(), before and after it is added, and can be assigned; the source file\'s ast is not changed',
+        run: (core) => {
+            const mm = source(core);
+            const target = new core.ModelManager();
+            const a = mm.getModelFile('a@1.0.0');
+            const f = a.filter(() => true, target);
+            const before = superTypes(f.ast);
+            const sameBefore = f.ast === f.getAst();
+            target.addModelFile(f);
+            const added = target.getModelFile('a@1.0.0');
+            const g = a.filter(() => true, new core.ModelManager());
+            const replaced = { ...a.getAst() };
+            g.ast = replaced;
+            return {
+                before,
+                sameBefore,
+                after: superTypes(f.ast),
+                sameAfter: f.ast === f.getAst(),
+                added: superTypes(added.ast),
+                addedSame: added.ast === added.getAst(),
+                declAst: f.getLocalType('A').ast.superType ? f.getLocalType('A').ast.superType.name : null,
+                sourceAst: superTypes(a.ast),
+                sourceSame: a.ast === a.getAst(),
+                assigned: g.ast === replaced && g.getAst() === replaced,
+            };
+        },
+        expect: { ok: AST_005 },
+        reference: { ok: AST_005 },
     },
 ];
