@@ -40,12 +40,8 @@ class StringValidator extends Validator{
     // Definitely assigned from the Rust snapshot.
     minLength!: number | null | undefined;
     maxLength!: number | null | undefined;
-    // BC-28: always a native RegExp built from the pattern and flags the
-    // engine has already compiled and validated (the `stringValidatorNew`
-    // call below throws first for a pattern it rejects). It is handed out
-    // by getRegex() for callers that want a JS object. `validate` never
-    // uses it: the engine evaluates the regex. (`matchesRegex`, which
-    // Factory's identifier check calls, still tests it.)
+    // BC-28: a native RegExp of the pattern the engine compiled, for
+    // getRegex() and matchesRegex(); `validate` uses the engine's regex.
     regex!: RegExp | null;
 
     /**
@@ -59,10 +55,7 @@ class StringValidator extends Validator{
     constructor(field: ValidatedElement, validator?: IStringRegexValidator, lengthValidator?: IStringLengthValidator) {
         super(field, validator);
 
-        // BC-28: there is no custom regex engine any more (`options.regExp`
-        // is ignored by the model manager), so the engine compiles the
-        // pattern, checks the length bounds and the default value, whatever
-        // the model manager.
+        // BC-28: the engine compiles the pattern and checks the bounds and default.
         Object.assign(this, rust.stringValidatorNew(this, validator, lengthValidator));
         this.regex = validator ? new RegExp(validator.pattern, validator.flags) : null;
     }

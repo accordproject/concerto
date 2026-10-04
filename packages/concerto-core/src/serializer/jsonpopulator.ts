@@ -34,11 +34,7 @@ import type { RelationshipMapValue } from './relationshipmapvalue';
 const debug = createDebug('concerto:JSONPopulator');
 
 /**
- * Whether the date and time fields of a string that already has the strict
- * `DateTime` format name a real instant (BC-42): `Date.parse` rolls
- * `2024-02-30` and `T24:00:00` over and rejects a leap second, so reading
- * the fields back out must give the same fields. The offset's own range
- * (hours up to 23, minutes up to 59) is `Date.parse`'s check.
+ * BC-42: whether a strict `DateTime` string names a real instant (no rollover).
  * @param {string} json a string matching the strict `DateTime` format
  * @returns {boolean} true when the fields name a real instant
  * @private
@@ -173,10 +169,8 @@ class JSONPopulator {
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
-            // BC-08: name the element. JSON.stringify of an introspection
-            // object (a scalar declaration, an enum value) meets the model
-            // manager again and threw V8's circular-structure TypeError
-            // (DV-010).
+            // BC-08: name the element; JSON.stringify of an introspection
+            // object can throw a circular-structure TypeError (DV-010).
             const name = typeof thing?.getFullyQualifiedName === 'function' ? thing.getFullyQualifiedName() : JSON.stringify(thing);
             throw new Error(`Unrecognised element "${name}"`);
         }
@@ -228,12 +222,10 @@ class JSONPopulator {
 
         const objMap = new Map(Object.entries(jsonObj));
 
-        // BC-05, DV-007: a relationship-typed value is read as a
-        // relationship property is, not as an embedded concept.
+        // BC-05, DV-007: read as a relationship property, not a concept.
         const relationship = getRelationshipMapValue(mapDeclaration);
 
         let map = new Map();
-        // The map's URI values, read in one engine call at the first one.
         let ids: (ResourceId | undefined)[] | undefined;
         let index = -1;
 
@@ -401,8 +393,6 @@ class JSONPopulator {
         parameters.path ?? (parameters.path = new TypedStack('$'));
         const path = parameters.path?.stack.join('');
 
-        // The coercion runs here, over the value TS already holds, with the
-        // BC-07, BC-10 and BC-42 rules.
         switch(field.getType()) {
         case 'DateTime': {
             if (json && typeof json === 'object' && typeof json.isBefore === 'function') {
@@ -410,9 +400,7 @@ class JSONPopulator {
             } else if (typeof json !== 'string') {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             } else if (!json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)) {
-                // BC-07: the strict format only, whatever
-                // `strictQualifiedDateTimes` says; the flag decides only
-                // whether `utcOffset` applies.
+                // BC-07: the strict format only; the flag decides only `utcOffset`.
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
             } else if (!isRealInstant(json)) {
                 // BC-42: an impossible date is not rolled over.
@@ -431,8 +419,7 @@ class JSONPopulator {
         case 'Long': {
             const num = json;
             if (typeof num === 'number') {
-                // BC-10, DV-012: `Math.trunc(n) !== n` alone passes
-                // `±Infinity`; a non-finite number is not an integer.
+                // BC-10, DV-012: a non-finite number is not an integer.
                 if (!Number.isFinite(num) || Math.trunc(num) !== num) {
                     throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
                 } else {
@@ -527,20 +514,14 @@ class JSONPopulator {
     }
 
     /**
-     * One relationship value (visitRelationshipDeclaration's non-array
-     * branch): a URI string becomes a Relationship, and an object an embedded
-     * resource when `acceptResourcesForRelationships` allows it. A
-     * relationship-typed map value is read here too (BC-05).
+     * One relationship value, or a relationship-typed map value (BC-05).
      * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
      * @param {Object} jsonObj - the JSON value
      * @param {Object} parameters  - the parameter
      * @return {Object} the Relationship or the embedded resource
      * @private
      */
-    // The return type is written out so the declaration keeps the
-    // `Relationship | Resource` order it was inferred with: a public member
-    // that names `Resource` earlier in the build reorders an inferred
-    // union.
+    // The explicit return type keeps the declaration's union order stable.
     convertRelationship(relationshipDeclaration: RelationshipDeclaration | RelationshipMapValue, jsonObj: unknown, parameters: JsonPopulatorParameters): Relationship | Resource {
         const { defaultNamespace, defaultType } = relationshipDefaults(relationshipDeclaration);
         if (typeof jsonObj === 'string') {
@@ -571,8 +552,7 @@ class JSONPopulator {
 }
 
 /**
- * The namespace and type a relationship URI without them takes: the
- * relationship's target type's (else the owner's namespace).
+ * The default namespace and type of a relationship URI.
  * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
  * @return {Object} `{ defaultNamespace, defaultType }`
  * @private
@@ -588,12 +568,10 @@ function relationshipDefaults(relationshipDeclaration: RelationshipDeclaration |
 }
 
 /**
- * A relationship-typed map's URI values, read in one engine call with the
- * defaults `convertRelationship` reads each one with.
+ * A relationship-typed map's URI values, read in one engine call.
  * @param {RelationshipMapValue} relationship - the map's relationship value
  * @param {Map} objMap - the map's JSON entries
- * @return {Array} per entry, its ResourceId, or `undefined` for a value that
- * is not a string or does not parse (read the usual way, which throws)
+ * @return {Array} per entry, its ResourceId, or `undefined` to read it the usual way
  * @private
  */
 function readRelationshipMapURIs(relationship: RelationshipMapValue, objMap: Map<string, unknown>): (ResourceId | undefined)[] {

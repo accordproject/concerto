@@ -80,9 +80,7 @@ class Decorator {
 
     /**
     * Handles a validation error, logging and throwing as required. Called
-    * back by the Rust engine's decoratorValidate binding (concerto-wasm
-    * src/lib.rs `handle_error`) for every non-fatal-or-fatal validation
-    * outcome, so this is a live collaborator, not TS-only fallback logic.
+    * back by the engine's decoratorValidate binding.
     * @param {string} level the log level
     * @param {string | Error} err the message to log, or the error that was caught
     * @private
@@ -90,11 +88,7 @@ class Decorator {
     handleError(level: string | undefined, err: string | Error): void {
         Logger.dispatch(level as string, err);
         if (level === 'error') {
-            // BC-14: a caught IllegalModelException already names its
-            // file, so it is thrown as it is, and a caught Error gives its
-            // message. TS 5.0.0 wrapped the Error itself, so the message
-            // embedded 'IllegalModelException: ' and the file suffix
-            // twice.
+            // BC-14: an IllegalModelException is rethrown as is; an Error gives its message.
             if (err instanceof IllegalModelException) {
                 throw err;
             }
@@ -109,8 +103,7 @@ class Decorator {
      * @private
      */
     process() {
-        // `this` lets the binding name `this.getParent().getModelFile()` in
-        // the IllegalModelException it throws for a null node (DV-018).
+        // `this` lets the binding name the model file for a null node (DV-018).
         Object.assign(this, rust.decoratorProcess(this.ast, this));
     }
 
@@ -125,10 +118,7 @@ class Decorator {
         const parent = this.getParent() as Decorated & { getFullyQualifiedName?(): string };
         const decoratedName = parent.getFullyQualifiedName?.();
 
-        // BC-52: the types are resolved by the engine from its arena, by
-        // the handle of `mf`; a replaced `getType` method is not called.
-        // Each problem is still reported through `handleError`. With both
-        // options off (the default) nothing is resolved.
+        // BC-52: resolved by the engine; a replaced `getType` is not called.
         const options = mf.getModelManager().getDecoratorValidation();
         if (!options.missingDecorator && !options.invalidDecorator) {
             return;

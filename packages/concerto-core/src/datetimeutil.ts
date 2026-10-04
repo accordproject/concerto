@@ -15,14 +15,9 @@
 import dayjs from './dayjs-setup';
 
 /**
- * Whether a value is a strict `DateTime` string (BC-07/BC-42/BC-43): the
- * `strictQualifiedDateTimes` format, whose date and time fields name a real
- * instant (`Date.parse` rolls `2024-02-30` and `T24:00:00` over and rejects
- * a leap second, so reading the fields back must give the same fields). The
- * Rust engine's rule (`instance::dayjs::strict_instant`): the same regex,
- * then chrono's RFC 3339 calendar checks. The lifted checks in
- * packages/concerto-core/test-lifted/datetimeutil-strict.checks.js compare
- * the two.
+ * Whether a value is a strict `DateTime` string naming a real instant
+ * (BC-07/BC-42/BC-43). Must match the engine's `strict_instant`
+ * (test-lifted/datetimeutil-strict.checks.js compares them).
  * @param {*} value the value
  * @returns {boolean} true for a strict `DateTime` string
  * @internal

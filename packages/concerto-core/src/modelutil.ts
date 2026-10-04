@@ -21,13 +21,7 @@ import type ModelFile from './introspect/modelfile';
 import { rust, engineViews } from './engineloader';
 import type { EngineBindings } from './engine/bindings';
 
-// The other pure string-to-value members below cross into the engine once
-// per distinct argument rather than once per call (a model load calls
-// isSystemProperty/isValidIdentifier/getFullyQualifiedName for every
-// property of every declaration). Only string arguments are memoised, and
-// only a result the engine returned (a throw is never cached), so every
-// other call, and every error, goes to the engine. Each
-// member's memo is cleared once it reaches ENGINE_MEMO_LIMIT entries.
+// Pure engine calls memoised per string argument; throws are never cached.
 const engineMemo: { [binding: string]: Map<string, unknown> } = {};
 const ENGINE_MEMO_LIMIT = 4096;
 
@@ -35,7 +29,7 @@ const ENGINE_MEMO_LIMIT = 4096;
 type MemoisedBinding = 'modelUtilIsValidIdentifier' | 'modelUtilGetFullyQualifiedName';
 
 /**
- * `rust[binding](...args)`, memoised under `key` (see engineMemo).
+ * `rust[binding](...args)`, memoised under `key`.
  * @param {string} binding - the engine binding to call
  * @param {string} key - the memo key: the call's string arguments, unambiguously joined
  * @param {...string} args - the arguments
@@ -57,15 +51,9 @@ function memoisedEngineCall<B extends MemoisedBinding>(binding: B, key: string, 
     return result;
 }
 
-// The members below that only slice a string, or look one up in a fixed
-// list, answer a string argument here, with the engine's own semantics
-// (concerto-rust `model_util::short_name`, `namespace_of`,
-// `PRIMITIVE_TYPES` and the reserved property lists), rather than crossing
-// into the engine for it. Any other argument, and every error, still goes
-// to the engine.
+// A string argument is answered here with the engine's semantics; else the engine.
 const PRIMITIVE_TYPES = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
-// A strict SemVer `major.minor.patch` with no prerelease or build part,
-// each component at most 19 digits (so it fits the engine's u64).
+// Strict SemVer `major.minor.patch`, each component fitting the engine's u64.
 const PLAIN_VERSION = /^(0|[1-9]\d{0,18})\.(0|[1-9]\d{0,18})\.(0|[1-9]\d{0,18})$/;
 const PRIVATE_RESERVED_PROPERTIES = [
     '$classDeclaration', '$namespace', '$type', '$modelManager', '$validator',
@@ -74,13 +62,9 @@ const PRIVATE_RESERVED_PROPERTIES = [
 const ASSIGNABLE_RESERVED_PROPERTIES = ['$identifier', '$timestamp'];
 
 /**
- * BC-52: `ModelUtil.isEnum`, `isMap` and `isScalar` resolve
- * `field.getParent().getModelFile().getType(field.getType())` in the
- * engine's arena, by the handle of that model file and the field's type
- * name (a Property, or a MapKeyType or MapValueType, whose parent is the
- * MapDeclaration); a replaced `getType` method is not called. `undefined`
- * stands for a type that is not found, as when the model file is outside
- * the arena (it resolves no type).
+ * BC-52: `isEnum`, `isMap` and `isScalar` resolve the field's type in the
+ * engine's arena; a replaced `getType` is not called. Undefined when the
+ * type is not found.
  * @param {Field} field - the field
  * @param {string} binding - the handle method answering for a found type
  * @return {boolean|undefined} the answer, or undefined when the type is not found
@@ -145,15 +129,7 @@ class ModelUtil {
         version?: string | null;
         versionParsed?: unknown;
     } {
-        // The engine checks the version and returns its result packed into
-        // one string (concerto-wasm modelUtilParseNamespaceChecked),
-        // without calling back into JS. `versionParsed` is then built
-        // here, by semver.parse, which costs far less in JS than a
-        // callback across the boundary. Since BC-41 the engine takes
-        // strict SemVer 2.0.0, which semver.parse accepts too, except
-        // where node-semver's own limits reject it (a component above
-        // Number.MAX_SAFE_INTEGER, or more than 256 characters):
-        // `versionParsed` is then null, as the engine's own is.
+        // BC-41: `versionParsed` is null where node-semver rejects a strict SemVer version.
         const packed = rust.modelUtilParseNamespaceChecked(ns, options) as string;
         const parts = packed.slice(1).split('@');
         if (packed[0] === 'N') {
@@ -199,14 +175,8 @@ class ModelUtil {
      * @private
      */
     static isAssignableTo(modelFile, typeName, property): any {
-        // BC-52: the type is resolved by the engine from its arena, by the
-        // handle of `modelFile` (engine/views-lookups.ts, "Arena handles of views");
-        // a replaced `getType` or `getAllSuperTypeDeclarations` method is
-        // not called. The property's own type is still read through
-        // `getFullyQualifiedTypeName` (the serializer passes a relationship
-        // map value's stand-in), and a direct match or a primitive on either
-        // side is decided here, with no crossing. `typeName` is converted
-        // with `String()`, as the JS-object binding did.
+        // BC-52: resolved by the engine; a replaced `getType` or
+        // `getAllSuperTypeDeclarations` is not called.
         const propertyTypeName = property.getFullyQualifiedTypeName();
         const name = String(typeName);
         const isDirectMatch = name === propertyTypeName;
@@ -228,8 +198,7 @@ class ModelUtil {
      * @private
      */
     static capitalizeFirstLetter(string): string {
-        // A lone high surrogate from `charAt(0)` is left as it is by
-        // `toUpperCase`, as the engine leaves a non-BMP first character.
+        // As the engine: a lone high surrogate from `charAt(0)` is left as it is.
         return typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : rust.modelUtilCapitalizeFirstLetter(string);
     }
 
@@ -295,10 +264,6 @@ class ModelUtil {
             if (PRIMITIVE_TYPES.includes(fqn)) {
                 return fqn;
             }
-            // `name@major.minor.patch`, a version strict SemVer accepts with
-            // no prerelease or build part (each component fits a u64): the
-            // engine's answer, without crossing. Anything else, and every
-            // error, goes to the engine.
             const dot = Math.max(fqn.lastIndexOf('.'), 0);
             const parts = fqn.substring(0, dot).split('@');
             if (parts.length === 2 && PLAIN_VERSION.test(parts[1])) {
@@ -350,9 +315,7 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
     static isValidMapKeyScalar(decl): any {
-        // `decl?.isScalarDeclaration?.() && ...`: a nullish declaration is
-        // undefined. BC-52: any other declaration is answered by the engine
-        // from its arena, by the declaration's handle.
+        // BC-52: answered by the engine, except a nullish declaration.
         if (decl === null || decl === undefined) {
             return undefined;
         }
