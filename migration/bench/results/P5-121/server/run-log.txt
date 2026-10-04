@@ -1,8 +1,0 @@
-16:51:22 time phase (load 1.53 1.54 1.48)
-16:51:22 time round 1 start (load 1.53 1.54 1.48)
-16:53:58 time round 1 done (load 1.97 1.67 1.53)
-16:53:58 time round 2 start (load 1.97 1.67 1.53)
-16:56:36 time round 2 done (load 1.18 1.48 1.49)
-16:56:36 time round 3 start (load 1.18 1.48 1.49)
-16:59:08 time round 3 done (load 1.75 1.66 1.56)
-16:59:08 p5121-server-run done (load 1.75 1.66 1.56)
