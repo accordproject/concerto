@@ -1,0 +1,25 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "com.hyperledger.testing@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "TestAsset",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "assetId",
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "assetId"
+      }
+    }
+  ]
+}

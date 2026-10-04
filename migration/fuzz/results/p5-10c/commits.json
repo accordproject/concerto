@@ -1,0 +1,17 @@
+{
+  "_about": "P5-10c (accordproject/concerto-rust#271): the commits the lazy and pre-lazy 1,000,000-case runs used (same plan as the stage-2 re-run: run-seeds 1001-1010, 100,000 cases each, batch 1000, 25 seeds per op)",
+  "lazy": {
+    "concerto": "d2be3f7be9d38f08cdf02f1a948922505077f95b",
+    "concerto-rust": "e7c0163fdda8d6b02963a1490e256fb984762812",
+    "note": "integration heads after P5-10b (#270); concerto-wasm/pkg built from concerto-rust e7c0163"
+  },
+  "prelazy": {
+    "concerto": "796669d5c1d391c5f40d246143e55150931dd926",
+    "concerto-rust": "5498f61190c98172627046753f040447f62a0141",
+    "note": "integration heads before P5-10a lazy views; aggregate in prelazy/"
+  },
+  "tsSide": "@accordproject/concerto-core 5.0.0, the frozen oracle reference (migration/oracle/reference), via lib/worker.js referenceAdapter(). After P5-02 the workspace src runs the Rust engine, so the stage-2 srcAdapter TS side no longer exists; the counts are therefore not comparable with results/stage2, only with prelazy/.",
+  "harness": "migration/fuzz at the P5-10c commit (worker.js referenceAdapter; opt-in FUZZ_STDERR_LOG in lib/run-batch.js), applied identically to both runs",
+  "corpus": "oracle-corpus-p107-06aa375 canonical pin plus supplement d842c0ab7 on disk (seeds drawn as in stage 2); CTO cache rebuilt with migration/oracle/bin/build-cto-cache.js",
+  "checkShard": "run-seed 1001 only, lazy engine with CONCERTO_LAZY_VIEWS_CHECK=1; aggregate in check/"
+}

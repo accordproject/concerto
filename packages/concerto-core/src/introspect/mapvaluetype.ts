@@ -13,9 +13,6 @@
  */
 
 import Decorated from './decorated';
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-import IllegalModelException from './illegalmodelexception';
-import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -23,6 +20,7 @@ import type ModelFile from './modelfile';
 import type MapDeclaration from './mapdeclaration';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
+import { rust, engineViews } from '../engineloader';
 
 /**
  * MapValueType defines a Value type of MapDeclaration.
@@ -58,7 +56,8 @@ class MapValueType extends Decorated {
      */
     process() {
         super.process();
-        this.processType(this.ast);
+        // From the file's view snapshot when it has it.
+        this.type = engineViews().mapValueTypeProcess(this);
     }
 
     /**
@@ -68,68 +67,7 @@ class MapValueType extends Decorated {
      * @protected
      */
     validate() {
-        if (!ModelUtil.isPrimitiveType(this.type)) {
-
-            const decl = this.modelFile.getType(this.ast.type.name);
-
-            // All declarations, with the exception of MapDeclarations, are valid Values.
-            if(decl.isMapDeclaration?.()) {
-                throw new IllegalModelException(
-                    `MapDeclaration as Map Type Value is not supported: ${this.type}`
-                );
-            }
-        }
-    }
-
-    /**
-     * Sets the Type name for the Map Value
-     *
-     * @param {Object} ast - The AST created by the parser
-     * @private
-     */
-    processType(ast: AstNode) {
-        let decl;
-        switch(this.ast.$class) {
-        case `${MetaModelNamespace}.ObjectMapValueType`:
-        case `${MetaModelNamespace}.RelationshipMapValueType`:
-
-            // ObjectMapValueType must have TypeIdentifier.
-            if (!('type' in ast)) {
-                throw new IllegalModelException(`ObjectMapValueType must contain property 'type', for MapDeclaration named ${this.parent.name}`);
-            }
-
-            // ObjectMapValueType TypeIdentifier must be properly formed.
-            if (!('$class' in ast.type) || !('name' in ast.type)) {
-                throw new IllegalModelException(`ObjectMapValueType type must contain property '$class' and property 'name', for MapDeclaration named ${this.parent.name}`);
-            }
-
-            // And the $class must be valid.
-            if (ast.type.$class !== 'concerto.metamodel@1.0.0.TypeIdentifier') {
-                throw new IllegalModelException(`ObjectMapValueType type $class must be of TypeIdentifier for MapDeclaration named ${this.parent.name}`);
-            }
-
-            this.type = String(this.ast.type.name); // cast for correct type resolution in generated types.
-
-            break;
-        case `${MetaModelNamespace}.BooleanMapValueType`:
-            this.type = 'Boolean';
-            break;
-        case `${MetaModelNamespace}.DateTimeMapValueType`:
-            this.type = 'DateTime';
-            break;
-        case `${MetaModelNamespace}.StringMapValueType`:
-            this.type = 'String';
-            break;
-        case `${MetaModelNamespace}.IntegerMapValueType`:
-            this.type = 'Integer';
-            break;
-        case `${MetaModelNamespace}.LongMapValueType`:
-            this.type = 'Long';
-            break;
-        case `${MetaModelNamespace}.DoubleMapValueType`:
-            this.type = 'Double';
-            break;
-        }
+        rust.mapValueTypeValidate(this);
     }
 
     /**

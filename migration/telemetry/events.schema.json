@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://concerto.local/migration/telemetry/events.schema.json",
+  "title": "Migration telemetry event",
+  "description": "One line of migration/telemetry/events.jsonl. One JSON object per line (JSON Lines), append-only.",
+  "type": "object",
+  "required": ["timestamp", "event"],
+  "additionalProperties": true,
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp, e.g. 2026-09-24T09:48:52.243Z. Written by the emitter, not the caller, wherever possible (migration/bin/emit stamps this itself)."
+    },
+    "event": {
+      "type": "string",
+      "description": "Lifecycle event name. The dispatcher and agents are expected to use the plan's §5.1 vocabulary, but this is not a closed enum: stuck.mjs writes 'stuck' events with a 'cause', and importers may carry through other labels.",
+      "examples": [
+        "queued", "started", "heartbeat", "test_run", "commit",
+        "review_verdict", "merged", "failed", "retried",
+        "stuck", "escalated", "blocked"
+      ]
+    },
+    "task": {
+      "type": ["string", "null"],
+      "description": "Task ID from migration/queue.yaml (e.g. 'P0-08'). Null/absent for log-wide events such as 'deadlock' or 'global_stall' stuck causes that are not about one task."
+    },
+    "attempt": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "description": "1-based attempt number for this task. Required for per-attempt events (started, test_run, commit, review_verdict, merged, failed, retried); omitted for log-wide events."
+    },
+    "role": {
+      "type": ["string", "null"],
+      "description": "Agent role/brief, e.g. 'architect', 'rust-core', 'reviewer', 'runner'."
+    },
+    "model": {
+      "type": ["string", "null"],
+      "description": "Opaque model identifier as reported by the dispatcher/agent completion result. Never a human-readable model name in files this task authors; this field only carries through whatever the runtime reports."
+    },
+    "branch": {
+      "type": ["string", "null"],
+      "description": "Git branch or worktree name the agent ran in."
+    },
+    "sha": {
+      "type": ["string", "null"],
+      "description": "Commit SHA associated with the event (e.g. the commit a 'commit' or 'merged' event records)."
+    },
+    "duration_ms": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Elapsed wall-clock duration in milliseconds, for events that span time (e.g. an imported agent's started->finished pair, folded onto the 'finished'-equivalent event)."
+    },
+    "tokens": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Token count associated with the event (e.g. total tokens used by the agent call this event reports on)."
+    },
+    "reason": {
+      "type": ["string", "null"],
+      "description": "Free-text detail: first error line, review comment, blocked/failed explanation, etc. Full output belongs in a log file, not here."
+    },
+    "signature": {
+      "type": ["string", "null"],
+      "description": "Failure signature: sha1(test full title + '\\n' + first error line), as produced by record-run.mjs. Present on test_run/failed events tied to a specific failing test."
+    },
+    "dedup_key": {
+      "type": ["string", "null"],
+      "description": "Present only on 'stuck' events: stuck.mjs's canonical fingerprint of the evidence behind the finding (e.g. the anchor commit timestamp for 'burning', the failure signature for 'looping'). Used to suppress re-appending the same still-open finding on the next evaluation cycle; it is not a moment in time, so an unchanged condition keeps the same key across runs."
+    },
+    "cause": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "silent", "looping", "plateau", "burning", "regression",
+        "deadlock", "global_stall", "review_churn", "external"
+      ],
+      "description": "Present only on 'stuck' events: which of the nine §5.1 stuck rules fired."
+    },
+    "source": {
+      "type": ["string", "null"],
+      "description": "Where this line came from when it was not written directly by migration/bin/emit, e.g. 'import-workflow-journal', 'stuck.mjs', 'record-run.mjs'."
+    },
+    "label": {
+      "type": ["string", "null"],
+      "description": "Free-form label carried through from an imported source, e.g. a workflow journal's 'task:role' agent label."
+    },
+    "workflow_run_id": {
+      "type": ["string", "null"],
+      "description": "Identifier of the workflow run and/or agent transcript this event links to (plan §5.1: 'every event links to the agent transcript and the workflow run ID')."
+    },
+    "transcript": {
+      "type": ["string", "null"],
+      "description": "Path (relative or absolute) to the agent transcript file this event was derived from or is otherwise associated with."
+    }
+  }
+}

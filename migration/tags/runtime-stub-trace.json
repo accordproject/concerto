@@ -1,0 +1,1670 @@
+{
+  "Validation (1.0.0) #positive should validate - classic (date)": {
+    "internal": [],
+    "external": [
+      "stub(<Factory-like>.newId)"
+    ]
+  },
+  "Validation (1.0.0) #positive should validate - classic (root hierarchy)": {
+    "internal": [],
+    "external": [
+      "stub(<Factory-like>.newId)"
+    ]
+  },
+  "Validation (1.0.0) #positive should validate - classic (generated identifier)": {
+    "internal": [],
+    "external": [
+      "stub(<Factory-like>.newId)"
+    ]
+  },
+  "Validation (1.0.0) #positive should validate - classic (user defined identifier through hierarchy)": {
+    "internal": [],
+    "external": [
+      "stub(<Factory-like>.newId)"
+    ]
+  },
+  "Validation (1.0.0) #positive should validate - classic (user defined identifier)": {
+    "internal": [],
+    "external": [
+      "stub(<Factory-like>.newId)"
+    ]
+  },
+  "Validation (1.0.0) #positive should validate - classic (timestamp (transaction))": {
+    "internal": [],
+    "external": [
+      "stub(<Factory-like>.newId)"
+    ]
+  },
+  "Validation (1.0.0) #negative should not validate - classic (root hierarchy)": {
+    "internal": [],
+    "external": [
+      "stub(<Factory-like>.newId)"
+    ]
+  },
+  "Validation (1.0.0) #negative should not validate - classic (user defined identifier)": {
+    "internal": [],
+    "external": [
+      "stub(<Factory-like>.newId)"
+    ]
+  },
+  "Factory #newTransaction should pass options onto newResource": {
+    "internal": [
+      "spy(Factory.newResource)"
+    ],
+    "external": []
+  },
+  "Factory #newEvent should pass options onto newEvent": {
+    "internal": [
+      "spy(Factory.newResource)"
+    ],
+    "external": []
+  },
+  "AssetDeclaration #validate should throw when it fails to resolve an imported base asset": {
+    "internal": [
+      "createStubInstance(ModelManager)",
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "AssetDeclaration #validate should throw when identifying field is not a string": {
+    "internal": [
+      "createStubInstance(ModelManager)",
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "AssetDeclaration #validate should throw when identifying field is optional": {
+    "internal": [
+      "createStubInstance(ModelManager)",
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "AssetDeclaration #validate should throw when field has been duplicated in the same class": {
+    "internal": [
+      "createStubInstance(ModelManager)",
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "AssetDeclaration #validate should throw when field has been duplicated in the same class hierarchy": {
+    "internal": [
+      "createStubInstance(ModelManager)",
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "AssetDeclaration #getProperty should resolve an imported base property": {
+    "internal": [
+      "createStubInstance(ModelManager)",
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "AssetDeclaration #getProperties should throw if base type not found": {
+    "internal": [
+      "createStubInstance(ModelManager)",
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "AssetDeclaration #hasInstance should return true for a valid Asset Declaration": {
+    "internal": [
+      "createStubInstance(ModelManager)",
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "AssetDeclaration #declarationKind should return that is is an Asset Declaration": {
+    "internal": [
+      "createStubInstance(ModelManager)",
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "Declaration #constructor should throw if ast not specified": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Declaration #isIdentified should be false": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Declaration #isMapDeclaration should be false": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Declaration #isSystemIdentified should be false": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Declaration #getIdentifierFieldName should be null": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Declaration #getType should be null": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Declaration #toString should be null": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Declaration declaration kind predicates should all be false on the base class": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Decorated #constructor should throw if ast not specified": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Decorated #getModelFile should throw as abstract": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Decorator #constructor should store values": {
+    "internal": [
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "Decorator #accept should call the visitor": {
+    "internal": [
+      "createStubInstance(AssetDeclaration)"
+    ],
+    "external": []
+  },
+  "Field #constructor should not have a validator by default": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Field #constructor should save the incoming string validator": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Field #constructor should save the incoming string validator (with flag)": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Field #constructor should not have a default value by default": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Field #constructor should save the incoming default value": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Field #constructor should not be optional by default": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Field #constructor should detect if field is optional": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Field #toString regular toString": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "stub(Field.getFullyQualifiedTypeName)"
+    ],
+    "external": []
+  },
+  "Field #getDefaultValue should return the default value for falsy defaults": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "IllegalModelException #constructor should return an instance of BaseFileException": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "IllegalModelException #constructor should return an instance of BaseFileException for another component": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "IllegalModelException #constructor should have a message": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "IllegalModelException #constructor should have a file name": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "IllegalModelException #constructor should have a stack trace": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "IllegalModelException #constructor should handle a lack of support for stack traces": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "NumberValidator #constructor should accept valid constructor parms VALID_UPPER_AND_LOWER_BOUND_AST": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #constructor should accept valid constructor parms NO_LOWER_BOUND_AST": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #constructor should accept valid constructor parms NO_UPPER_BOUND_AST": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #constructor should throw an error for constructor parms NO_PARMS_IN_AST": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #constructor should throw an error for constructor parms LOWER_IS_HIGHER_THAN_UPPER": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #constructor should use default value if input is null and within range": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #constructor should throw an error if default value is outside the lower bound": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #constructor should throw an error if default value is outside the upper bound": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #constructor should not throw an error if default value is exactly at the lower bound": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #constructor should not throw an error if default value is exactly at the upper bound": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #validate should validate": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #validate should detect lower bound violation": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #validate should detect upper bound violation": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #validate should ignore missing upper bound": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #validate should ignore missing lower bound": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #validate should do nothing if no value is given": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #toString should return the correct string": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #compatibleWith should return false for a string validator": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #compatibleWith should return true when the bounds are the same": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #compatibleWith should return false when a lower bound is added": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #compatibleWith should return true when a lower bound is removed": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #compatibleWith should return true when the lower bound is lower": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #compatibleWith should return false when the lower bound is higher": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #compatibleWith should return false when an upper bound is added": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #compatibleWith should return true when an upper bound is removed": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #compatibleWith should return true when the upper bound is higher": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "NumberValidator #compatibleWith should return false when the upper bound is lower": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "Property #constructor throw an error for no name": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Property #constructor should not throw for an identifier named null": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Property #constructor should save the incoming property type": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Property #constructor should handle a missing incoming property type": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Property #constructor should not be an array by default": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Property #constructor should mark as an array if required": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Property #constructor should throw for a bad property identifier": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Property #hasInstance should return true for a valid Property": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "Property #getFullyQualifiedTypeName should throw if no parent": {
+    "internal": [
+      "stub(RelationshipDeclaration.getParent)"
+    ],
+    "external": []
+  },
+  "Property #getFullyQualifiedTypeName should throw if parent has no ModelFile": {
+    "internal": [
+      "stub(AssetDeclaration.getModelFile)"
+    ],
+    "external": []
+  },
+  "Property #getFullyQualifiedTypeName should throw if ModelFile fails to find type": {
+    "internal": [
+      "stub(ModelFile.getFullyQualifiedTypeName)"
+    ],
+    "external": []
+  },
+  "RelationshipDeclaration #validate should detect relationships with no type": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "stub(RelationshipDeclaration.getType)"
+    ],
+    "external": []
+  },
+  "RelationshipDeclaration #validate should throw if relationship points to a missing type": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)"
+    ],
+    "external": []
+  },
+  "RelationshipDeclaration #validate should throw if relationship is not a relationship target": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)"
+    ],
+    "external": []
+  },
+  "Scalars #unbox should throw for a non scalar property": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "createStubInstance(ScalarDeclaration)"
+    ],
+    "external": []
+  },
+  "Scalars #unbox should throw for unknown scalar type": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "createStubInstance(ScalarDeclaration)"
+    ],
+    "external": []
+  },
+  "Scalars #unbox should unbox string": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "createStubInstance(ScalarDeclaration)"
+    ],
+    "external": []
+  },
+  "Scalars #unbox should unbox integer": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "createStubInstance(ScalarDeclaration)"
+    ],
+    "external": []
+  },
+  "Scalars #unbox should unbox boolean": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "createStubInstance(ScalarDeclaration)"
+    ],
+    "external": []
+  },
+  "Scalars #unbox should unbox double": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "createStubInstance(ScalarDeclaration)"
+    ],
+    "external": []
+  },
+  "Scalars #unbox should unbox long": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "createStubInstance(ScalarDeclaration)"
+    ],
+    "external": []
+  },
+  "Scalars #unbox should unbox date/time": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "createStubInstance(ScalarDeclaration)"
+    ],
+    "external": []
+  },
+  "Scalars #unbox should handle arrays correctly": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "createStubInstance(ScalarDeclaration)"
+    ],
+    "external": []
+  },
+  "Scalars #unbox should handle non-arrays correctly": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)",
+      "createStubInstance(ModelFile)",
+      "createStubInstance(ScalarDeclaration)"
+    ],
+    "external": []
+  },
+  "StringValidator #constructor should throw for invalid regexes": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #constructor should throw for invalid string length": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #constructor should throw for string min length is bigger than max length": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #constructor should throw for negetive string min length": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #constructor should throw for negetive string max length": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #constructor should throw for negetive string length": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #constructor should throw when defaultValue length is less than minLength": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #constructor should throw when defaultValue length is greater than maxLength": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #constructor should accept valid defaultValue that matches length and pattern constraints": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should ignore a null string": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should validate a string": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should detect mismatch string": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should repeatedly validate a matching string with a global regex": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should repeatedly reject a mismatched string with a global regex": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should not leave lastIndex set on the regex it exposes": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should repeatedly validate a matching string with a sticky regex": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should validate a string with escaped chacters": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should not validate a string with escaped chacters": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should validate a unicode string": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should not validate a unicode string": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should validate a string, when only minLength specified": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should validate a string, when only maxLength specified": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should validate a string, when maxLength specified and minLength null": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should validate a string, when minLength specified and maxLength null": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should string legth should take precedence over regex (if string length specified)": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate should validate a string, when min and max length are same": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate with custom RegEx engine should ignore a null string": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #validate with custom RegEx engine should validate a string": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return false for a number validator": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return true when the patterns are the same": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return false when the pattern is changed": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return true when the patterns and flags are the same": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return false when the flags are changed": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return true when the string lengths are the same": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return false when the string length is changed": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return true when the min lenghts of string are same": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return true when the max lenghts of string are same": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return false when the this min length is smallar than other min length": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return false when the this max length is greater than other max length": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return false when the this max length is null and other max length has value": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return true when the patterns and string lengths are the same": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return false when the pattern is changed but string lengths are same": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return false when the patterns are same but string lengths differs": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "StringValidator #compatibleWith should return false when the pattern and string lengths are different": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "TransactionDeclaration #validate should cover the other error paths": {
+    "internal": [
+      "createStubInstance(ClassDeclaration)"
+    ],
+    "external": []
+  },
+  "Validator #constructor should store values": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "Validator #validate should validate": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "Validator #accept should call the visitor": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "Validator #compatibleWith should always return false": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "ModelManager #validateModelFile should cope with object as modelfile": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addCTOModel should add a model file from an object": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addCTOModel should return error for duplicate namespaces for a string": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addCTOModel should return error for duplicate namespaces from an object": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addCTOModel should return error for duplicate namespaces from an model file with a filename": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addCTOModel should return error for duplicate namespaces from an model file where original filename was provided": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addCTOModel should return error for duplicate namespaces from an model file where original filename and new filename were provided": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addModelFiles should add model files from objects": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addModelFiles should add to existing model files from objects": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addModelFiles should restore existing model files on validation error": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addModelFiles should return an error for duplicate namespace from objects": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #addModelFiles should return an error for duplicate namespace from objects, with filenames": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #updateModelFile throw if the namespace from an object does not exist": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #updateModelFile should update from an object": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #updateModelFile should keep the original if an update from an object throws": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #deleteModelFile throw if the model file does not exist": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #deleteModelFile delete the model file": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #updateExternalModels should update external models": {
+    "internal": [],
+    "external": [
+      "createStubInstance(FileDownloader)"
+    ]
+  },
+  "ModelManager #updateExternalModels should rollback changes on error": {
+    "internal": [],
+    "external": [
+      "createStubInstance(FileDownloader)"
+    ]
+  },
+  "ModelManager #writeModelsToFileSystem should write models to the file system": {
+    "internal": [],
+    "external": [
+      "createStubInstance(FileDownloader)"
+    ]
+  },
+  "ModelManager #writeModelsToFileSystem should write models to the file system, without external models": {
+    "internal": [],
+    "external": [
+      "createStubInstance(FileDownloader)"
+    ]
+  },
+  "ModelManager #writeModelsToFileSystem should throw an error if the path is not provided": {
+    "internal": [],
+    "external": [
+      "createStubInstance(FileDownloader)"
+    ]
+  },
+  "ModelManager #getModels should fall back to the namespace when the file name is UNKNOWN": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #getModels should return a list of name / content pairs, with External Models": {
+    "internal": [],
+    "external": [
+      "createStubInstance(FileDownloader)"
+    ]
+  },
+  "ModelManager #getModels should return a list of name / content pairs, without External Models": {
+    "internal": [],
+    "external": [
+      "createStubInstance(FileDownloader)"
+    ]
+  },
+  "ModelManager #getNamespaces should list all of the namespaces": {
+    "internal": [
+      "createStubInstance(ModelFile)"
+    ],
+    "external": []
+  },
+  "ModelManager #getDecoratorFactories should return an array of processors": {
+    "internal": [
+      "createStubInstance(DecoratorFactory)"
+    ],
+    "external": []
+  },
+  "ModelManager #addDecoratorFactory should add a factory to the array": {
+    "internal": [
+      "createStubInstance(DecoratorFactory)"
+    ],
+    "external": []
+  },
+  "ModelUtil #isAssignableTo returns true for matching primitive types": {
+    "internal": [
+      "createStubInstance(ModelFile)",
+      "createStubInstance(Property)"
+    ],
+    "external": []
+  },
+  "ModelUtil #isAssignableTo returns false for non-matching primitive types": {
+    "internal": [
+      "createStubInstance(ModelFile)",
+      "createStubInstance(Property)"
+    ],
+    "external": []
+  },
+  "ModelUtil #isAssignableTo returns false for assignment of primitive to non-primitive property": {
+    "internal": [
+      "createStubInstance(ModelFile)",
+      "createStubInstance(Property)"
+    ],
+    "external": []
+  },
+  "ModelUtil #isAssignableTo returns false for assignment of non-primitive to primitive property": {
+    "internal": [
+      "createStubInstance(ModelFile)",
+      "createStubInstance(Property)"
+    ],
+    "external": []
+  },
+  "ModelUtil #isAssignableTo returns true if property type and required type are identical": {
+    "internal": [
+      "createStubInstance(ModelFile)",
+      "createStubInstance(Property)"
+    ],
+    "external": []
+  },
+  "ModelUtil #isAssignableTo throws error when type cannot be found": {
+    "internal": [
+      "createStubInstance(ModelFile)",
+      "createStubInstance(Property)",
+      "createStubInstance(ModelManager)"
+    ],
+    "external": []
+  },
+  "JSONGenerator #generate should handle a class that very long description": {
+    "internal": [
+      "spy(JSONGenerator._process)"
+    ],
+    "external": []
+  },
+  "Serializer #toJSON should throw if the class declaration cannot be found": {
+    "internal": [
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "Serializer #fromJSON should throw if the class declaration cannot be found": {
+    "internal": [
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONGenerator #visitField should recurse if an object": {
+    "internal": [
+      "spy(JSONGenerator.visitField)"
+    ],
+    "external": []
+  },
+  "JSONGenerator #visitField should recurse if array contains an object": {
+    "internal": [
+      "spy(JSONGenerator.visitField)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visit should throw an error for an unrecognized type": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should convert to dates from ISO8601 strings": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should convert to dates from fully qualified date-time strings with offset": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should reject unqualified date-time strings when strictQualifiedDateTimes is true": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should reject date-only strings when strictQualifiedDateTimes is true": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should convert to dates from dayjs objects": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to dates when not in ISO 8601 format": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to dates from null": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to dates from undefined": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should convert unqualified date-time strings when strictQualifiedDateTimes is false": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should convert date-only strings when strictQualifiedDateTimes is false": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should apply utcOffset to unqualified date-time strings when strictQualifiedDateTimes is false": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to integers from strings": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to integer from null": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to integer from undefined": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should convert to integers from numbers": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to longs from strings": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to long from null": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to long from undefined": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should convert to longs from numbers": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to longs from numbers that are not integers": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to doubles from strings": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to double from null": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to double from undefined": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should convert to doubles from numbers": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should convert to booleans from true": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to booleans from strings": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to booleans from numbers": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to boolean from null": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to boolean from undefined": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should convert to strings from strings": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to strings from numbers": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to string from null": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertToObject should not convert to string from undefined": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertItem should throw an error if the $class value does not match a class defined in the model": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertItem should create a new resource from an object using a $class value that matches the model": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertItem should create a new resource from an object using a $class value that matches the model with optional integer": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertItem should create a new resource from an object using a $class value that matches the model with optional integer (null)": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertItem should create a new resource from an object using a $class value even if it does not match the model": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #convertItem should create a new resource from an object using the model if no $class value is specified": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visit should throw if the type of a nested field is invalid": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visit should allow injection of a root object path": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visit should throw if the value for an array field is a string rather than an array": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visit should throw if the value for an array relationship is a string rather than an array": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visit should throw if the value for an array field is not an array": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visit should be able to deserialise a map that uses abstract types as values": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitField should visit a Field resource": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitField should allow injection of a root object path": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitClassDeclaration should visit a ClassDeclaration resource": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitClassDeclaration should allow injection of a root object path": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should create a new relationship from a string": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Relationship)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should get the relationship namespace if required": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "stub(RelationshipDeclaration.getFullyQualifiedTypeName)",
+      "stub(RelationshipDeclaration.getNamespace)",
+      "createStubInstance(Relationship)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should not create a new relationship from an object if not permitted": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should create a new relationship from an object if permitted": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should throw if the JSON data is not a string or an object": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should throw if the JSON data is an object without a class": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should throw if the JSON data is an object with a class that causes an error to be thrown": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should throw if the JSON data is an object with a class that does not exist": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "stub(ModelManager.getType)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should create a new relationship from an array of strings": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Relationship)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should not create a new relationship from an array of objects if not permitted": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should create a new relationship from an array of objects if permitted": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "createStubInstance(Resource)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should throw if the JSON data in the array is not a string or an object": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should throw if the JSON data in the array is an object without a class": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should throw if the JSON data in the array is an object with a class that causes an error to be thrown": {
+    "internal": [
+      "createStubInstance(Factory)"
+    ],
+    "external": []
+  },
+  "JSONPopulator #visitRelationshipDeclaration should throw if the JSON data in the array is an object with a class that does not exist": {
+    "internal": [
+      "createStubInstance(Factory)",
+      "stub(ModelManager.getType)"
+    ],
+    "external": []
+  },
+  "ResourceValidator #visit should do nothing if unknown object given": {
+    "internal": [
+      "stub(ResourceValidator.visitEnumDeclaration)",
+      "stub(ResourceValidator.visitClassDeclaration)",
+      "stub(ResourceValidator.visitRelationshipDeclaration)",
+      "stub(ResourceValidator.visitField)"
+    ],
+    "external": []
+  },
+  "ResourceValidator #visitField should throw if dataType is undefined": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "ResourceValidator #reportFieldTypeViolation should get fully qualified type and name if Identifiable": {
+    "internal": [
+      "createStubInstance(Identifiable)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "ResourceValidator #reportFieldTypeViolation should not fail if strigify fails": {
+    "internal": [
+      "createStubInstance(Identifiable)",
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "ResourceValidator #checkItem should throw if dataType is undefined": {
+    "internal": [
+      "createStubInstance(Field)"
+    ],
+    "external": []
+  },
+  "ResourceValidator #checkItem should throw if class declaration is not found": {
+    "internal": [
+      "createStubInstance(Field)",
+      "createStubInstance(Identifiable)"
+    ],
+    "external": []
+  },
+  "ResourceValidator #checkRelationship should not throw if Resource given and convertResourcesToRelationships is set": {
+    "internal": [
+      "createStubInstance(Resource)",
+      "createStubInstance(ClassDeclaration)",
+      "stub(ModelUtil.isAssignableTo)"
+    ],
+    "external": []
+  },
+  "ResourceValidator #checkRelationship should not throw if Resource given and permitResourcesForRelationships is set": {
+    "internal": [
+      "createStubInstance(Resource)",
+      "createStubInstance(ClassDeclaration)",
+      "stub(ModelUtil.isAssignableTo)"
+    ],
+    "external": []
+  }
+}

@@ -4,7 +4,7 @@
   "description": "Core Implementation for the Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
-    "node": ">=18",
+    "node": "^20.19.0 || >=22.12.0",
     "npm": ">=9"
   },
   "main": "dist/index.js",
@@ -19,9 +19,9 @@
     "licchk": "license-check-and-add",
     "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "cross-env TS_NODE_PROJECT=tsconfig.build.json TZ=UTC nyc mocha -r ts-node/register --recursive -t 10000",
+    "test": "cross-env TS_NODE_PROJECT=tsconfig.build.json TZ=UTC nyc mocha -r ts-node/register --recursive -t 10000 test-lifted/fallbacks.spec.js test",
     "test:watch": "cross-env TZ=UTC nyc mocha -r ts-node/register --watch --recursive -t 10000",
-    "build": "tsc -p tsconfig.build.json && cpx \"src/*.json\" dist/ && cpx \"src/messages/*.json\" dist/messages/ && npm run build:esm",
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.build.internal.json && cpx \"src/*.json\" dist/ && cpx \"src/messages/*.json\" dist/messages/ && npm run build:esm",
     "build:esm": "node ../../scripts/build-esm.js"
   },
   "repository": {
@@ -73,6 +73,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-cto": "5.0.0",
+    "@accordproject/concerto-engine": "0.0.0",
     "@accordproject/concerto-metamodel": "^3.17.0",
     "@accordproject/concerto-util": "5.0.0",
     "dayjs": "1.11.13",
@@ -156,8 +157,7 @@
       "import": "./dist/esm/index.mjs",
       "require": "./dist/index.js"
     },
-    "./package.json": "./package.json",
-    "./dist/*": "./dist/*"
+    "./package.json": "./package.json"
   },
   "sideEffects": [
     "./dist/dayjs-setup.js",

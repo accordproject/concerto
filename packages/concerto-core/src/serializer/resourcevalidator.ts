@@ -19,7 +19,8 @@ import { NullUtil as Util } from '@accordproject/concerto-util';
 import ModelUtil from '../modelutil';
 import ValidationException from './validationexception';
 import Globalize from '../globalize';
-import dayjs from '../dayjs-setup';
+import { getRelationshipMapValue } from './relationshipmapvalue';
+import { isStrictDateTime } from '../datetimeutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -124,10 +125,9 @@ class ResourceValidator {
 
         if (!ModelUtil.isPrimitiveType(type.getType())) {
 
-            // thing might be a Concept, Scalar String, Scalar DateTime
-            let thing = mapDeclaration.getModelFile()
-                .getAllDeclarations()
-                .find(decl => decl.name === type.getType());
+            // thing might be a Concept, Scalar String, Scalar DateTime.
+            // DV-023: resolved through the map's model file, imports included.
+            let thing = mapDeclaration.getModelFile().getType(type.getType()) ?? undefined;
 
             // if Key or Value is Scalar, get the Base Type of the Scalar for primitive validation.
             if (ModelUtil.isScalar(mapDeclaration.getKey())) {
@@ -153,7 +153,8 @@ class ResourceValidator {
             }
             break;
         case 'DateTime':
-            if (!dayjs.utc(value).isValid()) {
+            // BC-43: as a `DateTime` field (`undefined` still passes).
+            if (value !== undefined && !isStrictDateTime(value)) {
                 throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
             }
             break;
@@ -183,12 +184,19 @@ class ResourceValidator {
             throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
         }
 
+        // BC-05, DV-007: checked as a relationship property, not an object.
+        const relationship = getRelationshipMapValue(mapDeclaration);
+
         obj.forEach((value, key) => {
             if (!ModelUtil.isSystemProperty(key)) {
                 // Validate Key
                 this.checkMapType(mapDeclaration.getKey(), key, parameters, mapDeclaration);
                 // Validate Value
-                this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
+                if (relationship) {
+                    this.checkRelationship(parameters, relationship, value);
+                } else {
+                    this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
+                }
             }
         });
 
@@ -393,7 +401,6 @@ class ResourceValidator {
 
         if(field.isPrimitive()) {
             let invalid = false;
-
             switch(field.getType()) {
             case 'String':
                 if(dataType !== 'string') {
@@ -562,7 +569,8 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: classDeclaration.getFullyQualifiedName(),
-            invalidValue: value.toString()
+            // BC-06: String() is safe for null and undefined (DV-008).
+            invalidValue: String(value)
         }));
     }
 
@@ -578,7 +586,8 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: relationshipDeclaration.getFullyQualifiedTypeName(),
-            invalidValue: value.toString()
+            // BC-06: String() is safe for null and undefined (DV-008).
+            invalidValue: String(value)
         }));
     }
 
@@ -672,10 +681,17 @@ class ResourceValidator {
             typeName += '[]';
         }
 
+        // BC-06: a non-Identifiable value is named by its JS type (DV-008).
+        let objectType;
+        if (typeof obj?.getFullyQualifiedType === 'function') {
+            objectType = obj.getFullyQualifiedType();
+        } else {
+            objectType = obj === null ? 'null' : typeof obj;
+        }
         throw new ValidationException(formatter({
             resourceId: resourceId,
             propertyName: propName,
-            objectType: obj.getFullyQualifiedType(),
+            objectType,
             fieldType: typeName
         }));
     }

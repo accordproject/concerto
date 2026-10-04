@@ -1,0 +1,313 @@
+{
+  "tool": "p515-sweep",
+  "mode": "count",
+  "coreDist": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-106/concerto/packages/concerto-core/.bench-before/dist",
+  "coreVersion": "5.0.0",
+  "commit": "f1fab513d",
+  "node": "v22.23.2",
+  "cpu": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+  "loadavgEnd": [
+    3.41,
+    4.58,
+    5.36
+  ],
+  "samples": 10,
+  "warmup": 2,
+  "results": [
+    {
+      "op": "add_array_value",
+      "family": "instance",
+      "set": "concerto-core-test-data",
+      "n": 55,
+      "wallUs": 99.03047454545454,
+      "crossings": 6.345454545454546,
+      "inEngineUs": 30.423599999999997,
+      "bindings": [
+        {
+          "name": "modelUtilIsAssignableTo",
+          "perItem": 1.4545454545454546,
+          "usPerItem": 16.897836363636365
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 2.109090909090909,
+          "usPerItem": 4.677810909090909
+        },
+        {
+          "name": "ModelManagerHandle.modelFileResolveType",
+          "perItem": 1,
+          "usPerItem": 3.1466181818181815
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetFullyQualifiedTypeName",
+          "perItem": 1.2,
+          "usPerItem": 2.944456363636364
+        },
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 0.5818181818181818,
+          "usPerItem": 2.7568781818181813
+        }
+      ]
+    },
+    {
+      "op": "add_array_value",
+      "family": "instance",
+      "set": "conformance",
+      "n": 2,
+      "wallUs": 4.8346,
+      "crossings": 1,
+      "inEngineUs": 2.0715,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 1,
+          "usPerItem": 2.0715
+        }
+      ]
+    },
+    {
+      "op": "add_array_value",
+      "family": "instance",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 6.518692333333333,
+      "crossings": 1,
+      "inEngineUs": 2.1495246666666668,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 1,
+          "usPerItem": 2.1495246666666668
+        }
+      ]
+    },
+    {
+      "op": "set_property_value",
+      "family": "instance",
+      "set": "concerto-core-test-data",
+      "n": 582,
+      "wallUs": 3.917610824742268,
+      "crossings": 0.23711340206185566,
+      "inEngineUs": 1.1425443298969071,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 0.19415807560137457,
+          "usPerItem": 1.0556792096219931
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 0.041237113402061855,
+          "usPerItem": 0.07900378006872852
+        },
+        {
+          "name": "ModelManagerHandle.modelFileResolveType",
+          "perItem": 0.001718213058419244,
+          "usPerItem": 0.007861340206185568
+        }
+      ]
+    },
+    {
+      "op": "set_property_value",
+      "family": "instance",
+      "set": "conformance",
+      "n": 60,
+      "wallUs": 1.76381,
+      "crossings": 0.26666666666666666,
+      "inEngineUs": 0.5264800000000001,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 0.21666666666666667,
+          "usPerItem": 0.44890833333333335
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 0.03333333333333333,
+          "usPerItem": 0.047
+        },
+        {
+          "name": "ModelManagerHandle.modelFileResolveType",
+          "perItem": 0.016666666666666666,
+          "usPerItem": 0.030571666666666667
+        }
+      ]
+    },
+    {
+      "op": "set_property_value",
+      "family": "instance",
+      "set": "synthetic-large",
+      "n": 1499,
+      "wallUs": 1.4128686457638426,
+      "crossings": 0.19946631087391595,
+      "inEngineUs": 0.4746909272848565,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 0.19946631087391595,
+          "usPerItem": 0.4746909272848565
+        }
+      ]
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 14.124200833333335,
+      "crossings": 2.4916666666666667,
+      "inEngineUs": 3.3446458333333333,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 1.7333333333333334,
+          "usPerItem": 1.9479291666666665
+        },
+        {
+          "name": "ModelManagerHandle.modelFileResolveType",
+          "perItem": 0.6916666666666667,
+          "usPerItem": 1.211665
+        },
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 0.06666666666666667,
+          "usPerItem": 0.18505166666666667
+        }
+      ]
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 8.364045454545455,
+      "crossings": 1.1818181818181817,
+      "inEngineUs": 1.7999886363636364,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 1.0909090909090908,
+          "usPerItem": 1.628525
+        },
+        {
+          "name": "ModelManagerHandle.modelFileResolveType",
+          "perItem": 0.09090909090909091,
+          "usPerItem": 0.17146363636363637
+        }
+      ]
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 6.013934,
+      "crossings": 1,
+      "inEngineUs": 1.3300486666666667,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 1,
+          "usPerItem": 1.3300486666666667
+        }
+      ]
+    },
+    {
+      "op": "get_assignable_class_declarations",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 160,
+      "wallUs": 1044.06701875,
+      "crossings": 1,
+      "inEngineUs": 1043.4036449999999,
+      "bindings": [
+        {
+          "name": "classDeclarationGetAssignableClassDeclarations",
+          "perItem": 1,
+          "usPerItem": 1043.4036449999999
+        }
+      ]
+    },
+    {
+      "op": "get_assignable_class_declarations",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 53,
+      "wallUs": 377.56527735849056,
+      "crossings": 1,
+      "inEngineUs": 377.1838094339622,
+      "bindings": [
+        {
+          "name": "classDeclarationGetAssignableClassDeclarations",
+          "perItem": 1,
+          "usPerItem": 377.1838094339622
+        }
+      ]
+    },
+    {
+      "op": "get_assignable_class_declarations",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 302,
+      "wallUs": 1878.7567129139072,
+      "crossings": 1,
+      "inEngineUs": 1878.1130384105961,
+      "bindings": [
+        {
+          "name": "classDeclarationGetAssignableClassDeclarations",
+          "perItem": 1,
+          "usPerItem": 1878.1130384105961
+        }
+      ]
+    },
+    {
+      "op": "get_direct_subclasses",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 160,
+      "wallUs": 1034.0879625,
+      "crossings": 1,
+      "inEngineUs": 1033.430591875,
+      "bindings": [
+        {
+          "name": "classDeclarationGetDirectSubclasses",
+          "perItem": 1,
+          "usPerItem": 1033.430591875
+        }
+      ]
+    },
+    {
+      "op": "get_direct_subclasses",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 53,
+      "wallUs": 371.80058867924527,
+      "crossings": 1,
+      "inEngineUs": 371.24922452830185,
+      "bindings": [
+        {
+          "name": "classDeclarationGetDirectSubclasses",
+          "perItem": 1,
+          "usPerItem": 371.24922452830185
+        }
+      ]
+    },
+    {
+      "op": "get_direct_subclasses",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 302,
+      "wallUs": 1873.305702649007,
+      "crossings": 1,
+      "inEngineUs": 1872.777463245033,
+      "bindings": [
+        {
+          "name": "classDeclarationGetDirectSubclasses",
+          "perItem": 1,
+          "usPerItem": 1872.777463245033
+        }
+      ]
+    }
+  ]
+}

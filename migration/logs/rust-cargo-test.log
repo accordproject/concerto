@@ -1,0 +1,135 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.63s
+     Running unittests src/lib.rs (target/debug/deps/concerto_core-6b3984bff7654188)
+
+running 90 tests
+test error::tests::illegal_model_displays_message ... ok
+test error::tests::type_not_found_displays_name ... ok
+test introspect::declaration::tests::asset_kind_is_tagged ... ok
+test introspect::declaration::tests::a_declaration_name_must_be_an_identifier ... ok
+test introspect::declaration::tests::missing_class_is_rejected ... ok
+test introspect::declaration::tests::non_array_properties_is_rejected ... ok
+test introspect::declaration::tests::parses_concept_with_typed_properties ... ok
+test introspect::declaration::tests::scalar_reports_its_concrete_kind ... ok
+test introspect::declaration::tests::scalar_with_reversed_range_is_rejected ... ok
+test introspect::declaration::tests::unknown_declaration_kind_errors ... ok
+test introspect::declaration::tests::scalar_with_valid_range_is_accepted ... ok
+test introspect::import::tests::missing_class_is_rejected ... ok
+test introspect::import::tests::local_names_use_the_alias_where_one_is_given ... ok
+test introspect::import::tests::resolves_multi_import_with_alias ... ok
+test introspect::import::tests::wildcard_import_is_rejected ... ok
+test introspect::import::tests::resolves_named_import ... ok
+test introspect::model_file::tests::missing_namespace_is_rejected ... ok
+test introspect::model_file::tests::duplicate_declaration_is_rejected ... ok
+test introspect::model_file::tests::non_array_declarations_or_imports_is_rejected ... ok
+test introspect::model_file::tests::parses_namespace_imports_and_declarations ... ok
+test introspect::model_file::tests::resolves_local_primitive_and_import ... ok
+test introspect::model_file::tests::unversioned_namespace_is_rejected ... ok
+test introspect::property::tests::enum_member_has_no_type ... ok
+test introspect::property::tests::a_property_name_must_be_an_identifier ... ok
+test introspect::property::tests::missing_class_is_rejected ... ok
+test introspect::property::tests::negative_string_length_is_rejected ... ok
+test introspect::property::tests::parses_object_and_relationship_type_refs ... ok
+test introspect::property::tests::range_lower_above_upper_is_rejected ... ok
+test introspect::property::tests::range_with_one_open_end_is_accepted ... ok
+test introspect::declaration::tests::parses_enum_and_scalar_and_map ... ok
+test introspect::property::tests::a_regex_validator_must_compile ... ok
+test introspect::property::tests::parses_string_property_with_validators ... ok
+test introspect::property::tests::range_without_either_bound_is_rejected ... ok
+test introspect::property::tests::size_validator_min_above_max_is_rejected ... ok
+test introspect::property::tests::size_validator_on_array_is_accepted ... ok
+test introspect::property::tests::size_validator_on_non_array_is_rejected ... ok
+test introspect::property::tests::size_validator_on_non_array_relationship_is_rejected ... ok
+test introspect::property::tests::size_validator_negative_bounds_rejected ... ok
+test introspect::property::tests::size_validator_on_object_property_without_array_is_allowed ... ok
+test introspect::property::tests::size_validator_on_relationship_array_is_accepted ... ok
+test introspect::property::tests::unknown_property_kind_errors ... ok
+test introspect::property::tests::string_length_within_bounds_is_accepted ... ok
+test introspect::property::tests::string_length_min_above_max_is_rejected ... ok
+test model_manager::tests::duplicate_namespace_rejected ... ok
+test model_manager::tests::assignability_follows_inheritance ... ok
+test model_manager::tests::get_all_properties_on_enum_errors ... ok
+test model_manager::tests::preloads_system_model ... ok
+test model_util::tests::identifiers_must_start_with_a_letter_or_sign ... ok
+test model_manager::tests::collects_inherited_properties_in_order ... ok
+test model_manager::tests::resolves_by_exact_fqn_only ... ok
+test model_manager::tests::unresolved_super_type_is_hard_error ... ok
+test model_util::tests::namespace_of_returns_prefix ... ok
+test model_util::tests::parse_namespace_requires_version ... ok
+test model_util::tests::primitive_types_are_recognised ... ok
+test model_util::tests::qualify_round_trips ... ok
+test model_util::tests::reserved_property_names_are_recognised ... ok
+test model_util::tests::short_name_splits_on_last_dot ... ok
+test rootmodel::tests::asset_and_participant_are_identified ... ok
+test rootmodel::tests::root_model_defines_five_base_types ... ok
+test validation::tests::a_map_key_kind_outside_the_allowed_set_is_rejected ... ok
+test validation::tests::a_map_key_must_be_string_or_datetime ... ok
+test validation::tests::a_map_value_may_not_be_a_relationship ... ok
+test validation::tests::a_map_value_may_not_be_an_enum ... ok
+test validation::tests::a_system_identifier_may_not_extend_an_explicit_one ... ok
+test validation::tests::declaration_beside_a_distinct_import_is_accepted ... ok
+test validation::tests::a_map_value_must_name_a_declared_type ... ok
+test validation::tests::an_aliased_import_clashes_under_its_alias ... ok
+test validation::tests::declaration_clashing_with_an_imported_name_is_rejected ... ok
+test validation::tests::distinct_decorators_are_accepted ... ok
+test validation::tests::duplicate_decorator_is_rejected ... ok
+test validation::tests::duplicate_decorator_on_a_declaration_is_rejected ... ok
+test validation::tests::identifier_of_non_string_type_fails ... ok
+test validation::tests::field_redeclared_from_super_type_fails ... ok
+test validation::tests::identifier_of_string_scalar_type_passes ... ok
+test validation::tests::identifier_of_string_type_passes ... ok
+test validation::tests::importing_a_declared_type_is_accepted ... ok
+test validation::tests::importing_a_type_that_does_not_exist_is_rejected ... ok
+test validation::tests::importing_from_the_files_own_namespace_is_rejected ... ok
+test validation::tests::importing_two_versions_of_one_namespace_is_rejected ... ok
+test validation::tests::object_property_of_declared_type_passes ... ok
+test validation::tests::object_property_of_undeclared_type_fails ... ok
+test validation::tests::optional_identifier_fails ... ok
+test validation::tests::relationship_to_identified_class_passes ... ok
+test validation::tests::relationship_to_primitive_fails ... ok
+test validation::tests::relationship_to_unidentified_class_fails ... ok
+test validation::tests::reserved_field_name_is_rejected_at_load ... ok
+test validation::tests::super_type_that_exists_passes ... ok
+test validation::tests::super_type_that_is_missing_fails ... ok
+test validation::tests::test_fresh_model_manager_is_valid ... ok
+test validation::tests::unique_field_names_across_inheritance_pass ... ok
+
+test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/concerto_metamodel-447b5cae914de5c5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/concerto_vocabulary-2f0b67db53d14b2c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests concerto_core
+
+running 7 tests
+test concerto-core/src/model_util.rs - model_util::is_primitive_type (line 131) ... ok
+test concerto-core/src/model_util.rs - model_util::namespace_of (line 53) ... ok
+test concerto-core/src/model_util.rs - model_util::is_valid_identifier (line 146) ... ok
+test concerto-core/src/model_util.rs - model_util::is_system_property (line 163) ... ok
+test concerto-core/src/model_util.rs - model_util::parse_namespace (line 97) ... ok
+test concerto-core/src/model_util.rs - model_util::qualify (line 68) ... ok
+test concerto-core/src/model_util.rs - model_util::short_name (line 38) ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 4.15s; merged doctests compilation took 4.14s
+   Doc-tests concerto_metamodel
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests concerto_vocabulary
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

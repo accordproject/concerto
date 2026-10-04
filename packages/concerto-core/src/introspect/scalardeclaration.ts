@@ -12,20 +12,14 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-
 import Declaration from './declaration';
-import IllegalModelException from './illegalmodelexception';
-import NumberValidator from './numbervalidator';
-import StringValidator from './stringvalidator';
-import { NullUtil as Util } from '@accordproject/concerto-util';
-import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type Validator from './validator';
 import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
+import { engineViews } from '../engineloader';
 
 /**
  * ScalarDeclaration defines the structure (model/schema) of composite data.
@@ -61,57 +55,7 @@ class ScalarDeclaration extends Declaration {
     process() {
         super.process();
 
-        const scalarName = this.getName(); // Get the local name of the scalar
-        if (ModelUtil.isPrimitiveType(scalarName)) {
-            throw new IllegalModelException(
-                `Invalid scalar name '${scalarName}'. Name conflicts with primitive type.`,
-                this.modelFile,
-                this.ast.location
-            );
-        }
-        this.superType = null;
-        this.superTypeDeclaration = null;
-        this.idField = null;
-        this.timestamped = false;
-        this.abstract = false;
-        this.validator = null;
-
-        if (this.ast.$class === `${MetaModelNamespace}.BooleanScalar`) {
-            this.type = 'Boolean';
-        } else if (this.ast.$class === `${MetaModelNamespace}.IntegerScalar`) {
-            this.type = 'Integer';
-        } else if (this.ast.$class === `${MetaModelNamespace}.LongScalar`) {
-            this.type = 'Long';
-        } else if (this.ast.$class === `${MetaModelNamespace}.DoubleScalar`) {
-            this.type = 'Double';
-        } else if (this.ast.$class === `${MetaModelNamespace}.StringScalar`) {
-            this.type = 'String';
-        } else if (this.ast.$class === `${MetaModelNamespace}.DateTimeScalar`) {
-            this.type = 'DateTime';
-        } else {
-            this.type = null;
-        }
-
-        switch(this.getType()) {
-        case 'Integer':
-        case 'Double':
-        case 'Long':
-            if(this.ast.validator) {
-                this.validator = new NumberValidator(this, this.ast.validator);
-            }
-            break;
-        case 'String':
-            if(this.ast.validator || this.ast.lengthValidator) {
-                this.validator = new StringValidator(this, this.ast.validator, this.ast.lengthValidator);
-            }
-            break;
-        }
-
-        if(!Util.isNull(this.ast.defaultValue)) {
-            this.defaultValue = this.ast.defaultValue;
-        } else {
-            this.defaultValue = null;
-        }
+        engineViews().scalarDeclarationProcess(this);
     }
 
     /**
@@ -125,20 +69,13 @@ class ScalarDeclaration extends Declaration {
     validate() {
         super.validate();
 
-        const declarations = this.getModelFile().getAllDeclarations();
-        const declarationNames = declarations.map(
-            d => d.getFullyQualifiedName()
-        );
-        const uniqueNames = new Set(declarationNames);
-
-        if (uniqueNames.size !== declarations.length) {
-            const duplicateElements = declarationNames.filter(
-                (item, index) => declarationNames.indexOf(item) !== index
-            );
-            throw new IllegalModelException(
-                `Duplicate class name ${duplicateElements[0]}`
-            );
+        // BC-52: a replaced `getModelFile` or `getAllDeclarations` is not called.
+        const views = engineViews();
+        const ref = views.declarationArenaRef(this);
+        if (ref === undefined) {
+            throw views.notInArena('ScalarDeclaration.validate');
         }
+        ref.handle.scalarDeclarationValidate(ref.id);
     }
 
     /**
@@ -292,6 +229,9 @@ class ScalarDeclaration extends Declaration {
     }
 
 }
+
+// Built on first read in a lazily built file (engine/views-lazy.ts).
+engineViews().installLazyField(ScalarDeclaration.prototype, 'validator');
 
 export { ScalarDeclaration };
 export default ScalarDeclaration;

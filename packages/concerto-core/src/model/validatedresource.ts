@@ -19,6 +19,7 @@ import Resource from './resource';
 /* eslint-disable no-unused-vars */
 import type ResourceValidator from '../serializer/resourcevalidator';
 /* eslint-enable no-unused-vars */
+import { engineValidateResource } from '../engineloader';
 
 /**
  * ValidatedResource is a Resource that can validate that property
@@ -72,11 +73,14 @@ class ValidatedResource extends Resource {
         //     this.log( 'Validating field ' + field + ' with data ' + value );
         // }
 
-        const parameters:any = {};
-        parameters.stack = new TypedStack(value);
-        parameters.modelManager = this.getModelManager();
-        parameters.rootResourceIdentifier = this.getFullyQualifiedIdentifier();
-        field.accept(this.$validator, parameters);
+        const rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        if (!engineValidateResource().validateProperty(this, propName, value, rootResourceIdentifier, field)) {
+            const parameters:any = {};
+            parameters.stack = new TypedStack(value);
+            parameters.modelManager = this.getModelManager();
+            parameters.rootResourceIdentifier = rootResourceIdentifier;
+            field.accept(this.$validator, parameters);
+        }
         super.setPropertyValue(propName,value);
     }
 
@@ -107,12 +111,15 @@ class ValidatedResource extends Resource {
             newArray = this[propName].slice(0);
         }
         newArray.push(value);
-        const parameters = {
-            stack: new TypedStack(newArray),
-            modelManager: this.getModelManager(),
-            rootResourceIdentifier: this.getFullyQualifiedIdentifier(),
-        };
-        field.accept(this.$validator, parameters);
+        const rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        if (!engineValidateResource().validateProperty(this, propName, newArray, rootResourceIdentifier)) {
+            const parameters = {
+                stack: new TypedStack(newArray),
+                modelManager: this.getModelManager(),
+                rootResourceIdentifier,
+            };
+            field.accept(this.$validator, parameters);
+        }
         super.addArrayValue(propName, value);
     }
 
@@ -123,10 +130,14 @@ class ValidatedResource extends Resource {
      */
     validate() {
         const classDeclaration = this.getClassDeclaration();
+        const rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        if (engineValidateResource().validateResource(this, rootResourceIdentifier)) {
+            return;
+        }
         const parameters:any = {};
         parameters.stack = new TypedStack(this);
         parameters.modelManager = this.getModelManager();
-        parameters.rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        parameters.rootResourceIdentifier = rootResourceIdentifier;
         classDeclaration.accept(this.$validator, parameters);
     }
 }

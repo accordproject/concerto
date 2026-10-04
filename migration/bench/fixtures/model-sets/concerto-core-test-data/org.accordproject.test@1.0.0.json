@@ -1,0 +1,256 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "org.accordproject.test@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "Department",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "ENGINEERING"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "ACCOUNTS"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "HR"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "SALES"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Types",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "stringValue",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "stringArrayValue",
+          "isArray": true,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "longValue",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "integerValue",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "name": "doubleValue",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+          "name": "booleanValue",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DateTimeProperty",
+          "name": "dateTimeValue",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "conceptValue",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Product"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "departmentValue",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Department"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "departmentArrayValue",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Department"
+          },
+          "isArray": true,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "relationshipValue",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Person"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "relationshipArrayValue",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Person"
+          },
+          "isArray": true,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Product",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "sku",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "description",
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Person",
+      "isAbstract": true,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "ssn",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "department",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Department"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "manager",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Manager"
+          },
+          "isArray": false,
+          "isOptional": true
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "ssn"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Employee",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "pets",
+          "isArray": true,
+          "isOptional": true
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Person"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Manager",
+      "isAbstract": false,
+      "properties": [],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Person"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Customer",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "customerId",
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Person"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "TestAsset",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "id",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "types",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Types"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "id"
+      }
+    }
+  ]
+}

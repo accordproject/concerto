@@ -1,0 +1,3537 @@
+{
+ "engine": "rust-wasm",
+ "total": 16242,
+ "pass": 15971,
+ "fail": 271,
+ "harness_error": 0,
+ "message_only": 58,
+ "by_source": {
+  "conformance": {
+   "total": 815,
+   "pass": 791,
+   "fail": 24,
+   "harness_error": 0
+  },
+  "data": {
+   "total": 10231,
+   "pass": 10135,
+   "fail": 96,
+   "harness_error": 0
+  },
+  "gaps": {
+   "total": 658,
+   "pass": 618,
+   "fail": 40,
+   "harness_error": 0
+  },
+  "lifted": {
+   "total": 299,
+   "pass": 277,
+   "fail": 22,
+   "harness_error": 0
+  },
+  "supplement": {
+   "total": 157,
+   "pass": 157,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "unit": {
+   "total": 4082,
+   "pass": 3993,
+   "fail": 89,
+   "harness_error": 0
+  }
+ },
+ "by_op": {
+  "ModelFile.getName": {
+   "total": 76,
+   "pass": 76,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.new": {
+   "total": 196,
+   "pass": 192,
+   "fail": 4,
+   "harness_error": 0
+  },
+  "ModelManager.addCTOModel": {
+   "total": 1426,
+   "pass": 1403,
+   "fail": 23,
+   "harness_error": 0
+  },
+  "ModelManager.addModel": {
+   "total": 173,
+   "pass": 171,
+   "fail": 2,
+   "harness_error": 0
+  },
+  "ModelManager.addModelFile": {
+   "total": 92,
+   "pass": 92,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.validateModelFiles": {
+   "total": 376,
+   "pass": 370,
+   "fail": 6,
+   "harness_error": 0
+  },
+  "Serializer.fromJSON": {
+   "total": 2080,
+   "pass": 2046,
+   "fail": 34,
+   "harness_error": 0
+  },
+  "Serializer.new": {
+   "total": 164,
+   "pass": 164,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Serializer.toJSON": {
+   "total": 1777,
+   "pass": 1768,
+   "fail": 9,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isClassDeclaration": {
+   "total": 422,
+   "pass": 422,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isEnum": {
+   "total": 381,
+   "pass": 381,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isIdentified": {
+   "total": 330,
+   "pass": 330,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isSystemIdentified": {
+   "total": 158,
+   "pass": 158,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DcsConverter.jsonToYaml": {
+   "total": 22,
+   "pass": 22,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getFullyQualifiedName": {
+   "total": 493,
+   "pass": 493,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getName": {
+   "total": 369,
+   "pass": 369,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getNamespace": {
+   "total": 327,
+   "pass": 327,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isClassDeclaration": {
+   "total": 89,
+   "pass": 89,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.decorateModels": {
+   "total": 1301,
+   "pass": 1182,
+   "fail": 119,
+   "harness_error": 0
+  },
+  "DecoratorManager.extractDecorators": {
+   "total": 59,
+   "pass": 59,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.extractNonVocabDecorators": {
+   "total": 55,
+   "pass": 55,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.extractVocabularies": {
+   "total": 69,
+   "pass": 69,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.jsonToYaml": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.validate": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newResource": {
+   "total": 1398,
+   "pass": 1396,
+   "fail": 2,
+   "harness_error": 0
+  },
+  "MetaModel.modelManagerFromMetaModel": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MetaModel.validateMetaModel": {
+   "total": 12,
+   "pass": 12,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAllDeclarations": {
+   "total": 125,
+   "pass": 125,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addModelFiles": {
+   "total": 52,
+   "pass": 52,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.fromAst": {
+   "total": 42,
+   "pass": 30,
+   "fail": 12,
+   "harness_error": 0
+  },
+  "ModelManager.getAst": {
+   "total": 133,
+   "pass": 133,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getModels": {
+   "total": 112,
+   "pass": 112,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getType": {
+   "total": 688,
+   "pass": 685,
+   "fail": 3,
+   "harness_error": 0
+  },
+  "ModelManager.new": {
+   "total": 14,
+   "pass": 14,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.validate": {
+   "total": 75,
+   "pass": 72,
+   "fail": 3,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getProperties": {
+   "total": 88,
+   "pass": 88,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getProperty": {
+   "total": 218,
+   "pass": 210,
+   "fail": 8,
+   "harness_error": 0
+  },
+  "CollectionSizeValidator.compatibleWith": {
+   "total": 10,
+   "pass": 9,
+   "fail": 1,
+   "harness_error": 0
+  },
+  "Declaration.getModelFile": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorated.getDecorator": {
+   "total": 80,
+   "pass": 67,
+   "fail": 13,
+   "harness_error": 0
+  },
+  "Decorated.getDecorators": {
+   "total": 8,
+   "pass": 8,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newConcept": {
+   "total": 50,
+   "pass": 50,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newRelationship": {
+   "total": 38,
+   "pass": 38,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getScalarField": {
+   "total": 17,
+   "pass": 17,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getValidator": {
+   "total": 87,
+   "pass": 87,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getFullyQualifiedTypeName": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getImportURI": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getType": {
+   "total": 34,
+   "pass": 34,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelLoader.loadModelManager": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelLoader.loadModelManagerFromModelFiles": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addDecoratorFactory": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.deleteModelFile": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.filter": {
+   "total": 20,
+   "pass": 20,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.updateExternalModels": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.updateModelFile": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.validateModelFile": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.writeModelsToFileSystem": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isAssignableTo": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "NumberValidator.compatibleWith": {
+   "total": 9,
+   "pass": 9,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "NumberValidator.validate": {
+   "total": 3,
+   "pass": 1,
+   "fail": 2,
+   "harness_error": 0
+  },
+  "Property.getFullyQualifiedTypeName": {
+   "total": 63,
+   "pass": 63,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getSizeValidator": {
+   "total": 34,
+   "pass": 33,
+   "fail": 1,
+   "harness_error": 0
+  },
+  "Relationship.fromURI": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.instanceOf": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.setPropertyValue": {
+   "total": 56,
+   "pass": 56,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getDefaultValue": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getType": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getValidator": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isScalarDeclaration": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.new": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.toString": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "StringValidator.compatibleWith": {
+   "total": 29,
+   "pass": 29,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "StringValidator.validate": {
+   "total": 29,
+   "pass": 15,
+   "fail": 14,
+   "harness_error": 0
+  },
+  "TypeNotFoundException.new": {
+   "total": 9,
+   "pass": 9,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "StringValidator.getRegex": {
+   "total": 15,
+   "pass": 15,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.validate": {
+   "total": 8,
+   "pass": 8,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.getIdentifierFieldName": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isAsset": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isConcept": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isEvent": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isIdentified": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isParticipant": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isSystemIdentified": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isTransaction": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorated.accept": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorator.accept": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorator.isDecorator": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.isNamespaceTargetEnabled": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.toString": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Introspector.accept": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.getKey": {
+   "total": 12,
+   "pass": 12,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.getValue": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.isKey": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.isValue": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.isKey": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.isValue": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.accept": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getExternalImports": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.accept": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getFactory": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getModelFileByFileName": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.isAliasedTypeEnabled": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.isModelManager": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "NumberValidator.toString": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.validate": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "SecurityException.new": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Serializer.setDefaultOptions": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "StringValidator.matchesRegex": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "TypeNotFoundException.getTypeName": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.accept": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Validator.accept": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "AssetDeclaration.declarationKind": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "AstModelManager.new": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "BaseModelManager.new": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getAllSuperTypeDeclarations": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getAssignableClassDeclarations": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getDirectSubclasses": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getIdentifierFieldName": {
+   "total": 40,
+   "pass": 40,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getNestedProperty": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getOwnProperties": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getSuperType": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.getSuperTypeDeclaration": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isAbstract": {
+   "total": 32,
+   "pass": 32,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isEvent": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isExplicitlyIdentified": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.isMapDeclaration": {
+   "total": 66,
+   "pass": 66,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ClassDeclaration.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "CollectionSizeValidator.getMaxSize": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "CollectionSizeValidator.getMinSize": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ConceptDeclaration.declarationKind": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DateTimeUtil.setCurrentTime": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DcsConverter.yamlToJson": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isEnum": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isMapDeclaration": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Declaration.isScalarDeclaration": {
+   "total": 50,
+   "pass": 50,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorator.getArguments": {
+   "total": 43,
+   "pass": 41,
+   "fail": 2,
+   "harness_error": 0
+  },
+  "Decorator.validate": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.executePropertyCommand": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.falsyOrEqual": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.migrateTo": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "DecoratorManager.yamlToJson": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EnumDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EnumDeclaration.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EnumValueDeclaration.isEnumValue": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "EventDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newEvent": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Factory.newTransaction": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.getDefaultValue": {
+   "total": 28,
+   "pass": 28,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.isField": {
+   "total": 100,
+   "pass": 100,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Field.isTypeScalar": {
+   "total": 113,
+   "pass": 113,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.getFullyQualifiedIdentifier": {
+   "total": 21,
+   "pass": 21,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.getIdentifier": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.getTimestamp": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.isRelationship": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.isResource": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.setIdentifier": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Identifiable.toURI": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Introspector.getClassDeclaration": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Introspector.getClassDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Introspector.getModelManager": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.isMapDeclaration": {
+   "total": 8,
+   "pass": 8,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapDeclaration.validate": {
+   "total": 34,
+   "pass": 34,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.getNamespace": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.getParent": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.getType": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapKeyType.validate": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.getNamespace": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.getParent": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.getType": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "MapValueType.validate": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAssetDeclaration": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAssetDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getAst": {
+   "total": 29,
+   "pass": 18,
+   "fail": 11,
+   "harness_error": 0
+  },
+  "ModelFile.getClassDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getConcertoVersion": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getDefinitions": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getEnumDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getEventDeclaration": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getEventDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getImportedType": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getImports": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getModelManager": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getNamespace": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getParticipantDeclaration": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getScalarDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getTransactionDeclaration": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.getTransactionDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isDefined": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isExternal": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isImportedType": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isLocalType": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isModelFile": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.isSystemModelFile": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.resolveImport": {
+   "total": 8,
+   "pass": 8,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelFile.validate": {
+   "total": 17,
+   "pass": 17,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.clearModelFiles": {
+   "total": 72,
+   "pass": 72,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.derivesFrom": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getAssetDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getAssignableConcreteTypes": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getConceptDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getEnumDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getEventDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getMapDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getNamespaces": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getParticipantDeclarations": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.getTransactionDeclarations": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.isAssignableTo": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.resolveMetaModel": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.resolveType": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.capitalizeFirstLetter": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.getFullyQualifiedName": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.getNamespace": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.getShortName": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isPrimitiveType": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isPrivateSystemProperty": {
+   "total": 16,
+   "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isSystemProperty": {
+   "total": 28,
+   "pass": 28,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isValidIdentifier": {
+   "total": 9,
+   "pass": 7,
+   "fail": 2,
+   "harness_error": 0
+  },
+  "ModelUtil.isValidMapKey": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.isValidMapValue": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.parseNamespace": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelUtil.removeNamespaceVersionFromFullyQualifiedName": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ParticipantDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getFullyQualifiedName": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getName": {
+   "total": 245,
+   "pass": 245,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getNamespace": {
+   "total": 18,
+   "pass": 18,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getParent": {
+   "total": 21,
+   "pass": 21,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.getType": {
+   "total": 66,
+   "pass": 66,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isArray": {
+   "total": 92,
+   "pass": 92,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isOptional": {
+   "total": 154,
+   "pass": 154,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isPrimitive": {
+   "total": 73,
+   "pass": 73,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Property.isTypeEnum": {
+   "total": 23,
+   "pass": 23,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Relationship.isRelationship": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Relationship.toString": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "RelationshipDeclaration.isRelationship": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "RelationshipDeclaration.toString": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.addArrayValue": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.isConcept": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.isIdentifiable": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.isResource": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.toJSON": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Resource.toString": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getIdentifierFieldName": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getSuperType": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getSuperTypeDeclaration": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isAbstract": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isAsset": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isConcept": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isEvent": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isIdentified": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isParticipant": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isSystemIdentified": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isTransaction": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "TransactionDeclaration.declarationKind": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getClassDeclaration": {
+   "total": 42,
+   "pass": 42,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getFullyQualifiedType": {
+   "total": 68,
+   "pass": 68,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getNamespace": {
+   "total": 20,
+   "pass": 20,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Typed.getType": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "harness_error": 0
+  }
+ },
+ "failures": [
+  {
+   "file": "conformance/ModelFile.new/bdb431e0cda8fe58f6290730.json",
+   "status": "fail",
+   "op": "ModelFile.new",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelFile.new/bf2720822629387877f85dec.json",
+   "status": "fail",
+   "op": "ModelFile.new",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelFile.new/ce3c3765f776df2457fa2172.json",
+   "status": "fail",
+   "op": "ModelFile.new",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelFile.new/ea6dd9f821792570a3270f48.json",
+   "status": "fail",
+   "op": "ModelFile.new",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.addCTOModel/043b3c027015aed75cd6ab1b.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.addCTOModel/48a5fca59bbf5b8333f8da83.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.addCTOModel/5982dc1078d9bc711c90d391.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.addCTOModel/86d8728f782c4378437d2daf.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"TypeError\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.addCTOModel/9a32aa6233dd756d6d4c39b9.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.addCTOModel/aed7af84b5fe90e1d32b2482.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.addCTOModel/baaa6fe4dbfad944b5cfafa0.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.addCTOModel/d38cf1f58721bf76487ed5d0.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.addCTOModel/d85b28076a8ece00c558322c.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"RangeError\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.addCTOModel/d954b75af671265579268b39.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.validateModelFiles/0e00ad666a82bab5f4398fc2.json",
+   "status": "fail",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "state divergence: step validateModelFiles recorded error(TypeError), replayed error(IllegalModelException)"
+  },
+  {
+   "file": "conformance/ModelManager.validateModelFiles/343223828152dd93cffd4c24.json",
+   "status": "fail",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.class: expected \"RangeError\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.validateModelFiles/91fbc42e091bda3907e47d53.json",
+   "status": "fail",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.class: expected \"TypeError\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.validateModelFiles/b25d9dd5f7e2162ef0a0b2ee.json",
+   "status": "fail",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "state divergence: step validateModelFiles recorded error(RangeError), replayed error(IllegalModelException)"
+  },
+  {
+   "file": "conformance/ModelManager.validateModelFiles/ce4c72b99abd76dea938c762.json",
+   "status": "fail",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.class: expected \"RangeError\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/ModelManager.validateModelFiles/e69364085d56bf0e71748217.json",
+   "status": "fail",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.class: expected \"TypeError\" got \"IllegalModelException\""
+  },
+  {
+   "file": "conformance/Serializer.fromJSON/3fd7878b64ffd91a8fdaafd8.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "conformance/Serializer.fromJSON/473af29343921aa8bb2dd0df.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "conformance/Serializer.fromJSON/e541fb5cfcc2a7bf22214bad.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "conformance/Serializer.fromJSON/fb33005ed13aaba9f5011dbb.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/02712786c4566c62f34fb3e2.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/03c6b7a8160715e3db137b49.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/05880bc6fddd6b2ae4a8c88a.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/07ce9ea59d1603106cc8208a.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/0c19c540edd5efb8d1bab846.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/0c3eeae2c60441e6971779af.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/0ee711c21efdf224d0ffc36f.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/10f5233891bd1979f117185d.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/17a56b73420d1236d138f974.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/182aca2413f694fd52c99a70.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/19aafb9278d2c2803e4b2ca4.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/1a83fe1df2d313d701b7001d.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/1c8e01779d57d39aa2a9af67.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/2415c8d7a54e87942bc6d7f2.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/24e44a912e67d892dac14a9e.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/266a9ee8cec6e82f7de7b00c.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/2a245a72addcad22ab260212.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/2abab32073780d23f5463551.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/3436f2285fdd32f55c797a02.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/3462fd6c506e7bd956da558c.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/3480f2d8d39479f934633376.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/37dd6314ba52db2558ddf781.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/3b60629728a53c13cd87bafe.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/403e639e4c0eb37a0865a8b5.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/4171e2f000d0bee863bf00fc.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/45856dcef7eb45caa408df27.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/4b57ce5c71cbd9cc57dce9b2.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/4f6d7ec957df912747fd9ddc.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/4fc7c33f385d9184753c147d.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/51f4a756b1a1b4ce67376e0f.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/524893e9093ac5403d76b257.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/55ad6ba1665eee91475d503c.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/55ff4a08cb7abd4093fb02d9.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/56e47777b73910928d04f550.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/5f5743e3de2d25d08551e5eb.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/60ea5a8821e537fa2784a1c1.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/615d294c3ca0be4290ff75c7.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/657fa94514831933c22ec2e9.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/65f5c8a4b228cba17acaa992.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/666e17bcc61091bc9bd6bdb6.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/68724a94aac9c58814d8ce94.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/70580b501db34fe355a114ce.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/710492d2cac3fd47b059f8b7.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/7143e4165d1117ac46507984.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/73b4c5da40978aba55e2394d.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/7a8205af84c079cb7abbcc85.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/808275bcbb1483fcdd395de5.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/80cfc8303b294d12457dc231.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/81b7edc705235ede5342fb60.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/827deabd153b0767d0f938dd.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/82eeee857b080028179cae25.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/84176fcadda135768e14ec3d.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/87cd16923d20c833d4706f69.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/8e0e8b9868e847d82aa27303.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/8f53769ae9fb102c0b9cb29d.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/9223025992aa052e1e497d8d.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/9298fe8e1066d985b1a814b1.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/94aefb8c28968b7ab9d4c062.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/9615fce19c212ece35ae8ecc.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/994da6389f6ad2efd1960dd0.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/9db249e7b645f1c6e3a63687.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/9f1d25264f9ac8d03a1b4dc7.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/a345c70a5c0096fa674cf600.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/a4734e3a765a1d92c55412f9.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/a475816b7d3edbeb6008b3f6.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/a49f84622c76590b2b0419a2.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/a56e12981542c0f587e36e61.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/b2bd41f09b0a35d36d08947a.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/b3d53051b2b3e4240d87cfb1.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/bb1efd564675a5c786225d3e.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/c0e55dd171a37e10f6a374fe.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/d02a808a1442c61ca7903ae7.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/d447ab5db207b55f3c133501.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/d576cc1bd93478cad24ce69d.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/d62ed9a12178e37fbfa96d17.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/d644f4ce6bf9214d38892bca.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/d82987fd319b23a64ad2248c.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/d9cabc0377a22727d3415782.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/dac871de2469e94e126bc291.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/df3cc7ab93c6fcb9f3c251aa.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/e26540b8039c54b62648dc0a.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/e28b2986584912e9713699c1.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/e2a8970641b175f8f1f98f12.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/e2b3a67a5f7e287bfc0ae7ad.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/e487231e0a2745a37bcc90dd.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/ebf807829d9756a4f2107327.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/ec96f7216c5ef5f620451845.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/ecd264f76dd9dd000fef0b20.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/f133cae23012761e169f5354.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/f4e01831e9d647b0ed1dec77.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/f60316184610561d648a02cf.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/f6ea36ef516025de20263687.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/f8bfd14bcba07364d0a3413e.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/f926acde3071dd4a9f2ec811.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/fd29bcc82fb4d37cb56974af.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.class: expected \"IllegalModelException\" got \"Error\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/fd3dbc93d425bba788ca5506.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "gaps/ClassDeclaration.getProperty/0d408271fa91e648a4093020.json",
+   "status": "fail",
+   "op": "ClassDeclaration.getProperty",
+   "detail": "state divergence: step fromAst recorded ok, replayed error(IllegalModelException)"
+  },
+  {
+   "file": "gaps/CollectionSizeValidator.compatibleWith/045dc70766e21be935ad53c1.json",
+   "status": "fail",
+   "op": "CollectionSizeValidator.compatibleWith",
+   "detail": "state divergence: step fromAst recorded ok, replayed error(IllegalModelException)"
+  },
+  {
+   "file": "gaps/Factory.newResource/8556634c0dde38ec28d1fbd0.json",
+   "status": "fail",
+   "op": "Factory.newResource",
+   "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+  },
+  {
+   "file": "gaps/Factory.newResource/f7aca8c97373ef49085690d1.json",
+   "status": "fail",
+   "op": "Factory.newResource",
+   "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+  },
+  {
+   "file": "gaps/ModelManager.addCTOModel/600a2c246ae04367d123921d.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.addCTOModel/6a6c169b79c3ef6b2c46fe35.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.addCTOModel/af3bd91061265917b8b0578e.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/07a3c74cf230338389412f0b.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/274f8cebaf47c4089b212e87.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/6134444ec525e775d4fd9da5.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/6226cf4c4132dfadcfcf00c9.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.class: expected \"Error\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/6b2963681152f24e8334562b.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error: expected undefined got {\"class\":\"IllegalModelException\",\"component\":\"@accordproject/concerto-core\",\"location\":null}"
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/7b9fc1eca8208827732709eb.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/81611c59a730271c6f367bee.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error: expected undefined got {\"class\":\"IllegalModelException\",\"component\":\"@accordproject/concerto-core\",\"location\":null}"
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/968849bcd5b6b86038d6f832.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/9f5ad88d748e3c1073c0d6f8.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/a932ac7be9e572e694f8e909.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/c640dc9ea473b3b7cce95e16.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "gaps/ModelManager.getType/97fa8184f570990d8f7f19dd.json",
+   "status": "fail",
+   "op": "ModelManager.getType",
+   "detail": "state divergence: step fromAst recorded ok, replayed error(IllegalModelException)"
+  },
+  {
+   "file": "gaps/NumberValidator.validate/d53d0800f7cc33d437a69826.json",
+   "status": "fail",
+   "op": "NumberValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/NumberValidator.validate/e2b902739597d1fbfc49cf6e.json",
+   "status": "fail",
+   "op": "NumberValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/Property.getSizeValidator/8f990b8bd062d7839b2983ce.json",
+   "status": "fail",
+   "op": "Property.getSizeValidator",
+   "detail": "state divergence: step fromAst recorded ok, replayed error(IllegalModelException)"
+  },
+  {
+   "file": "gaps/Resource.validate/3c27c0784b532b087d7df40e.json",
+   "status": "fail",
+   "op": "Resource.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/Resource.validate/a7fd0f19c7d95f5cfddc9f0d.json",
+   "status": "fail",
+   "op": "Resource.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/Resource.validate/d444ebcf0cf5a3c23e5ee6dd.json",
+   "status": "fail",
+   "op": "Resource.validate",
+   "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/Serializer.fromJSON/85289b13ad849c509a61d932.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+  },
+  {
+   "file": "gaps/Serializer.fromJSON/ad039b9b37ee60b1a1556f69.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "gaps/Serializer.fromJSON/f15994fd38479210bfa67c82.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+  },
+  {
+   "file": "gaps/Serializer.toJSON/3b324a181dc418651686defb.json",
+   "status": "fail",
+   "op": "Serializer.toJSON",
+   "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/Serializer.toJSON/6684ed223599d0576d1512f8.json",
+   "status": "fail",
+   "op": "Serializer.toJSON",
+   "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/Serializer.toJSON/7d3800e3f4640b92e2c224b4.json",
+   "status": "fail",
+   "op": "Serializer.toJSON",
+   "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/Serializer.toJSON/8dddc00b8bfae07bfef03ca5.json",
+   "status": "fail",
+   "op": "Serializer.toJSON",
+   "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+  },
+  {
+   "file": "gaps/Serializer.toJSON/979f875542a474e9f77835ee.json",
+   "status": "fail",
+   "op": "Serializer.toJSON",
+   "detail": "$.error.class: expected \"TypeError\" got \"Error\""
+  },
+  {
+   "file": "gaps/Serializer.toJSON/a1904c4ff977a8514e15a39c.json",
+   "status": "fail",
+   "op": "Serializer.toJSON",
+   "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/Serializer.toJSON/a3466b1921a98b4a78b9a2ab.json",
+   "status": "fail",
+   "op": "Serializer.toJSON",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/Serializer.toJSON/b3c16848226bd8f97f67bf40.json",
+   "status": "fail",
+   "op": "Serializer.toJSON",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/Serializer.toJSON/fa5b026e1b5119eead5524e5.json",
+   "status": "fail",
+   "op": "Serializer.toJSON",
+   "detail": "$.error.class: expected \"TypeError\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/StringValidator.validate/212af0a7e03338e645d4bdaf.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/StringValidator.validate/23fb80cd5e9f31264b8cc823.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "gaps/StringValidator.validate/48f161667db64951937a14d0.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/ModelManager.addCTOModel/176db94c1729628a1bf289e7.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "lifted/ModelManager.addCTOModel/258ff4af328b96cf6f77cfc8.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "lifted/ModelManager.addCTOModel/354eab10434833df4a39a288.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "lifted/ModelManager.addCTOModel/719a297346e00ae34a6821dd.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "lifted/ModelManager.addCTOModel/971aa21b83527c5f2c7476b4.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "lifted/ModelManager.addCTOModel/a11a5dab7c795eeefa4433b1.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "lifted/ModelManager.addCTOModel/c5c0ae82175904edc6524e80.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "lifted/ModelManager.fromAst/14d322663ca024d8cf61abb1.json",
+   "status": "fail",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "lifted/Serializer.fromJSON/519856916d57a599469553de.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "lifted/Serializer.fromJSON/aed20361683be45d7c305857.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "lifted/Serializer.fromJSON/c4658233d7917d290972e42b.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "lifted/StringValidator.validate/0b342c7c7be08e043cafe617.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/StringValidator.validate/21309ced95fb59f0210b87e2.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/StringValidator.validate/3bf7e90d5c833c6f5cff00d1.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/StringValidator.validate/4ff9c4e5bf1d03e3eac2284b.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/StringValidator.validate/57c6c0f1a39e9f1ff9507a67.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/StringValidator.validate/a8ad4404a8d9fca86925da56.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/StringValidator.validate/b4cd31f091db21e503019001.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/StringValidator.validate/bdb5b634df9afdb6e600a0a0.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/StringValidator.validate/de983525a593fc98060f4067.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/StringValidator.validate/f6dfc812305a41c6991f8940.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "lifted/StringValidator.validate/fc4acc202ee4e70457b55a13.json",
+   "status": "fail",
+   "op": "StringValidator.validate",
+   "detail": "$.error.class: expected \"BaseException\" got \"ValidationException\""
+  },
+  {
+   "file": "unit/ClassDeclaration.getProperty/6a9a87e9edf8c459bda6134f.json",
+   "status": "fail",
+   "op": "ClassDeclaration.getProperty",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ClassDeclaration.getProperty/98d1c8a4284594cf284dcf6f.json",
+   "status": "fail",
+   "op": "ClassDeclaration.getProperty",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ClassDeclaration.getProperty/9b1308781655ade48b6df2b9.json",
+   "status": "fail",
+   "op": "ClassDeclaration.getProperty",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ClassDeclaration.getProperty/ae6d4f95e400d81352955b9c.json",
+   "status": "fail",
+   "op": "ClassDeclaration.getProperty",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ClassDeclaration.getProperty/ba14fc8109ee86f5b0e775c3.json",
+   "status": "fail",
+   "op": "ClassDeclaration.getProperty",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ClassDeclaration.getProperty/beef019127eaaeab512f073f.json",
+   "status": "fail",
+   "op": "ClassDeclaration.getProperty",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ClassDeclaration.getProperty/fa3815406ef20ed1f4cbecfd.json",
+   "status": "fail",
+   "op": "ClassDeclaration.getProperty",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/1a173a27658e9da45c1824c0.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/221c0a7ef0098435f0dcbffc.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/26cb740eb3e75f618a04e4c8.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/26cfdd282a2e47bbfb2de2dc.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/458228f8f52e002a39f7febf.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/6a3cc15d915298a73aea81ed.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/ad613adbe5b7bcbe6e34b87e.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/cd1a105c463b4e6f2e8d8769.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/d913c2afb3b20a75cf0a49a2.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/e3203272f426a09ad36d9252.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/e9ba244fc520ed03fc7436c6.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/f6ca361391e4789469f5b6ea.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorated.getDecorator/fb728261f45709a028c25991.json",
+   "status": "fail",
+   "op": "Decorated.getDecorator",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorator.getArguments/b1ddc43126c707ab6dc60069.json",
+   "status": "fail",
+   "op": "Decorator.getArguments",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/Decorator.getArguments/ff9f67306ff4d5112f510b3b.json",
+   "status": "fail",
+   "op": "Decorator.getArguments",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/02494476b6851ae52a67397b.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/07adf89849de8875b74e1565.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/13bea62a15de80343e280b3c.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/16a9be9030979a417b3b3d3d.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/1a3c45ef40abb7d7887277c6.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/457bfe320dbe0c3ce6f35a94.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/66dfc5849d908925bbfc0073.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/6d71cbf5cd531631c05d3113.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/7b5fae9dd69e2132f496134f.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/82ff8016808d89b54c316a08.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/8a9241f37ee6b45ab9db03e9.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/9fbb59aa0623041e4f056123.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/a673d7ceff26dd25ec1db2f5.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/c42bc0568ef6d89fb3b9284b.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/c9044a571b6b57e65d5d24dd.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/ca6f0992b048d4f465a365a0.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/cabc0d65824ea63b4b191ede.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/cdc6d570b765db615a25cd40.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/d1bd2636a89efea85ed2659b.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/d7714f3535efbad83b1cabb0.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/d7f1c02f8b21beb2a9933975.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/e399c5b5ca377e85e1ced268.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/DecoratorManager.decorateModels/f06543cbce2ea99e14348790.json",
+   "status": "fail",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error: expected undefined got {\"class\":\"Error\",\"component\":null,\"location\":null}"
+  },
+  {
+   "file": "unit/ModelFile.getAst/12c184659f82719af7141075.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelFile.getAst/55a344bd7d228a396d2a6ab9.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelFile.getAst/59e9812035755217e55ba56d.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelFile.getAst/5da2c0b39233cb1500546879.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelFile.getAst/601317211c3c4bbed3a4247f.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelFile.getAst/71ebcdaee68bcbb4d5d5ae9d.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelFile.getAst/890988f9b4e2e548e1442cdb.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelFile.getAst/8c18cc89fa43826735a5305b.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelFile.getAst/980448fde8c0aefe96ef44e6.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelFile.getAst/b0ceae244a8730bd6807dfab.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelFile.getAst/b2a19d3d2c988b4a7cb5ab1d.json",
+   "status": "fail",
+   "op": "ModelFile.getAst",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelManager.addCTOModel/25970ac4061611aa887a8b82.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "unit/ModelManager.addCTOModel/dee4955adbadd1782b484242.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "unit/ModelManager.addCTOModel/ede4594d7ab4449dcd5eaccf.json",
+   "status": "fail",
+   "op": "ModelManager.addCTOModel",
+   "detail": "$.error.class: expected \"BaseException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "unit/ModelManager.addModel/6b183dd04a82a63d693b6d35.json",
+   "status": "fail",
+   "op": "ModelManager.addModel",
+   "detail": "$.error.class: expected \"MetamodelException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "unit/ModelManager.addModel/75ea10eea76396079fe879ff.json",
+   "status": "fail",
+   "op": "ModelManager.addModel",
+   "detail": "$.error.class: expected \"MetamodelException\" got \"IllegalModelException\""
+  },
+  {
+   "file": "unit/ModelManager.getType/31dff4b23c6d4831e348e62c.json",
+   "status": "fail",
+   "op": "ModelManager.getType",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelManager.getType/a9f6277e06d21da74e6588cd.json",
+   "status": "fail",
+   "op": "ModelManager.getType",
+   "detail": "input construction failed: Error: Invalid namespace test"
+  },
+  {
+   "file": "unit/ModelUtil.isValidIdentifier/69180a304acffbfb4c5dd2b9.json",
+   "status": "fail",
+   "op": "ModelUtil.isValidIdentifier",
+   "detail": "$.ok: expected true got false"
+  },
+  {
+   "file": "unit/ModelUtil.isValidIdentifier/ddc54fdc16555fd15439a76d.json",
+   "status": "fail",
+   "op": "ModelUtil.isValidIdentifier",
+   "detail": "$.ok: expected true got false"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/18085424055e321750edebee.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/1fea82f44c36875c961b3f8e.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/494d8d9083a7b7e614fee3fa.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/526f1b9728b27dd31e9494f6.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/65335daaf05e8f1799e91ccb.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/6afd7912da6ffd43a408ffb7.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/6cbc00266ff1e25615aa2772.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/6e9026f51cd5ece8fc5ea402.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/7c1630d2a1cc381f73b18e68.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/81ae419d4329b9d36ba21e1c.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/8baf0a6515bd18d305be36ac.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/95353aac5a3d8b7ee9c05a38.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/a3a1a6ab000a539d70b29dc9.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/b656bb812e2a1c9b18606ea8.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/b781d8e9f91991a4111ee5ff.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/dae941961d1b8633c1c9ad99.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/deccc004cdb69dcd4dce17dc.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/e0100bce1a50d508eec71c88.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/e65b396734b2af5db3fd8851.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/eda5cf1dffe07a15996b2b08.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/edebccb603047fe3d939a63f.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/f5b5a7cf3b6aa55727f05512.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/fc5be1b119349be81dbdce5a.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  },
+  {
+   "file": "unit/Serializer.fromJSON/fe97d9372a3576fba7f2bc41.json",
+   "status": "fail",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error: expected undefined got {\"class\":\"ValidationException\",\"component\":\"@accordproject/concerto-util\",\"location\":null}"
+  }
+ ],
+ "message_diffs": [
+  {
+   "file": "data/DecoratorManager.decorateModels/3e50f2b77e8baeb8e29a9647.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.country\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/4559ca1416cc1304cd9194da.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.address1\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/4bab247a9ea9ff9751d60321.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.country\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/519c79f19d2e0b9975bc304d.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.address1\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/5b02b1bf910ef68c01340bd0.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.address1\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/5f4f30c134836596efcd6b6a.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.country\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/64f0c49f5439a8007418a7a1.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.country\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/663b174c0b1cb4d237391d0e.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.address1\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/69628a60ea75a46d52a66620.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.address1\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/8757c6f78a07d7c895cfd51f.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.country\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/b4d19b58f624f49f8490d72f.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.country\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/d5c3c530518b611a463a913e.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.address1\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/da127e4f72d2774d009a283a.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.country\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/DecoratorManager.decorateModels/e060c192c925da19e4f12bf7.json",
+   "op": "DecoratorManager.decorateModels",
+   "detail": "$.error.message: expected \"Decorator Command references property \\\"test.Person.address1\\\" which does not exist.\" got \"Invalid namespace test\""
+  },
+  {
+   "file": "data/Factory.newResource/06b61fce85c8582824fe30dc.json",
+   "op": "Factory.newResource",
+   "detail": "$.error.message: expected \"Model violation in the \\\"com.testing@1.0.0.Persons\\\" instance. The field \\\"ssnArray\\\" has a value of \\\"\\\"000-00-0000\\\"\\\" (type of value: \\\"string\\\"). Expected type of value: \\\"String[]\\\".\" got \"Model violation in the \\\"com.testing@1.0.0.Persons\\\" instance. The field \\\"ssnArray\\\" has a value of \\\"\\\"000-00-0000\\\"\\\" (type of value: \\\"string\\\"). Expected type of value: \\\"SSN[]\\\".\""
+  },
+  {
+   "file": "data/Factory.newResource/0eed3344835d8ebfba642960.json",
+   "op": "Factory.newResource",
+   "detail": "$.error.message: expected \"Model violation in the \\\"com.testing@1.0.0.Persons\\\" instance. The field \\\"ssnArray\\\" has a value of \\\"\\\"000-00-0000\\\"\\\" (type of value: \\\"string\\\"). Expected type of value: \\\"String[]\\\".\" got \"Model violation in the \\\"com.testing@1.0.0.Persons\\\" instance. The field \\\"ssnArray\\\" has a value of \\\"\\\"000-00-0000\\\"\\\" (type of value: \\\"string\\\"). Expected type of value: \\\"SSN[]\\\".\""
+  },
+  {
+   "file": "data/Factory.newResource/7ab17d6409ee793cdea5ab7b.json",
+   "op": "Factory.newResource",
+   "detail": "$.error.message: expected \"Model violation in the \\\"com.testing@1.0.0.Persons\\\" instance. The field \\\"ssnArray\\\" has a value of \\\"\\\"000-00-0000\\\"\\\" (type of value: \\\"string\\\"). Expected type of value: \\\"String[]\\\".\" got \"Model violation in the \\\"com.testing@1.0.0.Persons\\\" instance. The field \\\"ssnArray\\\" has a value of \\\"\\\"000-00-0000\\\"\\\" (type of value: \\\"string\\\"). Expected type of value: \\\"SSN[]\\\".\""
+  },
+  {
+   "file": "data/Factory.newResource/928fc9a03ea76d5fea036914.json",
+   "op": "Factory.newResource",
+   "detail": "$.error.message: expected \"Model violation in the \\\"com.testing@1.0.0.Persons\\\" instance. The field \\\"ssnArray\\\" has a value of \\\"\\\"000-00-0000\\\"\\\" (type of value: \\\"string\\\"). Expected type of value: \\\"String[]\\\".\" got \"Model violation in the \\\"com.testing@1.0.0.Persons\\\" instance. The field \\\"ssnArray\\\" has a value of \\\"\\\"000-00-0000\\\"\\\" (type of value: \\\"string\\\"). Expected type of value: \\\"SSN[]\\\".\""
+  },
+  {
+   "file": "data/Serializer.fromJSON/13055011e34d1f18e29d4447.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "data/Serializer.fromJSON/6b53b6b0f0dea16b34c89048.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "data/Serializer.fromJSON/850c8ffc5dd829804c4442ac.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "data/Serializer.fromJSON/d27ec51b87e1c03a592dd289.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "data/Serializer.fromJSON/d676fcc712ad706e2a0758d1.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/09f8ed77efb739ed3faffef1.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"ObjectMapValueType must contain property 'type', for MapDeclaration named M \" got \"Model AST does not conform to the metamodel: The instance \\\"concerto.metamodel@1.0.0.ObjectMapValueType\\\" is missing the required field \\\"type\\\". \""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/15c7357c92f6ae8ae942ab59.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"ObjectMapValueType type $class must be of TypeIdentifier for MapDeclaration named M \" got \"Model AST does not conform to the metamodel: Type \\\"SomethingElse\\\" is not defined in namespace \\\"concerto.metamodel@1.0.0\\\". \""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/52f8a94d983f4877bf41fa81.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"MapDeclaration must contain Key & Value properties M \" got \"Model AST does not conform to the metamodel: The instance \\\"concerto.metamodel@1.0.0.MapDeclaration\\\" is missing the required field \\\"key\\\". \""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/578a65700fb7658a691dc352.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"MapDeclaration must contain Key & Value properties M \" got \"Model AST does not conform to the metamodel: The instance \\\"concerto.metamodel@1.0.0.StringMapKeyType\\\" is missing the required field \\\"value\\\". \""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/59d7afc89582792f92b58854.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"MapDeclaration must contain valid MapKeyType  M \" got \"Model AST does not conform to the metamodel: Type \\\"BooleanMapKeyType\\\" is not defined in namespace \\\"concerto.metamodel@1.0.0\\\". \""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/5b5ea304cec625abe1294892.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"Invalid property name '1bad' \" got \"Model AST does not conform to the metamodel: Validator error for field `null`. concerto.metamodel@1.0.0.Property.name: Value '1bad' failed to match validation regex: /^(\\\\p{Lu}|\\\\p{Ll}|\\\\p{Lt}|\\\\p{Lm…"
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/7baa7b3dede700df9ff46df3.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"Unrecognised model element \\\"concerto.metamodel@1.0.0.BogusProperty\\\". \" got \"Model AST does not conform to the metamodel: Type \\\"BogusProperty\\\" is not defined in namespace \\\"concerto.metamodel@1.0.0\\\". \""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/7c285f5ae956fdd1ec6097cb.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"Invalid class name '1Bad' \" got \"Model AST does not conform to the metamodel: Validator error for field `null`. concerto.metamodel@1.0.0.Declaration.name: Value '1Bad' failed to match validation regex: /^(\\\\p{Lu}|\\\\p{Ll}|\\\\p{Lt}|\\\\p…"
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/90b04e7b77d4628b8500006e.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"MapDeclaration must contain valid MapValueType, for MapDeclaration M \" got \"Model AST does not conform to the metamodel: Type \\\"NotARealMapValueType\\\" is not defined in namespace \\\"concerto.metamodel@1.0.0\\\". \""
+  },
+  {
+   "file": "gaps/ModelManager.fromAst/eca12687b3986aa53aa9cfa3.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"ObjectMapValueType type must contain property '$class' and property 'name', for MapDeclaration named M \" got \"Model AST does not conform to the metamodel: The instance \\\"concerto.metamodel@1.0.0.TypeIdentifier\\\" is missing the required field \\\"name\\\". \""
+  },
+  {
+   "file": "gaps/Serializer.fromJSON/4c7744fcb50a6589269fecdc.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.dt` to be of type `DateTime`\" got \"Expected value at path `$.dt` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "lifted/Serializer.fromJSON/4cbbef1d3b9448fe5e45cede.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.dt` to be of type `DateTime`\" got \"Expected value at path `$.dt` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "supplement/ModelManager.fromAst/000dab841e9b0cef97e8826f.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"Properties of Class \\\"B\\\" has to be defined. \" got \"Model AST does not conform to the metamodel: Expected value at path `$.declarations[1].properties` to be an array of type `Property` \""
+  },
+  {
+   "file": "supplement/ModelManager.fromAst/7b02e626a0a226bde3b810e6.json",
+   "op": "ModelManager.fromAst",
+   "detail": "$.error.message: expected \"Properties of Class \\\"A\\\" has to be defined. \" got \"Model AST does not conform to the metamodel: The instance \\\"concerto.metamodel@1.0.0.ConceptDeclaration\\\" is missing the required field \\\"properties\\\". \""
+  },
+  {
+   "file": "unit/ModelFile.new/ba4f62fc881f4ee9b9a96fb4.json",
+   "op": "ModelFile.new",
+   "detail": "$.error.message: expected \"Unrecognised model element \\\"concerto.metamodel.UnknownThing\\\". \" got \"Model AST does not conform to the metamodel: FQN is invalid. \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/0c3b211ea1cddf829787c629.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Decorator Hide has invalid decorator argument. Expected object. Found string, with value \\\"foo\\\" File 'test.cto':  File 'test.cto': \" got \"Decorator Hide has invalid decorator argument. Expected object. Found string, with value \\\"foo\\\" File 'test.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/221a5b8b2b9287550d2d0b27.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Decorator Hide has too many arguments. Properties are: [hidden] File 'test.cto':  File 'test.cto': \" got \"Decorator Hide has too many arguments. Properties are: [hidden] File 'test.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/3291428502bf74c8e2699c19.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Undeclared type \\\"docs\\\" in \\\"system@1.0.0.ComposerParticipant\\\". File 'system.cto':  File 'system.cto': \" got \"Undeclared type \\\"docs\\\" in \\\"system@1.0.0.ComposerParticipant\\\". File 'system.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/439e7785020e88bb25f398bc.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Decorator Hide has invalid decorator argument. Expected number. Found boolean, with value false File 'test.cto':  File 'test.cto': \" got \"Decorator Hide has invalid decorator argument. Expected number. Found boolean, with value false File 'test.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/4842d268cea6b0007e20c172.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Decorator Hide has invalid decorator argument. Expected boolean. Found string, with value \\\"foo\\\" File 'test.cto':  File 'test.cto': \" got \"Decorator Hide has invalid decorator argument. Expected boolean. Found string, with value \\\"foo\\\" File 'test.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/63b2562dda3a5fb8e15036e1.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Undeclared type \\\"Hide\\\" in \\\"test@1.0.0.Person.ssn\\\". File 'test.cto':  File 'test.cto': \" got \"Undeclared type \\\"Hide\\\" in \\\"test@1.0.0.Person.ssn\\\". File 'test.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/779a4153e881852fc6a6d952.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Decorator Hide references a type Missing which has not been defined/imported. File 'test.cto':  File 'test.cto': \" got \"Decorator Hide references a type Missing which has not been defined/imported. File 'test.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/a68e82b4d64821413068b318.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Decorator Hide has invalid decorator argument. Expected string. Found boolean, with value false File 'test.cto':  File 'test.cto': \" got \"Decorator Hide has invalid decorator argument. Expected string. Found boolean, with value false File 'test.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/ca7a9f5d62c59b06d9eecae6.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Undeclared type \\\"Hide\\\" in \\\"test@1.0.0.Person\\\". File 'test.cto':  File 'test.cto': \" got \"Undeclared type \\\"Hide\\\" in \\\"test@1.0.0.Person\\\". File 'test.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/df3099fe7d9280707a6661a4.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Decorator Hide references a type Name which cannot be assigned to the declared type test@1.0.0.Category File 'test.cto':  File 'test.cto': \" got \"Decorator Hide references a type Name which cannot be assigned to the declared type test@1.0.0.Category File 'test.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/ec6349eb9fda3dadc04cabf2.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Undeclared type \\\"Hide\\\" in \\\"undefined\\\". File 'test.cto':  File 'test.cto': \" got \"Undeclared type \\\"Hide\\\" in \\\"undefined\\\". File 'test.cto': \""
+  },
+  {
+   "file": "unit/ModelManager.validateModelFiles/fade0eac78799247d99a5bcc.json",
+   "op": "ModelManager.validateModelFiles",
+   "detail": "$.error.message: expected \"IllegalModelException: Decorator Hide has too few arguments. Required properties are: [hidden] File 'test.cto':  File 'test.cto': \" got \"Decorator Hide has too few arguments. Required properties are: [hidden] File 'test.cto': \""
+  },
+  {
+   "file": "unit/Serializer.fromJSON/176b7fad280d782925876dbe.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "unit/Serializer.fromJSON/2f5917cb9f8474782ed86103.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "unit/Serializer.fromJSON/4e5e54f7d29f98ad492ed610.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "unit/Serializer.fromJSON/666906b008a6c7e7059b310a.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "unit/Serializer.fromJSON/6bf1c64c2d9d27f1f1fb47ff.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "unit/Serializer.fromJSON/b495d4615a40d41b599a9a79.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "unit/Serializer.fromJSON/c8f1678b323e930b675aa7fe.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  },
+  {
+   "file": "unit/Serializer.fromJSON/e96aca5dac05d1e99c37ad1e.json",
+   "op": "Serializer.fromJSON",
+   "detail": "$.error.message: expected \"Expected value at path `$.date` to be of type `DateTime`\" got \"Expected value at path `$.date` to be of type `DateTime` with format YYYY-MM-DDTHH:mm:ss[Z]\""
+  }
+ ],
+ "agreement_pct": 98.3315,
+ "seconds": 277.7,
+ "failures_truncated": true
+}

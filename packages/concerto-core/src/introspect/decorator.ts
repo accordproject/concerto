@@ -12,17 +12,15 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import { Logger } from '@accordproject/concerto-util';
-import ModelUtil from '../modelutil';
 import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type Decorated from './decorated';
 import type { AstNode } from './decorated';
-import type { IDecorator } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
+import { rust, engineViews } from '../engineloader';
 
 /**
  * A decorator argument that references a type, produced from a
@@ -63,19 +61,6 @@ class Decorator {
     }
 
     /**
-    * Handles a validation error, logging and throwing as required
-    * @param {string} level the log level
-    * @param {string | Error} err the message to log, or the error that was caught
-    * @private
-    */
-    handleError(level: string | undefined, err: string | Error): void {
-        Logger.dispatch(level as string, err);
-        if (level === 'error') {
-            throw new IllegalModelException(err, this.getParent().getModelFile(), this.ast.location);
-        }
-    }
-
-    /**
      * Visitor design pattern
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
@@ -94,32 +79,32 @@ class Decorator {
     }
 
     /**
+    * Handles a validation error, logging and throwing as required. Called
+    * back by the engine's decoratorValidate binding.
+    * @param {string} level the log level
+    * @param {string | Error} err the message to log, or the error that was caught
+    * @private
+    */
+    handleError(level: string | undefined, err: string | Error): void {
+        Logger.dispatch(level as string, err);
+        if (level === 'error') {
+            // BC-14: an IllegalModelException is rethrown as is; an Error gives its message.
+            if (err instanceof IllegalModelException) {
+                throw err;
+            }
+            const message = err instanceof Error ? err.message : err;
+            throw new IllegalModelException(message, this.getParent().getModelFile(), this.ast.location);
+        }
+    }
+
+    /**
      * Process the AST and build the model
      * @throws {IllegalModelException}
      * @private
      */
     process() {
-        // a Decorator is always built from a metamodel Decorator node, which
-        // always carries a name
-        this.name = (this.ast as IDecorator).name;
-        this.arguments = [];
-
-        if (this.ast.arguments) {
-            for (let n = 0; n < this.ast.arguments.length; n++) {
-                let thing = this.ast.arguments[n];
-                if (thing) {
-                    if (thing.$class === `${MetaModelNamespace}.DecoratorTypeReference`) {
-                        this.arguments.push({
-                            type: 'Identifier',
-                            name: thing.type.name,
-                            array: thing.isArray
-                        });
-                    } else {
-                        this.arguments.push(thing.value);
-                    }
-                }
-            }
-        }
+        // `this` lets the binding name the model file for a null node (DV-018).
+        Object.assign(this, rust.decoratorProcess(this.ast, this));
     }
 
     /**
@@ -132,82 +117,18 @@ class Decorator {
         // ModelFile decorators have no fully qualified name, hence the optional call
         const parent = this.getParent() as Decorated & { getFullyQualifiedName?(): string };
         const decoratedName = parent.getFullyQualifiedName?.();
-        const mm = mf.getModelManager();
-        const validationOptions = mm.getDecoratorValidation();
 
-        if (validationOptions.missingDecorator || validationOptions.invalidDecorator) {
-            try {
-                // this throws if the type does not exist
-                mf.resolveType(decoratedName, this.getName(), this.ast.location);
-                const decoratorDecl = mf.getType(this.getName());
-                const requiredProperties = decoratorDecl.getProperties().filter(p => !p.isOptional());
-                const optionalProperties = decoratorDecl.getProperties().filter(p => p.isOptional());
-                const allProperties = [...requiredProperties, ...optionalProperties];
-                if (this.getArguments().length < requiredProperties.length) {
-                    const err = `Decorator ${this.getName()} has too few arguments. Required properties are: [${requiredProperties.map(p => p.getName()).join()}]`;
-                    this.handleError(validationOptions.invalidDecorator, err);
-                }
-                const args = this.getArguments();
-                for (let n = 0; n < args.length; n++) {
-                    const arg = args[n];
-                    if (n > allProperties.length - 1) {
-                        const err = `Decorator ${this.getName()} has too many arguments. Properties are: [${allProperties.map(p => p.getName()).join()}]`;
-                        this.handleError(validationOptions.invalidDecorator, err);
-                    }
-                    else {
-                        const property = allProperties[n];
-                        const argType = typeof arg;
-                        switch (property.getType()) {
-                        case 'Integer':
-                        case 'Double':
-                        case 'Long':
-                            if (argType !== 'number') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected number. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            break;
-                        case 'String':
-                            if (argType !== 'string') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected string. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            break;
-                        case 'Boolean':
-                            if (argType !== 'boolean') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected boolean. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            break;
-                        default: {
-                            if (typeof arg !== 'object' || arg?.type !== 'Identifier') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected object. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            // handleError above only throws when the decorator
-                            // validation option is set to 'error', so arg may still
-                            // be something other than a type reference here
-                            const typeReference = arg as DecoratorTypeReferenceArgument;
-                            const typeDecl = mf.getType(typeReference.name);
-                            if (!typeDecl) {
-                                const err = `Decorator ${this.getName()} references a type ${typeReference.name} which has not been defined/imported.`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            else {
-                                if (!ModelUtil.isAssignableTo(typeDecl.getModelFile(), typeDecl.getFullyQualifiedName(), property)) {
-                                    const err = `Decorator ${this.getName()} references a type ${typeReference.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`;
-                                    this.handleError(validationOptions.invalidDecorator, err);
-                                }
-                            }
-                            break;
-                        }
-                        }
-                    }
-                }
-            }
-            catch (err) {
-                this.handleError(validationOptions.missingDecorator, err as Error);
-            }
+        // BC-52: resolved by the engine; a replaced `getType` is not called.
+        const options = mf.getModelManager().getDecoratorValidation();
+        if (!options.missingDecorator && !options.invalidDecorator) {
+            return;
         }
+        const views = engineViews();
+        const ref = views.modelFileArenaRef(mf);
+        if (ref === undefined) {
+            throw views.notInArena('Decorator.validate');
+        }
+        ref.handle.decoratorValidate(this, mf, ref.id, decoratedName, options);
     }
 
     /**

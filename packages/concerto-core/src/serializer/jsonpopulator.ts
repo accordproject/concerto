@@ -15,6 +15,8 @@
 import createDebug from 'debug';
 import { TypedStack, NullUtil as Util } from '@accordproject/concerto-util';
 import Relationship from '../model/relationship';
+import { resourceIdsFromURIs } from '../model/resourceid';
+import type ResourceId from '../model/resourceid';
 import ModelUtil from '../modelutil';
 import ValidationException from './validationexception';
 import dayjs from '../dayjs-setup';
@@ -26,8 +28,21 @@ import type RelationshipDeclaration from '../introspect/relationshipdeclaration'
 import type MapDeclaration from '../introspect/mapdeclaration';
 import type Resource from '../model/resource';
 import Field from '../introspect/field';
+import { getRelationshipMapValue } from './relationshipmapvalue';
+import type { RelationshipMapValue } from './relationshipmapvalue';
 
 const debug = createDebug('concerto:JSONPopulator');
+
+/**
+ * BC-42: whether a strict `DateTime` string names a real instant (no rollover).
+ * @param {string} json a string matching the strict `DateTime` format
+ * @returns {boolean} true when the fields name a real instant
+ * @private
+ */
+function isRealInstant(json: string): boolean {
+    const fields = json.slice(0, 19);
+    return dayjs.utc(`${fields}Z`).format('YYYY-MM-DDTHH:mm:ss') === fields;
+}
 
 
 type Stack<T> = {
@@ -154,7 +169,10 @@ class JSONPopulator {
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing) );
+            // BC-08: name the element; JSON.stringify of an introspection
+            // object can throw a circular-structure TypeError (DV-010).
+            const name = typeof thing?.getFullyQualifiedName === 'function' ? thing.getFullyQualifiedName() : JSON.stringify(thing);
+            throw new Error(`Unrecognised element "${name}"`);
         }
     }
 
@@ -204,9 +222,15 @@ class JSONPopulator {
 
         const objMap = new Map(Object.entries(jsonObj));
 
+        // BC-05, DV-007: read as a relationship property, not a concept.
+        const relationship = getRelationshipMapValue(mapDeclaration);
+
         let map = new Map();
+        let ids: (ResourceId | undefined)[] | undefined;
+        let index = -1;
 
         objMap.forEach((value, key) => {
+            index++;
 
             if (key === '$class') {
                 map.set(key, value);
@@ -217,7 +241,14 @@ class JSONPopulator {
                 key = this.processMapType(mapDeclaration, parameters, key, mapDeclaration.getKey().getType());
             }
 
-            if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
+            if (relationship) {
+                const id = typeof value === 'string'
+                    ? (ids ?? (ids = readRelationshipMapURIs(relationship, objMap)))[index]
+                    : undefined;
+                value = id
+                    ? relationshipFromId(parameters.modelManager, id)
+                    : this.convertRelationship(relationship, value, parameters);
+            } else if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
                 value = this.processMapType(mapDeclaration, parameters, value, mapDeclaration.getValue().getType());
             }
 
@@ -303,7 +334,6 @@ class JSONPopulator {
     }
 
     /**
-     *
      * @param {Field} field - the field of the item being converted
      * @param {Object} jsonItem - the JSON object of the item being converted
      * @param {Object} parameters - the parameters
@@ -369,14 +399,16 @@ class JSONPopulator {
                 result = json;
             } else if (typeof json !== 'string') {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-            } else if (!this.strictQualifiedDateTimes){
+            } else if (!json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)) {
+                // BC-07: the strict format only; the flag decides only `utcOffset`.
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
+            } else if (!isRealInstant(json)) {
+                // BC-42: an impossible date is not rolled over.
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+            } else if (this.strictQualifiedDateTimes) {
+                result = dayjs.utc(json);
+            } else {
                 result = dayjs.utc(json).utcOffset(this.utcOffset);
-            } else if (this.strictQualifiedDateTimes){
-                if (json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)){
-                    result = dayjs.utc(json);
-                } else {
-                    throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
-                }
             }
             if (!result || !result.isValid()) {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
@@ -387,7 +419,8 @@ class JSONPopulator {
         case 'Long': {
             const num = json;
             if (typeof num === 'number') {
-                if (Math.trunc(num) !== num) {
+                // BC-10, DV-012: a non-finite number is not an integer.
+                if (!Number.isFinite(num) || Math.trunc(num) !== num) {
                     throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
                 } else {
                     result = num;
@@ -440,14 +473,8 @@ class JSONPopulator {
         let jsonObj = parameters.jsonStack.pop();
         let result: any = null;
 
-        let typeFQN = relationshipDeclaration.getFullyQualifiedTypeName();
-        let defaultNamespace = ModelUtil.getNamespace(typeFQN);
-        if(!defaultNamespace) {
-            defaultNamespace = relationshipDeclaration.getNamespace();
-        }
-        let defaultType = ModelUtil.getShortName(typeFQN);
-
         if(relationshipDeclaration.isArray()) {
+            const { defaultNamespace, defaultType } = relationshipDefaults(relationshipDeclaration);
             if(!Array.isArray(jsonObj)) {
                 const path = parameters.path?.stack.join('');
                 throw new ValidationException(`Expected value at path \`${path}\` to be an array of type \`${relationshipDeclaration.getType()}\``);
@@ -481,33 +508,103 @@ class JSONPopulator {
             }
         }
         else {
-            if (typeof jsonObj === 'string') {
-                result = Relationship.fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );
-            } else if (typeof jsonObj === 'object' && jsonObj !== null) {
-                const jsonObjAsObject = jsonObj as { [key: string]: unknown, $class: string };
-                if (!this.acceptResourcesForRelationships) {
-                    throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
-                }
-
-                // this isn't a relationship, but it might be an object!
-                if(!jsonObjAsObject.$class) {
-                    throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonObj + ' for relationship ' + relationshipDeclaration );
-                }
-                const classDeclaration = parameters.modelManager.getType(jsonObjAsObject.$class);
-
-                // create a new instance, using the identifier field name as the ID.
-                let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
-                    classDeclaration.getName(), jsonObjAsObject[classDeclaration.getIdentifierFieldName()] );
-                parameters.jsonStack.push(jsonObjAsObject);
-                parameters.resourceStack.push(subResource);
-                classDeclaration.accept(this, parameters);
-                result = subResource;
-            } else {
-                throw new Error('Invalid JSON data. Found a value that is not a string or object: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
-            }
+            result = this.convertRelationship(relationshipDeclaration, jsonObj, parameters);
         }
         return result;
     }
+
+    /**
+     * One relationship value, or a relationship-typed map value (BC-05).
+     * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
+     * @param {Object} jsonObj - the JSON value
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the Relationship or the embedded resource
+     * @private
+     */
+    // The explicit return type keeps the declaration's union order stable.
+    convertRelationship(relationshipDeclaration: RelationshipDeclaration | RelationshipMapValue, jsonObj: unknown, parameters: JsonPopulatorParameters): Relationship | Resource {
+        const { defaultNamespace, defaultType } = relationshipDefaults(relationshipDeclaration);
+        if (typeof jsonObj === 'string') {
+            return Relationship.fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );
+        } else if (typeof jsonObj === 'object' && jsonObj !== null) {
+            const jsonObjAsObject = jsonObj as { [key: string]: unknown, $class: string };
+            if (!this.acceptResourcesForRelationships) {
+                throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
+            }
+
+            // this isn't a relationship, but it might be an object!
+            if(!jsonObjAsObject.$class) {
+                throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonObj + ' for relationship ' + relationshipDeclaration );
+            }
+            const classDeclaration = parameters.modelManager.getType(jsonObjAsObject.$class);
+
+            // create a new instance, using the identifier field name as the ID.
+            let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
+                classDeclaration.getName(), jsonObjAsObject[classDeclaration.getIdentifierFieldName()] );
+            parameters.jsonStack.push(jsonObjAsObject);
+            parameters.resourceStack.push(subResource);
+            classDeclaration.accept(this, parameters);
+            return subResource;
+        } else {
+            throw new Error('Invalid JSON data. Found a value that is not a string or object: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
+        }
+    }
+}
+
+/**
+ * The default namespace and type of a relationship URI.
+ * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
+ * @return {Object} `{ defaultNamespace, defaultType }`
+ * @private
+ */
+function relationshipDefaults(relationshipDeclaration: RelationshipDeclaration | RelationshipMapValue) {
+    let typeFQN = relationshipDeclaration.getFullyQualifiedTypeName();
+    let defaultNamespace = ModelUtil.getNamespace(typeFQN);
+    if(!defaultNamespace) {
+        defaultNamespace = relationshipDeclaration.getNamespace();
+    }
+    let defaultType = ModelUtil.getShortName(typeFQN);
+    return { defaultNamespace, defaultType };
+}
+
+/**
+ * A relationship-typed map's URI values, read in one engine call.
+ * @param {RelationshipMapValue} relationship - the map's relationship value
+ * @param {Map} objMap - the map's JSON entries
+ * @return {Array} per entry, its ResourceId, or `undefined` to read it the usual way
+ * @private
+ */
+function readRelationshipMapURIs(relationship: RelationshipMapValue, objMap: Map<string, unknown>): (ResourceId | undefined)[] {
+    const { defaultNamespace, defaultType } = relationshipDefaults(relationship);
+    const uris: string[] = [];
+    const at: number[] = [];
+    let index = 0;
+    objMap.forEach((value, key) => {
+        if (typeof value === 'string' && key !== '$class') {
+            uris.push(value);
+            at.push(index);
+        }
+        index++;
+    });
+    const ids = resourceIdsFromURIs(uris, defaultNamespace, defaultType);
+    const result: (ResourceId | undefined)[] = new Array(index);
+    for (let i = 0; i < at.length; i++) {
+        result[at[i]] = ids[i];
+    }
+    return result;
+}
+
+/**
+ * `Relationship.fromURI` for a URI already read.
+ * @param {BaseModelManager} modelManager - the model manager
+ * @param {ResourceId} id - the URI's parts
+ * @return {Relationship} the relationship
+ * @private
+ */
+function relationshipFromId(modelManager: BaseModelManager, id: ResourceId): Relationship {
+    const fqt = ModelUtil.getFullyQualifiedName(id.namespace, id.type);
+    const classDeclaration = modelManager.getType(fqt);
+    return new Relationship(modelManager, classDeclaration, id.namespace, id.type, id.id);
 }
 
 export { JSONPopulator };

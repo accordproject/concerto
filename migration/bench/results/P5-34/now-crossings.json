@@ -1,0 +1,1883 @@
+{
+  "tool": "p515-sweep",
+  "mode": "count",
+  "coreDist": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-34/concerto/packages/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "6561368bb",
+  "node": "v22.23.2",
+  "cpu": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+  "loadavgEnd": [
+    3.67,
+    4.42,
+    8.48
+  ],
+  "samples": 3,
+  "warmup": 1,
+  "results": [
+    {
+      "op": "mm_new",
+      "family": "load",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 713.517,
+      "crossings": 10,
+      "inEngineUs": 258.70433333333335,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 2,
+          "usPerItem": 165.66866666666667
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 3,
+          "usPerItem": 36.83266666666666
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 29.514666666666667
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 14.480333333333334
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 2,
+          "usPerItem": 10.084333333333333
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 2.1236666666666664
+        }
+      ]
+    },
+    {
+      "op": "modelfile_new",
+      "family": "load",
+      "set": "concerto-core-test-data",
+      "n": 35,
+      "wallUs": 190.40395238095238,
+      "crossings": 2,
+      "inEngineUs": 153.04091428571428,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 1,
+          "usPerItem": 141.00513333333333
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 1,
+          "usPerItem": 12.035780952380952
+        }
+      ]
+    },
+    {
+      "op": "modelfile_new",
+      "family": "load",
+      "set": "conformance",
+      "n": 41,
+      "wallUs": 119.12521951219512,
+      "crossings": 2,
+      "inEngineUs": 74.0159349593496,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 1,
+          "usPerItem": 67.13939024390244
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 1,
+          "usPerItem": 6.876544715447154
+        }
+      ]
+    },
+    {
+      "op": "modelfile_new",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 6006.916,
+      "crossings": 2,
+      "inEngineUs": 5253.117,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 1,
+          "usPerItem": 5233.907
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 1,
+          "usPerItem": 19.21
+        }
+      ]
+    },
+    {
+      "op": "add_model_file",
+      "family": "load",
+      "set": "concerto-core-test-data",
+      "n": 35,
+      "wallUs": 301.19614285714283,
+      "crossings": 3.2857142857142847,
+      "inEngineUs": 236.64543809523812,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 1.0571428571428572,
+          "usPerItem": 123.01955238095238
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 97.52889523809525
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 1.0857142857142856,
+          "usPerItem": 14.483723809523807
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 0.02857142857142857,
+          "usPerItem": 0.8782666666666666
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 0.02857142857142857,
+          "usPerItem": 0.398
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 0.05714285714285714,
+          "usPerItem": 0.29806666666666665
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 0.02857142857142857,
+          "usPerItem": 0.038933333333333334
+        }
+      ]
+    },
+    {
+      "op": "add_model_file",
+      "family": "load",
+      "set": "conformance",
+      "n": 41,
+      "wallUs": 188.18648780487803,
+      "crossings": 3.2439024390243905,
+      "inEngineUs": 136.96034146341464,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 1.048780487804878,
+          "usPerItem": 64.37238211382113
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 63.804040650406506
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 1.0731707317073171,
+          "usPerItem": 7.6043008130081295
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 0.024390243902439025,
+          "usPerItem": 0.6650162601626016
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 0.04878048780487805,
+          "usPerItem": 0.2467560975609756
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 0.024390243902439025,
+          "usPerItem": 0.24325203252032523
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 0.024390243902439025,
+          "usPerItem": 0.02459349593495935
+        }
+      ]
+    },
+    {
+      "op": "add_model_file",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 9401.990333333333,
+      "crossings": 13,
+      "inEngineUs": 8243.217333333334,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 3,
+          "usPerItem": 4610.148666666667
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 3517.8633333333337
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 4,
+          "usPerItem": 39.69533333333334
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 36.544
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 26.519333333333332
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 2,
+          "usPerItem": 10.507666666666665
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 1.939
+        }
+      ]
+    },
+    {
+      "op": "add_cto_model",
+      "family": "load",
+      "set": "concerto-core-test-data",
+      "n": 35,
+      "wallUs": 917.860219047619,
+      "crossings": 3.2857142857142847,
+      "inEngineUs": 276.86934285714284,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 1.0571428571428572,
+          "usPerItem": 159.18934285714286
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 101.66300952380952
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 1.0857142857142856,
+          "usPerItem": 14.59887619047619
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 0.02857142857142857,
+          "usPerItem": 0.7373238095238095
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 0.02857142857142857,
+          "usPerItem": 0.33808571428571427
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 0.05714285714285714,
+          "usPerItem": 0.3066952380952381
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 0.02857142857142857,
+          "usPerItem": 0.036009523809523804
+        }
+      ]
+    },
+    {
+      "op": "add_cto_model",
+      "family": "load",
+      "set": "conformance",
+      "n": 41,
+      "wallUs": 325.50134146341463,
+      "crossings": 3.2439024390243905,
+      "inEngineUs": 112.34173983739838,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 1.048780487804878,
+          "usPerItem": 65.49769918699187
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 38.74054471544716
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 1.0731707317073171,
+          "usPerItem": 6.881113821138213
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 0.024390243902439025,
+          "usPerItem": 0.7498048780487805
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 0.04878048780487805,
+          "usPerItem": 0.2434878048780488
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 0.024390243902439025,
+          "usPerItem": 0.2044552845528455
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 0.024390243902439025,
+          "usPerItem": 0.024634146341463412
+        }
+      ]
+    },
+    {
+      "op": "add_cto_model",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 32668.468666666668,
+      "crossings": 13,
+      "inEngineUs": 8138.925666666668,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 3,
+          "usPerItem": 4666.924666666667
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 3354.887
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 40.99766666666667
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 4,
+          "usPerItem": 39.935
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 23.47866666666667
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 2,
+          "usPerItem": 10.910666666666666
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 1.792
+        }
+      ]
+    },
+    {
+      "op": "from_json",
+      "family": "serializer",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 82.61464722222222,
+      "crossings": 1,
+      "inEngineUs": 47.11285833333333,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompact",
+          "perItem": 1,
+          "usPerItem": 47.11285833333333
+        }
+      ]
+    },
+    {
+      "op": "from_json",
+      "family": "serializer",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 35.309393939393935,
+      "crossings": 1,
+      "inEngineUs": 18.403780303030302,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompact",
+          "perItem": 1,
+          "usPerItem": 18.403780303030302
+        }
+      ]
+    },
+    {
+      "op": "from_json",
+      "family": "serializer",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 39.13197111111111,
+      "crossings": 1,
+      "inEngineUs": 24.21933111111111,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompact",
+          "perItem": 1,
+          "usPerItem": 24.21933111111111
+        }
+      ]
+    },
+    {
+      "op": "to_json",
+      "family": "serializer",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 92.15361944444446,
+      "crossings": 1,
+      "inEngineUs": 56.242069444444446,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerToJson",
+          "perItem": 1,
+          "usPerItem": 56.242069444444446
+        }
+      ]
+    },
+    {
+      "op": "to_json",
+      "family": "serializer",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 30.491075757575757,
+      "crossings": 1,
+      "inEngineUs": 18.931734848484847,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerToJson",
+          "perItem": 1,
+          "usPerItem": 18.931734848484847
+        }
+      ]
+    },
+    {
+      "op": "to_json",
+      "family": "serializer",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 45.636765555555556,
+      "crossings": 1,
+      "inEngineUs": 30.80812222222222,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerToJson",
+          "perItem": 1,
+          "usPerItem": 30.80812222222222
+        }
+      ]
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 22.66517222222222,
+      "crossings": 4.558333333333333,
+      "inEngineUs": 6.6424722222222226,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 1.7333333333333334,
+          "usPerItem": 2.7338444444444443
+        },
+        {
+          "name": "classDeclarationIsKind",
+          "perItem": 1.9083333333333334,
+          "usPerItem": 2.0521
+        },
+        {
+          "name": "ModelManagerHandle.modelFileResolveType",
+          "perItem": 0.6916666666666667,
+          "usPerItem": 1.228072222222222
+        },
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 0.06666666666666667,
+          "usPerItem": 0.45218888888888886
+        },
+        {
+          "name": "resourceValidatorPrimitiveValid",
+          "perItem": 0.15833333333333333,
+          "usPerItem": 0.17626666666666668
+        }
+      ]
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 12.003727272727271,
+      "crossings": 3.1818181818181817,
+      "inEngineUs": 3.974174242424242,
+      "bindings": [
+        {
+          "name": "classDeclarationIsKind",
+          "perItem": 2,
+          "usPerItem": 1.9011893939393938
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 1.0909090909090908,
+          "usPerItem": 1.8983787878787879
+        },
+        {
+          "name": "ModelManagerHandle.modelFileResolveType",
+          "perItem": 0.09090909090909091,
+          "usPerItem": 0.17460606060606063
+        }
+      ]
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 11.802723333333333,
+      "crossings": 3,
+      "inEngineUs": 3.388911111111111,
+      "bindings": [
+        {
+          "name": "classDeclarationIsKind",
+          "perItem": 2,
+          "usPerItem": 1.9628811111111113
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 1,
+          "usPerItem": 1.42603
+        }
+      ]
+    },
+    {
+      "op": "validate",
+      "family": "instance",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 26.165769444444447,
+      "crossings": 1,
+      "inEngineUs": 11.864291666666666,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateResourceBinary",
+          "perItem": 1,
+          "usPerItem": 11.864291666666666
+        }
+      ]
+    },
+    {
+      "op": "validate",
+      "family": "instance",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 9.76703787878788,
+      "crossings": 1,
+      "inEngineUs": 3.886659090909091,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateResourceBinary",
+          "perItem": 1,
+          "usPerItem": 3.886659090909091
+        }
+      ]
+    },
+    {
+      "op": "validate",
+      "family": "instance",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 11.257966666666666,
+      "crossings": 1,
+      "inEngineUs": 6.110894444444444,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateResourceBinary",
+          "perItem": 1,
+          "usPerItem": 6.110894444444444
+        }
+      ]
+    },
+    {
+      "op": "set_property_value",
+      "family": "instance",
+      "set": "concerto-core-test-data",
+      "n": 582,
+      "wallUs": 6.6789667812142035,
+      "crossings": 1.0807560137457046,
+      "inEngineUs": 2.241931271477663,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 0.19415807560137457,
+          "usPerItem": 1.4137182130584192
+        },
+        {
+          "name": "resourceValidatorPrimitiveValid",
+          "perItem": 0.8058419243986255,
+          "usPerItem": 0.7034719358533791
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 0.041237113402061855,
+          "usPerItem": 0.07721878579610539
+        },
+        {
+          "name": "classDeclarationIsKind",
+          "perItem": 0.037800687285223365,
+          "usPerItem": 0.04104352806414662
+        },
+        {
+          "name": "ModelManagerHandle.modelFileResolveType",
+          "perItem": 0.001718213058419244,
+          "usPerItem": 0.006478808705612829
+        }
+      ]
+    },
+    {
+      "op": "set_property_value",
+      "family": "instance",
+      "set": "conformance",
+      "n": 60,
+      "wallUs": 6.890144444444445,
+      "crossings": 1.05,
+      "inEngineUs": 1.832911111111111,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 0.21666666666666667,
+          "usPerItem": 0.9588111111111111
+        },
+        {
+          "name": "resourceValidatorPrimitiveValid",
+          "perItem": 0.7833333333333333,
+          "usPerItem": 0.75755
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 0.03333333333333333,
+          "usPerItem": 0.06051666666666666
+        },
+        {
+          "name": "ModelManagerHandle.modelFileResolveType",
+          "perItem": 0.016666666666666666,
+          "usPerItem": 0.05603333333333333
+        }
+      ]
+    },
+    {
+      "op": "set_property_value",
+      "family": "instance",
+      "set": "synthetic-large",
+      "n": 1499,
+      "wallUs": 2.953424060484768,
+      "crossings": 1,
+      "inEngineUs": 1.1209675339114966,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 0.19946631087391595,
+          "usPerItem": 0.7431594396264176
+        },
+        {
+          "name": "resourceValidatorPrimitiveValid",
+          "perItem": 0.800533689126084,
+          "usPerItem": 0.377808094285079
+        }
+      ]
+    },
+    {
+      "op": "add_array_value",
+      "family": "instance",
+      "set": "concerto-core-test-data",
+      "n": 55,
+      "wallUs": 73.7108303030303,
+      "crossings": 15.745454545454546,
+      "inEngineUs": 23.110351515151514,
+      "bindings": [
+        {
+          "name": "modelUtilIsAssignableTo",
+          "perItem": 1.4545454545454546,
+          "usPerItem": 8.296218181818181
+        },
+        {
+          "name": "resourceValidatorPrimitiveValid",
+          "perItem": 7.163636363636364,
+          "usPerItem": 4.383769696969697
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetTypeName",
+          "perItem": 2.109090909090909,
+          "usPerItem": 2.3483757575757576
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetFullyQualifiedTypeName",
+          "perItem": 1.2,
+          "usPerItem": 2.2787939393939394
+        },
+        {
+          "name": "ModelManagerHandle.modelFileResolveType",
+          "perItem": 1,
+          "usPerItem": 2.0978000000000003
+        },
+        {
+          "name": "classDeclarationIsKind",
+          "perItem": 2.2363636363636363,
+          "usPerItem": 1.9577090909090908
+        },
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 0.5818181818181818,
+          "usPerItem": 1.7476848484848486
+        }
+      ]
+    },
+    {
+      "op": "add_array_value",
+      "family": "instance",
+      "set": "conformance",
+      "n": 2,
+      "wallUs": 6.067,
+      "crossings": 1,
+      "inEngineUs": 1.7688333333333333,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 1,
+          "usPerItem": 1.7688333333333333
+        }
+      ]
+    },
+    {
+      "op": "add_array_value",
+      "family": "instance",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 4.295146666666667,
+      "crossings": 1,
+      "inEngineUs": 1.977152222222222,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyBinary",
+          "perItem": 1,
+          "usPerItem": 1.977152222222222
+        }
+      ]
+    },
+    {
+      "op": "dcs_decorate",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 49375.914666666664,
+      "crossings": 87,
+      "inEngineUs": 48129.31033333334,
+      "bindings": [
+        {
+          "name": "DcsManagerHandle.decorateModels",
+          "perItem": 1,
+          "usPerItem": 47491.105
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 4,
+          "usPerItem": 223.49066666666667
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 39,
+          "usPerItem": 169.31866666666664
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 34,
+          "usPerItem": 167.939
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 2,
+          "usPerItem": 49.84433333333334
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 4,
+          "usPerItem": 16.578666666666667
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 7.443333333333333
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 2.669
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 0.9216666666666666
+        }
+      ]
+    },
+    {
+      "op": "dcs_decorate",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 19850.876666666667,
+      "crossings": 101,
+      "inEngineUs": 17543.614,
+      "bindings": [
+        {
+          "name": "DcsManagerHandle.decorateModels",
+          "perItem": 1,
+          "usPerItem": 16938.533
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 4,
+          "usPerItem": 213.964
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 46,
+          "usPerItem": 167.879
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 41,
+          "usPerItem": 144.38733333333334
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 2,
+          "usPerItem": 48.7
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 4,
+          "usPerItem": 15.445666666666666
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 7.094
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 6.757666666666667
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 0.8533333333333334
+        }
+      ]
+    },
+    {
+      "op": "dcs_decorate",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 80454.74733333333,
+      "crossings": 21,
+      "inEngineUs": 79793.85,
+      "bindings": [
+        {
+          "name": "DcsManagerHandle.decorateModels",
+          "perItem": 1,
+          "usPerItem": 79345.10166666667
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 4,
+          "usPerItem": 225.70233333333334
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 104
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 2,
+          "usPerItem": 52.981
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 6,
+          "usPerItem": 37.657333333333334
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 4,
+          "usPerItem": 16.448666666666668
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 8.062
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 3.0183333333333335
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 0.8786666666666666
+        }
+      ]
+    },
+    {
+      "op": "dcs_validate",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 17988.335,
+      "crossings": 87,
+      "inEngineUs": 16005.056666666667,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsValidate",
+          "perItem": 1,
+          "usPerItem": 7571.372333333333
+        },
+        {
+          "name": "ModelManagerHandle.addModelWithDefinitions",
+          "perItem": 35,
+          "usPerItem": 2721.3693333333335
+        },
+        {
+          "name": "ModelManagerHandle.validateAstValue",
+          "perItem": 2,
+          "usPerItem": 2675.645
+        },
+        {
+          "name": "ModelManagerHandle.validateModelFiles",
+          "perItem": 1,
+          "usPerItem": 1711.8216666666667
+        },
+        {
+          "name": "ModelManagerHandle.modelFileValidateDetached",
+          "perItem": 1,
+          "usPerItem": 889.4056666666667
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 3,
+          "usPerItem": 214.16766666666666
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 98.03
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetVersion",
+          "perItem": 34,
+          "usPerItem": 39.56166666666667
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 4,
+          "usPerItem": 33.367666666666665
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 29.275333333333332
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 11.540666666666667
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 2,
+          "usPerItem": 8.338666666666667
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 1.161
+        }
+      ]
+    },
+    {
+      "op": "dcs_validate",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 11464.399333333335,
+      "crossings": 101,
+      "inEngineUs": 9995.672333333336,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsValidate",
+          "perItem": 1,
+          "usPerItem": 3292.1736666666666
+        },
+        {
+          "name": "ModelManagerHandle.validateAstValue",
+          "perItem": 2,
+          "usPerItem": 2548.5956666666666
+        },
+        {
+          "name": "ModelManagerHandle.addModelWithDefinitions",
+          "perItem": 42,
+          "usPerItem": 1474.9653333333333
+        },
+        {
+          "name": "ModelManagerHandle.validateModelFiles",
+          "perItem": 1,
+          "usPerItem": 1388.9933333333333
+        },
+        {
+          "name": "ModelManagerHandle.modelFileValidateDetached",
+          "perItem": 1,
+          "usPerItem": 890.5113333333334
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 3,
+          "usPerItem": 202.00233333333335
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 84.34733333333332
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetVersion",
+          "perItem": 41,
+          "usPerItem": 38.38433333333334
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 4,
+          "usPerItem": 31.67
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 29.387666666666668
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 7.313666666666667
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 2,
+          "usPerItem": 6.501
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 0.8266666666666667
+        }
+      ]
+    },
+    {
+      "op": "dcs_validate",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 40801.123,
+      "crossings": 21,
+      "inEngineUs": 36280.88566666666,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsValidate",
+          "perItem": 1,
+          "usPerItem": 25456.700666666668
+        },
+        {
+          "name": "ModelManagerHandle.addModelWithDefinitions",
+          "perItem": 2,
+          "usPerItem": 3857.435
+        },
+        {
+          "name": "ModelManagerHandle.validateAstValue",
+          "perItem": 2,
+          "usPerItem": 2818.1536666666666
+        },
+        {
+          "name": "ModelManagerHandle.validateModelFiles",
+          "perItem": 1,
+          "usPerItem": 2650.9296666666664
+        },
+        {
+          "name": "ModelManagerHandle.modelFileValidateDetached",
+          "perItem": 1,
+          "usPerItem": 988.9366666666666
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 3,
+          "usPerItem": 271.182
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 117.82933333333332
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 43.193
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 4,
+          "usPerItem": 41.85466666666667
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 17.22233333333333
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 2,
+          "usPerItem": 9.984
+        },
+        {
+          "name": "ModelManagerHandle.modelFileGetVersion",
+          "perItem": 1,
+          "usPerItem": 6.165666666666667
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 1.299
+        }
+      ]
+    },
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 25149.20466666667,
+      "crossings": 87,
+      "inEngineUs": 23647.622333333333,
+      "bindings": [
+        {
+          "name": "DcsManagerHandle.extractDecorators",
+          "perItem": 1,
+          "usPerItem": 23013.431333333334
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 4,
+          "usPerItem": 230.304
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 39,
+          "usPerItem": 173.372
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 34,
+          "usPerItem": 141.194
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 2,
+          "usPerItem": 47.818333333333335
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 4,
+          "usPerItem": 30.768666666666668
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 7.376
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 2.38
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 0.978
+        }
+      ]
+    },
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 15620.804,
+      "crossings": 101,
+      "inEngineUs": 14060.536333333332,
+      "bindings": [
+        {
+          "name": "DcsManagerHandle.extractDecorators",
+          "perItem": 1,
+          "usPerItem": 13487.610666666666
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 4,
+          "usPerItem": 220.81733333333335
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 46,
+          "usPerItem": 160.968
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 41,
+          "usPerItem": 115.67566666666667
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 2,
+          "usPerItem": 47.56966666666666
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 4,
+          "usPerItem": 16.557
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 7.727
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 2.622
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 0.989
+        }
+      ]
+    },
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 41587.153666666665,
+      "crossings": 21,
+      "inEngineUs": 40663.545000000006,
+      "bindings": [
+        {
+          "name": "DcsManagerHandle.extractDecorators",
+          "perItem": 1,
+          "usPerItem": 40233.72933333334
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 4,
+          "usPerItem": 220.20266666666666
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 97.17233333333333
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 2,
+          "usPerItem": 47.904
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 6,
+          "usPerItem": 36.779
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 4,
+          "usPerItem": 16.6
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 7.595
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 2.5353333333333334
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 1.0273333333333332
+        }
+      ]
+    },
+    {
+      "op": "extract_vocabularies",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 36517.172,
+      "crossings": 87,
+      "inEngineUs": 35119.47200000001,
+      "bindings": [
+        {
+          "name": "DcsManagerHandle.extractVocabularies",
+          "perItem": 1,
+          "usPerItem": 34552.128333333334
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 4,
+          "usPerItem": 209.772
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 39,
+          "usPerItem": 145.106
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 34,
+          "usPerItem": 137.925
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 2,
+          "usPerItem": 47.623333333333335
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 4,
+          "usPerItem": 16.133666666666667
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 7.072666666666667
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 2.487
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 1.224
+        }
+      ]
+    },
+    {
+      "op": "extract_vocabularies",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 16935.973,
+      "crossings": 101,
+      "inEngineUs": 14849.011666666669,
+      "bindings": [
+        {
+          "name": "DcsManagerHandle.extractVocabularies",
+          "perItem": 1,
+          "usPerItem": 14295.213333333333
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 4,
+          "usPerItem": 213.17666666666665
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 46,
+          "usPerItem": 149.80733333333333
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 41,
+          "usPerItem": 114.56633333333333
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 2,
+          "usPerItem": 49.004333333333335
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 4,
+          "usPerItem": 16.197666666666667
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 7.352666666666667
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 2.7123333333333335
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 0.981
+        }
+      ]
+    },
+    {
+      "op": "extract_vocabularies",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 61967.753333333334,
+      "crossings": 21,
+      "inEngineUs": 61107.43166666667,
+      "bindings": [
+        {
+          "name": "DcsManagerHandle.extractVocabularies",
+          "perItem": 1,
+          "usPerItem": 60696.851
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileWithHeader",
+          "perItem": 4,
+          "usPerItem": 212.60066666666665
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 89.349
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 2,
+          "usPerItem": 45.97266666666666
+        },
+        {
+          "name": "modelFileIsCompatibleVersion",
+          "perItem": 6,
+          "usPerItem": 35.35666666666666
+        },
+        {
+          "name": "ModelManagerHandle.dropStagedModelFile",
+          "perItem": 4,
+          "usPerItem": 15.837
+        },
+        {
+          "name": "ModelManagerHandle.setDecoratorValidation",
+          "perItem": 1,
+          "usPerItem": 7.57
+        },
+        {
+          "name": "ModelManagerHandle.epoch",
+          "perItem": 1,
+          "usPerItem": 2.8656666666666664
+        },
+        {
+          "name": "ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels",
+          "perItem": 1,
+          "usPerItem": 1.029
+        }
+      ]
+    },
+    {
+      "op": "get_type",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 0.8213744588744589,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_type",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 0.5661474358974359,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_type",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 0.6252214839424142,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 0.14791991341991342,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 0.28327564102564107,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 0.14995902547065335,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_decorators",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 163,
+      "wallUs": 0.12684253578732105,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_decorators",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 58,
+      "wallUs": 0.12695977011494253,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_decorators",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 303,
+      "wallUs": 0.12557425742574257,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 3.7903333333333333,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 1.5726666666666667,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 0.8843333333333334,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_type_first",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 1.7701991341991343,
+      "crossings": 1,
+      "inEngineUs": 0.9234675324675324,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getTypeName",
+          "perItem": 1,
+          "usPerItem": 0.9234675324675324
+        }
+      ]
+    },
+    {
+      "op": "get_type_first",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 1.905897435897436,
+      "crossings": 1,
+      "inEngineUs": 1.0113653846153847,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getTypeName",
+          "perItem": 1,
+          "usPerItem": 1.0113653846153847
+        }
+      ]
+    },
+    {
+      "op": "get_type_first",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 1.8469191583610187,
+      "crossings": 1,
+      "inEngineUs": 0.8932336655592469,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getTypeName",
+          "perItem": 1,
+          "usPerItem": 0.8932336655592469
+        }
+      ]
+    },
+    {
+      "op": "resolve_type_first",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 1.5586363636363638,
+      "crossings": 1,
+      "inEngineUs": 1.0358614718614718,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.resolveType",
+          "perItem": 1,
+          "usPerItem": 1.0358614718614718
+        }
+      ]
+    },
+    {
+      "op": "resolve_type_first",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 1.6100512820512822,
+      "crossings": 1,
+      "inEngineUs": 1.0821602564102564,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.resolveType",
+          "perItem": 1,
+          "usPerItem": 1.0821602564102564
+        }
+      ]
+    },
+    {
+      "op": "resolve_type_first",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 1.6720885935769656,
+      "crossings": 1,
+      "inEngineUs": 1.1716976744186047,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.resolveType",
+          "perItem": 1,
+          "usPerItem": 1.1716976744186047
+        }
+      ]
+    },
+    {
+      "op": "get_namespaces_first",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 12.799333333333333,
+      "crossings": 1,
+      "inEngineUs": 11.911,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getNamespaces",
+          "perItem": 1,
+          "usPerItem": 11.911
+        }
+      ]
+    },
+    {
+      "op": "get_namespaces_first",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 15.199,
+      "crossings": 1,
+      "inEngineUs": 13.644,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getNamespaces",
+          "perItem": 1,
+          "usPerItem": 13.644
+        }
+      ]
+    },
+    {
+      "op": "get_namespaces_first",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 2.548,
+      "crossings": 1,
+      "inEngineUs": 1.8506666666666667,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getNamespaces",
+          "perItem": 1,
+          "usPerItem": 1.8506666666666667
+        }
+      ]
+    },
+    {
+      "op": "derives_from",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 1.5832554112554111,
+      "crossings": 1,
+      "inEngineUs": 1.2147337662337663,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.derivesFrom",
+          "perItem": 1,
+          "usPerItem": 1.2147337662337663
+        }
+      ]
+    },
+    {
+      "op": "derives_from",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 1.6068205128205129,
+      "crossings": 1,
+      "inEngineUs": 1.2465064102564103,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.derivesFrom",
+          "perItem": 1,
+          "usPerItem": 1.2465064102564103
+        }
+      ]
+    },
+    {
+      "op": "derives_from",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 1.8328349944629014,
+      "crossings": 1,
+      "inEngineUs": 1.415124031007752,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.derivesFrom",
+          "perItem": 1,
+          "usPerItem": 1.415124031007752
+        }
+      ]
+    },
+    {
+      "op": "is_assignable_to",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 1.6479285714285714,
+      "crossings": 1,
+      "inEngineUs": 1.330298701298701,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.isAssignableTo",
+          "perItem": 1,
+          "usPerItem": 1.330298701298701
+        }
+      ]
+    },
+    {
+      "op": "is_assignable_to",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 3.517269230769231,
+      "crossings": 1,
+      "inEngineUs": 3.212147435897436,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.isAssignableTo",
+          "perItem": 1,
+          "usPerItem": 3.212147435897436
+        }
+      ]
+    },
+    {
+      "op": "is_assignable_to",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 3.2437851605758583,
+      "crossings": 1,
+      "inEngineUs": 1.466874861572536,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.isAssignableTo",
+          "perItem": 1,
+          "usPerItem": 1.466874861572536
+        }
+      ]
+    }
+  ]
+}

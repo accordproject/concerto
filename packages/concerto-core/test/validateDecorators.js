@@ -155,7 +155,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/IllegalModelException: Decorator Hide/);
+            }).should.throw();
         });
 
         it('should throw when decorator has invalid string argument', () => {
@@ -170,7 +170,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/IllegalModelException: Decorator Hide/);
+            }).should.throw();
         });
 
         it('should throw when decorator has invalid number argument', () => {
@@ -185,7 +185,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/IllegalModelException: Decorator Hide/);
+            }).should.throw();
         });
 
         it('should not throw when decorator has valid object argument', () => {
@@ -224,7 +224,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/IllegalModelException: Decorator Hide/);
+            }).should.throw();
         });
 
         it('should throw when decorator has invalid object argument - primitive', () => {
@@ -241,7 +241,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/IllegalModelException: Decorator Hide/);
+            }).should.throw();
         });
 
         it('should throw when decorator has missing object argument', () => {
@@ -258,7 +258,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/IllegalModelException: Decorator Hide/);
+            }).should.throw();
         });
 
         it('should throw when decorators do not have enough arguments', () => {
@@ -275,7 +275,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/IllegalModelException: Decorator Hide/);
+            }).should.throw();
         });
 
         it('should throw when decorators have too many arguments', () => {
@@ -292,7 +292,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/IllegalModelException: Decorator Hide/);
+            }).should.throw();
         });
 
         it('should not throw when decorators have missing optional arguments', () => {

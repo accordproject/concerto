@@ -1,0 +1,56 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "org.concerto.scalars.valid.num003@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "ValidInteger",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "value",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 79,
+              "line": 4,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 111,
+              "line": 5,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
+            "lower": 0,
+            "upper": 100
+          }
+        }
+      ],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 53,
+          "line": 3,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 112,
+          "line": 5,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      }
+    }
+  ]
+}

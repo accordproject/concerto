@@ -9,14 +9,43 @@ on:
     branches:
       - main
       - v4.0.0 # Temporary, while we prepare for merge to main
+      # The Rust migration's integration branch: its PRs are built and
+      # tested the same way before they merge.
+      - claude/tender-pascal-ocwf9q
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # concerto-core loads the Rust engine (@accordproject/concerto-engine) when it
+  # is imported, so nothing builds or tests without it
+  # (accordproject/concerto-rust#259). Build it once, on Linux, and hand the
+  # platform-independent pkg/ to the other jobs.
+  engine:
+    name: Rust Engine (concerto-wasm)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+
+      - name: Build concerto-wasm
+        id: engine
+        uses: ./.github/actions/concerto-engine
+
+      - name: Upload the engine package
+        uses: actions/upload-artifact@v4
+        with:
+          name: concerto-engine-pkg
+          path: ${{ steps.engine.outputs.pkg-dir }}
+          if-no-files-found: error
+          retention-days: 7
+
   build:
     name: Unit Tests
+    needs:
+      - engine
 
     strategy:
       fail-fast: false
@@ -40,6 +69,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+
+      # packages/concerto-engine links a concerto-rust checkout next to this one.
+      - name: Download the engine package
+        uses: actions/download-artifact@v4
+        with:
+          name: concerto-engine-pkg
+          path: ../concerto-rust/concerto-wasm/pkg
 
       - run: npm ci
       - run: npm run build --if-present
@@ -69,6 +105,7 @@ jobs:
     name: Browser E2E (Chromium)
     runs-on: ubuntu-latest
     needs:
+      - engine
       - build
 
     steps:
@@ -80,6 +117,13 @@ jobs:
         with:
           node-version: 22.x
           cache: 'npm'
+
+      # packages/concerto-engine links a concerto-rust checkout next to this one.
+      - name: Download the engine package
+        uses: actions/download-artifact@v4
+        with:
+          name: concerto-engine-pkg
+          path: ../concerto-rust/concerto-wasm/pkg
 
       - name: Install dependencies
         run: npm ci

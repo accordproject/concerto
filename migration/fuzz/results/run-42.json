@@ -1,0 +1,53 @@
+{
+  "started": "2026-09-25T19:11:44.108Z",
+  "fixturesDir": "/home/user/concerto/migration/oracle/fixtures",
+  "engineModule": "/home/user/wt/P5-05fix/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+  "runSeed": 42,
+  "planned": 60000,
+  "ran": 60000,
+  "agree": 54876,
+  "divergences": 2371,
+  "expectedDivergences": 2753,
+  "harnessErrorCases": 0,
+  "harnessErrorsTs": 0,
+  "harnessErrorsRust": 0,
+  "byOp": {
+    "Resource.validate": {
+      "ran": 15942,
+      "agree": 15942,
+      "divergences": 0,
+      "expectedDivergences": 0,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    "Serializer.fromJSON": {
+      "ran": 12454,
+      "agree": 9700,
+      "divergences": 1,
+      "expectedDivergences": 2753,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    "ModelManager.fromAst": {
+      "ran": 19313,
+      "agree": 17808,
+      "divergences": 1505,
+      "expectedDivergences": 0,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    },
+    "ModelManager.addModelFile": {
+      "ran": 12291,
+      "agree": 11426,
+      "divergences": 865,
+      "expectedDivergences": 0,
+      "harnessErrorCases": 0,
+      "harnessErrorsTs": 0,
+      "harnessErrorsRust": 0
+    }
+  },
+  "finished": "2026-09-25T19:27:39.949Z"
+}

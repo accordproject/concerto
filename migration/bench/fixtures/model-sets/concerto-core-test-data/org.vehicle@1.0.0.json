@@ -1,0 +1,37 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "org.vehicle@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Manufactured",
+      "isAbstract": true,
+      "properties": []
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Vehicle",
+      "isAbstract": true,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "name",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "name": "range",
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Manufactured"
+      }
+    }
+  ]
+}

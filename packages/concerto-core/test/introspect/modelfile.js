@@ -31,8 +31,6 @@ const Util = require('../composer/composermodelutility');
 const ParserUtil = require('./parserutility');
 const IntrospectUtils = require('./introspectutils');
 
-const { Parser } = require('@accordproject/concerto-cto');
-
 const chai = require('chai');
 const should = chai.should();
 chai.use(require('chai-things'));
@@ -85,56 +83,24 @@ describe('ModelFile', () => {
         });
 
         it('should call the parser with the definitions and save the abstract syntax tree', () => {
-            const ast = {
-                namespace: 'org.acme@1.0.0',
-                body: [ ]
-            };
-            sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
-            mf.ast.should.equal(ast);
-            mf.namespace.should.equal('org.acme@1.0.0');
+            let mf = ParserUtil.newModelFile(modelManager, 'namespace org.acme@1.0.0');
+            mf.getAst().namespace.should.equal('org.acme@1.0.0');
+            mf.getNamespace().should.equal('org.acme@1.0.0');
         });
 
         it('should call the parser with the definitions and save any imports', () => {
-            const imports = [ {
-                $class: `${MetaModelNamespace}.ImportType`,
-                namespace: 'org.freddo@1.0.0',
-                name: 'Bar',
-            }, {
-                $class: `${MetaModelNamespace}.ImportType`,
-                namespace: 'org.doge@1.0.0',
-                name: 'Foo',
-            } ];
-            const ast = {
-                $class: `${MetaModelNamespace}.Model`,
-                namespace: 'org.acme@1.0.0',
-                imports: imports,
-                declarations: [ ]
-            };
-            sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
+            const model = `namespace org.acme@1.0.0
+            import org.freddo@1.0.0.Bar
+            import org.doge@1.0.0.Foo`;
+            let mf = ParserUtil.newModelFile(modelManager, model);
             mf.getImports().should.deep.equal(['org.freddo@1.0.0.Bar', 'org.doge@1.0.0.Foo', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
         });
 
         it('should call the parser with the definitions and save imports with uris', () => {
-            const imports = [ {
-                $class: `${MetaModelNamespace}.ImportType`,
-                namespace: 'org.doge@1.0.0',
-                name:'Foo',
-            }, {
-                $class: `${MetaModelNamespace}.ImportType`,
-                namespace: 'org.freddos@1.0.0',
-                name: 'Bar',
-                uri: 'https://freddos.org/model.cto'
-            } ];
-            const ast = {
-                $class: `${MetaModelNamespace}.Model`,
-                namespace: 'org.acme@1.0.0',
-                imports: imports,
-                declarations: [ ]
-            };
-            sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
+            const model = `namespace org.acme@1.0.0
+            import org.doge@1.0.0.Foo
+            import org.freddos@1.0.0.Bar from https://freddos.org/model.cto`;
+            let mf = ParserUtil.newModelFile(modelManager, model);
             mf.getImports().should.deep.equal(['org.doge@1.0.0.Foo', 'org.freddos@1.0.0.Bar', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
             mf.getImportURI('org.freddos@1.0.0.Bar').should.equal('https://freddos.org/model.cto');
             mf.getExternalImports()['org.freddos@1.0.0.Bar'].should.equal('https://freddos.org/model.cto');
@@ -142,38 +108,39 @@ describe('ModelFile', () => {
         });
 
         it('should throw for a bad namespace part', () => {
-            const ast = {
+            const ast = (namespace) => ({
                 $class: `${MetaModelNamespace}.Model`,
-                namespace: 'org.foo-bar',
+                namespace,
                 imports: [],
                 declarations: [ ]
-            };
-            sandbox.stub(Parser, 'parse').returns(ast);
-
+            });
+            new ModelFile(modelManager, ast('org.foobar@1.0.0')).getNamespace().should.equal('org.foobar@1.0.0');
             (() => {
-                ParserUtil.newModelFile(modelManager, 'fake definitions');
-            }).should.throw(/Invalid namespace part 'foo-bar'/);
+                new ModelFile(modelManager, ast('org.foo-bar'));
+            }).should.throw(IllegalModelException);
         });
 
         it('should throw for a wildcard import ', () => {
             const strictModelManager = new ModelManager();
-
-            const imports = [{
-                $class: `${MetaModelNamespace}.ImportAll`,
-                namespace: 'org.freddos@1.0.0',
-                uri: 'https://freddos.org/model.cto'
-            }];
-            const ast = {
+            const ast = (imp) => ({
                 $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme@1.0.0',
-                imports: imports,
+                imports: [ imp ],
                 declarations: [ ]
-            };
-            sandbox.stub(Parser, 'parse').returns(ast);
-
+            });
+            new ModelFile(strictModelManager, ast({
+                $class: `${MetaModelNamespace}.ImportType`,
+                namespace: 'org.freddos@1.0.0',
+                name: 'Bar',
+                uri: 'https://freddos.org/model.cto'
+            })).getImports().should.include('org.freddos@1.0.0.Bar');
             (() => {
-                ParserUtil.newModelFile(strictModelManager, 'fake definitions');
-            }).should.throw(/Wildcard Imports are not permitted./);
+                new ModelFile(strictModelManager, ast({
+                    $class: `${MetaModelNamespace}.ImportAll`,
+                    namespace: 'org.freddos@1.0.0',
+                    uri: 'https://freddos.org/model.cto'
+                }));
+            }).should.throw(Error);
         });
 
         it('should throw for an unrecognized body element', () => {
@@ -184,10 +151,9 @@ describe('ModelFile', () => {
                     $class: 'BlahType'
                 } ]
             };
-            sandbox.stub(Parser, 'parse').returns(ast);
             (() => {
-                ParserUtil.newModelFile(modelManager, 'fake definitions');
-            }).should.throw(/BlahType/);
+                new ModelFile(modelManager, ast);
+            }).should.throw(IllegalModelException);
         });
     });
 
@@ -695,24 +661,14 @@ describe('ModelFile', () => {
     describe('#getType', () => {
 
         it('should passthrough the type name for primitive types', () => {
-            const ast = {
-                namespace: 'org.acme@1.0.0',
-                body: [ ]
-            };
-            sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
+            let mf = ParserUtil.newModelFile(modelManager, 'namespace org.acme@1.0.0');
             mf.getType('String').should.equal('String');
         });
 
         it('should return false if imported, non primative\'s modelFile doesn\'t exist', () => {
-            const ast = {
-                namespace: 'org.acme@1.0.0',
-                body: [ ]
-            };
-            sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = ParserUtil.newModelFile(modelManager, 'fake');
-            mf.isImportedType = () => { return true; };
-            mf.resolveImport = () => { return 'org.acme@1.0.0'; };
+            const model = `namespace org.acme@1.0.0
+            import org.missing@1.0.0.TNTAsset`;
+            let mf = ParserUtil.newModelFile(modelManager, model);
             should.not.exist(mf.getType('TNTAsset'));
         });
     });
@@ -833,25 +789,12 @@ describe('ModelFile', () => {
 
     describe('#getFullyQualifiedTypeName', () => {
         it('should return null if not prmative, imported or local type', () => {
-            const ast = {
-                namespace: 'org.acme@1.0.0',
-                body: [ ]
-            };
-            sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = ParserUtil.newModelFile(modelManager, 'fake');
-            mf.isImportedType = () => { return false; };
-            mf.isLocalType = () => { return false; };
+            let mf = ParserUtil.newModelFile(modelManager, 'namespace org.acme@1.0.0');
             should.not.exist(mf.getFullyQualifiedTypeName('TNTAsset'));
         });
 
         it('should return the type name if its a primative type', () => {
-            const ast = {
-                namespace: 'org.acme@1.0.0',
-                body: [ ]
-            };
-            sandbox.stub(Parser, 'parse').returns(ast);
-            let modelFile = ParserUtil.newModelFile(modelManager, 'something');
-
+            let modelFile = ParserUtil.newModelFile(modelManager, 'namespace org.acme@1.0.0');
             modelFile.getFullyQualifiedTypeName('String').should.equal('String');
         });
     });

@@ -1,0 +1,151 @@
+23:03:09 round 1 ts-ref extract_decorators start load 1.85 2.17 2.87
+23:03:10 round 1 ts-ref extract_decorators end load 1.85 2.17 2.87
+23:03:10 round 1 rust-engine-now extract_decorators start load 1.85 2.17 2.87
+23:03:11 round 1 rust-engine-now extract_decorators end load 1.85 2.17 2.87
+23:03:11 round 1 rust-engine-before extract_decorators start load 1.85 2.17 2.87
+23:03:12 round 1 rust-engine-before extract_decorators end load 2.10 2.22 2.88
+23:05:42 round 1 ts-ref extract_vocabularies start load 1.43 1.94 2.68
+23:05:43 round 1 ts-ref extract_vocabularies end load 1.43 1.94 2.68
+23:05:43 round 1 rust-engine-now extract_vocabularies start load 1.43 1.94 2.68
+23:05:44 round 1 rust-engine-now extract_vocabularies end load 1.43 1.94 2.68
+23:05:44 round 1 rust-engine-before extract_vocabularies start load 1.43 1.94 2.68
+23:05:46 round 1 rust-engine-before extract_vocabularies end load 1.64 1.97 2.68
+23:05:46 round 1 ts-ref extract_cold start load 1.64 1.97 2.68
+23:05:51 round 1 ts-ref extract_cold end load 1.59 1.96 2.68
+23:05:51 round 1 rust-engine-now extract_cold start load 1.59 1.96 2.68
+23:06:03 round 1 rust-engine-now extract_cold end load 1.50 1.92 2.66
+23:06:03 round 1 rust-engine-before extract_cold start load 1.50 1.92 2.66
+23:06:13 round 1 rust-engine-before extract_cold end load 1.42 1.89 2.64
+23:06:13 round 1 ts-ref extract_keep start load 1.42 1.89 2.64
+23:06:14 round 1 ts-ref extract_keep end load 1.42 1.89 2.64
+23:06:14 round 1 rust-engine-now extract_keep start load 1.42 1.89 2.64
+23:06:15 round 1 rust-engine-now extract_keep end load 1.42 1.89 2.64
+23:06:15 round 1 rust-engine-before extract_keep start load 1.42 1.89 2.64
+23:06:17 round 1 rust-engine-before extract_keep end load 1.47 1.89 2.63
+23:06:17 round 1 ts-ref dcs_decorate start load 1.47 1.89 2.63
+23:06:20 round 1 ts-ref dcs_decorate end load 1.47 1.89 2.63
+23:06:20 round 1 rust-engine-now dcs_decorate start load 1.47 1.89 2.63
+23:06:24 round 1 rust-engine-now dcs_decorate end load 1.43 1.88 2.63
+23:06:25 round 1 rust-engine-before dcs_decorate start load 1.43 1.88 2.63
+timed restart 23:11:21 after container restart killed the first timed run
+01:26:56 round 1 ts-ref extract_decorators start load 1.43 0.62 0.23
+01:26:57 round 1 ts-ref extract_decorators end load 1.43 0.62 0.23
+01:26:57 round 1 rust-engine-now extract_decorators start load 1.43 0.62 0.23
+01:26:58 round 1 rust-engine-now extract_decorators end load 1.43 0.62 0.23
+01:26:58 round 1 rust-engine-before extract_decorators start load 1.43 0.62 0.23
+01:27:01 round 1 rust-engine-before extract_decorators end load 1.40 0.62 0.23
+01:27:01 round 1 ts-ref extract_vocabularies start load 1.40 0.62 0.23
+01:27:02 round 1 ts-ref extract_vocabularies end load 1.40 0.62 0.23
+01:27:02 round 1 rust-engine-now extract_vocabularies start load 1.40 0.62 0.23
+01:27:03 round 1 rust-engine-now extract_vocabularies end load 1.40 0.62 0.23
+01:27:03 round 1 rust-engine-before extract_vocabularies start load 1.40 0.62 0.23
+01:27:06 round 1 rust-engine-before extract_vocabularies end load 1.45 0.65 0.24
+01:27:06 round 1 ts-ref extract_cold start load 1.45 0.65 0.24
+01:27:12 round 1 ts-ref extract_cold end load 1.41 0.65 0.25
+01:27:12 round 1 rust-engine-now extract_cold start load 1.41 0.65 0.25
+01:27:29 round 1 rust-engine-now extract_cold end load 1.52 0.72 0.28
+01:27:29 round 1 rust-engine-before extract_cold start load 1.52 0.72 0.28
+01:27:44 round 1 rust-engine-before extract_cold end load 1.75 0.81 0.31
+01:27:44 round 1 ts-ref extract_keep start load 1.75 0.81 0.31
+01:27:45 round 1 ts-ref extract_keep end load 1.75 0.81 0.31
+01:27:45 round 1 rust-engine-now extract_keep start load 1.75 0.81 0.31
+01:27:46 round 1 rust-engine-now extract_keep end load 1.69 0.82 0.32
+01:27:46 round 1 rust-engine-before extract_keep start load 1.69 0.82 0.32
+01:27:49 round 1 rust-engine-before extract_keep end load 1.69 0.82 0.32
+01:27:49 round 1 ts-ref dcs_decorate start load 1.69 0.82 0.32
+01:27:53 round 1 ts-ref dcs_decorate end load 1.64 0.82 0.32
+01:27:53 round 1 rust-engine-now dcs_decorate start load 1.64 0.82 0.32
+01:27:59 round 1 rust-engine-now dcs_decorate end load 1.91 0.89 0.35
+01:27:59 round 1 rust-engine-before dcs_decorate start load 1.91 0.89 0.35
+01:28:05 round 1 rust-engine-before dcs_decorate end load 1.83 0.89 0.35
+01:28:05 round 1 ts-ref dcs_validate start load 1.83 0.89 0.35
+01:28:09 round 1 ts-ref dcs_validate end load 1.77 0.89 0.36
+01:28:09 round 1 rust-engine-now dcs_validate start load 1.77 0.89 0.36
+01:28:12 round 1 rust-engine-now dcs_validate end load 1.87 0.93 0.37
+01:28:12 round 1 rust-engine-before dcs_validate start load 1.87 0.93 0.37
+01:28:14 round 1 rust-engine-before dcs_validate end load 1.87 0.93 0.37
+01:28:14 round 1 crate-now start load 1.87 0.93 0.37
+01:31:00 round 1 crate-now end load 1.54 1.15 0.55
+01:31:00 round 1 crate-before start load 1.54 1.15 0.55
+01:33:44 round 1 crate-before end load 1.76 1.38 0.74
+01:33:44 round 2 ts-ref extract_decorators start load 1.76 1.38 0.74
+01:33:45 round 2 ts-ref extract_decorators end load 1.76 1.38 0.74
+01:33:45 round 2 rust-engine-before extract_decorators start load 1.76 1.38 0.74
+01:33:47 round 2 rust-engine-before extract_decorators end load 1.70 1.37 0.75
+01:33:47 round 2 rust-engine-now extract_decorators start load 1.70 1.37 0.75
+01:33:49 round 2 rust-engine-now extract_decorators end load 1.70 1.37 0.75
+01:33:49 round 2 ts-ref extract_vocabularies start load 1.70 1.37 0.75
+01:33:50 round 2 ts-ref extract_vocabularies end load 1.70 1.37 0.75
+01:33:50 round 2 rust-engine-before extract_vocabularies start load 1.70 1.37 0.75
+01:33:53 round 2 rust-engine-before extract_vocabularies end load 1.64 1.37 0.75
+01:33:53 round 2 rust-engine-now extract_vocabularies start load 1.64 1.37 0.75
+01:33:54 round 2 rust-engine-now extract_vocabularies end load 1.64 1.37 0.75
+01:33:54 round 2 ts-ref extract_cold start load 1.64 1.37 0.75
+01:34:00 round 2 ts-ref extract_cold end load 1.59 1.36 0.75
+01:34:00 round 2 rust-engine-before extract_cold start load 1.59 1.36 0.75
+01:34:14 round 2 rust-engine-before extract_cold end load 1.84 1.42 0.78
+01:34:14 round 2 rust-engine-now extract_cold start load 1.84 1.42 0.78
+01:34:31 round 2 rust-engine-now extract_cold end load 1.73 1.42 0.79
+01:34:31 round 2 ts-ref extract_keep start load 1.73 1.42 0.79
+01:34:32 round 2 ts-ref extract_keep end load 1.67 1.41 0.79
+01:34:32 round 2 rust-engine-before extract_keep start load 1.67 1.41 0.79
+01:34:34 round 2 rust-engine-before extract_keep end load 1.67 1.41 0.79
+01:34:34 round 2 rust-engine-now extract_keep start load 1.67 1.41 0.79
+01:34:36 round 2 rust-engine-now extract_keep end load 1.67 1.41 0.79
+01:34:36 round 2 ts-ref dcs_decorate start load 1.67 1.41 0.79
+01:34:41 round 2 ts-ref dcs_decorate end load 1.62 1.40 0.79
+01:34:41 round 2 rust-engine-before dcs_decorate start load 1.62 1.40 0.79
+01:34:46 round 2 rust-engine-before dcs_decorate end load 1.82 1.46 0.82
+01:34:46 round 2 rust-engine-now dcs_decorate start load 1.82 1.46 0.82
+01:34:52 round 2 rust-engine-now dcs_decorate end load 1.75 1.45 0.82
+01:34:52 round 2 ts-ref dcs_validate start load 1.75 1.45 0.82
+01:34:56 round 2 ts-ref dcs_validate end load 1.69 1.44 0.82
+01:34:56 round 2 rust-engine-before dcs_validate start load 1.69 1.44 0.82
+01:34:59 round 2 rust-engine-before dcs_validate end load 1.69 1.44 0.82
+01:36:29 round 2 rust-engine-now dcs_validate start load 1.85 1.56 0.92
+01:36:32 round 2 rust-engine-now dcs_validate end load 2.11 1.62 0.94
+01:58:03 round 2 crate-before start load 1.65 1.72 1.49
+02:00:43 round 2 crate-before end load 1.45 1.58 1.46
+02:00:43 round 2 crate-now start load 1.45 1.58 1.46
+02:03:27 round 2 crate-now end load 1.42 1.49 1.44
+02:03:27 round 3 ts-ref extract_decorators start load 1.42 1.49 1.44
+02:03:28 round 3 ts-ref extract_decorators end load 1.39 1.48 1.44
+02:03:28 round 3 rust-engine-now extract_decorators start load 1.39 1.48 1.44
+02:03:30 round 3 rust-engine-now extract_decorators end load 1.39 1.48 1.44
+02:03:30 round 3 rust-engine-before extract_decorators start load 1.39 1.48 1.44
+02:03:32 round 3 rust-engine-before extract_decorators end load 1.39 1.48 1.44
+02:03:32 round 3 ts-ref extract_vocabularies start load 1.39 1.48 1.44
+02:03:34 round 3 ts-ref extract_vocabularies end load 1.36 1.47 1.44
+02:03:34 round 3 rust-engine-now extract_vocabularies start load 1.36 1.47 1.44
+02:03:35 round 3 rust-engine-now extract_vocabularies end load 1.36 1.47 1.44
+02:03:35 round 3 rust-engine-before extract_vocabularies start load 1.36 1.47 1.44
+02:03:38 round 3 rust-engine-before extract_vocabularies end load 1.65 1.53 1.46
+02:03:38 round 3 ts-ref extract_cold start load 1.65 1.53 1.46
+02:03:44 round 3 ts-ref extract_cold end load 1.60 1.52 1.46
+02:03:44 round 3 rust-engine-now extract_cold start load 1.60 1.52 1.46
+02:04:01 round 3 rust-engine-now extract_cold end load 1.46 1.50 1.45
+02:04:01 round 3 rust-engine-before extract_cold start load 1.46 1.50 1.45
+02:04:16 round 3 rust-engine-before extract_cold end load 1.36 1.47 1.44
+02:04:16 round 3 ts-ref extract_keep start load 1.36 1.47 1.44
+02:04:18 round 3 ts-ref extract_keep end load 1.33 1.46 1.44
+02:04:18 round 3 rust-engine-now extract_keep start load 1.33 1.46 1.44
+02:04:19 round 3 rust-engine-now extract_keep end load 1.33 1.46 1.44
+02:04:19 round 3 rust-engine-before extract_keep start load 1.33 1.46 1.44
+02:04:21 round 3 rust-engine-before extract_keep end load 1.33 1.46 1.44
+02:04:21 round 3 ts-ref dcs_decorate start load 1.33 1.46 1.44
+02:04:26 round 3 ts-ref dcs_decorate end load 1.30 1.46 1.44
+02:04:26 round 3 rust-engine-now dcs_decorate start load 1.30 1.46 1.44
+02:04:32 round 3 rust-engine-now dcs_decorate end load 1.28 1.45 1.43
+02:04:32 round 3 rust-engine-before dcs_decorate start load 1.28 1.45 1.43
+02:04:38 round 3 rust-engine-before dcs_decorate end load 1.60 1.52 1.46
+02:04:38 round 3 ts-ref dcs_validate start load 1.60 1.52 1.46
+02:04:42 round 3 ts-ref dcs_validate end load 1.60 1.52 1.46
+02:04:42 round 3 rust-engine-now dcs_validate start load 1.60 1.52 1.46
+02:04:45 round 3 rust-engine-now dcs_validate end load 1.56 1.51 1.45
+02:04:45 round 3 rust-engine-before dcs_validate start load 1.56 1.51 1.45
+02:04:48 round 3 rust-engine-before dcs_validate end load 1.56 1.51 1.45
+02:04:48 round 3 crate-now start load 1.51 1.50 1.45
+02:07:30 round 3 crate-now end load 1.42 1.45 1.44
+02:07:30 round 3 crate-before start load 1.42 1.45 1.44
+02:10:08 round 3 crate-before end load 1.60 1.55 1.48
+02:10:08 timed done

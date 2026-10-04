@@ -15,6 +15,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import * as path from 'path';
 import { startEsmServer, type EsmServer } from './support/esm-static-server';
+import { installEngineBundler, WASM_PKG_DIR } from './support/engine-bundler';
 
 // The `browser` export condition (see each package's package.json "exports")
 // resolves consumers to dist/esm-browser/index.mjs. That file is not a single
@@ -24,12 +25,19 @@ import { startEsmServer, type EsmServer } from './support/esm-static-server';
 // "@accordproject/concerto-cto") because those packages are external to the
 // browser build. These tests exercise exactly that graph, the way a real
 // browser consumer resolving through the "browser" condition would load it.
+//
+// concerto-core loads the Rust engine when it is imported (P5-02,
+// accordproject/concerto-rust#259), and its browser graph needs a bundler to
+// supply it (support/engine-bundler.ts). The concerto-core tests install that
+// bundler stand-in first; the engine is served from the concerto-rust
+// checkout next to this one, as CI provides it.
 const PACKAGES_ROOT = path.resolve(__dirname, '../../packages');
 
 const MOUNTS = [
     { prefix: '/concerto-core/', dir: path.join(PACKAGES_ROOT, 'concerto-core/dist/esm-browser') },
     { prefix: '/concerto-cto/', dir: path.join(PACKAGES_ROOT, 'concerto-cto/dist/esm-browser') },
     { prefix: '/concerto-util/', dir: path.join(PACKAGES_ROOT, 'concerto-util/dist/esm-browser') },
+    { prefix: '/concerto-engine/', dir: WASM_PKG_DIR },
 ];
 
 let server: EsmServer;
@@ -96,6 +104,7 @@ test.describe('Concerto browser ESM graph', () => {
 
     test('builds a ModelManager and round-trips a resource via the concerto-core browser ESM graph', async ({ page }) => {
         await withWorkspaceImportMap(page);
+        await installEngineBundler(page, server.baseUrl);
 
         const result = await page.evaluate(async (moduleUrl) => {
             const { ModelManager, Factory, Serializer } = await import(moduleUrl);
@@ -150,6 +159,7 @@ test.describe('Concerto browser ESM graph', () => {
     // below would throw or return wrong values instead of round-tripping.
     test('keeps dayjs plugins registered through the concerto-core browser ESM graph', async ({ page }) => {
         await withWorkspaceImportMap(page);
+        await installEngineBundler(page, server.baseUrl);
 
         const result = await page.evaluate(async ({ coreUrl, dayjsSetupUrl }) => {
             const { DateTimeUtil } = await import(coreUrl);

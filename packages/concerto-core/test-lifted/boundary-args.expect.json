@@ -1,0 +1,317 @@
+{
+  "BOUNDARY-ARG-001": {
+    "ok": "test@1.0.0"
+  },
+  "BOUNDARY-ARG-002": {
+    "ok": "<none>"
+  },
+  "BOUNDARY-ARG-003": {
+    "ok": "<none>"
+  },
+  "BOUNDARY-ARG-004": {
+    "ok": "<none>"
+  },
+  "BOUNDARY-ARG-005": {
+    "ok": "<none>"
+  },
+  "BOUNDARY-ARG-006": {
+    "throws": {
+      "name": "Error",
+      "message": "FQN is invalid."
+    }
+  },
+  "BOUNDARY-ARG-007": {
+    "throws": {
+      "name": "Error",
+      "message": "FQN is invalid."
+    }
+  },
+  "BOUNDARY-ARG-008": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-009": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-010": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-011": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-012": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-013": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-014": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-015": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-016": {
+    "throws": {
+      "name": "Error",
+      "message": "FQN is invalid."
+    }
+  },
+  "BOUNDARY-ARG-017": {
+    "throws": {
+      "name": "Error",
+      "message": "FQN is invalid."
+    }
+  },
+  "BOUNDARY-ARG-018": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-019": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-020": {
+    "throws": {
+      "name": "TypeError",
+      "message": "fqn.lastIndexOf is not a function"
+    }
+  },
+  "BOUNDARY-ARG-021": {
+    "throws": {
+      "name": "IllegalModelException",
+      "message": "No registered namespace for type \"A\" in \"undefined\". "
+    }
+  },
+  "BOUNDARY-ARG-022": {
+    "throws": {
+      "name": "IllegalModelException",
+      "message": "No registered namespace for type \"A\" in \"null\". "
+    }
+  },
+  "BOUNDARY-ARG-023": {
+    "throws": {
+      "name": "IllegalModelException",
+      "message": "No registered namespace for type \"A\" in \"123\". "
+    }
+  },
+  "BOUNDARY-ARG-024": {
+    "throws": {
+      "name": "IllegalModelException",
+      "message": "No registered namespace for type \"A\" in \"[object Object]\". "
+    }
+  },
+  "BOUNDARY-ARG-025": {
+    "throws": {
+      "name": "IllegalModelException",
+      "message": "No registered namespace for type \"A\" in \"true\". "
+    }
+  },
+  "BOUNDARY-ARG-026": {
+    "ok": "<undefined>"
+  },
+  "BOUNDARY-ARG-027": {
+    "ok": null
+  },
+  "BOUNDARY-ARG-028": {
+    "throws": {
+      "name": "TypeError",
+      "message": "type.startsWith is not a function"
+    }
+  },
+  "BOUNDARY-ARG-029": {
+    "throws": {
+      "name": "TypeError",
+      "message": "type.startsWith is not a function"
+    }
+  },
+  "BOUNDARY-ARG-030": {
+    "throws": {
+      "name": "TypeError",
+      "message": "type.startsWith is not a function"
+    }
+  },
+  "BOUNDARY-ARG-031": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-032": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-033": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-034": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-035": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-036": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-037": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-038": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-039": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-040": {
+    "ok": false
+  },
+  "BOUNDARY-ARG-041": {
+    "ok": "absent"
+  },
+  "BOUNDARY-ARG-042": {
+    "ok": "absent"
+  },
+  "BOUNDARY-ARG-045": {
+    "ok": [
+      "test@1.0.0",
+      0
+    ]
+  },
+  "BOUNDARY-ARG-046": {
+    "ok": [
+      "test@1.0.0",
+      false
+    ]
+  },
+  "BOUNDARY-ARG-047": {
+    "ok": [
+      "test@1.0.0",
+      null
+    ]
+  },
+  "BOUNDARY-ARG-048": {
+    "ok": [
+      "test@1.0.0",
+      0
+    ]
+  },
+  "BOUNDARY-ARG-049": {
+    "ok": [
+      "test@1.0.0",
+      false
+    ]
+  },
+  "BOUNDARY-ARG-050": {
+    "ok": [
+      "test@1.0.0",
+      null
+    ]
+  },
+  "BOUNDARY-ARG-051": {
+    "ok": [
+      "test@1.0.0",
+      0
+    ]
+  },
+  "BOUNDARY-ARG-052": {
+    "ok": [
+      "test@1.0.0",
+      false
+    ]
+  },
+  "BOUNDARY-ARG-053": {
+    "ok": [
+      "test@1.0.0",
+      null
+    ]
+  },
+  "BOUNDARY-ARG-054": {
+    "ok": [
+      "test@1.0.0",
+      0
+    ]
+  },
+  "BOUNDARY-ARG-055": {
+    "ok": [
+      "test@1.0.0",
+      false
+    ]
+  },
+  "BOUNDARY-ARG-056": {
+    "ok": [
+      "test@1.0.0",
+      null
+    ]
+  },
+  "BOUNDARY-ARG-057": {
+    "ok": [
+      "test@1.0.0",
+      0
+    ]
+  },
+  "BOUNDARY-ARG-058": {
+    "ok": [
+      "test@1.0.0",
+      false
+    ]
+  },
+  "BOUNDARY-ARG-059": {
+    "ok": [
+      "test@1.0.0",
+      null
+    ]
+  },
+  "BOUNDARY-ARG-060": {
+    "ok": [
+      true,
+      0
+    ]
+  },
+  "BOUNDARY-ARG-061": {
+    "ok": [
+      true,
+      false
+    ]
+  },
+  "BOUNDARY-ARG-062": {
+    "ok": [
+      true,
+      null
+    ]
+  },
+  "BOUNDARY-ARG-063": {
+    "ok": {
+      "$class": "test@1.0.0.A",
+      "id": "r1"
+    }
+  },
+  "BOUNDARY-ARG-064": {
+    "ok": {
+      "$class": "test@1.0.0.A",
+      "id": "r1"
+    }
+  },
+  "BOUNDARY-ARG-065": {
+    "ok": {
+      "$class": "test@1.0.0.A",
+      "id": "r1"
+    }
+  },
+  "BOUNDARY-ARG-066": {
+    "ok": "Resource {id=test@1.0.0.A#r1}"
+  },
+  "BOUNDARY-ARG-067": {
+    "ok": "Resource {id=test@1.0.0.A#r1}"
+  },
+  "BOUNDARY-ARG-068": {
+    "ok": "Resource {id=test@1.0.0.A#r1}"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "harness": "run-ts.mjs",
+  "recorded_at": "2026-09-28T18:58:24.416Z",
+  "machine": {
+    "platform": "darwin",
+    "arch": "x64",
+    "cpus": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+    "cpu_count": 8,
+    "total_mem_gb": 17,
+    "node": "v24.21.0"
+  },
+  "concerto_commit": "0b8cfd1e2c69afba0b79c267c4d7f64079cd1b05",
+  "concerto_engine": "ts",
+  "core_dist": "migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+  "workloads_run": [
+    "instance_validate"
+  ],
+  "loadavg": [
+    1.9453125,
+    2.67333984375,
+    3.72314453125
+  ],
+  "sample_opts": {
+    "warmup": 5,
+    "samples": 30
+  },
+  "workloads": {
+    "load_validate": {},
+    "validate_ast": {},
+    "instance_validate": {
+      "populate_and_validate": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.008835725,
+        "mean_ms": 0.009390686799999999,
+        "stddev_ms": 0.003015820041136526,
+        "min_ms": 0.008074088,
+        "max_ms": 0.025116768,
+        "cv": 0.32115010385997816
+      },
+      "validate_only": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.0019571650000000003,
+        "mean_ms": 0.0020158495999999995,
+        "stddev_ms": 0.00019916335150783763,
+        "min_ms": 0.0019510460000000001,
+        "max_ms": 0.0029596680000000004,
+        "cv": 0.09879871569180443
+      },
+      "set_property_value": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.00016285600000000001,
+        "mean_ms": 0.00019427333333333334,
+        "stddev_ms": 0.00011281078571855078,
+        "min_ms": 0.000155536,
+        "max_ms": 0.00076051,
+        "cv": 0.5806807541876606
+      },
+      "add_array_value": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.00028244800000000003,
+        "mean_ms": 0.00036490780000000004,
+        "stddev_ms": 0.00019314492379975663,
+        "min_ms": 0.000264084,
+        "max_ms": 0.001053256,
+        "cv": 0.5292978768876867
+      },
+      "n": 500
+    }
+  }
+}

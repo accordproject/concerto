@@ -1,0 +1,10 @@
+{
+  "name": "concerto-fuzz",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Differential fuzzing harness (task P5-05, plan accordproject/concerto-rust#29 §2.5): mutates models and instances drawn from the oracle corpus and diffs the TS reference engine against the Rust-backed engine.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "fast-check": "^4.10.2"
+  }
+}

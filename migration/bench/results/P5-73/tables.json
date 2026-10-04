@@ -1,0 +1,418 @@
+[
+ {
+  "op": "add_model_file",
+  "set": "concerto-core-test-data",
+  "tsUs": 56.17635714285714,
+  "tsRounds": [
+   51.40015714285715,
+   66.27581428571429,
+   56.17635714285714
+  ],
+  "before": {
+   "us": 312.3849714285715,
+   "rounds": [
+    298.2568142857143,
+    312.3849714285715,
+    323.27244285714283
+   ],
+   "xTs": 5.56079082583039,
+   "crossings": 3.2857142857142847,
+   "inEngineUs": 132.27793428571425,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "ModelManagerHandle.validateAndCommitStagedModelFile x1",
+    "modelFileIsCompatibleVersion x1.0857142857142856",
+    "ModelManagerHandle.stageModelFileWithHeader x0.05714285714285714"
+   ]
+  },
+  "now": {
+   "us": 306.52328571428575,
+   "rounds": [
+    306.52328571428575,
+    318.79117142857143,
+    305.2573428571429
+   ],
+   "xTs": 5.45644647150746,
+   "crossings": 3.2285714285714278,
+   "inEngineUs": 136.51309142857144,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "ModelManagerHandle.validateAndCommitStagedModelFile x1",
+    "modelFileIsCompatibleVersion x1.0857142857142856",
+    "new ModelManagerHandle x0.02857142857142857"
+   ]
+  },
+  "now-mmvoff": {
+   "us": 302.02757142857143,
+   "rounds": [
+    302.02757142857143,
+    305.60580000000004,
+    291.57304285714287
+   ],
+   "xTs": 5.376417888054075,
+   "crossings": 3.2285714285714278,
+   "inEngineUs": 145.98571428571427,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileWithHeader x1",
+    "ModelManagerHandle.validateAndCommitStagedModelFile x1",
+    "modelFileIsCompatibleVersion x1.0857142857142856",
+    "new ModelManagerHandle x0.02857142857142857"
+   ]
+  },
+  "nowOverBefore": 0.9812356987358272
+ },
+ {
+  "op": "add_model_file",
+  "set": "conformance",
+  "tsUs": 20.792390243902442,
+  "tsRounds": [
+   18.16432926829268,
+   20.792390243902442,
+   23.52260975609756
+  ],
+  "before": {
+   "us": 158.74120731707316,
+   "rounds": [
+    158.74120731707316,
+    191.37553658536586,
+    148.5743048780488
+   ],
+   "xTs": 7.634581953059748,
+   "crossings": 3.2439024390243905,
+   "inEngineUs": 64.93623902439023,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "ModelManagerHandle.validateAndCommitStagedModelFile x1",
+    "modelFileIsCompatibleVersion x1.0731707317073171",
+    "ModelManagerHandle.stageModelFileWithHeader x0.04878048780487805"
+   ]
+  },
+  "now": {
+   "us": 162.0391097560976,
+   "rounds": [
+    162.0391097560976,
+    176.41274390243902,
+    150.5114512195122
+   ],
+   "xTs": 7.793192983361642,
+   "crossings": 3.1951219512195124,
+   "inEngineUs": 80.57124146341465,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "ModelManagerHandle.validateAndCommitStagedModelFile x1",
+    "modelFileIsCompatibleVersion x1.0731707317073171",
+    "new ModelManagerHandle x0.024390243902439025"
+   ]
+  },
+  "now-mmvoff": {
+   "us": 170.50219512195122,
+   "rounds": [
+    156.01901219512195,
+    170.50219512195122,
+    171.74960975609758
+   ],
+   "xTs": 8.200221000178301,
+   "crossings": 3.1951219512195124,
+   "inEngineUs": 70.88021951219511,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileWithHeader x1",
+    "ModelManagerHandle.validateAndCommitStagedModelFile x1",
+    "modelFileIsCompatibleVersion x1.0731707317073171",
+    "ModelManagerHandle.systemModelFileHeader x0.04878048780487805"
+   ]
+  },
+  "nowOverBefore": 1.0207753392755614
+ },
+ {
+  "op": "add_model_file",
+  "set": "synthetic-large",
+  "tsUs": 2189.2895000000003,
+  "tsRounds": [
+   2179.498,
+   2450.2165,
+   2189.2895000000003
+  ],
+  "before": {
+   "us": 8947.7155,
+   "rounds": [
+    8944.176500000001,
+    9404.998500000002,
+    8947.7155
+   ],
+   "xTs": 4.087040795655394,
+   "crossings": 13,
+   "inEngineUs": 4857.084399999999,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "ModelManagerHandle.validateAndCommitStagedModelFile x1",
+    "ModelManagerHandle.stageModelFileWithHeader x2",
+    "modelFileIsCompatibleVersion x4"
+   ]
+  },
+  "now": {
+   "us": 9136.954,
+   "rounds": [
+    9136.954,
+    12480.3385,
+    8801.4155
+   ],
+   "xTs": 4.173479112744111,
+   "crossings": 11,
+   "inEngineUs": 4768.1125999999995,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "ModelManagerHandle.validateAndCommitStagedModelFile x1",
+    "modelFileIsCompatibleVersion x4",
+    "new ModelManagerHandle x1"
+   ]
+  },
+  "now-mmvoff": {
+   "us": 8967.304,
+   "rounds": [
+    9187.523,
+    8967.304,
+    8715.154999999999
+   ],
+   "xTs": 4.095988219008952,
+   "crossings": 11,
+   "inEngineUs": 4358.6280000000015,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileWithHeader x1",
+    "ModelManagerHandle.validateAndCommitStagedModelFile x1",
+    "modelFileIsCompatibleVersion x4",
+    "ModelManagerHandle.systemModelFileHeader x2"
+   ]
+  },
+  "nowOverBefore": 1.021149364885372
+ },
+ {
+  "op": "mm_new",
+  "set": "conformance",
+  "tsUs": 110.39200000000001,
+  "tsRounds": [
+   110.39200000000001,
+   103.128,
+   111.38100000000001
+  ],
+  "before": {
+   "us": 314.10550000000006,
+   "rounds": [
+    314.10550000000006,
+    311.0445,
+    351.912
+   ],
+   "xTs": 2.8453647003406046,
+   "crossings": 10,
+   "inEngineUs": 188.39170000000001,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileWithHeader x2",
+    "new ModelManagerHandle x1",
+    "modelFileIsCompatibleVersion x3",
+    "ModelManagerHandle.setDecoratorValidation x1"
+   ]
+  },
+  "now": {
+   "us": 193.2815,
+   "rounds": [
+    193.2815,
+    187.4135,
+    266.936
+   ],
+   "xTs": 1.7508650989202115,
+   "crossings": 8,
+   "inEngineUs": 65.0452,
+   "bindings": [
+    "modelFileIsCompatibleVersion x3",
+    "new ModelManagerHandle x1",
+    "ModelManagerHandle.systemModelFileHeader x2",
+    "ModelManagerHandle.setDecoratorValidation x1"
+   ]
+  },
+  "now-mmvoff": {
+   "us": 199.829,
+   "rounds": [
+    201.71650000000002,
+    199.829,
+    197.8215
+   ],
+   "xTs": 1.8101764620624683,
+   "crossings": 8,
+   "inEngineUs": 82.1639,
+   "bindings": [
+    "ModelManagerHandle.systemModelFileHeader x2",
+    "modelFileIsCompatibleVersion x3",
+    "new ModelManagerHandle x1",
+    "ModelManagerHandle.setDecoratorValidation x1"
+   ]
+  },
+  "nowOverBefore": 0.615339432133471
+ },
+ {
+  "op": "modelfile_new",
+  "set": "concerto-core-test-data",
+  "tsUs": 17.273471428571426,
+  "tsRounds": [
+   14.581742857142858,
+   20.51934285714286,
+   17.273471428571426
+  ],
+  "before": {
+   "us": 104.04105714285714,
+   "rounds": [
+    100.20102857142857,
+    104.04105714285714,
+    112.14042857142857
+   ],
+   "xTs": 6.023170129587651,
+   "crossings": 2,
+   "inEngineUs": 131.0891257142857,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "modelFileIsCompatibleVersion x1"
+   ]
+  },
+  "now": {
+   "us": 105.07414285714285,
+   "rounds": [
+    102.80581428571428,
+    105.07414285714285,
+    145.36362857142856
+   ],
+   "xTs": 6.0829777784761605,
+   "crossings": 2,
+   "inEngineUs": 206.38955142857142,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "modelFileIsCompatibleVersion x1"
+   ]
+  },
+  "now-mmvoff": {
+   "us": 95.30982857142857,
+   "rounds": [
+    86.59931428571429,
+    95.30982857142857,
+    97.03238571428571
+   ],
+   "xTs": 5.517699726169693,
+   "crossings": 2,
+   "inEngineUs": 230.89531142857143,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileWithHeader x1",
+    "modelFileIsCompatibleVersion x1"
+   ]
+  },
+  "nowOverBefore": 1.0099295964752375
+ },
+ {
+  "op": "modelfile_new",
+  "set": "conformance",
+  "tsUs": 5.090695121951219,
+  "tsRounds": [
+   4.4053048780487805,
+   5.090695121951219,
+   7.202926829268293
+  ],
+  "before": {
+   "us": 57.16570731707317,
+   "rounds": [
+    57.16570731707317,
+    52.14528048780488,
+    74.83369512195124
+   ],
+   "xTs": 11.229450192484137,
+   "crossings": 2,
+   "inEngineUs": 72.04398048780487,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "modelFileIsCompatibleVersion x1"
+   ]
+  },
+  "now": {
+   "us": 54.91301219512196,
+   "rounds": [
+    51.31692682926829,
+    54.91301219512196,
+    69.61013414634145
+   ],
+   "xTs": 10.786937909193485,
+   "crossings": 2,
+   "inEngineUs": 52.26853658536585,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "modelFileIsCompatibleVersion x1"
+   ]
+  },
+  "now-mmvoff": {
+   "us": 60.89135365853658,
+   "rounds": [
+    51.32623170731708,
+    61.031219512195115,
+    60.89135365853658
+   ],
+   "xTs": 11.961304340535218,
+   "crossings": 2,
+   "inEngineUs": 50.579356097560975,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileWithHeader x1",
+    "modelFileIsCompatibleVersion x1"
+   ]
+  },
+  "nowOverBefore": 0.9605935931229452
+ },
+ {
+  "op": "modelfile_new",
+  "set": "synthetic-large",
+  "tsUs": 564.2625,
+  "tsRounds": [
+   517.0369999999999,
+   581.6295,
+   564.2625
+  ],
+  "before": {
+   "us": 7822.7835,
+   "rounds": [
+    7540.9974999999995,
+    7822.7835,
+    8025.8685
+   ],
+   "xTs": 13.863730976274338,
+   "crossings": 2,
+   "inEngineUs": 3237.6197,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "modelFileIsCompatibleVersion x1"
+   ]
+  },
+  "now": {
+   "us": 7750.935,
+   "rounds": [
+    7344.1455,
+    8639.838000000002,
+    7750.935
+   ],
+   "xTs": 13.736399282248954,
+   "crossings": 2,
+   "inEngineUs": 3061.2104,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileChecked x1",
+    "modelFileIsCompatibleVersion x1"
+   ]
+  },
+  "now-mmvoff": {
+   "us": 7521.9705,
+   "rounds": [
+    7388.7745,
+    7521.9705,
+    7787.179
+   ],
+   "xTs": 13.33062271549146,
+   "crossings": 2,
+   "inEngineUs": 3349.9084000000003,
+   "bindings": [
+    "ModelManagerHandle.stageModelFileWithHeader x1",
+    "modelFileIsCompatibleVersion x1"
+   ]
+  },
+  "nowOverBefore": 0.9908154814715249
+ }
+]

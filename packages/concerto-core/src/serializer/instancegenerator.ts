@@ -44,7 +44,10 @@ class InstanceGenerator {
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing) );
+            // BC-08: name the element; JSON.stringify of an introspection
+            // object can throw a circular-structure TypeError (DV-010).
+            const name = typeof thing?.getFullyQualifiedName === 'function' ? thing.getFullyQualifiedName() : JSON.stringify(thing);
+            throw new Error(`Unrecognised element "${name}"`);
         }
     }
 

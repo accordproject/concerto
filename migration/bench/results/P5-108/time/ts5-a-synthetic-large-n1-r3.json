@@ -1,0 +1,34 @@
+{
+  "set": "synthetic-large",
+  "approach": "a",
+  "mode": "time",
+  "coreVersion": "5.0.0",
+  "coreDist": "/home/user/wt/P5-108/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+  "engineModule": "@accordproject/concerto-engine",
+  "node": "v22.22.2",
+  "platformModels": 1,
+  "concurrency": 1,
+  "requests": 150,
+  "warmup": 20,
+  "p50Ms": 2.287597000000005,
+  "p95Ms": 6.716865049999957,
+  "meanMs": 3.2583849733333374,
+  "throughputPerS": 306.65038704737225,
+  "wallMs": 489.15640199999996,
+  "start": {
+    "wasmBytes": null,
+    "unfinalized": 0,
+    "rss": 90320896,
+    "heapUsed": 9862864,
+    "external": 2010225,
+    "arrayBuffers": 16875
+  },
+  "end": {
+    "wasmBytes": null,
+    "unfinalized": 67,
+    "rss": 132284416,
+    "heapUsed": 38992960,
+    "external": 2010265,
+    "arrayBuffers": 16875
+  }
+}

@@ -1,0 +1,404 @@
+{
+  "$schema": "migration/status/status.json",
+  "generated_at": "2026-09-27T04:42:29.686Z",
+  "requested_at_sha": null,
+  "fast": false,
+  "runtime_ms": 502814,
+  "repos": {
+    "concerto": {
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-01/concerto",
+      "commit": "520b243139923843a3e7bd62b1501ae09aaba356",
+      "commit_used": "520b243139923843a3e7bd62b1501ae09aaba356"
+    },
+    "concerto-rust": {
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-01/concerto-rust",
+      "commit": "ad806ade0c79024f08057e0d7dfaa21a936b4eaf"
+    },
+    "concerto-validate-rs": {
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-01/concerto-validate-rs",
+      "commit": "c8e27378fc3983844b33d760e6adb4a49669b7d3"
+    },
+    "concerto-conformance": {
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-01/concerto-conformance",
+      "commit": "93396426fd5854e9c691fdef6bf557a026cbb8c4"
+    }
+  },
+  "metrics": {
+    "queue": {
+      "available": true,
+      "total": 56,
+      "counts": {
+        "done": 11,
+        "in_progress": 4,
+        "pending": 41
+      },
+      "by_priority": {
+        "P0": {
+          "done": 9,
+          "in_progress": 2,
+          "pending": 9
+        },
+        "P1": {
+          "done": 2,
+          "pending": 24,
+          "in_progress": 2
+        },
+        "P2": {
+          "pending": 7
+        },
+        "P3": {
+          "pending": 1
+        }
+      }
+    },
+    "concerto_core_tests": {
+      "overall": {
+        "available": true,
+        "engine": "ts",
+        "suites": 411,
+        "tests": 1308,
+        "passing": 1300,
+        "failing": 0,
+        "pending": 8,
+        "duration_ms": 6204
+      },
+      "by_tag": {
+        "available": true,
+        "tally": {
+          "B": {
+            "tests": 956,
+            "passing": 950,
+            "failing": 0,
+            "pending": 6
+          },
+          "M": {
+            "tests": 80,
+            "passing": 78,
+            "failing": 0,
+            "pending": 2
+          },
+          "W": {
+            "tests": 272,
+            "passing": 272,
+            "failing": 0,
+            "pending": 0
+          }
+        }
+      },
+      "engine_modes": {
+        "ts": {
+          "available": true,
+          "engine": "ts",
+          "suites": 411,
+          "tests": 1308,
+          "passing": 1300,
+          "failing": 0,
+          "pending": 8,
+          "duration_ms": 6204
+        },
+        "rust": {
+          "available": true,
+          "engine": "rust",
+          "suites": 411,
+          "tests": 1308,
+          "passing": 1300,
+          "failing": 0,
+          "pending": 8,
+          "duration_ms": 10273,
+          "by_tag": {
+            "available": true,
+            "tally": {
+              "B": {
+                "tests": 956,
+                "passing": 950,
+                "failing": 0,
+                "pending": 6
+              },
+              "M": {
+                "tests": 80,
+                "passing": 78,
+                "failing": 0,
+                "pending": 2
+              },
+              "W": {
+                "tests": 272,
+                "passing": 272,
+                "failing": 0,
+                "pending": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "nyc_coverage": {
+      "available": true,
+      "statements_pct": 99.04,
+      "branches_pct": 95.72,
+      "functions_pct": 99.34,
+      "lines_pct": 99.06,
+      "thresholds": {
+        "statements": 99,
+        "branches": 94.8,
+        "functions": 99,
+        "lines": 99
+      },
+      "gate_status": "PASS"
+    },
+    "oracle": {
+      "reference": {
+        "available": true,
+        "engine": "reference@5.0.0",
+        "total": 15850,
+        "pass": 15850,
+        "fail": 0,
+        "harness_error": 0,
+        "pass_pct": 100,
+        "by_source": {
+          "conformance": {
+            "total": 815,
+            "pass": 815,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "data": {
+            "total": 10231,
+            "pass": 10231,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "gaps": {
+            "total": 658,
+            "pass": 658,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "lifted": {
+            "total": 64,
+            "pass": 64,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "unit": {
+            "total": 4082,
+            "pass": 4082,
+            "fail": 0,
+            "harness_error": 0
+          }
+        }
+      },
+      "native": {
+        "available": true,
+        "generated_at": "2026-09-27T04:02:33.952Z",
+        "total_fixtures": 16242,
+        "pass": 13921,
+        "fail": 0,
+        "unsupported": 2321,
+        "harness_error": 0,
+        "regressions": 0,
+        "pass_pct": 85.71
+      },
+      "wasm": {
+        "available": false,
+        "reason": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-01/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs is built (P4-01/P4-02 have landed), but this collector has no stable corpus-replay report to read for it; see migration/gate/run.mjs's stepOracleWasm for a real replay"
+      },
+      "corpus_coverage_of_reference": {
+        "available": true,
+        "generated_at": "2026-09-27T04:05:59.736Z",
+        "corpus": {
+          "statements": {
+            "pct": 99.21,
+            "covered": 3400,
+            "total": 3427
+          },
+          "branches": {
+            "pct": 96.34,
+            "covered": 1768,
+            "total": 1835
+          },
+          "functions": {
+            "pct": 99.01,
+            "covered": 604,
+            "total": 610
+          },
+          "lines": {
+            "pct": 99.19,
+            "covered": 3345,
+            "total": 3372
+          }
+        },
+        "unit_suite": {
+          "statements": {
+            "pct": 99.01,
+            "covered": 3308,
+            "total": 3341
+          },
+          "branches": {
+            "pct": 95.8,
+            "covered": 1758,
+            "total": 1835
+          },
+          "functions": {
+            "pct": 99.34,
+            "covered": 606,
+            "total": 610
+          },
+          "lines": {
+            "pct": 99.02,
+            "covered": 3254,
+            "total": 3286
+          }
+        },
+        "thresholds": {
+          "statements": 99,
+          "branches": 94.8,
+          "functions": 99,
+          "lines": 99
+        }
+      },
+      "mutants": {
+        "available": true,
+        "detected": 13,
+        "total": 13,
+        "catch_rate_pct": 100,
+        "all_mutants_detected": true,
+        "harness_checks_ok": true
+      }
+    },
+    "rust": {
+      "concerto-rust": {
+        "cargo_test": {
+          "available": true,
+          "command_exit_ok": true,
+          "totals": {
+            "passed": 927,
+            "failed": 0
+          },
+          "per_crate": {
+            "concerto_core": {
+              "passed": 862,
+              "failed": 0
+            },
+            "derive": {
+              "passed": 3,
+              "failed": 0
+            },
+            "oracle": {
+              "passed": 32,
+              "failed": 0
+            },
+            "traits": {
+              "passed": 9,
+              "failed": 0
+            },
+            "concerto_macros": {
+              "passed": 11,
+              "failed": 0
+            },
+            "concerto_metamodel": {
+              "passed": 0,
+              "failed": 0
+            },
+            "debug": {
+              "passed": 1,
+              "failed": 0
+            },
+            "numeric_widening": {
+              "passed": 5,
+              "failed": 0
+            },
+            "round_trip": {
+              "passed": 4,
+              "failed": 0
+            },
+            "concerto_vocabulary": {
+              "passed": 0,
+              "failed": 0
+            }
+          }
+        },
+        "llvm_cov": {
+          "available": true,
+          "workspace_lines_pct": 94.41,
+          "per_crate_lines_pct": {
+            "concerto-core": 94.43,
+            "concerto-macros": 99.22,
+            "concerto-metamodel": 0,
+            "concerto-vocabulary": 0
+          }
+        }
+      },
+      "concerto-validate-rs": {
+        "cargo_test": {
+          "available": true,
+          "command_exit_ok": true,
+          "totals": {
+            "passed": 11,
+            "failed": 0
+          },
+          "per_crate": {
+            "concerto_validator_rs": {
+              "passed": 6,
+              "failed": 0
+            },
+            "concerto_validator": {
+              "passed": 0,
+              "failed": 0
+            },
+            "cli_tests": {
+              "passed": 5,
+              "failed": 0
+            }
+          }
+        },
+        "llvm_cov": {
+          "available": true,
+          "workspace_lines_pct": 73.38,
+          "per_crate_lines_pct": {
+            "lib.rs": 100,
+            "main.rs": 0,
+            "model_manager": 82.41,
+            "validator.rs": 100
+          }
+        }
+      }
+    },
+    "ledger": {
+      "available": true,
+      "rows": 508,
+      "full_weight": {
+        "total_weight": 6588.5,
+        "weight_by_classification": {
+          "RUST": 3715,
+          "HYBRID": 1826,
+          "TS": 1047.5
+        },
+        "weighted_pct_rust_plus_hybrid": 84.1
+      },
+      "d1_denominator_weight": 6498.5,
+      "d1_excluded": {
+        "members": 60,
+        "weight": 90
+      },
+      "weighted_pct_rust_plus_hybrid": 85.3,
+      "weighted_pct_rust_only": 57.2
+    },
+    "mutants": {
+      "available": true,
+      "source": "concerto-core/MUTANTS.md (accordproject/concerto-rust#183, P5-06)",
+      "total": 420,
+      "caught": 358,
+      "missed": 21,
+      "unviable": 41,
+      "catch_rate_pct": 94.5,
+      "floor_pct": 85,
+      "meets_floor": true
+    },
+    "conformance": {
+      "available": true,
+      "total_scenarios": 75,
+      "passed": 75,
+      "failed": 0
+    }
+  }
+}

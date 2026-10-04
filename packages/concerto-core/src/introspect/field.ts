@@ -12,12 +12,7 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-
 import Property from './property';
-import NumberValidator from './numbervalidator';
-import StringValidator from './stringvalidator';
-import { NullUtil as Util } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -25,6 +20,7 @@ import type ClassDeclaration from './classdeclaration';
 import type Validator from './validator';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
+import { engineViews } from '../engineloader';
 
 /**
  * Class representing the definition of a Field. A Field is owned
@@ -61,35 +57,7 @@ class Field extends Property {
     process() {
         super.process();
 
-        this.validator = null;
-
-        switch (this.getType()) {
-        case 'Integer':
-        case 'Double':
-        case 'Long':
-            if (this.ast.validator) {
-                this.validator = new NumberValidator(
-                    this,
-                    this.ast.validator
-                );
-            }
-            break;
-        case 'String':
-            if (this.ast.validator || this.ast.lengthValidator) {
-                this.validator = new StringValidator(
-                    this,
-                    this.ast.validator,
-                    this.ast.lengthValidator
-                );
-            }
-            break;
-        }
-
-        if (!Util.isNull(this.ast.defaultValue)) {
-            this.defaultValue = this.ast.defaultValue;
-        } else {
-            this.defaultValue = null;
-        }
+        engineViews().fieldProcess(this);
     }
 
     /**
@@ -113,17 +81,8 @@ class Field extends Property {
      * @return {String} the string version of the property.
      */
     toString(): string {
-        return (
-            'Field {name=' +
-            this.name +
-            ', type=' +
-            this.getFullyQualifiedTypeName() +
-            ', array=' +
-            this.array +
-            ', optional=' +
-            this.optional +
-            '}'
-        );
+        return 'Field {name=' + this.name + ', type=' + this.getFullyQualifiedTypeName() +
+            ', array=' + this.array + ', optional=' + this.optional + '}';
     }
 
     /**
@@ -162,45 +121,15 @@ class Field extends Property {
         if(this.scalarField) {
             return this.scalarField;
         }
-        if (!this.isTypeScalar()) {
-            throw new Error(`Field ${this.name} is not a scalar property.`);
-        }
-        const type = this.getParent().getModelFile().getType(this.getType());
-        const fieldAst = JSON.parse(JSON.stringify(type.ast));
 
-        switch (type.ast.$class) {
-        case `${MetaModelNamespace}.StringScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.StringProperty`;
-            break;
-        case `${MetaModelNamespace}.BooleanScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.BooleanProperty`;
-            break;
-
-        case `${MetaModelNamespace}.DateTimeScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.DateTimeProperty`;
-            break;
-
-        case `${MetaModelNamespace}.DoubleScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.DoubleProperty`;
-            break;
-
-        case `${MetaModelNamespace}.IntegerScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.IntegerProperty`;
-            break;
-
-        case `${MetaModelNamespace}.LongScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.LongProperty`;
-            break;
-        default:
-            throw new Error(`Unrecognized scalar type ${type.ast.$class}`);
-        }
-
-        fieldAst.name = this.ast.name;
-        this.scalarField = new Field(this.getParent(), fieldAst);
-        this.scalarField.array = this.isArray();
-        return this.scalarField;
+        const scalarField: Field = engineViews().fieldGetScalarField(this);
+        this.scalarField = scalarField;
+        return scalarField;
     }
 }
+
+// Built on first read in a lazily built file (engine/views-lazy.ts).
+engineViews().installLazyField(Field.prototype, 'validator');
 
 export { Field };
 export default Field;

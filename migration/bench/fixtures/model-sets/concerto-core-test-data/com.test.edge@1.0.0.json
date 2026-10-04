@@ -1,0 +1,447 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "com.test.edge@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "EdgeCases",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "emptyTerm",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "tabInValue",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "col1\tcol2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "doubleQuoteInValue",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "say \"hello\""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "backslashInValue",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "path\\to\\file"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "literalBackslashN",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "literal\\n value"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "gtChar",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "> folded block"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "pipeChar",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "| literal block"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "exclamationChar",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "!tag handle"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "ampersandChar",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "&anchor ref"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "asteriskChar",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "*alias ref"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "percentChar",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "%directive"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "uppercaseTrue",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "TRUE"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "uppercaseYes",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "YES"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "uppercaseNull",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "NULL"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "yamlNull",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "~"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "leadingDotDecimal",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": ".5"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "negativeDecimal",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "-1.5"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "scientificNotation",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "1e10"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "carriageReturn",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "foo\rbar"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "dashSpaceValue",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "- foo"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "questionSpaceValue",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "? key"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "hexValue",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "0x1A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "octalValue",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "0o10"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "binaryValue",
+          "isArray": false,
+          "isOptional": true,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Term",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "0b11"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

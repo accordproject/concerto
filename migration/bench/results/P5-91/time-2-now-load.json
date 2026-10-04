@@ -1,0 +1,102 @@
+{
+  "tool": "p515-sweep",
+  "mode": "time",
+  "coreDist": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-91/concerto/packages/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "a4bf2b898",
+  "node": "v22.23.2",
+  "cpu": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+  "loadavgEnd": [
+    17.69,
+    18.87,
+    22.33
+  ],
+  "samples": 100,
+  "warmup": 10,
+  "results": [
+    {
+      "op": "modelfile_new",
+      "family": "load",
+      "set": "concerto-core-test-data",
+      "n": 35,
+      "medianUs": 160.13484285714284,
+      "samples": 100,
+      "median_ms": 0.16013484285714286,
+      "mean_ms": 0.25610844428571433,
+      "stddev_ms": 0.1852165625953732,
+      "min_ms": 0.10330137142857143,
+      "max_ms": 0.9393101142857142,
+      "cv": 0.7231958442914354
+    },
+    {
+      "op": "modelfile_new",
+      "family": "load",
+      "set": "conformance",
+      "n": 41,
+      "medianUs": 63.20842682926829,
+      "samples": 100,
+      "median_ms": 0.06320842682926829,
+      "mean_ms": 0.10068794439024394,
+      "stddev_ms": 0.0957800087632617,
+      "min_ms": 0.05449834146341463,
+      "max_ms": 0.5453321463414634,
+      "cv": 0.9512559755122205
+    },
+    {
+      "op": "modelfile_new",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "medianUs": 6689.2485,
+      "samples": 100,
+      "median_ms": 6.6892485,
+      "mean_ms": 9.685761270000002,
+      "stddev_ms": 7.107230723589666,
+      "min_ms": 4.183091,
+      "max_ms": 45.911412,
+      "cv": 0.7337813234777016
+    },
+    {
+      "op": "add_model_file",
+      "family": "load",
+      "set": "concerto-core-test-data",
+      "n": 35,
+      "medianUs": 518.5746428571429,
+      "samples": 100,
+      "median_ms": 0.5185746428571428,
+      "mean_ms": 0.5991109862857144,
+      "stddev_ms": 0.2797430883400153,
+      "min_ms": 0.2759063428571429,
+      "max_ms": 1.9573233428571428,
+      "cv": 0.4669303263395785
+    },
+    {
+      "op": "add_model_file",
+      "family": "load",
+      "set": "conformance",
+      "n": 41,
+      "medianUs": 228.01034146341465,
+      "samples": 100,
+      "median_ms": 0.22801034146341465,
+      "mean_ms": 0.2777863575609756,
+      "stddev_ms": 0.15300687583676892,
+      "min_ms": 0.11926936585365852,
+      "max_ms": 0.8928659512195122,
+      "cv": 0.5508077400927909
+    },
+    {
+      "op": "add_model_file",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "medianUs": 23390.266499999998,
+      "samples": 100,
+      "median_ms": 23.3902665,
+      "mean_ms": 25.30291213999999,
+      "stddev_ms": 9.446090961081941,
+      "min_ms": 14.759068,
+      "max_ms": 63.902395,
+      "cv": 0.3733203083035305
+    }
+  ]
+}

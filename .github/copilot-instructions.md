@@ -6,7 +6,7 @@ This repository is **Concerto** - a lightweight schema language and runtime for 
 
 ### Tech Stack
 - **Language**: JavaScript (ES6+) transitioning to TypeScript
-- **Runtime**: Node.js 18+ with npm 10+
+- **Runtime**: Node.js 20.19+ or 22.12+ with npm 10+
 - **Build System**: npm workspaces with interdependent packages
 - **Testing**: Mocha, Chai, Chai-as-promised, Sinon, Istanbul (99% coverage target)
 - **Linting**: ESLint with strict configuration

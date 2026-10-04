@@ -1,0 +1,195 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "org.accordproject.time@0.3.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "Month",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "January"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "February"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "March"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "April"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "May"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "June"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "July"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "August"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "September"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "October"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "November"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "December"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "Day",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "Monday"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "Tuesday"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "Wednesday"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "Thursday"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "Friday"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "Saturday"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "Sunday"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "TemporalUnit",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "seconds"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "minutes"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "hours"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "days"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "weeks"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Duration",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "amount",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "unit",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "TemporalUnit"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "PeriodUnit",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "days"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "weeks"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "months"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "quarters"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "years"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Period",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "amount",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "unit",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "PeriodUnit"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    }
+  ],
+  "concertoVersion": ">3.0.0"
+}

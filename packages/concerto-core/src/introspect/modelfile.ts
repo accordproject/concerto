@@ -14,7 +14,6 @@
 
 import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-import semver from 'semver';
 import AssetDeclaration from './assetdeclaration';
 import EnumDeclaration from './enumdeclaration';
 import ClassDeclaration from './classdeclaration';
@@ -28,20 +27,41 @@ import MapDeclaration from './mapdeclaration';
 import ModelUtil from '../modelutil';
 import Globalize from '../globalize';
 import Decorated from './decorated';
-import packageJson from '../../package.json';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type BaseModelManager from '../basemodelmanager';
 import type Declaration from './declaration';
 import type { AstNode } from './decorated';
-import type { IImportType, IModel } from '@accordproject/concerto-metamodel';
+import type { IModel } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
 
 /**
  * A predicate over a Declaration, used by ModelFile#filter.
  */
 export type FilterFunction = (declaration: Declaration) => boolean;
+import { rust, engineHandles, engineViews } from '../engineloader';
+import { optionalString } from '../engineutil';
+import type { EngineHandle } from '../engine/bindings';
+
+/** BC-46: every ModelFile the constructor built; managers accept only these. */
+const constructedModelFiles = new WeakSet<object>();
+
+/** BC-47: every constructed BaseModelManager; ModelFiles need one. */
+const engineManagers = new WeakSet<object>();
+
+/** A `_sharedView`'s source and the shared engine file's stage or holder. */
+interface SharedViewSource {
+    source: ModelFile;
+    stage: { handle: object; id: number } | undefined;
+    committed: object | undefined;
+}
+
+/** The view `_sharedView` is building; read and cleared by the constructor. */
+let sharedViewSource: SharedViewSource | null = null;
+
+/** The engine header for `_systemView`; read and cleared by the constructor. */
+let systemViewHeader: unknown[] | null = null;
 
 /**
  * Class representing a Model File. A Model File contains a single namespace
@@ -55,8 +75,9 @@ class ModelFile extends Decorated {
     definitions: string | null | undefined;
     fileName: string | null | undefined;
     external: boolean;
-    declarations: Declaration[];
-    localTypes: Map<string, Declaration> | null;
+    // Lazy prototype accessors until first read or write.
+    declarations!: Declaration[];
+    localTypes!: Map<string, Declaration> | null;
     imports: AstNode[];
     importShortNames: Map<string, string>;
     importWildcardNamespaces: string[];
@@ -73,14 +94,22 @@ class ModelFile extends Decorated {
      * @param {object} ast - The abstract syntax tree of the model as a JSON object.
      * @param {string} [definitions] - The optional CTO model as a string.
      * @param {string} [fileName] - The optional filename for this modelfile
+     * @throws {TypeError} if modelManager is not a BaseModelManager (BC-47)
      * @throws {IllegalModelException}
      */
     constructor(modelManager: BaseModelManager, ast: AstNode, definitions?: string | null, fileName?: string | null) {
         super(ast);
+        const shared = sharedViewSource;
+        sharedViewSource = null;
+        const systemHeader = systemViewHeader;
+        systemViewHeader = null;
+        if (typeof modelManager !== 'object' || modelManager === null || !engineManagers.has(modelManager)) {
+            throw new TypeError('ModelFile expects a BaseModelManager built by its constructor');
+        }
+        constructedModelFiles.add(this);
         this.modelManager = modelManager;
         this.external = false;
-        this.declarations = [];
-        this.localTypes = null;
+        const views = engineViews();
         this.imports = [];
         this.importShortNames = new Map();
         this.importWildcardNamespaces = [];
@@ -109,12 +138,39 @@ class ModelFile extends Decorated {
             this.external = fileName.startsWith('@');
         }
 
+        // Declarations are lazy if the engine loads the AST, else eager so TS throws.
+        // BC-19: unless `metamodelValidation: false`, a malformed AST is an IllegalModelException.
+        let lazy: boolean;
+        if (shared !== null) {
+            lazy = views.adoptSharedView(this, shared.source, shared.stage, shared.committed);
+        } else if (systemHeader !== null) {
+            lazy = views.adoptSystemView(this, systemHeader);
+        } else {
+            const checkedText: string | object | undefined = views.checkAstShape(this);
+            lazy = views.stageModelFile(this, checkedText);
+        }
         // Set up the decorators.
         this.process();
-        // Populate from the AST
-        this.fromAst(this.ast);
-        // Check version compatibility
-        this.isCompatibleVersion();
+        // Populate from the AST.
+        if (shared !== null) {
+            this._copyHeader(shared.source);
+            if (!lazy && this.ast.declarations) {
+                this._fromAstDeclarations(this.ast);
+            }
+        } else if (lazy) {
+            this._fromAstHeader(this.ast);
+        } else {
+            this.fromAst(this.ast);
+        }
+        // Check version compatibility (a view's source was checked)
+        if (shared === null) {
+            this.isCompatibleVersion();
+        }
+
+        if (lazy) {
+            views.deferDeclarations(this);
+            return;
+        }
 
         // Now build local types from Declarations
         this.localTypes = new Map();
@@ -124,6 +180,70 @@ class ModelFile extends Decorated {
             let localType = namespace + '.' + classDeclaration.getName();
             this.localTypes.set(localType, this.declarations[index]);
         }
+    }
+
+    /**
+     * A ModelFile of `manager` viewing `source` and sharing its engine file,
+     * with no engine call.
+     * @param {BaseModelManager} manager the manager the view belongs to
+     * @param {ModelFile} source the model file it is a view of
+     * @param {string} [definitions] the view's definitions
+     * @param {object} [stage] the shared file's stage in manager's rustHandle
+     * @param {object} [committed] the rustHandle that holds the shared file
+     * @param {object} [ast] the view's AST copy; `source`'s own when omitted (BC-23)
+     * @return {ModelFile} the view
+     * @private
+     * @internal
+     */
+    static _sharedView(manager: BaseModelManager, source: ModelFile, definitions: string | null | undefined,
+        stage?: { handle: object; id: number }, committed?: object, ast?: AstNode): ModelFile {
+        sharedViewSource = { source, stage, committed };
+        try {
+            return new ModelFile(manager, ast ?? source.ast, definitions, source.fileName);
+        } finally {
+            sharedViewSource = null;
+        }
+    }
+
+    /**
+     * A view of a system model over rustHandle's preloaded copy, or
+     * undefined when the engine has no header for `ast`.
+     * @param {BaseModelManager} manager the manager the view belongs to
+     * @param {object} ast the fixed system model's AST, this view's own copy
+     * @param {string} definitions the model's CTO text
+     * @param {string} fileName the model's file name
+     * @return {ModelFile|undefined} the view, or undefined
+     * @private
+     * @internal
+     */
+    static _systemView(manager: BaseModelManager, ast: AstNode, definitions: string, fileName: string): ModelFile | undefined {
+        const header = engineViews().systemViewHeader(ast);
+        if (header === undefined) {
+            return undefined;
+        }
+        systemViewHeader = header;
+        try {
+            return new ModelFile(manager, ast, definitions, fileName);
+        } finally {
+            systemViewHeader = null;
+        }
+    }
+
+    /**
+     * Copies `_fromAstHeader`'s fields from a view of the same AST.
+     * @param {ModelFile} source the view whose header is copied
+     * @private
+     * @internal
+     */
+    _copyHeader(source: ModelFile) {
+        this.namespace = source.namespace;
+        this.version = source.version;
+        this.concertoVersion = source.concertoVersion;
+        this.imports = source.imports.slice();
+        this.importShortNames = new Map(source.importShortNames);
+        this.importWildcardNamespaces = source.importWildcardNamespaces.slice();
+        this.importUriMap = { ...source.importUriMap };
+        engineViews().copyImportNames(this, source);
     }
 
     /**
@@ -145,20 +265,71 @@ class ModelFile extends Decorated {
     }
 
     /**
+     * Whether the ModelFile constructor built `value` (BC-46).
+     * @param {*} value the value to check
+     * @return {boolean} true if the ModelFile constructor built `value`
+     * @private
+     * @internal
+     */
+    static _isConstructed(value: unknown): value is ModelFile {
+        return typeof value === 'object' && value !== null && constructedModelFiles.has(value);
+    }
+
+    /**
+     * Records a constructed BaseModelManager (BC-47).
+     * @param {BaseModelManager} manager the manager being constructed
+     * @private
+     * @internal
+     */
+    static _registerManager(manager: BaseModelManager): void {
+        engineManagers.add(manager);
+    }
+
+    /**
+     * This file's engine handle when it is registered.
+     * @return {number | undefined} the handle, or undefined to fall back to TS
+     * @private
+     * @internal
+     */
+    _rustHandleId(): number | undefined {
+        if (!this._isRegistered()) {
+            return undefined;
+        }
+        const manager = this.modelManager;
+        return manager._rustModelFileId(this.namespace);
+    }
+
+    /**
+     * Whether this is the file its manager registers and mirrors.
+     * @return {boolean} true if registered and mirrored
+     * @private
+     * @internal
+     */
+    _isRegistered(): boolean {
+        const manager = this.modelManager;
+        // A detached file (`filter()`'s result) must not answer from another's mirror.
+        if (manager.modelFiles[this.namespace] !== this) {
+            return false;
+        }
+        return manager._rustHandleMatchesModelFiles();
+    }
+
+    /**
      * Returns the semantic version
      * @returns {string} the semantic version or null if the namespace for the model file is
      * unversioned
      */
     getVersion(): string | null | undefined {
-        return this.version;
+        return this._isRegistered() ? this.version || null : this.version;
     }
 
     /**
      * Returns true if the ModelFile is a system namespace
      * @returns {Boolean} true if this is a system model file
      */
-    isSystemModelFile() {
-        return this.namespace.startsWith('concerto@') || this.namespace === 'concerto';
+    isSystemModelFile(): boolean {
+        // As the engine, bare `concerto` is a system namespace only if unregistered.
+        return this.namespace.startsWith('concerto@') || (this.namespace === 'concerto' && !this._isRegistered());
     }
 
     /**
@@ -191,7 +362,7 @@ class ModelFile extends Decorated {
      * @private
      */
     getExternalImports(): Record<string, string> {
-        return this.importUriMap;
+        return this._isRegistered() ? { ...this.importUriMap } : this.importUriMap;
     }
 
     /**
@@ -220,11 +391,41 @@ class ModelFile extends Decorated {
      * this ModelFile
      */
     getImports(): string[] {
+        const views = engineViews();
+        const recorded: string[] | undefined = views.recordedImportNames(this);
+        if (recorded !== undefined) {
+            return recorded;
+        }
         let result: string[] = [];
-        this.imports.forEach( imp => {
-            result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
-        });
+        const id = this._rustHandleId();
+        if (id !== undefined) {
+            const manager = this.modelManager;
+            result = manager.rustHandle.modelFileGetImports(id);
+        } else {
+            this.imports.forEach( imp => {
+                result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
+            });
+        }
+        views.recordImportNames(this, result.slice());
         return result;
+    }
+
+    /**
+     * An engine validation error re-wrapped with this file, as TS reported
+     * it, unless marked `needsModelFile: false` (the duplicate class check).
+     * @param {*} e the error the engine threw
+     * @return {*} the error to throw
+     * @private
+     * @internal
+     */
+    _engineValidationError(e: unknown): unknown {
+        if (e instanceof IllegalModelException) {
+            const needsModelFile = (e as unknown as { needsModelFile?: boolean }).needsModelFile;
+            if (needsModelFile !== false && e.getFileName() !== this.getName()) {
+                return new IllegalModelException(e.getShortMessage(), this, e.getFileLocation());
+            }
+        }
+        return e;
     }
 
     /**
@@ -234,73 +435,17 @@ class ModelFile extends Decorated {
      * @protected
      */
     validate() {
-        super.validate();
-
-        // A dictionary of imports to versions to track unique namespaces
-        const importsMap = new Map();
-
-        // Validate all of the imports to check that they reference
-        // namespaces or types that actually exist.
-        this.getImports().forEach((importFqn) => {
-            const importNamespace = ModelUtil.getNamespace(importFqn);
-            const importShortName = ModelUtil.getShortName(importFqn);
-            const modelFile = this.getModelManager().getModelFile(importNamespace);
-            const { name, version: importVersion } = ModelUtil.parseNamespace(importNamespace);
-
-            if (!modelFile) {
-                let formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
-                throw new IllegalModelException(formatter({
-                    type: importFqn
-                }), this);
+        const manager = this.modelManager;
+        try {
+            if (!engineViews().validateLoaded(this, manager.rustHandle)) {
+                manager.rustHandle.modelFileValidateDetached(
+                    JSON.stringify(this.getAst()),
+                    optionalString(this.getDefinitions()),
+                    optionalString(this.getName()),
+                );
             }
-
-            const existingNamespaceVersion = importsMap.get(name);
-            // undefined means we haven't seen this namespace before,
-            // null means we have seen it before but it didn't have a version
-            const unseenNamespace = existingNamespaceVersion === undefined;
-
-            const isGlobalModel = name === 'concerto';
-
-            const differentVersionsOfSameNamespace = !unseenNamespace && existingNamespaceVersion !== importVersion;
-            if (!isGlobalModel && differentVersionsOfSameNamespace){
-                let formatter = Globalize.messageFormatter('modelmanager-gettype-duplicatensimport');
-                throw new IllegalModelException(formatter({
-                    namespace: importNamespace,
-                    version1: existingNamespaceVersion,
-                    version2: importVersion
-                }), this);
-            }
-            importsMap.set(name, importVersion);
-
-            if (!modelFile.isLocalType(importShortName)) {
-                let formatter = Globalize.messageFormatter('modelmanager-gettype-notypeinns');
-                throw new IllegalModelException(formatter({
-                    type: importShortName,
-                    namespace: importNamespace
-                }), this);
-            }
-        });
-
-        // Validate all of the types in this model file.
-        // Check if names of the declarations are unique.
-        const uniqueNames = new Set();
-        this.declarations.forEach(
-            d => {
-                const fqn = d.getFullyQualifiedName();
-                if (!uniqueNames.has(fqn)) {
-                    uniqueNames.add(fqn);
-                } else {
-                    throw new IllegalModelException(
-                        `Duplicate class name ${fqn}`
-                    );
-                }
-            }
-        );
-
-        // Run validations on class declarations
-        for(let n=0; n < this.declarations.length; n++) {
-            let classDeclaration = this.declarations[n];
-            classDeclaration.validate();
+        } catch (e) {
+            throw this._engineValidationError(e);
         }
     }
 
@@ -317,6 +462,13 @@ class ModelFile extends Decorated {
      * @private
      */
     resolveType(context, type, fileLocation?) {
+        // A detached file or a non-string argument takes the TS path.
+        const id = typeof context === 'string' && typeof type === 'string' ? this._rustHandleId() : undefined;
+        if (id !== undefined) {
+            const manager = this.modelManager;
+            manager.rustHandle.modelFileResolveType(id, context, type, fileLocation, this);
+            return;
+        }
         // is the type a primitive?
         if(!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?
@@ -344,8 +496,16 @@ class ModelFile extends Decorated {
      * @private
      */
     isLocalType(type) {
-        let result = (type && this.getLocalType(type) !== null);
-        return result;
+        // A non-string cannot cross (`&str`); TS's expression answers it.
+        if (typeof type !== 'string' || !type) {
+            return (type && this.getLocalType(type) !== null);
+        }
+        const id = this._rustHandleId();
+        if (id !== undefined) {
+            const manager = this.modelManager;
+            return manager.rustHandle.modelFileIsLocalType(id, type);
+        }
+        return this.getLocalType(type) !== null;
     }
 
     /**
@@ -406,6 +566,16 @@ class ModelFile extends Decorated {
      * @private
      */
     getType(type) {
+        const id = typeof type === 'string' ? this._rustHandleId() : undefined;
+        if (id !== undefined) {
+            const manager = this.modelManager;
+            const name: string | undefined = manager._modelFileTypeName(this.namespace, id, type);
+            if (name === undefined) {
+                return null;
+            }
+            const dot = name.lastIndexOf('.');
+            return dot < 0 ? name : manager.modelFiles[name.substring(0, dot)].getLocalType(name);
+        }
         // is the type a primitive?
         if(!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?
@@ -443,6 +613,11 @@ class ModelFile extends Decorated {
      * @private
      */
     getFullyQualifiedTypeName(type) {
+        const id = typeof type === 'string' ? this._rustHandleId() : undefined;
+        if (id !== undefined) {
+            const manager = this.modelManager;
+            return manager.rustHandle.modelFileGetFullyQualifiedTypeName(id, type) ?? null;
+        }
         // is the type a primitive?
         if(!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?
@@ -471,6 +646,10 @@ class ModelFile extends Decorated {
      * @return {ClassDeclaration} the ClassDeclaration, or null if the type does not exist
      */
     getLocalType(type: string): Declaration | null {
+        const lazy = engineViews().localType(this, type);
+        if (lazy !== undefined) {
+            return lazy;
+        }
         if(!this.localTypes) {
             throw new Error('Internal error: local types are not yet initialized. Do not try to resolve types inside `process`.');
         }
@@ -669,7 +848,10 @@ class ModelFile extends Decorated {
      * @return {object} The definitions for this model.
      */
     getAst(): IModel {
-        // a ModelFile is always constructed from a metamodel Model node
+        // a ModelFile is always constructed from a metamodel Model node. A
+        // view of a file `filter` kept whole has TS 5.0.0's filtered form as
+        // its `ast`, built on first read (engine/views-staging.ts
+        // `installFilteredAst`).
         return this.ast as IModel;
     }
 
@@ -687,18 +869,12 @@ class ModelFile extends Decorated {
      * with newer runtimes (e.g. a model declaring "^3.0.0" loads under v4).
      */
     isCompatibleVersion() {
-        if (this.ast.concertoVersion) {
-            if (semver.satisfies(packageJson.version, this.ast.concertoVersion, { includePrerelease: true })) {
-                this.concertoVersion = this.ast.concertoVersion;
-            } else {
-                // Allow v3 models to load under newer runtimes
-                if (semver.minSatisfying(['3.0.0'], this.ast.concertoVersion)) {
-                    this.concertoVersion = this.ast.concertoVersion;
-                } else {
-                    throw new Error(`This version of Concerto supports a language version of v3.0.0 or greater, but this model is for ${this.ast.concertoVersion}`);
-                }
-            }
+        // No engine call without a `concertoVersion` (a nullish `ast` throws there).
+        const ast: any = this.ast;
+        if (ast !== null && ast !== undefined && !ast.concertoVersion) {
+            return;
         }
+        rust.modelFileIsCompatibleVersion(this);
     }
     /**
      * Verifies that an import is versioned if the strict
@@ -707,10 +883,7 @@ class ModelFile extends Decorated {
      * @private
      */
     enforceImportVersioning(imp) {
-        const nsInfo = ModelUtil.parseNamespace(imp.namespace);
-        if(!nsInfo.version) {
-            throw new Error(`Cannot use an unversioned import ${imp.namespace}.`);
-        }
+        rust.modelFileEnforceImportVersioning(imp);
     }
 
     /**
@@ -719,150 +892,131 @@ class ModelFile extends Decorated {
      * @private
      */
     fromAst(ast: AstNode) {
-        const nsInfo = ModelUtil.parseNamespace(ast.namespace);
-
-        const namespaceParts = nsInfo.name.split('.');
-        namespaceParts.forEach(part => {
-            if (!ModelUtil.isValidIdentifier(part)){
-                throw new IllegalModelException(`Invalid namespace part '${part}'`, this, this.ast.location);
-            }
-        });
-
-        this.namespace = ast.namespace;
-        this.version = nsInfo.version;
-
-        // In v4, all non-system models must declare a namespace version (e.g., @1.0.0)
-        if (!this.version && !this.isSystemModelFile()) {
-            throw new Error(`Cannot create a ModelFile with an unversioned namespace: ${ast.namespace}. All models must specify a version (e.g., @1.0.0).`);
-        }
-
-        // Make sure to clone imports since we will add built-in imports
-        const imports = ast.imports ? ast.imports.concat([]) : [];
-
-        if(!this.isSystemModelFile()) {
-            imports.push(
-                {
-                    $class: `${MetaModelNamespace}.ImportTypes`,
-                    namespace: 'concerto@1.0.0',
-                    types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event']
-                }
-            );
-        }
-
-        this.imports = imports;
-        this.imports.forEach((imp) => {
-            this.enforceImportVersioning(imp);
-            switch(imp.$class) {
-            case `${MetaModelNamespace}.ImportAll`:
-                throw new Error('Wildcard Imports are not permitted.');
-            case `${MetaModelNamespace}.ImportTypes`: {
-                const ns = imp.namespace;
-                if (imp.aliasedTypes && imp.aliasedTypes.length > 0) {
-                    const aliasedTypes = new Map();
-                    imp.aliasedTypes.forEach(({ name, aliasedName }) => {
-                        if(ModelUtil.isPrimitiveType(aliasedName)){
-                            throw new Error('Types cannot be aliased to primitive type');
-                        }
-                        aliasedTypes.set(name, aliasedName);
-                    });
-                    // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
-                    imp.types.forEach((type) => {
-                        const alias = aliasedTypes.get(type);
-                        this.importShortNames.set(alias ?? type, `${ns}.${type}`);
-                    });
-                } else {
-                    imp.types.forEach((type) =>
-                        this.importShortNames.set(type, `${ns}.${type}`)
-                    );
-                }
-                break;
-            }
-            default:
-                this.importShortNames.set((imp as IImportType).name, ModelUtil.importFullyQualifiedNames(imp)[0]);
-            }
-            if(imp.uri) {
-                this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
-            }
-        });
+        rust.modelFileFromAstHeader(this, ast);
 
         // declarations is an optional field
         if (!ast.declarations) {
             return;
         }
 
+        this._fromAstDeclarations(ast);
+    }
+
+    /**
+     * The part of fromAst before the declarations: the namespace, its
+     * version and the imports.
+     * @param {object} ast - the AST obtained from the parser
+     * @private
+     * @internal
+     */
+    _fromAstHeader(ast: AstNode) {
+        // Checked by the engine in TS's order, with TS's error classes.
+        const views = engineViews();
+        if (!views.applyStagedHeaders(this, ast)) {
+            rust.modelFileFromAstHeader(this, ast);
+        }
+    }
+
+    /**
+     * The part of fromAst that builds the declarations.
+     * @param {object} ast - the AST obtained from the parser, with declarations
+     * @private
+     * @internal
+     */
+    _fromAstDeclarations(ast: AstNode) {
+        const views = engineViews();
+        const saved = views.beginModelFile(this, ast);
+        try {
+            this._fromAstDeclarationViews(ast);
+        } finally {
+            views.endModelFile(saved);
+        }
+    }
+
+    /**
+     * Builds the declaration views of `ast.declarations`.
+     * @param {object} ast - the AST obtained from the parser, with declarations
+     * @private
+     * @internal
+     */
+    _fromAstDeclarationViews(ast: AstNode) {
+        const views = engineViews();
         for(let n=0; n < ast.declarations.length; n++) {
-            let thing = ast.declarations[n];
+            const thing = ast.declarations[n];
+            const built = views.builtDeclaration(this, n, thing);
+            this.declarations.push(built !== undefined ? built : this._declarationView(thing));
+        }
+    }
 
-            switch(thing.$class) {
-            case `${MetaModelNamespace}.AssetDeclaration`:
-                // Default super type for asset
-                if (!thing.superType) {
-                    thing = Object.assign({}, thing);
-                    thing.superType = {
-                        $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Asset',
-                    };
-                }
-                this.declarations.push( new AssetDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.TransactionDeclaration`:
-                // Default super type for transaction
-                if (!thing.superType) {
-                    thing = Object.assign({}, thing);
-                    thing.superType = {
-                        $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Transaction',
-                    };
-                }
-                this.declarations.push( new TransactionDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.EventDeclaration`:
-                // Default super type for event
-                if (!thing.superType) {
-                    thing = Object.assign({}, thing);
-                    thing.superType = {
-                        $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Event',
-                    };
-                }
-                this.declarations.push( new EventDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.ParticipantDeclaration`:
-                // Default super type for participant
-                if (!thing.superType) {
-                    thing = Object.assign({}, thing);
-                    thing.superType = {
-                        $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Participant',
-                    };
-                }
-                this.declarations.push( new ParticipantDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.EnumDeclaration`:
-                this.declarations.push( new EnumDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.MapDeclaration`:
-                this.declarations.push( new MapDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.ConceptDeclaration`:
-                this.declarations.push( new ConceptDeclaration(this, thing) );
-                break;
-            case `${MetaModelNamespace}.BooleanScalar`:
-            case `${MetaModelNamespace}.IntegerScalar`:
-            case `${MetaModelNamespace}.LongScalar`:
-            case `${MetaModelNamespace}.DoubleScalar`:
-            case `${MetaModelNamespace}.StringScalar`:
-            case `${MetaModelNamespace}.DateTimeScalar`:
-                this.declarations.push( new ScalarDeclaration(this, thing) );
-                break;
-            default: {
-                let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');
+    /**
+     * Builds the view of one declaration of the AST.
+     * @param {object} thing - the declaration's AST node
+     * @return {Declaration} the view
+     * @private
+     * @internal
+     */
+    _declarationView(thing: AstNode): Declaration {
+        switch(thing.$class) {
+        case `${MetaModelNamespace}.AssetDeclaration`:
+            // Default super type for asset
+            if (!thing.superType) {
+                thing = Object.assign({}, thing);
+                thing.superType = {
+                    $class: `${MetaModelNamespace}.TypeIdentified`,
+                    name: 'Asset',
+                };
+            }
+            return new AssetDeclaration(this, thing);
+        case `${MetaModelNamespace}.TransactionDeclaration`:
+            // Default super type for transaction
+            if (!thing.superType) {
+                thing = Object.assign({}, thing);
+                thing.superType = {
+                    $class: `${MetaModelNamespace}.TypeIdentified`,
+                    name: 'Transaction',
+                };
+            }
+            return new TransactionDeclaration(this, thing);
+        case `${MetaModelNamespace}.EventDeclaration`:
+            // Default super type for event
+            if (!thing.superType) {
+                thing = Object.assign({}, thing);
+                thing.superType = {
+                    $class: `${MetaModelNamespace}.TypeIdentified`,
+                    name: 'Event',
+                };
+            }
+            return new EventDeclaration(this, thing);
+        case `${MetaModelNamespace}.ParticipantDeclaration`:
+            // Default super type for participant
+            if (!thing.superType) {
+                thing = Object.assign({}, thing);
+                thing.superType = {
+                    $class: `${MetaModelNamespace}.TypeIdentified`,
+                    name: 'Participant',
+                };
+            }
+            return new ParticipantDeclaration(this, thing);
+        case `${MetaModelNamespace}.EnumDeclaration`:
+            return new EnumDeclaration(this, thing);
+        case `${MetaModelNamespace}.MapDeclaration`:
+            return new MapDeclaration(this, thing);
+        case `${MetaModelNamespace}.ConceptDeclaration`:
+            return new ConceptDeclaration(this, thing);
+        case `${MetaModelNamespace}.BooleanScalar`:
+        case `${MetaModelNamespace}.IntegerScalar`:
+        case `${MetaModelNamespace}.LongScalar`:
+        case `${MetaModelNamespace}.DoubleScalar`:
+        case `${MetaModelNamespace}.StringScalar`:
+        case `${MetaModelNamespace}.DateTimeScalar`:
+            return new ScalarDeclaration(this, thing);
+        default: {
+            let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');
 
-                throw new IllegalModelException(formatter({
-                    'type': thing.$class,
-                }),this);
-            }
-            }
+            throw new IllegalModelException(formatter({
+                'type': thing.$class,
+            }),this);
+        }
         }
     }
 
@@ -889,6 +1043,44 @@ class ModelFile extends Decorated {
      * @private
      */
     filter(predicate: FilterFunction, modelManager: BaseModelManager): ModelFile | null {
+        const id = this._rustHandleId();
+        if (id !== undefined) {
+            const manager = this.modelManager;
+            const sourceManager = this.getModelManager();
+            // The engine calls back with a FQN.
+            const wrappedPredicate = (fqn: string): boolean => {
+                const namespace = ModelUtil.getNamespace(fqn);
+                const shortName = ModelUtil.getShortName(fqn);
+                const sourceFile = sourceManager.getModelFile(namespace);
+                const decl = sourceFile ? sourceFile.getLocalType(shortName) : null;
+                if (!decl) {
+                    return false;
+                }
+                return predicate(decl);
+            };
+            const handles = engineHandles();
+            const target: EngineHandle | undefined = modelManager.rustHandle;
+            // An unchanged file is shared into a distinct target; else an AST comes back.
+            const staged = target !== undefined && target !== manager.rustHandle;
+            const result: string | undefined = handles.withEngineCallbacks(
+                () => staged
+                    ? manager.rustHandle.modelFileFilterStaged(id, wrappedPredicate, target)
+                    : manager.rustHandle.modelFileFilterAst(id, wrappedPredicate));
+            if (result === undefined) {
+                return null;
+            }
+            const filtered = JSON.parse(result);
+            if (filtered.stage !== undefined) {
+                // As in TS, the view gets its own shallow copy of the AST.
+                const ast = {
+                    ...this.ast,
+                    declarations: this.ast.declarations.slice(),
+                    imports: this.ast.imports?.map(imp => ({...imp})),
+                };
+                return ModelFile._sharedView(modelManager, this, undefined, { handle: target as EngineHandle, id: filtered.stage }, undefined, ast);
+            }
+            return new ModelFile(modelManager, filtered.ast, undefined, this.fileName);
+        }
         const declarations: AstNode[] = [];
         for (const declaration of this.declarations) {
             if (predicate(declaration)) {
@@ -951,6 +1143,9 @@ class ModelFile extends Decorated {
         return new ModelFile(modelManager, ast, undefined, this.fileName);
     }
 }
+
+engineViews().installLazyField(ModelFile.prototype, 'declarations', () => [], true);
+engineViews().installLazyField(ModelFile.prototype, 'localTypes', () => null, true);
 
 export { ModelFile };
 export default ModelFile;

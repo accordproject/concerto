@@ -1,0 +1,857 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "ibm.procurement.contingentLabor@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "POContractorApprovalStatus",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "APPROVED"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "NOT_APPROVED"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "PENDING_REAPPROVAL"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "Flag_Y_N",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "Y"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "N"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "POContractor",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "itemStraightTime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poQtyStraightTime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "unitPriceStraightTime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "uomStraightTime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "shortTextStraightTime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "hoursDeliveredStraightTime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "hoursRemainingStraightTime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "itemOvertime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poQtyOvertime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "unitPriceOvertime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "uomOvertime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "shortTextOvertime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "hoursDeliveredOvertime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "hoursRemainingOvertime",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "itemExpense",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poQtyExpense",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "unitPriceExpense",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "uomExpense",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "shortTextExpense",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "hoursDeliveredExpense",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "hoursRemainingExpense",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "currency",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "startDate",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "endDate",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "street",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "postcode",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "city",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "country",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "region",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "timezone",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "requestContactName",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "requestContractID",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "orderedQty",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "deliveredQty",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "invoicedQty",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "toBeDeliveredQty",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "orderedValue",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "deliveredValue",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "invoicedValue",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "toBeDeliveredValue",
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "PurchaseOrder",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poNumber",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "supplier",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Supplier"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "supplierDescription",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poDate",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "paymentTerms",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "paymentInDays",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "agreementNumber",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "poContractor",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "POContractor"
+          },
+          "isArray": true,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "poNumber"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "POContractorBuyerDetails",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "contractorID",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "contractorEmail",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "buyerEmail",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "overTimeRate_1_0",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "overTimeRate_1_5",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "overTimeRate_2_0",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "expenseEligiblity",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "activity",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "activityDescription",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "accountID",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "workItem",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "activtyCode",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "bandLevel",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "overTimeValidToInvoiceFlag",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Flag_Y_N"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "expenseValidToInvoiceFlag",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Flag_Y_N"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "POContractorSupplierDetails",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "contractorID",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "contractorName",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "samID",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "singleHours",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "timeHalfHours",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "doubleTimeHours",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "contractorWorkLocation",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "actualStartDate",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "workItem",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "workItemDescription",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "jobRoleDescription",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "jobRoleSkillSet",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "skillLevel",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "backgroundCheckFlag",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Flag_Y_N"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "backgroundCheckDate",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "backgroundCheckEndDate",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "hoursToBeWorkedInADay",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "hoursToBeWorkedInAWeek",
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "POContractorRecord",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "poNumber",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "PurchaseOrder"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poLineItem",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poContractorKey",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "poContractorBuyerDetails",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "POContractorBuyerDetails"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "poContractorSupplierDetails",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "POContractorSupplierDetails"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "actualEndDate",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "activeContractorFlag",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Flag_Y_N"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "buyerApproval",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "POContractorApprovalStatus"
+          },
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": "NOT_APPROVED"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "supplierApproval",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "POContractorApprovalStatus"
+          },
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": "NOT_APPROVED"
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "poContractorKey"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "CreatePO",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "trxId",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "po",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "PurchaseOrder"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "UpdatePOContractorSupplierDetails",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "trxId",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poNumber",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "poContractorSupplierDetails",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "POContractorSupplierDetails"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "UpdatePOContractorBuyerDetails",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "trxId",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poNumber",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "poContractorBuyerDetails",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "POContractorBuyerDetails"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "ApprovePOContractorBuyerDetails",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "trxId",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poNumber",
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "ApprovePOContractorSupplierDetails",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "trxId",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "poNumber",
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "User",
+      "isAbstract": true,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "id",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "organizationName",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "defaultEmail",
+          "isArray": false,
+          "isOptional": true
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "id"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "POProvider",
+      "isAbstract": false,
+      "properties": [],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "User"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "BuyerPM",
+      "isAbstract": false,
+      "properties": [],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "User"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Supplier",
+      "isAbstract": false,
+      "properties": [],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "User"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "BuyerSRM",
+      "isAbstract": false,
+      "properties": [],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "User"
+      }
+    }
+  ]
+}

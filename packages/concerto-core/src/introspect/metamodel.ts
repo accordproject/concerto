@@ -18,6 +18,8 @@ import ModelManager from '../modelmanager';
 import Factory from '../factory';
 import Serializer from '../serializer';
 import ModelFile from '../introspect/modelfile';
+import { engineHandles, engineSerializer } from '../engineloader';
+import { isFastPathUnsupported } from '../engineutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -46,12 +48,26 @@ function newMetaModelManager() {
  * @return {object} the validated metamodel instance in JSON
  */
 function validateMetaModel(input) {
+    // One engine call; an input it cannot carry goes through the Serializer below.
+    try {
+        engineSerializer().validateMetaModel(input);
+        return input;
+    } catch (err) {
+        if (!isFastPathUnsupported(err)) {
+            throw err;
+        }
+    }
     const metaModelManager = newMetaModelManager();
-    const factory = new Factory(metaModelManager);
-    const serializer = new Serializer(factory, metaModelManager);
+    try {
+        const factory = new Factory(metaModelManager);
+        const serializer = new Serializer(factory, metaModelManager);
 
-    // validate the metaModel
-    serializer.fromJSON(input);
+        // validate the metaModel
+        serializer.fromJSON(input);
+    } finally {
+        // Released now: the manager is this function's own and nothing escapes.
+        engineHandles().releaseHandle(metaModelManager.rustHandle);
+    }
 
     return input;
 }

@@ -21,6 +21,7 @@ import type { IDecorator, IRange } from '@accordproject/concerto-metamodel';
 /* eslint-disable no-unused-vars */
 import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
+import { engineViews } from '../engineloader';
 
 /**
  * The shape shared by every metamodel AST node that the introspect classes
@@ -49,7 +50,8 @@ export interface AstNode {
  */
 class Decorated {
     ast: AstNode;
-    decorators: Decorator[] = [];
+    // A lazy prototype accessor (installed below); reads [] until set.
+    decorators!: Decorator[];
     /**
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.
@@ -92,11 +94,16 @@ class Decorated {
      * @private
      */
     process() {
+        const views = engineViews();
+        if (views.deferDecorators(this)) {
+            return;
+        }
         this.decorators = [];
 
         if(this.ast.decorators) {
             const modelFile = this.getModelFile();
-            const factories = modelFile.getModelManager()?.getDecoratorFactories();
+            // The manager's decorator factories (deferred in a lazily built file).
+            const factories = views.decoratorFactories(modelFile);
             const hasFactories = factories && factories.length > 0;
             for(let n=0; n < this.ast.decorators.length; n++ ) {
                 let thing = this.ast.decorators[n];
@@ -136,13 +143,12 @@ class Decorated {
             const uniqueDecoratorNames = new Set();
             this.decorators.forEach(d => {
                 const decoratorName = d.getName();
-                if(!uniqueDecoratorNames.has(decoratorName)) {
+                if (!uniqueDecoratorNames.has(decoratorName)) {
                     uniqueDecoratorNames.add(decoratorName);
                 } else {
-                    const modelFile = this.getModelFile();
                     throw new IllegalModelException(
                         `Duplicate decorator ${decoratorName}`,
-                        modelFile,
+                        this.getModelFile(),
                         this.ast.location,
                     );
                 }
@@ -175,6 +181,8 @@ class Decorated {
         return null;
     }
 }
+
+engineViews().installLazyField(Decorated.prototype, 'decorators', () => []);
 
 export { Decorated };
 export default Decorated;

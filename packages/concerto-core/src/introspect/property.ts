@@ -12,20 +12,17 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-
 import ModelUtil from '../modelutil';
-import IllegalModelException from './illegalmodelexception';
 import Decorated from './decorated';
-import CollectionSizeValidator from './collectionsizevalidator';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ClassDeclaration from './classdeclaration';
 import type ModelFile from './modelfile';
 import type { AstNode } from './decorated';
+import type CollectionSizeValidator from './collectionsizevalidator';
 /* eslint-enable no-unused-vars */
-
+import { rust, engineViews } from '../engineloader';
 
 /**
  * Property representing an attribute of a class declaration,
@@ -82,60 +79,11 @@ class Property extends Decorated {
     process() {
         super.process();
 
-        if (!ModelUtil.isValidIdentifier(this.ast.name)){
-            throw new IllegalModelException(`Invalid property name '${this.ast.name}'`, this.getModelFile(), this.ast.location);
-        }
-
-        this.name = this.ast.name;
-
-        if(!this.name) {
+        // Kept in TS: `isValidIdentifier` passes a nullish name ("null").
+        if (this.ast.name === null || this.ast.name === undefined) {
             throw new Error('No name for type ' + JSON.stringify(this.ast));
         }
-
-        switch (this.ast.$class) {
-        case `${MetaModelNamespace}.EnumProperty`:
-            break;
-        case `${MetaModelNamespace}.BooleanProperty`:
-            this.type = 'Boolean';
-            break;
-        case `${MetaModelNamespace}.DateTimeProperty`:
-            this.type = 'DateTime';
-            break;
-        case `${MetaModelNamespace}.DoubleProperty`:
-            this.type = 'Double';
-            break;
-        case `${MetaModelNamespace}.IntegerProperty`:
-            this.type = 'Integer';
-            break;
-        case `${MetaModelNamespace}.LongProperty`:
-            this.type = 'Long';
-            break;
-        case `${MetaModelNamespace}.StringProperty`:
-            this.type = 'String';
-            break;
-        case `${MetaModelNamespace}.ObjectProperty`:
-            this.type = this.ast.type ? this.ast.type.name : null;
-            break;
-        case `${MetaModelNamespace}.RelationshipProperty`:
-            this.type = this.ast.type.name;
-            break;
-        }
-        this.array = false;
-
-        if(this.ast.isArray) {
-            this.array = true;
-        }
-
-        this.sizeValidator = this.ast.sizeValidator
-            ? new CollectionSizeValidator(this, this.ast.sizeValidator)
-            : null;
-
-        if(this.ast.isOptional) {
-            this.optional = true;
-        }
-        else {
-            this.optional = false;
-        }
+        engineViews().propertyProcess(this);
     }
 
     /**
@@ -147,28 +95,7 @@ class Property extends Decorated {
     validate(classDecl: ClassDeclaration) {
         super.validate();
 
-        if(this.type) {
-            classDecl.getModelFile().resolveType( 'property ' + this.getFullyQualifiedName(), this.type);
-        }
-
-        if(this.sizeValidator && !this.array) {
-            let isMapType = false;
-            if(this.type && !this.isPrimitive()) {
-                try {
-                    const resolvedType = classDecl.getModelFile().getType(this.type);
-                    isMapType = resolvedType.isMapDeclaration?.() === true;
-                } catch(e) {
-                    // type resolution failed — will be caught by other validation
-                }
-            }
-            if(!isMapType) {
-                throw new IllegalModelException(
-                    `size validator can only be applied to array or map properties: ${this.getFullyQualifiedName()}`,
-                    classDecl.getModelFile(),
-                    this.ast.location
-                );
-            }
-        }
+        rust.propertyValidate(this, classDecl);
     }
 
     /**
@@ -276,6 +203,9 @@ class Property extends Decorated {
         return ModelUtil.isPrimitiveType(this.getType());
     }
 }
+
+// Built on first read in a lazily built file (engine/views-lazy.ts).
+engineViews().installLazyField(Property.prototype, 'sizeValidator');
 
 export { Property };
 export default Property;

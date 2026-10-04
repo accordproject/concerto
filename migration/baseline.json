@@ -1,0 +1,127 @@
+{
+  "$schema": "migration/baseline.json",
+  "recorded_at": "2026-09-24T09:20:00Z",
+  "purpose": "Reference numbers captured before any migration work (plan §0, §1, §4 Phase 0 / P0-01). All later work is judged against these.",
+  "repos": {
+    "concerto": {
+      "path": "/home/user/concerto",
+      "branch": "claude/tender-pascal-ocwf9q",
+      "commit": "95645ef27044260c5368ff83004b628d11a0677c",
+      "package": "packages/concerto-core",
+      "package_version": "5.0.0"
+    },
+    "concerto-rust": {
+      "path": "/home/user/concerto-rust",
+      "branch": "claude/tender-pascal-ocwf9q",
+      "commit": "a80e56207606a8a5c579dec6a2923214bb4453e8"
+    },
+    "concerto-validate-rs": {
+      "path": "/home/user/concerto-validate-rs",
+      "branch": "claude/tender-pascal-ocwf9q",
+      "commit": "c8e27378fc3983844b33d760e6adb4a49669b7d3",
+      "note": "build.rs overwrites the tracked metamodel.json from the network at build/test time; it was restored with `git checkout metamodel.json` after every cargo run in this repo."
+    },
+    "concerto-conformance": {
+      "path": "/home/user/concerto-conformance",
+      "branch": "claude/tender-pascal-ocwf9q",
+      "commit": "66a5e8bc290eb4f33ee0f065104f76b30e7cce66"
+    }
+  },
+  "tool_versions": {
+    "node": "v22.22.2",
+    "npm": "10.9.7",
+    "rustc": "1.94.1 (e408947bf 2026-03-25)",
+    "cargo": "1.94.1 (29ea6fb6a 2026-03-24)",
+    "cargo-llvm-cov": "0.9.1",
+    "mocha_in_concerto_core": "10.8.2",
+    "nyc_in_concerto_core": "15.1.0"
+  },
+  "typescript_concerto_core": {
+    "build": {
+      "command": "npm ci (root) then: npm run build -w packages/concerto-util, npm run build -w packages/concerto-cto, npm run build -w packages/concerto-core, npm run build -w packages/concerto-vocabulary",
+      "note": "concerto-vocabulary is not a declared dependency of concerto-core's package.json but is required at test time by test/decoratormanager.js via the npm workspace symlink; it must be built too, or test/dist loading fails with MODULE_NOT_FOUND.",
+      "status": "ok"
+    },
+    "test_command": "cd packages/concerto-core && TS_NODE_PROJECT=tsconfig.build.json TZ=UTC npx nyc mocha -r ts-node/register --recursive -t 10000 test/",
+    "mocha": {
+      "suites": 411,
+      "tests": 1308,
+      "passing": 1299,
+      "failing": 1,
+      "pending": 8
+    },
+    "suite_status": "NOT fully green in this sandboxed environment",
+    "failure_detail": {
+      "test": "ModelLoader #loadModelFromUrl should load models",
+      "cause": "environment (network): the test fetches a model over HTTP; the outbound request is blocked by the sandbox's egress proxy and returns HTTP 403. This is not a code regression - it is a live-network integration test that cannot pass without external network access.",
+      "error": "Error: HTTP request failed with status: 403 (at HTTPFileLoader.load, packages/concerto-util/dist/loaders/httpfileloader.js:63)"
+    },
+    "pending_tests": [
+      "Globalization #check globalization library works check formatters",
+      "Globalization #check Factory messages are correct check messages in newResource() where namespace hasn't been registered in the model manager",
+      "Globalization #check Factory messages are correct check messages in newResource() where a type is't declared in a namespace",
+      "Globalization #check Factory messages are correct check messages in newRelationship() where namespace hasn't been registered in the model manager",
+      "Globalization #check Factory messages are correct check messages in newRelationship() where a type is't declared in a namespace",
+      "JavascriptParser #getExample should throw an error if the javascript syntax aren't valid"
+    ],
+    "nyc_coverage": {
+      "statements_pct": 98.95,
+      "statements_fraction": "3306/3341",
+      "branches_pct": 95.8,
+      "branches_fraction": "1758/1835",
+      "functions_pct": 99.18,
+      "functions_fraction": "605/610",
+      "lines_pct": 98.96,
+      "lines_fraction": "3252/3286"
+    },
+    "nyc_thresholds": {
+      "statements": 99,
+      "branches": 94.8,
+      "functions": 99,
+      "lines": 99
+    },
+    "nyc_gate_status": "FAILS: statements (98.95% < 99%) and lines (98.96% < 99%) miss the gate; branches (95.8%) and functions (99.18%) clear it.",
+    "gate_miss_cause": "Same root cause as the test failure: the blocked network test never exercises the success path in httpfileloader.js / the ModelLoader URL branch, so those lines/statements are never covered. In an environment with outbound network access, this test is expected to pass and close the small remaining coverage gap.",
+    "conclusion": "The reference is unchanged and its source is untouched; the single failure and the coverage shortfall are both attributable to sandbox network egress restrictions, not to any defect in concerto-core. Re-run in an environment with network access to confirm a fully green baseline."
+  },
+  "rust": {
+    "concerto-rust": {
+      "cargo_test": {
+        "command": "cargo test --workspace",
+        "result": "ok",
+        "unit_tests_passed": 90,
+        "unit_tests_failed": 0,
+        "doctests_passed": 7,
+        "doctests_failed": 0
+      },
+      "llvm_cov": {
+        "command": "cargo llvm-cov --workspace --summary-only",
+        "lines_pct": 83.40,
+        "lines_fraction": "2155/2584",
+        "functions_pct": 84.14,
+        "regions_pct": 83.79,
+        "note": "concerto-metamodel/src/metamodel/utils.rs (generated) and the concerto-vocabulary stub are both 0% covered and pull the workspace total down; concerto-core's own files individually range from 82.35% to 100% lines."
+      }
+    },
+    "concerto-validate-rs": {
+      "cargo_test": {
+        "command": "cargo test --workspace",
+        "result": "ok",
+        "lib_tests_passed": 6,
+        "cli_tests_passed": 5,
+        "doctests_passed": 0,
+        "total_passed": 11,
+        "total_failed": 0
+      },
+      "llvm_cov": {
+        "command": "cargo llvm-cov --workspace --summary-only",
+        "lines_pct": 73.38,
+        "lines_fraction": "339/462",
+        "functions_pct": 79.10,
+        "regions_pct": 75.93,
+        "note": "main.rs (the CLI entry point) is 0% covered under llvm-cov because the CLI is exercised via tests/cli_tests.rs subprocess invocations, which llvm-cov's default instrumentation does not attribute to the binary's own coverage; model_manager/mod.rs is the largest module at 85.31% lines."
+      },
+      "build_rs_side_effect": "build.rs downloads and overwrites the tracked metamodel.json from the network on every build/test. It was restored via `git -C /home/user/concerto-validate-rs checkout metamodel.json` after all cargo invocations here, leaving the repo's tracked file unmodified."
+    }
+  }
+}

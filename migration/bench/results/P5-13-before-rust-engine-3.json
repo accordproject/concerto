@@ -1,0 +1,89 @@
+{
+  "harness": "run-ts.mjs",
+  "recorded_at": "2026-09-28T15:20:16.903Z",
+  "machine": {
+    "platform": "darwin",
+    "arch": "x64",
+    "cpus": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
+    "cpu_count": 8,
+    "total_mem_gb": 17,
+    "node": "v24.21.0"
+  },
+  "concerto_commit": "697dbc900642eabfd886c93fe339f10684b18d5f",
+  "concerto_engine": "ts",
+  "core_dist": "../base/concerto/packages/concerto-core/dist",
+  "workloads_run": [
+    "validate_ast",
+    "instance_validate"
+  ],
+  "loadavg": [
+    1.8115234375,
+    2.2880859375,
+    3.2353515625
+  ],
+  "sample_opts": {
+    "warmup": 5,
+    "samples": 30
+  },
+  "workloads": {
+    "load_validate": {},
+    "validate_ast": {
+      "concerto-core-test-data": {
+        "validateAst": {
+          "samples": 30,
+          "n": 34,
+          "median_ms": 0.929173455882353,
+          "mean_ms": 0.9302364588235295,
+          "stddev_ms": 0.03150198067892208,
+          "min_ms": 0.8782188235294117,
+          "max_ms": 1.0076235882352942,
+          "cv": 0.033864487228078166
+        },
+        "n": 34,
+        "totalInSet": 35
+      },
+      "conformance": {
+        "validateAst": {
+          "samples": 30,
+          "n": 41,
+          "median_ms": 0.5261961463414634,
+          "mean_ms": 0.5308827227642278,
+          "stddev_ms": 0.013096033749608741,
+          "min_ms": 0.5174342439024391,
+          "max_ms": 0.5692909756097561,
+          "cv": 0.024668412039140455
+        },
+        "n": 41,
+        "totalInSet": 41
+      },
+      "synthetic-large": {
+        "validateAst": null,
+        "n": 1,
+        "error": "validateAst rejects every model in this set"
+      }
+    },
+    "instance_validate": {
+      "populate_and_validate": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.057697979999999996,
+        "mean_ms": 0.05829770973333333,
+        "stddev_ms": 0.003150757239047617,
+        "min_ms": 0.054196942,
+        "max_ms": 0.066275382,
+        "cv": 0.05404598659981465
+      },
+      "validate_only": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.021881665,
+        "mean_ms": 0.021788737799999992,
+        "stddev_ms": 0.001094186392107109,
+        "min_ms": 0.019881602,
+        "max_ms": 0.023520528,
+        "cv": 0.050217979680636175
+      },
+      "n": 500
+    }
+  }
+}

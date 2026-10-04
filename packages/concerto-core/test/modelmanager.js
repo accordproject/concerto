@@ -26,6 +26,7 @@ const { EnumDeclaration } = require('../src/introspect/enumdeclaration');
 const { MapDeclaration } = require('../src/introspect/mapdeclaration');
 const { EventDeclaration } = require('../src/introspect/eventdeclaration');
 const { Factory } = require('../src/factory');
+const { IllegalModelException } = require('../src/introspect/illegalmodelexception');
 const { ModelFile } = require('../src/introspect/modelfile');
 const { ModelManager } = require('../src/modelmanager');
 const { ParticipantDeclaration } = require('../src/introspect/participantdeclaration');
@@ -113,9 +114,12 @@ describe('ModelManager', () => {
         });
 
         it('should cope with object as modelfile', ()=>{
-            let mockModelFile = sinon.createStubInstance(ModelFile);
-            modelManager.validateModelFile(mockModelFile);
-            sinon.assert.calledOnce(mockModelFile.validate);
+            let modelFile = ParserUtil.newModelFile(modelManager, modelBase);
+            modelManager.validateModelFile(modelFile);
+            let invalidFile = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nconcept Doge { o Missing m }');
+            (() => {
+                modelManager.validateModelFile(invalidFile);
+            }).should.throw(IllegalModelException);
         });
     });
 
@@ -169,15 +173,20 @@ describe('ModelManager', () => {
         });
 
         it('should add a model file from an object', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
-            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nconcept Doge { o String name }');
             let res = modelManager.addModelFile(mf1);
-            sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
             res.should.equal(mf1);
+            modelManager.getType('org.doge@1.0.0.Doge').getName().should.equal('Doge');
+
+            // The model file is validated: an invalid one is rejected, unless validation is disabled.
+            let mf2 = ParserUtil.newModelFile(modelManager, 'namespace org.fry@1.0.0\nconcept Fry { o Missing m }');
+            (() => {
+                modelManager.addModelFile(mf2);
+            }).should.throw(IllegalModelException);
+            should.equal(modelManager.modelFiles['org.fry@1.0.0'], undefined);
+            modelManager.addModelFile(mf2, null, null, true).should.equal(mf2);
+            modelManager.modelFiles['org.fry@1.0.0'].should.equal(mf2);
         });
 
         it('should add a model file with parsing options', () => {
@@ -201,7 +210,7 @@ describe('ModelManager', () => {
 
             modelManagerWithOptions.addCTOModel(`namespace org.acme@1.0.0
         concept Bar {
-            o String foo regex=/\\p{S}/
+            o String foo regex=/\\p{S}/u
         }`, 'internal.cto', true);
 
             const bar = {
@@ -217,9 +226,6 @@ describe('ModelManager', () => {
 
         it('should return error for duplicate namespaces for a string', () => {
             modelManager.addCTOModel(modelBase);
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.acme.base@1.0.0');
-            mf1.isModelFile.returns(true);
             (() => {
                 modelManager.addCTOModel(modelBase);
             }).should.throw(/Namespace org.acme.base@1.0.0 is already declared/);
@@ -227,10 +233,7 @@ describe('ModelManager', () => {
 
         it('should return error for duplicate namespaces from an object', () => {
             modelManager.addCTOModel(modelBase);
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.acme.base@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
+            let mf1 = ParserUtil.newModelFile(modelManager, modelBase);
             (() => {
                 modelManager.addModelFile(mf1);
             }).should.throw(/Namespace org.acme.base@1.0.0 is already declared/);
@@ -238,11 +241,7 @@ describe('ModelManager', () => {
 
         it('should return error for duplicate namespaces from an model file with a filename', () => {
             modelManager.addCTOModel(modelBase);
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.acme.base@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
-            mf1.getName.returns('duplFile');
+            let mf1 = ParserUtil.newModelFile(modelManager, modelBase, 'duplFile');
             (() => {
                 modelManager.addModelFile(mf1);
             }).should.throw(/Namespace org.acme.base@1.0.0 specified in file duplFile is already declared/);
@@ -250,10 +249,7 @@ describe('ModelManager', () => {
 
         it('should return error for duplicate namespaces from an model file where original filename was provided', () => {
             modelManager.addCTOModel(modelBase, 'origFile');
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getVersion.returns('1.0.0');
-            mf1.getNamespace.returns('org.acme.base@1.0.0');
-            mf1.isModelFile.returns(true);
+            let mf1 = ParserUtil.newModelFile(modelManager, modelBase);
             (() => {
                 modelManager.addModelFile(mf1);
             }).should.throw(/Namespace org.acme.base@1.0.0 is already declared in file origFile/);
@@ -261,11 +257,7 @@ describe('ModelManager', () => {
 
         it('should return error for duplicate namespaces from an model file where original filename and new filename were provided', () => {
             modelManager.addCTOModel(modelBase, 'origFile');
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.acme.base@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
-            mf1.getName.returns('duplFile');
+            let mf1 = ParserUtil.newModelFile(modelManager, modelBase, 'duplFile');
             (() => {
                 modelManager.addModelFile(mf1);
             }).should.throw(/Namespace org.acme.base@1.0.0 specified in file duplFile is already declared in file origFile/);
@@ -313,20 +305,22 @@ describe('ModelManager', () => {
         });
 
         it('should add model files from objects', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
-            let mf2 = sinon.createStubInstance(ModelFile);
-            mf2.getNamespace.returns('org.fry@1.0.0');
-            mf2.getVersion.returns('1.0.0');
-            mf2.isModelFile.returns(true);
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nconcept Doge { o String name }');
+            let mf2 = ParserUtil.newModelFile(modelManager, 'namespace org.fry@1.0.0\nimport org.doge@1.0.0.Doge\nconcept Fry { o Doge doge }');
             let res = modelManager.addModelFiles([mf1, mf2]);
-            sinon.assert.calledOnce(mf1.validate);
-            sinon.assert.calledOnce(mf2.validate);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
             modelManager.modelFiles['org.fry@1.0.0'].should.equal(mf2);
             res.should.deep.equal([mf1, mf2]);
+            modelManager.getType('org.fry@1.0.0.Fry').getProperty('doge').getFullyQualifiedTypeName().should.equal('org.doge@1.0.0.Doge');
+
+            // The model files are validated: an invalid one is rejected, unless validation is disabled.
+            let mf3 = ParserUtil.newModelFile(modelManager, 'namespace org.bender@1.0.0\nconcept Bender { o Missing m }');
+            (() => {
+                modelManager.addModelFiles([mf3]);
+            }).should.throw(IllegalModelException);
+            should.equal(modelManager.modelFiles['org.bender@1.0.0'], undefined);
+            modelManager.addModelFiles([mf3], null, true).should.deep.equal([mf3]);
+            modelManager.modelFiles['org.bender@1.0.0'].should.equal(mf3);
         });
 
         it('should add to existing model files from strings', () => {
@@ -342,22 +336,15 @@ describe('ModelManager', () => {
         });
 
         it('should add to existing model files from objects', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nconcept Doge { o String name }');
             modelManager.addModelFiles([mf1]);
-            sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
-            let mf2 = sinon.createStubInstance(ModelFile);
-            mf2.getNamespace.returns('org.fry@1.0.0');
-            mf2.getVersion.returns('1.0.0');
-            mf2.isModelFile.returns(true);
+            // The new file is validated together with the existing ones, so it can use their types.
+            let mf2 = ParserUtil.newModelFile(modelManager, 'namespace org.fry@1.0.0\nimport org.doge@1.0.0.Doge\nconcept Fry { o Doge doge }');
             modelManager.addModelFiles([mf2]);
-            sinon.assert.calledTwice(mf1.validate);
-            sinon.assert.calledOnce(mf2.validate);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
             modelManager.modelFiles['org.fry@1.0.0'].should.equal(mf2);
+            modelManager.getType('org.fry@1.0.0.Fry').getProperty('doge').getFullyQualifiedTypeName().should.equal('org.doge@1.0.0.Doge');
         });
 
         it('should restore existing model files on validation error from strings', () => {
@@ -376,25 +363,17 @@ describe('ModelManager', () => {
         });
 
         it('should restore existing model files on validation error', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nconcept Doge { o String name }');
             modelManager.addModelFiles([mf1]);
-            sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
-            let mf2 = sinon.createStubInstance(ModelFile);
-            mf2.validate.throws(new Error('validation error'));
-            mf2.getNamespace.returns('org.fry@1.0.0');
-            mf2.getVersion.returns('1.0.0');
-            mf2.isModelFile.returns(true);
+            let mf2 = ParserUtil.newModelFile(modelManager, 'namespace org.fry@1.0.0\nconcept Fry { o Missing m }');
             (() => {
                 modelManager.addModelFiles([mf2]);
-            }).should.throw(/validation error/);
-            sinon.assert.calledTwice(mf1.validate);
-            sinon.assert.calledOnce(mf2.validate);
+            }).should.throw(IllegalModelException);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
             should.equal(modelManager.modelFiles['org.fry@1.0.0'], undefined);
+            modelManager.getNamespaces().should.not.include('org.fry@1.0.0');
+            modelManager.getType('org.doge@1.0.0.Doge').getName().should.equal('Doge');
         });
 
         it('should return an error for duplicate namespace from strings', () => {
@@ -410,14 +389,8 @@ describe('ModelManager', () => {
         });
 
         it('should return an error for duplicate namespace from objects', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
-            let mf2 = sinon.createStubInstance(ModelFile);
-            mf2.getNamespace.returns('org.doge.base@1.0.0');
-            mf2.getVersion.returns('1.0.0');
-            mf2.isModelFile.returns(true);
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nconcept Doge { o String name }');
+            let mf2 = ParserUtil.newModelFile(modelManager, 'namespace org.doge.base@1.0.0\nconcept DogeBase { o String name }');
             modelManager.addModelFiles([mf1,mf2]);
             (() => {
                 modelManager.addModelFiles([mf1]);
@@ -425,21 +398,9 @@ describe('ModelManager', () => {
         });
 
         it('should return an error for duplicate namespace from objects, with filenames', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.getName.returns('mf1');
-            mf1.isModelFile.returns(true);
-            let mf2 = sinon.createStubInstance(ModelFile);
-            mf2.getNamespace.returns('org.doge.base');
-            mf2.getVersion.returns('1.0.0');
-            mf2.getName.returns('mf2');
-            mf2.isModelFile.returns(true);
-            let mf3 = sinon.createStubInstance(ModelFile);
-            mf3.getNamespace.returns('org.doge@1.0.0');
-            mf3.getVersion.returns('1.0.0');
-            mf3.getName.returns('mf1-again');
-            mf3.isModelFile.returns(true);
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nconcept Doge { o String name }', 'mf1');
+            let mf2 = ParserUtil.newModelFile(modelManager, 'namespace org.doge.base@1.0.0\nconcept DogeBase { o String name }', 'mf2');
+            let mf3 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nconcept DogeAgain { o String name }', 'mf1-again');
             modelManager.addModelFiles([mf1,mf2]);
             (() => {
                 modelManager.addModelFiles([mf3]);
@@ -526,10 +487,7 @@ describe('ModelManager', () => {
     describe('#updateModelFile', () => {
 
         it('throw if the namespace from an object does not exist', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nasset TestAsset identified by assetId { o String assetId }');
             (() => {
                 modelManager.updateModelFile(mf1);
             }).should.throw(/Model file for namespace org.doge@1.0.0 not found/);
@@ -543,27 +501,19 @@ describe('ModelManager', () => {
         });
 
         it('should update from an object', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
-            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
-            mf1.$marker = 'mf1';
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nasset TestAsset identified by assetId { o String assetId }');
             let res = modelManager.addModelFile(mf1);
-            sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
             res.should.equal(mf1);
 
-            let mf2 = sinon.createStubInstance(ModelFile);
-            mf2.getNamespace.returns('org.doge@1.0.0');
-            mf2.getVersion.returns('1.0.0');
-            mf2.isModelFile.returns(true);
-            mf2.getAst.returns({$class: `${MetaModelNamespace}.Model`});
-            mf2.$marker = 'mf2';
+            let mf2 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nasset TestAsset2 identified by assetId2 { o String assetId2 }');
             res = modelManager.updateModelFile(mf2);
-            sinon.assert.calledOnce(mf2.validate);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf2);
             res.should.equal(mf2);
+            modelManager.getType('org.doge@1.0.0.TestAsset2').getName().should.equal('TestAsset2');
+            (() => {
+                modelManager.getType('org.doge@1.0.0.TestAsset');
+            }).should.throw(TypeNotFoundException);
         });
 
         it('should update from a string', () => {
@@ -577,28 +527,17 @@ describe('ModelManager', () => {
         });
 
         it('should keep the original if an update from an object throws', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
-            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
-            mf1.$marker = 'mf1';
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nasset TestAsset identified by assetId { o String assetId }');
             let res = modelManager.addModelFile(mf1);
-            sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
             res.should.equal(mf1);
 
-            let mf2 = sinon.createStubInstance(ModelFile);
-            mf2.getNamespace.returns('org.doge@1.0.0');
-            mf2.getVersion.returns('1.0.0');
-            mf2.isModelFile.returns(true);
-            mf2.$marker = 'mf2';
-            mf2.validate.throws(new Error('fake error'));
+            let mf2 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nasset TestAsset2 identified by assetId2 { o Missing assetId2 }');
             (() => {
                 modelManager.updateModelFile(mf2);
-            }).should.throw(/fake error/);
-            sinon.assert.calledOnce(mf2.validate);
+            }).should.throw(IllegalModelException);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
+            modelManager.getType('org.doge@1.0.0.TestAsset').getName().should.equal('TestAsset');
         });
 
         it('should keep the original if an update from an string throws', () => {
@@ -618,27 +557,23 @@ describe('ModelManager', () => {
     describe('#deleteModelFile', () => {
 
         it('throw if the model file does not exist', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.isModelFile.returns(true);
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nconcept Doge { o String name }');
             (() => {
                 modelManager.deleteModelFile(mf1);
             }).should.throw(/Model file does not exist/);
         });
 
         it('delete the model file', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
-            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
-            mf1.$marker = 'mf1';
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.doge@1.0.0\nconcept Doge { o String name }');
             let res = modelManager.addModelFile(mf1);
-            sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
             res.should.equal(mf1);
             modelManager.deleteModelFile('org.doge@1.0.0');
             should.equal(modelManager.modelFiles['org.doge@1.0.0'], undefined);
+            modelManager.getNamespaces().should.not.include('org.doge@1.0.0');
+            (() => {
+                modelManager.getType('org.doge@1.0.0.Doge');
+            }).should.throw(TypeNotFoundException);
         });
     });
 
@@ -850,15 +785,8 @@ concept Bar {
             });
         });
         it('should fall back to the namespace when the file name is UNKNOWN', () => {
-            const modelFile = sinon.createStubInstance(ModelFile);
-            modelFile.getNamespace.returns('org.example@1.0.0');
-            modelFile.getVersion.returns('1.0.0');
-            modelFile.isModelFile.returns(true);
-            modelFile.getAst.returns({ $class: `${MetaModelNamespace}.Model` });
-            modelFile.isExternal.returns(false);
-            modelFile.fileName = 'UNKNOWN';
-            modelFile.namespace = 'org.example@1.0.0';
-            modelFile.definitions = 'namespace org.example@1.0.0';
+            const modelFile = ParserUtil.newModelFile(modelManager, 'namespace org.example@1.0.0', 'UNKNOWN');
+            modelFile.getName().should.equal('UNKNOWN');
 
             modelManager.addModelFile(modelFile);
 
@@ -919,17 +847,9 @@ concept Bar {
     describe('#getNamespaces', () => {
 
         it('should list all of the namespaces', () => {
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.wow@1.0.0');
-            mf1.getVersion.returns('1.0.0');
-            mf1.isModelFile.returns(true);
-            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
+            let mf1 = ParserUtil.newModelFile(modelManager, 'namespace org.wow@1.0.0\nconcept Wow { o String name }');
             modelManager.addModelFile(mf1);
-            let mf2 = sinon.createStubInstance(ModelFile);
-            mf2.getNamespace.returns('org.such@1.0.0');
-            mf2.getVersion.returns('1.0.0');
-            mf2.isModelFile.returns(true);
-            mf2.getAst.returns({$class: `${MetaModelNamespace}.Model`});
+            let mf2 = ParserUtil.newModelFile(modelManager, 'namespace org.such@1.0.0\nconcept Such { o String name }');
             modelManager.addModelFile(mf2);
             let ns = modelManager.getNamespaces();
             ns.should.include('org.wow@1.0.0');

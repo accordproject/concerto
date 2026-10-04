@@ -12,7 +12,8 @@
  * limitations under the License.
  */
 
-import { BaseException, ErrorCodes } from '@accordproject/concerto-util';
+import { ErrorCodes } from '@accordproject/concerto-util';
+import ValidationException from '../serializer/validationexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -73,13 +74,18 @@ class Validator {
     }
 
     /**
+     * Reports an instance value that fails the validator (BC-39: a
+     * ValidationException; keeping the errorType; 5.0.0 threw a
+     * BaseException).
      * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
      * @param {string} errorType the type of error
-     * @throws {Error} throws an error to report the message
+     * @throws {ValidationException} throws an error to report the message
      */
     reportError(id: string | null, msg: string, errorType: string = ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION): never {
-        throw new BaseException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg, undefined, errorType);
+        const err = new ValidationException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg);
+        err.errorType = errorType;
+        throw err;
     }
 
     /**

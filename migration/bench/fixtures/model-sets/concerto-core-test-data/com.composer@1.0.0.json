@@ -1,0 +1,400 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "com.composer@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "AnimalType",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "SHEEP_GOAT"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "CATTLE"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "PIG"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "DEER_OTHER"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "MovementStatus",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "IN_FIELD"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "IN_TRANSIT"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "ProductionType",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "MEAT"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "WOOL"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "DAIRY"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "BREEDING"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "OTHER"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "User",
+      "isAbstract": true,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "email",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "firstName",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "lastName",
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "email"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Farmer",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "address1",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "address2",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "county",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "postcode",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "business",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Business"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "User"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Regulator",
+      "isAbstract": false,
+      "properties": [],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "User"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "Field",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "cph",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "name",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "business",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Business"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "cph"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "Animal",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "animalId",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "species",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "AnimalType"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "movementStatus",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "MovementStatus"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "productionType",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "ProductionType"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "location",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Field"
+          },
+          "isArray": false,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "owner",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Farmer"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "animalId"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "Business",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "sbi",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "address1",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "address2",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "county",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "postcode",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "owner",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Farmer"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "incomingAnimals",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Animal"
+          },
+          "isArray": true,
+          "isOptional": true
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "sbi"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "AnimalMovement",
+      "isAbstract": true,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "logs",
+          "isArray": true,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "animal",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Animal"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "from",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Business"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "to",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Business"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "AnimalMovementDeparture",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "fromField",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Field"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "AnimalMovement"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "AnimalMovementArrival",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "arrivalField",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Field"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "AnimalMovement"
+      }
+    }
+  ]
+}

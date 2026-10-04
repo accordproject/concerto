@@ -1,0 +1,385 @@
+{
+  "file": "/home/user/wt/P5-109/concerto/migration/bench/results/P5-109/typedread/dhat/synthetic-large.json",
+  "loads": 3,
+  "blocksPerLoad": 308,
+  "bytesPerLoad": 1338545,
+  "kinds": [
+    {
+      "key": "Vec/String growth (realloc, grow_one, reserve)",
+      "blocksPerLoad": 249.3,
+      "bytesPerLoad": 853904,
+      "blockShare": 81,
+      "byteShare": 63.8
+    },
+    {
+      "key": "serde_json::Value nodes (and their maps/strings)",
+      "blocksPerLoad": 27.3,
+      "bytesPerLoad": 1624,
+      "blockShare": 8.9,
+      "byteShare": 0.1
+    },
+    {
+      "key": "Kept nodes (P5-76 JSON tree)",
+      "blocksPerLoad": 11,
+      "bytesPerLoad": 1447,
+      "blockShare": 3.6,
+      "byteShare": 0.1
+    },
+    {
+      "key": "Box::new (boxed nodes)",
+      "blocksPerLoad": 5.3,
+      "bytesPerLoad": 327,
+      "blockShare": 1.7,
+      "byteShare": 0
+    },
+    {
+      "key": "string copies (to_owned, to_string, format!)",
+      "blocksPerLoad": 4,
+      "bytesPerLoad": 83,
+      "blockShare": 1.3,
+      "byteShare": 0
+    },
+    {
+      "key": "other",
+      "blocksPerLoad": 3.7,
+      "bytesPerLoad": 229677,
+      "blockShare": 1.2,
+      "byteShare": 17.2
+    },
+    {
+      "key": "Vec collect / with_capacity (sized once)",
+      "blocksPerLoad": 3.7,
+      "bytesPerLoad": 242446,
+      "blockShare": 1.2,
+      "byteShare": 18.1
+    },
+    {
+      "key": "hash/index tables (IndexMap, HashMap, HashSet)",
+      "blocksPerLoad": 2.7,
+      "bytesPerLoad": 9011,
+      "blockShare": 0.9,
+      "byteShare": 0.7
+    },
+    {
+      "key": "Arc/Rc",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 27,
+      "blockShare": 0.3,
+      "byteShare": 0
+    }
+  ],
+  "origins": [
+    {
+      "key": "typed_ast.rs:491 exact",
+      "blocksPerLoad": 242,
+      "bytesPerLoad": 625968,
+      "blockShare": 78.6,
+      "byteShare": 46.8
+    },
+    {
+      "key": "typed_ast.rs:1520 next_value_seed",
+      "blocksPerLoad": 8,
+      "bytesPerLoad": 449,
+      "blockShare": 2.6,
+      "byteShare": 0
+    },
+    {
+      "key": "scalar.rs:191 process",
+      "blocksPerLoad": 7,
+      "bytesPerLoad": 442,
+      "blockShare": 2.3,
+      "byteShare": 0
+    },
+    {
+      "key": "model_file.rs:1305 built_in_import",
+      "blocksPerLoad": 4.3,
+      "bytesPerLoad": 278,
+      "blockShare": 1.4,
+      "byteShare": 0
+    },
+    {
+      "key": "name.rs:77 new",
+      "blocksPerLoad": 3.7,
+      "bytesPerLoad": 101,
+      "blockShare": 1.2,
+      "byteShare": 0
+    },
+    {
+      "key": "kept.rs:237 visit_map",
+      "blocksPerLoad": 3,
+      "bytesPerLoad": 1152,
+      "blockShare": 1,
+      "byteShare": 0.1
+    },
+    {
+      "key": "kept.rs:137 deserialize",
+      "blocksPerLoad": 3,
+      "bytesPerLoad": 93,
+      "blockShare": 1,
+      "byteShare": 0
+    },
+    {
+      "key": "typed_ast.rs:680 ErrorBridge>",
+      "blocksPerLoad": 2.7,
+      "bytesPerLoad": 225760,
+      "blockShare": 0.9,
+      "byteShare": 16.9
+    },
+    {
+      "key": "model_file.rs:1341 import_short_names",
+      "blocksPerLoad": 2.3,
+      "bytesPerLoad": 124,
+      "blockShare": 0.8,
+      "byteShare": 0
+    },
+    {
+      "key": "validators.rs:689 compile_regex",
+      "blocksPerLoad": 2.3,
+      "bytesPerLoad": 217,
+      "blockShare": 0.8,
+      "byteShare": 0
+    },
+    {
+      "key": "typed_ast.rs:683 ErrorBridge>",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 364,
+      "blockShare": 0.6,
+      "byteShare": 0
+    },
+    {
+      "key": "typed_ast.rs:1516 UnknownInlinedFun",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 13,
+      "blockShare": 0.6,
+      "byteShare": 0
+    },
+    {
+      "key": "model_util.rs:106 UnknownInlinedFun",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 117,
+      "blockShare": 0.6,
+      "byteShare": 0
+    },
+    {
+      "key": "ecma.rs:30 to_js_string",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 60,
+      "blockShare": 0.6,
+      "byteShare": 0
+    },
+    {
+      "key": "typed_ast.rs:1691 UnknownInlinedFun",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 128,
+      "blockShare": 0.6,
+      "byteShare": 0
+    },
+    {
+      "key": "import.rs:183 UnknownInlinedFun",
+      "blocksPerLoad": 1.7,
+      "bytesPerLoad": 13,
+      "blockShare": 0.5,
+      "byteShare": 0
+    },
+    {
+      "key": "panicking.rs:581 do_call",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 16,
+      "blockShare": 0.3,
+      "byteShare": 0
+    },
+    {
+      "key": "model_file.rs:291 load_text",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 229600,
+      "blockShare": 0.3,
+      "byteShare": 17.2
+    },
+    {
+      "key": "typed_ast.rs:460 visit_map",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 39,
+      "blockShare": 0.3,
+      "byteShare": 0
+    },
+    {
+      "key": "typed_ast.rs:1488 next_key_seed",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 6,
+      "blockShare": 0.3,
+      "byteShare": 0
+    },
+    {
+      "key": "typed_ast.rs:1498 next_value_seed",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 37,
+      "blockShare": 0.3,
+      "byteShare": 0
+    },
+    {
+      "key": "kept.rs:209 UnknownInlinedFun",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 39,
+      "blockShare": 0.3,
+      "byteShare": 0
+    },
+    {
+      "key": "kept.rs:145 kept_key",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 3,
+      "blockShare": 0.3,
+      "byteShare": 0
+    },
+    {
+      "key": "model_file.rs:463 load",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 242400,
+      "blockShare": 0.3,
+      "byteShare": 18.1
+    },
+    {
+      "key": "model_file.rs:467 load",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 8720,
+      "blockShare": 0.3,
+      "byteShare": 0.7
+    }
+  ],
+  "topPoints": [
+    {
+      "kind": "Vec/String growth (realloc, grow_one, reserve)",
+      "origin": "typed_ast.rs:491 exact",
+      "site": "exact<concerto_core::introspect::property::Property> @typed_ast.rs:491 < concerto_core::introspect::typed_ast::typed_properties @typed_ast.rs:580 < read_declaration<concerto_core::introspect::typed_ast::ErrorBridge<serde_json::de::MapAccess<serde_json::read::StrRead>>> @typed_ast.rs:726 < <concerto_core::introspect::typed_ast::DeclarationSeed as serde_core::de::Visitor>::visit_map @typed_ast.rs:648",
+      "blocksPerLoad": 241,
+      "bytesPerLoad": 624240,
+      "blockShare": 78.2,
+      "byteShare": 46.6
+    },
+    {
+      "kind": "serde_json::Value nodes (and their maps/strings)",
+      "origin": "scalar.rs:191 process",
+      "site": "alloc @alloc.rs:95 < alloc_impl_runtime @alloc.rs:190 < alloc_impl @alloc.rs:312 < allocate @alloc.rs:429",
+      "blocksPerLoad": 3,
+      "bytesPerLoad": 18,
+      "blockShare": 1,
+      "byteShare": 0
+    },
+    {
+      "kind": "Vec/String growth (realloc, grow_one, reserve)",
+      "origin": "typed_ast.rs:680 ErrorBridge>",
+      "site": "read_declaration<concerto_core::introspect::typed_ast::ErrorBridge<serde_json::de::MapAccess<serde_json::read::StrRead>>> @typed_ast.rs:680 < <concerto_core::introspect::typed_ast::DeclarationSeed as serde_core::de::Visitor>::visit_map @typed_ast.rs:648 < <&mut serde_json::de::Deserializer<R> as serde_core::de::Deserializer>::deserialize_map @src/de.rs:1803 < deserialize<&mut serde_json::de::Deserializer<serde_json::read::StrRead>> @typed_ast.rs:634",
+      "blocksPerLoad": 2.7,
+      "bytesPerLoad": 225760,
+      "blockShare": 0.9,
+      "byteShare": 16.9
+    },
+    {
+      "kind": "serde_json::Value nodes (and their maps/strings)",
+      "origin": "typed_ast.rs:1516 UnknownInlinedFun",
+      "site": "UnknownInlinedFun @src/de/impls.rs:596 < UnknownInlinedFun @src/de.rs:0 < UnknownInlinedFun @src/macros.rs:132 < UnknownInlinedFun @src/de/impls.rs:693",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 13,
+      "blockShare": 0.6,
+      "byteShare": 0
+    },
+    {
+      "kind": "serde_json::Value nodes (and their maps/strings)",
+      "origin": "typed_ast.rs:1520 next_value_seed",
+      "site": "UnknownInlinedFun @src/de/impls.rs:596 < UnknownInlinedFun @src/de.rs:0 < UnknownInlinedFun @src/macros.rs:132 < UnknownInlinedFun @src/de/impls.rs:693",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 12,
+      "blockShare": 0.6,
+      "byteShare": 0
+    },
+    {
+      "kind": "Kept nodes (P5-76 JSON tree)",
+      "origin": "kept.rs:237 visit_map",
+      "site": "visit_map<serde_json::de::MapAccess<serde_json::read::StrRead>> @kept.rs:237 < deserialize_any<serde_json::read::StrRead, concerto_core::introspect::kept::KeptSeed> @src/de.rs:1447 < <concerto_core::introspect::kept::KeptSeed as serde_core::de::DeserializeSeed>::deserialize @kept.rs:137 < UnknownInlinedFun @src/de.rs:2033",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 768,
+      "blockShare": 0.6,
+      "byteShare": 0.1
+    },
+    {
+      "kind": "Kept nodes (P5-76 JSON tree)",
+      "origin": "kept.rs:137 deserialize",
+      "site": "deserialize_any<serde_json::read::StrRead, concerto_core::introspect::kept::KeptSeed> @src/de.rs:0 < <concerto_core::introspect::kept::KeptSeed as serde_core::de::DeserializeSeed>::deserialize @kept.rs:137 < UnknownInlinedFun @src/de.rs:2033 < concerto_core::introspect::kept::read_entries @kept.rs:258",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 84,
+      "blockShare": 0.6,
+      "byteShare": 0
+    },
+    {
+      "kind": "Vec/String growth (realloc, grow_one, reserve)",
+      "origin": "model_util.rs:106 UnknownInlinedFun",
+      "site": "alloc @alloc.rs:95 < alloc_impl_runtime @alloc.rs:190 < alloc_impl @alloc.rs:312 < allocate @alloc.rs:429",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 117,
+      "blockShare": 0.6,
+      "byteShare": 0
+    },
+    {
+      "kind": "serde_json::Value nodes (and their maps/strings)",
+      "origin": "scalar.rs:191 process",
+      "site": "alloc @alloc.rs:95 < alloc_impl_runtime @alloc.rs:190 < alloc_impl @alloc.rs:312 < allocate @alloc.rs:429",
+      "blocksPerLoad": 2,
+      "bytesPerLoad": 60,
+      "blockShare": 0.6,
+      "byteShare": 0
+    },
+    {
+      "kind": "Box::new (boxed nodes)",
+      "origin": "model_file.rs:1341 import_short_names",
+      "site": "concerto_core::introspect::model_file::import_short_names @model_file.rs:1341 < {closure#0} @model_file.rs:1351 < {closure#0} @model_file.rs:1351 < {closure#0}<std::collections::hash::map::HashMap<alloc::boxed::Box<str, alloc::alloc::Global>, @u32, u32), rustc_hash::FxBuildHasher, alloc::alloc::Global>, fn() -> std::collections::hash::map::HashMap<alloc::boxed::Box<str, alloc::alloc::Global>, (u32, u32), rustc_hash::FxBuildHasher, alloc::alloc::Global>> (library/std/src/sync/lazy_lock.rs:259",
+      "blocksPerLoad": 1.7,
+      "bytesPerLoad": 13,
+      "blockShare": 0.5,
+      "byteShare": 0
+    },
+    {
+      "kind": "serde_json::Value nodes (and their maps/strings)",
+      "origin": "import.rs:183 UnknownInlinedFun",
+      "site": "UnknownInlinedFun @import.rs:183 < {closure#6} @import.rs:184 < <concerto_core::introspect::import::Import as core::convert::TryFrom<&serde_json::value::Value>>::try_from @import.rs:181 < {closure#0} @model_file.rs:1316",
+      "blocksPerLoad": 1.3,
+      "bytesPerLoad": 11,
+      "blockShare": 0.4,
+      "byteShare": 0
+    },
+    {
+      "kind": "string copies (to_owned, to_string, format!)",
+      "origin": "panicking.rs:581 do_call",
+      "site": "alloc @alloc.rs:95 < alloc_impl_runtime @alloc.rs:190 < alloc_impl @alloc.rs:312 < allocate @alloc.rs:429",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 16,
+      "blockShare": 0.3,
+      "byteShare": 0
+    },
+    {
+      "kind": "other",
+      "origin": "model_file.rs:291 load_text",
+      "site": "concerto_core::introspect::model_file::ModelFile::load_text @model_file.rs:291 < concerto_core::introspect::model_file::ModelFile::from_json_text_checked_with_imports @model_file.rs:186 < p590_typed_read::typed_read @p590_typed_read.rs:95 < p590_typed_read::main @p590_typed_read.rs:160",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 229600,
+      "blockShare": 0.3,
+      "byteShare": 17.2
+    },
+    {
+      "kind": "serde_json::Value nodes (and their maps/strings)",
+      "origin": "typed_ast.rs:460 visit_map",
+      "site": "deserialize_any<serde_json::read::StrRead, serde_json::value::de::{impl#0}::deserialize::ValueVisitor> @src/de.rs:0 < serde_json::value::de::<impl serde_core::de::Deserialize for serde_json::value::Value>::deserialize @src/value/de.rs:151 < UnknownInlinedFun @src/de/mod.rs:825 < UnknownInlinedFun @src/de.rs:2033",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 39,
+      "blockShare": 0.3,
+      "byteShare": 0
+    },
+    {
+      "kind": "serde_json::Value nodes (and their maps/strings)",
+      "origin": "typed_ast.rs:1488 next_key_seed",
+      "site": "UnknownInlinedFun @src/value/de.rs:1366 < UnknownInlinedFun @src/de/mod.rs:1547 < UnknownInlinedFun @src/de/value.rs:573 < UnknownInlinedFun @src/macros.rs:132",
+      "blocksPerLoad": 1,
+      "bytesPerLoad": 6,
+      "blockShare": 0.3,
+      "byteShare": 0
+    }
+  ]
+}

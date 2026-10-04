@@ -1,0 +1,86 @@
+{
+  "harness": "run-ts.mjs",
+  "recorded_at": "2026-09-28T21:53:40.420Z",
+  "machine": {
+    "platform": "linux",
+    "arch": "x64",
+    "cpus": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "cpu_count": 4,
+    "total_mem_gb": 17,
+    "node": "v22.22.2"
+  },
+  "concerto_commit": "npm:@accordproject/concerto-core@5.0.0",
+  "concerto_rust_commit": "none",
+  "engine_module": "@accordproject/concerto-engine",
+  "concerto_engine": "ts",
+  "core_dist": "migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+  "workloads_run": [
+    "instance_validate"
+  ],
+  "loadavg": [
+    0.85,
+    2.17,
+    2.05
+  ],
+  "sample_opts": {
+    "warmup": 5,
+    "samples": 30
+  },
+  "workloads": {
+    "load_validate": {},
+    "validate_ast": {},
+    "instance_validate": {
+      "populate_and_validate": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.006417241,
+        "mean_ms": 0.006661639199999999,
+        "stddev_ms": 0.0008708990272913346,
+        "min_ms": 0.005552852,
+        "max_ms": 0.009149896,
+        "cv": 0.13073344279758273
+      },
+      "validate_only": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.0013106939999999998,
+        "mean_ms": 0.0014651380666666667,
+        "stddev_ms": 0.0004363733261156516,
+        "min_ms": 0.001217882,
+        "max_ms": 0.003294174,
+        "cv": 0.2978376823615292
+      },
+      "to_json": {
+        "samples": 30,
+        "n": 500,
+        "median_ms": 0.004221847,
+        "mean_ms": 0.004096341133333333,
+        "stddev_ms": 0.0008036884527361521,
+        "min_ms": 0.002801708,
+        "max_ms": 0.00583867,
+        "cv": 0.19619666101445102
+      },
+      "get_properties": {
+        "samples": 30,
+        "n": 1000,
+        "median_ms": 0.00031751100000000003,
+        "mean_ms": 0.00038144933333333317,
+        "stddev_ms": 0.0001413273999090674,
+        "min_ms": 0.00025418099999999997,
+        "max_ms": 0.0007135,
+        "cv": 0.37050110606843584
+      },
+      "get_property": {
+        "samples": 30,
+        "n": 1000,
+        "median_ms": 0.0000248125,
+        "mean_ms": 0.000028157533333333343,
+        "stddev_ms": 0.000011306680111952534,
+        "min_ms": 0.000022978,
+        "max_ms": 0.00008384500000000001,
+        "cv": 0.40155080269646715
+      },
+      "n": 500
+    }
+  }
+}

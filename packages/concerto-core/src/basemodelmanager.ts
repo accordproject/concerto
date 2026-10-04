@@ -18,16 +18,13 @@ import { MetaModelUtil, MetaModelNamespace } from '@accordproject/concerto-metam
 import type { IModel, IModels } from '@accordproject/concerto-metamodel';
 
 import Factory from './factory';
-import Globalize from './globalize';
-import IllegalModelException from './introspect/illegalmodelexception';
 import ModelFile from './introspect/modelfile';
 import ModelUtil from './modelutil';
 import Serializer from './serializer';
-import TypeNotFoundException from './typenotfoundexception';
-import MetamodelException from './metamodelexception';
-import rootModelModule from './rootmodelhelper';
-import decoratorModelModule from './decoratormodelhelper';
-import type { ModelFileSource, ModelManagerOptions } from './types';
+import rootModelModule, { getRootModel as fixedGetRootModel } from './rootmodelhelper';
+import decoratorModelModule, { getDecoratorModel as fixedGetDecoratorModel } from './decoratormodelhelper';
+import type { ModelFileSource, ModelManagerOptions, ValidateInstanceOptions, ValidationResult } from './types';
+import type Resource from './model/resource';
 import type { AstNode } from './introspect/decorated';
 type ModelFileInstance = InstanceType<typeof ModelFile>;
 type ModelFileInput = string | ModelFileInstance;
@@ -53,6 +50,84 @@ import type TransactionDeclaration from './introspect/transactiondeclaration';
 
 import debugLib from 'debug';
 const debug = debugLib('concerto:BaseModelManager');
+import { rust, engineHandles, engineValidateInstance, engineViews } from './engineloader';
+import { optionalString } from './engineutil';
+import type { EngineHandle, EngineState } from './engine/bindings';
+
+/**
+ * A new manager's engine state: model version 0, nothing cached.
+ * @return {EngineState} the record
+ * @private
+ */
+function newEngineState(): EngineState {
+    return {
+        version: 0,
+        readMemo: undefined,
+        namespaces: undefined,
+        serializerCache: undefined,
+        propertySlots: undefined,
+    };
+}
+
+/**
+ * The read memo, started afresh when the model version has moved.
+ * @param {object} state - the manager's engine state
+ * @return {object} its current memo
+ * @private
+ */
+function managerReadMemo(state: EngineState): NonNullable<EngineState['readMemo']> {
+    let memo = state.readMemo;
+    if (memo === undefined || memo.version !== state.version) {
+        memo = state.readMemo = {
+            version: state.version,
+            typeNames: new Map(),
+            resolvedTypes: new Map(),
+            fileTypeNames: new Map(),
+        };
+    }
+    return memo;
+}
+
+/**
+ * The cached namespace list, if any and not mid-batch.
+ * @param {object} manager - the BaseModelManager
+ * @return {string[]|undefined} its list
+ * @private
+ */
+function namespaceListOf(manager: { _engine: EngineState; _mirrorPending: boolean }): string[] | undefined {
+    return manager._mirrorPending ? undefined : manager._engine.namespaces;
+}
+
+/**
+ * Appends a new namespace to the cached list (dropped mid-batch).
+ * @param {object} manager - the BaseModelManager
+ * @param {string} namespace - the namespace added
+ * @private
+ */
+function noteNamespaceAdded(manager: { _engine: EngineState; _mirrorPending: boolean }, namespace: string): void {
+    const list = namespaceListOf(manager);
+    if (list) {
+        list.push(namespace);
+    } else {
+        manager._engine.namespaces = undefined;
+    }
+}
+
+/**
+ * Removes a deleted namespace from the cached list.
+ * @param {object} manager - the BaseModelManager
+ * @param {string} namespace - the namespace (key) removed
+ * @private
+ */
+function noteNamespaceRemoved(manager: { _engine: EngineState; _mirrorPending: boolean }, namespace: string): void {
+    const list = namespaceListOf(manager);
+    const at = list?.indexOf(namespace) ?? -1;
+    if (at < 0) {
+        manager._engine.namespaces = undefined;
+    } else {
+        list!.splice(at, 1);
+    }
+}
 
 // How to create a modelfile from the external content
 const defaultProcessFile = (name: string | null, data: unknown): ModelFileSource => {
@@ -69,9 +144,83 @@ const DEFAULT_DECORATOR_VALIDATION = {
     invalidDecorator: undefined, // 'error' | 'warn' ...
 };
 
-// these namespaces are internal and excluded by default by getModelFiles
-// and ignored by fromAst
-const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
+/**
+ * Internal namespaces: excluded by default by getModelFiles, ignored by fromAst.
+ * @private
+ * @internal
+ */
+export const EXCLUDE_NS: readonly string[] = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
+
+// BC-28: the `regExp` option is ignored, with one warning per process.
+let regExpOptionWarned = false;
+
+/**
+ * Warns, once per process, that the `regExp` option is ignored.
+ * @private
+ */
+function warnRegExpOptionIgnored() {
+    if (regExpOptionWarned) {
+        return;
+    }
+    regExpOptionWarned = true;
+    /* istanbul ignore else: process.emitWarning is Node's */
+    if (typeof process !== 'undefined' && typeof process.emitWarning === 'function') {
+        process.emitWarning(
+            'The ModelManager regExp option is ignored: regular expressions are evaluated by the Concerto engine (ECMAScript syntax and semantics)',
+            { type: 'Warning', code: 'concerto-regexp-option' }
+        );
+    }
+}
+
+// The system namespaces a new rustHandle loads itself.
+const RUST_PRELOADED_NS = ['concerto.decorator@1.0.0', 'concerto@1.0.0'];
+
+/**
+ * Makes `metamodelModelFile` build on first read (BC-55: an invalid
+ * metamodel AST throws there, not in the constructor).
+ * @param {BaseModelManager} manager the manager
+ * @private
+ */
+function installLazyMetamodelCopy(manager: BaseModelManager): void {
+    const define = (value: ModelFileInstance) => {
+        Object.defineProperty(manager, 'metamodelModelFile', { value, writable: true, enumerable: true, configurable: true });
+    };
+    Object.defineProperty(manager, 'metamodelModelFile', {
+        configurable: true,
+        enumerable: true,
+        get() {
+            let copy: ModelFileInstance;
+            const factories = manager.decoratorFactories;
+            manager.decoratorFactories = [];
+            manager._buildingMetamodelCopy = true;
+            try {
+                copy = new ModelFile(manager, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace) as ModelFileInstance;
+            } finally {
+                manager._buildingMetamodelCopy = false;
+                manager.decoratorFactories = factories;
+            }
+            define(copy);
+            return copy;
+        },
+        set(value) {
+            define(value);
+        },
+    });
+}
+
+/**
+ * A type name for a `&str` binding; a non-string throws as TS did.
+ * @param {*} name the type name argument
+ * @return {string} the name as a string
+ * @private
+ */
+function typeNameArgument(name: unknown): string {
+    if (typeof name === 'string') {
+        return name;
+    }
+    ModelUtil.getNamespace(name);
+    return String(name);
+}
 
 /**
  * Manages the Concerto model files.
@@ -89,6 +238,7 @@ const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
  * @memberof module:concerto-core
  */
 class BaseModelManager {
+    /** The model files by namespace; read-only (BC-48). @internal */
      modelFiles: Record<string, ModelFileInstance>;
      processFile: (fileName: string | null, modelInput: string | unknown) => ModelFileSource;
      factory: Factory;
@@ -96,13 +246,33 @@ class BaseModelManager {
      decoratorFactories: DecoratorFactory[];
      options: ModelManagerOptions | undefined;
      decoratorValidation: NonNullable<ModelManagerOptions['decoratorValidation']>;
-     metamodelModelFile: ModelFileInstance;
+     metamodelModelFile!: ModelFileInstance;
+    /** The engine handle mirroring `modelFiles`. @internal */
+     rustHandle: EngineHandle;
+    /** True while `metamodelModelFile` is built: that copy is never mirrored. @internal */
+     _buildingMetamodelCopy?: boolean;
+    /** True while `addModelFiles` has `modelFiles` ahead of `rustHandle`. @internal */
+     _mirrorPending: boolean;
+    /** Engine file handles by namespace; cleared when the arena is rebuilt. @internal */
+     _modelFileIds: Map<string, number>;
+    /** Preloaded system namespaces not yet in `modelFiles`. @internal */
+     _rustPreloaded: Set<string>;
+    /** The model version, which keys every cached answer, and the caches. @internal */
+     _engine: EngineState;
     /**
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {Object} [options.regExp] - An alternative regular expression engine.
-     * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
+     * @param {Object} [options.regExp] - Deprecated and ignored, with a warning: regular expressions are evaluated by the Concerto engine.
+     * @param {boolean} [options.metamodelValidation] - Unless false, every ModelFile built for this
+     * manager has its AST checked against the Concerto metamodel when it is constructed (at model
+     * load: fromAst, addModel, addCTOModel, addModelFiles, updateModelFile), and a malformed AST is an
+     * IllegalModelException (BC-19, on by default). When true, addModelFile also runs
+     * validateAst on each new file. false is an escape hatch for trusted input only: the
+     * shape check is skipped, and code downstream of the load may assume a well-formed AST. A
+     * malformed AST still throws an error when it is loaded, never a WASM trap or a process crash,
+     * unless the loader can read it all the same (a node's $class naming the wrong type, say); the
+     * error's class and message are unspecified.
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
     * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
@@ -111,18 +281,30 @@ class BaseModelManager {
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
     */
     constructor(options?: ModelManagerOptions, processFile?: (fileName: string | null, modelInput: string | unknown) => ModelFileSource) {
+        // BC-47: a ModelFile may be built only for a constructed manager.
+        ModelFile._registerManager(this);
+        this._engine = newEngineState();
         this.processFile = processFile ? processFile : defaultProcessFile;
         this.modelFiles = {};
         this.factory = new Factory(this);
         this.serializer = new Serializer(this.factory, this, options);
         this.decoratorFactories = [];
         this.options = options;
+        if (options?.regExp) {
+            warnRegExpOptionIgnored();
+        }
+        this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
+        this._mirrorPending = false;
+        this._modelFileIds = new Map();
+        this._rustPreloaded = new Set(RUST_PRELOADED_NS);
+        this.rustHandle = this._newRustHandle();
+        this._engine.namespaces = [];
         this.addDecoratorModel();
         this.addRootModel();
-        this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
 
-        // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
-        this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace);
+        // A copy of the Metamodel ModelFile, built on first read.
+        this._buildingMetamodelCopy = false;
+        installLazyMetamodelCopy(this);
 
         if(options?.addMetamodel) {
             this.addModelFile(this.metamodelModelFile);
@@ -149,6 +331,10 @@ class BaseModelManager {
         }
 
         const {rootModelAst, rootModelCto, rootModelFile} = getRootModel();
+        engineViews().markSystemModelAst(rootModelAst);
+        if (getRootModel === fixedGetRootModel && this._adoptPreloadedModel(rootModelAst, rootModelCto, rootModelFile)) {
+            return;
+        }
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
 
         this.addModelFile(m, rootModelCto, rootModelFile, true);
@@ -197,10 +383,6 @@ class BaseModelManager {
      * Adds decorator types
      * @private
      */
-    /**
-     * Adds decorator types
-     * @private
-     */
     addDecoratorModel() {
         const getDecoratorModel = decoratorModelModule.getDecoratorModel || decoratorModelModule;
 
@@ -209,9 +391,262 @@ class BaseModelManager {
         }
         const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
 
+        engineViews().markSystemModelAst(decoratorModelAst);
+        if (getDecoratorModel === fixedGetDecoratorModel &&
+            this._adoptPreloadedModel(decoratorModelAst, decoratorModelCto, decoratorModelFile)) {
+            return;
+        }
         const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
 
         this.addModelFile(m, decoratorModelCto, decoratorModelFile, true);
+    }
+
+    /**
+     * Registers a system model as a view of rustHandle's preloaded copy.
+     * False when not preloaded or `addModelFile` is overridden.
+     * @param {object} ast the fixed system model's AST
+     * @param {string} cto the model's CTO text
+     * @param {string} fileName the model's file name
+     * @return {boolean} true if the model was registered
+     * @private
+     * @internal
+     */
+    _adoptPreloadedModel(ast: AstNode, cto: string, fileName: string): boolean {
+        const namespace = ast.namespace as string;
+        if (!this._rustPreloaded.has(namespace) || this.addModelFile !== BaseModelManager.prototype.addModelFile) {
+            return false;
+        }
+        const m = ModelFile._systemView(this, ast, cto, fileName) as ModelFileInstance | undefined;
+        /* istanbul ignore if: the engine answers for the fixed system models' text */
+        if (m === undefined) {
+            return false;
+        }
+        this.modelFiles[namespace] = m;
+        this._rustPreloaded.delete(namespace);
+        noteNamespaceAdded(this, namespace);
+        this._engine.version++;
+        return true;
+    }
+
+    /**
+     * Whether a namespace needs writing to `rustHandle`.
+     * @param {string} namespace - the namespace being added, updated or removed
+     * @return {boolean} true if `namespace` needs writing to `rustHandle`
+     * @private
+     * @internal
+     */
+    _needsRustWrite(namespace) {
+        if (this._rustPreloaded.has(namespace)) {
+            return false;
+        }
+        return !(namespace === MetaModelNamespace && this._buildingMetamodelCopy);
+    }
+
+    /**
+     * BC-46: a `TypeError` unless the ModelFile constructor built `modelFile`.
+     * @param {*} modelFile - the argument
+     * @param {string} method - the method it was passed to
+     * @private
+     * @internal
+     */
+    _checkModelFile(modelFile: unknown, method: string) {
+        if (!ModelFile._isConstructed(modelFile)) {
+            throw new TypeError(`${method} expects a ModelFile built by the ModelFile constructor`);
+        }
+    }
+
+    /**
+     * Writes an added model file to rustHandle and caches its handle.
+     * @param {ModelFile} modelFile - the model file being added
+     * @return {boolean} true if the namespace was written to rustHandle
+     * @private
+     * @internal
+     */
+    _rustMirrorAdd(modelFile) {
+        const namespace = modelFile.getNamespace();
+        if (!this._needsRustWrite(namespace)) {
+            engineViews().dropStaged(modelFile, this.rustHandle);
+            this._rustPreloaded.delete(namespace);
+            return false;
+        }
+        let id = engineViews().commitStaged(modelFile, this.rustHandle);
+        if (id === undefined) {
+            id = this.rustHandle.addModelWithDefinitions(
+                JSON.stringify(modelFile.getAst()),
+                optionalString(modelFile.getDefinitions()),
+                optionalString(modelFile.getName()),
+                false,
+            );
+        }
+        this._modelFileIds.set(namespace, id as number);
+        return true;
+    }
+
+    /**
+     * `_rustMirrorAdd` for each file, in one engine call when all are staged.
+     * @param {ModelFile[]} modelFiles - the model files being added
+     * @param {Set<string>} mirrored - the namespaces written, filled in
+     * @private
+     * @internal
+     */
+    _rustMirrorAddAll(modelFiles: ModelFileInstance[], mirrored: Set<string>) {
+        const handle = this.rustHandle;
+        if (modelFiles.every((m) => this._needsRustWrite(m.getNamespace()))) {
+            const ids = engineViews().commitStagedAll(modelFiles, handle);
+            if (ids !== undefined) {
+                modelFiles.forEach((m, i) => {
+                    this._modelFileIds.set(m.getNamespace(), ids[i]);
+                    mirrored.add(m.getNamespace());
+                });
+                return;
+            }
+        }
+        modelFiles.forEach((m) => {
+            if (this._rustMirrorAdd(m)) {
+                mirrored.add(m.getNamespace());
+            }
+        });
+    }
+
+    /**
+     * `addModelFile(m, null, null, true)` per file, in one engine call if possible.
+     * @param {ModelFile[]} modelFiles - the model files being added
+     * @private
+     * @internal
+     */
+    _addStagedModelFiles(modelFiles: ModelFileInstance[]) {
+        const ids = engineViews().commitStagedAll(modelFiles, this.rustHandle);
+        if (ids === undefined) {
+            modelFiles.forEach((m) => this.addModelFile(m, null, null, true));
+            return;
+        }
+        modelFiles.forEach((m, i) => this._registerAdded(m, ids![i]));
+    }
+
+    /**
+     * Registers a file already written to rustHandle.
+     * @param {ModelFile} modelFile - the model file added
+     * @param {number} id - its rustHandle handle
+     * @private
+     * @internal
+     */
+    _registerAdded(modelFile: ModelFileInstance, id: number) {
+        const namespace = modelFile.getNamespace();
+        this._modelFileIds.set(namespace, id);
+        this.modelFiles[namespace] = modelFile;
+        noteNamespaceAdded(this, namespace);
+        this._engine.version++;
+    }
+
+    /**
+     * Validates and writes a staged file in one engine call, else false.
+     * @param {ModelFile} modelFile - the model file being added
+     * @param {boolean} [metamodel] - whether to run the metamodel check too
+     * @return {boolean} true if the file was validated and written
+     * @private
+     * @internal
+     */
+    _rustValidateAndMirrorAdd(modelFile, metamodel?: boolean) {
+        const namespace = modelFile.getNamespace();
+        if (modelFile.validate !== ModelFile.prototype.validate || !this._needsRustWrite(namespace)) {
+            return false;
+        }
+        let id;
+        if (metamodel) {
+            const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
+            try {
+                id = engineViews().validateAndCommitStaged(modelFile, this.rustHandle, true);
+            } catch (err) {
+                this._mirrorMetamodelLeak(alreadyHasMetamodel);
+                throw err;
+            }
+        } else {
+            id = engineViews().validateAndCommitStaged(modelFile, this.rustHandle);
+        }
+        if (id === undefined) {
+            return false;
+        }
+        this._modelFileIds.set(namespace, id);
+        return true;
+    }
+
+    /**
+     * Writes a replacing model file to rustHandle.
+     * @param {ModelFile} modelFile - the model file replacing the registered one
+     * @private
+     * @internal
+     */
+    _rustMirrorUpdate(modelFile) {
+        const namespace = modelFile.getNamespace();
+        const staged = engineViews().updateStaged(modelFile, this.rustHandle);
+        if (staged !== undefined) {
+            this._modelFileIds.clear();
+            this._modelFileIds.set(namespace, staged);
+            return;
+        }
+        engineViews().dropStaged(modelFile, this.rustHandle);
+        const id = this.rustHandle.updateModelFile(
+            JSON.stringify(modelFile.getAst()),
+            optionalString(modelFile.getDefinitions()),
+            optionalString(modelFile.getName()),
+            false,
+        );
+        this._modelFileIds.clear();
+        this._modelFileIds.set(namespace, id);
+    }
+
+    /**
+     * Whether `rustHandle` mirrors `modelFiles`: true except mid-batch.
+     * @return {boolean} true if rustHandle mirrors the namespaces TS has
+     * @private
+     * @internal
+     */
+    _rustHandleMatchesModelFiles() {
+        return !this._mirrorPending;
+    }
+
+    /**
+     * `rustHandle.modelFileGetTypeName`, memoised until the next model change.
+     * @param {string} namespace - the model file's namespace
+     * @param {number} id - its rustHandle model file handle
+     * @param {string} type - the type name, as `ModelFile.getType` takes it
+     * @return {string|undefined} the engine's answer
+     * @private
+     * @internal
+     */
+    _modelFileTypeName(namespace: string, id: number, type: string): string | undefined {
+        const memo = managerReadMemo(this._engine);
+        let byType = memo.fileTypeNames.get(namespace);
+        if (byType === undefined) {
+            byType = new Map();
+            memo.fileTypeNames.set(namespace, byType);
+        }
+        if (byType.has(type)) {
+            return byType.get(type);
+        }
+        const name: string | undefined = this.rustHandle.modelFileGetTypeName(id, type);
+        if (memo.version === this._engine.version) {
+            byType.set(type, name);
+        }
+        return name;
+    }
+
+    /**
+     * The engine handle of the model file for `namespace`, cached.
+     * @param {string} namespace - the namespace to look up
+     * @return {number|undefined} its model file handle, or undefined
+     * @private
+     * @internal
+     */
+    _rustModelFileId(namespace: string): number | undefined {
+        let id = this._modelFileIds.get(namespace);
+        if (id === undefined) {
+            id = this.rustHandle.modelFileId(namespace);
+            if (id !== undefined) {
+                this._modelFileIds.set(namespace, id);
+            }
+        }
+        return id;
     }
 
     /**
@@ -220,6 +655,12 @@ class BaseModelManager {
      * @private
      */
     _throwAlreadyExists(modelFile) {
+        const namespace = modelFile.getNamespace();
+        const fileName = modelFile.getName();
+        if (!this._mirrorPending && typeof namespace === 'string' &&
+            (typeof fileName === 'string' || fileName === undefined || fileName === null)) {
+            this.rustHandle.throwAlreadyExists(namespace, fileName ?? undefined);
+        }
         const existingModelFileName = this.modelFiles[modelFile.getNamespace()].getName();
         const postfix = existingModelFileName ? ` in file ${existingModelFileName}` : '';
         const prefix = modelFile.getName() ? ` specified in file ${modelFile.getName()}` : '';
@@ -245,22 +686,31 @@ class BaseModelManager {
         addModelFile(modelFile: ModelFileInstance, cto?: string | null, fileName?: string | null, disableValidation?: boolean) {
             const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
+        this._checkModelFile(modelFile, 'addModelFile');
 
         if(!modelFile.getVersion()) {
             throw new Error(`Cannot add an unversioned namespace: ${modelFile.getNamespace()}`);
         }
 
         if (!this.modelFiles[modelFile.getNamespace()]) {
+            // Mirrored first, so an error leaves both unchanged.
+            let mirrored = false;
             if (!disableValidation) {
-                // Structural validation against the Metamodel
-                if(this.options?.metamodelValidation){
-                    this.validateAst(modelFile);
+                const metamodel = !!this.options?.metamodelValidation;
+                mirrored = this._rustValidateAndMirrorAdd(modelFile, metamodel);
+                if (!mirrored) {
+                    if (metamodel) {
+                        this.validateAst(modelFile);
+                    }
+                    modelFile.validate();
                 }
-
-                // Semantic validation of the model file
-                modelFile.validate();
+            }
+            if (!mirrored) {
+                this._rustMirrorAdd(modelFile);
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
+            noteNamespaceAdded(this, modelFile.getNamespace());
+            this._engine.version++;
         } else {
             this._throwAlreadyExists(modelFile);
         }
@@ -276,28 +726,30 @@ class BaseModelManager {
      * @private
      */
     validateAst(modelFile) {
-        const { version: modelFileVersion } = ModelUtil.parseNamespace(ModelUtil.getNamespace(modelFile.getAst().$class));
-        const { version: metamodelVersion } = ModelUtil.parseNamespace(MetaModelNamespace);
-
-        if (modelFileVersion !== metamodelVersion){
-            throw new MetamodelException(`Model file version ${modelFileVersion} does not match metamodel version ${metamodelVersion}`);
-        }
-
+        // Checks the AST alone, so a malformed AST is a MetamodelException.
         const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
-        if (!alreadyHasMetamodel) {
-            this.addModelFile(this.metamodelModelFile, undefined, MetaModelNamespace, true);
-        }
-
         try {
-            // Use deserialization to validate the AST
-            this.getSerializer().fromJSON(modelFile.getAst());
-        } catch (err: unknown) {
-            const error = err as Error;
-            throw new MetamodelException(error.message);
+            if (!engineViews().validateAstStaged(modelFile, this.rustHandle)) {
+                this.rustHandle.validateAstValue(JSON.stringify(modelFile.getAst()));
+            }
+        } catch (err) {
+            this._mirrorMetamodelLeak(alreadyHasMetamodel);
+            throw err;
         }
+    }
 
-        if (!alreadyHasMetamodel) {
-            this.deleteModelFile(MetaModelNamespace);
+    /**
+     * After a failed metamodel check, mirrors the engine's metamodel registration.
+     * @param {boolean} alreadyHasMetamodel - whether the manager held the
+     * metamodel before the check
+     * @private
+     * @internal
+     */
+    _mirrorMetamodelLeak(alreadyHasMetamodel: boolean) {
+        if (!alreadyHasMetamodel && this.rustHandle.modelFileId(MetaModelNamespace) !== undefined) {
+            this.modelFiles[MetaModelNamespace] = this.metamodelModelFile;
+            noteNamespaceAdded(this, MetaModelNamespace);
+            this._engine.version++;
         }
     }
 
@@ -347,19 +799,22 @@ class BaseModelManager {
             const { ast } = this.processFile(fileName, modelFile);
             let m = new ModelFile(this, ast as AstNode, modelFile, fileName);
             return this.updateModelFile(m,fileName,disableValidation);
-        } else {
-            let existing = this.modelFiles[modelFile.getNamespace()];
-            if (!existing) {
-                throw new Error(`Model file for namespace ${modelFile.getNamespace()} not found`);
-            }
-            if (!modelFile.getVersion()) {
-                throw new Error(`Cannot update with an unversioned namespace: ${modelFile.getNamespace()}`);
-            }
-            if (!disableValidation) {
-                modelFile.validate();
-            }
         }
+        this._checkModelFile(modelFile, 'updateModelFile');
+        const existing = this.modelFiles[modelFile.getNamespace()];
+        if (!existing) {
+            throw new Error(`Model file for namespace ${modelFile.getNamespace()} not found`);
+        }
+        if (!modelFile.getVersion()) {
+            throw new Error(`Cannot update with an unversioned namespace: ${modelFile.getNamespace()}`);
+        }
+        if (!disableValidation) {
+            modelFile.validate();
+        }
+        // Mirrored first, so a mirror error leaves both unchanged.
+        this._rustMirrorUpdate(modelFile);
         this.modelFiles[modelFile.getNamespace()] = modelFile;
+        this._engine.version++;
         return modelFile;
     }
 
@@ -371,7 +826,12 @@ class BaseModelManager {
         if (!this.modelFiles[namespace]) {
             throw new Error('Model file does not exist');
         } else {
+            // Mirrored first. A non-string is sent as its string form.
+            this.rustHandle.deleteModelFile(typeof namespace === 'string' ? namespace : String(namespace));
+            this._modelFileIds.clear();
             delete this.modelFiles[namespace];
+            noteNamespaceRemoved(this, String(namespace));
+            this._engine.version++;
         }
     }
 
@@ -388,8 +848,11 @@ class BaseModelManager {
         const originalModelFiles = {};
         Object.assign(originalModelFiles, this.modelFiles);
         let newModelFiles: ModelFileInstance[] = [];
+        const mirroredNamespaces = new Set<string>();
+        const namespaces = namespaceListOf(this);
 
         try {
+            this._mirrorPending = true;
             // create the model files
             for (let n = 0; n < modelFiles.length; n++) {
                 const modelFile = modelFiles[n];
@@ -404,6 +867,7 @@ class BaseModelManager {
                     const { ast } = this.processFile(fileName, modelFile);
                     m = new ModelFile(this, ast as AstNode, modelFile, fileName);
                 } else {
+                    this._checkModelFile(modelFile, 'addModelFiles');
                     m = modelFile;
                 }
                 if (!m.getVersion()) {
@@ -411,15 +875,24 @@ class BaseModelManager {
                 }
                 if (!this.modelFiles[m.getNamespace()]) {
                     this.modelFiles[m.getNamespace()] = m;
+                    this._engine.version++;
                     newModelFiles.push(m);
                 } else {
                     this._throwAlreadyExists(m);
                 }
             }
 
+            // Mirror all before validating: files may import one another.
+            this._rustMirrorAddAll(newModelFiles, mirroredNamespaces);
+            this._mirrorPending = false;
+
             // re-validate all the model files
             if (!disableValidation) {
                 this.validateModelFiles();
+            }
+
+            if (namespaces && namespaceListOf(this) === namespaces) {
+                newModelFiles.forEach((m) => namespaces.push(m.getNamespace()));
             }
 
             // return the model files.
@@ -427,8 +900,19 @@ class BaseModelManager {
         } catch (err) {
             this.modelFiles = {};
             Object.assign(this.modelFiles, originalModelFiles);
+            this._engine.version++;
+            // Undo only this batch's mirror writes.
+            newModelFiles.forEach((m) => {
+                if (!mirroredNamespaces.has(m.getNamespace())) {
+                    return;
+                }
+                this.rustHandle.deleteModelFile(m.getNamespace());
+                this._modelFileIds.clear();
+            });
+            this._engine.namespaces = namespaces;
             throw err;
         } finally {
+            this._mirrorPending = false;
             debug(NAME, newModelFiles);
         }
     }
@@ -437,9 +921,7 @@ class BaseModelManager {
      * Validates all models files in this model manager
      */
     validateModelFiles() {
-        for (let ns in this.modelFiles) {
-            this.modelFiles[ns].validate();
-        }
+        this.rustHandle.validateModelFiles(this.modelFiles);
     }
 
     /**
@@ -465,25 +947,43 @@ class BaseModelManager {
         try {
             const externalModels = await downloader.downloadExternalDependencies(this.getModelFiles(), options);
 
-            const externalModelFiles: ModelFileInstance[] = [];
-            externalModels.forEach((file) => {
-                const mf = new ModelFile(this, file.ast as AstNode, file.definitions, file.fileName);
-                const existing = this.modelFiles[mf.getNamespace()];
+            // Every view is built first, so a rejected file changes nothing.
+            const views: ModelFileInstance[] = externalModels.map((file) =>
+                new ModelFile(this, file.ast as AstNode, file.definitions, file.fileName));
 
-                if (existing) {
-                    externalModelFiles.push(this.updateModelFile(mf, mf.getName(), true)); // disable validation
-                } else {
-                    externalModelFiles.push(this.addModelFile(mf, null, mf.getName(), true)); // disable validation
+            // One engine call that changes nothing on failure.
+            try {
+                const next: Record<string, ModelFileInstance> = Object.assign({}, this.modelFiles);
+                views.forEach((mf) => {
+                    next[mf.getNamespace()] = mf;
+                });
+                if (!engineViews().updateExternalStaged(views, this.rustHandle, next)) {
+                    const sources = views.map((mf) => ({
+                        ast: mf.getAst(),
+                        definitions: optionalString(mf.getDefinitions()),
+                        fileName: optionalString(mf.getName()),
+                    }));
+                    this.rustHandle.updateExternalModels(JSON.stringify(sources), next);
+                }
+            } finally {
+                views.forEach((mf) => engineViews().dropStaged(mf, this.rustHandle));
+                this._modelFileIds.clear();
+            }
+            views.forEach((mf) => {
+                const isNew = !Object.prototype.hasOwnProperty.call(this.modelFiles, mf.getNamespace());
+                this.modelFiles[mf.getNamespace()] = mf;
+                if (isNew) {
+                    noteNamespaceAdded(this, mf.getNamespace());
                 }
             });
-
-            // now everything is applied, we need to revalidate all models
-            this.validateModelFiles();
-            return externalModelFiles;
+            this._engine.version++;
+            return views;
         } catch (err) {
             // Restore original files
             this.modelFiles = {};
             Object.assign(this.modelFiles, originalModelFiles);
+            this._engine.namespaces = undefined;
+            this._engine.version++;
             throw err;
         }
     }
@@ -579,32 +1079,37 @@ class BaseModelManager {
      * @throws {IllegalModelException} - if the type is not defined
      * @private
      */
-    resolveType(context, type) {
-        // is the type a primitive?
-        if (ModelUtil.isPrimitiveType(type)) {
-            return type;
+    resolveType(context, type): any {
+        const typeName = typeNameArgument(type);
+        const memo = managerReadMemo(this._engine);
+        const resolved = memo.resolvedTypes.get(typeName);
+        if (resolved !== undefined) {
+            return resolved;
         }
-
-        let ns = ModelUtil.getNamespace(type);
-        let modelFile = this.getModelFile(ns);
-        if (!modelFile) {
-            let formatter = Globalize.messageFormatter('modelmanager-resolvetype-nonsfortype');
-            throw new IllegalModelException(formatter({
-                type: type,
-                context: context
-            }));
+        const result: string = this.rustHandle.resolveType(typeof context === 'string' ? context : String(context), typeName);
+        if (memo.version === this._engine.version) {
+            memo.resolvedTypes.set(typeName, result);
         }
+        return result;
+    }
 
-        if (modelFile.isLocalType(type)) {
-            return type;
+    /**
+     * A new engine handle with this manager's validation options.
+     * @return {object} the handle
+     * @private
+     * @internal
+     */
+    _newRustHandle(): EngineHandle {
+        const handle = new rust.ModelManagerHandle();
+        if (this.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels) {
+            handle.setDangerouslyAllowReservedSystemTypeNamesInUserModels(true);
         }
-
-        let formatter = Globalize.messageFormatter('modelmanager-resolvetype-notypeinnsforcontext');
-        throw new IllegalModelException(formatter({
-            context: context,
-            type: type,
-            namespace: modelFile.getNamespace()
-        }));
+        const validation = this.decoratorValidation;
+        if (typeof validation !== 'object' || validation === null ||
+            validation.missingDecorator || validation.invalidDecorator) {
+            handle.setDecoratorValidation(validation);
+        }
+        return handle;
     }
 
     /**
@@ -612,6 +1117,14 @@ class BaseModelManager {
      */
     clearModelFiles() {
         this.modelFiles = {};
+        const replaced = this.rustHandle;
+        this.rustHandle = this._newRustHandle();
+        this._modelFileIds = new Map();
+        this._rustPreloaded = new Set(RUST_PRELOADED_NS);
+        // Safe: the handle is this manager's alone; staged files keep snapshots.
+        engineHandles().releaseHandle(replaced);
+        this._engine.namespaces = [];
+        this._engine.version++;
         this.addDecoratorModel();
         this.addRootModel();
     }
@@ -633,7 +1146,12 @@ class BaseModelManager {
      * @return {ModelFile} registered ModelFile for the namespace or null
      * @private
      */
-    getModelFileByFileName(fileName) {
+    getModelFileByFileName(fileName): ModelFile {
+        // Only a string or undefined crosses (null would match an unnamed file).
+        if (typeof fileName === 'string' || fileName === undefined) {
+            const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
+            return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
+        }
         return this.getModelFiles().filter(mf => mf.getName() === fileName)[0];
     }
 
@@ -641,8 +1159,16 @@ class BaseModelManager {
      * Get the namespaces registered with the ModelManager.
      * @return {string[]} namespaces - the namespaces that have been registered.
      */
-    getNamespaces() {
-        return Object.keys(this.modelFiles);
+    getNamespaces(): string[] {
+        const list = namespaceListOf(this);
+        if (list) {
+            return list.slice();
+        }
+        const result: string[] = this.rustHandle.getNamespaces();
+        if (!this._mirrorPending) {
+            this._engine.namespaces = result.slice();
+        }
+        return result;
     }
 
     /**
@@ -652,28 +1178,17 @@ class BaseModelManager {
      * @return {ClassDeclaration} - the class declaration for the specified type.
      * @throws {TypeNotFoundException} - if the type cannot be found or is a primitive type.
      */
-    getType(qualifiedName) {
-
-        const namespace = ModelUtil.getNamespace(qualifiedName);
-
-        const modelFile = this.getModelFile(namespace);
-        if (!modelFile) {
-            const formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
-            throw new TypeNotFoundException(qualifiedName, formatter({
-                type: qualifiedName
-            }));
+    getType(qualifiedName): any {
+        const name = typeNameArgument(qualifiedName);
+        const memo = managerReadMemo(this._engine);
+        let fqn = memo.typeNames.get(name);
+        if (fqn === undefined) {
+            fqn = this.rustHandle.getTypeName(name) as string;
+            if (memo.version === this._engine.version) {
+                memo.typeNames.set(name, fqn);
+            }
         }
-
-        const classDecl = modelFile.getType(qualifiedName);
-        if (!classDecl) {
-            const formatter = Globalize.messageFormatter('modelmanager-gettype-notypeinns');
-            throw new TypeNotFoundException(qualifiedName, formatter({
-                type: ModelUtil.getShortName(qualifiedName),
-                namespace: namespace
-            }));
-        }
-
-        return classDecl;
+        return this.modelFiles[fqn.substring(0, fqn.lastIndexOf('.'))].getLocalType(fqn);
     }
 
     /**
@@ -763,6 +1278,37 @@ class BaseModelManager {
     }
 
     /**
+     * Validates an instance against the models in this model manager, as
+     * its own `$class` (accordproject/concerto#1239), without building a
+     * Resource: the instance is valid exactly when
+     * {@link Serializer#fromJSON} (with the same options) would accept it.
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {ValidationResult} `{ valid: true, resource, warnings }`, the
+     * resource being built when first read (or `null` with `hydrate: false`),
+     * or `{ valid: false, resource: null, errors, warnings }`, the first
+     * error being the one {@link BaseModelManager#validateInstanceOrThrow}
+     * throws
+     */
+    validateInstance(json: object | string, options?: ValidateInstanceOptions): ValidationResult<Resource> {
+        return engineValidateInstance().validateInstance(this, json, options);
+    }
+
+    /**
+     * Validates an instance as {@link BaseModelManager#validateInstance}
+     * does, and returns it as a Resource (accordproject/concerto#1239).
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {Resource|null} the resource, or `null` with `hydrate: false`
+     * @throws {ValidationException|TypeNotFoundException|Error} what
+     * {@link Serializer#fromJSON} throws for the instance, with its
+     * diagnostics as `details`
+     */
+    validateInstanceOrThrow(json: object | string, options?: ValidateInstanceOptions): Resource | null {
+        return engineValidateInstance().validateInstanceOrThrow(this, json, options);
+    }
+
+    /**
      * Get the decorator factories for this model manager.
      * @return {DecoratorFactory[]} The decorator factories for this model manager.
      */
@@ -785,16 +1331,9 @@ class BaseModelManager {
      * @returns {boolean} True if this instance is an instance of the specified fully
      * qualified type name, false otherwise.
      */
-    derivesFrom(fqt1, fqt2) {
-        // Check to see if this is an exact instance of the specified type.
-        let typeDeclaration = this.getType(fqt1);
-        while (typeDeclaration) {
-            if (typeDeclaration.getFullyQualifiedName() === fqt2) {
-                return true;
-            }
-            typeDeclaration = typeDeclaration.getSuperTypeDeclaration();
-        }
-        return false;
+    derivesFrom(fqt1, fqt2): boolean {
+        // A non-string `fqt2` names no type, so '' is walked.
+        return this.rustHandle.derivesFrom(typeNameArgument(fqt1), typeof fqt2 === 'string' ? fqt2 : '');
     }
 
     /**
@@ -822,18 +1361,11 @@ class BaseModelManager {
      * @returns {boolean} True if fqn is assignable to baseFqn
      */
     isAssignableTo(fqn: string, baseFqn: string): boolean {
-        let typeDeclaration;
-        try {
-            typeDeclaration = this.getType(fqn);
-        } catch (e) {
+        // As TS, false for a non-string `fqn`; '' for a non-string `baseFqn`.
+        if (typeof fqn !== 'string') {
             return false;
         }
-
-        if (typeDeclaration.isAbstract()) {
-            return false;
-        }
-
-        return this.derivesFrom(fqn, baseFqn);
+        return this.rustHandle.isAssignableTo(fqn, typeof baseFqn === 'string' ? baseFqn : '');
     }
 
     /**
@@ -854,12 +1386,36 @@ class BaseModelManager {
      */
     fromAst(ast: IModels, options?: { disableValidation?: boolean }) {
         this.clearModelFiles();
-        ast.models.forEach( (model: IModel) => {
-            if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
-                const modelFile = new ModelFile( this, model );
-                this.addModelFile( modelFile, null, null, true );
+        // Runs commit in one engine call, so a throw leaves what TS had added.
+        const batching = this.addModelFile === BaseModelManager.prototype.addModelFile;
+        let run: ModelFileInstance[] = [];
+        const runNamespaces = new Set<string>();
+        const commitRun = () => {
+            if (run.length > 0) {
+                const files = run;
+                run = [];
+                runNamespaces.clear();
+                this._addStagedModelFiles(files);
             }
-        });
+        };
+        try {
+            ast.models.forEach( (model: IModel) => {
+                if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
+                    const modelFile = new ModelFile( this, model ) as ModelFileInstance;
+                    const namespace = modelFile.getNamespace();
+                    if (batching && modelFile.getVersion() && !this.modelFiles[namespace] &&
+                        !runNamespaces.has(namespace) && this._needsRustWrite(namespace)) {
+                        run.push(modelFile);
+                        runNamespaces.add(namespace);
+                    } else {
+                        commitRun();
+                        this.addModelFile( modelFile, null, null, true );
+                    }
+                }
+            });
+        } finally {
+            commitRun();
+        }
         if (!options?.disableValidation) {
             this.validateModelFiles();
         }
@@ -889,6 +1445,60 @@ class BaseModelManager {
 
 
     /**
+     * Returns a new ModelManager over the same model files as this one,
+     * with the same options and decorator factories, without loading or
+     * validating any model file again. Unlike a `filter` that keeps every
+     * declaration, every model file is kept, including one with no
+     * declarations, and no predicate is called.
+     *
+     * The fork is independent of this manager from then on: model files
+     * added to, updated in or deleted from either one never reach the
+     * other. A server can therefore keep one base manager of its common
+     * models and fork it per request, each request adding its own models to
+     * its own fork. The engine shares the base's model files with every
+     * fork instead of copying them, and a fork starts with the base's warmed
+     * per-type caches. A fork's ModelFile views are its own; their
+     * declarations are built on first use. Memory is released by the
+     * garbage collector when a fork is no longer referenced.
+     * @returns {BaseModelManager} the fork, of this manager's own class
+     */
+    fork(): this {
+        if (this._mirrorPending) {
+            throw new Error('A ModelManager cannot be forked while model files are being added to it');
+        }
+        const fork = Object.create(Object.getPrototypeOf(this)) as this;
+        ModelFile._registerManager(fork);
+        fork.processFile = this.processFile;
+        fork.modelFiles = {};
+        fork.factory = new Factory(fork);
+        fork.options = this.options === undefined ? undefined : { ...this.options };
+        fork.serializer = new Serializer(fork.factory, fork, fork.options);
+        fork.serializer.defaultOptions = Object.assign({}, this.serializer.defaultOptions);
+        fork.decoratorFactories = this.decoratorFactories.slice();
+        fork.decoratorValidation = this.decoratorValidation;
+        fork._mirrorPending = false;
+        fork._engine = newEngineState();
+        fork._modelFileIds = new Map(this._modelFileIds);
+        fork._rustPreloaded = new Set(this._rustPreloaded);
+        fork.rustHandle = this.rustHandle.fork();
+        fork._buildingMetamodelCopy = false;
+        installLazyMetamodelCopy(fork);
+        const handle = fork.rustHandle;
+        for (const namespace of Object.keys(this.modelFiles)) {
+            const source = this.modelFiles[namespace];
+            fork.modelFiles[namespace] = ModelFile._sharedView(fork, source, source.getDefinitions(), undefined, handle) as ModelFileInstance;
+        }
+        // A registered metamodel copy stays the fork's registered view.
+        const copy = Object.getOwnPropertyDescriptor(this, 'metamodelModelFile');
+        if (copy !== undefined && 'value' in copy && this.modelFiles[MetaModelNamespace] === copy.value) {
+            fork.metamodelModelFile = fork.modelFiles[MetaModelNamespace];
+        }
+        const namespaces = namespaceListOf(this);
+        fork._engine.namespaces = namespaces?.slice();
+        return fork;
+    }
+
+    /**
      * A function type definition for use as an argument to the filter function
      * @callback FilterFunction
      * @param {Declaration} declaration
@@ -901,6 +1511,12 @@ class BaseModelManager {
      *
      * ModelFiles with no declarations after filtering will be removed.
      *
+     * The model files the new ModelManager holds from its constructor (the
+     * decorator and root models, and the metamodel under `addMetamodel`)
+     * are kept whole: the predicate is not called on their declarations
+     * (an import of one is always kept), and this manager's copies are not
+     * added again (BC-53; v5.0.0 re-added the decorator model and threw).
+     *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @param {Object} [options] - options for the filter method
      * @param {boolean} [options.disableValidation] — If true then the model files are not validated
@@ -909,12 +1525,16 @@ class BaseModelManager {
     filter(predicate, options?){
         const modelManager = new BaseModelManager({...this.options}, this.processFile);
         const filteredModels: ModelFileInstance[] = [];
+        // BC-53: the new manager's own system declarations are always kept.
+        const keep = (declaration) =>
+            modelManager.modelFiles[declaration.getNamespace()] !== undefined || predicate(declaration);
 
         for (const modelFile of Object.values(this.modelFiles) as ModelFileInstance[]) {
-            if (modelFile.isSystemModelFile()) {
+            // BC-53: skip every file the new manager already holds.
+            if (modelFile.isSystemModelFile() || modelManager.modelFiles[modelFile.getNamespace()] !== undefined) {
                 continue;
             }
-            const filtered = modelFile.filter(predicate, modelManager);
+            const filtered = modelFile.filter(keep, modelManager);
             if (filtered) {
                 filteredModels.push(filtered);
             }

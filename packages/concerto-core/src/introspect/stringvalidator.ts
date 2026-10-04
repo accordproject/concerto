@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-import { ErrorCodes, NullUtil } from '@accordproject/concerto-util';
-const { isNull } = NullUtil;
 import Validator from './validator';
 
 // Types needed for TypeScript generation.
@@ -27,6 +25,7 @@ import type { IStringLengthValidator, IStringRegexValidator } from '@accordproje
 import type Field from './field';
 import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
+import { rust } from '../engineloader';
 
 /**
  * A Validator to enforce that a string matches a regex
@@ -38,9 +37,12 @@ class StringValidator extends Validator{
     declare validator: IStringRegexValidator | undefined;
     // The metamodel makes both bounds optional, so an AST can leave either
     // absent as well as explicitly null.
-    minLength: number | null | undefined;
-    maxLength: number | null | undefined;
-    regex: RegExp | null;
+    // Definitely assigned from the Rust snapshot.
+    minLength!: number | null | undefined;
+    maxLength!: number | null | undefined;
+    // BC-28: a native RegExp of the pattern the engine compiled, for
+    // getRegex() and matchesRegex(); `validate` uses the engine's regex.
+    regex!: RegExp | null;
 
     /**
      * Create a StringValidator.
@@ -52,42 +54,10 @@ class StringValidator extends Validator{
      */
     constructor(field: ValidatedElement, validator?: IStringRegexValidator, lengthValidator?: IStringLengthValidator) {
         super(field, validator);
-        this.minLength = null;
-        this.maxLength = null;
-        this.regex = null;
 
-        if (lengthValidator) {
-            this.minLength = lengthValidator?.minLength;
-            this.maxLength = lengthValidator?.maxLength;
-
-            if(this.minLength === null && this.maxLength === null) {
-                // can't specify no upper and lower value
-                this.reportError(field.getName(), 'Invalid string length, minLength and-or maxLength must be specified.');
-            } else if ((this.minLength ?? 0) < 0 || (this.maxLength ?? 0) < 0) {
-                this.reportError(field.getName(), 'minLength and-or maxLength must be positive integers.');
-            } else if (this.minLength === null || this.maxLength === null) {
-                // this is fine and means that we don't need to check whether minLength > maxLength
-            } else if(this.minLength !== undefined && this.maxLength !== undefined && this.minLength > this.maxLength) {
-                this.reportError(field.getName(), 'minLength must be less than or equal to maxLength.');
-            }
-        }
-
-        if (validator) {
-            try {
-                // ScalarDeclarations have no parent, so the custom RegExp option
-                // is only picked up for properties
-                const parent = 'getParent' in field ? field.getParent() : undefined;
-                const CustomRegExp = (parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp) as typeof RegExp;
-                this.regex = new CustomRegExp(validator.pattern, validator.flags);
-            }
-            catch (exception) {
-                this.reportError(field.getName(), (exception as Error).message, ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
-            }
-        }
-
-        if(this.field?.ast?.defaultValue) {
-            this.validate(field.getName(), this.field.ast.defaultValue);
-        }
+        // BC-28: the engine compiles the pattern and checks the bounds and default.
+        Object.assign(this, rust.stringValidatorNew(this, validator, lengthValidator));
+        this.regex = validator ? new RegExp(validator.pattern, validator.flags) : null;
     }
 
     /**
@@ -98,19 +68,7 @@ class StringValidator extends Validator{
      * @private
      */
     validate(identifier: string | null, value: string): void {
-        if(value !== null) {
-            //Enforce string length rule first
-            if(this.minLength !== null && this.minLength !== undefined && value.length < this.minLength) {
-                this.reportError(identifier, `The string length of '${value}' should be at least ${this.minLength} characters.`);
-            }
-            if(this.maxLength !== null && this.maxLength !== undefined && value.length > this.maxLength) {
-                this.reportError(identifier, `The string length of '${value}' should not exceed ${this.maxLength} characters.`);
-            }
-
-            if (this.regex && !this.matchesRegex(value)) {
-                this.reportError(identifier, `Value '${value}' failed to match validation regex: ${this.regex}`);
-            }
-        }
+        rust.stringValidatorValidate(this, identifier, value);
     }
 
     /**
@@ -167,35 +125,7 @@ class StringValidator extends Validator{
      * validator, false otherwise.
      */
     compatibleWith(other: Validator | null): boolean {
-        if (!(other instanceof StringValidator)) {
-            return false;
-        }
-
-        if (this.validator?.pattern !== other.validator?.pattern) {
-            return false;
-        } else if (this.validator?.flags !== other.validator?.flags) {
-            return false;
-        }
-
-        const thisMinLength = this.getMinLength();
-        const otherMinLength = other.getMinLength();
-        if (isNull(thisMinLength) && !isNull(otherMinLength)) {
-            return false;
-        } else if (!isNull(thisMinLength) && !isNull(otherMinLength)) {
-            if (thisMinLength < otherMinLength) {
-                return false;
-            }
-        }
-        const thisMaxLength = this.getMaxLength();
-        const otherMaxLength = other.getMaxLength();
-        if (isNull(thisMaxLength) && !isNull(otherMaxLength)) {
-            return false;
-        } else if (!isNull(thisMaxLength) && !isNull(otherMaxLength)) {
-            if (thisMaxLength > otherMaxLength) {
-                return false;
-            }
-        }
-        return true;
+        return rust.stringValidatorCompatibleWith(this, other, StringValidator);
     }
 }
 

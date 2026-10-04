@@ -1,0 +1,80 @@
+15:37:48 weak round 1 one-process start load 1.58 1.93 2.03
+15:38:42 weak round 1 mm_new alone start load 1.56 1.94 2.03
+15:38:43 weak round 1 modelfile_new alone start load 1.56 1.94 2.03
+15:38:50 weak round 1 add_model_file alone start load 1.47 1.91 2.02
+15:39:37 weak round 2 one-process start load 1.30 1.83 1.99
+15:40:31 weak round 2 mm_new alone start load 1.52 1.86 1.99
+15:40:32 weak round 2 modelfile_new alone start load 1.52 1.86 1.99
+15:40:39 weak round 2 add_model_file alone start load 1.44 1.83 1.98
+15:40:57 weak probe one-process start load 1.34 1.79 1.97
+15:41:53 weak probe mm_new alone start load 1.25 1.74 1.94
+15:41:53 weak probe modelfile_new alone start load 1.31 1.74 1.94
+15:42:02 weak probe add_model_file alone start load 1.29 1.73 1.93
+15:42:21 weak done
+15:42:21 round 1 ts modelfile_new start load 1.35 1.71 1.92
+15:42:22 round 1 ts modelfile_new end load 1.35 1.71 1.92
+15:42:22 round 1 rust modelfile_new start load 1.35 1.71 1.92
+15:42:27 round 1 rust modelfile_new end load 1.32 1.70 1.92
+15:42:27 round 1 ts add_model_file start load 1.32 1.70 1.92
+15:42:29 round 1 ts add_model_file end load 1.30 1.69 1.91
+15:42:29 round 1 rust add_model_file start load 1.30 1.69 1.91
+15:42:37 round 1 rust add_model_file end load 1.27 1.68 1.91
+15:42:37 round 1 ts add_cto_model start load 1.27 1.68 1.91
+15:42:53 round 1 ts add_cto_model end load 1.19 1.63 1.89
+15:42:53 round 1 rust add_cto_model start load 1.19 1.63 1.89
+15:43:23 round 1 rust add_cto_model end load 1.88 1.75 1.92
+15:43:23 round 1 ts extract_cold start load 1.88 1.75 1.92
+15:43:29 round 1 ts extract_cold end load 1.89 1.75 1.92
+15:43:29 round 1 rust extract_cold start load 1.89 1.75 1.92
+15:43:44 round 1 rust extract_cold end load 1.96 1.78 1.93
+15:43:44 round 1 typedread-dlmalloc start load 1.96 1.78 1.93
+15:43:46 round 1 typedread-dlmalloc end load 1.96 1.78 1.93
+15:43:46 round 1 typedread-talc start load 1.96 1.78 1.93
+15:43:48 round 1 typedread-talc end load 1.96 1.78 1.93
+15:43:48 round 1 native start load 1.96 1.78 1.93
+15:43:48 round 1 native end load 1.96 1.78 1.93
+15:43:48 round 2 rust modelfile_new start load 1.96 1.78 1.93
+15:43:52 round 2 rust modelfile_new end load 1.89 1.77 1.92
+15:43:52 round 2 ts modelfile_new start load 1.89 1.77 1.92
+15:43:53 round 2 ts modelfile_new end load 1.89 1.77 1.92
+15:43:53 round 2 rust add_model_file start load 1.89 1.77 1.92
+15:44:02 round 2 rust add_model_file end load 1.83 1.76 1.92
+15:44:02 round 2 ts add_model_file start load 1.83 1.76 1.92
+15:44:05 round 2 ts add_model_file end load 1.76 1.75 1.91
+15:44:05 round 2 rust add_cto_model start load 1.76 1.75 1.91
+15:44:35 round 2 rust add_cto_model end load 1.75 1.75 1.91
+15:44:35 round 2 ts add_cto_model start load 1.75 1.75 1.91
+15:44:52 round 2 ts add_cto_model end load 1.59 1.72 1.89
+15:44:52 round 2 rust extract_cold start load 1.59 1.72 1.89
+15:45:09 round 2 rust extract_cold end load 1.56 1.70 1.88
+15:45:09 round 2 ts extract_cold start load 1.56 1.70 1.88
+15:45:15 round 2 ts extract_cold end load 1.51 1.69 1.88
+15:45:15 round 2 typedread-talc start load 1.51 1.69 1.88
+15:45:17 round 2 typedread-talc end load 1.51 1.69 1.88
+15:45:17 round 2 typedread-dlmalloc start load 1.51 1.69 1.88
+15:45:19 round 2 typedread-dlmalloc end load 1.47 1.68 1.87
+15:45:19 round 2 native start load 1.47 1.68 1.87
+15:45:19 round 2 native end load 1.47 1.68 1.87
+15:45:19 round 3 ts modelfile_new start load 1.47 1.68 1.87
+15:45:20 round 3 ts modelfile_new end load 1.47 1.68 1.87
+15:45:20 round 3 rust modelfile_new start load 1.47 1.68 1.87
+15:45:25 round 3 rust modelfile_new end load 1.51 1.68 1.87
+15:45:25 round 3 ts add_model_file start load 1.51 1.68 1.87
+15:45:27 round 3 ts add_model_file end load 1.51 1.68 1.87
+15:45:27 round 3 rust add_model_file start load 1.51 1.68 1.87
+15:45:36 round 3 rust add_model_file end load 1.51 1.68 1.87
+15:45:36 round 3 ts add_cto_model start load 1.51 1.68 1.87
+15:45:53 round 3 ts add_cto_model end load 1.53 1.68 1.87
+15:45:53 round 3 rust add_cto_model start load 1.53 1.68 1.87
+15:46:26 round 3 rust add_cto_model end load 2.70 1.95 1.95
+15:46:56 round 3 ts extract_cold start load 1.64 1.76 1.89
+15:47:02 round 3 ts extract_cold end load 1.58 1.75 1.88
+15:47:02 round 3 rust extract_cold start load 1.58 1.75 1.88
+15:47:18 round 3 rust extract_cold end load 1.99 1.83 1.91
+15:47:18 round 3 typedread-dlmalloc start load 1.99 1.83 1.91
+15:47:20 round 3 typedread-dlmalloc end load 1.99 1.83 1.91
+15:47:20 round 3 typedread-talc start load 1.99 1.83 1.91
+15:47:22 round 3 typedread-talc end load 1.99 1.83 1.91
+15:47:22 round 3 native start load 1.99 1.83 1.91
+15:47:22 round 3 native end load 1.99 1.83 1.91
+15:47:22 timed done

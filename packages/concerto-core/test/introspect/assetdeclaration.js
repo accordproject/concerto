@@ -15,38 +15,31 @@
 'use strict';
 
 const { AssetDeclaration } = require('../../src/introspect/assetdeclaration');
+const { IllegalModelException } = require('../../src/introspect/illegalmodelexception');
 const { ModelManager } = require('../../src/modelmanager');
+const { TypeNotFoundException } = require('../../src/typenotfoundexception');
 const ParserUtil = require('./parserutility');
 const fs = require('fs');
 
 const should = require('chai').should();
-const sinon = require('sinon');
 
 describe('AssetDeclaration', () => {
 
-    let mockModelManager;
-    let mockClassDeclaration;
-    let mockSystemAsset;
-    let sandbox;
+    // The fixtures import com.hyperledger.elsewhere@1.0.0.BaseAsset.
+    const elsewhereModel = `namespace com.hyperledger.elsewhere@1.0.0
+abstract asset BaseAsset {
+    o String baseProp
+}`;
+    let modelManager;
 
     beforeEach(() => {
-        sandbox = sinon.createSandbox();
-        mockModelManager = sinon.createStubInstance(ModelManager);
-        mockSystemAsset = sinon.createStubInstance(AssetDeclaration);
-        mockSystemAsset.getFullyQualifiedName.returns('org.hyperledger.composer.system@1.0.0.Asset');
-        mockClassDeclaration = sinon.createStubInstance(AssetDeclaration);
-        mockModelManager.getType.returns(mockClassDeclaration);
-        mockClassDeclaration.getProperties.returns([]);
-        mockClassDeclaration.declarationKind.returns('AssetDeclaration');
-    });
-
-    afterEach(() => {
-        sandbox.restore();
+        modelManager = new ModelManager();
+        modelManager.addCTOModel(elsewhereModel);
     });
 
     let loadAssetDeclaration = (modelFileName) => {
         let modelDefinitions = fs.readFileSync(modelFileName, 'utf8');
-        let modelFile = ParserUtil.newModelFile(mockModelManager, modelDefinitions, null, false);
+        let modelFile = ParserUtil.newModelFile(modelManager, modelDefinitions, null, false);
         let assets = modelFile.getAssetDeclarations();
         assets.should.have.lengthOf(1);
 
@@ -55,7 +48,7 @@ describe('AssetDeclaration', () => {
 
     let loadLastAssetDeclaration = (modelFileName) => {
         let modelDefinitions = fs.readFileSync(modelFileName, 'utf8');
-        let modelFile = ParserUtil.newModelFile(mockModelManager, modelDefinitions);
+        let modelFile = ParserUtil.newModelFile(modelManager, modelDefinitions);
         let assets = modelFile.getAssetDeclarations();
         return assets[assets.length - 1];
     };
@@ -76,16 +69,16 @@ describe('AssetDeclaration', () => {
         // });
 
         it('should throw when it fails to resolve an imported base asset', () => {
-            mockModelManager.getType.returns(null);
+            // A model manager without the imported namespace.
+            modelManager = new ModelManager();
             let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.resolve.cto');
             (() => {
-                asset.validate();
-            }).should.throw(/Could not find super type/);
+                modelManager.validateModelFile(asset.getModelFile());
+            }).should.throw(IllegalModelException);
         });
 
         it('should throw when identifying field is not a string', () => {
             let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.numid.cto');
-            mockModelManager.getType.returns(mockClassDeclaration);
             (() => {
                 asset.validate();
             }).should.throw(/Class "TestAsset" is identified by field "assetId", but the type of the field is not "String". Line 19 column 1, to line 21 column 2. /);
@@ -117,13 +110,9 @@ describe('AssetDeclaration', () => {
     describe('#getProperty', () => {
 
         it('should resolve an imported base property', () => {
-            let mockAssetDeclaration = sinon.createStubInstance(AssetDeclaration);
-            mockModelManager.getType.returns(mockAssetDeclaration);
-            mockAssetDeclaration.getProperty.returns(null);
             let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.resolve.cto');
             should.equal(asset.getProperty('noSuchProperty'), null);
-            sinon.assert.calledOnce(mockAssetDeclaration.getProperty);
-            sinon.assert.calledWith(mockAssetDeclaration.getProperty, 'noSuchProperty');
+            asset.getProperty('baseProp').getFullyQualifiedName().should.equal('com.hyperledger.elsewhere@1.0.0.BaseAsset.baseProp');
         });
 
     });
@@ -131,11 +120,12 @@ describe('AssetDeclaration', () => {
     describe('#getProperties', () => {
 
         it('should throw if base type not found', () => {
-            mockModelManager.getType.returns(null);
+            // A model manager without the imported namespace.
+            modelManager = new ModelManager();
             let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.resolve.cto');
             (() => {
                 asset.getProperties();
-            }).should.throw(/Could not find super type/);
+            }).should.throw(TypeNotFoundException);
         });
 
     });
