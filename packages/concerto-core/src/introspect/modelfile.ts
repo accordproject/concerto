@@ -1005,8 +1005,10 @@ class ModelFile extends Decorated {
      * @return {object} The definitions for this model.
      */
     getAst(): IModel {
-        // a ModelFile is always constructed from a metamodel Model node
-        return this.ast as IModel;
+        // a ModelFile is always constructed from a metamodel Model node. A
+        // view of a file `filter` kept whole reads TS 5.0.0's filtered form,
+        // built on first read (engine/views-staging.ts `filteredViewAst`).
+        return engineViews().filteredViewAst(this) as IModel;
     }
 
     /**
@@ -1268,7 +1270,9 @@ class ModelFile extends Decorated {
             if (filtered.stage !== undefined) {
                 // As TS 5.0.0's filtered file, the view has its own
                 // shallow copy of the AST (a new declarations array and
-                // copies of the imports), not this file's AST object.
+                // copies of the imports), not this file's AST object. Its
+                // `getAst()` adds the default super types TS 5.0.0's
+                // filtered file has, on first read (R2A-4).
                 const ast = {
                     ...this.ast,
                     declarations: this.ast.declarations.slice(),

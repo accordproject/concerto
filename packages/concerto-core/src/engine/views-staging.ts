@@ -489,6 +489,15 @@ function adoptSharedView(modelFile: any, source: any, stage?: Stage, committed?:
     if (sourceState?.shapeChecked !== undefined && sourceState.shapeChecked === source.ast) {
         state.shapeChecked = modelFile.ast;
     }
+    // R2A-4: a staged view is `filter`'s, of a file it kept whole, which the
+    // engine shares: its `getAst()` is TS 5.0.0's filtered form, built on
+    // first read (`filteredViewAst`). A fork's view, of `source`'s own AST
+    // object, reads it as `source` does.
+    if (stage !== undefined) {
+        state.filteredAst = { ast: undefined };
+    } else if (modelFile.ast === source.ast) {
+        state.filteredAst = sourceState?.filteredAst;
+    }
     const factories = modelFile.modelManager.getDecoratorFactories();
     const lazy = sourceState?.lazy !== undefined || !(Array.isArray(factories) && factories.length > 0);
     if (lazy) {
@@ -874,6 +883,60 @@ function updateExternalStaged(modelFiles: any[], handle: any, next: object): boo
     return updated;
 }
 
+/** The default super type TS 5.0.0's `ModelFile._declarationView` gives each declaration `$class`. */
+const DEFAULT_SUPER_TYPES = new Map([
+    ['AssetDeclaration', 'Asset'],
+    ['TransactionDeclaration', 'Transaction'],
+    ['EventDeclaration', 'Event'],
+    ['ParticipantDeclaration', 'Participant'],
+].map(([kind, name]) => [`concerto.metamodel@1.0.0.${kind}`, name]));
+
+/**
+ * The default super type `_declarationView` gives the declaration AST
+ * `node`, or undefined when it gives none.
+ */
+function defaultSuperType(node: any): string | undefined {
+    return node.superType ? undefined : DEFAULT_SUPER_TYPES.get(node.$class);
+}
+
+/**
+ * `ModelFile.getAst()`: the view's AST, or, for a view of a file
+ * `ModelFile.filter` kept whole (R2A-4, `adoptSharedView`), TS 5.0.0's
+ * filtered form of it. TS 5.0.0 builds a filtered file from each kept
+ * declaration's own `ast`, so an asset, participant, transaction or event
+ * with no super type has the default one its view was given. The engine
+ * shares the source's file instead, so the form is built here on the first
+ * read, a copy with a new declarations array, and kept: the view's own
+ * `ast`, which its declaration views and lookups are built from, is not
+ * changed. A view no declaration of which takes a default super type
+ * reads its own `ast`.
+ */
+function filteredViewAst(modelFile: any): object {
+    const form = stateOf(modelFile)?.filteredAst;
+    if (form === undefined) {
+        return modelFile.ast;
+    }
+    if (form.ast === undefined) {
+        // `filter` stages only a file with declarations, so `declarations`
+        // is an array of declaration nodes.
+        const ast = modelFile.ast;
+        const declarations: any[] = ast.declarations;
+        form.ast = declarations.some((node) => defaultSuperType(node) !== undefined)
+            ? {
+                ...ast,
+                declarations: declarations.map((node) => {
+                    const name = defaultSuperType(node);
+                    return name === undefined ? node : {
+                        ...node,
+                        superType: { $class: 'concerto.metamodel@1.0.0.TypeIdentified', name },
+                    };
+                }),
+            }
+            : ast;
+    }
+    return form.ast as object;
+}
+
 /**
  * `ModelFile.validate()` over the staged or registered file; false when
  * neither applies.
@@ -905,6 +968,7 @@ export {
     commitStagedAll,
     copyImportNames,
     dropStaged,
+    filteredViewAst,
     markSystemModelAst,
     recordImportNames,
     recordedImportNames,

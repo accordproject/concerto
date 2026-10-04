@@ -78,6 +78,7 @@ export {
     commitStagedAll,
     copyImportNames,
     dropStaged,
+    filteredViewAst,
     markSystemModelAst,
     recordImportNames,
     recordedImportNames,

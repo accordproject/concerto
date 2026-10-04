@@ -39,6 +39,12 @@ interface FileState {
     deferred: DeferredFile | undefined;
     /** The rustHandle the ModelFile was registered in from its stage. */
     committed: object | undefined;
+    /**
+     * R2A-4: set for a view of a file `ModelFile.filter` kept whole, whose
+     * `getAst()` is TS 5.0.0's filtered form (`filteredViewAst`), built on
+     * the first read and kept in `ast`. A fork's view of it shares it.
+     */
+    filteredAst: { ast: object | undefined } | undefined;
 }
 
 const fileStates = new WeakMap<object, FileState>();
@@ -57,6 +63,7 @@ function fileState(modelFile: object): FileState {
             shapePending: undefined,
             deferred: undefined,
             committed: undefined,
+            filteredAst: undefined,
         };
         fileStates.set(modelFile, state);
     }
