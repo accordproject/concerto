@@ -1,0 +1,215 @@
+{
+  "tool": "p560-bundle",
+  "esbuild": "0.27.7",
+  "node": "v22.22.2",
+  "v5Version": "5.0.0",
+  "enginePkg": "/home/user/wt/P5-121/concerto-rust/concerto-wasm/pkg",
+  "parts": {
+    "jsWithoutEnginePkg": {
+      "E1-keepnames": {
+        "raw": 441531,
+        "gzip": 112053,
+        "brotli": 83449
+      },
+      "E1": {
+        "raw": 419425,
+        "gzip": 105229,
+        "brotli": 78140
+      },
+      "E2-keepnames": {
+        "raw": 441558,
+        "gzip": 112094,
+        "brotli": 83569
+      },
+      "E2": {
+        "raw": 419452,
+        "gzip": 105251,
+        "brotli": 78239
+      },
+      "E3-keepnames": {
+        "raw": 439797,
+        "gzip": 111892,
+        "brotli": 83424
+      },
+      "E3": {
+        "raw": 417691,
+        "gzip": 105054,
+        "brotli": 78006
+      }
+    },
+    "wasm": {
+      "raw": 3577737,
+      "gzip": 1145040,
+      "brotli": 745862
+    },
+    "wasmBase64": {
+      "raw": 4770316,
+      "gzip": 1665059,
+      "brotli": 1073155
+    },
+    "engineMjs": {
+      "raw": 4771181,
+      "gzip": 1665776,
+      "brotli": 1073416
+    },
+    "engineCjsRaw": 4926127
+  },
+  "results": [
+    {
+      "entry": "E1",
+      "engine": "v5.0.0",
+      "label": "E1-v5",
+      "keepNames": true,
+      "file": "E1-v5-keepnames.mjs",
+      "raw": 387945,
+      "gzip": 94331,
+      "brotli": 67666,
+      "enginePkgBytesInOutput": 0,
+      "output": "[\"org.example.p560@1.0.0.Age\",\"org.example.p560@1.0.0.Party\",\"  partyId:String\",\"  name:String\",\"  $identifier:String\",\"org.example.p560@1.0.0.Tier\",\"  GOLD:undefined\",\"  SILVER:undefined\",\"org.example.p560@1.0.0.Customer\",\"  age:Age\",\"  since:DateTime\",\"  emails:String\",\"  tier:Tier\",\"  referrals:Customer\",\"  partyId:String\",\"  name:String\",\"  $identifier:String\"]",
+      "error": null
+    },
+    {
+      "entry": "E1",
+      "engine": "rust",
+      "label": "E1-engine",
+      "keepNames": true,
+      "file": "E1-engine-keepnames.mjs",
+      "raw": 5265387,
+      "gzip": 1788419,
+      "brotli": 1166285,
+      "enginePkgBytesInOutput": 4772926,
+      "output": "[\"org.example.p560@1.0.0.Age\",\"org.example.p560@1.0.0.Party\",\"  partyId:String\",\"  name:String\",\"  $identifier:String\",\"org.example.p560@1.0.0.Tier\",\"  GOLD:undefined\",\"  SILVER:undefined\",\"org.example.p560@1.0.0.Customer\",\"  age:Age\",\"  since:DateTime\",\"  emails:String\",\"  tier:Tier\",\"  referrals:Customer\",\"  partyId:String\",\"  name:String\",\"  $identifier:String\"]",
+      "error": null
+    },
+    {
+      "entry": "E1",
+      "engine": "v5.0.0",
+      "label": "E1-v5",
+      "keepNames": false,
+      "file": "E1-v5.mjs",
+      "raw": 371689,
+      "gzip": 89498,
+      "brotli": 63899,
+      "enginePkgBytesInOutput": 0,
+      "output": "[\"org.example.p560@1.0.0.Age\",\"org.example.p560@1.0.0.Party\",\"  partyId:String\",\"  name:String\",\"  $identifier:String\",\"org.example.p560@1.0.0.Tier\",\"  GOLD:undefined\",\"  SILVER:undefined\",\"org.example.p560@1.0.0.Customer\",\"  age:Age\",\"  since:DateTime\",\"  emails:String\",\"  tier:Tier\",\"  referrals:Customer\",\"  partyId:String\",\"  name:String\",\"  $identifier:String\"]",
+      "error": null
+    },
+    {
+      "entry": "E1",
+      "engine": "rust",
+      "label": "E1-engine",
+      "keepNames": false,
+      "file": "E1-engine.mjs",
+      "raw": 5238476,
+      "gzip": 1780528,
+      "brotli": 1159449,
+      "enginePkgBytesInOutput": 4772894,
+      "output": "[\"org.example.p560@1.0.0.Age\",\"org.example.p560@1.0.0.Party\",\"  partyId:String\",\"  name:String\",\"  $identifier:String\",\"org.example.p560@1.0.0.Tier\",\"  GOLD:undefined\",\"  SILVER:undefined\",\"org.example.p560@1.0.0.Customer\",\"  age:Age\",\"  since:DateTime\",\"  emails:String\",\"  tier:Tier\",\"  referrals:Customer\",\"  partyId:String\",\"  name:String\",\"  $identifier:String\"]",
+      "error": null
+    },
+    {
+      "entry": "E2",
+      "engine": "v5.0.0",
+      "label": "E2-v5",
+      "keepNames": true,
+      "file": "E2-v5-keepnames.mjs",
+      "raw": 387972,
+      "gzip": 94372,
+      "brotli": 67691,
+      "enginePkgBytesInOutput": 0,
+      "output": "{\"$class\":\"org.example.p560@1.0.0.Customer\",\"age\":42,\"since\":\"2024-01-02T03:04:05.000Z\",\"emails\":[\"a@example.com\"],\"tier\":\"GOLD\",\"referrals\":[\"resource:org.example.p560@1.0.0.Customer#c2\"],\"partyId\":\"c1\",\"name\":\"Ann Lee\",\"$identifier\":\"c1\"}",
+      "error": null
+    },
+    {
+      "entry": "E2",
+      "engine": "rust",
+      "label": "E2-engine",
+      "keepNames": true,
+      "file": "E2-engine-keepnames.mjs",
+      "raw": 5265414,
+      "gzip": 1788468,
+      "brotli": 1165997,
+      "enginePkgBytesInOutput": 4772926,
+      "output": "{\"$class\":\"org.example.p560@1.0.0.Customer\",\"age\":42,\"since\":\"2024-01-02T03:04:05.000Z\",\"emails\":[\"a@example.com\"],\"tier\":\"GOLD\",\"referrals\":[\"resource:org.example.p560@1.0.0.Customer#c2\"],\"partyId\":\"c1\",\"name\":\"Ann Lee\",\"$identifier\":\"c1\"}",
+      "error": null
+    },
+    {
+      "entry": "E2",
+      "engine": "v5.0.0",
+      "label": "E2-v5",
+      "keepNames": false,
+      "file": "E2-v5.mjs",
+      "raw": 371716,
+      "gzip": 89568,
+      "brotli": 64036,
+      "enginePkgBytesInOutput": 0,
+      "output": "{\"$class\":\"org.example.p560@1.0.0.Customer\",\"age\":42,\"since\":\"2024-01-02T03:04:05.000Z\",\"emails\":[\"a@example.com\"],\"tier\":\"GOLD\",\"referrals\":[\"resource:org.example.p560@1.0.0.Customer#c2\"],\"partyId\":\"c1\",\"name\":\"Ann Lee\",\"$identifier\":\"c1\"}",
+      "error": null
+    },
+    {
+      "entry": "E2",
+      "engine": "rust",
+      "label": "E2-engine",
+      "keepNames": false,
+      "file": "E2-engine.mjs",
+      "raw": 5238503,
+      "gzip": 1780554,
+      "brotli": 1159489,
+      "enginePkgBytesInOutput": 4772894,
+      "output": "{\"$class\":\"org.example.p560@1.0.0.Customer\",\"age\":42,\"since\":\"2024-01-02T03:04:05.000Z\",\"emails\":[\"a@example.com\"],\"tier\":\"GOLD\",\"referrals\":[\"resource:org.example.p560@1.0.0.Customer#c2\"],\"partyId\":\"c1\",\"name\":\"Ann Lee\",\"$identifier\":\"c1\"}",
+      "error": null
+    },
+    {
+      "entry": "E3",
+      "engine": "v5.0.0",
+      "label": "E3-v5",
+      "keepNames": true,
+      "file": "E3-v5-keepnames.mjs",
+      "raw": 386211,
+      "gzip": 94184,
+      "brotli": 67510,
+      "enginePkgBytesInOutput": 0,
+      "output": "[[\"Party\",\"Participant\",\"Concept\"],[\"age\",\"since\",\"emails\",\"tier\",\"referrals\",\"partyId\",\"name\",\"$identifier\"]]",
+      "error": null
+    },
+    {
+      "entry": "E3",
+      "engine": "rust",
+      "label": "E3-engine",
+      "keepNames": true,
+      "file": "E3-engine-keepnames.mjs",
+      "raw": 5263653,
+      "gzip": 1788245,
+      "brotli": 1165190,
+      "enginePkgBytesInOutput": 4772926,
+      "output": "[[\"Party\",\"Participant\",\"Concept\"],[\"age\",\"since\",\"emails\",\"tier\",\"referrals\",\"partyId\",\"name\",\"$identifier\"]]",
+      "error": null
+    },
+    {
+      "entry": "E3",
+      "engine": "v5.0.0",
+      "label": "E3-v5",
+      "keepNames": false,
+      "file": "E3-v5.mjs",
+      "raw": 369955,
+      "gzip": 89370,
+      "brotli": 63697,
+      "enginePkgBytesInOutput": 0,
+      "output": "[[\"Party\",\"Participant\",\"Concept\"],[\"age\",\"since\",\"emails\",\"tier\",\"referrals\",\"partyId\",\"name\",\"$identifier\"]]",
+      "error": null
+    },
+    {
+      "entry": "E3",
+      "engine": "rust",
+      "label": "E3-engine",
+      "keepNames": false,
+      "file": "E3-engine.mjs",
+      "raw": 5236742,
+      "gzip": 1780355,
+      "brotli": 1159203,
+      "enginePkgBytesInOutput": 4772894,
+      "output": "[[\"Party\",\"Participant\",\"Concept\"],[\"age\",\"since\",\"emails\",\"tier\",\"referrals\",\"partyId\",\"name\",\"$identifier\"]]",
+      "error": null
+    }
+  ]
+}
