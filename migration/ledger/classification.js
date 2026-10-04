@@ -479,6 +479,8 @@ const P5_11 = {
     'src/decoratormanager.ts': {
         'assignDeep': { c: 'TS', r: 'merges the result of the RUST decoratorManagerMigrateTo into the caller\'s object in place, to preserve JS object identity (a JS-only concern). ' + R.p511 },
         'DecoratorManager.canMigrate': { c: 'TS', r: 'JS-side helper: a semver comparison of the command set\'s namespace version. ' + R.p511 },
+        'intersect': { c: 'TS', r: 'TS 5.0.0\'s string-array intersection, the helper of falsyOrEqual (P5-116 R2E-1)' },
+        'DecoratorManager.falsyOrEqual': { c: 'TS', r: 'TS 5.0.0\'s body restored for parity (substring match on a string values, TypeError on undefined values): pure work over data TS holds, so no engine crossing (P5-116 R2E-1)' },
     },
     'src/decoratormodelhelper.ts': {
         'getDecoratorModel': { c: 'TS', r: R.fixedData },
