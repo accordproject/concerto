@@ -17,7 +17,7 @@
 /**
  * P5-14 lifted checks (accordproject/concerto-rust#308): the property
  * lookup cache on ClassDeclaration views (`getProperties()`,
- * `getProperty()`; packages/concerto-core/src/engine/views.ts) is dropped
+ * `getProperty()`; packages/concerto-core/src/engine/views-lookups.ts) is dropped
  * at every point where TS 5.0.0 could answer differently: a model file
  * added, updated (replaced) or deleted, the model files cleared, and a
  * failed `addModelFiles` batch rolled back.

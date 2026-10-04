@@ -345,7 +345,7 @@ class ClassDeclaration extends Declaration {
      */
     getIdentifierFieldName(): string | null {
         // The whole super type walk runs in one engine call, and the answer
-        // is memoised per view until the models change (engine/views.ts).
+        // is memoised per view until the models change (engine/views-lookups.ts).
         // BC-50: the walk inlines the ClassDeclaration methods it reaches,
         // so replacing them at runtime does not change the answer.
         return engineViews().classDeclarationGetIdentifierFieldName(this) as string | null;
@@ -446,7 +446,7 @@ class ClassDeclaration extends Declaration {
      */
     getProperty(name: string): Property | null {
         // The `classDeclarationGetProperty` binding, answered from the
-        // view's cached property list when it has one (engine/views.ts).
+        // view's cached property list when it has one (engine/views-lookups.ts).
         return engineViews().classDeclarationGetProperty(this, name) as Property | null;
     }
 
@@ -490,7 +490,7 @@ class ClassDeclaration extends Declaration {
      */
     getProperties(): Property[] {
         // The `classDeclarationGetProperties` binding, cached per view
-        // (engine/views.ts).
+        // (engine/views-lookups.ts).
         return engineViews().classDeclarationGetProperties(this) as Property[];
     }
 

@@ -20,14 +20,14 @@
  * results they replace.
  *
  * - The flat staging header (concerto-wasm `stageModelFileBytes`, P5-101,
- *   read by engine/views.ts `applyStagedFileHeader`): a ModelFile's
+ *   read by engine/views-staging.ts `applyStagedFileHeader`): a ModelFile's
  *   version, `importShortNames` (in order), `importUriMap` and
  *   `getImports()` are v5.0.0's, for plain, aliased and URI-carrying
  *   imports, with and without BC-19's shape check. (P5-103 removed the
  *   checks of the object result, which P5-101 had already removed from the
  *   engine.)
  * - The remembered text of the metamodel copy every `new ModelManager()`
- *   builds from one shared constant AST (engine/views.ts `stableAstText`):
+ *   builds from one shared constant AST (engine/views-staging.ts `stableAstText`):
  *   a change to that constant is seen by the next manager, which checks
  *   and loads the changed AST, and a change back is accepted again.
  * - `declarations` and `localTypes`, which P5-100 (E-13,

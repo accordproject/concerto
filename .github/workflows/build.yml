@@ -9,6 +9,9 @@ on:
     branches:
       - main
       - v4.0.0 # Temporary, while we prepare for merge to main
+      # The Rust migration's integration branch: its PRs are built and
+      # tested the same way before they merge.
+      - claude/tender-pascal-ocwf9q
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

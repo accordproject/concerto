@@ -146,7 +146,7 @@ n += 2;
  * stored as-is. `BaseModelManager`/`ModelFile` forwarded that raw value to
  * several wasm `Option<String>` params via `x ?? undefined` (which maps
  * only null/undefined), trapping the engine at each of: `stageModelFile`
- * (engine/views.ts, run by the `ModelFile` constructor itself),
+ * (engine/views-staging.ts, run by the `ModelFile` constructor itself),
  * `_rustMirrorAdd`'s and `_rustMirrorUpdate`'s `addModelWithDefinitions`/
  * `updateModelFile` calls, `ModelFile#validate()`'s
  * `modelFileValidateDetached` fallback, and `BaseModelManager#validateAst`

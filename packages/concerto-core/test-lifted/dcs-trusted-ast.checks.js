@@ -16,7 +16,7 @@
 
 /**
  * P5-68 lifted checks (BC-19-a, accordproject/concerto-rust#407): the
- * DecoratorManager result managers (engine/views.ts `adoptStagedModels`)
+ * DecoratorManager result managers (engine/views-staging.ts `adoptStagedModels`)
  * skip the BC-19 AST shape check for the ASTs the engine has just written
  * from models that all passed it (`dcsSourceShapeChecked`), and, for
  * `decorateModels`, only when every command's decorator and the imports

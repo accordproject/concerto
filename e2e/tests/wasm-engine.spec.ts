@@ -22,7 +22,7 @@ import { installEngineBundler, WASM_PKG_DIR } from './support/engine-bundler';
 // browser-bundles.spec.ts exercises; accordproject/concerto-rust#70,
 // #115/P4-11a). The test calls public API
 // (ModelUtil, ModelManager, ScalarDeclaration) whose views reach the engine
-// through their `loadEngine` -> `module.require(specifier)`.
+// through src/engineloader.ts's `loadEngine` -> `module.require(specifier)`.
 //
 // Browser rust mode needs a bundler (or a host that supplies a synchronous
 // `require`): the views load the engine synchronously, and a browser cannot
@@ -84,8 +84,9 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
         // the synchronous `require` calls in the engine code at build time,
         // so at run time each one returns an already-loaded module; the
         // stand-in loads those modules up front with `import()` and answers
-        // the synchronous calls from that registry: the views'
-        // `module.require('./engine' | '../engine' | '../engine/<subpath>')`,
+        // the synchronous calls from that registry: src/engineloader.ts's
+        // `module.require('./engine' | './engine/<subpath>')` (the one loader
+        // every public module reaches the engine through),
         // src/engine/rust.ts's `require('@accordproject/concerto-engine')`,
         // and the engine's own `require`s of public modules, which resolve to
         // the SAME module instances the public graph uses.
@@ -95,19 +96,16 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
         const result = await page.evaluate(async (baseUrl) => {
             // The thing under test: the PUBLIC browser entry point only. No
             // engine function is called directly; every Rust-backed result
-            // below comes from public API whose view went through
-            // loadEngine. Importing the entry runs modelutil.ts's './engine'
-            // and the other views' module-level '../engine' (introspect/
-            // scalardeclaration.ts and others). Validating a model with a
-            // scalar range goes through ModelManager, ModelFile and
-            // ScalarDeclaration's '../engine/views' snapshot path, which
-            // builds its NumberValidator through the engine. addCTOModel's
-            // write to rustHandle also goes through BaseModelManager's own
-            // '_rustMirrorAdd' (P5-10a lazy views), which lazily requires
-            // engine/views.ts for every model file added (dropStaged /
-            // commitStaged) -- that is basemodelmanager.ts's own top-level
-            // './engine/views' (a sibling of engine/, unlike introspect/'s
-            // '../engine/views').
+            // below comes from public API that reached the engine through
+            // src/engineloader.ts. Its module-level `loadEngine('./engine')`
+            // already ran while the bundler stand-in loaded the engine (the
+            // engine's modules import public modules that share the loader's
+            // chunk), so that request is part of the discarded setup.
+            // Building the model goes through ModelManager, ModelFile and
+            // ScalarDeclaration's snapshot path, which builds its
+            // NumberValidator through the engine views. The loader requires
+            // './engine/views' on the first `engineViews()` call of the public
+            // graph (introspect/field.ts's top level, or this path).
             const { ModelUtil, ModelManager } = await import(`${baseUrl}/concerto-core/index.mjs`);
 
             const modelManager = new ModelManager();
@@ -124,9 +122,8 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
             const validator = scalarDeclaration.getValidator();
 
             return {
-                // Which engine specifiers the public views' loadEngine asked
-                // the bundler stand-in for: proof the results below came
-                // through the views' loadEngine.
+                // Which engine specifiers engineloader.ts asked the bundler
+                // stand-in for: proof the results below came through it.
                 viewEngineRequests: [...(globalThis as any).__concertoBundler.requested as Set<string>]
                     .filter((s) => /^\.\.?\/engine/.test(s)).sort(),
                 capitalized: ModelUtil.capitalizeFirstLetter('vehicle'),
@@ -140,24 +137,32 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
                 // does, not by its (possibly renamed) constructor.name.
                 lowerBound: validator?.getLowerBound?.(),
                 upperBound: validator?.getUpperBound?.(),
+                // P5-110 (accordproject/concerto-rust#477): the engine's
+                // `#[wasm_bindgen(start)]` seeds the hasher of untrusted keys
+                // from crypto.getRandomValues when the module is
+                // instantiated. Read from the SAME engine module instance
+                // src/engine/rust.ts got from the bundler stand-in, taken
+                // from its registry rather than through `require` so the
+                // read is not counted in viewEngineRequests.
+                hashSeed: (globalThis as any).__concertoBundler.bundled
+                    .get('@accordproject/concerto-engine').hashSeed(),
             };
         }, server.baseUrl);
 
         expect(pageErrors).toEqual([]);
         expect(result).toEqual({
-            // './engine/views' (distinct from introspect/'s '../engine/views')
-            // is basemodelmanager.ts's own lazy require of engine/views.ts,
-            // taken by every addCTOModel/addModelFile through
-            // '_rustMirrorAdd' (P5-10a lazy views: dropStaged/commitStaged).
-            // A legitimate new back-reference, not a bug: accordproject/
-            // concerto-rust#282's Browser E2E finding.
-            viewEngineRequests: ['../engine', '../engine/views', './engine', './engine/views'],
+            // engineloader.ts's lazy require of engine/views.ts, the only
+            // engine request the public graph makes after setup. Its
+            // specifiers are all './engine...', relative to src/: no public
+            // module requires '../engine' any more.
+            viewEngineRequests: ['./engine/views'],
             capitalized: 'Vehicle',
             validIdentifier: true,
             invalidIdentifier: false,
             scalarType: 'Integer',
             lowerBound: 0,
             upperBound: null,
+            hashSeed: { source: 'crypto', probe: expect.stringMatching(/^[0-9a-f]{16}$/) },
         });
     });
 });

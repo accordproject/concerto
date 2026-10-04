@@ -17,7 +17,7 @@
 /**
  * P5-55 lifted checks (T1, F-A1, accordproject/concerto-rust#376): the
  * DecoratorManager operations run on the source ModelManager's own engine
- * handle (engine/views.ts `sourceDcsHandle`) instead of on a copy of its
+ * handle (engine/views-dcs.ts `sourceDcsHandle`) instead of on a copy of its
  * models, checked through the public API against the frozen v5.0.0
  * reference. Run by fallbacks.spec.js.
  *

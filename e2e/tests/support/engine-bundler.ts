@@ -100,6 +100,8 @@ export function engineModules(): string[] {
  * therefore everything the public graph asked for, whether that happened
  * while resolving these shared modules here or later while a test imports
  * and exercises the public entry point.
+ * `globalThis.__concertoBundler.bundled` is the registry itself, keyed as
+ * above (`@accordproject/concerto-engine`, `engine/<name>`, specifiers).
  *
  * @param {Page} page - the Playwright page
  * @param {string} baseUrl - the server's base URL
@@ -123,7 +125,10 @@ export async function installEngineBundler(page: Page, baseUrl: string): Promise
         // first time its build imports it.
         (globalThis as any).module = { require: bundlerRequire };
         (globalThis as any).require = bundlerRequire;
-        (globalThis as any).__concertoBundler = { requested };
+        // `bundled` lets a test read a registry entry (e.g. the engine
+        // module, for hashSeed()) without going through `require`, so the
+        // read is not recorded in `requested`.
+        (globalThis as any).__concertoBundler = { requested, bundled };
 
         // The engine bytes are inlined and instantiated synchronously by this
         // module at import time (concerto-wasm/scripts/inline.mjs).
