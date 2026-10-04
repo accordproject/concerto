@@ -1567,12 +1567,15 @@ class BaseModelManager {
      */
     isAssignableTo(fqn: string, baseFqn: string): boolean {
         // The binding's `&str` parameters cannot take a non-string (a JS
-        // non-string traps the engine). TS 5.0.0 answered false for any
-        // non-string argument.
-        if (typeof fqn !== 'string' || typeof baseFqn !== 'string') {
+        // non-string traps the engine). TS 5.0.0 answered false for a
+        // non-string `fqn` (`getType` throws, and is caught). A non-string
+        // `baseFqn` is no type's name: as TS's walk, the answer is false,
+        // unless the walk of `fqn`'s super types throws, so the engine walks
+        // it against '', which no declaration is named.
+        if (typeof fqn !== 'string') {
             return false;
         }
-        return this.rustHandle.isAssignableTo(fqn, baseFqn);
+        return this.rustHandle.isAssignableTo(fqn, typeof baseFqn === 'string' ? baseFqn : '');
     }
 
     /**

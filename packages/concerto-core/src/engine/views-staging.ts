@@ -551,9 +551,9 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
 
 /**
  * The load step for a view of `source` (`ModelFile._sharedView`), which
- * shares its AST and engine-side file: records the shared stage or
- * committing handle, and `source`'s shape-check mark. Lazy when `source` was
- * or the manager has no decorator factories.
+ * shares its engine-side file and its AST (or an equal copy of it): records
+ * the shared stage or committing handle, and `source`'s shape-check mark.
+ * Lazy when `source` was or the manager has no decorator factories.
  */
 function adoptSharedView(modelFile: any, source: any, stage?: Stage, committed?: object): boolean {
     const state = fileState(modelFile);
@@ -565,8 +565,9 @@ function adoptSharedView(modelFile: any, source: any, stage?: Stage, committed?:
         state.committed = committed;
     }
     const sourceState = fileStates.get(source);
+    // The view's AST is `source`'s, or `filter`'s equal shallow copy of it.
     if (sourceState?.shapeChecked !== undefined && sourceState.shapeChecked === source.ast) {
-        state.shapeChecked = sourceState.shapeChecked;
+        state.shapeChecked = modelFile.ast;
     }
     const factories = modelFile.modelManager.getDecoratorFactories();
     const lazy = sourceState?.lazy !== undefined || !(Array.isArray(factories) && factories.length > 0);

@@ -125,10 +125,12 @@ class ResourceValidator {
 
         if (!ModelUtil.isPrimitiveType(type.getType())) {
 
-            // thing might be a Concept, Scalar String, Scalar DateTime
-            let thing = mapDeclaration.getModelFile()
-                .getAllDeclarations()
-                .find(decl => decl.name === type.getType());
+            // thing might be a Concept, Scalar String, Scalar DateTime.
+            // DV-023: resolved through the map's model file, imports
+            // included, as the engine resolves it; TS 5.0.0 looked only at
+            // the file's own declarations, so an imported type was never
+            // validated.
+            let thing = mapDeclaration.getModelFile().getType(type.getType()) ?? undefined;
 
             // if Key or Value is Scalar, get the Base Type of the Scalar for primitive validation.
             if (ModelUtil.isScalar(mapDeclaration.getKey())) {

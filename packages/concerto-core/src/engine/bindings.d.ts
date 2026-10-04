@@ -129,7 +129,6 @@ export interface EngineBindings {
 
     // DecoratorManager
     decoratorManagerMigrateTo(decoratorCommandSet: object): object;
-    decoratorManagerFalsyOrEqual(test: string | string[] | null, values: string[]): boolean;
     /** The property's decorators after the command, to assign onto it. */
     decoratorManagerExecutePropertyCommand(property: object, command: object): object;
 

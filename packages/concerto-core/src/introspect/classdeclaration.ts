@@ -39,6 +39,10 @@ import { rust, engineValidateInstance, engineViews } from '../engineloader';
  * non-string `$class` (a declaration built from a stub AST with
  * `metamodelValidation: false`) gives `''`, which matches no kind, so
  * `isAsset()` and its siblings return false as the TS string checks did.
+ * Only the last segment is compared, so under `metamodelValidation: false`
+ * (the trusted-input escape hatch) a `$class` outside the metamodel whose
+ * last segment is a kind (`foo.AssetDeclaration`) matches it, where TS
+ * 5.0.0 compared the whole metamodel name.
  * @param {string} type - the declaration's `$class` (`this.type`)
  * @return {string} its short name
  * @private
@@ -509,12 +513,10 @@ class ClassDeclaration extends Declaration {
      * @return {String} the string representation of the class
      */
     toString(): string {
-        // Built here, as the engine's
-        // `ClassDeclaration::to_string` builds it: a
-        // `ClassDeclaration` receiver is never an enum
-        // (`EnumDeclaration` overrides this).
-        const superType = this.superType === null || this.superType === undefined ? '' : ` super=${this.superType}`;
-        return `ClassDeclaration {id=${this.getFullyQualifiedName()}${superType} enum=false abstract=${this.abstract}}`;
+        // As TS 5.0.0 builds it: a truthy super type, and the class's own
+        // `isEnum()` and `isAbstract()`, which a subclass may override.
+        const superType = this.superType ? ` super=${this.superType}` : '';
+        return `ClassDeclaration {id=${this.getFullyQualifiedName()}${superType} enum=${this.isEnum()} abstract=${this.isAbstract()}}`;
     }
 
     /**

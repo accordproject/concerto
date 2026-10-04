@@ -376,6 +376,15 @@ without editing `packages/concerto-core/test/**`:
   its siblings) on a `ClassDeclaration` built from a stub AST with no
   `$class`, under `metamodelValidation: false`, return false as on v5.0.0
   rather than throwing a TypeError.
+* `review-fixes-p5-116.checks.js` (task P5-116,
+  accordproject/concerto-rust#486): the TS 5.0.0 parity fixes of the second
+  end-to-end review: `DecoratorManager.falsyOrEqual`, type names written
+  with their own namespace, `derivesFrom` and `isAssignableTo` over a broken
+  chain, duplicate aliases, `getImportURI`, enum, scalar and unknown
+  `$class` values nested in an instance, `ModelFile.filter`'s default super
+  types and AST copy, the metamodel version mismatch and
+  `ClassDeclaration.toString`. A throw is reduced to its class; DV-023 and
+  BC-53 have v5.0.0's outcome as `reference`.
 
 `serializer-fallback.checks.js` also passes a boxed `utcOffset`
 (`new Number(0)`) to `fromJSON`: the codec cannot carry it, so plain, valid
