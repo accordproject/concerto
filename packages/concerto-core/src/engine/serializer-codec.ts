@@ -12,31 +12,20 @@
  * limitations under the License.
  */
 
-// The wire codec for the Serializer fast path (P4-10; PORTING.md section 5
-// row 6, D7). `Serializer.fromJSON`/`toJSON` cross the WASM boundary in one
-// call each, instead of per field through the TS visitors (which keep
-// their shells and stay the fallback path, plan §3).
+// The wire codec of the Serializer fast path: `Serializer.fromJSON`/`toJSON`
+// cross in one call each instead of per field through the TS visitors.
 //
 // Plain JSON crosses unchanged. Anything else is a one-key object tagged
-// `@@oracle` (matching concerto-wasm's own `WIRE_TAG`, and the oracle
-// harness's own codec), so that a value JSON cannot hold (a non-finite
-// number or `-0`, `undefined`, a `Map`, a dayjs, an already-`Resource`/
-// `ValidatedResource`/`Relationship` field) still round-trips.
-//
-// A `"typed"` value's `fields` holds every own property of the TS object,
-// in order, `$`-prefixed handles included (`$namespace`, `$type`,
-// `$identifierFieldName`, `$identifier`, `$timestamp`, and `$class` for a
-// `Relationship`) except `$modelManager`/`$classDeclaration`/`$validator`,
-// which this codec never sends or expects. A dayjs crosses as `(epoch ms,
-// utcOffset minutes)` (PORTING.md 3.3), never a date object: D7 keeps dayjs
-// construction in TS, so `decodeTagged` rebuilds one from that pair.
+// `@@oracle` (concerto-wasm's `WIRE_TAG`), so a value JSON cannot hold (a
+// non-finite number or `-0`, `undefined`, a `Map`, a dayjs, a
+// `Resource`/`ValidatedResource`/`Relationship`) round-trips. A `"typed"`
+// value's `fields` holds every own property of the object, `$`-prefixed ones
+// included, except `$modelManager`/`$classDeclaration`/`$validator`. A dayjs
+// crosses as `(epoch ms, utcOffset minutes)`, and is rebuilt in TS.
 //
 // `encodeValue` throws `EngineFastPathUnsupported` for anything it cannot
-// express this way (a stubbed instance, a class other than the three
-// listed above, a function, a symbol, or an object or array reached twice:
-// a cycle or a shared reference, whose identity a JSON tree cannot carry);
-// the fast path catches it and falls
-// back to the TS visitor path, exactly as an unconverted call would run.
+// express (another class, a function, a symbol, or an object reached twice);
+// the caller then falls back to the TS visitors.
 
 import dayjs from '../dayjs-setup';
 import { EngineFastPathUnsupported, isDayjsLike, isTypedLike, hasLoneSurrogate } from './util';
@@ -52,9 +41,8 @@ const TAG = '@@oracle';
 const hasOwn = Object.prototype.hasOwnProperty;
 
 /**
- * Throws `EngineFastPathUnsupported` for a string the engine cannot receive
- * unchanged: one with a lone surrogate. The caller falls back to the TS
- * path, which keeps it as is.
+ * Throws `EngineFastPathUnsupported` for a string with a lone surrogate,
+ * which the engine cannot receive unchanged.
  * @param {string} s the string (a value, an object key or a map key)
  */
 function checkString(s: string): void {
@@ -65,13 +53,8 @@ function checkString(s: string): void {
 
 /**
  * Throws `EngineFastPathUnsupported` for an object key the codec cannot
- * carry: a lone surrogate (`checkString`), or `__proto__`. On the TS side
- * `out['__proto__'] = x` would set the prototype instead of an own
- * property, so the key would vanish (and `ResourceValidator`'s "Unexpected
- * properties ... __proto__" check with it); rather than special-case it
- * across the boundary, the whole call falls back to the TS path, which
- * treats it exactly as ts mode does.
- * @param {string} key the key
+ * carry: a lone surrogate, or `__proto__` (`out['__proto__'] = x` would set
+ * the prototype, losing the key), so the TS path treats it instead.
  */
 function checkKey(key: string): void {
     if (key === '__proto__') {
@@ -80,16 +63,13 @@ function checkKey(key: string): void {
     checkString(key);
 }
 
-// The three own properties a "typed" value never carries across (they are
-// handles the engine has no use for; `$validator` is rebuilt on decode from
-// the serializer's own options instead).
+// The handles a "typed" value never carries (`$validator` is rebuilt on
+// decode from the serializer's options).
 const TYPED_SKIP = new Set(['$modelManager', '$classDeclaration', '$validator']);
 
 /**
  * A live Resource/ValidatedResource/Relationship in the `"typed"` wire
  * shape (module doc).
- * @param {object} v the instance
- * @return {object} its wire encoding
  */
 function encodeTyped(v, seen: Set<object>) {
     const ctorName = typedCtorName(v);
@@ -105,13 +85,10 @@ function encodeTyped(v, seen: Set<object>) {
 }
 
 /**
- * Marks `v` as visited on this encode, throwing `EngineFastPathUnsupported`
- * if it was already visited: a cycle (`vehicle.logEntries[0].vehicle ===
- * vehicle`) would recurse forever, and a value shared between two places
- * (the same `Resource` as a field of two parents, which `toJSON`'s
- * `deduplicateResources` relies on) would cross as two independent copies,
- * losing the identity the TS visitors see. Either way the fast path cannot
- * express it, so the caller falls back to the visitor path.
+ * Marks `v` as visited on this encode. A cycle would recurse forever, and a
+ * value shared between two places (which `toJSON`'s `deduplicateResources`
+ * relies on) would cross as two copies, so either throws
+ * `EngineFastPathUnsupported`.
  * @param {object} v the object or array about to be encoded
  * @param {Set<object>} seen the objects already visited on this encode
  */
@@ -124,9 +101,7 @@ function visit(v: object, seen: Set<object>): void {
 
 /**
  * A JS runtime value as the wire value the engine reads (module doc).
- * @param {*} v the value
  * @param {Set<object>} [seen] the objects already visited on this encode (see `visit`)
- * @return {*} its wire encoding
  */
 function encodeValue(v, seen: Set<object> = new Set()) {
     if (v === undefined) {
@@ -186,11 +161,9 @@ function encodeValue(v, seen: Set<object> = new Set()) {
 }
 
 // ---------------------------------------------------------------------
-// P5-101 (E-7, F-8; accordproject/concerto-rust#455): the same wire value,
-// written straight from the live object in the compact binary layout
-// (wire.ts) instead of built as a tagged object tree and then
-// `JSON.stringify`d. The engine reads the bytes as it reads that text
-// (concerto-wasm `parse_wire_bytes`).
+// The same wire value written straight from the live object in the compact
+// binary layout (wire.ts), which the engine reads as it reads the text
+// (`parse_wire_bytes`).
 // ---------------------------------------------------------------------
 
 /** The one writer of the Serializer fast path's binary input. */
@@ -201,8 +174,7 @@ let valueWriterBusy = false;
 
 /**
  * How deep the binary write nests before it leaves the value to the text
- * path, as ast-codec.ts does: below the engine's JSON reader's limit (128),
- * so a value that text rejects for its depth is still sent, and rejected,
+ * path: below the engine's JSON limit (128), so a value too deep is rejected
  * as text.
  */
 const MAX_BINARY_DEPTH = 100;
@@ -214,15 +186,10 @@ class TextPathOnly extends Error {
 /**
  * `encodeValue(v)`'s wire value in the compact binary layout: a view of the
  * writer's buffer, valid until the next call. Undefined when the value is
- * left to the text path (`JSON.stringify(encodeValue(v))`), which then
- * throws what it always threw: a value `encodeValue` cannot express
- * (`EngineFastPathUnsupported`), one nested deeper than
- * `MAX_BINARY_DEPTH`, a non-finite number where `encodeValue` would not
- * tag one, or a call made while the writer is in use. Any other error (a
- * throwing getter) propagates, as from `encodeValue`, which reads the same
- * properties in the same order.
- * @param {*} v the value
- * @return {Uint8Array | undefined} its bytes
+ * left to the text path, which throws what it always threw (a value
+ * `encodeValue` cannot express, one nested deeper than `MAX_BINARY_DEPTH`,
+ * or a call while the writer is in use). Any other error (a throwing getter)
+ * propagates, as from `encodeValue`.
  */
 function encodeBytes(v: unknown): Uint8Array | undefined {
     if (valueWriterBusy) {
@@ -248,7 +215,6 @@ function encodeBytes(v: unknown): Uint8Array | undefined {
  * A one-key-or-more tagged object's head: the object header with `count`
  * entries, and its `TAG` entry.
  * @param {number} count the entries, the tag's included
- * @param {string} kind the tag's value
  */
 function writeTagHead(count: number, kind: string): void {
     const at = valueWriter.beginObject();
@@ -257,10 +223,7 @@ function writeTagHead(count: number, kind: string): void {
     valueWriter.str(kind);
 }
 
-/**
- * A finite number `encodeValue` writes as itself.
- * @param {number} n the number
- */
+/** A finite number `encodeValue` writes as itself. */
 function writeNumber(n: number): void {
     if (!Number.isFinite(n)) {
         throw new TextPathOnly();
@@ -270,7 +233,6 @@ function writeNumber(n: number): void {
 
 /**
  * `encodeValue(v, seen)`, written to `valueWriter` (`encodeBytes`).
- * @param {*} v the value
  * @param {Set<object>} seen the objects already visited on this encode
  * @param {number} depth how deep `v` is
  */
@@ -284,9 +246,8 @@ function writeWireValue(v, seen: Set<object>, depth: number): void {
         return;
     }
     if (typeof v === 'string') {
-        // P5-113: `rawStr` throws `checkString`'s error for a lone
-        // surrogate (the only non-ASCII case it checks), so the string is
-        // not scanned twice.
+        // `rawStr` throws for a lone surrogate, so the string is scanned
+        // once.
         w.str(v);
         return;
     }
@@ -309,8 +270,7 @@ function writeWireValue(v, seen: Set<object>, depth: number): void {
         const n = v.length;
         w.array(n);
         for (let i = 0; i < n; i++) {
-            // A hole (`encodeValue`'s `map` keeps it) is `null` in
-            // `JSON.stringify`'s text.
+            // A hole is `null` in `JSON.stringify`'s text.
             if (i in v) {
                 writeWireValue(v[i], seen, depth + 1);
             } else {
@@ -323,9 +283,8 @@ function writeWireValue(v, seen: Set<object>, depth: number): void {
         visit(v, seen);
         writeTagHead(2, 'map');
         w.rawStr('entries');
-        // P5-113: the entries written as the map yields them, with no
-        // `[key, value]` array per entry, and their count patched in after
-        // (the map's own size, unless writing a value changed the map).
+        // No `[key, value]` array per entry; the count is patched in after
+        // (a value's getter may change the map).
         const countAt = w.pos + 1;
         w.array(0);
         let count = 0;
@@ -384,8 +343,6 @@ function writeWireValue(v, seen: Set<object>, depth: number): void {
 /**
  * The object of `v`'s own enumerable keys (less `skip`) and their values,
  * as `encodeValue` and `encodeTyped` build it.
- * @param {object} v the object
- * @param {Set<string>|undefined} skip the keys left out
  * @param {Set<object>} seen the objects already visited on this encode
  * @param {number} depth how deep `v` is
  */
@@ -393,12 +350,9 @@ function writeEntries(v, skip: Set<string> | undefined, seen: Set<object>, depth
     const w = valueWriter;
     const countAt = w.beginObject();
     let count = 0;
-    // P5-113 (accordproject/concerto-rust#480): `for...in` with an own
-    // check visits the keys `Object.keys` lists, in the same order, but
-    // reads each value through V8's enumeration cache, where `v[key]` for a
-    // key from `Object.keys` is a full property lookup (most of the encode
-    // of a large map: a 1,000-key object). `rawStr` throws `checkKey`'s
-    // error for a lone surrogate, so only `__proto__` is checked here.
+    // `for...in` with an own check visits `Object.keys` order but reads each
+    // value through V8's enumeration cache. `rawStr` checks lone surrogates,
+    // so only `__proto__` is checked here.
     for (const key in v) {
         if (!hasOwn.call(v, key) || (skip !== undefined && skip.has(key))) {
             continue;
@@ -416,13 +370,8 @@ function writeEntries(v, skip: Set<string> | undefined, seen: Set<object>, depth
 let modelClassesCache: any;
 
 /**
- * The public model classes `materializeTyped` constructs, required once on
- * first use and cached (P5-06: it runs once per decoded instance).
- * Required late, not at module load: these are the public model classes,
- * not engine-only code, and a late require avoids a load-order cycle with
- * them (P5-02 removed the CONCERTO_ENGINE=ts|rust flag: the whole directory
- * is rust-mode code now, but the public model classes it requires here are
- * not).
+ * The public model classes `materializeTyped` constructs, required on first
+ * use (a late require avoids a load-order cycle) and cached.
  * @return {object} `{Resource, ValidatedResource, Relationship, ResourceValidator}`
  */
 function modelClasses(): any {
@@ -442,13 +391,9 @@ function modelClasses(): any {
 }
 
 /**
- * The wire name (`ctor`) of a Resource/ValidatedResource/Relationship, found
- * by the identity of its constructor against the public model classes (the
- * same module instances the public graph uses, build-esm.js), never by
- * `constructor.name`, which a minifier renames (P5-43,
- * accordproject/concerto-rust#364). Any other class, a subclass of the three
- * included, throws `EngineFastPathUnsupported` (`typed-class:`), as before.
- * @param {object} v a typed-like instance
+ * The wire name (`ctor`) of a Resource/ValidatedResource/Relationship, by
+ * constructor identity, never `constructor.name` (a minifier renames it).
+ * Any other class, a subclass included, throws `EngineFastPathUnsupported`.
  * @return {string} `'Resource'`, `'ValidatedResource'` or `'Relationship'`
  */
 function typedCtorName(v): string {
@@ -467,16 +412,10 @@ function typedCtorName(v): string {
 }
 
 /**
- * What `materializeTyped` needs to know about an instance's class, kept per
- * class (and checked against the constructor, namespace and type it was
- * learned for) by a caller that decodes many
- * instances against the same, unchanged model files (P5-16,
- * accordproject/concerto-rust#310): the class declaration
- * `modelManager.getType(fqn)` answers, and the `$identifierFieldName` the
- * instance constructor computes (`Identifiable`'s constructor looks the
- * type up again, through `getModelFile(ns).getType(fqn)`, for every
- * instance). The caller owns the map and drops it whenever the model files
- * change (`engine/serializer.ts` keeps it next to its handle).
+ * What `materializeTyped` needs about an instance's class, kept per class
+ * (checked against the constructor, namespace and type) while the model files
+ * are unchanged: the class declaration `getType(fqn)` answers, and the
+ * `$identifierFieldName` the constructor computes.
  */
 interface TypeInfo {
     ctor: string;
@@ -487,42 +426,26 @@ interface TypeInfo {
 }
 
 /**
- * The `TypeInfo`s of each class, by fully-qualified name and then by TS
- * class (`ctor`), and the entry found last: a run of instances of one
- * class then compares the name with the last one's instead of hashing it
- * again (P5-16).
+ * The `TypeInfo`s by fully-qualified name and then TS class, and the entry
+ * found last, so a run of one class skips the hash lookup.
  */
 interface TypeCache {
     byFqn: Map<string, Record<string, TypeInfo>>;
     last: { fqn: string; entry: Record<string, TypeInfo> } | undefined;
 }
 
-/**
- * A new, empty `TypeCache`.
- * @return {object} the cache
- */
+/** A new, empty `TypeCache`. */
 function newTypeCache(): TypeCache {
     return { byFqn: new Map(), last: undefined };
 }
 
 /**
- * `new Ctor(modelManager, classDeclaration, ns, type, id, timestamp[, validator])`,
- * the instance's own properties set in the order the constructors set them
- * (`Typed`, then `Identifiable`, then `Relationship`'s `$class` or
- * `ValidatedResource`'s `$validator`), but with `$identifierFieldName`
- * taken from `info`, which the real constructor computed for the first
- * instance of this class (P5-16). Only `newInstance` calls it, with
- * `info` from a `TypeCache`.
+ * `new Ctor(modelManager, classDeclaration, ns, type, id, timestamp[,
+ * validator])`, the own properties set in the constructors' order, but with
+ * `$identifierFieldName` from `info`.
  * @param {Function} Ctor Resource, ValidatedResource or Relationship
  * @param {object} info the class's `TypeInfo`
- * @param {BaseModelManager} modelManager the model manager
- * @param {string} ns the namespace
- * @param {string} type the short type name
- * @param {*} id the identifier
- * @param {*} timestamp the timestamp
  * @param {boolean} isRelationship whether `Ctor` is Relationship
- * @param {*} [validator] the ValidatedResource's validator
- * @return {object} the instance
  */
 function constructCached(Ctor, info: TypeInfo, modelManager: BaseModelManager, ns, type, id, timestamp, isRelationship: boolean, validator?) {
     const resource = Object.create(Ctor.prototype);
@@ -546,20 +469,13 @@ function constructCached(Ctor, info: TypeInfo, modelManager: BaseModelManager, n
 }
 
 /**
- * A `"typed"` wire node (module doc) materialised into a real
- * Resource/ValidatedResource/Relationship, using the real TS classes so
- * that every getter and later mutation (`setPropertyValue`, `toJSON`, ...)
- * behaves exactly as the visitor path's result would.
- *
- * The class lookups are made once per class and kept in `types` (P5-16,
- * `TypeCache`), and the node's fields are decoded in place
- * (`decodeParsed`): the node must be fresh `JSON.parse` output that
- * nothing else holds. (P5-113: every caller decodes such output, so the
- * copying decode without `types` is gone.)
- * @param {object} node the wire node
+ * A `"typed"` wire node materialised into a real
+ * Resource/ValidatedResource/Relationship, so every getter and later mutation
+ * behaves as on the visitor path's result. Class lookups come from `types`;
+ * the fields are decoded in place, so `node` must be fresh `JSON.parse`
+ * output nothing else holds.
  * @param {BaseModelManager} modelManager the model manager to resolve its class in
  * @param {Map} types the caller's `TypeCache`
- * @return {object} the materialised instance
  */
 function materializeTyped(node, modelManager: BaseModelManager, types: TypeCache) {
     const decode = (v) => decodeParsed(v, modelManager, types);
@@ -581,17 +497,12 @@ function materializeTyped(node, modelManager: BaseModelManager, types: TypeCache
 }
 
 /**
- * `materializeTyped` for the compact result of `serializerFromJsonCompact`
- * (concerto-wasm, P5-16): `[ctor, fqn, $namespace, $type,
- * $identifierFieldName, $identifier, $timestamp, fields]`, each value in its
- * wire encoding, where `fields` already leaves out what `materializeTyped`
- * skips. Builds the same instance `materializeTyped` builds from the
- * `"typed"` node of the same resource. `node` must be fresh `JSON.parse`
- * output that nothing else holds (it is decoded in place).
- * @param {Array} node the compact result
+ * `materializeTyped` for `serializerFromJsonCompact`'s result: `[ctor, fqn,
+ * $namespace, $type, $identifierFieldName, $identifier, $timestamp,
+ * fields]`, each in its wire encoding, `fields` without what
+ * `materializeTyped` skips. Decoded in place.
  * @param {BaseModelManager} modelManager the model manager to resolve its class in
  * @param {Map} types the caller's `TypeCache`
- * @return {object} the materialised instance
  */
 function materializeCompact(node, modelManager: BaseModelManager, types: TypeCache) {
     const decode = (v) => decodeParsed(v, modelManager, types);
@@ -605,25 +516,18 @@ function materializeCompact(node, modelManager: BaseModelManager, types: TypeCac
 }
 
 /**
- * The Resource/ValidatedResource/Relationship (by `ctor`) of class `fqn`
- * that `materializeTyped` builds, before its fields are set: through its
- * constructor the first time, then (`types` has this class) `constructCached`.
- * @param {string} ctor the TS class name
- * @param {string} fqn the class's fully-qualified name
- * @param {string} ns the namespace
- * @param {string} type the short type name
- * @param {*} id the identifier
- * @param {*} timestamp the timestamp
+ * The instance of class `fqn` that `materializeTyped` builds, before its
+ * fields are set: through its constructor the first time, then
+ * `constructCached`.
  * @param {BaseModelManager} modelManager the model manager to resolve the class in
  * @param {Map} types the caller's `TypeCache`
- * @return {object} the instance
  */
 function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModelManager, types: TypeCache) {
     const { Resource, ValidatedResource, Relationship, ResourceValidator } = modelClasses();
     const Ctor = ctor === 'ValidatedResource' ? ValidatedResource : ctor === 'Relationship' ? Relationship : Resource;
     const validator = ctor === 'ValidatedResource' ? new ResourceValidator({}) : undefined;
-    // Looked up by the strings `JSON.parse` already made (no key is built),
-    // and checked against the namespace and type it was learned for.
+    // Looked up by the strings `JSON.parse` made, and checked against the
+    // namespace and type it was learned for.
     const last = types.last;
     const entry = last && last.fqn === fqn ? last.entry : types.byFqn.get(fqn);
     const info = entry?.[ctor];
@@ -645,23 +549,14 @@ function newInstance(ctor, fqn, ns, type, id, timestamp, modelManager: BaseModel
     }
     learnedEntry[ctor] = learned;
     types.last = { fqn, entry: learnedEntry };
-    // The first instance of a class is built again the way every later one
-    // is, so that all of them share one object layout (V8 map): the
-    // constructor's instance has a different one, and code that reads
-    // instances of both (validate, toJSON) would see two.
+    // The first instance is rebuilt as every later one is, so they share
+    // one V8 object layout.
     return constructCached(Ctor, learned, modelManager, ns, type, id, timestamp, Ctor === Relationship, validator);
 }
 
 /**
- * `resource[key] = value` as an own, enumerable, writable, configurable
- * data property, whatever `key` is: the model classes define methods only
- * (no accessors), so a plain assignment makes one, except for `__proto__`,
- * which is defined instead, so that a decoded object never gets a
- * prototype from its data (P5-113: this is the only place left that
- * needs it).
- * @param {object} resource the instance
- * @param {string} key the key
- * @param {*} value the value
+ * `resource[key] = value` as an own enumerable data property; `__proto__` is
+ * defined instead, so decoded data never sets a prototype.
  */
 function setField(resource, key: string, value: unknown): void {
     if (key === '__proto__') {
@@ -672,23 +567,12 @@ function setField(resource, key: string, value: unknown): void {
 }
 
 /**
- * A wire value (module doc) as the JS runtime value it decodes to, over
- * fresh `JSON.parse` output that nothing else holds (P5-16): plain arrays
- * are kept and only their tagged members replaced, instead of being
- * copied. The compact result's values are primitives,
- * arrays or tagged values (P5-103 removed the branch for an untagged
- * object, which only the removed `serializerFromJson` result had). P5-113
- * (accordproject/concerto-rust#480): an untagged object, which
- * `serializerToJson`'s result is made of, is kept the same way, only its
- * object members decoded in place, instead of being copied key by key
- * (the copy's `defineProperty` per key was most of the decode of a large
- * map's toJSON). `JSON.parse` already made every key an own, enumerable,
- * writable, configurable data property, `__proto__` included, as that
- * copy did. `types` is `materializeTyped`'s `TypeCache`.
- * @param {*} v the parsed wire value
+ * A wire value as the runtime value it decodes to, over fresh `JSON.parse`
+ * output nothing else holds: arrays and untagged objects are kept and only
+ * their tagged members replaced in place (`JSON.parse` already made every key
+ * an own data property, `__proto__` included).
  * @param {BaseModelManager} modelManager the model manager, for a `"typed"` value
  * @param {Map} types the caller's `TypeCache`
- * @return {*} the decoded value
  */
 function decodeParsed(v, modelManager: BaseModelManager, types: TypeCache) {
     if (v === null || typeof v !== 'object') {
@@ -725,16 +609,11 @@ function decodeParsed(v, modelManager: BaseModelManager, types: TypeCache) {
 }
 
 /**
- * A `"map"` wire value's `entries` (fresh `JSON.parse` output) as a Map,
- * its keys and values decoded by `decodeParsed`
- * (P5-113, accordproject/concerto-rust#480): a `"typed"` value (a
- * relationship-typed map's Relationship) then takes its class lookups from
- * the caller's `TypeCache`, once per class rather than once per value, and
- * no `[key, value]` pair is built per entry.
+ * A `"map"` wire value's `entries` as a Map, each key and value decoded by
+ * `decodeParsed` (so a `"typed"` value takes its class from `types`).
  * @param {Array} entries the `[key, value]` wire pairs
  * @param {BaseModelManager} modelManager the model manager, for a `"typed"` value
  * @param {Map} types the caller's `TypeCache`
- * @return {Map} the decoded map
  */
 function decodeParsedMap(entries, modelManager: BaseModelManager, types: TypeCache): Map<unknown, unknown> {
     const out = new Map();
@@ -746,13 +625,8 @@ function decodeParsedMap(entries, modelManager: BaseModelManager, types: TypeCac
 }
 
 /**
- * A wire value that is a primitive (itself) or one of the tagged values
- * `decodeParsed` leaves to it (`"undefined"`, `"number"`, `"dayjs"`), as
- * the JS runtime value it decodes to. P5-113: arrays, untagged objects,
- * maps and `"typed"` values are `decodeParsed`'s alone, so this no longer
- * copies them.
- * @param {*} v the wire value
- * @return {*} the decoded value
+ * A primitive (itself) or an `"undefined"`, `"number"` or `"dayjs"` tagged
+ * value, as the runtime value it decodes to.
  */
 function decodeTagged(v) {
     if (v === null || typeof v !== 'object') {

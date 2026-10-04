@@ -12,16 +12,14 @@
  * limitations under the License.
  */
 
-// Engine handle release (P5-97, accordproject/concerto-rust#448). P5-100
-// (accordproject/concerto-rust#454) removed the P4-02 handle registry
-// (`registryFor`, a module-level WeakMap by ModelManagerHandle) that no view
-// ever used: per-manager state lives in `BaseModelManager._engine`.
+// Engine handle release. Per-manager state lives in
+// `BaseModelManager._engine`.
 
 /**
- * P5-97 (accordproject/concerto-rust#448): how many engine calls that call
- * back into user code (`ModelFile.filter`'s predicate) are running. While
- * one is, an engine handle it borrows cannot be freed: wasm-bindgen's
- * `free()` panics on a borrowed object.
+ * How many engine calls that call back into user code
+ * (`ModelFile.filter`'s predicate) are running. While one is, an engine
+ * handle it borrows cannot be freed: wasm-bindgen's `free()` panics on a
+ * borrowed object.
  */
 let callbackDepth = 0;
 
@@ -32,15 +30,11 @@ let callbackDepth = 0;
 const pendingRelease: Array<{ free(): void }> = [];
 
 /**
- * Frees `handle` (a concerto-wasm `ModelManagerHandle` the library created
- * for itself and holds no other reference to), so its engine memory is
- * released now rather than when the garbage collector runs its finalizer.
- * Internal only (the maintainer ruled out a public release API): the
- * library calls it for its own short-lived and replaced handles. Deferred
- * while an engine call that runs user code is on the stack
- * (`withEngineCallbacks`), since that call may borrow it; an error from
- * `free()` is ignored, as the finalizer would have freed it anyway.
- * @param {object} handle the handle
+ * Frees `handle`, a `ModelManagerHandle` the library created for itself and
+ * holds no other reference to, now rather than at finalization. Internal
+ * only: there is no public release API. Deferred while an engine call that
+ * runs user code is on the stack (`withEngineCallbacks`), since that call
+ * may borrow it; an error from `free()` is ignored.
  */
 function releaseHandle(handle: { free(): void }): void {
     if (callbackDepth > 0) {
@@ -50,10 +44,7 @@ function releaseHandle(handle: { free(): void }): void {
     freeQuietly(handle);
 }
 
-/**
- * `handle.free()`, ignoring any error.
- * @param {object} handle the handle
- */
+/** `handle.free()`, ignoring any error. */
 function freeQuietly(handle: { free(): void }): void {
     try {
         handle.free();
@@ -65,7 +56,6 @@ function freeQuietly(handle: { free(): void }): void {
 /**
  * Runs `fn`, an engine call that calls back into user code, deferring every
  * `releaseHandle` made meanwhile until the outermost such call returns.
- * @param {Function} fn the engine call
  * @return {*} what `fn` returns
  */
 function withEngineCallbacks<T>(fn: () => T): T {

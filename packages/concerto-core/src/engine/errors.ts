@@ -12,19 +12,11 @@
  * limitations under the License.
  */
 
-// Maps the engine's error payload to the TS exception class (PORTING.md 2.3;
-// P4-02). Every ErrorKind concerto-rust's error/mod.rs raises has an entry
-// here (`Validator`, raised by none since BC-39, and `RecursionLimit`, by
-// none since BC-11 reports a circular super type chain as an
-// IllegalModelException, map to a plain `Error` in concerto-wasm; P5-103
-// removed their entries), so no converted member (from the original P0-04b trial units of
-// ModelUtil, NumberValidator and ScalarDeclaration through to the full
-// conversion at P5-02) is ever left throwing the "unknown engine error kind"
-// fallback.
-//
-// The payload is {kind, code, params, message, location, errorType,
-// modelFile}. `message` is the raw rendered message: each TS constructor
-// decorates it exactly as it does for the TS code path.
+// Maps the engine's error payload, {kind, code, params, message, location,
+// errorType, modelFile}, to the TS exception class. Every ErrorKind the
+// engine sends has an entry here; concerto-wasm maps any other kind to
+// `Error`. `message` is the raw rendered message, which each TS constructor
+// decorates as TS 5.0.0 does.
 
 import IllegalModelException from '../introspect/illegalmodelexception';
 import TypeNotFoundException from '../typenotfoundexception';
@@ -32,9 +24,7 @@ import ValidationException from '../serializer/validationexception';
 import MetamodelException from '../metamodelexception';
 import { FAST_PATH_UNSUPPORTED } from '../engineutil';
 
-/**
- * The error payload the engine hands to the factory.
- */
+/** The error payload the engine hands to the factory. */
 interface ErrorPayload {
     kind: string;
     code: string;
@@ -43,28 +33,20 @@ interface ErrorPayload {
     location?: unknown;
     errorType?: string;
     modelFile?: unknown;
-    // P5-89 (accordproject/concerto#1325): an error about an instance
-    // (`Serializer.fromJSON`, `validateInstance*`) carries its diagnostics,
+    // An instance error's diagnostics (accordproject/concerto#1325):
     // `{code, path, expected?, severity, message}`.
     details?: unknown[];
-    // Whether the engine's own contract (concerto-wasm `throw`, mirroring
-    // concerto-core's `attach_model_file`) considers this `IllegalModel`
-    // error one that TS attaches a model file to at all. False for the
-    // handful of checks TS never attaches a file to (e.g.
-    // `ModelFile.validate`'s duplicate-class-name scan) even though a caller
-    // that owns a `ModelFile` (`this`) is available to attach — see
-    // `ModelFile.validate()` (modelfile.ts), the only caller that consults
-    // this, since `p.modelFile` above is never populated for that binding.
+    // Whether TS attaches a model file to this `IllegalModel` error at all:
+    // false for checks TS never attaches one to (e.g. `ModelFile.validate`'s
+    // duplicate-class-name scan). Read only by `ModelFile.validate()`.
     needsModelFile?: boolean;
-    // P5-101 (E-11, accordproject/concerto-rust#455): the serializer fast
-    // path's wire codec could not carry the value (concerto-wasm
-    // `Error::Unsupported`): the caller runs its TS path instead.
+    // The fast path's wire codec could not carry the value: the caller runs
+    // its TS path instead.
     fastPathUnsupported?: boolean;
 }
 
 /**
- * P5-69 (BC-19-b): the codes of BC-19's AST shape check (concerto-rust
- * `instance::check_ast_shape`, with BC-17 and BC-20), all
+ * The codes of BC-19's AST shape check (with BC-17 and BC-20), all
  * `IllegalModelException`s.
  */
 const AST_SHAPE_CODES = new Set([
@@ -83,25 +65,20 @@ const AST_SHAPE_CODES = new Set([
 interface EngineErrorFlags {
     /** The payload's `needsModelFile` (see {@link ErrorPayload}). */
     needsModelFile?: boolean;
-    /** P5-61: an AST the engine's typed read cannot read. */
+    /** An AST the engine's typed read cannot read. */
     unreadableAst?: boolean;
-    /** P5-69 (BC-19-b): an error of BC-19's AST shape check. */
+    /** An error of BC-19's AST shape check. */
     astShape?: boolean;
     /**
-     * P5-101 (D-9): an error of `validateAst`'s metamodel check, run by
+     * An error of `validateAst`'s metamodel check, run by
      * `validateAndCommitStagedModelFile` (set by the engine itself).
      */
     metamodelCheck?: boolean;
 }
 
 /**
- * Sets one of the engine's internal flags on `err` as a non-enumerable own
- * property (P5-98, E-12), so an engine-thrown exception has the same
- * enumerable shape (what `JSON.stringify`, `Object.keys` or a deep equality
- * sees) as the one TS 5.0.0 throws, as `details` below already is.
- * @param {Error} err the exception
- * @param {string} key the flag
- * @param {boolean} value its value
+ * Sets an internal flag on `err` as a non-enumerable property, so the
+ * exception's enumerable shape matches TS 5.0.0's.
  */
 function setInternalFlag<K extends keyof EngineErrorFlags>(err: Error, key: K, value: EngineErrorFlags[K]): void {
     Object.defineProperty(err, key, { value, enumerable: false, writable: true, configurable: true });
@@ -110,10 +87,8 @@ function setInternalFlag<K extends keyof EngineErrorFlags>(err: Error, key: K, v
 const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     IllegalModel: (p) => {
         const err = new IllegalModelException(p.message, p.modelFile, p.location);
-        // Carried through as a plain property (not a constructor argument):
-        // `IllegalModelException`'s constructor is public API TS callers
-        // construct directly too, and does not itself need this internal
-        // engine-to-caller signal.
+        // A plain property, not a constructor argument: the constructor is
+        // public API.
         if (p.needsModelFile !== undefined) {
             setInternalFlag(err, 'needsModelFile', p.needsModelFile);
         }
@@ -122,32 +97,21 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
         if (p.errorType) {
             err.errorType = p.errorType;
         }
-        // P5-61: an AST the engine's typed read cannot read
-        // (`modelfile-load-unreadable`), which the ModelFile constructor
-        // throws when the shape check is off (engine/views.ts
-        // `stageModelFile`).
+        // An AST the engine's typed read cannot read, which the ModelFile
+        // constructor throws when the shape check is off.
         if (p.code === 'modelfile-load-unreadable') {
             setInternalFlag(err, 'unreadableAst', true);
         }
-        // P5-69 (BC-19-b): an error of BC-19's AST shape check, which the
-        // engine's folded load (`stageModelFileBytes`) throws before any
-        // other, and the ModelFile constructor throws as the check's
-        // (engine/views.ts `stageModelFile`).
+        // BC-19: an AST shape check error, thrown before any other by the
+        // folded load and by the ModelFile constructor as the check's.
         if (AST_SHAPE_CODES.has(p.code)) {
             setInternalFlag(err, 'astShape', true);
         }
         return err;
     },
-    // `TypeNotFoundException(typeName, message)`: `typeName` travels in
-    // `params.typeName` (concerto-rust error/mod.rs `ContractError::type_not_found`),
-    // separately from the rendered `message` the constructor would otherwise
-    // recompute a default for.
+    // `typeName` travels in `params.typeName`, separately from the rendered
+    // message.
     TypeNotFound: (p) => new TypeNotFoundException(p.params.typeName, p.message),
-    // `ValidationException(message)` (error/mod.rs `ErrorKind::Validation`
-    // doc): thrown by `ResourceValidator`'s `report*` methods, and by the
-    // populator/generator/validator per-field delegation the P4-10 fast
-    // path and views call into (concerto-core/src/instance/populator.rs
-    // `validation()`).
     // An instance value that fails a validator (BC-39) keeps its errorType.
     Validation: (p) => {
         const err = new ValidationException(p.message);
@@ -158,30 +122,23 @@ const FACTORIES: Record<string, (p: ErrorPayload) => Error> = {
     },
     Error: (p) => new Error(p.message),
     JsTypeError: (p) => new TypeError(p.message),
-    // `MetamodelException(message)` (P4-08b): thrown by
-    // `BaseModelManager.validateAst`.
+    // Thrown by `BaseModelManager.validateAst`.
     Metamodel: (p) => new MetamodelException(p.message),
 };
 
-/**
- * Builds the TS exception for an engine error payload.
- * @param {ErrorPayload} payload the payload
- * @return {Error} the exception to throw
- */
+/** Builds the TS exception for an engine error payload. */
 function makeError(payload: ErrorPayload): Error {
-    // concerto-wasm sends only these kinds (its `kind_name` maps any other
-    // to `Error`), and it is pinned in lockstep with this shim.
+    // concerto-wasm sends only these kinds, and is pinned in lockstep with
+    // this shim.
     const err = FACTORIES[payload.kind](payload);
-    // P5-89 (accordproject/concerto#1325): the structured, value-free
-    // details of an instance error, additively. Not enumerable, so the
-    // exception's own enumerable shape (what `JSON.stringify` or a deep
-    // equality sees) is unchanged.
+    // An instance error's structured, value-free details
+    // (accordproject/concerto#1325), not enumerable, so the exception's
+    // enumerable shape is unchanged.
     if (Array.isArray(payload.details)) {
         Object.defineProperty(err, 'details', { value: payload.details, enumerable: false, writable: true, configurable: true });
     }
-    // P5-101 (E-11): a value the fast path cannot carry is a fallback
-    // signal, branded as `EngineFastPathUnsupported` is
-    // (`isFastPathUnsupported`), so no caller decides by the message text.
+    // A value the fast path cannot carry: a fallback signal, branded so no
+    // caller decides by the message text.
     if (payload.fastPathUnsupported === true) {
         Object.defineProperty(err, FAST_PATH_UNSUPPORTED, { value: true, enumerable: false, writable: true, configurable: true });
     }

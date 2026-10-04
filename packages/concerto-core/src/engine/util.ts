@@ -12,10 +12,9 @@
  * limitations under the License.
  */
 
-// P5-101 (E-14, accordproject/concerto-rust#455): the helpers the engine
-// codecs share (serializer-codec.ts, validate-resource.ts, ast-codec.ts and
-// wire.ts), where each kept its own copy, and the fast-path fallback signal
-// (E-11), defined once.
+// The helpers the engine codecs share (serializer-codec.ts,
+// validate-resource.ts, ast-codec.ts and wire.ts), where each kept its own
+// copy, and the fast-path fallback signal, defined once.
 
 import { FAST_PATH_UNSUPPORTED, isFastPathUnsupported, optionalString } from '../engineutil';
 
@@ -23,12 +22,9 @@ import { FAST_PATH_UNSUPPORTED, isFastPathUnsupported, optionalString } from '..
 class EngineFastPathUnsupported extends Error {
 }
 
-// P5-43 (accordproject/concerto-rust#364): the brand the fast path's
-// callers test for (`isFastPathUnsupported`), instead of the class's
-// `constructor.name`, which a minifier renames (a production bundle without
-// `keepNames` would rethrow every EngineFastPathUnsupported instead of
-// falling back). A registered symbol, so a caller needs no reference to this
-// module (the public modules reach it only through `loadEngine`).
+// The brand the fast path's callers test for (`isFastPathUnsupported`)
+// rather than `constructor.name`, which a minifier renames. A registered
+// symbol, so callers need no reference to this module.
 Object.defineProperty(EngineFastPathUnsupported.prototype, FAST_PATH_UNSUPPORTED, { value: true });
 
 /**
@@ -54,10 +50,9 @@ function isTypedLike(v): boolean {
         typeof v.$type === 'string';
 }
 
-// A UTF-16 code unit in D800-DFFF that is not half of a surrogate pair.
-// `JSON.stringify` writes one as a `\udXXX` escape, which serde_json (the
-// engine's JSON reader) rejects outright, and Rust strings cannot hold one
-// anyway (PORTING.md 3.1, DV-004).
+// A UTF-16 code unit in D800-DFFF that is not half of a surrogate pair:
+// serde_json rejects its `\udXXX` escape and a Rust string cannot hold it
+// (DV-004).
 const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 
 /** Whether this runtime has `String.prototype.isWellFormed` (ES2024). */
@@ -65,10 +60,8 @@ const hasIsWellFormed = typeof (String.prototype as any).isWellFormed === 'funct
 
 /**
  * Whether `s` holds a lone surrogate, which the engine cannot receive
- * unchanged. P5-16: `isWellFormed()` (Node 20+) is false exactly then, and
- * costs much less than the regular expression, which stays for older
- * runtimes.
- * @param {string} s the string
+ * unchanged. `isWellFormed()` (Node 20+) is much cheaper than the regular
+ * expression, which stays for older runtimes.
  * @return {boolean} true if it has one
  */
 function hasLoneSurrogate(s: string): boolean {

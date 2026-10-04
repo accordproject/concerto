@@ -12,27 +12,21 @@
  * limitations under the License.
  */
 
-// Loads the WASM engine (P4-02; P5-02 removed the CONCERTO_ENGINE=ts|rust
-// flag: the Rust engine is now the only path) and registers the host
-// function it calls back: the error factory. P5-103 removed the
-// `semver.parse` callback with the `modelUtilParseNamespace` binding, its
-// only user.
+// Loads the WASM engine and registers the one host function it calls back:
+// the error factory.
 
 import { makeError } from './errors';
 import type { EngineBindings, EngineInternals } from './bindings';
 
 /**
- * The bindings of the concerto-wasm module (concerto-rust
- * concerto-wasm/src/lib.rs): the ones the public classes call
- * (`EngineBindings`) and the ones only src/engine/ calls (`EngineInternals`),
- * both in bindings.d.ts (P5-100, E-10).
+ * The concerto-wasm bindings: those the public classes call
+ * (`EngineBindings`) and those only src/engine/ calls (`EngineInternals`).
  */
 export type RustEngine = EngineBindings & EngineInternals;
 
 /**
  * Loads the engine module (CONCERTO_ENGINE_MODULE, or the package
  * @accordproject/concerto-engine) and registers the host functions.
- * @return {RustEngine} the engine
  */
 function loadRustEngine(): RustEngine {
     const env = typeof process === 'undefined' ? undefined : process.env;

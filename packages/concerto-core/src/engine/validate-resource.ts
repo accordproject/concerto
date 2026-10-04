@@ -12,70 +12,37 @@
  * limitations under the License.
  */
 
-// Instance validation in one engine call per resource (task P5-12c,
-// accordproject/concerto-rust#293: the P5-12 spike's variant B on the P5-12b
-// transport, accordproject/concerto-rust#289 and #292).
+// Instance validation in one engine call per resource.
 //
 // `ValidatedResource.validate()`, `setPropertyValue` and `addArrayValue`
-// (src/model/validatedresource.ts) call `validateResource`/`validateProperty`
-// below first. Each writes the value straight from the live object into a
-// compact binary layout (concerto-wasm src/validate_resource.rs has the
-// format), already in the shape the engine's instance validator reads
-// (concerto-core `instance/validate.rs`, module doc "Scope"; exactly what
-// `Instance::to_validator_value` builds from the Serializer's wire value):
-// a `$class`-tagged object per Resource, `{$$relationship, $class, <id
-// field>}` per Relationship, and `$$dayjs`/`$$undefined`/`$$number`/`$$map`
-// markers. One engine call then runs the validator and returns a code:
+// call `validateResource`/`validateProperty` first. Each writes the live
+// value into the compact binary layout, already in the shape the engine's
+// instance validator reads (`Instance::to_validator_value`'s): a
+// `$class`-tagged object per Resource, `{$$relationship, $class, <id field>}`
+// per Relationship, and `$$dayjs`/`$$undefined`/`$$number`/`$$map` markers.
+// One engine call then returns a code: 0 valid; 1 a `Validation` error (TS
+// throws `ValidationException` with the fetched message); 2 any other error
+// (thrown through the error factory, `validateTakeError`); 3 the engine
+// could not read the value, or its model lacks the property, so the caller
+// runs the `ResourceValidator` visitor. A property is checked by its slot
+// (`validatePropertyById`, looked up once per model version), which returns
+// a `Validation` message itself and throws any other error itself.
 //
-//   0  valid;
-//   1  a `Validation` error: the message is fetched and TS throws
-//      `new ValidationException(message)`, which is what the error factory
-//      (errors.ts) builds for that kind;
-//   2  any other error: TS throws the exception the unchanged error-factory
-//      path builds (`validateTakeError`), so its class is the same as for
-//      every other binding;
-//   3  the engine could not read the value (or its model lacks the
-//      property TS found): as for a value TS cannot encode at all, the
-//      caller runs the `ResourceValidator` visitor instead.
-//
-// P5-101 (D-10, accordproject/concerto-rust#455): a property is checked by
-// its slot (`validatePropertyById`: the declaration's handle and the
-// property's index in its validation plan, looked up once per model
-// version, `propertySlot`), so neither the type's name nor the property's
-// crosses, and that call returns a `Validation` error's message itself (a
-// string in place of code 1) and throws any other error itself (code 2),
-// with no `validateErrorMessage`/`validateTakeError` crossing.
-//
-// Both functions return `false` only in that last case, when the value
+// Both functions return `false`, for the visitor to run, only when the value
 // cannot cross (`EngineFastPathUnsupported`: a lone surrogate, a function,
-// a symbol, a BigInt, a class instance that is not a Resource or a dayjs, a
-// shared or cyclic reference, a `__proto__` or own `$class` key) or the
-// instance's validator is not
-// a plain `ResourceValidator` (a subclass or another object may override
-// the visitor, which the engine cannot run). Every other outcome is final:
-// a valid value returns `true`, an invalid one throws with the class TS
-// 5.0.0 throws. The one other `false` is a speed choice, not a fallback:
-// `setPropertyValue` of a string, number or boolean on a plain primitive
-// field with no validator stays on the visitor, which is cheaper there than
-// an engine call (`visitorIsCheaper`).
-//
-// A Resource whose `$identifierFieldName` is not its model's identifying
-// field, or whose identifier is truthy but not a string, also takes the
-// visitor: the engine reads the model's field and treats a non-string as
-// empty, where the visitor reads `getIdentifier()` and calls `trim()` on it.
+// symbol or BigInt, a class instance that is not a Resource or dayjs, a
+// shared or cyclic reference, a `__proto__` or own `$class` key), when the
+// validator is not a plain `ResourceValidator`, or, as a speed choice, for a
+// primitive set on a plain field (`visitorIsCheaper`). A Resource whose
+// `$identifierFieldName` is not its model's identifying field, or whose
+// identifier is truthy but not a string, also takes the visitor. Any other
+// outcome is final, with TS 5.0.0's exception class.
 //
 // The `$identifier` write-back of `ResourceValidator.visitClassDeclaration`
-// (`obj.$identifier = obj.getIdentifier()` for an identified Resource whose
-// identifying field is not `$identifier`) happens here while the resource
-// is written out, before the engine call, for every Resource in the tree.
-// On a valid value that is exactly what the visitor leaves behind. On an
-// invalid one the visitor has written back only the resources it reached
-// before the failing check, so the `$identifier` of a resource past that
-// point (or of the one that failed before its own write-back) can differ
-// from what TS 5.0.0 leaves; its value is then the identifier, the value TS
-// would have written had it got that far. A Resource held by a relationship
-// field (`permitResourcesForRelationships`) is written back too, which the
-// visitor never visits.
+// happens while each Resource is written out, before the engine call. On a
+// valid value that is what the visitor leaves; on an invalid one, a resource
+// past the failing check also gets it (the visitor stops there), and so does
+// a Resource held by a relationship field.
 
 import { rust } from './index';
 import { checkString, typedCtorName, modelClasses } from './serializer-codec';
@@ -90,9 +57,8 @@ import ValidationException from '../serializer/validationexception';
 import type { SerializerOptions } from '../types';
 /* eslint-enable no-unused-vars */
 
-// `Instance::to_validator_value`'s PRIVATE_ONLY_KEYS (concerto-core-js
-// value.rs), which the engine drops from a Resource: TS skips them too,
-// rather than sending them to be dropped.
+// `Instance::to_validator_value`'s PRIVATE_ONLY_KEYS, which the engine drops
+// from a Resource: TS skips them rather than send them.
 const PRIVATE_ONLY = new Set([
     '$modelManager', '$classDeclaration', '$namespace', '$type', '$identifierFieldName',
     '$validator', '$imports', '$superTypes', '$id',
@@ -105,19 +71,16 @@ const CODE_UNSUPPORTED = 3;
 const CODE_STALE = 4;
 
 /**
- * `Dayjs::to_iso_string` (concerto-core instance/dayjs.rs): `null` when the
- * date is invalid or out of the ECMAScript time range (a dayjs is valid
- * only within it, since its Date is).
- * @param {*} d the dayjs
- * @return {string|null} the ISO text
+ * `Dayjs::to_iso_string`: `null` when the date is invalid or outside the
+ * ECMAScript time range.
  */
 function dayjsIso(d): string | null {
     return d.isValid() ? new Date(d.valueOf()).toISOString() : null;
 }
 
 /**
- * Marks `v` as visited on this encode (serializer-codec's `visit`): a value
- * reached twice (a cycle or a shared reference) cannot cross.
+ * Marks `v` as visited: a value reached twice (a cycle or a shared
+ * reference) cannot cross.
  * @param {object} v about to be encoded
  * @param {Set<object>} seen visited
  */
@@ -129,8 +92,7 @@ function visit(v: object, seen: Set<object>): void {
 }
 
 // ---------------------------------------------------------------------
-// The binary layout (concerto-rust concerto-core `introspect::compact`),
-// written through the one writer of that layout (wire.ts, P5-101 F-8).
+// The binary layout (wire.ts)
 // ---------------------------------------------------------------------
 
 /** The writer every call writes its value into; wasm-bindgen copies the bytes in. */
@@ -138,7 +100,6 @@ const writer = new WireWriter(1 << 12);
 
 /**
  * A live value, in one pass.
- * @param {*} v the value
  * @param {Set<object>} seen visited objects
  */
 function writeValue(v, seen: Set<object>): void {
@@ -226,9 +187,8 @@ function writeValue(v, seen: Set<object>): void {
 
 /**
  * A live Resource/ValidatedResource/Relationship, as
- * `Instance::to_validator_value` builds it. Also does the `$identifier`
- * write-back of a Resource (module doc).
- * @param {object} v the instance
+ * `Instance::to_validator_value` builds it, with a Resource's `$identifier`
+ * write-back (module doc).
  * @param {Set<object>} seen visited objects
  */
 function writeTyped(v, seen: Set<object>): void {
@@ -253,10 +213,9 @@ function writeTyped(v, seen: Set<object>): void {
         return;
     }
     // The engine reads a Resource's identifier from its model's identifying
-    // field, and treats any value there that is not a string as empty.
-    // `visitClassDeclaration` reads `getIdentifier()` (the instance's own
-    // `$identifierFieldName`) and calls `id.trim()` on it. Where the two can
-    // differ, the visitor runs instead.
+    // field and treats a non-string as empty; the visitor reads
+    // `getIdentifier()` and calls `trim()`. Where they can differ, the
+    // visitor runs.
     const field = v.$identifierFieldName;
     if (field !== modelIdentifierField(v.$classDeclaration)) {
         throw new EngineFastPathUnsupported('identifier-field');
@@ -291,18 +250,11 @@ function writeTyped(v, seen: Set<object>): void {
 }
 
 /**
- * The identifying field the engine uses for a Resource of `decl`: as the
- * Identifiable constructor computes `$identifierFieldName`,
- * `getIdentifierFieldName() || '$identifier'`.
- *
- * P5-98 (F-1): read through `views.classDeclarationGetIdentifierFieldName`,
- * which caches the answer per view and checks the whole super type chain
- * against the model epoch before reusing it. A memo of its own here, keyed
- * by the view alone, went stale when a super type's model file was updated
- * (the subclass's view, in another file, is not replaced), and the stale
- * field then sent every later validation to the visitor.
+ * The identifying field the engine uses for a Resource of `decl`
+ * (`getIdentifierFieldName() || '$identifier'`), read through the view,
+ * which checks the whole super type chain against the model epoch before it
+ * reuses a cached answer.
  * @param {*} decl the Resource's `$classDeclaration`
- * @return {string} the field name
  */
 function modelIdentifierField(decl): string {
     if (!decl || typeof decl !== 'object' || typeof decl.getIdentifierFieldName !== 'function') {
@@ -319,7 +271,6 @@ function modelIdentifierField(decl): string {
  * The validator's options as the engine's bit set, or `-1` when the
  * validator is not a plain `ResourceValidator` (module doc).
  * @param {*} validator the instance's `$validator`
- * @return {number} the flags
  */
 function flagsOf(validator): number {
     if (!validator || validator.constructor !== modelClasses().ResourceValidator) {
@@ -335,7 +286,6 @@ function flagsOf(validator): number {
 /**
  * Throws the error behind a non-zero code, or returns `false` for
  * `CODE_UNSUPPORTED`.
- * @param {number} code the engine's result code
  * @return {boolean} `true` when valid
  */
 function outcome(code: number): boolean {
@@ -354,7 +304,6 @@ function outcome(code: number): boolean {
 
 /**
  * `ValidatedResource.validate()` in one engine call.
- * @param {object} resource the ValidatedResource
  * @param {string} rootId its `getFullyQualifiedIdentifier()`
  * @return {boolean} `true` when valid; `false` when the engine cannot
  * validate it (the caller runs the visitor)
@@ -385,19 +334,11 @@ function validateResource(resource, rootId: string): boolean {
 
 /**
  * Whether the visitor checks `value` against `field` more cheaply than an
- * engine call: a string, number or boolean set on a single primitive field
- * with no enum type, no scalar type and no validator. The visitor then does
- * one type check (itself one small engine call, P4-10) and nothing more,
- * while the engine call pays a fixed cost to encode the value, cross into
- * WASM and look the property up (measured on workload 3's
- * `setPropertyValue('sequence', i)`: 0.55 µs through the visitor, 1.3 µs
- * through `validatePropertyBinary`). A field with a validator (`regex`,
- * `length`, `range`), or any object or array value, costs the visitor far
- * more (8.8 µs for a `regex`+`length` String, 40 µs for a concept) and goes
- * to the engine. The visitor is the TS reference path, so the choice
- * changes speed only, never the outcome.
+ * engine call: a string, number or boolean on a single primitive field with
+ * no enum, scalar or validator, where the visitor does one type check (about
+ * 0.55 µs against 1.3 µs for the engine call). Speed only: the visitor is
+ * the TS reference path.
  * @param {*} field the property TS found on the class declaration
- * @param {*} value the value being set
  * @return {boolean} `true` when the visitor should run
  */
 function visitorIsCheaper(field, value): boolean {
@@ -416,7 +357,6 @@ function visitorIsCheaper(field, value): boolean {
 /**
  * `field.accept(this.$validator, parameters)` in
  * `ValidatedResource.setPropertyValue`/`addArrayValue`, in one engine call.
- * @param {object} resource the ValidatedResource
  * @param {string} propName the property TS found on its class declaration
  * @param {*} value the value to check (for `addArrayValue`, the new array)
  * @param {string} rootId the resource's `getFullyQualifiedIdentifier()`
@@ -452,8 +392,8 @@ function validateProperty(resource, propName: string, value, rootId: string, fie
     const fqn = resource.getFullyQualifiedType();
     const slot = propertySlot(resource.getModelManager(), handle, fqn, propName);
     if (slot !== undefined) {
-        // P5-101 (D-10): by the slot, and with a `Validation` error's
-        // message in the same call (any other error is thrown by it).
+        // By the slot; a `Validation` error's message comes back in the
+        // same call, and any other error is thrown by it.
         const result = handle.validatePropertyById(writer.bytes(), slot[0], slot[1], slot[2], rootId, flags);
         if (typeof result === 'string') {
             writer.release();
@@ -471,12 +411,10 @@ function validateProperty(resource, propName: string, value, rootId: string, fie
 }
 
 /**
- * P5-101 (D-10, accordproject/concerto-rust#455): the `validatePropertyById`
- * slots (`[declId, propIndex, epoch]`) of one rustHandle, by type and
- * property name, for the model version they were looked up at
- * (`EngineState.version`, which every change of the manager's model files
- * or rustHandle moves). A slot of another epoch is also refused by the
- * engine (`CODE_STALE`), and the slots are then looked up again.
+ * The `validatePropertyById` slots (`[declId, propIndex, epoch]`) of one
+ * rustHandle, by type and property name, for the model version they were
+ * looked up at. The engine also refuses a slot of another epoch
+ * (`CODE_STALE`), and the slots are then looked up again.
  */
 interface PropertySlots {
     version: number;
@@ -485,28 +423,18 @@ interface PropertySlots {
 
 const propertySlots = new WeakMap<object, PropertySlots>();
 
-/**
- * Forgets `handle`'s slots.
- * @param {object} handle the rustHandle
- */
+/** Forgets `handle`'s slots. */
 function dropSlots(handle: object): void {
     propertySlots.delete(handle);
 }
 
 /**
- * The `validatePropertyById` slot of property `propName` of type `fqn`,
- * looked up once per model version (`validationPropertySlot`); undefined
- * when the engine has none (the caller then crosses by name, which answers
- * `CODE_UNSUPPORTED` for it).
- * @param {object} modelManager the resource's model manager
- * @param {object} handle its rustHandle
- * @param {string} fqn the resource's type
- * @param {string} propName the property
- * @return {Uint32Array | undefined} the slot
+ * The slot of property `propName` of type `fqn`, looked up once per model
+ * version; undefined when the engine has none (the caller then crosses by
+ * name).
  */
 function propertySlot(modelManager, handle, fqn: string, propName: string): Uint32Array | undefined {
-    // A manager with a rustHandle is a BaseModelManager, with its engine
-    // state.
+    // A manager with a rustHandle has engine state.
     const state = modelManager._engine;
     let slots = propertySlots.get(handle);
     if (slots === undefined || slots.version !== state.version) {

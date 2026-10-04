@@ -12,51 +12,33 @@
  * limitations under the License.
  */
 
-// Property lookups, identifier field names and the arena handles of views
-// (P5-14, P5-19, P5-106): split out of views.ts (P5-104, review M7), which
-// re-exports them.
+// Property lookups, identifier field names and the arena handles of views.
 
 import { rust } from './index';
 import type { EngineHandle, EngineState } from './bindings';
 import { modelFileModule } from './views';
 
 // ---------------------------------------------------------------------------
-// Property lookups (P5-14, accordproject/concerto-rust#308): a
-// ClassDeclaration view's `getProperties()` list, and the name lookup
-// `getProperty()` makes over it, are cached once per view, so repeated calls
-// do not cross into the engine again.
+// Property lookups: a ClassDeclaration view's `getProperties()` list, and
+// `getProperty()`'s name index over it, are cached per view. A miss runs the
+// `classDeclarationGetProperties` binding, so every error is raised by the
+// same call; the super type's `getProperties()` call it makes comes back
+// through here and is recorded, so the entry knows which view and entry
+// supplied the inherited part. An entry is reused only while:
+// - its manager's engine state is at the same model version;
+// - the view's own properties array, its length, `superType` and
+//   `modelFile` are unchanged;
+// - the super type's view still holds the entry it was built from, and that
+//   entry is itself still reusable.
+// Only views of files the ModelFile constructor built are cached.
 //
-// A miss runs the `classDeclarationGetProperties` binding exactly as before,
-// so every error is raised by the same call. While it runs, the super type's
-// `getProperties()` call it makes (TS: `classDecl.getProperties()`) comes
-// back through this module and is recorded, so the entry knows which view
-// supplied the inherited part and which of that view's entries it copied.
-// An entry is reused only while:
-// - the view's ModelManager is the one it was built for, at the same model
-//   version (`EngineState.version`, P5-100: moved by BaseModelManager at
-//   every change of its `modelFiles` map or rustHandle, the points where
-//   TS 5.0.0 could resolve a super type differently);
-// - the view's own properties array, its length, its `superType` and its
-//   `modelFile` are the ones it was built from;
-// - the super type's view still holds the entry it was built from, and
-//   that entry is itself still reusable.
-// Only views of model files the ModelFile constructor built for a real
-// BaseModelManager are cached (a stub collaborator's answers can change
-// without a model change); anything else calls the binding every time, as
-// before.
-//
-// `getProperties()` returns a new array on every call, as TS 5.0.0 did
-// whenever it concatenated a super type's properties, and as the binding did
-// on every call: mutating it reaches neither the cache nor the engine. The
-// Property objects in it are the views themselves, so identity is unchanged
-// (BC-23).
+// `getProperties()` returns a new array on every call, as TS 5.0.0 did; the
+// Property objects in it are the views themselves (BC-23).
 // ---------------------------------------------------------------------------
 
 /**
- * `manager`'s engine state (`BaseModelManager._engine`, P5-100), or
+ * `manager`'s engine state (`BaseModelManager._engine`), or
  * undefined for anything else.
- * @param {object} manager the ModelManager
- * @return {object|undefined} its engine state
  */
 function engineStateOf(manager: any): EngineState | undefined {
     return typeof manager === 'object' && manager !== null ? manager._engine : undefined;
@@ -100,9 +82,7 @@ const lookupFrames: LookupCall[][] = [];
 /**
  * Whether `view`'s property lookups may be cached: its model file was built
  * by the ModelFile constructor (`ModelFile._isConstructed`), which accepts
- * only a BaseModelManager (P5-35, BC-47).
- * @param {object} view the ClassDeclaration view
- * @return {boolean} true if cacheable
+ * only a BaseModelManager (BC-47).
  */
 function lookupCacheable(view: any): boolean {
     return modelFileModule().default._isConstructed(view?.modelFile);
@@ -110,8 +90,6 @@ function lookupCacheable(view: any): boolean {
 
 /**
  * Whether `entry` is still `view`'s answer (see the section comment).
- * @param {object} view the ClassDeclaration view
- * @param {object} entry its cached entry
  * @return {boolean} true if it may be reused
  */
 function lookupValid(view: any, entry: PropertyLookup): boolean {
@@ -130,11 +108,7 @@ function lookupValid(view: any, entry: PropertyLookup): boolean {
     return propertyLookups.get(entry.superView) === entry.superEntry && lookupValid(entry.superView, entry.superEntry!);
 }
 
-/**
- * `view`'s cached entry, if it may be reused, else undefined.
- * @param {object} view the ClassDeclaration view
- * @return {object|undefined} the entry
- */
+/** `view`'s cached entry, if it may be reused, else undefined. */
 function validLookup(view: any): PropertyLookup | undefined {
     const entry = propertyLookups.get(view);
     if (entry === undefined) {
@@ -152,13 +126,10 @@ function validLookup(view: any): PropertyLookup | undefined {
  * cannot be cached: the own properties are not the view's `properties`
  * array, or, with a super type, the inherited part did not come from
  * exactly one recorded `getProperties()` call of a cached view.
- * @param {object} view the ClassDeclaration view
  * @param {any[]} own the own properties array before the call
  * @param {object} state the view's `superType` and `modelFile`, and its
  * manager's engine state and that state's model version, before the call
- * @param {any[]} list what the binding returned
  * @param {object[]} calls the `getProperties()` calls it made
- * @return {object|undefined} the entry
  */
 function newLookup(view: any, own: any, state: { superType: any; modelFile: any; engine: EngineState | undefined; version: number },
     list: any, calls: LookupCall[]): PropertyLookup | undefined {
@@ -174,13 +145,10 @@ function newLookup(view: any, own: any, state: { superType: any; modelFile: any;
         superView = calls[0].view;
         superEntry = propertyLookups.get(superView) ?? null;
     }
-    // P5-103: the binding returns `own` (the view's own `getOwnProperties()`)
-    // then, for a view with a super type, what its one recorded call (the
-    // super type's view, never this one: a circular chain is rejected at
-    // load) returned, and makes no call for a view without one; it is
-    // pinned in lockstep with this shim, so that is not checked again here.
-    // A super type's view with no entry of its own (`superEntry` null) makes
-    // this entry invalid at its next use (`lookupValid`).
+    // The binding returns `own`, then, with a super type, what its one
+    // recorded call (the super type's view; a circular chain is rejected at
+    // load) returned. A super type view with no entry of its own makes this
+    // entry invalid at its next use.
     return {
         state: state.engine,
         version: state.version,
@@ -195,10 +163,9 @@ function newLookup(view: any, own: any, state: { superType: any; modelFile: any;
 }
 
 /**
- * `ClassDeclaration.getProperties` (P5-14): a copy of the cached list, or
- * the `classDeclarationGetProperties` binding's answer, cached when it can
- * be. Throws what the binding throws.
- * @param {object} view the ClassDeclaration view
+ * `ClassDeclaration.getProperties`: a copy of the cached list, or the
+ * `classDeclarationGetProperties` binding's answer, cached when it can be.
+ * Throws what the binding throws.
  * @return {object[]} the properties, own first, then the super type's
  */
 function classDeclarationGetProperties(view: any): any[] {
@@ -211,8 +178,6 @@ function classDeclarationGetProperties(view: any): any[] {
 /**
  * The body of `classDeclarationGetProperties`, without recording the call
  * in the enclosing frame.
- * @param {object} view the ClassDeclaration view
- * @return {object[]} the properties
  */
 function propertiesOf(view: any): any[] {
     if (!lookupCacheable(view)) {
@@ -246,15 +211,10 @@ function propertiesOf(view: any): any[] {
 }
 
 /**
- * `ClassDeclaration.getProperty` (P5-14): the first property of that name in
- * the cached `getProperties()` list, which is the property the binding
- * returns (the own property of that name, else the super type's answer),
- * or null. The list is built (with the binding, as `getProperties()` builds
- * it) when it is not cached; when that is not possible, or it throws, the
- * `classDeclarationGetProperty` binding answers, as before, and throws what
- * it throws.
- * @param {object} view the ClassDeclaration view
- * @param {string} name the property name
+ * `ClassDeclaration.getProperty`: the first property of that name in the
+ * cached `getProperties()` list (the own property, else the super type's),
+ * or null. When the list cannot be cached or built, the
+ * `classDeclarationGetProperty` binding answers and throws what it throws.
  * @return {object|null} the property, or null
  */
 function classDeclarationGetProperty(view: any, name: any): any {
@@ -289,29 +249,16 @@ function classDeclarationGetProperty(view: any, name: any): any {
 }
 
 // ---------------------------------------------------------------------------
-// Identifier field names (P5-19, accordproject/concerto-rust#317): the
-// answer of `ClassDeclaration.getIdentifierFieldName()` is kept per view,
-// keyed on the model epoch P5-14 introduced (per manager since F-2), so the
-// repeated calls Factory, Serializer and ResourceValidator make
-// (`isIdentified()`, `isSystemIdentified()`, `getIdentifierFieldName()`) do
-// not cross into the engine again.
-//
-// A miss runs the `classDeclarationGetIdentifierFieldNameWalk` binding,
-// which walks the super types in one call and returns every declaration it
-// read, and whether the walk ran without calling back (see the binding's doc
-// comment in concerto-wasm). Its answer is kept only when it did, for views
-// of model files built for a real BaseModelManager (as P5-14's property
-// lookups), and is reused only while:
-// - each manager on the way is at the model version it was at
-//   (`EngineState.version`, P5-100);
-// - every declaration in the chain still has the `idField`, `superType`,
-//   `superTypeDeclaration` and `modelFile` it had, and its model file the
-//   same manager.
-// Anything else calls the binding every time. A call that throws keeps
-// nothing. P5-36 (BC-50, accordproject/concerto-rust#346): the walk always
-// inlines the ClassDeclaration methods, and replacing a method the walk
-// reaches (on the object or its prototype) is not supported, so the cache no
-// longer compares them.
+// Identifier field names: `ClassDeclaration.getIdentifierFieldName()` is
+// cached per view, for the calls Factory, Serializer and ResourceValidator
+// repeat. A miss runs `classDeclarationGetIdentifierFieldNameWalk`, which
+// walks the super types in one call and returns every declaration it read
+// and whether it ran without calling back; only then is the answer kept,
+// for views of constructed model files. It is reused only while each
+// manager on the way is at the same model version and every declaration in
+// the chain has the same `idField`, `superType`, `superTypeDeclaration`,
+// `modelFile` and manager. A call that throws keeps nothing. Replacing a
+// ClassDeclaration method the walk reaches is not supported (BC-50).
 // ---------------------------------------------------------------------------
 
 /** One declaration of a cached identifier walk, as it was read. */
@@ -336,14 +283,10 @@ interface IdentifierEntry {
 
 const identifierEntries = new WeakMap<object, IdentifierEntry>();
 
-/**
- * `view` as the walk read it.
- * @param {object} view a declaration of the chain
- * @return {object|undefined} the level
- */
+/** `view` as the walk read it. */
 function identifierLevel(view: any): IdentifierLevel {
-    // The walk's declarations are views of the model files of the asking
-    // view's manager, a BaseModelManager, so each may be cached.
+    // The walk's declarations are views of files of the asking view's
+    // BaseModelManager.
     const manager = view.modelFile.modelManager;
     const state = engineStateOf(manager)!;
     return {
@@ -360,7 +303,6 @@ function identifierLevel(view: any): IdentifierLevel {
 
 /**
  * Whether `entry` is still its view's answer (see the section comment).
- * @param {object} entry the cached entry
  * @return {boolean} true if it may be reused
  */
 function identifierValid(entry: IdentifierEntry): boolean {
@@ -376,10 +318,9 @@ function identifierValid(entry: IdentifierEntry): boolean {
 }
 
 /**
- * `ClassDeclaration.getIdentifierFieldName` (P5-19): the cached answer, or
- * the `classDeclarationGetIdentifierFieldNameWalk` binding's, cached when it
- * can be. Throws what the binding throws.
- * @param {object} view the ClassDeclaration view
+ * `ClassDeclaration.getIdentifierFieldName`: the cached answer, or the
+ * `classDeclarationGetIdentifierFieldNameWalk` binding's, cached when it can
+ * be. Throws what the binding throws.
  * @return {string|null} the name of the identifying field, or null
  */
 function classDeclarationGetIdentifierFieldName(view: any): any {
@@ -408,28 +349,21 @@ function classDeclarationGetIdentifierFieldName(view: any): any {
 }
 
 // ---------------------------------------------------------------------------
-// Arena handles of views (P5-106, BC-52; accordproject/concerto-rust#460)
+// Arena handles of views (BC-52)
 //
-// `ModelUtil.isAssignableTo`, `isEnum`, `isMap`, `isScalar` and
+// `ModelUtil.isAssignableTo`, `isEnum`, `isMap`, `isScalar`,
 // `isValidMapKeyScalar`, `ScalarDeclaration.validate`, `Decorator.validate`
 // and `ClassDeclaration.getAssignableClassDeclarations`/`getDirectSubclasses`
-// are answered by the engine from its own arena, by the handle of the model
-// file or declaration they are given (concerto-wasm "Arena answers"),
-// rather than by calling the views' methods back from the engine. A replaced `getType`, `getSuperType` or `getModelFiles` method (on
-// a view, a manager or a prototype, e.g. a sinon stub) is therefore not
-// called (BC-52). A model file has a handle when it is the one its manager
-// has registered for its namespace (`ModelFile._rustHandleId`), and a
-// declaration when its model file has one and it is that file's own
-// `getLocalType(name)`. A declaration view keeps its handle for as long as
-// its manager's model version holds, in a non-enumerable `_engineId` field.
+// are answered from the engine's arena by the handle of the model file or
+// declaration given, so a replaced `getType`, `getSuperType` or
+// `getModelFiles` is not called. A model file has a handle when it is the one
+// its manager registered for its namespace, and a declaration when its file
+// has one and it is that file's `getLocalType(name)`; a declaration keeps it
+// for the model version, in a non-enumerable `_engineId` field.
 //
-// A model file outside the arena (one not registered in its manager, or a
-// stand-in such as a sinon stub instance) resolves no type: `isEnum`,
-// `isMap` and `isScalar` answer undefined for a field of one, and
-// `isAssignableTo` finds no type in one. A declaration outside the arena
-// has no answer: `isValidMapKeyScalar`, `ScalarDeclaration.validate`, the
-// subclass queries and `Decorator.validate` (with decorator validation on)
-// throw a TypeError for it (`notInArena`).
+// A model file outside the arena resolves no type (`isEnum`, `isMap` and
+// `isScalar` answer undefined, `isAssignableTo` finds none); for a
+// declaration outside it the other members throw a TypeError (`notInArena`).
 // ---------------------------------------------------------------------------
 
 /** A view's arena handle, as its manager's engine held it at one version. */
@@ -453,7 +387,6 @@ interface ArenaRef {
 /**
  * The handle of a ModelFile view in its manager's engine handle: defined
  * when the file is the one its manager registered for its namespace.
- * @param {object} modelFile the ModelFile view
  * @return {object|undefined} the engine handle and the file's handle
  */
 function modelFileArenaRef(modelFile: any): ArenaRef | undefined {
@@ -467,8 +400,6 @@ function modelFileArenaRef(modelFile: any): ArenaRef | undefined {
 /**
  * A view's cached handle, or `lookup`'s, cached for the manager's current
  * model version and engine handle.
- * @param {object} view the declaration view
- * @param {object} manager its ModelManager
  * @param {function} lookup finds the handle, or undefined
  * @return {object|undefined} the engine handle and the view's handle
  */
@@ -487,7 +418,6 @@ function cachedArenaRef(view: any, manager: any, lookup: () => number | undefine
  * The handle of a declaration view in its manager's engine handle: defined
  * when its model file is registered (`modelFileArenaRef`) and the view is
  * that file's own declaration of its name.
- * @param {object} declaration the declaration view
  * @return {object|undefined} the engine handle and the declaration's handle
  */
 function declarationArenaRef(declaration: any): ArenaRef | undefined {
@@ -503,12 +433,9 @@ function declarationArenaRef(declaration: any): ArenaRef | undefined {
 }
 
 /**
- * The error a BC-52 member raises for a declaration or model file that has
- * no arena handle: one that is not part of a model file registered in its
- * ModelManager (a detached ModelFile's, or a stand-in object such as a sinon
- * stub instance).
+ * The error a BC-52 member raises for a declaration or model file with no
+ * arena handle (a detached ModelFile's, or a stand-in object).
  * @param {string} member the member, e.g. `ModelUtil.isAssignableTo`
- * @return {TypeError} the error
  */
 function notInArena(member: string): TypeError {
     return new TypeError(`${member} expects model elements of a ModelFile registered in its ModelManager`);
@@ -518,9 +445,6 @@ function notInArena(member: string): TypeError {
  * The views of declarations the engine named by fully qualified name, each
  * looked up in the model file `manager` registered for its namespace, as
  * `ModelFile.getType` maps the names `modelFileGetTypeName` returns.
- * @param {object} manager the ModelManager
- * @param {string[]} names the fully qualified names
- * @return {object[]} the declaration views
  */
 function declarationViews(manager: any, names: string[]): any[] {
     return names.map((name) => manager.modelFiles[name.substring(0, name.lastIndexOf('.'))].getLocalType(name));
