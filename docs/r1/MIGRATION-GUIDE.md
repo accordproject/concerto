@@ -23,7 +23,9 @@ JSON need only the Node.js upgrade. Check the following:
    `±HH:mm`?
 4. **Hand-built or tool-built ASTs.** Do you load JSON ASTs that the CTO parser
    did not write?
-5. **Search your code** for the options and APIs that changed:
+5. **Servers.** Do you create a `ModelManager` per request or per tenant? See
+   [Servers and many managers](#servers-and-many-managers).
+6. **Search your code** for the options and APIs that changed:
 
 ```bash
 grep -rnE "strictQualifiedDateTimes|regExp *:|metamodelValidation|setCurrentTime" .
@@ -463,6 +465,79 @@ cannot see into. No production use was found for any of them.
   to the 5.0.0 outcome.
 - **What to do:** add model files to their `ModelManager` before asking these
   questions, and change the model instead of patching it.
+
+---
+
+## Servers and many managers
+
+R1 adds `ModelManager.fork()` (P5-97). A server that builds a `ModelManager`
+per request or per tenant should build one base manager at startup and fork
+it, rather than building a new manager and loading every model each time.
+
+- **Who:** servers and other long-running processes that create many
+  `ModelManager`s over their lifetime, for example one per request or per
+  tenant.
+- **What changes:** in 5.x, each manager lived on the JavaScript heap and
+  was freed like any other object. In R1, each manager's models are held
+  by the engine in WebAssembly memory. Many short-lived managers therefore
+  raise the process's peak memory (see below).
+- **What to do:** load the shared or platform models into one base
+  manager, then call `base.fork()` per request or tenant and add the
+  request's own models to the fork. A fork does not load or validate the
+  base's model files again and starts with the base's warmed caches. It is
+  independent of the base: models added to, updated in or deleted from one
+  never reach the other. Finish loading the base before you fork it:
+  `fork()` throws while model files are still being added to it.
+
+```js
+const { ModelManager, Factory, Serializer } = require('@accordproject/concerto-core');
+
+// Once, at startup: the models every request shares.
+const base = new ModelManager({ strict: true });
+base.addCTOModel(platformCto, 'platform.cto');
+
+// Per request: a fork of the base, plus the request's own model.
+function handle(request) {
+    const modelManager = base.fork();
+    modelManager.addCTOModel(request.modelCto, 'request.cto');
+    const serializer = new Serializer(new Factory(modelManager), modelManager);
+    return serializer.fromJSON(request.instance);
+}
+```
+
+**How engine memory works.**
+
+- The engine keeps its model data in WebAssembly linear memory, outside the
+  JavaScript heap. V8's heap figures (`heapUsed`, `heapTotal`) do not show
+  it; it appears in the process RSS and in `external`.
+- A manager's engine memory is freed after its JavaScript `ModelManager` is
+  garbage collected, through finalizers. That happens when the garbage
+  collector gets to it, not at a point your code can choose.
+- WebAssembly linear memory never shrinks. The process keeps the peak size
+  it reached, and later managers reuse that space.
+- So creating many short-lived managers, each with its own copy of every
+  model, raises the peak while managers wait for their finalizers to run.
+  `fork()` shares the base's model files in the engine instead of copying
+  them, so each fork adds only the request's own models.
+  `ModelManager.filter()` also shares the model files it keeps unchanged.
+- There is no public `free()` or `dispose()` API, by design: memory is
+  released only by garbage collection. Drop your references to a manager
+  (or fork) when you no longer need it.
+
+**What the P5-120 memory soak measured.** 64 concurrent requests for
+1,200 s on two model sets, one machine (a 4 vCPU cloud container), each
+request adding a small model and deserializing two instances
+([P5-120 results](../../migration/bench/RESULTS.md#headline-p5-120)):
+
+| Approach | RSS against TS 5.0.0 | Memory over time |
+|---|---|---|
+| 5.0.0, a new `ModelManager` per request | 204 MB and 288 MB | flat |
+| R1, `base.fork()` per request | 1.06-1.6x 5.0.0 | WebAssembly memory flat after warm-up; a plateau on both sets |
+| R1, a new `ModelManager` per request | 2.5-3.3x 5.0.0 (518 MB and 941 MB) | mostly WebAssembly linear memory, which V8's heap figures do not show; occasional late steps in WebAssembly memory |
+
+`fork()` was also the fastest of the three on the conformance set (1,073
+requests a second against 5.0.0's 708). These figures come from one
+machine; expect yours to differ.
 
 ---
 
