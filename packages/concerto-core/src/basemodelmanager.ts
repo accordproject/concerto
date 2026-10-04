@@ -246,7 +246,7 @@ class BaseModelManager {
      * cached copy of the metamodel `validateAst` registers when rustHandle
      * keeps its own copy after a failed check. `_needsRustWrite` answers
      * false for the metamodel namespace while it is set, so
-     * engine/views.ts `stageModelFile` keeps no engine stage for that copy
+     * engine/views-staging.ts `stageModelFile` keeps no engine stage for that copy
      * in every new manager. Every other metamodel file, a user's included,
      * is mirrored.
      * @internal
@@ -367,7 +367,7 @@ class BaseModelManager {
 
         const {rootModelAst, rootModelCto, rootModelFile} = getRootModel();
         // The engine's precomputed verdict applies to this AST while it is
-        // exactly the fixed root model (engine/views.ts `systemModelAsts`).
+        // exactly the fixed root model (engine/views-staging.ts `systemModelAsts`).
         engineViews().markSystemModelAst(rootModelAst);
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
 
@@ -426,7 +426,7 @@ class BaseModelManager {
         const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
 
         // The engine's precomputed verdict applies to this AST while it is
-        // exactly the fixed decorator model (engine/views.ts
+        // exactly the fixed decorator model (engine/views-staging.ts
         // `systemModelAsts`).
         engineViews().markSystemModelAst(decoratorModelAst);
         const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
@@ -632,7 +632,7 @@ class BaseModelManager {
     _rustMirrorUpdate(modelFile) {
         const namespace = modelFile.getNamespace();
         // The file Rust loaded when the ModelFile was constructed
-        // replaces the registered one (engine/views.ts
+        // replaces the registered one (engine/views-staging.ts
         // `updateStaged`); only a file with no usable stage sends
         // its AST.
         const staged = engineViews().updateStaged(modelFile, this.rustHandle);
@@ -1110,7 +1110,7 @@ class BaseModelManager {
                     next[mf.getNamespace()] = mf;
                 });
                 // From the files Rust loaded when each view was constructed
-                // (engine/views.ts `updateExternalStaged`); otherwise every
+                // (engine/views-staging.ts `updateExternalStaged`); otherwise every
                 // AST is sent.
                 if (!engineViews().updateExternalStaged(views, this.rustHandle, next)) {
                     const sources = views.map((mf) => ({

@@ -526,7 +526,7 @@ class ModelFile extends Decorated {
         try {
             // The file Rust already loaded (staged, or registered from
             // its stage) is validated without sending the AST again
-            // (engine/views.ts `validateLoaded`).
+            // (engine/views-staging.ts `validateLoaded`).
             if (!engineViews().validateLoaded(this, manager.rustHandle)) {
                 manager.rustHandle.modelFileValidateDetached(
                     JSON.stringify(this.getAst()),
@@ -754,7 +754,7 @@ class ModelFile extends Decorated {
      */
     getLocalType(type: string): Declaration | null {
         // A lazily built file whose declaration views are not all built
-        // yet builds only the one asked for (engine/views.ts
+        // yet builds only the one asked for (engine/views-staging.ts
         // `localType`).
         const lazy = engineViews().localType(this, type);
         if (lazy !== undefined) {
@@ -1073,7 +1073,7 @@ class ModelFile extends Decorated {
      */
     _fromAstDeclarationViews(ast: AstNode) {
         // A declaration view already built on its own (a lazily built
-        // file's `getLocalType`, engine/views.ts `localType`) is
+        // file's `getLocalType`, engine/views-staging.ts `localType`) is
         // reused, so each declaration has one view.
         const views = engineViews();
         for(let n=0; n < ast.declarations.length; n++) {
@@ -1302,7 +1302,7 @@ class ModelFile extends Decorated {
 }
 
 // Built on first read in a lazily built file
-// (engine/views.ts `deferModelFileFields`), like the other
+// (engine/views-staging.ts `deferModelFileFields`), like the other
 // lazy parts.
 engineViews().installLazyField(ModelFile.prototype, 'declarations', () => [], true);
 engineViews().installLazyField(ModelFile.prototype, 'localTypes', () => null, true);

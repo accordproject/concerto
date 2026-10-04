@@ -19,7 +19,7 @@
  * ModelManager()` and `clearModelFiles()` no longer load and shape-check
  * the two fixed system models (`concerto@1.0.0`,
  * `concerto.decorator@1.0.0`) on every call. Their ModelFiles take the
- * engine's precomputed verdict (engine/views.ts `systemModelAsts`,
+ * engine's precomputed verdict (engine/views-staging.ts `systemModelAsts`,
  * concerto-wasm `systemModelFileHeader`), which the engine gives only for
  * exactly the fixed system model text.
  *
