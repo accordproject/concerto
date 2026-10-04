@@ -68,4 +68,5 @@ runs:
         npm run build
         test -f pkg/concerto-engine.cjs
         test -f pkg/concerto-engine.mjs
+        test -f pkg/concerto_wasm.wasm
         echo "pkg-dir=$(pwd)/pkg" >> "$GITHUB_OUTPUT"
