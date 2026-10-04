@@ -1,3 +1,143 @@
+# P5-120: memory soak over time, TS 5.0.0 against the TS API over Rust (new manager per request, and fork), with GC pauses (2026-10-04)
+
+Task P5-120 (accordproject/concerto-rust#495). Measure only: no engine or
+concerto-core change. P5-97 soaked only Rust with fork() per request; this
+runs the same soak on three sides of the same server scenario, so like is
+compared with like. Raw outputs in `results/P5-120/` (`soak/`, one JSON per
+side and set with the 5 s timeline and the GC pauses; `tables.md`,
+`tables.json`, `charts/`, `run-log.txt`).
+
+| | |
+|---|---|
+| Machine | Cloud container (cloud-3), Intel Xeon @ 2.80GHz, 4 vCPU, 15 GB, Linux 6.18 |
+| Toolchain | Node v22.22.2 (all six runs with `--expose-gc`) |
+| Integration head | `concerto` `7b31f19a5` (concerto-core dist; the harness commit on top changes only `migration/bench/`), `concerto-rust` `8999183` (engine `concerto_wasm.wasm` 3,577,814 bytes) |
+| Sides | **TS 5.0.0 (a):** published `@accordproject/concerto-core` 5.0.0 (`migration/oracle/reference`), a new ModelManager and a full reload per request. **Rust (a):** the integration head, the same. **Rust (c):** the integration head, `base.fork()` per request. |
+| Work per request | P5-97's: add a small user model, deserialize one user and one platform instance. N = 64 concurrent async requests. |
+| Driver | `p5120-run.sh`: `p597-server.mjs --mode soak --concurrency 64 --seconds 1200 --sample-seconds 5` for each side and set, 1,200 s each, interleaved: conformance TS 5.0.0, synthetic-large Rust (c), conformance Rust (a), synthetic-large Rust (a), conformance Rust (c), synthetic-large TS 5.0.0. Tables and charts: `p5120-table.mjs`. |
+| Sampling | Every 5 s: RSS, heapUsed, heapTotal, external, arrayBuffers, WASM `memory.buffer.byteLength` (0 for TS 5.0.0), requests done, and unfinalised managers (managers created minus those a FinalizationRegistry has seen collected; counted on all three sides). |
+| GC | A `PerformanceObserver` on `gc` entries, every pause kept, split by kind (`p597-server.mjs`, new in this task). |
+| Quiet gate | Before each run: 1-minute load < 2, 5-minute < 3, no other bench, cargo or mocha process. None waited long; the 1-minute load at the starts was 1.08-1.76. |
+| Plateau rule | The issue's form of P5-97's rule: after a 20% warm-up (240 s), no WASM growth in the second half of the post-warm-up window, and the second half's peak RSS within 5% of the first half's. Where P5-97's strict form (no WASM growth at all after warm-up) gives a different answer, the table says so. |
+
+## Headline (P5-120)
+
+- **TS 5.0.0 plateaus on both sets.** RSS sits at 204 MB (conformance) and
+  288 MB (synthetic-large), slope under 0.1 MB/min.
+- **Rust with fork() per request plateaus on both sets**, at 332 MB and
+  304 MB RSS. WASM memory reaches its ceiling in warm-up (55.3 MB at
+  t = 10 s on conformance, 28.1 MB at t = 163 s on synthetic-large) and
+  never grows after it. On conformance this run does better than P5-97's
+  2,400 s fork soak, which grew 1.9 MB after warm-up.
+- **Rust with a new manager per request uses the most memory and is the
+  only side that grows after warm-up.**
+  - **conformance: growth (fail).** RSS 518 MB, 2.5x TS 5.0.0. WASM memory
+    climbs from 67 to 219 MB in the first 117 s, then steps to 221.4 MB at
+    t = 259 s and to 221.6 MB at t = 1,122 s. That last 0.2 MB step falls in
+    the second half, so the rule says fail. The second half's peak RSS is
+    within 0.1% of the first half's (518.5 against 518.2 MB), and the RSS
+    slope after warm-up is 0.03 MB/min.
+  - **synthetic-large: plateau (pass) under the issue's rule, fail under
+    P5-97's strict form.** RSS 941 MB, 3.3x TS 5.0.0. WASM memory reaches
+    662.6 MB by t = 44 s, then one 18.8 MB step at t = 546 s (first half
+    after warm-up), then nothing for the remaining 654 s. That step is
+    also why the RSS slope after warm-up reads 1.67 MB/min; the second
+    half is flat (943.9 against 944.9 MB peak).
+  - The steps line up neither with new peaks of unfinalised managers
+    (conformance peaked at 1,216 by t = 183 s, synthetic-large at 327 at
+    t = 668 s) nor with a per-request trend. Like P5-97's fork steps, they
+    look like high-water marks of a linear memory that never shrinks while
+    many managers wait for finalizers. This is inferred from the curves,
+    not proven.
+- **Where the memory sits.** For TS 5.0.0 it is all JS heap (external
+  2.2 MB). For Rust (a) most of it is WASM linear memory, which the V8 heap
+  figures do not show: steady heapUsed is 71 MB on conformance and 49 MB on
+  synthetic-large, external 224 MB and 684 MB. Fork keeps WASM at 55 MB and
+  28 MB.
+- **GC.** TS 5.0.0 spends 13% of wall time in GC pauses on both sets,
+  nearly all of it in scavenges (p95 about 5 ms). Rust (a) pauses least
+  (5.6% and 2.5%), since it allocates less on the JS heap per request but
+  also completes fewer requests. Fork (c) is at 14.1% on conformance, where
+  it does the most requests, and 4.3% on synthetic-large. The longest
+  single pause was 664 ms (fork, conformance). No weak-callback pauses were
+  recorded on any side.
+- **Throughput over the soak** (indicative only; the soak runs at N = 64 for
+  memory, not to time requests, and P5-121's server bench is the timing
+  reference): conformance TS 5.0.0 708 req/s, Rust (a) 368, Rust (c) 1,073;
+  synthetic-large 344, 58 and 108.
+
+## Soak tables (P5-120)
+
+The tables below are `results/P5-120/tables.md` as generated.
+
+#### conformance
+
+| side | seconds | requests | req/s | peak RSS MB | steady RSS MB (median after warm-up) | RSS slope after warm-up (MB/min) | RSS peak 1st / 2nd half (MB) | WASM MB start / end | WASM growth after warm-up, 1st / 2nd half (MB) | steady heapUsed / heapTotal / external MB | unfinalised managers median / max | plateau verdict |
+|---|---:|---:|---:|---:|---:|---:|---|---|---|---|---|---|
+| TS 5.0.0, new manager per request | 1200 | 850176 | 708 | 204.7 | 204.2 | -0.03 | 204.7 / 204.2 | 0.0 / 0.0 | 0.0 / 0.0 | 73.5 / 128.3 / 2.2 | 448 / 704 | plateau (pass) |
+| Rust, new manager per request | 1200 | 442112 | 368 | 518.5 | 518.2 | 0.03 | 518.2 / 518.5 | 67.3 / 221.6 | 2.3 / 0.3 | 71.0 / 117.0 / 223.7 | 704 / 1216 | growth (fail) |
+| Rust, fork() per request | 1200 | 1287872 | 1073 | 332.5 | 332.4 | 0.00 | 332.4 / 332.5 | 40.4 / 55.3 | 0.0 / 0.0 | 81.4 / 138.3 / 57.6 | 1024 / 1600 | plateau (pass) |
+
+GC pauses, conformance (major = mark-compact plus incremental marking steps; minor = scavenges):
+
+| side | pauses | total pause s | share of wall | share after warm-up | p95 ms | max ms | major count / total s | minor count / total s | weak-callback count / total s |
+|---|---:|---:|---:|---:|---:|---:|---|---|---|
+| TS 5.0.0, new manager per request | 44524 | 158.2 | 13.2% | 13.2% | 5.15 | 103.7 | 3074 / 9.7 | 41450 / 148.5 | 0 / 0.0 |
+| Rust, new manager per request | 8490 | 66.9 | 5.6% | 5.5% | 14.87 | 161.1 | 1594 / 9.5 | 6896 / 57.4 | 0 / 0.0 |
+| Rust, fork() per request | 20822 | 169.4 | 14.1% | 14.2% | 13.25 | 664.1 | 1794 / 21.4 | 19028 / 148.0 | 0 / 0.0 |
+
+Curves, conformance (RSS / WASM / heapUsed MB, and requests done, at every 10% of the run):
+
+| % of run | TS 5.0.0, new manager per request | Rust, new manager per request | Rust, fork() per request |
+|---:|---|---|---|
+| 0% | 199.6 / 0.0 / 118.6, 3136 | 293.4 / 67.3 / 46.7, 1472 | 285.8 / 40.4 / 84.9, 4736 |
+| 10% | 204.1 / 0.0 / 37.1, 90816 | 514.7 / 219.1 / 109.8, 44672 | 332.4 / 55.3 / 115.4, 135936 |
+| 20% | 204.1 / 0.0 / 49.2, 178560 | 515.7 / 219.1 / 100.7, 88448 | 332.4 / 55.3 / 42.7, 269824 |
+| 30% | 204.2 / 0.0 / 40.7, 262272 | 518.2 / 221.4 / 93.5, 134912 | 332.4 / 55.3 / 89.8, 392000 |
+| 40% | 204.7 / 0.0 / 76.7, 349248 | 518.2 / 221.4 / 88.6, 178176 | 332.4 / 55.3 / 74.3, 518848 |
+| 50% | 204.7 / 0.0 / 88.2, 433536 | 518.2 / 221.4 / 33.8, 221888 | 332.4 / 55.3 / 42.6, 646272 |
+| 60% | 204.2 / 0.0 / 92.6, 515648 | 518.2 / 221.4 / 56.5, 265664 | 332.4 / 55.3 / 74.2, 770496 |
+| 70% | 204.0 / 0.0 / 91.8, 599488 | 518.2 / 221.4 / 70.6, 308608 | 332.4 / 55.3 / 70.5, 896896 |
+| 80% | 204.1 / 0.0 / 46.7, 679680 | 518.2 / 221.4 / 110.1, 354624 | 332.4 / 55.3 / 54.2, 1019968 |
+| 90% | 204.1 / 0.0 / 31.4, 765184 | 518.2 / 221.4 / 37.4, 398080 | 332.4 / 55.3 / 117.8, 1152832 |
+| 100% | 204.1 / 0.0 / 95.5, 850176 | 518.5 / 221.6 / 104.7, 442112 | 332.5 / 55.3 / 34.5, 1287872 |
+
+Charts: [conformance-rss](results/P5-120/charts/conformance-rss.svg), [conformance-wasm](results/P5-120/charts/conformance-wasm.svg), [conformance-heap](results/P5-120/charts/conformance-heap.svg).
+
+#### synthetic-large
+
+| side | seconds | requests | req/s | peak RSS MB | steady RSS MB (median after warm-up) | RSS slope after warm-up (MB/min) | RSS peak 1st / 2nd half (MB) | WASM MB start / end | WASM growth after warm-up, 1st / 2nd half (MB) | steady heapUsed / heapTotal / external MB | unfinalised managers median / max | plateau verdict |
+|---|---:|---:|---:|---:|---:|---:|---|---|---|---|---|---|
+| TS 5.0.0, new manager per request | 1200 | 412736 | 344 | 289.1 | 288.2 | 0.07 | 288.2 / 289.1 | 0.0 / 0.0 | 0.0 / 0.0 | 115.7 / 184.3 / 2.2 | 320 / 512 | plateau (pass) |
+| Rust, new manager per request | 1202 | 69952 | 58 | 944.9 | 940.5 | 1.67 | 943.9 / 944.9 | 360.8 / 681.4 | 18.8 / 0.0 | 49.4 / 98.3 / 683.9 | 208 / 327 | plateau (pass) (P5-97 strict form, no WASM growth after warm-up at all: fail) |
+| Rust, fork() per request | 1201 | 129344 | 108 | 306.4 | 304.4 | 0.00 | 306.4 / 306.3 | 25.8 / 28.1 | 0.0 / 0.0 | 68.1 / 113.0 / 30.6 | 256 / 328 | plateau (pass) |
+
+GC pauses, synthetic-large (major = mark-compact plus incremental marking steps; minor = scavenges):
+
+| side | pauses | total pause s | share of wall | share after warm-up | p95 ms | max ms | major count / total s | minor count / total s | weak-callback count / total s |
+|---|---:|---:|---:|---:|---:|---:|---|---|---|
+| TS 5.0.0, new manager per request | 42449 | 154.0 | 12.8% | 12.8% | 4.89 | 198.2 | 2400 / 7.2 | 40049 / 146.8 | 0 / 0.0 |
+| Rust, new manager per request | 6275 | 29.7 | 2.5% | 2.4% | 7.68 | 81.1 | 2124 / 3.6 | 4151 / 26.1 | 0 / 0.0 |
+| Rust, fork() per request | 8838 | 51.3 | 4.3% | 4.3% | 7.97 | 187.2 | 1351 / 3.4 | 7487 / 47.9 | 0 / 0.0 |
+
+Curves, synthetic-large (RSS / WASM / heapUsed MB, and requests done, at every 10% of the run):
+
+| % of run | TS 5.0.0, new manager per request | Rust, new manager per request | Rust, fork() per request |
+|---:|---|---|---|
+| 0% | 284.1 / 0.0 / 197.0, 1536 | 559.7 / 360.8 / 15.0, 256 | 297.5 / 25.8 / 48.1, 512 |
+| 10% | 287.7 / 0.0 / 90.5, 43520 | 923.1 / 662.6 / 74.1, 7168 | 305.2 / 28.0 / 73.0, 13440 |
+| 20% | 287.7 / 0.0 / 165.1, 83392 | 920.0 / 662.6 / 68.8, 14208 | 303.8 / 28.1 / 42.8, 25792 |
+| 30% | 287.7 / 0.0 / 117.6, 125440 | 921.3 / 662.6 / 50.3, 21312 | 303.9 / 28.1 / 43.0, 38848 |
+| 40% | 288.1 / 0.0 / 99.3, 165056 | 921.0 / 662.6 / 49.3, 28160 | 305.1 / 28.1 / 92.4, 51456 |
+| 50% | 288.2 / 0.0 / 117.8, 207360 | 940.7 / 681.4 / 49.2, 35200 | 304.6 / 28.1 / 92.0, 64128 |
+| 60% | 288.2 / 0.0 / 166.1, 247360 | 940.5 / 681.4 / 50.8, 42240 | 306.1 / 28.1 / 72.5, 77120 |
+| 70% | 288.2 / 0.0 / 68.0, 289344 | 939.8 / 681.4 / 49.0, 49216 | 304.6 / 28.1 / 91.7, 90240 |
+| 80% | 288.5 / 0.0 / 167.9, 330304 | 940.4 / 681.4 / 44.9, 56192 | 303.9 / 28.1 / 43.1, 103744 |
+| 90% | 288.7 / 0.0 / 119.8, 372800 | 940.9 / 681.4 / 21.3, 63232 | 303.6 / 28.1 / 20.9, 116736 |
+| 100% | 289.1 / 0.0 / 62.5, 412736 | 941.3 / 681.4 / 42.2, 69952 | 304.5 / 28.1 / 67.4, 129344 |
+
+Charts: [synthetic-large-rss](results/P5-120/charts/synthetic-large-rss.svg), [synthetic-large-wasm](results/P5-120/charts/synthetic-large-wasm.svg), [synthetic-large-heap](results/P5-120/charts/synthetic-large-heap.svg).
+
 # P5-121: consolidated re-measure after review 2's fixes (P5-110..P5-118) (2026-10-04)
 
 Task P5-121 (accordproject/concerto-rust#497). Measure only: no engine or
