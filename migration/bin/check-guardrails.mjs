@@ -24,14 +24,20 @@
  *      an allow-list row naming a BC row, or the strict consumer
  *      (migration/api-snapshot/consumer/strict-consumer.ts) no longer
  *      compiles with `tsc --strict` against the live .d.ts (P5-84,
- *      accordproject/concerto-rust#430; see migration/api-snapshot/v5-types.mjs).
+ *      accordproject/concerto-rust#430; see migration/api-snapshot/v5-types.mjs);
+ *   6. a source comment in packages/concerto-core/src (and, with
+ *      --rust-root, in the src/ of each concerto-rust crate) names a
+ *      migration task id or a bare or concerto-rust issue number
+ *      (accordproject/concerto-rust#459; see
+ *      migration/guardrails/comment-policy.mjs). BC-nn and DV-nn rows and
+ *      full-form upstream links (accordproject/concerto#NNNN) are allowed.
  *
  * "Changed relative to base ref" covers both committed history (base..HEAD)
  * and anything not yet committed (staged + working tree), so this also
  * works as a local pre-flight/hook check, not just a CI one.
  *
  * Usage:
- *   node migration/bin/check-guardrails.mjs [--base-ref origin/main] [--skip-dts-build]
+ *   node migration/bin/check-guardrails.mjs [--base-ref origin/main] [--skip-dts-build] [--rust-root <concerto-rust checkout>]
  *
  * --skip-dts-build skips rule 4's `tsc --emitDeclarationOnly` rebuild and
  * just diffs the previously-generated migration/api-snapshot/ against git's
@@ -48,6 +54,7 @@ import { fileURLToPath } from 'node:url';
 import { buildSnapshot } from '../api-snapshot/generate-snapshot.mjs';
 import { checkTestTree } from '../guardrails/relaxations.mjs';
 import { checkAgainstV5, compileConsumer } from '../api-snapshot/v5-types.mjs';
+import { checkCommentPolicy } from '../guardrails/comment-policy.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATION_ROOT = path.resolve(__dirname, '..');
@@ -61,6 +68,7 @@ function argVal(name, def) {
 }
 const BASE_REF = argVal('base-ref', 'origin/main');
 const SKIP_DTS_BUILD = process.argv.includes('--skip-dts-build');
+const RUST_ROOT_ARG = argVal('rust-root', undefined);
 
 function git(args) {
     return execFileSync('git', args, { cwd: REPO_ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
@@ -262,6 +270,24 @@ if (storedIndexDts === null || storedFullApiDts === null || storedExportsJson ==
     }
     if (liveDtsDir) {
         fs.rmSync(liveDtsDir, { recursive: true, force: true });
+    }
+}
+
+// -- Rule 6: source comments follow the comment policy. ----------------------
+{
+    const rustRoot = RUST_ROOT_ARG === undefined ? undefined : path.resolve(RUST_ROOT_ARG);
+    if (rustRoot !== undefined && !fs.existsSync(rustRoot)) {
+        failures.push(`--rust-root ${RUST_ROOT_ARG} does not exist.`);
+    } else {
+        const violations = checkCommentPolicy(REPO_ROOT, rustRoot);
+        if (violations.length > 0) {
+            failures.push([
+                `${violations.length} source comment(s) break the comment policy (no task ids, no bare or concerto-rust issue numbers; see migration/guardrails/comment-policy.mjs):`,
+                ...violations.map((v) => `    ${v}`),
+            ].join('\n'));
+        } else {
+            console.log(`(info) comment policy OK (packages/concerto-core/src${rustRoot ? `, ${rustRoot}/concerto-*/src` : ''}).`);
+        }
     }
 }
 
