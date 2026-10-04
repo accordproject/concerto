@@ -273,12 +273,23 @@ describe('converter fixes', () => {
             'concept D {}',
         ].join('\n'));
         const concertino = expectLosslessRoundTrip(metamodel);
-        expect(concertino.declarations['v@1.0.0.P'].metadata).toStrictEqual({ M1: ['some value'], Term_participantName: ['some value'] });
-        expect(concertino.declarations['v@1.0.0.C'].vocabulary).toStrictEqual({ additionalTerms: { x: 'x' } });
-        expect(concertino.declarations['v@1.0.0.C'].metadata).toStrictEqual({ Term: ['label'], M2: null });
-        // The usual order (label, terms, then the rest) still uses vocabulary.
-        expect(concertino.declarations['v@1.0.0.D'].vocabulary).toStrictEqual({ label: 'a', additionalTerms: { b: 'b' } });
-        expect(concertino.declarations['v@1.0.0.D'].metadata).toStrictEqual({ M4: [1] });
+        // Since 5.1.0 every term is in vocabulary, wherever it is, and
+        // decoratorOrder keeps the source order when it is not the usual one.
+        const P = concertino.declarations['v@1.0.0.P'];
+        expect(P.vocabulary).toStrictEqual({ additionalTerms: { participantName: 'some value' } });
+        expect(P.metadata).toStrictEqual({ M1: ['some value'] });
+        expect(P.decoratorOrder).toStrictEqual(['M1', 'Term_participantName']);
+        const C = concertino.declarations['v@1.0.0.C'];
+        expect(C.vocabulary).toStrictEqual({ label: 'label', additionalTerms: { x: 'x' } });
+        expect(C.metadata).toStrictEqual({ M2: null });
+        expect(C.decoratorOrder).toStrictEqual(['Term_x', 'Term', 'M2']);
+        expect(C.properties.s.vocabulary).toStrictEqual({ label: 'late' });
+        expect(C.properties.s.decoratorOrder).toStrictEqual(['M3', 'Term']);
+        // The usual order (label, terms, then the rest) needs no decoratorOrder.
+        const D = concertino.declarations['v@1.0.0.D'];
+        expect(D.vocabulary).toStrictEqual({ label: 'a', additionalTerms: { b: 'b' } });
+        expect(D.metadata).toStrictEqual({ M4: [1] });
+        expect(D).not.toHaveProperty('decoratorOrder');
     });
 
     it('should keep type-reference decorator arguments without a namespace', () => {

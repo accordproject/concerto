@@ -1,4 +1,20 @@
-namespace concertino.metamodel@5.0.0
+/*
+ * The Concertino format, version 5.1.0.
+ *
+ * The namespace version is the format version, which a document records as
+ * `metadata.concertinoVersion`. It follows semantic versioning: a minor
+ * version only adds optional fields, so every 5.x document is read by every
+ * 5.x reader, which ignores the optional fields it does not know; only a new
+ * major version may remove, rename or change the meaning of a field. The
+ * runtime and validator subpaths of @accordproject/concertino reject a
+ * document of another major version.
+ *
+ * 5.1.0 (additive): ConcertinoConceptDeclaration.systemSuperTypes;
+ * ConcertinoProperty.isMap and isSystem (and isEnum, which 5.0.0 declared but
+ * never wrote); decoratorOrder on every decorated element; inherited system
+ * identifiers ($identifier from concerto@1.0.0.Asset and Participant).
+ */
+namespace concertino.metamodel@5.1.0
 
 import concerto.metamodel@1.0.0.{Decorator, Import}
 
@@ -63,6 +79,14 @@ abstract concept ConcertinoDeclaration {
   o String type
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
+  /**
+   * The names of the element's decorators in their source order (since
+   * 5.1.0). Written only when that order is not the order a reader rebuilds
+   * from `vocabulary` (`@Term`, then the `@Term_*` additional terms) followed
+   * by `metadata`, for example for `@Foo @Term("x")`. A name repeats when a
+   * decorator does.
+   */
+  o String[] decoratorOrder optional
 }
 
 /**
@@ -73,6 +97,13 @@ concept ConcertinoConceptDeclaration extends ConcertinoDeclaration {
   o FullyQualifiedName[] extends optional
   o Boolean isAbstract optional
   o Prototype prototype optional // only specified, if the concept uses a prototype
+  /**
+   * The implicit system super types (since 5.1.0), nearest first:
+   * `concerto@1.0.0.Asset`, `Participant`, `Transaction` or `Event` for the
+   * prototypes, then `concerto@1.0.0.Concept`. `extends` followed by
+   * `systemSuperTypes` is concerto-core's getAllSuperTypeDeclarations().
+   */
+  o FullyQualifiedName[] systemSuperTypes optional
 }
 
 /**
@@ -103,6 +134,7 @@ map EnumValueMap {
 concept ConcertinoEnumValue {
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
+  o String[] decoratorOrder optional // since 5.1.0, as ConcertinoDeclaration.decoratorOrder
 }
 
 /**
@@ -153,6 +185,7 @@ concept MapKey {
   o String type // Fully qualified type name or primitive type
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
+  o String[] decoratorOrder optional // since 5.1.0, as ConcertinoDeclaration.decoratorOrder
 }
 
 /**
@@ -162,8 +195,8 @@ concept MapValue {
   o String type // Fully qualified type name or primitive type
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
+  o String[] decoratorOrder optional // since 5.1.0, as ConcertinoDeclaration.decoratorOrder
   o Boolean isRelationship optional // For relationship map values
-
 }
 
 /**
@@ -179,11 +212,19 @@ abstract concept ConcertinoProperty {
   o Boolean isIdentifier optional
   o Identifier inheritedFrom optional // For inherited properties
   o Boolean isCircular optional
-  o Boolean isEnum optional
+  o Boolean isEnum optional // the type is an enum declared in the document (written since 5.1.0)
+  o Boolean isMap optional // since 5.1.0: the type is a map declared in the document
+  /**
+   * Since 5.1.0: a system property ($identifier, $timestamp), which
+   * concerto-core adds and the model does not declare. Instances carry it,
+   * but it is populated by the system (a generated identifier or timestamp).
+   */
+  o Boolean isSystem optional
   @CodeGen_TypeScript_Override("[number | null, number | null]")
   o Integer[] size optional
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
+  o String[] decoratorOrder optional // since 5.1.0, as ConcertinoDeclaration.decoratorOrder
 }
 
 concept ConcertinoStringProperty extends ConcertinoProperty {

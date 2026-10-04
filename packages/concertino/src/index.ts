@@ -19,17 +19,19 @@
  */
 /* eslint-disable valid-jsdoc */
 import { IModels } from '@accordproject/concerto-metamodel';
-import { IConcertino } from './spec/concertino.metamodel@5.0.0';
+import { IConcertino } from './spec/concertino.metamodel@5.1.0';
 import { convertToConcertino } from './concertinoSerializer';
 import { convertToMetamodel } from './metamodelSerializer';
 import { checkSchema, SchemaError } from './schema';
+import { CONCERTINO_VERSION, CONCERTINO_MAJOR_VERSION, ConcertinoVersionError, checkConcertinoVersion } from './version';
 
 /**
  * Conversion options for Concertino format.
  */
 export interface ConcertinoOptions {
   /**
-   * Version of Concertino to use.
+   * The format version to record as `metadata.concertinoVersion`. Defaults
+   * to `CONCERTINO_VERSION`, the version this package writes.
    */
   version?: string;
 }
@@ -47,7 +49,7 @@ export class ConcertinoConverter {
      */
     constructor(options: ConcertinoOptions = {}) {
         this.options = {
-            version: '5.0.0',
+            version: CONCERTINO_VERSION,
             ...options
         };
         this.errors = null;
@@ -101,6 +103,9 @@ export class ConcertinoConverter {
 // Export individual conversion functions for direct use
 export { convertToConcertino, convertToMetamodel };
 
+// The format version and its compatibility check
+export { CONCERTINO_VERSION, CONCERTINO_MAJOR_VERSION, ConcertinoVersionError, checkConcertinoVersion };
+
 // Export types
 export type { SchemaError };
-export * from './spec/concertino.metamodel@5.0.0';
+export * from './spec/concertino.metamodel@5.1.0';

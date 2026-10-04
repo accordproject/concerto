@@ -40,7 +40,7 @@ import type {
 	IVocabulary,
 	IDecoratorValues,
 	IDecoratorValue
-} from './concertino.metamodel@5.0.0';
+} from './concertino.metamodel@5.1.0';
 
 // interfaces
 export interface IConcept {

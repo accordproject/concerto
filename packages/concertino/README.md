@@ -21,8 +21,30 @@ The Concertino format provides several advantages:
 - **Strict Mode By Default**: Namespaces are always versioned.
 - **Support for Partial Models** Allowing client applications to filter models to tailor payloads for their use cases.
 - **Lossless Conversion** Concertino is designed for 100% lossless roundtrip conversion with Concerto models.
+- **System Types Included**: each concept lists its implicit system super types (`concerto@1.0.0.Asset`, `Concept` and so on) and the system properties it inherits from them (`$identifier`, `$timestamp`), marked `isSystem`.
+- **Property Kinds**: properties whose type is an enum or a map declared in the document are flagged `isEnum` or `isMap`.
+- **Complete Vocabulary**: every `@Term` and `@Term_*` decorator is in `vocabulary`, wherever it is among an element's decorators.
 
 > Concerto (Metamodel) → Concertino → Concerto (Metamodel)
+
+## Format Versioning
+
+A Concertino document records the version of the format it was written in as `metadata.concertinoVersion`. This package writes format version **5.1.0** (`CONCERTINO_VERSION`, exported by every entry point). The format is specified by `src/spec/concertino.cto` (namespace `concertino.metamodel@5.1.0`) and checked by `src/spec/concertino.schema.json`.
+
+The format version follows [semantic versioning](https://semver.org):
+
+- A new **minor** version only adds optional fields. Every document of an earlier minor version of the same major is still a valid document, and is read the same way. A reader ignores the optional fields it does not know, so it can read documents of a later minor version too.
+- A new **patch** version changes no fields.
+- Only a new **major** version may remove or rename a field, or change what it means.
+
+`load` (`./runtime`) and every `./validate` entry point accept a document of major version 5 (any `5.x.y`) and throw a `ConcertinoVersionError` for a missing or malformed `concertinoVersion` or another major version, such as the pre-release `4.0.0-alpha.2` format. `checkConcertinoVersion(document)` runs the same check on its own. The schema check (`isValid`) is strict: it describes this package's version, so it rejects a field from a later minor version.
+
+The format version is not the npm package version: the package is released with the rest of the Concerto monorepo, and a new major release of the package does not change the format version.
+
+| format version | changes |
+|---|---|
+| 5.0.0 | the format of Concertino 5.0.0 |
+| 5.1.0 | additive: `systemSuperTypes` on concept declarations; the inherited system properties (`$identifier` of assets and participants, `$timestamp` of transactions and events, now inherited from the system type rather than an own property), marked `isSystem`; `isEnum` (declared in 5.0.0 but never written) and `isMap` on properties; `decoratorOrder` on every decorated element, so that every vocabulary term goes to `vocabulary` (5.0.0 kept a term that was not in leading position in `metadata`) |
 
 ## Installation
 
@@ -99,7 +121,7 @@ getIdentifierFieldName(model, 'org.example.models@1.0.0.Person'); // null: not i
 | `getEnumValues`, `getMapTypes` | the enum's values, `MapDeclaration.getKey` / `getValue` |
 | `getDecorators`, `getVocabulary`, `getNamespaceDecorators` | decorators of a declaration, property or enum value; `@Term` vocabulary; model-level decorators |
 
-Differences from concerto-core: `getSuperTypes` leaves out `concerto@1.0.0.Concept` (every class derives from it, and `derivesFrom` says so), `isClass` is false for enums, type names are always fully qualified (map key and value types included), the system properties `$identifier` and `$timestamp` can come in another order, and Concertino lists `$timestamp` as an own property of transactions and events.
+Differences from concerto-core: `getSuperTypes` leaves out `concerto@1.0.0.Concept` (every class derives from it, and `derivesFrom` says so), `isClass` is false for enums, type names are always fully qualified (map key and value types included), and the system properties `$identifier` and `$timestamp` can come in another order. A 5.0.0 document lists `$timestamp` as an own property of transactions and events; from format 5.1.0 it is inherited from the system type, as in concerto-core.
 
 ### Validating instances
 
@@ -126,11 +148,11 @@ Each subpath bundled for the browser on its own (esbuild: ESM, browser platform,
 
 | subpath | raw (KiB) | gzip (KiB) |
 |---|---:|---:|
-| `.` (every export) | 118.1 | 14.8 |
-| `./schema` | 102.5 | 10.7 |
-| `./runtime` | 4.2 | 1.6 |
-| `./validate` | 18.6 | 6.2 |
-| `./validate` and `load` from `./runtime` | 18.8 | 6.2 |
+| `.` (every export) | 126.4 | 16.2 |
+| `./schema` | 108.6 | 11.3 |
+| `./runtime` | 5.0 | 1.9 |
+| `./validate` | 19.7 | 6.5 |
+| `./validate` and `load` from `./runtime` | 19.8 | 6.6 |
 
 ## Model Size
 
@@ -147,103 +169,115 @@ Below is an example of how a simple Concerto model is represented in the Concert
 ```json
 {
   "declarations": {
-    "readme@1.0.0.Address": {
-      "properties": {
-        "city": {
-          "name": "city",
-          "type": "String",
-          "vocabulary": {
-            "label": "City/Town",
-          },
-        },
-        "country": {
-          "name": "country",
-          "type": "String",
-        },
-        "street": {
-          "name": "street",
-          "type": "String",
-          "vocabulary": {
-            "label": "Street Address",
-          },
-        },
-        "zipCode": {
-          "name": "zipCode",
-          "type": "String",
-        },
-      },
-      "type": "ConceptDeclaration",
-      "vocabulary": {
-        "label": "Physical Address",
-      },
-    },
-    "readme@1.0.0.Email": {
-      "regex": "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/",
+    "org.example.models@1.0.0.Email": {
       "type": "StringScalar",
+      "regex": "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/"
     },
-    "readme@1.0.0.Person": {
+    "org.example.models@1.0.0.Person": {
+      "type": "ConceptDeclaration",
       "properties": {
-        "address": {
-          "isOptional": true,
-          "name": "address",
-          "type": "readme@1.0.0.Address",
-          "vocabulary": {
-            "label": "Mailing Address",
-          },
-        },
-        "age": {
-          "isOptional": true,
-          "name": "age",
-          "range": [
-            0,
-            null,
-          ],
-          "type": "Integer",
-        },
-        "email": {
-          "isOptional": true,
-          "metadata": {
-            "sensitive": null,
-          },
-          "name": "email",
-          "regex": "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/",
-          "scalarType": "readme@1.0.0.Email",
-          "type": "String",
-        },
         "firstName": {
           "name": "firstName",
           "type": "String",
           "vocabulary": {
-            "label": "Given Name",
-          },
+            "label": "Given Name"
+          }
         },
         "lastName": {
           "name": "lastName",
           "type": "String",
           "vocabulary": {
-            "label": "Family Name",
+            "label": "Family Name"
+          }
+        },
+        "age": {
+          "name": "age",
+          "type": "Integer",
+          "isOptional": true,
+          "range": [
+            0,
+            null
+          ]
+        },
+        "email": {
+          "name": "email",
+          "type": "String",
+          "metadata": {
+            "sensitive": null
           },
+          "isOptional": true,
+          "scalarType": "org.example.models@1.0.0.Email",
+          "regex": "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/"
         },
+        "address": {
+          "name": "address",
+          "type": "org.example.models@1.0.0.Address",
+          "vocabulary": {
+            "label": "Mailing Address"
+          },
+          "isOptional": true
+        }
       },
-      "type": "ConceptDeclaration",
       "vocabulary": {
-        "additionalTerms": {
-          "plural": "People",
-        },
         "label": "Individual",
+        "additionalTerms": {
+          "plural": "People"
+        }
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept"
+      ]
     },
+    "org.example.models@1.0.0.Address": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "street": {
+          "name": "street",
+          "type": "String",
+          "vocabulary": {
+            "label": "Street Address"
+          }
+        },
+        "city": {
+          "name": "city",
+          "type": "String",
+          "vocabulary": {
+            "label": "City/Town"
+          }
+        },
+        "zipCode": {
+          "name": "zipCode",
+          "type": "String"
+        },
+        "country": {
+          "name": "country",
+          "type": "String"
+        }
+      },
+      "vocabulary": {
+        "label": "Physical Address"
+      },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept"
+      ]
+    }
   },
   "metadata": {
-    "concertinoVersion": "4.0.0-alpha.2",
+    "concertinoVersion": "5.1.0",
     "models": {
       "org.example.models@1.0.0": {
-        "concertoVersion": "1.0.0",
         "sourceUri": "org/example/models.cto",
+        "imports": [],
         "decorators": [
           {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
             "name": "license",
-            "arguments": ["Apache-2.0"]
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "Apache-2.0"
+              }
+            ]
           }
         ]
       }
@@ -269,7 +303,7 @@ concept Person {
   @Term("Family Name")
   o String lastName
   
-  o Integer age optional range=[0, ]
+  o Integer age range=[0,] optional
   
   @sensitive
   o Email email optional 

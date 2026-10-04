@@ -22,7 +22,7 @@
  * you only need the schema check; the converter entry point does not need it.
  */
 import validate from './spec/concertinoSchemaValidator';
-import type { IConcertino } from './spec/concertino.metamodel@5.0.0';
+import type { IConcertino } from './spec/concertino.metamodel@5.1.0';
 
 /**
  * One schema error, as ajv reports it (ajv's `ErrorObject`).

@@ -34,8 +34,11 @@
  *   event declared without `extends` (Concertino's `prototype`), and so the
  *   system identifier `$identifier` of an asset or participant declared
  *   without `identified`;
- * - whether a property's type is an enum or a map (`isEnum` is in the
- *   format but the converter never sets it), by looking the type up.
+ * - whether a property's type is an enum or a map, by looking the type up
+ *   (format 5.1.0 also flags it, with `isEnum` and `isMap`).
+ *
+ * `load` reads documents of Concertino format major version 5 (any 5.x.y)
+ * and throws a `ConcertinoVersionError` for any other version.
  */
 /* eslint-disable no-use-before-define */
 /* eslint-disable valid-jsdoc */
@@ -43,7 +46,10 @@
 import type {
     IConcertino, IConcertinoDeclaration, IConcertinoConceptDeclaration, IConcertinoProperty,
     IConcertinoEnumDeclaration, IConcertinoMapDeclaration,
-} from './spec/concertino.metamodel@5.0.0';
+} from './spec/concertino.metamodel@5.1.0';
+import { checkConcertinoVersion } from './version';
+
+export { CONCERTINO_VERSION, CONCERTINO_MAJOR_VERSION, ConcertinoVersionError, checkConcertinoVersion } from './version';
 
 export const SYSTEM_NS = 'concerto@1.0.0';
 const PRIMITIVES = new Set(['String', 'Boolean', 'DateTime', 'Double', 'Integer', 'Long']);
@@ -76,13 +82,20 @@ const sys = (identified: boolean, timestamped: boolean): IConcertinoConceptDecla
     return { type: 'ConceptDeclaration', isAbstract: true, properties } as IConcertinoConceptDeclaration;
 };
 
-/** The system model, as concerto-core's rootmodel.json declares it (R1: no $timestamp property there). */
+/**
+ * The system model, with the system properties concerto-core gives its
+ * types: `$identifier` on Asset and Participant, `$timestamp` on Transaction
+ * and Event (concerto-core adds the latter; rootmodel.json declares none).
+ * Format 5.1.0 writes these properties onto each declaration, inherited from
+ * the system type; a 5.0.0 document had `$timestamp` as an own property and
+ * left the inherited `$identifier` out, so they are read from here.
+ */
 const SYSTEM: Record<string, IConcertinoConceptDeclaration> = {
     [`${SYSTEM_NS}.Concept`]: sys(false, false),
     [`${SYSTEM_NS}.Asset`]: sys(true, false),
     [`${SYSTEM_NS}.Participant`]: sys(true, false),
-    [`${SYSTEM_NS}.Transaction`]: sys(false, false),
-    [`${SYSTEM_NS}.Event`]: sys(false, false),
+    [`${SYSTEM_NS}.Transaction`]: sys(false, true),
+    [`${SYSTEM_NS}.Event`]: sys(false, true),
 };
 const PROTOTYPE_SUPER: Record<string, string> = {
     AssetDeclaration: `${SYSTEM_NS}.Asset`,
@@ -95,8 +108,10 @@ const PROTOTYPE_SUPER: Record<string, string> = {
  * Load a Concertino document.
  * @param doc the document (ConcertinoConverter.fromConcertoMetamodel output, or JSON built ahead of time)
  * @returns the model
+ * @throws {ConcertinoVersionError} when `metadata.concertinoVersion` is missing, malformed, or not major version 5
  */
 export function load(doc: IConcertino): Model {
+    checkConcertinoVersion(doc);
     const decls = new Map<string, IConcertinoDeclaration>(Object.entries(SYSTEM));
     for (const [fqn, d] of Object.entries(doc.declarations)) {
         decls.set(fqn, d);
