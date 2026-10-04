@@ -65,6 +65,30 @@ at concerto `574faa716` and concerto-rust `bfa4a55` (2026-10-02). The
   exceptions `Serializer.fromJSON` and `validateInstanceOrThrow` throw carry
   the same diagnostics as a `details` property (not enumerable); their class
   and message are unchanged.
+- **Added: `ModelManager.fork()` (additive; P5-97).** `base.fork()` returns an
+  independent copy of a loaded manager without loading or validating its
+  model files again, for servers that build one manager per request or
+  tenant. See
+  [Servers and many managers](./MIGRATION-GUIDE.md#servers-and-many-managers).
+- **Added: Concertino subpaths for the web (additive; P5-79, P5-127).**
+  `@accordproject/concertino` no longer depends on concerto-core or ajv at
+  run time, and adds three subpaths that need neither concerto-core nor the
+  engine, and compile no code at run time: `./schema` (`isValid`,
+  `checkSchema`, the Concertino schema checks precompiled),
+  `./runtime` (introspection over a Concertino document: `load`,
+  `getProperties`, `getSuperTypes`, `getIdentifierFieldName` and so on) and
+  `./validate` (`validate`, `normalise`, `check` and `toJSON` of plain JSON
+  instances, with R1's rules and concerto-core's exception classes).
+  `ConcertinoConverter.isValid` stays, over the precompiled checks.
+- **Added: Concertino format 5.1.0 and its versioning policy (additive;
+  P5-130).** `metadata.concertinoVersion` follows semantic versioning: minor
+  versions only add optional fields, and `./runtime` and `./validate` read
+  every 5.x document and throw a `ConcertinoVersionError` for another major
+  version. The converter writes 5.1.0, which adds each concept's implicit
+  system super types (`systemSuperTypes`) and inherited system properties
+  (`$identifier`, `$timestamp`, marked `isSystem`), `isEnum` and `isMap` on
+  properties, and `decoratorOrder`, so that every `@Term` and `@Term_*`
+  decorator is in `vocabulary`. 5.0.0 documents still read the same way.
 
 ### Performance
 
@@ -130,6 +154,13 @@ reason, who is affected and the upgrade step for each one.
   `ERR_PACKAGE_PATH_NOT_EXPORTED`. The package exports only its root (`.`) and
   `./package.json`. Use the root exports; the migration guide lists the
   replacements. (BC-34)
+- **`@accordproject/concertino` no longer ships the pre-release format type
+  files**, `dist/spec/concertino.metamodel@4.0.0-alpha.2` and
+  `concertino.metamodel@1.0.0-alpha.7`, and its format types moved from
+  `dist/spec/concertino.metamodel@5.0.0` to
+  `dist/spec/concertino.metamodel@5.1.0`. Nothing in the package used them;
+  only a deep import through its `./dist/*` export reached them. Import the
+  types from the package root. (P5-130)
 
 ### Dates
 
@@ -297,10 +328,11 @@ release:
   unreferenced engine exports) and P5-47 (#368, the CTO parser out of
   AST-only entry points). Until those are decided, BC-32 ships as described
   above.
-- The Concertino spike, P5-78 (accordproject/concerto-rust#420): whether
-  Concertino becomes the R1 web story for introspection, validation and
-  plain-JSON serialisation. Its decisions are open, so the browser story also
-  waits on #420, and any BC rows it would add are not in R1.
+- The rest of the Concertino web story, P5-78 (accordproject/concerto-rust#420,
+  decided 2026-10-04): the `./resolve` subpath and the browser CTO pipeline
+  (P5-128, #505) and `ModelManager.toConcertino()` (P5-129, #506, BC-54) are
+  still to come. The `./schema`, `./runtime` and `./validate` subpaths and
+  format 5.1.0 are in R1 (see What's new).
 - The P5-80 spike (accordproject/concerto-rust#424): a cached
   per-generation validation plan for instance validation and serialisation.
   Analysis only.

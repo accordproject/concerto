@@ -1,0 +1,310 @@
+{
+  "declarations": {
+    "org.example.gaps@1.0.0.Colour": {
+      "type": "EnumDeclaration",
+      "values": {
+        "RED": {
+          "vocabulary": {
+            "label": "Red colour"
+          }
+        },
+        "GREEN": {
+          "metadata": {
+            "Deprecated": null,
+            "Term": [
+              "Green colour"
+            ]
+          }
+        }
+      }
+    },
+    "org.example.gaps@1.0.0.Scores": {
+      "type": "MapDeclaration",
+      "key": {
+        "type": "String"
+      },
+      "value": {
+        "type": "Integer"
+      }
+    },
+    "org.example.gaps@1.0.0.Owners": {
+      "type": "MapDeclaration",
+      "key": {
+        "type": "String"
+      },
+      "value": {
+        "type": "org.example.gaps@1.0.0.Person",
+        "isRelationship": true
+      }
+    },
+    "org.example.gaps@1.0.0.Code": {
+      "type": "StringScalar",
+      "regex": "/^[A-Z]{3}$/"
+    },
+    "org.example.gaps@1.0.0.Person": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "email": {
+          "name": "email",
+          "type": "String",
+          "isIdentifier": true
+        },
+        "favourite": {
+          "name": "favourite",
+          "type": "org.example.gaps@1.0.0.Colour",
+          "isOptional": true
+        },
+        "others": {
+          "name": "others",
+          "type": "org.example.gaps@1.0.0.Colour",
+          "isArray": true,
+          "isOptional": true
+        },
+        "scores": {
+          "name": "scores",
+          "type": "org.example.gaps@1.0.0.Scores",
+          "isOptional": true
+        },
+        "owners": {
+          "name": "owners",
+          "type": "org.example.gaps@1.0.0.Owners",
+          "isOptional": true
+        }
+      },
+      "vocabulary": {
+        "label": "A person"
+      },
+      "prototype": "ParticipantDeclaration"
+    },
+    "org.example.gaps@1.0.0.Anonymous": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "nickname": {
+          "name": "nickname",
+          "type": "String",
+          "metadata": {
+            "Hidden": null,
+            "Term": [
+              "Nickname"
+            ]
+          },
+          "isOptional": true
+        }
+      },
+      "prototype": "ParticipantDeclaration"
+    },
+    "org.example.gaps@1.0.0.Visitor": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "nickname": {
+          "name": "nickname",
+          "type": "String",
+          "metadata": {
+            "Hidden": null,
+            "Term": [
+              "Nickname"
+            ]
+          },
+          "isOptional": true,
+          "inheritedFrom": "org.example.gaps@1.0.0.Anonymous"
+        }
+      },
+      "prototype": "ParticipantDeclaration",
+      "extends": [
+        "org.example.gaps@1.0.0.Anonymous"
+      ]
+    },
+    "org.example.gaps@1.0.0.Vehicle": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "vin": {
+          "name": "vin",
+          "type": "String",
+          "isIdentifier": true
+        },
+        "code": {
+          "name": "code",
+          "type": "String",
+          "isOptional": true,
+          "scalarType": "org.example.gaps@1.0.0.Code",
+          "regex": "/^[A-Z]{3}$/"
+        }
+      },
+      "vocabulary": {
+        "additionalTerms": {
+          "plural": "Vehicles"
+        }
+      },
+      "prototype": "AssetDeclaration",
+      "isAbstract": true
+    },
+    "org.example.gaps@1.0.0.Car": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "vin": {
+          "name": "vin",
+          "type": "String",
+          "isIdentifier": true,
+          "inheritedFrom": "org.example.gaps@1.0.0.Vehicle"
+        },
+        "code": {
+          "name": "code",
+          "type": "String",
+          "isOptional": true,
+          "scalarType": "org.example.gaps@1.0.0.Code",
+          "regex": "/^[A-Z]{3}$/",
+          "inheritedFrom": "org.example.gaps@1.0.0.Vehicle"
+        },
+        "colour": {
+          "name": "colour",
+          "type": "org.example.gaps@1.0.0.Colour"
+        }
+      },
+      "metadata": {
+        "Fast": null,
+        "Term": [
+          "A car"
+        ],
+        "Term_plural": [
+          "Cars"
+        ]
+      },
+      "prototype": "AssetDeclaration",
+      "extends": [
+        "org.example.gaps@1.0.0.Vehicle"
+      ]
+    },
+    "org.example.gaps@1.0.0.Token": {
+      "type": "ConceptDeclaration",
+      "properties": {},
+      "prototype": "AssetDeclaration"
+    },
+    "org.example.gaps@1.0.0.Address": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "street": {
+          "name": "street",
+          "type": "String"
+        },
+        "$identifier": {
+          "name": "$identifier",
+          "type": "String",
+          "isIdentifier": true
+        }
+      }
+    },
+    "org.example.gaps@1.0.0.HomeAddress": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "street": {
+          "name": "street",
+          "type": "String",
+          "inheritedFrom": "org.example.gaps@1.0.0.Address"
+        },
+        "$identifier": {
+          "name": "$identifier",
+          "type": "String",
+          "isIdentifier": true,
+          "inheritedFrom": "org.example.gaps@1.0.0.Address"
+        }
+      },
+      "extends": [
+        "org.example.gaps@1.0.0.Address"
+      ]
+    },
+    "org.example.gaps@1.0.0.Plain": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "colour": {
+          "name": "colour",
+          "type": "org.example.gaps@1.0.0.Colour"
+        }
+      }
+    },
+    "org.example.gaps@1.0.0.Transfer": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "car": {
+          "name": "car",
+          "type": "org.example.gaps@1.0.0.Car",
+          "isRelationship": true
+        },
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime"
+        }
+      },
+      "prototype": "TransactionDeclaration"
+    },
+    "org.example.gaps@1.0.0.BigTransfer": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "car": {
+          "name": "car",
+          "type": "org.example.gaps@1.0.0.Car",
+          "isRelationship": true,
+          "inheritedFrom": "org.example.gaps@1.0.0.Transfer"
+        },
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "Double"
+        }
+      },
+      "prototype": "TransactionDeclaration",
+      "extends": [
+        "org.example.gaps@1.0.0.Transfer"
+      ]
+    },
+    "org.example.gaps@1.0.0.Moved": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "scores": {
+          "name": "scores",
+          "type": "org.example.gaps@1.0.0.Scores"
+        },
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime"
+        }
+      },
+      "prototype": "EventDeclaration"
+    },
+    "org.example.gaps@1.0.0.Base": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime"
+        }
+      },
+      "prototype": "EventDeclaration",
+      "isAbstract": true
+    },
+    "org.example.gaps@1.0.0.Derived": {
+      "type": "ConceptDeclaration",
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime"
+        }
+      },
+      "prototype": "EventDeclaration",
+      "extends": [
+        "org.example.gaps@1.0.0.Base"
+      ]
+    }
+  },
+  "metadata": {
+    "concertinoVersion": "5.0.0",
+    "models": {
+      "org.example.gaps@1.0.0": {
+        "imports": [],
+        "decorators": []
+      }
+    }
+  }
+}

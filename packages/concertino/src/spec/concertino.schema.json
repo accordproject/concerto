@@ -84,6 +84,10 @@
                 ]
             }
         },
+        "DecoratorOrder": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
         "FullyQualifiedName": {
             "type": "object",
             "required": ["namespace", "localName", "version"],
@@ -98,7 +102,8 @@
             "type": "object",
             "properties": {
                 "vocabulary": { "$ref": "#/definitions/Vocabulary" },
-                "metadata": { "$ref": "#/definitions/MetadataMap" }
+                "metadata": { "$ref": "#/definitions/MetadataMap" },
+                "decoratorOrder": { "$ref": "#/definitions/DecoratorOrder" }
             },
             "additionalProperties": false
         },
@@ -127,6 +132,11 @@
                 "vocabulary": { "$ref": "#/definitions/Vocabulary" },
                 "metadata": { "$ref": "#/definitions/MetadataMap" },
                 "prototype": { "type": "string" },
+                "systemSuperTypes": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "decoratorOrder": { "$ref": "#/definitions/DecoratorOrder" },
                 "name": { "$ref": "#/definitions/FullyQualifiedName" }
             },
             "additionalProperties": false
@@ -144,6 +154,7 @@
                 },
                 "vocabulary": { "$ref": "#/definitions/Vocabulary" },
                 "metadata": { "$ref": "#/definitions/MetadataMap" },
+                "decoratorOrder": { "$ref": "#/definitions/DecoratorOrder" },
                 "name": { "$ref": "#/definitions/FullyQualifiedName" }
             },
             "additionalProperties": false
@@ -164,6 +175,7 @@
                 },
                 "vocabulary": { "$ref": "#/definitions/Vocabulary" },
                 "metadata": { "$ref": "#/definitions/MetadataMap" },
+                "decoratorOrder": { "$ref": "#/definitions/DecoratorOrder" },
                 "regex": { "type": "string" },
                 "length": {
                     "type": "array",
@@ -205,7 +217,8 @@
                     "properties": {
                         "type": { "type": "string" },
                         "vocabulary": { "$ref": "#/definitions/Vocabulary" },
-                        "metadata": { "$ref": "#/definitions/MetadataMap" }
+                        "metadata": { "$ref": "#/definitions/MetadataMap" },
+                        "decoratorOrder": { "$ref": "#/definitions/DecoratorOrder" }
                     }
                 },
                 "value": {
@@ -215,11 +228,13 @@
                         "type": { "type": "string" },
                         "vocabulary": { "$ref": "#/definitions/Vocabulary" },
                         "metadata": { "$ref": "#/definitions/MetadataMap" },
+                        "decoratorOrder": { "$ref": "#/definitions/DecoratorOrder" },
                         "isRelationship": { "type": "boolean" }
                     }
                 },
                 "vocabulary": { "$ref": "#/definitions/Vocabulary" },
                 "metadata": { "$ref": "#/definitions/MetadataMap" },
+                "decoratorOrder": { "$ref": "#/definitions/DecoratorOrder" },
                 "name": { "$ref": "#/definitions/FullyQualifiedName" }
             },
             "additionalProperties": false
@@ -234,12 +249,15 @@
                 "vocabulary": { "$ref": "#/definitions/Vocabulary" },
                 "isCircular": { "type": "boolean" },
                 "isEnum": { "type": "boolean" },
+                "isMap": { "type": "boolean" },
+                "isSystem": { "type": "boolean" },
                 "isOptional": { "type": "boolean" },
                 "isArray": { "type": "boolean" },
                 "isRelationship": { "type": "boolean" },
                 "isIdentifier": { "type": "boolean" },
                 "inheritedFrom": { "type": "string" },
                 "metadata": { "$ref": "#/definitions/MetadataMap" },
+                "decoratorOrder": { "$ref": "#/definitions/DecoratorOrder" },
                 "regex": { "type": "string" },
                 "length": {
                     "type": "array",

@@ -50,7 +50,8 @@ import {
     EnumValueMap,
     PropertyMap,
     Prototype
-} from './spec/concertino.metamodel@5.0.0';
+} from './spec/concertino.metamodel@5.1.0';
+import { CONCERTINO_VERSION } from './version';
 
 // Type definition for scalar types as strings for easier mapping
 type ScalarType = 'BooleanScalar' | 'IntegerScalar' | 'LongScalar' | 'DoubleScalar' | 'StringScalar' | 'DateTimeScalar';
@@ -149,24 +150,30 @@ function isVocabularyTerm(decorator: any): boolean {
 /**
  * Extracts vocabulary and metadata from decorators.
  *
- * Concertino reads decorators back in this order: the vocabulary label, the
- * additional terms, then the metadata entries. So a term goes to
- * `vocabulary` only while that order holds (no metadata entry before it, and
- * for the label no additional term before it). A term after that goes to
- * `metadata` under its own name, so the decorators come back in their
- * original order.
+ * Every vocabulary term (`@Term("label")`, `@Term()`, `@Term_key("term")`)
+ * goes to `vocabulary`, wherever it is among the element's decorators. Any
+ * other decorator, and a term that `vocabulary` cannot hold as it is (other
+ * argument types or counts, or a repeated term), goes to `metadata`, which
+ * keeps the arguments as they are.
+ *
+ * A reader rebuilds the decorators as the vocabulary label, the additional
+ * terms, then the metadata entries. When the source order is not that order
+ * (`@Foo @Term("x")`, say), `decoratorOrder` lists the decorator names in
+ * their source order (since 5.1.0). 5.0.0 kept such a term in `metadata`
+ * instead, so its vocabulary missed it.
  * @param decorators The decorators array.
  * @returns The extracted info.
  */
-function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: IVocabulary; metadata?: MetadataMap } {
+function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: IVocabulary; metadata?: MetadataMap; decoratorOrder?: string[] } {
     const vocabulary: IVocabulary = {};
     const metadata: MetadataMap = {};
+    const order: string[] = [];
 
     decorators.forEach((decorator) => {
-        const inOrder = Object.keys(metadata).length === 0;
-        if (decorator.name === 'Term' && inOrder && !vocabulary.additionalTerms && !('label' in vocabulary) && isVocabularyTerm(decorator)) {
+        order.push(decorator.name);
+        if (decorator.name === 'Term' && !('label' in vocabulary) && isVocabularyTerm(decorator)) {
             vocabulary.label = decorator.arguments.length === 0 ? null : decorator.arguments[0].value;
-        } else if (decorator.name.startsWith('Term_') && inOrder && isVocabularyTerm(decorator) &&
+        } else if (decorator.name.startsWith('Term_') && isVocabularyTerm(decorator) &&
             !Object.prototype.hasOwnProperty.call(vocabulary.additionalTerms ?? {}, decorator.name.substring('Term_'.length))) {
             // The key is everything after `Term_`, so `@Term_my_type` keeps `my_type`.
             const key = decorator.name.substring('Term_'.length);
@@ -192,12 +199,20 @@ function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: IVocabula
         }
     });
 
-    const result: { vocabulary?: IVocabulary; metadata?: MetadataMap } = {};
+    const result: { vocabulary?: IVocabulary; metadata?: MetadataMap; decoratorOrder?: string[] } = {};
     if (Object.keys(vocabulary).length > 0) {
         result.vocabulary = vocabulary;
     }
     if (Object.keys(metadata).length > 0) {
         result.metadata = metadata;
+    }
+    const readBack = [
+        ...('label' in vocabulary ? ['Term'] : []),
+        ...Object.keys(vocabulary.additionalTerms ?? {}).map((key) => `Term_${key}`),
+        ...Object.keys(metadata),
+    ];
+    if (readBack.length !== order.length || readBack.some((name, i) => name !== order[i])) {
+        result.decoratorOrder = order;
     }
     return result;
 }
@@ -415,14 +430,13 @@ function transformConceptDeclaration(declaration: IConceptDeclaration, context: 
             name: '$identifier',
             type: 'String',
             isIdentifier: true,
+            isSystem: true,
         };
     }
-    if (['TransactionDeclaration', 'EventDeclaration'].includes(declarationClass)) {
-        result.properties.$timestamp = {
-            name: '$timestamp',
-            type: 'DateTime',
-        };
-    }
+    // The system properties inherited from the implicit system super type
+    // ($timestamp of a transaction or event, $identifier of an asset or
+    // participant) are added by addSystemSuperTypes, once the inherited
+    // properties are known.
     return result;
 }
 
@@ -473,6 +487,91 @@ export function getInheritanceChain(declaration: IConcertinoConceptDeclaration, 
     return chain;
 }
 
+const SYSTEM_NAMESPACE = 'concerto@1.0.0';
+
+/**
+ * The implicit system super types of each prototype, nearest first, as
+ * concerto-core's getAllSuperTypeDeclarations() lists them after the declared
+ * super types.
+ */
+const SYSTEM_SUPER_TYPES: Record<string, string[]> = {
+    ConceptDeclaration: [`${SYSTEM_NAMESPACE}.Concept`],
+    AssetDeclaration: [`${SYSTEM_NAMESPACE}.Asset`, `${SYSTEM_NAMESPACE}.Concept`],
+    ParticipantDeclaration: [`${SYSTEM_NAMESPACE}.Participant`, `${SYSTEM_NAMESPACE}.Concept`],
+    TransactionDeclaration: [`${SYSTEM_NAMESPACE}.Transaction`, `${SYSTEM_NAMESPACE}.Concept`],
+    EventDeclaration: [`${SYSTEM_NAMESPACE}.Event`, `${SYSTEM_NAMESPACE}.Concept`],
+};
+
+/**
+ * The system property each system super type declares, as concerto-core
+ * adds it: `$identifier` (String) for assets and participants, `$timestamp`
+ * (DateTime) for transactions and events.
+ */
+const SYSTEM_PROPERTIES: Record<string, { name: string; type: string }> = {
+    [`${SYSTEM_NAMESPACE}.Asset`]: { name: '$identifier', type: 'String' },
+    [`${SYSTEM_NAMESPACE}.Participant`]: { name: '$identifier', type: 'String' },
+    [`${SYSTEM_NAMESPACE}.Transaction`]: { name: '$timestamp', type: 'DateTime' },
+    [`${SYSTEM_NAMESPACE}.Event`]: { name: '$timestamp', type: 'DateTime' },
+};
+
+/**
+ * Writes a concept declaration's implicit system super types
+ * (`systemSuperTypes`, since 5.1.0) and the system properties it inherits
+ * from them: `$timestamp` from `concerto@1.0.0.Transaction` or `Event`, and
+ * `$identifier` from `concerto@1.0.0.Asset` or `Participant`, which is the
+ * identifier only when no other property is. Each is marked `isSystem` and
+ * `inheritedFrom` the system type, so that the properties are the ones
+ * concerto-core's getProperties() lists. (5.0.0 wrote `$timestamp` as an own
+ * property and left out an inherited `$identifier`.)
+ * Note: mutates the declaration.
+ * @param fqn The declaration's fully qualified name.
+ * @param concept The declaration.
+ */
+function addSystemSuperTypes(fqn: string, concept: IConcertinoConceptDeclaration): void {
+    let systemSuperTypes = SYSTEM_SUPER_TYPES[concept.prototype ?? 'ConceptDeclaration'] ?? [];
+    // A declaration of the system model itself has only the ones above it.
+    const self = systemSuperTypes.indexOf(fqn);
+    if (self >= 0) {
+        systemSuperTypes = systemSuperTypes.slice(self + 1);
+    }
+    if (systemSuperTypes.length === 0) {
+        return;
+    }
+    concept.systemSuperTypes = [...systemSuperTypes];
+    const properties = concept.properties ?? {};
+    const systemProperties: PropertyMap = {};
+    systemSuperTypes.forEach((systemType) => {
+        const systemProperty = SYSTEM_PROPERTIES[systemType];
+        if (systemProperty && !(systemProperty.name in properties) && !(systemProperty.name in systemProperties)) {
+            const property: IConcertinoProperty = { ...systemProperty, inheritedFrom: systemType, isSystem: true };
+            if (systemProperty.name === '$identifier' && !Object.values(properties).some((p) => p.isIdentifier)) {
+                property.isIdentifier = true;
+            }
+            systemProperties[systemProperty.name] = property;
+        }
+    });
+    concept.properties = { ...systemProperties, ...properties };
+}
+
+/**
+ * Flags the properties whose type is an enum (`isEnum`) or a map (`isMap`,
+ * since 5.1.0) declared in the document. A type the document does not hold
+ * (a partial model) is not flagged.
+ * Note: mutates the declaration's properties.
+ * @param concept The declaration.
+ * @param concertino The document.
+ */
+function flagPropertyTypes(concept: IConcertinoConceptDeclaration, concertino: IConcertino): void {
+    Object.values(concept.properties ?? {}).forEach((property) => {
+        const type = concertino.declarations[property.type];
+        if (type?.type === 'EnumDeclaration') {
+            property.isEnum = true;
+        } else if (type?.type === 'MapDeclaration') {
+            property.isMap = true;
+        }
+    });
+}
+
 /**
  * Converts a Concerto metamodel to the Concertino format.
  * @param metamodel The Concerto metamodel.
@@ -482,7 +581,7 @@ function convertToConcertino(metamodel: IModels): IConcertino {
     const concertino: IConcertino = {
         declarations: {},
         metadata: {
-            concertinoVersion: '5.0.0',
+            concertinoVersion: CONCERTINO_VERSION,
             models: {},
         },
     };
@@ -556,6 +655,13 @@ function convertToConcertino(metamodel: IModels): IConcertino {
                     return [key, value];
                 }).filter((entry): entry is [string, IConcertinoProperty] => entry !== undefined)
             );
+        }
+    });
+    Object.entries(concertino.declarations).forEach(([fqn, declaration]) => {
+        if (declaration.type === 'ConceptDeclaration') {
+            const concept = declaration as IConcertinoConceptDeclaration;
+            addSystemSuperTypes(fqn, concept);
+            flagPropertyTypes(concept, concertino);
         }
     });
     return concertino;

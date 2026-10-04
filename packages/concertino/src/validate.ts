@@ -33,6 +33,10 @@
  * (`errorClass`); messages are not matched (maintainer decision 2026-09-27).
  * Regexes are native JS `RegExp` (as R1, BC-28).
  *
+ * Every entry point reads only documents of Concertino format major version
+ * 5 (any 5.x.y), as `load` does, and throws a `ConcertinoVersionError` for a
+ * model over any other version.
+ *
  * Not covered: Factory instance generation, `rejectUnknownKeys` /
  * `rejectRequiredNull`, `permitResourcesForRelationships` /
  * `convertResourcesToRelationships` on toJSON, resource de-duplication.
@@ -40,11 +44,14 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable valid-jsdoc */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IConcertinoProperty } from './spec/concertino.metamodel@5.0.0';
+import type { IConcertinoProperty } from './spec/concertino.metamodel@5.1.0';
 import {
     Model, getType, kindOf, isAbstract, isTransaction, isEvent, getProperties, getProperty,
     getIdentifierFieldName, getEnumValues, getMapTypes, isAssignableTo, isClass, namespaceOf, shortName, isPrimitive,
 } from './runtime';
+import { checkConcertinoVersion } from './version';
+
+export { CONCERTINO_VERSION, CONCERTINO_MAJOR_VERSION, ConcertinoVersionError, checkConcertinoVersion } from './version';
 
 export type ErrorClass = 'ValidationException' | 'TypeNotFoundException' | 'Error' | 'TypeError';
 
@@ -845,12 +852,30 @@ function ctxOf(m: Model, o: Options = {}): Ctx {
     };
 }
 
+/** The documents whose version has been checked. */
+const checkedDocs = new WeakSet<object>();
+
+/**
+ * Checks the format version of a model's document, once per document.
+ * @throws {ConcertinoVersionError} when the document is not major version 5
+ */
+function checkModelVersion(m: Model): void {
+    const doc = m?.doc as unknown;
+    if (doc !== null && typeof doc === 'object' && checkedDocs.has(doc)) {
+        return;
+    }
+    checkConcertinoVersion(doc);
+    checkedDocs.add(doc as object);
+}
+
 /**
  * Populate and validate `json` (Serializer.fromJSON with R1 semantics).
  * @returns the populated instance (opaque; pass it to toJSON)
  * @throws InstanceError
+ * @throws {ConcertinoVersionError} when the model's document is not Concertino major version 5
  */
 export function validate(m: Model, json: unknown, options: Options = {}): Res {
+    checkModelVersion(m);
     const c = ctxOf(m, options);
     const cls = readProp(json, '$class');
     if (!cls) {
@@ -881,6 +906,7 @@ export function validate(m: Model, json: unknown, options: Options = {}): Res {
 
 /** Serializer.toJSON of a populated instance. */
 export function toJSON(m: Model, r: Res, options: Pick<Options, 'utcOffset'> = {}): Record<string, unknown> {
+    checkModelVersion(m);
     return toJSONResource(m, r, offsetMinutes(options.utcOffset));
 }
 

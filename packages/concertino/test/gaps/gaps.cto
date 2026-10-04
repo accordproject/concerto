@@ -1,0 +1,79 @@
+namespace org.example.gaps@1.0.0
+
+// A model for the Concertino 5.1.0 additive fixes (test/format.test.ts):
+// system super types and properties, $timestamp, isEnum, isMap and the
+// vocabulary terms that 5.0.0 kept in metadata.
+
+enum Colour {
+  @Term("Red colour")
+  o RED
+  @Deprecated @Term("Green colour")
+  o GREEN
+}
+
+map Scores {
+  o String
+  o Integer
+}
+
+map Owners {
+  o String
+  --> Person
+}
+
+scalar Code extends String regex=/^[A-Z]{3}$/
+
+@Term("A person")
+participant Person identified by email {
+  o String email
+  o Colour favourite optional
+  o Colour[] others optional
+  o Scores scores optional
+  o Owners owners optional
+}
+
+participant Anonymous {
+  @Hidden @Term("Nickname")
+  o String nickname optional
+}
+
+participant Visitor extends Anonymous {}
+
+@Term_plural("Vehicles")
+abstract asset Vehicle identified by vin {
+  o String vin
+  o Code code optional
+}
+
+@Fast @Term("A car") @Term_plural("Cars")
+asset Car extends Vehicle {
+  o Colour colour
+}
+
+asset Token {}
+
+concept Address identified {
+  o String street
+}
+
+concept HomeAddress extends Address {}
+
+concept Plain {
+  o Colour colour
+}
+
+transaction Transfer {
+  --> Car car
+}
+
+transaction BigTransfer extends Transfer {
+  o Double amount
+}
+
+event Moved {
+  o Scores scores
+}
+
+abstract event Base {}
+
+event Derived extends Base {}

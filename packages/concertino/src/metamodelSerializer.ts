@@ -32,7 +32,7 @@ import {
     MetadataMap,
     IVocabulary,
     IStringDecoratorValue,
-} from './spec/concertino.metamodel@5.0.0';
+} from './spec/concertino.metamodel@5.1.0';
 import {
     IBooleanProperty,
     IBooleanScalar,
@@ -173,66 +173,101 @@ function extractScalarValidators(declaration: IConcertinoScalarDeclaration) {
 }
 
 /**
- * Converts vocabulary and metadata into Concerto decorators.
- * @param {IVocabulary} [vocabulary] - The vocabulary object.
- * @param {MetadataMap} [metadata] - The metadata map.
+ * The vocabulary, metadata and decorator order of a decorated Concertino element.
+ */
+interface Decorated {
+    vocabulary?: IVocabulary;
+    metadata?: MetadataMap;
+    decoratorOrder?: string[];
+}
+
+/**
+ * Converts a metadata entry into a Concerto decorator.
+ * @param {string} name - The decorator name.
+ * @param {unknown[] | null} decoratorValues - The arguments, or null for a decorator without an argument list.
+ * @param {Aliases} aliases - The model's import aliases.
+ * @returns {IDecorator} The decorator.
+ */
+function decoratorFromMetadata(name: string, decoratorValues: unknown[] | null | undefined, aliases: Aliases): IDecorator {
+    const decorator : IDecorator = {
+        $class: 'concerto.metamodel@1.0.0.Decorator',
+        name,
+    };
+    if (decoratorValues) {
+        decorator.arguments = (decoratorValues || []).map((arg) => {
+            const stringArg = arg as IStringDecoratorValue;
+            if (typeof stringArg === 'string') {
+                return { $class: 'concerto.metamodel@1.0.0.DecoratorString', value: arg };
+            } else if (typeof stringArg === 'number') {
+                return { $class: 'concerto.metamodel@1.0.0.DecoratorNumber', value: arg };
+            } else if (typeof stringArg === 'boolean') {
+                return { $class: 'concerto.metamodel@1.0.0.DecoratorBoolean', value: arg };
+            } else if (typeof arg === 'object' && arg !== null && 'type' in arg) {
+                return {
+                    '$class': 'concerto.metamodel@1.0.0.DecoratorTypeReference',
+                    'isArray': (arg as { isArray?: boolean}).isArray || false,
+                    'type': typeIdentifier((arg as { type: string}).type, aliases)
+                };
+            }
+            throw new Error(`Unsupported argument type: ${typeof arg}`);
+        }) as IDecorator['arguments'];
+    }
+    return decorator;
+}
+
+/**
+ * Converts vocabulary and metadata into Concerto decorators: the vocabulary
+ * label, the additional terms, then the metadata entries, or in
+ * `decoratorOrder` when the element has one (since 5.1.0). A name in
+ * `decoratorOrder` takes the vocabulary term of that name first, then the
+ * metadata entry; a decorator `decoratorOrder` does not name comes last.
+ * @param {Decorated} element - The decorated element.
  * @param {Aliases} [aliases] - The model's import aliases.
  * @returns {any[] | undefined} The decorators array or undefined if none.
  */
-function decoratorsFromVocabularyAndMetadata(vocabulary?: IVocabulary, metadata?: MetadataMap, aliases: Aliases = NO_ALIASES): any[] | undefined {
-    const decorators: any[] = [];
-
+function decoratorsOf(element: Decorated, aliases: Aliases = NO_ALIASES): any[] | undefined {
+    const { vocabulary, metadata, decoratorOrder } = element;
+    // Each source of decorators, by name, in the order a 5.0.0 reader writes them.
+    const fromVocabulary: [string, any][] = [];
     if (vocabulary?.label === null) {
-        decorators.push({
+        fromVocabulary.push(['Term', {
             $class: 'concerto.metamodel@1.0.0.Decorator',
             name: 'Term',
             arguments: [],
-        });
+        }]);
     } else if (vocabulary?.label !== undefined) {
-        decorators.push({
+        fromVocabulary.push(['Term', {
             $class: 'concerto.metamodel@1.0.0.Decorator',
             name: 'Term',
             arguments: [{ $class: 'concerto.metamodel@1.0.0.DecoratorString', value: vocabulary.label }],
-        });
+        }]);
     }
-
     if (vocabulary?.additionalTerms) {
         Object.entries(vocabulary.additionalTerms).forEach(([key, value]) => {
-            decorators.push({
+            fromVocabulary.push([`Term_${key}`, {
                 $class: 'concerto.metamodel@1.0.0.Decorator',
                 name: `Term_${key}`,
                 arguments: [{ $class: 'concerto.metamodel@1.0.0.DecoratorString', value }],
-            });
+            }]);
         });
     }
+    const fromMetadata: [string, any][] = Object.entries(metadata ?? {})
+        .map(([name, values]) => [name, decoratorFromMetadata(name, values as unknown[] | null, aliases)]);
 
-    if (metadata) {
-        Object.entries(metadata).forEach(([name, decoratorValues]) => {
-            const decorator : IDecorator = {
-                $class: 'concerto.metamodel@1.0.0.Decorator',
-                name,
-            };
-            if (decoratorValues) {
-                decorator.arguments = (decoratorValues || []).map((arg) => {
-                    const stringArg = arg as IStringDecoratorValue;
-                    if (typeof stringArg === 'string') {
-                        return { $class: 'concerto.metamodel@1.0.0.DecoratorString', value: arg };
-                    } else if (typeof stringArg === 'number') {
-                        return { $class: 'concerto.metamodel@1.0.0.DecoratorNumber', value: arg };
-                    } else if (typeof stringArg === 'boolean') {
-                        return { $class: 'concerto.metamodel@1.0.0.DecoratorBoolean', value: arg };
-                    } else if (typeof arg === 'object' && arg !== null && 'type' in arg) {
-                        return {
-                            '$class': 'concerto.metamodel@1.0.0.DecoratorTypeReference',
-                            'isArray': (arg as { isArray?: boolean}).isArray || false,
-                            'type': typeIdentifier((arg as { type: string}).type, aliases)
-                        };
-                    }
-                    throw new Error(`Unsupported argument type: ${typeof arg}`);
-                });
+    let decorators: any[];
+    if (Array.isArray(decoratorOrder)) {
+        const pending = [...fromVocabulary, ...fromMetadata];
+        decorators = [];
+        decoratorOrder.forEach((name) => {
+            const i = pending.findIndex(([n]) => n === name);
+            if (i >= 0) {
+                decorators.push(pending[i][1]);
+                pending.splice(i, 1);
             }
-            decorators.push(decorator);
         });
+        pending.forEach(([, decorator]) => decorators.push(decorator));
+    } else {
+        decorators = [...fromVocabulary, ...fromMetadata].map(([, decorator]) => decorator);
     }
 
     if (decorators.length === 0) {
@@ -268,7 +303,7 @@ function mapValueType(value: MapValue, aliases: Aliases): MapValueTypeUnion {
         (result as IObjectMapValueType).type = typeIdentifier(value.type, aliases);
     }
 
-    const decorators = decoratorsFromVocabularyAndMetadata(value.vocabulary, value.metadata, aliases);
+    const decorators = decoratorsOf(value, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
@@ -294,7 +329,7 @@ function mapKeyType(key: MapValue, aliases: Aliases): MapKeyTypeUnion {
         (result as IObjectMapKeyType).type = typeIdentifier(key.type, aliases);
     }
 
-    const decorators = decoratorsFromVocabularyAndMetadata(key.vocabulary, key.metadata, aliases);
+    const decorators = decoratorsOf(key, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
@@ -314,7 +349,7 @@ function transformEnumValues(values: Record<string, IConcertinoEnumValue>, alias
             name,
         };
 
-        const decorators = decoratorsFromVocabularyAndMetadata(value.vocabulary, value.metadata, aliases);
+        const decorators = decoratorsOf(value, aliases);
         if (decorators !== undefined) {
             result.decorators = decorators;
         }
@@ -435,7 +470,7 @@ function transformProperties(properties: Record<string, IConcertinoProperty>, al
                     }
                 }
 
-                const decorators = decoratorsFromVocabularyAndMetadata(property.vocabulary, property.metadata, aliases);
+                const decorators = decoratorsOf(property, aliases);
                 if (decorators !== undefined) {
                     result.decorators = decorators;
                 }
@@ -468,7 +503,7 @@ function transformMap(name: string, declaration: IConcertinoMapDeclaration, alia
         value: mapValueType(declaration.value, aliases),
     };
 
-    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata, aliases);
+    const decorators = decoratorsOf(declaration, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
@@ -507,7 +542,7 @@ function transformScalar(namespace: string, name: string, declaration: IConcerti
         (result as IStringScalar | IIntegerScalar | ILongScalar | IDoubleScalar | IBooleanScalar).defaultValue = stringDeclaration.default;
     }
 
-    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata, aliases);
+    const decorators = decoratorsOf(declaration, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
@@ -528,7 +563,7 @@ function transformEnum(name: string, declaration: IConcertinoEnumDeclaration, al
         properties: transformEnumValues(declaration.values, aliases),
     };
 
-    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata, aliases);
+    const decorators = decoratorsOf(declaration, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }
@@ -551,7 +586,7 @@ function transformConcept(name: string, declaration: IConcertinoConceptDeclarati
         properties,
     };
 
-    const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata, aliases);
+    const decorators = decoratorsOf(declaration, aliases);
     if (decorators !== undefined) {
         result.decorators = decorators;
     }

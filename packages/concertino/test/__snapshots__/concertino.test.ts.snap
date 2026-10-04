@@ -4,7 +4,7 @@ exports[`concertino edge cases and error handling > should roundtrip sourceUri 1
 {
   "declarations": {},
   "metadata": {
-    "concertinoVersion": "5.0.0",
+    "concertinoVersion": "5.1.0",
     "models": {
       "sourceUriTest@1.0.0": {
         "concertoVersion": undefined,
@@ -33,6 +33,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "com.test.another@1.0.0.Fo": {
@@ -52,12 +55,16 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "com.test.another@1.0.0.Fum": {
       "properties": {
         "$identifier": {
           "isIdentifier": true,
+          "isSystem": true,
           "name": "$identifier",
           "type": "String",
         },
@@ -66,16 +73,25 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "com.test.models@1.2.3.AuditEvent": {
       "properties": {
         "$timestamp": {
+          "inheritedFrom": "concerto@1.0.0.Transaction",
+          "isSystem": true,
           "name": "$timestamp",
           "type": "DateTime",
         },
       },
       "prototype": "TransactionDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Transaction",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "com.test.models@1.2.3.Bar": {
@@ -91,6 +107,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           },
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
       "vocabulary": {
         "additionalTerms": {
@@ -136,6 +155,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           },
         },
         "myEnum": {
+          "isEnum": true,
           "metadata": {
             "Decoratored": [
               1,
@@ -227,6 +247,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "Integer",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
       "vocabulary": {
         "additionalTerms": {
@@ -326,11 +349,20 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.AbstractAsset": {
       "isAbstract": true,
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "stringProperty": {
           "default": "defaultString",
           "isIdentifier": true,
@@ -339,6 +371,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.Address": {
@@ -365,10 +401,19 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.BaseAsset": {
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "booleanArrayProperty": {
           "isArray": true,
           "isOptional": true,
@@ -453,12 +498,14 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "stateArrayProperty": {
           "isArray": true,
+          "isEnum": true,
           "isOptional": true,
           "name": "stateArrayProperty",
           "type": "org.acme.base@1.0.0.State",
         },
         "stateProperty": {
           "default": "GOLD",
+          "isEnum": true,
           "isOptional": true,
           "name": "stateProperty",
           "type": "org.acme.base@1.0.0.State",
@@ -477,6 +524,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.Bloke": {
@@ -498,6 +549,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         ],
       },
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Participant",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "stringProperty": {
           "isIdentifier": true,
           "metadata": {
@@ -513,6 +570,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "ParticipantDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Participant",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.DerivedAsset": {
@@ -520,6 +581,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.base@1.0.0.BaseAsset",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "anotherStringProperty": {
           "default": "defaultString",
           "name": "anotherStringProperty",
@@ -624,6 +691,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "stateArrayProperty": {
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isArray": true,
+          "isEnum": true,
           "isOptional": true,
           "name": "stateArrayProperty",
           "type": "org.acme.base@1.0.0.State",
@@ -631,6 +699,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "stateProperty": {
           "default": "GOLD",
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isEnum": true,
           "isOptional": true,
           "name": "stateProperty",
           "type": "org.acme.base@1.0.0.State",
@@ -651,6 +720,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.DerivedDerivedAsset": {
@@ -659,6 +732,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.base@1.0.0.BaseAsset",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "anotherStringProperty": {
           "default": "defaultString",
           "inheritedFrom": "org.acme.base@1.0.0.DerivedAsset",
@@ -768,6 +847,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "stateArrayProperty": {
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isArray": true,
+          "isEnum": true,
           "isOptional": true,
           "name": "stateArrayProperty",
           "type": "org.acme.base@1.0.0.State",
@@ -775,6 +855,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "stateProperty": {
           "default": "GOLD",
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isEnum": true,
           "isOptional": true,
           "name": "stateProperty",
           "type": "org.acme.base@1.0.0.State",
@@ -795,21 +876,33 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.MyBasicTransaction": {
       "properties": {
         "$timestamp": {
+          "inheritedFrom": "concerto@1.0.0.Transaction",
+          "isSystem": true,
           "name": "$timestamp",
           "type": "DateTime",
         },
       },
       "prototype": "TransactionDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Transaction",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.MyTransaction": {
       "properties": {
         "$timestamp": {
+          "inheritedFrom": "concerto@1.0.0.Transaction",
+          "isSystem": true,
           "name": "$timestamp",
           "type": "DateTime",
         },
@@ -819,6 +912,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "TransactionDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Transaction",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.MyTransactionEx": {
@@ -827,6 +924,8 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       ],
       "properties": {
         "$timestamp": {
+          "inheritedFrom": "concerto@1.0.0.Transaction",
+          "isSystem": true,
           "name": "$timestamp",
           "type": "DateTime",
         },
@@ -846,6 +945,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "TransactionDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Transaction",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.Person": {
@@ -857,6 +960,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         ],
       },
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Participant",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "address": {
           "name": "address",
           "type": "org.acme.base@1.0.0.UnitedStatesAddress",
@@ -868,10 +977,20 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "ParticipantDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Participant",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.SimpleAsset": {
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "stringProperty": {
           "isIdentifier": true,
           "name": "stringProperty",
@@ -879,6 +998,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.State": {
@@ -923,6 +1046,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr.base@1.0.0.Address": {
@@ -936,6 +1062,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
         "state": {
+          "isEnum": true,
           "isOptional": true,
           "name": "state",
           "type": "org.acme.hr.base@1.0.0.State",
@@ -949,11 +1076,17 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr.base@1.0.0.Category": {
       "isAbstract": true,
       "properties": {},
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr.base@1.0.0.EmployeeTShirtSizes": {
@@ -971,6 +1104,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       ],
       "isAbstract": true,
       "properties": {},
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr.base@1.0.0.Level": {
@@ -1006,11 +1142,16 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "org.acme.hr@1.0.0.Category": {
       "properties": {},
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.ChangeOfAddress": {
       "properties": {
         "$timestamp": {
+          "inheritedFrom": "concerto@1.0.0.Transaction",
+          "isSystem": true,
           "name": "$timestamp",
           "type": "DateTime",
         },
@@ -1025,6 +1166,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "TransactionDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Transaction",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.Company": {
@@ -1035,11 +1180,13 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       },
       "properties": {
         "companyProperties": {
+          "isMap": true,
           "isOptional": true,
           "name": "companyProperties",
           "type": "org.acme.hr@1.0.0.CompanyProperties",
         },
         "employeeDirectory": {
+          "isMap": true,
           "isOptional": true,
           "metadata": {
             "category": [
@@ -1052,16 +1199,19 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "org.acme.hr@1.0.0.EmployeeDirectory",
         },
         "employeeProfiles": {
+          "isMap": true,
           "isOptional": true,
           "name": "employeeProfiles",
           "type": "org.acme.hr@1.0.0.EmployeeProfiles",
         },
         "employeeSocialSecurityNumbers": {
+          "isMap": true,
           "isOptional": true,
           "name": "employeeSocialSecurityNumbers",
           "type": "org.acme.hr@1.0.0.EmployeeSocialSecurityNumbers",
         },
         "employeeTShirtSizes": {
+          "isMap": true,
           "isOptional": true,
           "name": "employeeTShirtSizes",
           "type": "org.acme.hr.base@1.0.0.EmployeeTShirtSizes",
@@ -1081,16 +1231,25 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.CompanyEvent": {
       "properties": {
         "$timestamp": {
+          "inheritedFrom": "concerto@1.0.0.Event",
+          "isSystem": true,
           "name": "$timestamp",
           "type": "DateTime",
         },
       },
       "prototype": "EventDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Event",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.CompanyProperties": {
@@ -1107,6 +1266,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.hr@1.0.0.Person",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Participant",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "company": {
           "name": "company",
           "type": "org.acme.hr@1.0.0.Company",
@@ -1167,6 +1332,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "nextOfKin": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "isMap": true,
           "name": "nextOfKin",
           "type": "org.acme.hr@1.0.0.NextOfKin",
         },
@@ -1180,6 +1346,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "ParticipantDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Participant",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.Department": {
@@ -1223,12 +1393,19 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         ],
       },
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Participant",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "companyAssets": {
           "isArray": true,
           "name": "companyAssets",
           "type": "org.acme.hr@1.0.0.Equipment",
         },
         "department": {
+          "isEnum": true,
           "name": "department",
           "type": "org.acme.hr@1.0.0.Department",
         },
@@ -1285,6 +1462,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "nextOfKin": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "isMap": true,
           "name": "nextOfKin",
           "type": "org.acme.hr@1.0.0.NextOfKin",
         },
@@ -1318,6 +1496,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "ParticipantDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Participant",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.EmployeeDirectory": {
@@ -1386,6 +1568,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "resource": null,
       },
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "serialNumber": {
           "isIdentifier": true,
           "name": "serialNumber",
@@ -1393,6 +1581,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.Info": {
@@ -1410,6 +1602,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.KinName": {
@@ -1430,7 +1625,14 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.hr@1.0.0.Equipment",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "make": {
+          "isEnum": true,
           "name": "make",
           "type": "org.acme.hr@1.0.0.LaptopMake",
         },
@@ -1442,6 +1644,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.LaptopMake": {
@@ -1462,6 +1668,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.hr@1.0.0.Person",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Participant",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "companyAssets": {
           "inheritedFrom": "org.acme.hr@1.0.0.Employee",
           "isArray": true,
@@ -1470,6 +1682,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "department": {
           "inheritedFrom": "org.acme.hr@1.0.0.Employee",
+          "isEnum": true,
           "name": "department",
           "type": "org.acme.hr@1.0.0.Department",
         },
@@ -1528,6 +1741,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "nextOfKin": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "isMap": true,
           "name": "nextOfKin",
           "type": "org.acme.hr@1.0.0.NextOfKin",
         },
@@ -1572,6 +1786,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "ParticipantDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Participant",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.NextOfKin": {
@@ -1589,6 +1807,8 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       ],
       "properties": {
         "$timestamp": {
+          "inheritedFrom": "concerto@1.0.0.Event",
+          "isSystem": true,
           "name": "$timestamp",
           "type": "DateTime",
         },
@@ -1599,6 +1819,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "EventDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Event",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.Person": {
@@ -1607,6 +1831,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "resource": null,
       },
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Participant",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "dob": {
           "name": "dob",
           "type": "DateTime",
@@ -1642,6 +1872,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
         "nextOfKin": {
+          "isMap": true,
           "name": "nextOfKin",
           "type": "org.acme.hr@1.0.0.NextOfKin",
         },
@@ -1654,6 +1885,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "ParticipantDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Participant",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.pii": {
@@ -1678,6 +1913,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "Boolean",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.acme@1.2.3.SampleModel": {
@@ -1716,6 +1954,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.agreement@1.2.3.AgreementBase": {
@@ -1755,6 +1996,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "Double",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.example.collectionsize@1.0.0.PhoneBook": {
@@ -1769,6 +2013,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "org.example.collectionsize@1.0.0.Team": {
       "properties": {
         "contacts": {
+          "isMap": true,
           "name": "contacts",
           "size": [
             1,
@@ -1805,6 +2050,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.example.complex@1.0.0.Department": {
@@ -1822,6 +2070,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.example.complex@1.0.0.Document": {
@@ -1853,10 +2104,14 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
         "type": {
+          "isEnum": true,
           "name": "type",
           "type": "org.example.complex@1.0.0.DocumentType",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.example.complex@1.0.0.DocumentBase": {
@@ -1866,6 +2121,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.example.complex@1.0.0.DocumentType": {
@@ -1896,6 +2154,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "org.example.sample@1.0.0.Person",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.example.sample@1.0.0.Address": {
@@ -1927,6 +2188,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.example.sample@1.0.0.ContactInfo": {
@@ -1940,6 +2204,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "org.example.sample@1.0.0.Person": {
@@ -1966,6 +2233,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           },
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "readme@1.0.0.Address": {
@@ -1993,6 +2263,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "type": "String",
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
       "vocabulary": {
         "label": "Physical Address",
@@ -2046,6 +2319,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           },
         },
       },
+      "systemSuperTypes": [
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
       "vocabulary": {
         "additionalTerms": {
@@ -2062,6 +2338,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "comment": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
           "name": "comment",
@@ -2090,6 +2372,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.AXZDS1": {
@@ -2097,6 +2383,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "axyAddress": {
           "name": "axyAddress",
           "type": "String",
@@ -2123,6 +2415,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.AXZDS2": {
@@ -2130,6 +2426,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "clientName": {
           "name": "clientName",
           "type": "String",
@@ -2165,6 +2467,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.AXZDS3": {
@@ -2172,6 +2478,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
@@ -2198,6 +2510,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.AXZDS4": {
@@ -2205,6 +2521,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "bxberCode": {
           "name": "bxberCode",
           "type": "String",
@@ -2239,6 +2561,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.AXZHDR": {
@@ -2249,6 +2575,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "billWeekStartDay": {
           "name": "billWeekStartDay",
           "type": "Long",
@@ -2362,6 +2694,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.AXZHIA": {
@@ -2370,6 +2706,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
@@ -2398,6 +2740,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.AXZSTD": {
@@ -2408,6 +2754,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "comment": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
           "name": "comment",
@@ -2436,6 +2788,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.AXZTLR": {
@@ -2443,6 +2799,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
@@ -2473,6 +2835,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.AgencyOrder": {
@@ -2480,6 +2846,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.Some",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "agycoms": {
           "isArray": true,
           "name": "agycoms",
@@ -2532,6 +2904,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.BXBCOM": {
@@ -2542,6 +2918,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "comment": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
           "name": "comment",
@@ -2570,6 +2952,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.BXBDEM": {
@@ -2577,6 +2963,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "demos": {
           "isArray": true,
           "name": "demos",
@@ -2600,6 +2992,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.BXBDTL": {
@@ -2608,6 +3004,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
@@ -2647,6 +3049,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.BXBHDR": {
@@ -2655,6 +3061,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "cost": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "cost",
@@ -2737,6 +3149,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.BXBORB": {
@@ -2745,6 +3161,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
@@ -2788,20 +3210,36 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.BaseTransaction": {
       "properties": {
         "$timestamp": {
+          "inheritedFrom": "concerto@1.0.0.Transaction",
+          "isSystem": true,
           "name": "$timestamp",
           "type": "DateTime",
         },
       },
       "prototype": "TransactionDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Transaction",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.BxblineTransmission": {
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "bxbcoms": {
           "isArray": true,
           "name": "bxbcoms",
@@ -2832,10 +3270,20 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.Par1": {
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Participant",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "bool1": {
           "name": "bool1",
           "type": "Boolean",
@@ -2867,10 +3315,20 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "ParticipantDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Participant",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.Par2": {
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Participant",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "address": {
           "name": "address",
           "type": "String",
@@ -2886,10 +3344,20 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "ParticipantDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Participant",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.Some": {
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "uuid": {
           "isIdentifier": true,
           "name": "uuid",
@@ -2897,6 +3365,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomeBxbRecord": {
@@ -2904,6 +3376,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "cost": {
           "name": "cost",
           "type": "Long",
@@ -2970,6 +3448,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomeComment": {
@@ -2978,6 +3460,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "comment": {
           "name": "comment",
           "type": "String",
@@ -3005,6 +3493,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomeModifier": {
@@ -3012,6 +3504,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "cn": {
           "name": "cn",
           "type": "String",
@@ -3054,6 +3552,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomeMultiple": {
@@ -3061,6 +3563,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "continuation": {
           "name": "continuation",
           "type": "String",
@@ -3083,6 +3591,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomePreviousSssModifier": {
@@ -3091,6 +3603,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "cn": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
           "name": "cn",
@@ -3143,10 +3661,20 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomeRecord": {
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "id": {
           "name": "id",
           "type": "String",
@@ -3162,10 +3690,20 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomeSss": {
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Participant",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "bb": {
           "isRelationship": true,
           "name": "bb",
@@ -3187,10 +3725,20 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "ParticipantDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Participant",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomeTransmission": {
       "properties": {
+        "$identifier": {
+          "inheritedFrom": "concerto@1.0.0.Asset",
+          "isSystem": true,
+          "name": "$identifier",
+          "type": "String",
+        },
         "aa": {
           "isRelationship": true,
           "name": "aa",
@@ -3213,11 +3761,17 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "AssetDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Asset",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.UpdateOrderEvent": {
       "properties": {
         "$timestamp": {
+          "inheritedFrom": "concerto@1.0.0.Event",
+          "isSystem": true,
           "name": "$timestamp",
           "type": "DateTime",
         },
@@ -3228,6 +3782,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "EventDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Event",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.UpdateOrderTransaction": {
@@ -3236,6 +3794,8 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       ],
       "properties": {
         "$timestamp": {
+          "inheritedFrom": "concerto@1.0.0.Transaction",
+          "isSystem": true,
           "name": "$timestamp",
           "type": "DateTime",
         },
@@ -3259,11 +3819,15 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
       },
       "prototype": "TransactionDeclaration",
+      "systemSuperTypes": [
+        "concerto@1.0.0.Transaction",
+        "concerto@1.0.0.Concept",
+      ],
       "type": "ConceptDeclaration",
     },
   },
   "metadata": {
-    "concertinoVersion": "5.0.0",
+    "concertinoVersion": "5.1.0",
     "models": {
       "com.test.another@1.0.0": {
         "concertoVersion": undefined,
