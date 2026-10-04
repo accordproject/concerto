@@ -12,22 +12,10 @@
  * limitations under the License.
  */
 
-// P5-84 (accordproject/concerto-rust#430): the engine bindings and views the
-// public classes call, with their real signatures.
-//
-// Until P5-84 every caller typed the binding table as
-// `{ [binding: string]: (...args: any[]) => never }` (PORTING.md, "Why
-// never"). That kept the inferred return types of the TS bodies while both
-// paths existed, but once P5-02 removed the TS bodies, every public method
-// that returned a binding's result directly was declared as returning
-// `never` in the published .d.ts. Naming each binding here, with its real
-// signature, gives those methods a real type, and a misspelt or missing
-// binding is now a compile error.
-//
-// This is a declaration file, imported with `import type` only, so it adds
-// nothing to the JavaScript build and emits no .d.ts of its own: the public
-// declaration build (tsconfig.build.json, which excludes src/engine) and the
-// API snapshot stay as they were.
+// The engine bindings and views the public classes call, with their real
+// signatures. Imported with `import type` only, so it adds nothing to the
+// JavaScript build, and the public declarations and API snapshot do not
+// see it.
 
 import type ModelManager from '../modelmanager';
 import type ClassDeclaration from '../introspect/classdeclaration';
@@ -35,13 +23,12 @@ import type Property from '../introspect/property';
 
 /**
  * An engine-side ModelManager handle (concerto-wasm `ModelManagerHandle`):
- * the methods concerto-core calls, with the signatures wasm-bindgen
- * generates for them (P5-100, E-10).
+ * the methods concerto-core calls, as wasm-bindgen generates them.
  */
 export interface EngineHandle {
     addModel(ast: string, file_name?: string | null): number;
     addModelWithDefinitions(ast: string, definitions: string | null | undefined, file_name: string | null | undefined, validate: boolean): number;
-    // P5-106 (BC-52): the arena answers of the retired JsContext bindings.
+    // BC-52: the arena answers of the retired JsContext bindings.
     classDeclarationGetAssignableClassDeclarations(declaration: number): string[];
     classDeclarationGetDirectSubclasses(declaration: number): string[];
     decoratorValidate(decorator: object, modelFile: object, modelFileId: number, decoratedName: string | undefined, options: object): void;
@@ -104,48 +91,25 @@ export interface EngineHandle {
     validateResourceBinary(bytes: Uint8Array, root_id: string, flags: number): number;
 }
 
-/**
- * P5-100 (M1, accordproject/concerto-rust#454): one BaseModelManager's
- * engine state (`BaseModelManager._engine`), which replaces the
- * module-level WeakMaps that used to hold it by manager.
- */
+/** One BaseModelManager's engine state (`BaseModelManager._engine`). */
 export interface EngineState {
-    /**
-     * The model version: moved by every change of the manager's
-     * `modelFiles` or `rustHandle` (the mutation sites in
-     * basemodelmanager.ts). Every cached answer below, and every view's
-     * cached answer (engine/views.ts), is valid only for the version it was
-     * made at.
-     */
+    /** The model version, moved by every change; every cached answer is valid only at its version. */
     version: number;
-    /** P5-29: `getType`'s and `resolveType`'s engine answers, by argument. */
     readMemo: {
         version: number;
-        /** `rustHandle.getTypeName(name)`, by name. */
         typeNames: Map<string, string>;
-        /** `rustHandle.resolveType(context, type)`, by type (the context only words an error). */
+        /** `resolveType` answers by type (the context only words an error). */
         resolvedTypes: Map<string, string>;
-        /**
-         * P5-113: `rustHandle.modelFileGetTypeName(id, type)` (`ModelFile.getType`),
-         * by the model file's namespace and then by type.
-         */
+        /** `ModelFile.getType` answers, by namespace and then type. */
         fileTypeNames: Map<string, Map<string, string | undefined>>;
     } | undefined;
-    /**
-     * P5-75: the namespaces, in `getNamespaces()` order, updated in place by
-     * every mutator; undefined when the manager has none (the next
-     * `getNamespaces()` asks the engine).
-     */
+    /** The namespaces in `getNamespaces()` order, or undefined when the engine must be asked. */
     namespaces: string[] | undefined;
-    /** P5-16: the class lookups of the serializer fast path (engine/serializer.ts). */
+    /** The class lookups of the serializer fast path (engine/serializer.ts). */
     serializerCache: { version: number; handle: EngineHandle; types: unknown } | undefined;
 }
 
-/**
- * The bindings of the concerto-wasm module (concerto-rust
- * concerto-wasm/src/lib.rs) that the public classes call, as
- * `loadEngine('./engine').rust` exposes them.
- */
+/** The concerto-wasm bindings the public classes call. */
 export interface EngineBindings {
     // ModelUtil
     modelUtilGetShortName(fqn: string): string;
@@ -209,25 +173,19 @@ export interface EngineBindings {
     // ResourceId
     resourceIdFromURI(uri: string, legacyNamespace?: string, legacyType?: string): { namespace: string, type: string, id: string };
     resourceIdToURI(namespace: string, type: string, id: string): string;
-    // P5-113: many at once, for a relationship-typed map; flat, with
-    // `undefined` where one fails (the caller then makes the single call).
+    // Many at once, flat, with `undefined` where one fails.
     resourceIdsFromURIs(uris: string[], legacyNamespace?: string, legacyType?: string): (string | undefined)[];
     resourceIdsToURIs(fields: unknown[]): (string | undefined)[];
 }
 
-/**
- * An engine-side DCS input manager (concerto-wasm `DcsManagerHandle`, P5-27).
- */
+/** An engine-side DCS input manager (concerto-wasm `DcsManagerHandle`). */
 export interface EngineDcsHandle {
     free(): void;
     decorateModels(target: EngineHandle, decoratorCommandSets: any, options: any): any;
     extract(target: EngineHandle, options: any, action: number): any;
 }
 
-/**
- * The bindings only src/engine/ calls (P5-100, E-10): together with
- * `EngineBindings`, the type of `rust` in src/engine/index.ts.
- */
+/** The bindings only src/engine/ calls. */
 export interface EngineInternals {
     setHost(errorFactory: Function): void;
     DcsManagerHandle: new (models: any) => EngineDcsHandle;
@@ -245,27 +203,20 @@ export interface EngineInternals {
     modelFileViewSnapshot(ast: string, namespace?: string | null): string | undefined;
     validateErrorMessage(): string;
     validateTakeError(): any;
-    /** P5-102: validates a metamodel instance (wire-encoded JSON text) on the engine's resident metamodel manager, validate-only. */
+    /** Validates a wire-encoded metamodel instance on the engine's resident metamodel manager. */
     validateMetaModelInstance(jsonText: string, preset: 'strict' | 'default' | 'serializer'): void;
     checkAstShape(ast: string): void;
     systemModelFileHeader(ast: string): string | undefined;
 }
 
-/**
- * The DecoratorManager.extract* result shapes, exactly as the published
- * concerto-core 5.0.0 declared them (its compiler inferred `never[]` from the
- * TS bodies' `[]` initialisers, so the arrays keep that element type).
- */
+/** The extract* result shapes as concerto-core 5.0.0 declared them (`never[]`). */
 export interface ExtractDecoratorsResult {
     modelManager: ModelManager;
     decoratorCommandSet: never[];
     vocabularies: never[];
 }
 
-/**
- * The view functions (src/engine/views.ts) the public modules call, as
- * src/engineloader.ts's `engineViews()` exposes them.
- */
+/** The view functions the public modules call, through `engineViews()`. */
 export interface EngineViewsModule {
     // ModelFile load path
     markSystemModelAst(ast: object): void;
@@ -289,7 +240,7 @@ export interface EngineViewsModule {
     validateAstStaged(modelFile: object, handle: EngineHandle): boolean;
     updateExternalStaged(modelFiles: object[], handle: EngineHandle, next: object): boolean;
     validateLoaded(modelFile: object, handle: EngineHandle): boolean;
-    // P5-106 (BC-52): arena handles of views
+    // BC-52: arena handles of views
     modelFileArenaRef(modelFile: unknown): { handle: EngineHandle; id: number } | undefined;
     declarationArenaRef(declaration: unknown): { handle: EngineHandle; id: number } | undefined;
     declarationViews(manager: object, names: string[]): any[];

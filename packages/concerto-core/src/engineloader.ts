@@ -12,26 +12,24 @@
  * limitations under the License.
  */
 
-// P5-100 (E-3, E-10; accordproject/concerto-rust#454): the one loader the
-// public modules reach the engine (src/engine/) through. It replaces the 31
-// copies of `loadEngine` each public module used to carry.
+// The one loader the public modules reach the engine (src/engine/) through.
 //
 // dist/, dist/esm and dist/esm-browser ship src/engine/ as JavaScript only,
-// with no .d.ts, since it is not public API (tsconfig.build.internal.json;
-// OD-11). A bundler must never see a specifier it would resolve: `require`
-// below takes a non-literal one (esbuild, rollup and browserify leave it
-// alone) and never names the bare `require` (esbuild's ESM output would add
-// its `__require` shim, which webpack reports as a critical dependency), and
+// with no .d.ts, since it is not public API (tsconfig.build.internal.json).
+// A bundler must never see a specifier it would resolve: `require` below
+// takes a non-literal one (esbuild, rollup and browserify leave it alone)
+// and never names the bare `require` (esbuild's ESM output would add its
+// `__require` shim, which webpack reports as a critical dependency), and
 // webpack folds the `typeof __webpack_require__` test and keeps only the
 // dead-in-Node `__non_webpack_require__` branch, so it neither resolves nor
 // warns.
 //
 // The specifiers are relative to this file, which sits next to engine/ in
-// src/ and in dist/. Through the public ESM entry points (P4-11a, PORTING.md
-// 1.5), Node ESM (dist/esm/index.mjs) works unaided: scripts/build-esm.js's
-// Node banner sets a `globalThis.module` whose `require` rewrites `./engine`
-// and `./engine/<subpath>` to the engine directory it finds at runtime from
-// the chunk's own import.meta.url. The browser (dist/esm-browser/index.mjs)
+// src/ and in dist/. Through the public ESM entry points (PORTING.md 1.5),
+// Node ESM (dist/esm/index.mjs) works unaided: scripts/build-esm.js's Node
+// banner sets a `globalThis.module` whose `require` rewrites `./engine` and
+// `./engine/<subpath>` to the engine directory it finds at runtime from the
+// chunk's own import.meta.url. The browser (dist/esm-browser/index.mjs)
 // needs a bundler, or a host that supplies a synchronous `require`
 // (scripts/browser-module-shim.js).
 //

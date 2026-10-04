@@ -45,7 +45,7 @@ import { optionalString } from '../engineutil';
 import type { EngineHandle } from '../engine/bindings';
 
 /**
- * Every ModelFile the ModelFile constructor ran for (P5-34, BC-46). A
+ * Every ModelFile the ModelFile constructor ran for (BC-46). A
  * BaseModelManager accepts only these: an object the constructor never
  * built (a duck-typed object, `Object.create(ModelFile.prototype)`, a sinon
  * stub instance) was never loaded by the engine, so its manager could not
@@ -54,18 +54,18 @@ import type { EngineHandle } from '../engine/bindings';
 const constructedModelFiles = new WeakSet<object>();
 
 /**
- * Every BaseModelManager whose constructor ran (P5-35, BC-47): the only
- * managers a ModelFile may be built for. Only such a manager has the
- * engine mirror (`rustHandle`) the ModelFile reads and validates through;
- * a stub, a duck-typed object or a Proxy wrapping a real manager is not one.
+ * Every BaseModelManager whose constructor ran (BC-47): the only managers
+ * a ModelFile may be built for. Only such a manager has the engine mirror
+ * (`rustHandle`) the ModelFile reads and validates through; a stub, a
+ * duck-typed object or a Proxy wrapping a real manager is not one.
  */
 const engineManagers = new WeakSet<object>();
 
 /**
- * P5-97 (accordproject/concerto-rust#448): a view of a model file another
- * manager already loaded, which the next ModelFile constructor call builds
- * (`ModelFile._sharedView`): the source file, and the engine stage or
- * registration of the same engine-side file in the new manager.
+ * A view of a model file another manager already loaded, which the next
+ * ModelFile constructor call builds (`ModelFile._sharedView`): the source
+ * file, and the engine stage or registration of the same engine-side file
+ * in the new manager.
  */
 interface SharedViewSource {
     source: ModelFile;
@@ -91,8 +91,8 @@ class ModelFile extends Decorated {
     definitions: string | null | undefined;
     fileName: string | null | undefined;
     external: boolean;
-    // P5-100 (E-13): prototype accessors (`installLazyField`, below) until
-    // first read or write, then plain own fields.
+    // Prototype accessors (`installLazyField`, below) until first read or
+    // write, then plain own fields.
     declarations!: Declaration[];
     localTypes!: Map<string, Declaration> | null;
     imports: AstNode[];
@@ -116,10 +116,10 @@ class ModelFile extends Decorated {
      */
     constructor(modelManager: BaseModelManager, ast: AstNode, definitions?: string | null, fileName?: string | null) {
         super(ast);
-        // P5-97: set only for `ModelFile._sharedView`'s own call.
+        // Set only for `ModelFile._sharedView`'s own call.
         const shared = sharedViewSource;
         sharedViewSource = null;
-        // P5-35 (BC-47): only a BaseModelManager has the engine mirror this
+        // BC-47: only a BaseModelManager has the engine mirror this
         // ModelFile is loaded, read and validated through.
         if (typeof modelManager !== 'object' || modelManager === null || !engineManagers.has(modelManager)) {
             throw new TypeError('ModelFile expects a BaseModelManager built by its constructor');
@@ -127,11 +127,11 @@ class ModelFile extends Decorated {
         constructedModelFiles.add(this);
         this.modelManager = modelManager;
         this.external = false;
-        // P5-100 (E-13, accordproject/concerto-rust#454): `declarations`
-        // and `localTypes` are not set here: they are ModelFile.prototype
-        // accessors (below) reading [] and null, and a write stores a plain
-        // own field, so an eagerly built file gets them as plain fields and
-        // a lazily built one has them deferred (`deferDeclarations`).
+        // `declarations` and `localTypes` are not set here: they are
+        // ModelFile.prototype accessors (below) reading [] and null, and a
+        // write stores a plain own field, so an eagerly built file gets
+        // them as plain fields and a lazily built one has them deferred
+        // (`deferDeclarations`).
         const views = engineViews();
         this.imports = [];
         this.importShortNames = new Map();
@@ -161,25 +161,19 @@ class ModelFile extends Decorated {
             this.external = fileName.startsWith('@');
         }
 
-        // P5-10a lazy views (engine/views.ts): the AST crosses into Rust
-        // once, here, and Rust loads it with every construction-time check
-        // it makes. When it loads, only the header (namespace, version,
-        // imports) is populated now, and the declaration views are built on
-        // first use, from one batch snapshot per file. Otherwise the file is
-        // built eagerly, as fromAst would, so a TS error is thrown here by
-        // the TS code. P5-10b: staged before the decorators are set up, so
-        // that a lazily built file's own decorators are built on first read
-        // too (staging never throws, so every error keeps its point).
-        // P5-49 (BC-19 with BC-17 and BC-20, R1): the AST's shape is checked
-        // against the metamodel first, unless the manager opted out with
+        // Lazy views (engine/views-staging.ts): the AST crosses into the
+        // engine once, here, and is loaded with every construction-time
+        // check. When it loads, only the header (namespace, version,
+        // imports) is set now, and the declaration views, and this file's
+        // own decorators, are built on first use from one snapshot per
+        // file. Otherwise the file is built eagerly, as fromAst would, so a
+        // TS error is thrown here by the TS code. BC-19 (with BC-17 and
+        // BC-20): the AST's shape is checked first, unless the manager set
         // `metamodelValidation: false`, so a malformed AST is an
-        // IllegalModelException here, before any part of it is walked.
-        // P5-92: what the check hands the staging step is the AST's JSON
-        // text, or the AST in the engine's compact layout.
-        // P5-97 (accordproject/concerto-rust#448): a view of a file another
-        // manager already loaded (`_sharedView`) is neither checked nor
-        // staged again: the engine-side file is the same, shared, and the
-        // header is copied from the source view.
+        // IllegalModelException before any part of it is walked. A view of a
+        // file another manager already loaded (`_sharedView`) shares the
+        // engine-side file and copies its header, and is neither checked nor
+        // staged again.
         let lazy: boolean;
         if (shared !== null) {
             lazy = views.adoptSharedView(this, shared.source, shared.stage, shared.committed);
@@ -200,7 +194,7 @@ class ModelFile extends Decorated {
         } else {
             this.fromAst(this.ast);
         }
-        // Check version compatibility (P5-97: a view's source was checked)
+        // Check version compatibility (a view's source was checked)
         if (shared === null) {
             this.isCompatibleVersion();
         }
@@ -221,18 +215,17 @@ class ModelFile extends Decorated {
     }
 
     /**
-     * P5-97 (accordproject/concerto-rust#448): a new ModelFile of `manager`
-     * that is a view of `source`, a model file another manager already
-     * loaded: the same AST object and file name, with `definitions`, and
-     * the same header (namespace, version, imports), copied from `source`
-     * without an engine call. The engine-side file is the one `source`'s
-     * manager holds, shared: `stage` is its stage in `manager`'s
-     * rustHandle (`BaseModelManager.filter`, which registers it from there),
-     * or `committed` the rustHandle that already holds it
+     * A new ModelFile of `manager` that is a view of `source`, a model file
+     * another manager already loaded: the same AST object and file name,
+     * with `definitions`, and the same header (namespace, version, imports),
+     * copied from `source` without an engine call. The engine-side file is
+     * the one `source`'s manager holds, shared: `stage` is its stage in
+     * `manager`'s rustHandle (`BaseModelManager.filter`, which registers it
+     * from there), or `committed` the rustHandle that already holds it
      * (`BaseModelManager.fork`). The declaration views are built on first
-     * use, as for any lazily built file (P5-06a), unless `manager` has
-     * decorator factories and `source` was built eagerly; then they are
-     * built now, as the constructor builds them.
+     * use, as for any lazily built file, unless `manager` has decorator
+     * factories and `source` was built eagerly; then they are built now, as
+     * the constructor builds them.
      * @param {BaseModelManager} manager the manager the view belongs to
      * @param {ModelFile} source the model file it is a view of
      * @param {string} [definitions] the view's definitions
@@ -253,10 +246,10 @@ class ModelFile extends Decorated {
     }
 
     /**
-     * P5-97: `_fromAstHeader`'s fields, copied from `source`, a view of the
-     * same AST (`_sharedView`), with no engine call: `namespace`,
-     * `version`, `concertoVersion`, and copies of `imports`,
-     * `importShortNames`, `importWildcardNamespaces` and `importUriMap`.
+     * `_fromAstHeader`'s fields, copied from `source`, a view of the same
+     * AST (`_sharedView`), with no engine call: `namespace`, `version`,
+     * `concertoVersion`, and copies of `imports`, `importShortNames`,
+     * `importWildcardNamespaces` and `importUriMap`.
      * @param {ModelFile} source the view whose header is copied
      * @private
      * @internal
@@ -292,7 +285,7 @@ class ModelFile extends Decorated {
 
     /**
      * Whether `value` is a ModelFile the ModelFile constructor built
-     * (P5-34, BC-46): the only kind of model file a BaseModelManager
+     * (BC-46): the only kind of model file a BaseModelManager
      * accepts.
      * @param {*} value the value to check
      * @return {boolean} true if the ModelFile constructor built `value`
@@ -304,8 +297,8 @@ class ModelFile extends Decorated {
     }
 
     /**
-     * Records `manager` as a BaseModelManager whose constructor ran (P5-35,
-     * BC-47): the BaseModelManager constructor calls this before it builds
+     * Records `manager` as a BaseModelManager whose constructor ran
+     * (BC-47): the BaseModelManager constructor calls this before it builds
      * any ModelFile of its own.
      * @param {BaseModelManager} manager the manager being constructed
      * @private
@@ -317,13 +310,13 @@ class ModelFile extends Decorated {
 
     /**
      * The handle of this ModelFile's own namespace in `this.modelManager`'s
-     * `rustHandle` (P4-08), when this ModelFile is the one registered for
-     * its namespace and no write of the manager's is pending
+     * `rustHandle`, when this ModelFile is the one registered for its
+     * namespace and no write of the manager's is pending
      * (`BaseModelManager#_rustHandleMatchesModelFiles`). The handle is the
-     * one the manager cached when it committed the file (P5-34), so a
-     * registered file's read makes no extra engine call. `undefined`
-     * otherwise: a ModelFile detached from its manager's registration.
-     * The manager is always a BaseModelManager (P5-35, BC-47).
+     * one the manager cached when it committed the file, so a registered
+     * file's read makes no extra engine call. `undefined` otherwise: a
+     * ModelFile detached from its manager's registration. The manager is
+     * always a BaseModelManager (BC-47).
      * @return {number | undefined} the handle, or undefined to fall back to TS
      * @private
      * @internal
@@ -333,36 +326,35 @@ class ModelFile extends Decorated {
             return undefined;
         }
         const manager = this.modelManager;
-        // P5-34: the handle the manager cached when it committed the file.
-        // An error reading rustHandle propagates
-        // (accordproject/concerto-rust#262).
+        // The handle the manager cached when it committed
+        // the file. An error reading rustHandle propagates.
         return manager._rustModelFileId(this.namespace);
     }
 
     /**
      * Whether this ModelFile is the one its manager's `rustHandle` mirrors
-     * for its namespace (P5-32, accordproject/concerto-rust#342): the
-     * checks `_rustHandleId` makes before it looks the handle up, none of
-     * which crosses into the engine. A registered file's field-backed
-     * getters (`getVersion`, `isSystemModelFile`, `getExternalImports`)
-     * answer exactly as the engine's own model file did.
+     * for its namespace: the checks `_rustHandleId` makes before it looks
+     * the handle up, none of which crosses into the engine. A registered
+     * file's field-backed getters (`getVersion`, `isSystemModelFile`,
+     * `getExternalImports`) answer exactly as the engine's own model file
+     * did.
      * @return {boolean} true if registered and mirrored
      * @private
      * @internal
      */
     _isRegistered(): boolean {
-        // The manager is always a BaseModelManager (P5-35, BC-47).
+        // The manager is always a BaseModelManager (BC-47).
         const manager = this.modelManager;
         // A ModelFile detached from its manager's own registration -- most
         // notably `filter()`'s result before it is ever added -- must never
         // answer from a same-namespace mirror that belongs to a different
-        // (unfiltered) ModelFile object (P5-10a: a ModelFile being
-        // constructed or added is not registered yet, and needs no boundary
-        // call to say so).
+        // (unfiltered) ModelFile object (a ModelFile being constructed or
+        // added is not registered yet, and needs no boundary call to say
+        // so).
         if (manager.modelFiles[this.namespace] !== this) {
             return false;
         }
-        // P5-34: a flag read, not a boundary call (`_mirrorPending`).
+        // A flag read, not a boundary call (`_mirrorPending`).
         return manager._rustHandleMatchesModelFiles();
     }
 
@@ -372,12 +364,9 @@ class ModelFile extends Decorated {
      * unversioned
      */
     getVersion(): string | null | undefined {
-        // P5-32 (accordproject/concerto-rust#342): `this.version` is the
-        // field Rust itself wrote at construction (concerto-wasm
-        // `modelFileFromAstHeader`, or the staged header P5-28 applies), so
-        // no engine call is needed. A registered file answers as the
-        // engine's `modelFileGetVersion` did: `null`, never `undefined` or
-        // `''`, for a namespace with no version.
+        // `this.version` was written by the engine at construction. A
+        // registered file answers `null`, never `undefined` or `''`, for a
+        // namespace with no version.
         return this._isRegistered() ? this.version || null : this.version;
     }
 
@@ -386,9 +375,9 @@ class ModelFile extends Decorated {
      * @returns {Boolean} true if this is a system model file
      */
     isSystemModelFile(): boolean {
-        // P5-32 (accordproject/concerto-rust#342): from `this.namespace`,
-        // which Rust wrote at construction. A registered file answers as the
-        // engine's `modelFileIsSystemModelFile` did (concerto-core
+        // From `this.namespace`, which Rust wrote at construction. A
+        // registered file answers as the engine's
+        // `modelFileIsSystemModelFile` did (concerto-core
         // `ModelFile::is_system_namespace`: a `concerto@` namespace only);
         // otherwise the bare `concerto` namespace is a system one too, as the
         // namespace check during construction takes it.
@@ -425,11 +414,10 @@ class ModelFile extends Decorated {
      * @private
      */
     getExternalImports(): Record<string, string> {
-        // P5-32 (accordproject/concerto-rust#342): `this.importUriMap` is the
-        // field Rust itself wrote at construction, in import order (the
-        // order `modelFileGetExternalImports` kept, #263). A registered file
-        // returns a fresh copy, as the engine route did, so mutating the
-        // result never reaches the file.
+        // `this.importUriMap` is the field Rust itself wrote at construction,
+        // in import order (the order `modelFileGetExternalImports` kept). A
+        // registered file returns a fresh copy, as the engine route did, so
+        // mutating the result never reaches the file.
         return this._isRegistered() ? { ...this.importUriMap } : this.importUriMap;
     }
 
@@ -459,14 +447,10 @@ class ModelFile extends Decorated {
      * this ModelFile
      */
     getImports(): string[] {
-        // P5-32 (accordproject/concerto-rust#342): `this.imports` is the
-        // field Rust itself wrote at construction, so its fully-qualified
-        // names are recorded once (engine/views.ts `recordImportNames`):
-        // from the staged header when one was applied, with no engine call,
-        // or else on the first call, through the engine's own model file
-        // for a registered file, as before, and the TS body otherwise (the
-        // two agree). Every later call answers from that record, with no
-        // engine call, as a fresh array, as both routes did.
+        // `this.imports` was written by the engine at construction, so its
+        // fully-qualified names are recorded once (`recordImportNames`): from
+        // the staged header, or on the first call. Every later call answers
+        // from that record, as a fresh array.
         const views = engineViews();
         const recorded: string[] | undefined = views.recordedImportNames(this);
         if (recorded !== undefined) {
@@ -488,8 +472,7 @@ class ModelFile extends Decorated {
 
     /**
      * The error to throw for an error the engine threw validating this
-     * ModelFile (`validate()`, and BaseModelManager's one-crossing add,
-     * P5-34).
+     * ModelFile (`validate()`, and BaseModelManager's one-crossing add).
      *
      * rustHandle's `modelFile` (errors.ts's ErrorPayload) is not this
      * ModelFile, so `IllegalModelException`'s own constructor already baked
@@ -532,27 +515,17 @@ class ModelFile extends Decorated {
      * @protected
      */
     validate() {
-        // P4-08 (accordproject/concerto-rust#67, maintainer decision
-        // 2026-09-26): delegates fully to Rust in rust mode, unconditionally,
-        // now that P4-08a/b/e closed the gaps the earlier attempts (see the
-        // history in `BaseModelManager.addModelFile`) hit -- rustHandle's
-        // validation is now told about `decoratorValidation` and
-        // `dangerouslyAllowReservedSystemTypeNamesInUserModels`
-        // (`BaseModelManager`'s constructor), so it no longer silently skips
-        // an option-gated TS check the way step 4's narrower attempt still
-        // could.
-        //
-        // BaseModelManager accepts only ModelFiles its constructor built
-        // (P5-34, BC-46), and its `addModelFile` validates and registers a
-        // staged file in one engine call without calling this method
-        // (`_rustValidateAndMirrorAdd`). A ModelFile's manager is always a
-        // BaseModelManager (P5-35, BC-47), so there is no TS body: a
-        // genuine validation failure throws the mapped
-        // `IllegalModelException` (src/engine/errors.ts).
+        // The engine validates the file, told about `decoratorValidation`
+        // and `dangerouslyAllowReservedSystemTypeNamesInUserModels` by the
+        // BaseModelManager constructor. A ModelFile's manager is always a
+        // BaseModelManager (BC-47), whose `addModelFile` validates and
+        // registers a staged file in one engine call without calling this
+        // method; a validation failure throws the mapped
+        // `IllegalModelException`.
         const manager = this.modelManager;
         try {
-            // P5-10a: the file Rust already loaded (staged, or registered
-            // from its stage) is validated without sending the AST again
+            // The file Rust already loaded (staged, or registered from
+            // its stage) is validated without sending the AST again
             // (engine/views.ts `validateLoaded`).
             if (!engineViews().validateLoaded(this, manager.rustHandle)) {
                 manager.rustHandle.modelFileValidateDetached(
@@ -579,12 +552,10 @@ class ModelFile extends Decorated {
      * @private
      */
     resolveType(context, type, fileLocation?) {
-        // P5-11 (accordproject/concerto-rust#287): resolved in Rust
-        // (concerto-wasm `modelFileResolveType`) for a file its manager has
-        // mirrored into rustHandle, with the IllegalModelException TS throws
-        // (naming this file). A file that is not mirrored (a stub manager,
-        // a detached file) and non-string arguments, which the binding's
-        // `&str` parameters cannot take, keep the TS body below.
+        // Resolved in the engine (`modelFileResolveType`) for a file its
+        // manager has mirrored, with the IllegalModelException TS throws. A
+        // file that is not mirrored (a detached file), or a non-string
+        // argument, takes the TS path below.
         const id = typeof context === 'string' && typeof type === 'string' ? this._rustHandleId() : undefined;
         if (id !== undefined) {
             const manager = this.modelManager;
@@ -691,17 +662,16 @@ class ModelFile extends Decorated {
      * @private
      */
     getType(type) {
-        // P5-11 (accordproject/concerto-rust#287): resolved in Rust
-        // (concerto-wasm `modelFileGetTypeName`) for a file its manager has
-        // mirrored into rustHandle. Rust answers by name: a primitive's own
-        // name (no dot), the fully-qualified name of the declaration found,
-        // which is mapped to its view in the model file of its namespace, or
-        // undefined for null. A file that is not mirrored and a non-string
-        // type keep the TS body below.
+        // Resolved in Rust (concerto-wasm `modelFileGetTypeName`) for a file
+        // its manager has mirrored into rustHandle. Rust answers by name: a
+        // primitive's own name (no dot), the fully-qualified name of the
+        // declaration found, which is mapped to its view in the model file
+        // of its namespace, or undefined for null. A file that is not
+        // mirrored and a non-string type take the TS path below.
         const id = typeof type === 'string' ? this._rustHandleId() : undefined;
         if (id !== undefined) {
             const manager = this.modelManager;
-            // P5-113: through the manager's read memo, so one type is
+            // Through the manager's read memo, so one type is
             // resolved once per model version, not once per call.
             const name: string | undefined = manager._modelFileTypeName(this.namespace, id, type);
             if (name === undefined) {
@@ -747,10 +717,9 @@ class ModelFile extends Decorated {
      * @private
      */
     getFullyQualifiedTypeName(type) {
-        // P5-11 (accordproject/concerto-rust#287): resolved in Rust
-        // (concerto-wasm `modelFileGetFullyQualifiedTypeName`, undefined for
-        // null) for a file its manager has mirrored into rustHandle. A file
-        // that is not mirrored and a non-string type keep the TS body below.
+        // Resolved in the engine (`modelFileGetFullyQualifiedTypeName`,
+        // undefined for null) for a mirrored file. A file that is not
+        // mirrored and a non-string type take the TS path below.
         const id = typeof type === 'string' ? this._rustHandleId() : undefined;
         if (id !== undefined) {
             const manager = this.modelManager;
@@ -784,8 +753,8 @@ class ModelFile extends Decorated {
      * @return {ClassDeclaration} the ClassDeclaration, or null if the type does not exist
      */
     getLocalType(type: string): Declaration | null {
-        // P5-10b: a lazily built file whose declaration views are not all
-        // built yet builds only the one asked for (engine/views.ts
+        // A lazily built file whose declaration views are not all built
+        // yet builds only the one asked for (engine/views.ts
         // `localType`).
         const lazy = engineViews().localType(this, type);
         if (lazy !== undefined) {
@@ -1007,15 +976,11 @@ class ModelFile extends Decorated {
      * with newer runtimes (e.g. a model declaring "^3.0.0" loads under v4).
      */
     isCompatibleVersion() {
-        // P5-11 (accordproject/concerto-rust#287): checked in Rust
-        // (concerto-wasm `modelFileIsCompatibleVersion`, node-semver's range
-        // grammar ported in concerto-rust semver_range.rs), which sets
-        // `this.concertoVersion` or throws the Error TS throws.
-        // P5-94 (accordproject/concerto-rust#444): an AST without a
-        // `concertoVersion` (nearly every model) is accepted without the
-        // engine call, as the binding accepts it, so its three crossings
-        // and the key strings it reads with are not paid for every file.
-        // A nullish `ast` still goes to the binding, which throws for it.
+        // Checked in the engine (`modelFileIsCompatibleVersion`, node-semver's
+        // range grammar), which sets `this.concertoVersion` or throws the
+        // Error TS throws. An AST without a `concertoVersion` (nearly every
+        // model) is accepted without the engine call; a nullish `ast` still
+        // goes to the binding, which throws for it.
         const ast: any = this.ast;
         if (ast !== null && ast !== undefined && !ast.concertoVersion) {
             return;
@@ -1029,8 +994,8 @@ class ModelFile extends Decorated {
      * @private
      */
     enforceImportVersioning(imp) {
-        // P5-11 (accordproject/concerto-rust#287): checked in Rust
-        // (concerto-wasm `modelFileEnforceImportVersioning`).
+        // Checked in Rust (concerto-wasm
+        // `modelFileEnforceImportVersioning`).
         rust.modelFileEnforceImportVersioning(imp);
     }
 
@@ -1040,9 +1005,8 @@ class ModelFile extends Decorated {
      * @private
      */
     fromAst(ast: AstNode) {
-        // P5-11 (accordproject/concerto-rust#287): the header (namespace,
-        // version and imports, `_fromAstHeader`) is read and checked in Rust
-        // (concerto-wasm `modelFileFromAstHeader`).
+        // The header (namespace, version and imports, `_fromAstHeader`) is
+        // read and checked in Rust (concerto-wasm `modelFileFromAstHeader`).
         rust.modelFileFromAstHeader(this, ast);
 
         // declarations is an optional field
@@ -1061,23 +1025,21 @@ class ModelFile extends Decorated {
      * @internal
      */
     _fromAstHeader(ast: AstNode) {
-        // P5-11 (accordproject/concerto-rust#287): read and checked in Rust
-        // (concerto-wasm `modelFileFromAstHeader`), over this ModelFile and
-        // the AST's own JS values in TS's order: `ast.namespace` (every part
-        // a valid identifier, and a version unless isSystemModelFile()),
-        // then `this.namespace`, `this.version` and `this.imports` (a copy of
-        // `ast.imports` plus, for a non-system file, the implicit import of
-        // the system types), and `this.importShortNames` and
-        // `this.importUriMap` from each import, which must be versioned
-        // (enforceImportVersioning), not a wildcard import, and not alias a
-        // primitive type. Each error keeps TS's class.
+        // Read and checked in Rust (concerto-wasm `modelFileFromAstHeader`),
+        // over this ModelFile and the AST's own JS values in TS's order:
+        // `ast.namespace` (every part a valid identifier, and a version
+        // unless isSystemModelFile()), then `this.namespace`, `this.version`
+        // and `this.imports` (a copy of `ast.imports` plus, for a non-system
+        // file, the implicit import of the system types), and
+        // `this.importShortNames` and `this.importUriMap` from each import,
+        // which must be versioned (enforceImportVersioning), not a wildcard
+        // import, and not alias a primitive type. Each error keeps TS's
+        // class.
         //
-        // The engine call that staged the file may have read its header
-        // already, and then it is applied without crossing again: P5-27 (F6)
-        // for a DecoratorManager result model, P5-28
-        // (accordproject/concerto-rust#333) for a file `stageModelFile`
-        // staged, both in the one header format since P5-101 (engine/views.ts
-        // `applyStagedHeaders`); otherwise the engine reads it now.
+        // The engine call that staged the file (or a DecoratorManager
+        // result) may have read its header already, which is then applied
+        // without crossing again (`applyStagedHeaders`); otherwise the
+        // engine reads it now.
         const views = engineViews();
         if (!views.applyStagedHeaders(this, ast)) {
             rust.modelFileFromAstHeader(this, ast);
@@ -1091,8 +1053,8 @@ class ModelFile extends Decorated {
      * @internal
      */
     _fromAstDeclarations(ast: AstNode) {
-        // P5-06/P5-10a: every declaration's and property's engine snapshot
-        // in one call, read by the views built below (engine/views.ts
+        // Every declaration's and property's engine snapshot in one call,
+        // read by the views built below (engine/views.ts
         // `beginModelFile`).
         const views = engineViews();
         const saved = views.beginModelFile(this, ast);
@@ -1110,8 +1072,8 @@ class ModelFile extends Decorated {
      * @internal
      */
     _fromAstDeclarationViews(ast: AstNode) {
-        // P5-10b: a declaration view already built on its own (a lazily
-        // built file's `getLocalType`, engine/views.ts `localType`) is
+        // A declaration view already built on its own (a lazily built
+        // file's `getLocalType`, engine/views.ts `localType`) is
         // reused, so each declaration has one view.
         const views = engineViews();
         for(let n=0; n < ast.declarations.length; n++) {
@@ -1239,13 +1201,13 @@ class ModelFile extends Decorated {
             const handles = engineHandles();
             const target: EngineHandle | undefined = modelManager.rustHandle;
             if (target && target !== manager.rustHandle) {
-                // P5-97 (accordproject/concerto-rust#448): a file the filter
-                // keeps exactly as it is (every declaration kept, every
-                // import unchanged) is staged, shared, in `modelManager`'s
-                // own rustHandle (staging registers nothing there), and its
-                // view is built from this file's own AST and header: no
-                // JSON round trip. Any other result comes back as its AST,
-                // as `modelFileSnapshot` returned it, with no scratch handle.
+                // A file the filter keeps exactly as it is (every
+                // declaration kept, every import unchanged) is staged,
+                // shared, in `modelManager`'s own rustHandle (staging
+                // registers nothing there), and its view is built from this
+                // file's own AST and header: no JSON round trip. Any other
+                // result comes back as its AST, as `modelFileSnapshot`
+                // returned it, with no scratch handle.
                 const result: string | undefined = handles.withEngineCallbacks(
                     () => manager.rustHandle.modelFileFilterStaged(id, wrappedPredicate, target));
                 if (result === undefined) {
@@ -1257,15 +1219,11 @@ class ModelFile extends Decorated {
                 }
                 return new ModelFile(modelManager, filtered.ast, undefined, this.fileName);
             }
-            // A scratch handle, never `modelManager`'s own `rustHandle`:
-            // `filter`'s result is returned *detached* (TS never adds it
-            // to `modelManager` here -- `BaseModelManager.filter` does
-            // that later, via `addModelFiles`), so writing straight into
-            // `modelManager`'s real mirror here would register a
-            // namespace there ahead of the TS side, breaking the
-            // namespace-set invariant `_rustHandleMatchesModelFiles` relies on.
-            // P5-97: freed here once its last use returns, not left to the
-            // garbage collector.
+            // A scratch handle, never `modelManager`'s own: `filter`'s result
+            // is returned detached (`BaseModelManager.filter` adds it later),
+            // so writing into the manager's mirror here would register a
+            // namespace ahead of `modelFiles`. Freed once its last use
+            // returns.
             const scratch = new rust.ModelManagerHandle();
             let filteredSnapshot;
             try {
@@ -1343,8 +1301,9 @@ class ModelFile extends Decorated {
     }
 }
 
-// P5-100 (E-13): built on first read in a lazily built file
-// (engine/views.ts `deferModelFileFields`), like the other lazy parts.
+// Built on first read in a lazily built file
+// (engine/views.ts `deferModelFileFields`), like the other
+// lazy parts.
 engineViews().installLazyField(ModelFile.prototype, 'declarations', () => [], true);
 engineViews().installLazyField(ModelFile.prototype, 'localTypes', () => null, true);
 

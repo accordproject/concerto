@@ -90,10 +90,11 @@ class Decorator {
     handleError(level: string | undefined, err: string | Error): void {
         Logger.dispatch(level as string, err);
         if (level === 'error') {
-            // BC-14 (R1): a caught IllegalModelException already names its
+            // BC-14: a caught IllegalModelException already names its
             // file, so it is thrown as it is, and a caught Error gives its
             // message. TS 5.0.0 wrapped the Error itself, so the message
-            // embedded 'IllegalModelException: ' and the file suffix twice.
+            // embedded 'IllegalModelException: ' and the file suffix
+            // twice.
             if (err instanceof IllegalModelException) {
                 throw err;
             }
@@ -108,9 +109,8 @@ class Decorator {
      * @private
      */
     process() {
-        // `this` lets the binding name `this.getParent().getModelFile()`
-        // in the IllegalModelException it throws for a null node, where
-        // the old TS body used to crash (concerto-rust DIVERGENCES.md DV-018).
+        // `this` lets the binding name `this.getParent().getModelFile()` in
+        // the IllegalModelException it throws for a null node (DV-018).
         Object.assign(this, rust.decoratorProcess(this.ast, this));
     }
 
@@ -125,10 +125,10 @@ class Decorator {
         const parent = this.getParent() as Decorated & { getFullyQualifiedName?(): string };
         const decoratedName = parent.getFullyQualifiedName?.();
 
-        // P5-106 (BC-52): the types are resolved by the engine from its
-        // arena, by the handle of `mf`; a replaced `getType` method is not
-        // called. Each problem is still reported through `handleError`.
-        // With both options off (the default) nothing is resolved.
+        // BC-52: the types are resolved by the engine from its arena, by
+        // the handle of `mf`; a replaced `getType` method is not called.
+        // Each problem is still reported through `handleError`. With both
+        // options off (the default) nothing is resolved.
         const options = mf.getModelManager().getDecoratorValidation();
         if (!options.missingDecorator && !options.invalidDecorator) {
             return;

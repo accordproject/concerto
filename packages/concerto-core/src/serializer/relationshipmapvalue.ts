@@ -18,14 +18,14 @@ import type MapDeclaration from '../introspect/mapdeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
- * The relationship a map holds when its value type is a relationship
- * (`map M { o String --> T }`), with the members of a
- * RelationshipDeclaration that the serializer's relationship code reads
- * (P5-58, BC-05, R1; DV-007). JSONPopulator, JSONGenerator and
- * ResourceValidator hand it to their relationship-property code, so a map
- * value is read, written and validated as a `--> T` property is, under the
- * same `acceptResourcesForRelationships`, `convertResourcesToRelationships`
- * and `permitResourcesForRelationships` options.
+ * The relationship a map holds when its value type is a relationship (`map
+ * M { o String --> T }`), with the members of a RelationshipDeclaration
+ * that the serializer's relationship code reads (BC-05; DV-007).
+ * JSONPopulator, JSONGenerator and ResourceValidator hand it to their
+ * relationship-property code, so a map value is read, written and validated
+ * as a `--> T` property is, under the same
+ * `acceptResourcesForRelationships`, `convertResourcesToRelationships` and
+ * `permitResourcesForRelationships` options.
  * @private
  */
 export interface RelationshipMapValue {

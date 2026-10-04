@@ -32,12 +32,12 @@ import type { AstNode } from './decorated';
 import { rust, engineValidateInstance, engineViews } from '../engineloader';
 
 /**
- * P5-100 (E-1, M2): the declaration kind a metamodel `$class` names, as
- * the engine's `ClassDeclaration::is_kind` compares it: whatever follows
- * the last `.`. A pure predicate over a string the view already holds, so
- * it runs here rather than crossing into the engine on every call.
- * A missing or non-string `$class` (a declaration built from a stub AST
- * with `metamodelValidation: false`) gives `''`, which matches no kind, so
+ * The declaration kind a metamodel `$class` names, as the engine's
+ * `ClassDeclaration::is_kind` compares it: whatever follows the last `.`.
+ * A pure predicate over a string the view already holds, so it runs here
+ * rather than crossing into the engine on every call. A missing or
+ * non-string `$class` (a declaration built from a stub AST with
+ * `metamodelValidation: false`) gives `''`, which matches no kind, so
  * `isAsset()` and its siblings return false as the TS string checks did.
  * @param {string} type - the declaration's `$class` (`this.type`)
  * @return {string} its short name
@@ -103,18 +103,13 @@ class ClassDeclaration extends Declaration {
             this.abstract = true;
         }
 
-        // The superType/idField decision below has no dependency on the
-        // ast.properties loop that follows (Field/RelationshipDeclaration/
-        // EnumValueDeclaration views, constructed in TS; since P4-07 those
-        // Property views delegate their own process/validate to the engine),
-        // so it is made once, up front, either by the Rust engine or by the
-        // unchanged TS body, and the loop stays a single copy shared by both
-        // engines.
+        // The superType/idField decision below does not depend on the
+        // ast.properties loop that follows, so it is made once, up front.
         let shouldAddIdentifierField = false;
         let shouldAddTimestampField = false;
 
-        // P5-10a: the `classDeclarationProcess` binding, read from the
-        // file's view snapshot while its declarations are built
+        // The `classDeclarationProcess` binding, read from the file's
+        // view snapshot while its declarations are built
         // (engine/views.ts).
         const decision = engineViews().classDeclarationProcess(this) as {
             superType: string | null;
@@ -349,11 +344,10 @@ class ClassDeclaration extends Declaration {
      * @return {string} the name of the id field for this class or null if it does not exist
      */
     getIdentifierFieldName(): string | null {
-        // P5-19: the whole super type walk runs in one engine call, and the
-        // answer is memoised per view until the models change
-        // (engine/views.ts). P5-36 (BC-50): the walk always inlines the
-        // ClassDeclaration methods it reaches, so replacing them at runtime
-        // does not change the answer.
+        // The whole super type walk runs in one engine call, and the answer
+        // is memoised per view until the models change (engine/views.ts).
+        // BC-50: the walk inlines the ClassDeclaration methods it reaches,
+        // so replacing them at runtime does not change the answer.
         return engineViews().classDeclarationGetIdentifierFieldName(this) as string | null;
     }
 
@@ -408,8 +402,8 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} subclass declarations.
      */
     getAssignableClassDeclarations(): ClassDeclaration[] {
-        // P5-106 (BC-52): answered by the engine from its arena and its
-        // cached subclass map, by this declaration's handle, as fully
+        // BC-52: answered by the engine from its arena and its cached
+        // subclass map, by this declaration's handle, as fully
         // qualified names (this declaration's first); a replaced
         // `getSuperType` or `getModelFiles` method is not called.
         const views = engineViews();
@@ -426,7 +420,7 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} direct subclass declarations.
      */
     getDirectSubclasses(): ClassDeclaration[] {
-        // P5-106 (BC-52): as `getAssignableClassDeclarations`.
+        // BC-52: as `getAssignableClassDeclarations`.
         const views = engineViews();
         const ref = views.declarationArenaRef(this);
         if (ref === undefined) {
@@ -451,8 +445,8 @@ class ClassDeclaration extends Declaration {
      * @return {Property} the field, or null if it does not exist
      */
     getProperty(name: string): Property | null {
-        // P5-14: the `classDeclarationGetProperty` binding, answered from
-        // the view's cached property list when it has one (engine/views.ts).
+        // The `classDeclarationGetProperty` binding, answered from the
+        // view's cached property list when it has one (engine/views.ts).
         return engineViews().classDeclarationGetProperty(this, name) as Property | null;
     }
 
@@ -495,7 +489,7 @@ class ClassDeclaration extends Declaration {
      * @return {Property[]} the array of fields
      */
     getProperties(): Property[] {
-        // P5-14: the `classDeclarationGetProperties` binding, cached per view
+        // The `classDeclarationGetProperties` binding, cached per view
         // (engine/views.ts).
         return engineViews().classDeclarationGetProperties(this) as Property[];
     }
@@ -515,9 +509,10 @@ class ClassDeclaration extends Declaration {
      * @return {String} the string representation of the class
      */
     toString(): string {
-        // P5-100 (E-1, M2): built here, as the engine's
-        // `ClassDeclaration::to_string` builds it: a `ClassDeclaration`
-        // receiver is never an enum (`EnumDeclaration` overrides this).
+        // Built here, as the engine's
+        // `ClassDeclaration::to_string` builds it: a
+        // `ClassDeclaration` receiver is never an enum
+        // (`EnumDeclaration` overrides this).
         const superType = this.superType === null || this.superType === undefined ? '' : ` super=${this.superType}`;
         return `ClassDeclaration {id=${this.getFullyQualifiedName()}${superType} enum=false abstract=${this.abstract}}`;
     }

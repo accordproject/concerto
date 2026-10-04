@@ -29,7 +29,7 @@ import { rust } from '../engineloader';
  */
 class CollectionSizeValidator extends Validator {
     declare validator: ICollectionSizeValidator;
-    // Definitely assigned: by the TS body, or from the Rust snapshot.
+    // Definitely assigned: by the constructor, or from the engine snapshot.
     minSize!: number | null;
     maxSize!: number | null;
 

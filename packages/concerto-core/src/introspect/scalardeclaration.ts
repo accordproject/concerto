@@ -69,7 +69,7 @@ class ScalarDeclaration extends Declaration {
     validate() {
         super.validate();
 
-        // P5-106 (BC-52): answered by the engine from its arena, by this
+        // BC-52: answered by the engine from its arena, by this
         // declaration's handle; a replaced `getModelFile` or
         // `getAllDeclarations` method is not called.
         const views = engineViews();
@@ -232,7 +232,7 @@ class ScalarDeclaration extends Declaration {
 
 }
 
-// P5-10b: built on first read in a lazily built file (engine/views.ts).
+// Built on first read in a lazily built file (engine/views.ts).
 engineViews().installLazyField(ScalarDeclaration.prototype, 'validator');
 
 export { ScalarDeclaration };

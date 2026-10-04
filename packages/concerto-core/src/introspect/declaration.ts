@@ -60,9 +60,10 @@ class Declaration extends Decorated {
     process() {
         super.process();
 
-        // P5-10a: `modelUtilIsValidIdentifier` and
-        // `modelUtilGetFullyQualifiedName`, read from the file's view
-        // snapshot while its declarations are built (engine/views.ts).
+        // `modelUtilIsValidIdentifier` and
+        // `modelUtilGetFullyQualifiedName`, read from the
+        // file's view snapshot while its declarations are
+        // built (engine/views.ts).
         const views = engineViews();
         if (!views.declarationIsValidIdentifier(this)) {
             throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
@@ -85,12 +86,11 @@ class Declaration extends Decorated {
      */
     validate(...args: any[]) {
         super.validate(...args);
-        // #648 - check for clashes against imported types. P5-11
-        // (accordproject/concerto-rust#287): the rule runs in Rust
-        // (concerto-wasm `declarationValidate`) over this view's
-        // collaborators (`getModelFile().isImportedType`, the manager's
-        // `dangerouslyAllowReservedSystemTypeNamesInUserModels` option and
-        // `isReservedSystemTypeImport`), and throws the
+        // Check for clashes against imported types (accordproject/concerto#648).
+        // The rule runs in the engine (`declarationValidate`) over
+        // this view's collaborators (`getModelFile().isImportedType`, the
+        // manager's `dangerouslyAllowReservedSystemTypeNamesInUserModels`
+        // option and `isReservedSystemTypeImport`), and throws the
         // IllegalModelException TS throws.
         rust.declarationValidate(this);
     }
@@ -103,8 +103,8 @@ class Declaration extends Decorated {
      * @returns {boolean} true if the resolved import is a reserved system type
      */
     private isReservedSystemTypeImport(modelFile: ModelFile, typeName: string): boolean {
-        // P5-11 (accordproject/concerto-rust#287): decided in Rust
-        // (concerto-wasm `declarationIsReservedSystemTypeImport`) over
+        // Decided in Rust (concerto-wasm
+        // `declarationIsReservedSystemTypeImport`) over
         // `modelFile.getType(typeName)` and the declaration it resolves to:
         // a concept, asset, transaction, participant or event of a system
         // model file.

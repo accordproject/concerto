@@ -12,19 +12,19 @@
  * limitations under the License.
  */
 
-// P5-101 (E-11, E-14; accordproject/concerto-rust#455): the engine helpers
-// the public modules share with src/engine/, in a module with no imports, so
-// a public module reaches them without loading the engine (engineloader.ts
-// loads engine modules only through its non-literal `require`). Nothing here
-// is exported from index.ts, and every export is `@internal`.
+// The engine helpers the public modules share with src/engine/, in a module
+// with no imports, so a public module reaches them without loading the
+// engine (engineloader.ts loads engine modules only through its non-literal
+// `require`). Nothing here is exported from index.ts, and every export is
+// `@internal`.
 
 /**
- * The brand of a fast-path fallback signal (P5-43): a registered symbol,
- * set to `true` on `EngineFastPathUnsupported` (engine/serializer-codec.ts)
- * and, since P5-101, on an engine error whose payload says the engine's
- * wire codec could not carry the value (`fastPathUnsupported`, concerto-wasm
- * `Error::Unsupported`; engine/errors.ts). A registered symbol rather than a
- * class test, which a minifier or a second copy of the module would break.
+ * The brand of a fast-path fallback signal: a registered symbol, set to
+ * `true` on `EngineFastPathUnsupported` (engine/serializer-codec.ts) and on
+ * an engine error whose payload says the wire codec could not carry the
+ * value (`fastPathUnsupported`; engine/errors.ts). A registered symbol
+ * rather than a class test, which a minifier or a second copy of the module
+ * would break.
  * @internal
  */
 export const FAST_PATH_UNSUPPORTED: unique symbol = Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported') as any;
@@ -48,8 +48,7 @@ export function isFastPathUnsupported(err: unknown): boolean {
  * parameters. The `ModelFile` constructor rejects only a *truthy*
  * non-string, so `0`, `false` and `NaN` are stored as they are; only a
  * genuine string is forwarded, anything else is `undefined`, as TS 5.0.0
- * (which makes no engine call) sees it (accordproject/concerto-rust#294
- * follow-up).
+ * (which makes no engine call) sees it.
  * @param {*} v the value
  * @return {string|undefined} the string, or undefined
  * @internal

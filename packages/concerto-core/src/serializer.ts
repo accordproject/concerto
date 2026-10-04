@@ -37,9 +37,9 @@ import type Resource from './model/resource';
 import { engineSerializer } from './engineloader';
 import { isFastPathUnsupported } from './engineutil';
 
-// P5-24 (BC-07, R1; accordproject/concerto-rust#328): `DateTime` strings are
-// strict whatever `strictQualifiedDateTimes` says, so an explicit `false` no
-// longer opens a lenient path. It is ignored, with one warning per process.
+// BC-07: `DateTime` strings are strict whatever `strictQualifiedDateTimes`
+// says, so an explicit `false` opens no lenient path. It is ignored, with
+// one warning per process.
 let lenientDateTimesWarned = false;
 
 /**
@@ -128,14 +128,11 @@ class Serializer {
             throw new Error(Globalize.formatMessage('serializer-tojson-notcobject'));
         }
 
-        // Fast path (P4-10; PORTING.md section 5 row 6, D7): one engine call
-        // for the whole document, instead of one per field through
-        // ResourceValidator/JSONGenerator's visitors. Falls back to the
-        // visitor path below on anything the engine cannot cross
-        // (EngineFastPathUnsupported: a cycle or shared reference, a value
-        // the wire codec cannot carry), exactly as calling the visitors directly still
-        // does for callers/tests that need them.
-        // P5-101 (E-7): the options are merged once, for both paths.
+        // Fast path: one engine call for the whole document instead of one
+        // per field through the visitors, which still run for anything the
+        // engine cannot cross (EngineFastPathUnsupported: a cycle or shared
+        // reference, a value the wire codec cannot carry). The options are
+        // merged once, for both paths.
         options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
         try {
             return engineSerializer().fastToJson(this.modelManager, resource, options);
@@ -200,12 +197,9 @@ class Serializer {
             warnLenientDateTimesIgnored();
         }
 
-        // Fast path (P4-10; PORTING.md section 5 row 6, D7): one engine call
-        // for the whole document, instead of one per field through
-        // JSONPopulator's visitor. Falls back to the visitor path below on
-        // anything the engine cannot cross (EngineFastPathUnsupported),
-        // exactly as calling the visitor directly still does for
-        // callers/tests that need it.
+        // Fast path: one engine call for the whole document instead of one
+        // per field through JSONPopulator's visitor, which still runs for
+        // anything the engine cannot cross (EngineFastPathUnsupported).
         try {
             return engineSerializer().fastFromJson(this.modelManager, jsonObject, options);
         } catch (err) {

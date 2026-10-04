@@ -35,10 +35,10 @@ const debug = createDebug('concerto:JSONPopulator');
 
 /**
  * Whether the date and time fields of a string that already has the strict
- * `DateTime` format name a real instant (P5-24, BC-42, R1): `Date.parse`
- * rolls `2024-02-30` and `T24:00:00` over and rejects a leap second, so
- * reading the fields back out must give the same fields. The offset's own
- * range (hours up to 23, minutes up to 59) is `Date.parse`'s check.
+ * `DateTime` format name a real instant (BC-42): `Date.parse` rolls
+ * `2024-02-30` and `T24:00:00` over and rejects a leap second, so reading
+ * the fields back out must give the same fields. The offset's own range
+ * (hours up to 23, minutes up to 59) is `Date.parse`'s check.
  * @param {string} json a string matching the strict `DateTime` format
  * @returns {boolean} true when the fields name a real instant
  * @private
@@ -173,9 +173,10 @@ class JSONPopulator {
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
-            // BC-08 (R1): name the element. JSON.stringify of an introspection
+            // BC-08: name the element. JSON.stringify of an introspection
             // object (a scalar declaration, an enum value) meets the model
-            // manager again and threw V8's circular-structure TypeError (DV-010).
+            // manager again and threw V8's circular-structure TypeError
+            // (DV-010).
             const name = typeof thing?.getFullyQualifiedName === 'function' ? thing.getFullyQualifiedName() : JSON.stringify(thing);
             throw new Error(`Unrecognised element "${name}"`);
         }
@@ -227,13 +228,12 @@ class JSONPopulator {
 
         const objMap = new Map(Object.entries(jsonObj));
 
-        // P5-58 (BC-05, R1; DV-007): a relationship-typed value is read as a
+        // BC-05, DV-007: a relationship-typed value is read as a
         // relationship property is, not as an embedded concept.
         const relationship = getRelationshipMapValue(mapDeclaration);
 
         let map = new Map();
-        // P5-113: the map's URI values, read in one engine call on the first
-        // one (where its first `convertRelationship` used to run).
+        // The map's URI values, read in one engine call at the first one.
         let ids: (ResourceId | undefined)[] | undefined;
         let index = -1;
 
@@ -342,7 +342,6 @@ class JSONPopulator {
     }
 
     /**
-     *
      * @param {Field} field - the field of the item being converted
      * @param {Object} jsonItem - the JSON object of the item being converted
      * @param {Object} parameters - the parameters
@@ -402,10 +401,8 @@ class JSONPopulator {
         parameters.path ?? (parameters.path = new TypedStack('$'));
         const path = parameters.path?.stack.join('');
 
-        // P5-100 (E-2, M2): the coercion runs here, over the value TS already
-        // holds; it no longer crosses into the engine per primitive
-        // (`populatorConvertPrimitive`) before this switch, which keeps the
-        // R1 rules (BC-07, BC-10, BC-42).
+        // The coercion runs here, over the value TS already holds, with the
+        // BC-07, BC-10 and BC-42 rules.
         switch(field.getType()) {
         case 'DateTime': {
             if (json && typeof json === 'object' && typeof json.isBefore === 'function') {
@@ -413,12 +410,12 @@ class JSONPopulator {
             } else if (typeof json !== 'string') {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             } else if (!json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)) {
-                // P5-24 (BC-07, R1): the strict format only, whatever
-                // `strictQualifiedDateTimes` says; the flag now decides only
-                // whether `utcOffset` applies, as it did before.
+                // BC-07: the strict format only, whatever
+                // `strictQualifiedDateTimes` says; the flag decides only
+                // whether `utcOffset` applies.
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
             } else if (!isRealInstant(json)) {
-                // BC-42 (R1): an impossible date is not rolled over.
+                // BC-42: an impossible date is not rolled over.
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             } else if (this.strictQualifiedDateTimes) {
                 result = dayjs.utc(json);
@@ -434,8 +431,8 @@ class JSONPopulator {
         case 'Long': {
             const num = json;
             if (typeof num === 'number') {
-                // P5-51 (BC-10, R1; DV-012): `Math.trunc(n) !== n` alone
-                // passes `±Infinity`; a non-finite number is not an integer.
+                // BC-10, DV-012: `Math.trunc(n) !== n` alone passes
+                // `±Infinity`; a non-finite number is not an integer.
                 if (!Number.isFinite(num) || Math.trunc(num) !== num) {
                     throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
                 } else {
@@ -533,16 +530,17 @@ class JSONPopulator {
      * One relationship value (visitRelationshipDeclaration's non-array
      * branch): a URI string becomes a Relationship, and an object an embedded
      * resource when `acceptResourcesForRelationships` allows it. A
-     * relationship-typed map value is read here too (P5-58, BC-05).
+     * relationship-typed map value is read here too (BC-05).
      * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
      * @param {Object} jsonObj - the JSON value
      * @param {Object} parameters  - the parameter
      * @return {Object} the Relationship or the embedded resource
      * @private
      */
-    // The return type is written out (P5-89) so the declaration keeps the
+    // The return type is written out so the declaration keeps the
     // `Relationship | Resource` order it was inferred with: a public member
-    // that names `Resource` earlier in the build reorders an inferred union.
+    // that names `Resource` earlier in the build reorders an inferred
+    // union.
     convertRelationship(relationshipDeclaration: RelationshipDeclaration | RelationshipMapValue, jsonObj: unknown, parameters: JsonPopulatorParameters): Relationship | Resource {
         const { defaultNamespace, defaultType } = relationshipDefaults(relationshipDeclaration);
         if (typeof jsonObj === 'string') {
@@ -590,9 +588,8 @@ function relationshipDefaults(relationshipDeclaration: RelationshipDeclaration |
 }
 
 /**
- * A relationship-typed map's URI values, read in one engine call (P5-113,
- * accordproject/concerto-rust#480) with the defaults `convertRelationship`
- * reads each one with.
+ * A relationship-typed map's URI values, read in one engine call with the
+ * defaults `convertRelationship` reads each one with.
  * @param {RelationshipMapValue} relationship - the map's relationship value
  * @param {Map} objMap - the map's JSON entries
  * @return {Array} per entry, its ResourceId, or `undefined` for a value that

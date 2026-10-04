@@ -21,12 +21,12 @@ import type ModelFile from './introspect/modelfile';
 import { rust, engineViews } from './engineloader';
 import type { EngineBindings } from './engine/bindings';
 
-// P5-06: the other pure string-to-value members below cross into the engine
-// once per distinct argument rather than once per call (a model load calls
+// The other pure string-to-value members below cross into the engine once
+// per distinct argument rather than once per call (a model load calls
 // isSystemProperty/isValidIdentifier/getFullyQualifiedName for every
 // property of every declaration). Only string arguments are memoised, and
 // only a result the engine returned (a throw is never cached), so every
-// other call, and every error, goes to the engine exactly as before. Each
+// other call, and every error, goes to the engine. Each
 // member's memo is cleared once it reaches ENGINE_MEMO_LIMIT entries.
 const engineMemo: { [binding: string]: Map<string, unknown> } = {};
 const ENGINE_MEMO_LIMIT = 4096;
@@ -58,12 +58,12 @@ function memoisedEngineCall<B extends MemoisedBinding>(binding: B, key: string, 
     return result;
 }
 
-// P5-100 (F-4, M2; accordproject/concerto-rust#454): the members below that
-// only slice a string, or look one up in a fixed list, answer a string
-// argument here, with the engine's own semantics (concerto-rust
-// `model_util::short_name`, `namespace_of`, `PRIMITIVE_TYPES` and the
-// reserved property lists), rather than crossing into the engine for it.
-// Any other argument, and every error, still goes to the engine.
+// The members below that only slice a string, or look one up in a fixed
+// list, answer a string argument here, with the engine's own semantics
+// (concerto-rust `model_util::short_name`, `namespace_of`,
+// `PRIMITIVE_TYPES` and the reserved property lists), rather than crossing
+// into the engine for it. Any other argument, and every error, still goes
+// to the engine.
 const PRIMITIVE_TYPES = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
 const PRIVATE_RESERVED_PROPERTIES = [
     '$classDeclaration', '$namespace', '$type', '$modelManager', '$validator',
@@ -72,7 +72,7 @@ const PRIVATE_RESERVED_PROPERTIES = [
 const ASSIGNABLE_RESERVED_PROPERTIES = ['$identifier', '$timestamp'];
 
 /**
- * P5-106 (BC-52): `ModelUtil.isEnum`, `isMap` and `isScalar` resolve
+ * BC-52: `ModelUtil.isEnum`, `isMap` and `isScalar` resolve
  * `field.getParent().getModelFile().getType(field.getType())` in the
  * engine's arena, by the handle of that model file and the field's type
  * name (a Property, or a MapKeyType or MapValueType, whose parent is the
@@ -143,16 +143,15 @@ class ModelUtil {
         version?: string | null;
         versionParsed?: unknown;
     } {
-        // P5-20 (F4): the engine checks the version and returns its result
-        // packed into one string (concerto-wasm
-        // modelUtilParseNamespaceChecked), without calling back into JS.
-        // `versionParsed` is then built here, by semver.parse, which costs
-        // far less in JS than a callback across the boundary. Since BC-41
-        // (P5-38) the engine takes strict SemVer 2.0.0, which semver.parse
-        // accepts too, except where node-semver's own limits reject it (a
-        // component above Number.MAX_SAFE_INTEGER, or more than 256
-        // characters): `versionParsed` is then null, as the engine's own
-        // is (P5-38).
+        // The engine checks the version and returns its result packed into
+        // one string (concerto-wasm modelUtilParseNamespaceChecked),
+        // without calling back into JS. `versionParsed` is then built
+        // here, by semver.parse, which costs far less in JS than a
+        // callback across the boundary. Since BC-41 the engine takes
+        // strict SemVer 2.0.0, which semver.parse accepts too, except
+        // where node-semver's own limits reject it (a component above
+        // Number.MAX_SAFE_INTEGER, or more than 256 characters):
+        // `versionParsed` is then null, as the engine's own is.
         const packed = rust.modelUtilParseNamespaceChecked(ns, options) as string;
         const parts = packed.slice(1).split('@');
         if (packed[0] === 'N') {
@@ -198,15 +197,14 @@ class ModelUtil {
      * @private
      */
     static isAssignableTo(modelFile, typeName, property): any {
-        // P5-106 (BC-52): the type is resolved by the engine from its arena,
-        // by the handle of `modelFile` (engine/views.ts, "Arena handles of
-        // views"); a replaced `getType` or `getAllSuperTypeDeclarations`
-        // method is not called. The property's own type is still read
-        // through `getFullyQualifiedTypeName` (the serializer passes a
-        // relationship map value's stand-in), and a direct match or a
-        // primitive on either side is decided here, with no crossing.
-        // `typeName` is converted with `String()`, as the JS-object binding
-        // did.
+        // BC-52: the type is resolved by the engine from its arena, by the
+        // handle of `modelFile` (engine/views.ts, "Arena handles of views");
+        // a replaced `getType` or `getAllSuperTypeDeclarations` method is
+        // not called. The property's own type is still read through
+        // `getFullyQualifiedTypeName` (the serializer passes a relationship
+        // map value's stand-in), and a direct match or a primitive on either
+        // side is decided here, with no crossing. `typeName` is converted
+        // with `String()`, as the JS-object binding did.
         const propertyTypeName = property.getFullyQualifiedTypeName();
         const name = String(typeName);
         const isDirectMatch = name === propertyTypeName;
@@ -334,8 +332,8 @@ class ModelUtil {
     */
     static isValidMapKeyScalar(decl): any {
         // `decl?.isScalarDeclaration?.() && ...`: a nullish declaration is
-        // undefined. P5-106 (BC-52): any other declaration is answered by
-        // the engine from its arena, by the declaration's handle.
+        // undefined. BC-52: any other declaration is answered by the engine
+        // from its arena, by the declaration's handle.
         if (decl === null || decl === undefined) {
             return undefined;
         }

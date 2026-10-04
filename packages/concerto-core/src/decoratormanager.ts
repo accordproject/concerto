@@ -24,8 +24,8 @@ import type ModelFile from './introspect/modelfile';
 /* eslint-enable no-unused-vars */
 import { rust, engineViews } from './engineloader';
 
-// The engine bindings (`rust`) and the rust-mode view functions
-// (src/engine/views.ts) are typed by src/engine/bindings.d.ts (P5-84).
+// The engine bindings (`rust`) and views are typed by
+// src/engine/bindings.d.ts.
 
 const DCS_VERSION = '0.4.0';
 
@@ -97,15 +97,11 @@ concept DecoratorCommandSet {
  * Copies every own field of `source` onto `target`, recursing into matching
  * nested objects and arrays so nested references already held by a caller
  * (for example a DecoratorCommandSet an outer scope kept a reference to) end
- * up mutated in place rather than replaced. Not a DecoratorManager member on
- * purpose: it is an engine-shim implementation detail (used only in rust
- * mode, by `DecoratorManager.migrateTo` below) and must not appear in
- * DecoratorManager's public API (`migration/api-snapshot`) the way a
- * `static` method -- even one tagged `@private` in its jsdoc -- would. Used
- * because the WASM binding computes the migrated value but, unlike the
- * ts-mode body, does not mutate the JS object it was given: this reproduces
- * that in-place mutation so rust mode has the same observable effect on its
- * argument as ts mode.
+ * up mutated in place rather than replaced. Not a DecoratorManager member,
+ * so it stays out of the public API (`migration/api-snapshot`) as even a
+ * `@private` static would not. The binding computes the migrated value
+ * without mutating the JS object it was given; this mutates it in place, as
+ * TS 5.0.0's `migrateTo` did.
  * @param {*} target the object (or array) to mutate in place
  * @param {*} source the value to copy onto it
  * @returns {*} target
@@ -159,11 +155,9 @@ class DecoratorManager {
             DCS_MODEL,
             'decoratorcommands@0.3.0.cto'
         );
-        // The structural check only (src/dcs/mod.rs `validate`); the
-        // validationModelManager above is still built the TS way (CTO
-        // parsing is not ported) and returned unchanged. P5-27 (F6): the
-        // check runs against validationModelManager's own rustHandle, which
-        // mirrors its model files, instead of rebuilding them in Rust.
+        // The structural check only, on validationModelManager's own
+        // rustHandle, which mirrors its model files. validationModelManager
+        // is built from CTO in TS and returned unchanged.
         engineViews().decoratorManagerValidate(validationModelManager, decoratorCommandSet);
         return validationModelManager;
     }
@@ -191,7 +185,7 @@ class DecoratorManager {
      */
     static canMigrate(decoratorCommandSet, DCS_VERSION) {
         const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
-        // BC-41 (P5-38): a namespace version is strict SemVer 2.0.0, whose
+        // BC-41: a namespace version is strict SemVer 2.0.0, whose
         // components go up to 2^64-1, beyond node-semver's
         // Number.MAX_SAFE_INTEGER, so its major and minor (the first two
         // dot-separated parts, always plain digits) are compared exactly.
@@ -320,10 +314,8 @@ class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property, command) {
-        // Mutates a detached clone across the boundary; copy the result
-        // back onto `property` so callers that hold onto it (as every
-        // test does) see the same mutation the TS body used to make in
-        // place.
+        // The binding mutates a detached clone; the result is copied back
+        // onto `property`, which TS 5.0.0 mutated in place.
         Object.assign(property, rust.decoratorManagerExecutePropertyCommand(property, command));
     }
 

@@ -12,10 +12,7 @@
  * limitations under the License.
  */
 
-// P5-101 (E-14, accordproject/concerto-rust#455): the helpers the engine
-// codecs share (serializer-codec.ts, validate-resource.ts, ast-codec.ts and
-// wire.ts), where each kept its own copy, and the fast-path fallback signal
-// (E-11), defined once.
+// Helpers the engine codecs share, and the fast-path fallback signal.
 
 import { FAST_PATH_UNSUPPORTED, isFastPathUnsupported, optionalString } from '../engineutil';
 
@@ -23,18 +20,11 @@ import { FAST_PATH_UNSUPPORTED, isFastPathUnsupported, optionalString } from '..
 class EngineFastPathUnsupported extends Error {
 }
 
-// P5-43 (accordproject/concerto-rust#364): the brand the fast path's
-// callers test for (`isFastPathUnsupported`), instead of the class's
-// `constructor.name`, which a minifier renames (a production bundle without
-// `keepNames` would rethrow every EngineFastPathUnsupported instead of
-// falling back). A registered symbol, so a caller needs no reference to this
-// module (the public modules reach it only through `loadEngine`).
+// The brand callers test (`isFastPathUnsupported`) instead of the
+// minifier-renamed `constructor.name`; a registered symbol.
 Object.defineProperty(EngineFastPathUnsupported.prototype, FAST_PATH_UNSUPPORTED, { value: true });
 
-/**
- * @param {*} v value
- * @returns {boolean} duck-typed dayjs instance
- */
+/** Whether `v` is a duck-typed dayjs. */
 function isDayjsLike(v): boolean {
     return !!v && typeof v === 'object' &&
         typeof v.isValid === 'function' &&
@@ -43,10 +33,7 @@ function isDayjsLike(v): boolean {
         typeof v.valueOf === 'function';
 }
 
-/**
- * @param {*} v value
- * @returns {boolean} duck-typed Resource/ValidatedResource/Relationship
- */
+/** Whether `v` is a duck-typed Resource/ValidatedResource/Relationship. */
 function isTypedLike(v): boolean {
     return !!v && typeof v === 'object' &&
         typeof v.getFullyQualifiedType === 'function' &&
@@ -54,23 +41,12 @@ function isTypedLike(v): boolean {
         typeof v.$type === 'string';
 }
 
-// A UTF-16 code unit in D800-DFFF that is not half of a surrogate pair.
-// `JSON.stringify` writes one as a `\udXXX` escape, which serde_json (the
-// engine's JSON reader) rejects outright, and Rust strings cannot hold one
-// anyway (PORTING.md 3.1, DV-004).
+// A lone UTF-16 surrogate, which a Rust string cannot hold (DV-004).
 const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 
-/** Whether this runtime has `String.prototype.isWellFormed` (ES2024). */
 const hasIsWellFormed = typeof (String.prototype as any).isWellFormed === 'function';
 
-/**
- * Whether `s` holds a lone surrogate, which the engine cannot receive
- * unchanged. P5-16: `isWellFormed()` (Node 20+) is false exactly then, and
- * costs much less than the regular expression, which stays for older
- * runtimes.
- * @param {string} s the string
- * @return {boolean} true if it has one
- */
+/** Whether `s` holds a lone surrogate; `isWellFormed()` (Node 20+) is cheaper than the regex. */
 function hasLoneSurrogate(s: string): boolean {
     return hasIsWellFormed ? !(s as any).isWellFormed() : LONE_SURROGATE.test(s);
 }

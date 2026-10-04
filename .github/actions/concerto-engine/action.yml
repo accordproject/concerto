@@ -18,7 +18,9 @@ runs:
   steps:
     # The concerto-rust commit the engine is built from. Bump it (to a commit
     # of concerto-rust's integration branch, claude/tender-pascal-ocwf9q) when
-    # concerto-core needs a newer engine.
+    # concerto-core needs a newer engine. The guardrails' comment policy
+    # (rule 6) scans this checkout too, so the pin must also include the
+    # concerto-rust comment policy pass before a PR into main runs it.
     - name: Check out concerto-rust
       uses: actions/checkout@v4
       with:
