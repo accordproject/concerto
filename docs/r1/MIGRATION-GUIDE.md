@@ -23,7 +23,9 @@ JSON need only the Node.js upgrade. Check the following:
    `±HH:mm`?
 4. **Hand-built or tool-built ASTs.** Do you load JSON ASTs that the CTO parser
    did not write?
-5. **Search your code** for the options and APIs that changed:
+5. **Servers.** Do you build a new `ModelManager` per request or per tenant?
+   See [Servers and many managers](#servers-and-many-managers).
+6. **Search your code** for the options and APIs that changed:
 
 ```bash
 grep -rnE "strictQualifiedDateTimes|regExp *:|metamodelValidation|setCurrentTime" .
@@ -505,6 +507,77 @@ cannot see into. No production use was found for any of them.
     with a decorator factory builds its files eagerly.
 - **What to do:** call the getters (`getDeclarations()`, `getDecorators()`,
   `getValidator()`), and change models only through the `ModelManager`.
+
+---
+
+## Servers and many managers
+
+This is not a breaking change, but it changes how a server should use model
+managers. 5.x code that builds a new `ModelManager` for every request or
+tenant still works in R1, but it uses much more memory than in 5.x.
+
+### Fork one base manager
+
+- **Who:** servers and other long-running processes that build many
+  `ModelManager`s, for example one per request or per tenant, over a common
+  set of models.
+- **What to do:** build one base `ModelManager` with the shared or platform
+  models when the process starts. For each request or tenant, call
+  `base.fork()` and add the request's own models to the fork. A fork is
+  independent of its base: models added to, updated in or deleted from
+  either one never reach the other. `fork()` loads and validates nothing
+  again. It shares the base's model files with every fork instead of
+  copying them, and a fork starts with the base's warmed caches.
+
+```js
+const { ModelManager } = require('@accordproject/concerto-core');
+
+// Once, at start-up: the models every request needs.
+const base = new ModelManager({ strict: true });
+base.addCTOModel(platformCto, 'platform.cto');
+
+// Per request or tenant: fork, then add only what this request brings.
+function handle(request) {
+    const mm = base.fork();
+    mm.addCTOModel(request.cto, 'request.cto');
+    const resource = mm.getSerializer().fromJSON(request.instance);
+    // ... use mm and resource; just drop them when done.
+}
+```
+
+### Engine memory
+
+- **Engine memory is outside the JavaScript heap.** The engine keeps its
+  copy of every model in WebAssembly linear memory. V8's heap figures
+  (`heapUsed`, `heapTotal`) do not show it; it appears in RSS and under
+  `external`.
+- **It is freed when the garbage collector collects the `ModelManager`**,
+  through finalizers, not at a known point. There is no public `free()` or
+  `dispose()`, by design: drop your references to a manager and the engine
+  memory follows when the manager is collected.
+- **The process keeps its peak.** WebAssembly linear memory never shrinks.
+  Memory freed inside it is reused, but the process stays at the largest
+  size it ever reached.
+- **So many short-lived managers raise peak memory.** While managers wait to
+  be collected, each holds its own copy of the models, and the peak sets the
+  process's size from then on. A fork shares the base's model files, so
+  forks stay small. `filter()` also shares the model files it does not
+  change.
+
+In the P5-120 memory soak (64 concurrent requests for 1,200 s, on the
+conformance and synthetic-large model sets), compared with 5.0.0 building a
+new `ModelManager` per request:
+
+| Approach | Memory (RSS) | Over time |
+|---|---|---|
+| 5.0.0, new `ModelManager` per request | 204 MB and 288 MB | flat |
+| R1, `base.fork()` per request | 1.06-1.6× 5.0.0 | engine memory flat after warm-up, on both sets |
+| R1, new `ModelManager` per request | 2.5-3.3× 5.0.0 (518 MB and 941 MB) | mostly engine memory; occasional late steps |
+
+Fork was also the fastest of the three on the conformance set (1,073
+requests per second, against 708 for 5.0.0). These figures come from one
+machine; see the [P5-120 results](../../migration/bench/RESULTS.md#headline-p5-120)
+for the method, the tables and the charts.
 
 ---
 
