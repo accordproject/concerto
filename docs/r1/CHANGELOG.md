@@ -212,6 +212,13 @@ reason, who is affected and the upgrade step for each one.
   `getDirectSubclasses()` no longer call replaced `getType`, `getSuperType`
   or `getModelFiles` methods, and answer only for a `ModelFile` registered in
   its `ModelManager`. (BC-52)
+- **A `ModelManager` builds its metamodel copy (`metamodelModelFile`) at
+  first read, not in its constructor.** If the shared constant
+  `MetaModelUtil.metaModelAst` has been changed so that it is no longer a
+  valid model, the `IllegalModelException` is thrown at the first read of
+  `metamodelModelFile` (in the constructor only with `addMetamodel`), and
+  `new ModelManager()` no longer throws. Changing this constant is not
+  supported. (BC-55)
 
 ### Lazy views and internals
 

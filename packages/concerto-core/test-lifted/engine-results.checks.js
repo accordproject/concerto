@@ -26,10 +26,16 @@
  *   imports, with and without BC-19's shape check. (P5-103 removed the
  *   checks of the object result, which P5-101 had already removed from the
  *   engine.)
- * - The remembered text of the metamodel copy every `new ModelManager()`
- *   builds from one shared constant AST (engine/views-staging.ts `stableAstText`):
- *   a change to that constant is seen by the next manager, which checks
- *   and loads the changed AST, and a change back is accepted again.
+ * - The remembered text of the metamodel copy built from one shared
+ *   constant AST (engine/views-staging.ts `stableAstText`): a change to
+ *   that constant is seen by the next copy built, which checks and loads
+ *   the changed AST, and a change back is accepted again. Since P5-124
+ *   (accordproject/concerto-rust#501, BC-55) a manager builds its copy
+ *   (`metamodelModelFile`) at its first read, not in its constructor, so
+ *   `new ModelManager()` no longer throws for a changed constant; the read
+ *   does (P594-MEMO-002), and `addMetamodel`, which reads it in the
+ *   constructor, still throws there. v5.0.0's outcomes are the two
+ *   checks' `reference`.
  * - `declarations` and `localTypes`, which P5-100 (E-13,
  *   accordproject/concerto-rust#454) made ModelFile.prototype accessors
  *   (`installLazyField`), like the other lazy parts: the same declarations
@@ -40,7 +46,8 @@
  *
  * Only public members are used. `expect` is the frozen v5.0.0 reference's
  * outcome, which src matches, except for the two P594-FIELDS checks, whose
- * `reference` is v5.0.0's (BC-23(b)). Run by fallbacks.spec.js.
+ * `reference` is v5.0.0's (BC-23(b)), and the two P594-MEMO checks, whose
+ * `reference` is v5.0.0's (BC-55). Run by fallbacks.spec.js.
  */
 
 const MM = 'concerto.metamodel@1.0.0';
@@ -233,7 +240,7 @@ module.exports = [
     },
     {
         id: 'P594-MEMO-001',
-        covers: 'P5-94: a change to the shared metamodel constant is seen by the next new ModelManager(), and a change back is accepted again',
+        covers: 'P5-94, P5-124 (BC-55): a change to the shared metamodel constant is seen by the next metamodel copy built (under addMetamodel, in the constructor), not by a plain new ModelManager(), and a change back is accepted again',
         run: (core) => {
             const ast = metaModelAst(core);
             const declaration = ast.declarations[0];
@@ -256,8 +263,38 @@ module.exports = [
                 .getAllDeclarations()[0].getName()));
             return outcomes;
         },
-        expect: { ok: [['ok', 'built'], ['throws', 'IllegalModelException'], ['throws', 'IllegalModelException'], ['ok', 'built'],
+        expect: { ok: [['ok', 'built'], ['ok', 'built'], ['ok', 'built'], ['ok', 'built'],
             ['throws', 'IllegalModelException'], ['ok', 'Position']] },
+        reference: { ok: [['ok', 'built'], ['throws', 'IllegalModelException'], ['throws', 'IllegalModelException'], ['ok', 'built'],
+            ['throws', 'IllegalModelException'], ['ok', 'Position']] },
+    },
+    {
+        id: 'P594-MEMO-002',
+        covers: 'P5-124 (BC-55): a change to the shared metamodel constant surfaces at the first read of a manager\'s metamodelModelFile (and again at the next read), also for a manager built before the change; a change back is accepted again',
+        run: (core) => {
+            const ast = metaModelAst(core);
+            const declaration = ast.declarations[0];
+            const name = declaration.name;
+            const outcomes = [];
+            try {
+                const before = new core.ModelManager();
+                declaration.name = 42;
+                const during = probe(() => new core.ModelManager());
+                outcomes.push(during[0] === 'ok' ? ['ok', 'built'] : during);
+                if (during[0] === 'ok') {
+                    outcomes.push(probe(() => during[1].metamodelModelFile.getNamespace()));
+                    outcomes.push(probe(() => during[1].metamodelModelFile.getNamespace()));
+                }
+                outcomes.push(probe(() => before.metamodelModelFile.getNamespace()));
+            } finally {
+                declaration.name = name;
+            }
+            outcomes.push(probe(() => new core.ModelManager().metamodelModelFile.getNamespace()));
+            return outcomes;
+        },
+        expect: { ok: [['ok', 'built'], ['throws', 'IllegalModelException'], ['throws', 'IllegalModelException'],
+            ['throws', 'IllegalModelException'], ['ok', MM]] },
+        reference: { ok: [['throws', 'IllegalModelException'], ['ok', MM], ['ok', MM]] },
     },
     {
         id: 'P594-FIELDS-001',

@@ -468,6 +468,16 @@ cannot see into. No production use was found for any of them.
 
 ## Lazy views and internals
 
+### The metamodel copy is built at first read (BC-55)
+
+- **Who:** code that changes the shared constant `MetaModelUtil.metaModelAst`
+  and relies on `new ModelManager()` throwing for it.
+- **What changes:** a manager builds `metamodelModelFile` when it is first
+  read (with `addMetamodel`, still in the constructor), so the
+  `IllegalModelException` for an invalid constant is thrown at that read,
+  also for a manager built before the change.
+- **What to do:** do not change `MetaModelUtil.metaModelAst`; copy it first.
+
 ### Lazy model views (BC-23)
 
 - **Why:** building every declaration, property, decorator and validator

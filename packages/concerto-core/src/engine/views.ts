@@ -70,6 +70,7 @@ export {
 
 export {
     adoptSharedView,
+    adoptSystemView,
     applyStagedFileHeader,
     applyStagedHeaders,
     checkAstShape,
@@ -81,6 +82,7 @@ export {
     recordImportNames,
     recordedImportNames,
     stageModelFile,
+    systemViewHeader,
     updateExternalStaged,
     updateStaged,
     validateAndCommitStaged,
