@@ -216,8 +216,9 @@ class ModelFile extends Decorated {
 
     /**
      * A new ModelFile of `manager` that is a view of `source`, a model file
-     * another manager already loaded: the same AST object and file name,
-     * with `definitions`, and the same header (namespace, version, imports),
+     * another manager already loaded: the same AST object (or the copy
+     * `ast`) and file name, with `definitions`, and the same header
+     * (namespace, version, imports),
      * copied from `source` without an engine call. The engine-side file is
      * the one `source`'s manager holds, shared: `stage` is its stage in
      * `manager`'s rustHandle (`BaseModelManager.filter`, which registers it
@@ -231,15 +232,17 @@ class ModelFile extends Decorated {
      * @param {string} [definitions] the view's definitions
      * @param {object} [stage] the shared file's stage in manager's rustHandle
      * @param {object} [committed] the rustHandle that holds the shared file
+     * @param {object} [ast] the view's AST, an equal copy of `source`'s
+     * (`filter`); `source`'s own AST object when omitted (`fork`, BC-23)
      * @return {ModelFile} the view
      * @private
      * @internal
      */
     static _sharedView(manager: BaseModelManager, source: ModelFile, definitions: string | null | undefined,
-        stage?: { handle: object; id: number }, committed?: object): ModelFile {
+        stage?: { handle: object; id: number }, committed?: object, ast?: AstNode): ModelFile {
         sharedViewSource = { source, stage, committed };
         try {
-            return new ModelFile(manager, source.ast, definitions, source.fileName);
+            return new ModelFile(manager, ast ?? source.ast, definitions, source.fileName);
         } finally {
             sharedViewSource = null;
         }
@@ -1215,7 +1218,15 @@ class ModelFile extends Decorated {
                 }
                 const filtered = JSON.parse(result);
                 if (filtered.stage !== undefined) {
-                    return ModelFile._sharedView(modelManager, this, undefined, { handle: target, id: filtered.stage });
+                    // As TS 5.0.0's filtered file, the view has its own
+                    // shallow copy of the AST (a new declarations array and
+                    // copies of the imports), not this file's AST object.
+                    const ast = {
+                        ...this.ast,
+                        declarations: this.ast.declarations.slice(),
+                        imports: this.ast.imports?.map(imp => ({...imp})),
+                    };
+                    return ModelFile._sharedView(modelManager, this, undefined, { handle: target, id: filtered.stage }, undefined, ast);
                 }
                 return new ModelFile(modelManager, filtered.ast, undefined, this.fileName);
             }

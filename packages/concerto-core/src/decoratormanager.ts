@@ -94,6 +94,20 @@ concept DecoratorCommandSet {
 `;
 
 /**
+ * Intersection of two string arrays
+ * @param {string[]} a the first array
+ * @param {string[]} b the second array
+ * @returns {string[]} returns the intersection of a and b (i.e. an
+ * array of the elements they have in common)
+ */
+function intersect(a, b) {
+    const setA = new Set(a);
+    const setB = new Set(b);
+    const intersection = new Set([...setA].filter((x) => setB.has(x)));
+    return Array.from(intersection);
+}
+
+/**
  * Copies every own field of `source` onto `target`, recursing into matching
  * nested objects and arrays so nested references already held by a caller
  * (for example a DecoratorCommandSet an outer scope kept a reference to) end
@@ -303,7 +317,11 @@ class DecoratorManager {
      * the test and values arrays is not empty (i.e. they have values in common)
      */
     static falsyOrEqual(test, values): any {
-        return rust.decoratorManagerFalsyOrEqual(test, values);
+        return Array.isArray(test)
+            ? intersect(test, values).length > 0
+            : test
+                ? values.includes(test)
+                : true;
     }
 
     /**

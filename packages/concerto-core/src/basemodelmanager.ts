@@ -1531,14 +1531,12 @@ class BaseModelManager {
      */
     derivesFrom(fqt1, fqt2): boolean {
         // The binding's `&str` parameters cannot take a non-string (a JS
-        // non-string traps the engine). A non-string
-        // `fqt1` throws what `getType` throws for it; a non-string `fqt2`
-        // is no type's name, so the answer is false once `fqt1` is found.
-        if (typeof fqt2 !== 'string') {
-            this.getType(fqt1);
-            return false;
-        }
-        return this.rustHandle.derivesFrom(typeNameArgument(fqt1), fqt2);
+        // non-string traps the engine). A non-string `fqt1` throws what
+        // `getType` throws for it. A non-string `fqt2` is no type's name: as
+        // TS's walk, the answer is false, unless the walk of `fqt1`'s super
+        // types throws, so the engine walks it against '', which no
+        // declaration is named (as `isAssignableTo` does).
+        return this.rustHandle.derivesFrom(typeNameArgument(fqt1), typeof fqt2 === 'string' ? fqt2 : '');
     }
 
     /**
@@ -1567,12 +1565,15 @@ class BaseModelManager {
      */
     isAssignableTo(fqn: string, baseFqn: string): boolean {
         // The binding's `&str` parameters cannot take a non-string (a JS
-        // non-string traps the engine). TS 5.0.0 answered false for any
-        // non-string argument.
-        if (typeof fqn !== 'string' || typeof baseFqn !== 'string') {
+        // non-string traps the engine). TS 5.0.0 answered false for a
+        // non-string `fqn` (`getType` throws, and is caught). A non-string
+        // `baseFqn` is no type's name: as TS's walk, the answer is false,
+        // unless the walk of `fqn`'s super types throws, so the engine walks
+        // it against '', which no declaration is named.
+        if (typeof fqn !== 'string') {
             return false;
         }
-        return this.rustHandle.isAssignableTo(fqn, baseFqn);
+        return this.rustHandle.isAssignableTo(fqn, typeof baseFqn === 'string' ? baseFqn : '');
     }
 
     /**

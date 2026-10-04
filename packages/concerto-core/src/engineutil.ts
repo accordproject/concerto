@@ -32,8 +32,10 @@ export const FAST_PATH_UNSUPPORTED: unique symbol = Symbol.for('@accordproject/c
 /**
  * Whether `err` tells a fast path's caller to run its TS path instead: an
  * `EngineFastPathUnsupported`, or an engine error flagged the same way. The
- * one test every caller uses, so the decision never depends on an error's
- * message text (error parity lets messages change).
+ * test for an error the engine may have thrown, so the decision never
+ * depends on an error's message text (error parity lets messages change);
+ * a caller that catches only its own internal throw may test
+ * `instanceof EngineFastPathUnsupported` instead.
  * @param {*} err the error caught
  * @return {boolean} true to fall back
  * @internal

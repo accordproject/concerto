@@ -38,6 +38,8 @@ interface ErrorPayload {
     needsModelFile?: boolean;
     // The wire codec could not carry the value: the caller runs its TS path.
     fastPathUnsupported?: boolean;
+    // An error of `validateAst`'s metamodel check (`EngineErrorFlags`).
+    metamodelCheck?: boolean;
 }
 
 /** The codes of BC-19's AST shape check (with BC-17, BC-20), all `IllegalModelException`s. */
@@ -56,7 +58,7 @@ interface EngineErrorFlags {
     unreadableAst?: boolean;
     /** An error of BC-19's AST shape check. */
     astShape?: boolean;
-    /** An error of `validateAst`'s metamodel check, set by the engine. */
+    /** An error of `validateAst`'s metamodel check, from the engine's payload. */
     metamodelCheck?: boolean;
 }
 
@@ -107,6 +109,9 @@ function makeError(payload: ErrorPayload): Error {
     // Non-enumerable, so the exception's enumerable shape is unchanged.
     if (Array.isArray(payload.details)) {
         Object.defineProperty(err, 'details', { value: payload.details, enumerable: false, writable: true, configurable: true });
+    }
+    if (payload.metamodelCheck === true) {
+        setInternalFlag(err, 'metamodelCheck', true);
     }
     // Branded, so no caller decides by the message text.
     if (payload.fastPathUnsupported === true) {
