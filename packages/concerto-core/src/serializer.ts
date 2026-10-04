@@ -34,6 +34,32 @@ import type { SerializerOptions } from './types';
 import type { JsonPopulatorParameters } from './serializer/jsonpopulator';
 import type Resource from './model/resource';
 /* eslint-enable no-unused-vars */
+import { engineSerializer } from './engineloader';
+import { isFastPathUnsupported } from './engineutil';
+
+// BC-07: `DateTime` strings are strict whatever `strictQualifiedDateTimes`
+// says, so an explicit `false` opens no lenient path. It is ignored, with
+// one warning per process.
+let lenientDateTimesWarned = false;
+
+/**
+ * Warns, once per process, that `strictQualifiedDateTimes: false` is
+ * ignored.
+ * @private
+ */
+function warnLenientDateTimesIgnored() {
+    if (lenientDateTimesWarned) {
+        return;
+    }
+    lenientDateTimesWarned = true;
+    /* istanbul ignore else: process.emitWarning is Node's */
+    if (typeof process !== 'undefined' && typeof process.emitWarning === 'function') {
+        process.emitWarning(
+            'strictQualifiedDateTimes: false is ignored: DateTime values must be ISO 8601 date-times with an offset (YYYY-MM-DDTHH:mm:ss[.SSS] then Z or \u00b1HH:mm)',
+            { type: 'Warning', code: 'concerto-strict-datetime' }
+        );
+    }
+}
 
 /**
  * Serialize Resources instances to/from various formats for long-term storage
@@ -102,6 +128,20 @@ class Serializer {
             throw new Error(Globalize.formatMessage('serializer-tojson-notcobject'));
         }
 
+        // Fast path: one engine call for the whole document instead of one
+        // per field through the visitors, which still run for anything the
+        // engine cannot cross (EngineFastPathUnsupported: a cycle or shared
+        // reference, a value the wire codec cannot carry). The options are
+        // merged once, for both paths.
+        options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
+        try {
+            return engineSerializer().fastToJson(this.modelManager, resource, options);
+        } catch (err) {
+            if (!isFastPathUnsupported(err)) {
+                throw err;
+            }
+        }
+
         const parameters = {
             stack: new TypedStack(resource),
             modelManager: this.modelManager,
@@ -111,7 +151,6 @@ class Serializer {
         const classDeclaration = this.modelManager.getType( resource.getFullyQualifiedType() );
 
         // validate the resource against the model
-        options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
         if(options.validate) {
             const validator = new ResourceValidator(options);
             classDeclaration.accept(validator, parameters);
@@ -154,6 +193,20 @@ class Serializer {
     fromJSON(jsonObject, options?) {
         // set default options
         options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
+        if (options.strictQualifiedDateTimes === false) {
+            warnLenientDateTimesIgnored();
+        }
+
+        // Fast path: one engine call for the whole document instead of one
+        // per field through JSONPopulator's visitor, which still runs for
+        // anything the engine cannot cross (EngineFastPathUnsupported).
+        try {
+            return engineSerializer().fastFromJson(this.modelManager, jsonObject, options);
+        } catch (err) {
+            if (!isFastPathUnsupported(err)) {
+                throw err;
+            }
+        }
 
         if(!jsonObject.$class) {
             throw new Error('Invalid JSON data. Does not contain a $class type identifier.');

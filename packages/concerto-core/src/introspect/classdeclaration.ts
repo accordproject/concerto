@@ -19,15 +19,36 @@ import EnumValueDeclaration from './enumvaluedeclaration';
 import Field from './field';
 import Globalize from '../globalize';
 import IllegalModelException from './illegalmodelexception';
-import Introspector from './introspector';
 import RelationshipDeclaration from './relationshipdeclaration';
 import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type Property from './property';
+import type Resource from '../model/resource';
+import type { ValidateInstanceOptions, ValidationResult } from '../types';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
+import { rust, engineValidateInstance, engineViews } from '../engineloader';
+
+/**
+ * The declaration kind a metamodel `$class` names, as the engine's
+ * `ClassDeclaration::is_kind` compares it: whatever follows the last `.`.
+ * A pure predicate over a string the view already holds, so it runs here
+ * rather than crossing into the engine on every call. A missing or
+ * non-string `$class` (a declaration built from a stub AST with
+ * `metamodelValidation: false`) gives `''`, which matches no kind, so
+ * `isAsset()` and its siblings return false as the TS string checks did.
+ * @param {string} type - the declaration's `$class` (`this.type`)
+ * @return {string} its short name
+ * @private
+ */
+function declarationKindOf(type: string): string {
+    if (typeof type !== 'string') {
+        return '';
+    }
+    return type.substring(type.lastIndexOf('.') + 1);
+}
 
 /**
  * ClassDeclaration defines the structure (model/schema) of composite data.
@@ -82,20 +103,27 @@ class ClassDeclaration extends Declaration {
             this.abstract = true;
         }
 
-        if (this.ast.superType) {
-            this.superType = this.ast.superType.name;
-        }
-        else if(!(this.modelFile.isSystemModelFile() && this.name === 'Concept')) {
-            this.superType = 'Concept';
-        }
+        // The superType/idField decision below does not depend on the
+        // ast.properties loop that follows, so it is made once, up front.
+        let shouldAddIdentifierField = false;
+        let shouldAddTimestampField = false;
 
-        if (this.ast.identified) {
-            if (this.ast.identified.$class === `${MetaModelNamespace}.IdentifiedBy`) {
-                this.idField = this.ast.identified.name;
-            } else {
-                this.idField = '$identifier';
-                this.addIdentifierField();
-            }
+        // The `classDeclarationProcess` binding, read from the file's
+        // view snapshot while its declarations are built
+        // (engine/views.ts).
+        const decision = engineViews().classDeclarationProcess(this) as {
+            superType: string | null;
+            idField: string | null;
+            addIdentifierField: boolean;
+            addTimestampField: boolean;
+        };
+        this.superType = decision.superType;
+        this.idField = decision.idField;
+        shouldAddIdentifierField = decision.addIdentifierField;
+        shouldAddTimestampField = decision.addTimestampField;
+
+        if (shouldAddIdentifierField) {
+            this.addIdentifierField();
         }
 
         if (!Array.isArray(this.ast.properties)) {
@@ -134,7 +162,7 @@ class ClassDeclaration extends Declaration {
             }
         }
 
-        if (this.fqn === 'concerto@1.0.0.Transaction' || this.fqn === 'concerto@1.0.0.Event') {
+        if (shouldAddTimestampField) {
             this.addTimestampField();
         }
     }
@@ -167,30 +195,7 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration} The super type, or null if non specified.
      */
     _resolveSuperType(): ClassDeclaration | null {
-        if (!this.superType) {
-            return null;
-        }
-        // Clear out any old resolved super types.
-        this.superTypeDeclaration = null;
-        let classDecl: ClassDeclaration;
-        if (this.getModelFile().isImportedType(this.superType)) {
-            let fqnSuper = this.getModelFile().resolveImport(this.superType);
-            classDecl = this.modelFile.getModelManager().getType(fqnSuper);
-        } else {
-            classDecl = this.getModelFile().getType(this.superType);
-        }
-
-        if (!classDecl) {
-            throw new IllegalModelException('Could not find super type ' + this.superType, this.modelFile, this.ast.location);
-        }
-
-        // if super type is not a concept, then check that this type and the super type
-        // are of the same type. E.g. an asset cannot extend a participant
-        if (classDecl.declarationKind() !== 'ConceptDeclaration' && this.declarationKind() !== classDecl.declarationKind()) {
-            throw new IllegalModelException(`${this.declarationKind()} (${this.getName()}) cannot extend ${classDecl.declarationKind()} (${classDecl.getName()})`, this.modelFile, this.ast.location);
-        }
-        this.superTypeDeclaration = classDecl;
-        return classDecl;
+        return rust.classDeclarationResolveSuperType(this) as ClassDeclaration | null;
     }
 
     /**
@@ -252,16 +257,8 @@ class ClassDeclaration extends Declaration {
                 if(this.superType) {
                     const superType = this.getModelFile().getType(this.superType);
                     if (superType && superType.isIdentified() ) {
-                        if(this.isSystemIdentified()) {
-                            // check that the super type is also system identified
-                            if(!superType.isSystemIdentified()) {
-                                throw new IllegalModelException(`Super class ${superType.getFullyQualifiedName()} has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
-                            }
-                        }
-                        else {
-                            if(superType.isExplicitlyIdentified()) {
-                                throw new IllegalModelException(`Super class ${superType.getFullyQualifiedName()} has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
-                            }
+                        if (rust.classDeclarationIdentifierRedeclareConflict(this.isSystemIdentified(), superType.isSystemIdentified(), superType.isExplicitlyIdentified())) {
+                            throw new IllegalModelException(`Super class ${superType.getFullyQualifiedName()} has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
                         }
                     }
                 }
@@ -347,25 +344,11 @@ class ClassDeclaration extends Declaration {
      * @return {string} the name of the id field for this class or null if it does not exist
      */
     getIdentifierFieldName(): string | null {
-        if (this.idField) {
-            return this.idField;
-        } else {
-            const superType = this.getSuperType();
-            if (superType) {
-                // we first check our own modelfile, as we may be called from validate
-                // in which case our model file has not yet been added to the model modelManager
-                let classDecl = this.getModelFile().getLocalType(superType);
-
-                // not a local type, so we try the model manager, which throws
-                // if the super type cannot be resolved
-                if (!classDecl) {
-                    classDecl = this.modelFile.getModelManager().getType(superType);
-                }
-                return classDecl!.getIdentifierFieldName();
-            } else {
-                return null;
-            }
-        }
+        // The whole super type walk runs in one engine call, and the answer
+        // is memoised per view until the models change (engine/views.ts).
+        // BC-50: the walk inlines the ClassDeclaration methods it reaches,
+        // so replacing them at runtime does not change the answer.
+        return engineViews().classDeclarationGetIdentifierFieldName(this) as string | null;
     }
 
     /**
@@ -403,12 +386,7 @@ class ClassDeclaration extends Declaration {
      * @return {string} the FQN name of the super type or null
      */
     getSuperType(): string | null {
-        const superTypeDeclaration = this.getSuperTypeDeclaration();
-        if (superTypeDeclaration) {
-            return superTypeDeclaration.getFullyQualifiedName();
-        } else {
-            return null;
-        }
+        return rust.classDeclarationGetSuperType(this) as string | null;
     }
 
     /**
@@ -416,16 +394,7 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration} the super type declaration, or null if there is no super type.
      */
     getSuperTypeDeclaration(): ClassDeclaration | null {
-        if (!this.superType) {
-            // No super type.
-            return null;
-        } else if (!this.superTypeDeclaration) {
-            // Super type that hasn't been resolved yet.
-            return this._resolveSuperType();
-        } else {
-            // Resolved super type.
-            return this.superTypeDeclaration;
-        }
+        return rust.classDeclarationGetSuperTypeDeclaration(this) as ClassDeclaration | null;
     }
 
     /**
@@ -433,37 +402,17 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} subclass declarations.
      */
     getAssignableClassDeclarations(): ClassDeclaration[] {
-        const results = new Set<ClassDeclaration>();
-        const modelManager = this.getModelFile().getModelManager();
-        const introspector = new Introspector(modelManager);
-        const allClassDeclarations = introspector.getClassDeclarations();
-        const subclassMap = new Map();
-
-        // Build map of all direct subclasses relationships
-        allClassDeclarations.forEach((declaration) => {
-            const superType = declaration.getSuperType();
-            if (superType) {
-                const subclasses = subclassMap.get(superType) || new Set();
-                subclasses.add(declaration);
-                subclassMap.set(superType, subclasses);
-            }
-        });
-
-        // Recursive function to collect all direct and indirect subclasses of a given (set) of base classes.
-        const collectSubclasses = (superclasses) => {
-            superclasses.forEach((declaration) => {
-                results.add(declaration);
-                const superType = declaration.getFullyQualifiedName();
-                const subclasses = subclassMap.get(superType);
-                if (subclasses) {
-                    collectSubclasses(subclasses);
-                }
-            });
-        };
-
-        collectSubclasses([this]);
-
-        return Array.from(results);
+        // BC-52: answered by the engine from its arena and its cached
+        // subclass map, by this declaration's handle, as fully
+        // qualified names (this declaration's first); a replaced
+        // `getSuperType` or `getModelFiles` method is not called.
+        const views = engineViews();
+        const ref = views.declarationArenaRef(this);
+        if (ref === undefined) {
+            throw views.notInArena('ClassDeclaration.getAssignableClassDeclarations');
+        }
+        const names = ref.handle.classDeclarationGetAssignableClassDeclarations(ref.id);
+        return [this, ...views.declarationViews(this.modelFile.modelManager, names.slice(1))];
     }
 
     /**
@@ -471,28 +420,13 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} direct subclass declarations.
      */
     getDirectSubclasses(): ClassDeclaration[] {
-        const modelManager = this.getModelFile().getModelManager();
-        const introspector = new Introspector(modelManager);
-        const allClassDeclarations = introspector.getClassDeclarations();
-        const subclassMap = new Map();
-
-        // Build map of all direct subclasses relationships
-        allClassDeclarations.forEach((declaration) => {
-            const superType = declaration.getSuperType();
-            if (superType) {
-                const subclasses = subclassMap.get(superType) || new Set();
-                subclasses.add(declaration);
-                subclassMap.set(superType, subclasses);
-            }
-        });
-
-        const superType = this.getFullyQualifiedName();
-        const subclasses = subclassMap.get(superType);
-
-        if (subclasses) {
-            return Array.from(subclasses);
+        // BC-52: as `getAssignableClassDeclarations`.
+        const views = engineViews();
+        const ref = views.declarationArenaRef(this);
+        if (ref === undefined) {
+            throw views.notInArena('ClassDeclaration.getDirectSubclasses');
         }
-        return [];
+        return views.declarationViews(this.modelFile.modelManager, ref.handle.classDeclarationGetDirectSubclasses(ref.id));
     }
 
     /**
@@ -500,13 +434,7 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} super-type declarations.
      */
     getAllSuperTypeDeclarations(): ClassDeclaration[] {
-        const results: ClassDeclaration[] = [];
-        for (let type: ClassDeclaration | null = this;
-            (type = type.getSuperTypeDeclaration());) {
-            results.push(type);
-        }
-
-        return results;
+        return rust.classDeclarationGetAllSuperTypeDeclarations(this) as ClassDeclaration[];
     }
 
     /**
@@ -517,20 +445,42 @@ class ClassDeclaration extends Declaration {
      * @return {Property} the field, or null if it does not exist
      */
     getProperty(name: string): Property | null {
-        let result = this.getOwnProperty(name);
-        let classDecl: ClassDeclaration;
+        // The `classDeclarationGetProperty` binding, answered from the
+        // view's cached property list when it has one (engine/views.ts).
+        return engineViews().classDeclarationGetProperty(this, name) as Property | null;
+    }
 
-        if (result === null && this.superType !== null) {
-            if (this.getModelFile().isImportedType(this.superType)) {
-                let fqnSuper = this.getModelFile().resolveImport(this.superType);
-                classDecl = this.modelFile.getModelManager().getType(fqnSuper);
-            } else {
-                classDecl = this.getModelFile().getType(this.superType);
-            }
-            result = classDecl.getProperty(name);
-        }
+    /**
+     * Validates an instance as this type (accordproject/concerto#1239),
+     * without building a Resource: its own `$class` must be this type or a
+     * subtype of it, and an instance with no `$class` is read as this type.
+     * The instance is valid exactly when {@link Serializer#fromJSON} (with the
+     * same options) would accept it.
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {ValidationResult} `{ valid: true, resource, warnings }`, the
+     * resource being built when first read (or `null` with `hydrate: false`),
+     * or `{ valid: false, resource: null, errors, warnings }`, the first
+     * error being the one {@link ClassDeclaration#validateInstanceOrThrow}
+     * throws
+     */
+    validateInstance(json: object | string, options?: ValidateInstanceOptions): ValidationResult<Resource> {
+        return engineValidateInstance().validateInstance(this.modelFile.getModelManager(), json, options, this.getFullyQualifiedName());
+    }
 
-        return result;
+    /**
+     * Validates an instance as {@link ClassDeclaration#validateInstance}
+     * does, and returns it as a Resource (accordproject/concerto#1239).
+     * @param {object|string} json the instance, as a JSON object or its JSON text
+     * @param {ValidateInstanceOptions} [options] the options
+     * @return {Resource|null} the resource, or `null` with `hydrate: false`
+     * @throws {ValidationException|TypeNotFoundException|Error} what
+     * {@link Serializer#fromJSON} throws for the instance, with its
+     * diagnostics as `details`; a ValidationException when its `$class` is
+     * not this type or a subtype of it
+     */
+    validateInstanceOrThrow(json: object | string, options?: ValidateInstanceOptions): Resource | null {
+        return engineValidateInstance().validateInstanceOrThrow(this.modelFile.getModelManager(), json, options, this.getFullyQualifiedName());
     }
 
     /**
@@ -539,28 +489,9 @@ class ClassDeclaration extends Declaration {
      * @return {Property[]} the array of fields
      */
     getProperties(): Property[] {
-        let result = this.getOwnProperties();
-        let classDecl: ClassDeclaration;
-        if (this.superType !== null) {
-            if (this.getModelFile().isImportedType(this.superType)) {
-                let fqnSuper = this.getModelFile().resolveImport(this.superType);
-                classDecl = this.modelFile.getModelManager().getType(fqnSuper);
-            } else {
-                classDecl = this.getModelFile().getType(this.superType);
-            }
-
-            if (!classDecl) {
-                throw new IllegalModelException('Could not find super type ' + this.superType, this.modelFile, this.ast.location);
-            }
-
-            // go get the fields from the super type
-            // Note: this allows addition of an $identifier field from a supertype
-            // even if this type is explicitly identified.
-            // We allow this because it allows normalization of identifier lookup without the model present
-            result = result.concat(classDecl.getProperties());
-        }
-
-        return result;
+        // The `classDeclarationGetProperties` binding, cached per view
+        // (engine/views.ts).
+        return engineViews().classDeclarationGetProperties(this) as Property[];
     }
 
     /**
@@ -570,35 +501,7 @@ class ClassDeclaration extends Declaration {
      * @throws {IllegalModelException} if the property path is invalid or the property does not exist
      */
     getNestedProperty(propertyPath: string): Property {
-
-        const propertyNames = propertyPath.split('.');
-        let classDeclaration: ClassDeclaration = this;
-        // propertyPath.split() always yields at least one name, so the loop below
-        // either assigns result or throws
-        let result!: Property;
-
-        for (let n = 0; n < propertyNames.length; n++) {
-
-            // get the nth property
-            const property = classDeclaration.getProperty(propertyNames[n]);
-
-            if (property === null) {
-                throw new IllegalModelException('Property ' + propertyNames[n] + ' does not exist on ' + classDeclaration.getFullyQualifiedName(), this.modelFile, this.ast.location);
-            }
-            result = property;
-
-            // not the last element, get the class of the element
-            if (n < propertyNames.length - 1) {
-                if (result.isPrimitive() || result.isTypeEnum()) {
-                    throw new Error('Property ' + propertyNames[n] + ' is a primitive or enum. Invalid property path: ' + propertyPath);
-                } else {
-                    // get the nested type, this throws if the type is missing or if the type is an enum
-                    classDeclaration = classDeclaration.getModelFile().getModelManager().getType(result.getFullyQualifiedTypeName());
-                }
-            }
-        }
-
-        return result;
+        return rust.classDeclarationGetNestedProperty(this, propertyPath) as Property;
     }
 
     /**
@@ -606,11 +509,12 @@ class ClassDeclaration extends Declaration {
      * @return {String} the string representation of the class
      */
     toString(): string {
-        let superType = '';
-        if (this.superType) {
-            superType = ' super=' + this.superType;
-        }
-        return 'ClassDeclaration {id=' + this.getFullyQualifiedName() + superType + ' enum=' + this.isEnum() + ' abstract=' + this.isAbstract() + '}';
+        // Built here, as the engine's
+        // `ClassDeclaration::to_string` builds it: a
+        // `ClassDeclaration` receiver is never an enum
+        // (`EnumDeclaration` overrides this).
+        const superType = this.superType === null || this.superType === undefined ? '' : ` super=${this.superType}`;
+        return `ClassDeclaration {id=${this.getFullyQualifiedName()}${superType} enum=false abstract=${this.abstract}}`;
     }
 
     /**
@@ -619,7 +523,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isAsset(): boolean {
-        return this.type === `${MetaModelNamespace}.AssetDeclaration`;
+        return declarationKindOf(this.type) === 'AssetDeclaration';
     }
 
     /**
@@ -628,7 +532,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isParticipant(): boolean {
-        return this.type === `${MetaModelNamespace}.ParticipantDeclaration`;
+        return declarationKindOf(this.type) === 'ParticipantDeclaration';
     }
 
     /**
@@ -637,7 +541,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isTransaction(): boolean {
-        return this.type === `${MetaModelNamespace}.TransactionDeclaration`;
+        return declarationKindOf(this.type) === 'TransactionDeclaration';
     }
 
     /**
@@ -646,7 +550,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isEvent(): boolean {
-        return this.type === `${MetaModelNamespace}.EventDeclaration`;
+        return declarationKindOf(this.type) === 'EventDeclaration';
     }
 
     /**
@@ -655,7 +559,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isConcept(): boolean {
-        return this.type === `${MetaModelNamespace}.ConceptDeclaration`;
+        return declarationKindOf(this.type) === 'ConceptDeclaration';
     }
 
     /**
@@ -664,7 +568,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isEnum(): boolean {
-        return this.type === `${MetaModelNamespace}.EnumDeclaration`;
+        return declarationKindOf(this.type) === 'EnumDeclaration';
     }
 
     /**
@@ -673,7 +577,7 @@ class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isMapDeclaration(): boolean {
-        return this.type === `${MetaModelNamespace}.MapDeclaration`;
+        return declarationKindOf(this.type) === 'MapDeclaration';
     }
 
     /**

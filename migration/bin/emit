@@ -1,0 +1,144 @@
+#!/usr/bin/env node
+'use strict';
+/**
+ * migration/bin/emit -- append one telemetry event to migration/telemetry/events.jsonl.
+ *
+ * Usage:
+ *   emit <event> --task ID --attempt N [--role R] [--model M] [--sha S]
+ *        [--branch B] [--reason TEXT] [--tokens N] [--duration-ms N]
+ *        [--signature SIG] [--cause CAUSE] [--source SRC] [--label L]
+ *        [--workflow-run-id ID] [--transcript PATH]
+ *        [--events-file PATH] [--timestamp ISO] [--dry-run]
+ *
+ * See migration/telemetry/events.schema.json for field meanings.
+ * The timestamp is stamped by this script (Date.now(), UTC ISO-8601)
+ * unless --timestamp is given (only meant for tests/replay).
+ *
+ * Exits non-zero and prints to stderr on a usage error. Never throws
+ * past main() so a caller shell script gets a clean exit code.
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const NUMERIC_FIELDS = new Set(['attempt', 'tokens']);
+const FLOAT_FIELDS = new Set(['duration_ms']);
+
+const FLAG_TO_FIELD = {
+  '--task': 'task',
+  '--attempt': 'attempt',
+  '--role': 'role',
+  '--model': 'model',
+  '--sha': 'sha',
+  '--branch': 'branch',
+  '--reason': 'reason',
+  '--tokens': 'tokens',
+  '--duration-ms': 'duration_ms',
+  '--signature': 'signature',
+  '--cause': 'cause',
+  '--source': 'source',
+  '--label': 'label',
+  '--workflow-run-id': 'workflow_run_id',
+  '--transcript': 'transcript',
+};
+
+function usage() {
+  return [
+    'usage: emit <event> --task ID --attempt N [--role R] [--model M] [--sha S]',
+    '            [--branch B] [--reason TEXT] [--tokens N] [--duration-ms N]',
+    '            [--signature SIG] [--cause CAUSE] [--source SRC] [--label L]',
+    '            [--workflow-run-id ID] [--transcript PATH]',
+    '            [--events-file PATH] [--timestamp ISO] [--dry-run]',
+  ].join('\n');
+}
+
+function parseArgs(argv) {
+  if (argv.length === 0 || argv[0].startsWith('-')) {
+    throw new Error('missing <event> as the first argument\n' + usage());
+  }
+  const event = argv[0];
+  const fields = {};
+  let eventsFile = null;
+  let timestamp = null;
+  let dryRun = false;
+
+  for (let i = 1; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--dry-run') {
+      dryRun = true;
+      continue;
+    }
+    if (arg === '--events-file') {
+      eventsFile = argv[++i];
+      continue;
+    }
+    if (arg === '--timestamp') {
+      timestamp = argv[++i];
+      continue;
+    }
+    const field = FLAG_TO_FIELD[arg];
+    if (!field) {
+      throw new Error(`unknown flag: ${arg}\n${usage()}`);
+    }
+    const value = argv[++i];
+    if (value === undefined) {
+      throw new Error(`${arg} needs a value\n${usage()}`);
+    }
+    fields[field] = value;
+  }
+
+  return { event, fields, eventsFile, timestamp, dryRun };
+}
+
+function coerce(fields) {
+  const out = {};
+  for (const [key, raw] of Object.entries(fields)) {
+    if (NUMERIC_FIELDS.has(key)) {
+      const n = Number.parseInt(raw, 10);
+      if (Number.isNaN(n)) {
+        throw new Error(`--${key.replace('_', '-')} expects an integer, got: ${raw}`);
+      }
+      out[key] = n;
+    } else if (FLOAT_FIELDS.has(key)) {
+      const n = Number.parseFloat(raw);
+      if (Number.isNaN(n)) {
+        throw new Error(`--${key.replace(/_/g, '-')} expects a number, got: ${raw}`);
+      }
+      out[key] = n;
+    } else {
+      out[key] = raw;
+    }
+  }
+  return out;
+}
+
+function defaultEventsFile() {
+  return path.join(__dirname, '..', 'telemetry', 'events.jsonl');
+}
+
+function main(argv) {
+  const { event, fields, eventsFile, timestamp, dryRun } = parseArgs(argv);
+  const record = {
+    timestamp: timestamp || new Date().toISOString(),
+    event,
+    ...coerce(fields),
+  };
+
+  const targetFile = eventsFile || defaultEventsFile();
+  const line = JSON.stringify(record) + '\n';
+
+  if (dryRun) {
+    process.stdout.write(line);
+    return;
+  }
+
+  fs.mkdirSync(path.dirname(targetFile), { recursive: true });
+  fs.appendFileSync(targetFile, line, 'utf8');
+}
+
+try {
+  main(process.argv.slice(2));
+} catch (err) {
+  process.stderr.write(`emit: ${err.message}\n`);
+  process.exit(1);
+}

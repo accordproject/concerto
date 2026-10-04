@@ -1,0 +1,136 @@
+
+> concerto@5.0.0 build:level1
+> npm run build -w packages/concerto-cto && npm run build -w packages/concerto-core
+
+
+> @accordproject/concerto-cto@5.0.0 prebuild
+> npm-run-all clean
+
+
+> @accordproject/concerto-cto@5.0.0 clean
+> rimraf dist
+
+
+> @accordproject/concerto-cto@5.0.0 build
+> npm run parser && tsc -p tsconfig.build.json && npm run build:esm
+
+
+> @accordproject/concerto-cto@5.0.0 parser
+> peggy -o src/parser.js src/parser.pegjs
+
+
+> @accordproject/concerto-cto@5.0.0 build:esm
+> node ../../scripts/build-esm.js
+
+
+  dist/esm/chunk-Z274WV22.mjs      382.7kb
+  dist/esm/chunk-L6QXUSLL.mjs       23.1kb
+  dist/esm/chunk-ADOFOC62.mjs       12.0kb
+  dist/esm/chunk-WNU2QZFD.mjs        1.8kb
+  dist/esm/chunk-ADZEFNZ5.mjs        1.7kb
+  dist/esm/chunk-AKCFZ6K2.mjs        1.3kb
+  dist/esm/index.mjs                 598b 
+  dist/esm/external.mjs              410b 
+  dist/esm/parserMain.mjs            395b 
+  dist/esm/parseexception.mjs        333b 
+  dist/esm/printer.mjs               294b 
+  dist/esm/chunk-Z274WV22.mjs.map  559.9kb
+  dist/esm/chunk-L6QXUSLL.mjs.map   44.0kb
+  dist/esm/chunk-ADOFOC62.mjs.map   25.9kb
+  dist/esm/chunk-ADZEFNZ5.mjs.map    3.8kb
+  dist/esm/chunk-AKCFZ6K2.mjs.map    3.7kb
+  dist/esm/chunk-WNU2QZFD.mjs.map     93b 
+  dist/esm/external.mjs.map           93b 
+  dist/esm/index.mjs.map              93b 
+  dist/esm/parseexception.mjs.map     93b 
+  ...and 2 more output files...
+
+⚡ Done in 59ms
+
+  dist/esm-browser/chunk-TQPDAJQB.mjs      382.6kb
+  dist/esm-browser/chunk-E5UYTZNO.mjs       59.4kb
+  dist/esm-browser/chunk-5Z2F6LHO.mjs       28.1kb
+  dist/esm-browser/chunk-W7LTTM2O.mjs       13.7kb
+  dist/esm-browser/chunk-MSZDQHW6.mjs        2.3kb
+  dist/esm-browser/chunk-OMK4IF4X.mjs        1.7kb
+  dist/esm-browser/chunk-HZQXVGUH.mjs        1.3kb
+  dist/esm-browser/index.mjs                 603b 
+  dist/esm-browser/external.mjs              332b 
+  dist/esm-browser/parserMain.mjs            317b 
+  dist/esm-browser/parseexception.mjs        224b 
+  dist/esm-browser/printer.mjs               216b 
+  dist/esm-browser/chunk-TQPDAJQB.mjs.map  559.9kb
+  dist/esm-browser/chunk-E5UYTZNO.mjs.map   88.5kb
+  dist/esm-browser/chunk-5Z2F6LHO.mjs.map   53.9kb
+  dist/esm-browser/chunk-W7LTTM2O.mjs.map   25.9kb
+  dist/esm-browser/chunk-OMK4IF4X.mjs.map    3.8kb
+  dist/esm-browser/chunk-HZQXVGUH.mjs.map    3.7kb
+  dist/esm-browser/chunk-MSZDQHW6.mjs.map    2.6kb
+  dist/esm-browser/index.mjs.map             1.1kb
+  ...and 4 more output files...
+
+⚡ Done in 41ms
+
+> @accordproject/concerto-core@5.0.0 prebuild
+> npm-run-all clean
+
+
+> @accordproject/concerto-core@5.0.0 clean
+> rimraf dist
+
+
+> @accordproject/concerto-core@5.0.0 build
+> tsc -p tsconfig.build.json && cpx "src/*.json" dist/ && cpx "src/messages/*.json" dist/messages/ && npm run build:esm
+
+
+> @accordproject/concerto-core@5.0.0 build:esm
+> node ../../scripts/build-esm.js
+
+
+  dist/esm/chunk-VPW635LB.mjs  31.5kb
+  dist/esm/chunk-3T5UNLUU.mjs  31.3kb
+  dist/esm/chunk-7AO6RN3Z.mjs  29.3kb
+  dist/esm/chunk-UBE2LIHP.mjs  20.7kb
+  dist/esm/chunk-LOUBTGMW.mjs  19.8kb
+  dist/esm/chunk-US57EQQ4.mjs  19.8kb
+  dist/esm/chunk-4M4SBMVU.mjs  16.0kb
+  dist/esm/chunk-PE2ZLMZJ.mjs  10.7kb
+  dist/esm/chunk-2AW335NH.mjs  10.6kb
+  dist/esm/chunk-72DB3VOC.mjs  10.0kb
+  dist/esm/chunk-SLFS72HP.mjs   9.3kb
+  dist/esm/chunk-TIDZOVP6.mjs   8.9kb
+  dist/esm/chunk-JZV4UMNP.mjs   7.4kb
+  dist/esm/chunk-2KP64MHV.mjs   7.2kb
+  dist/esm/chunk-ZLXYMKOW.mjs   6.9kb
+  dist/esm/chunk-I7P7PGNA.mjs   6.5kb
+  dist/esm/chunk-NNGY4SHF.mjs   6.4kb
+  dist/esm/chunk-TSQNA4NG.mjs   6.4kb
+  dist/esm/chunk-UHCJ2DG5.mjs   5.4kb
+  dist/esm/chunk-BHCGC6RV.mjs   5.2kb
+  ...and 214 more output files...
+
+⚡ Done in 50ms
+
+  dist/esm-browser/chunk-KIFUQVXT.mjs  208.4kb
+  dist/esm-browser/chunk-R3PSQ7FP.mjs  131.4kb
+  dist/esm-browser/chunk-ML5T5NOC.mjs   38.5kb
+  dist/esm-browser/chunk-732UJGDM.mjs   31.9kb
+  dist/esm-browser/chunk-3NI323CE.mjs   31.8kb
+  dist/esm-browser/chunk-4C7LTP6X.mjs   29.6kb
+  dist/esm-browser/chunk-MBFR6Y3A.mjs   26.2kb
+  dist/esm-browser/chunk-4XKHMQ63.mjs   20.7kb
+  dist/esm-browser/chunk-YQOWID5F.mjs   20.3kb
+  dist/esm-browser/chunk-TPN55WIZ.mjs   19.9kb
+  dist/esm-browser/chunk-YXCU22GC.mjs   16.1kb
+  dist/esm-browser/chunk-RCJUD4LO.mjs   13.1kb
+  dist/esm-browser/chunk-JQS2CPMS.mjs   12.8kb
+  dist/esm-browser/chunk-XZZBCMLM.mjs   10.0kb
+  dist/esm-browser/chunk-A7FXMVLY.mjs    8.8kb
+  dist/esm-browser/chunk-7UGZPIJE.mjs    7.4kb
+  dist/esm-browser/chunk-ZQCZPU6O.mjs    7.2kb
+  dist/esm-browser/chunk-UBVRMUSB.mjs    6.9kb
+  dist/esm-browser/chunk-W2HMZ2XW.mjs    6.7kb
+  dist/esm-browser/chunk-GFFRFZYZ.mjs    6.6kb
+  ...and 220 more output files...
+
+⚡ Done in 96ms

@@ -21,6 +21,7 @@ import type { IDecorator, IRange } from '@accordproject/concerto-metamodel';
 /* eslint-disable no-unused-vars */
 import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
+import { rust, engineViews } from '../engineloader';
 
 /**
  * The shape shared by every metamodel AST node that the introspect classes
@@ -49,7 +50,11 @@ export interface AstNode {
  */
 class Decorated {
     ast: AstNode;
-    decorators: Decorator[] = [];
+    // An accessor on the prototype (installed below), so that a lazily
+    // built file's element builds its decorators on first read. A write
+    // stores a plain own field, and an element that never processed any
+    // reads an empty array, as the `= []` initialiser gave it.
+    decorators!: Decorator[];
     /**
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.
@@ -92,11 +97,19 @@ class Decorated {
      * @private
      */
     process() {
+        // In a lazily built file, the decorators are built on first read
+        // (engine/views.ts `deferDecorators`).
+        const views = engineViews();
+        if (views.deferDecorators(this)) {
+            return;
+        }
         this.decorators = [];
 
         if(this.ast.decorators) {
             const modelFile = this.getModelFile();
-            const factories = modelFile.getModelManager()?.getDecoratorFactories();
+            // `modelFile.getModelManager()?.getDecoratorFactories()`, except
+            // for a lazily built file (engine/views.ts `decoratorFactories`).
+            const factories = views.decoratorFactories(modelFile);
             const hasFactories = factories && factories.length > 0;
             for(let n=0; n < this.ast.decorators.length; n++ ) {
                 let thing = this.ast.decorators[n];
@@ -132,21 +145,14 @@ class Decorated {
                 this.decorators[n].validate();
             }
 
-            // check we don't have this decorator twice
-            const uniqueDecoratorNames = new Set();
-            this.decorators.forEach(d => {
-                const decoratorName = d.getName();
-                if(!uniqueDecoratorNames.has(decoratorName)) {
-                    uniqueDecoratorNames.add(decoratorName);
-                } else {
-                    const modelFile = this.getModelFile();
-                    throw new IllegalModelException(
-                        `Duplicate decorator ${decoratorName}`,
-                        modelFile,
-                        this.ast.location,
-                    );
-                }
-            });
+            const duplicateName = rust.decoratedFindDuplicateName(this.decorators.map(d => d.getName())) as string | null;
+            if (duplicateName !== null) {
+                throw new IllegalModelException(
+                    `Duplicate decorator ${duplicateName}`,
+                    this.getModelFile(),
+                    this.ast.location,
+                );
+            }
         }
     }
 
@@ -175,6 +181,8 @@ class Decorated {
         return null;
     }
 }
+
+engineViews().installLazyField(Decorated.prototype, 'decorators', () => []);
 
 export { Decorated };
 export default Decorated;

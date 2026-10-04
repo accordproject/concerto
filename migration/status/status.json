@@ -1,0 +1,347 @@
+{
+  "$schema": "migration/status/status.json",
+  "generated_at": "2026-10-02T07:29:23.940Z",
+  "requested_at_sha": null,
+  "fast": false,
+  "runtime_ms": 765368,
+  "repos": {
+    "concerto": {
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto",
+      "commit": "4578718b27bf054bb87e54dfcc0a50ce19559759",
+      "commit_used": "4578718b27bf054bb87e54dfcc0a50ce19559759"
+    },
+    "concerto-rust": {
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust",
+      "commit": "bfa4a5535e4a64f81954d5287ed0c0a331e3c241"
+    },
+    "concerto-validate-rs": {
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-validate-rs",
+      "commit": null
+    },
+    "concerto-conformance": {
+      "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-conformance",
+      "commit": "57d3c2397acf333985f761684ad2cbef55ba7ead"
+    }
+  },
+  "metrics": {
+    "queue": {
+      "available": true,
+      "total": 56,
+      "counts": {
+        "done": 11,
+        "in_progress": 4,
+        "pending": 41
+      },
+      "by_priority": {
+        "P0": {
+          "done": 9,
+          "in_progress": 2,
+          "pending": 9
+        },
+        "P1": {
+          "done": 2,
+          "pending": 24,
+          "in_progress": 2
+        },
+        "P2": {
+          "pending": 7
+        },
+        "P3": {
+          "pending": 1
+        }
+      }
+    },
+    "concerto_core_tests": {
+      "overall": {
+        "available": true,
+        "engine": "ts",
+        "suites": 436,
+        "tests": 2234,
+        "passing": 2226,
+        "failing": 0,
+        "pending": 8,
+        "duration_ms": 13022
+      },
+      "by_tag": {
+        "available": true,
+        "tally": {
+          "untagged": {
+            "tests": 953,
+            "passing": 953,
+            "failing": 0,
+            "pending": 0
+          },
+          "B": {
+            "tests": 932,
+            "passing": 926,
+            "failing": 0,
+            "pending": 6
+          },
+          "M": {
+            "tests": 80,
+            "passing": 78,
+            "failing": 0,
+            "pending": 2
+          },
+          "W": {
+            "tests": 269,
+            "passing": 269,
+            "failing": 0,
+            "pending": 0
+          }
+        }
+      },
+      "engine_modes": {
+        "ts": {
+          "available": true,
+          "engine": "ts",
+          "suites": 436,
+          "tests": 2234,
+          "passing": 2226,
+          "failing": 0,
+          "pending": 8,
+          "duration_ms": 13022
+        },
+        "rust": {
+          "available": true,
+          "engine": "rust",
+          "engine_module": {
+            "path": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+            "source": "env (CONCERTO_ENGINE_MODULE)",
+            "exists": true,
+            "built_at": "2026-10-02T07:05:10.263Z"
+          },
+          "suites": 411,
+          "tests": 1308,
+          "passing": 1300,
+          "failing": 0,
+          "pending": 8,
+          "duration_ms": 8288,
+          "by_tag": {
+            "available": true,
+            "tally": {
+              "B": {
+                "tests": 932,
+                "passing": 926,
+                "failing": 0,
+                "pending": 6
+              },
+              "M": {
+                "tests": 80,
+                "passing": 78,
+                "failing": 0,
+                "pending": 2
+              },
+              "W": {
+                "tests": 269,
+                "passing": 269,
+                "failing": 0,
+                "pending": 0
+              },
+              "untagged": {
+                "tests": 27,
+                "passing": 27,
+                "failing": 0,
+                "pending": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "nyc_coverage": {
+      "available": true,
+      "statements_pct": 99.4,
+      "branches_pct": 95.45,
+      "functions_pct": 99.81,
+      "lines_pct": 99.44,
+      "thresholds": {
+        "statements": 99,
+        "branches": 94.8,
+        "functions": 99,
+        "lines": 99
+      },
+      "gate_status": "PASS"
+    },
+    "oracle": {
+      "reference": {
+        "available": true,
+        "engine": "reference@5.0.0",
+        "total": 15850,
+        "pass": 15850,
+        "fail": 0,
+        "harness_error": 0,
+        "pass_pct": 100,
+        "by_source": {
+          "conformance": {
+            "total": 815,
+            "pass": 815,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "data": {
+            "total": 10231,
+            "pass": 10231,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "gaps": {
+            "total": 658,
+            "pass": 658,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "lifted": {
+            "total": 64,
+            "pass": 64,
+            "fail": 0,
+            "harness_error": 0
+          },
+          "unit": {
+            "total": 4082,
+            "pass": 4082,
+            "fail": 0,
+            "harness_error": 0
+          }
+        }
+      },
+      "native": {
+        "available": true,
+        "generated_at": "2026-10-02T07:06:25.947Z",
+        "total_fixtures": 16242,
+        "pass": 13861,
+        "fail": 271,
+        "unsupported": 2110,
+        "harness_error": 0,
+        "regressions": 0,
+        "pass_pct": 85.34
+      },
+      "wasm": {
+        "available": false,
+        "reason": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs is built (P4-01/P4-02 have landed), but this collector has no stable corpus-replay report to read for it; see migration/gate/run.mjs's stepOracleWasm for a real replay"
+      },
+      "corpus_coverage_of_reference": {
+        "available": true,
+        "generated_at": "2026-09-27T04:05:59.736Z",
+        "corpus": {
+          "statements": {
+            "pct": 99.21,
+            "covered": 3400,
+            "total": 3427
+          },
+          "branches": {
+            "pct": 96.34,
+            "covered": 1768,
+            "total": 1835
+          },
+          "functions": {
+            "pct": 99.01,
+            "covered": 604,
+            "total": 610
+          },
+          "lines": {
+            "pct": 99.19,
+            "covered": 3345,
+            "total": 3372
+          }
+        },
+        "unit_suite": {
+          "statements": {
+            "pct": 99.01,
+            "covered": 3308,
+            "total": 3341
+          },
+          "branches": {
+            "pct": 95.8,
+            "covered": 1758,
+            "total": 1835
+          },
+          "functions": {
+            "pct": 99.34,
+            "covered": 606,
+            "total": 610
+          },
+          "lines": {
+            "pct": 99.02,
+            "covered": 3254,
+            "total": 3286
+          }
+        },
+        "thresholds": {
+          "statements": 99,
+          "branches": 94.8,
+          "functions": 99,
+          "lines": 99
+        }
+      },
+      "mutants": {
+        "available": true,
+        "detected": 13,
+        "total": 13,
+        "catch_rate_pct": 100,
+        "all_mutants_detected": true,
+        "harness_checks_ok": true
+      }
+    },
+    "rust": {
+      "concerto-rust": {
+        "cargo_test": {
+          "available": false,
+          "reason": "cargo test timed out"
+        },
+        "llvm_cov": {
+          "available": false,
+          "reason": "cargo llvm-cov timed out"
+        }
+      },
+      "concerto-validate-rs": {
+        "cargo_test": {
+          "available": false,
+          "reason": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-82/concerto-validate-rs does not exist"
+        },
+        "llvm_cov": {
+          "available": false,
+          "reason": "n/a"
+        }
+      }
+    },
+    "ledger": {
+      "available": true,
+      "rows": 672,
+      "full_weight": {
+        "total_weight": 7594,
+        "weight_by_classification": {
+          "RUST": 1438,
+          "HYBRID": 1545.5,
+          "PARTIAL": 0,
+          "TS": 4610.5
+        },
+        "weighted_pct_rust_plus_hybrid": 39.3
+      },
+      "d1_denominator_weight": 7513,
+      "d1_excluded": {
+        "members": 54,
+        "weight": 81
+      },
+      "weighted_pct_rust_plus_hybrid": 39.7,
+      "weighted_pct_rust_only": 19.1
+    },
+    "mutants": {
+      "available": true,
+      "source": "concerto-core/MUTANTS.md (accordproject/concerto-rust#183, P5-06)",
+      "total": 420,
+      "caught": 358,
+      "missed": 21,
+      "unviable": 41,
+      "catch_rate_pct": 94.5,
+      "floor_pct": 85,
+      "meets_floor": true
+    },
+    "conformance": {
+      "available": true,
+      "total_scenarios": 109,
+      "passed": 109,
+      "failed": 0
+    }
+  }
+}

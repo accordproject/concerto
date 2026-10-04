@@ -13,9 +13,12 @@
  */
 
 import Resource from '../model/resource';
+import Identifiable from '../model/identifiable';
+import { resourceIdsToURIs } from '../model/resourceid';
 import Typed from '../model/typed';
 import ModelUtil from '../modelutil';
 import { NullUtil as Util } from '@accordproject/concerto-util';
+import { getRelationshipMapValue } from './relationshipmapvalue';
 
 /**
  * Converts the contents of a Resource to JSON. The parameters
@@ -75,7 +78,12 @@ class JSONGenerator {
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing));
+            // BC-08: name the element. JSON.stringify of an introspection
+            // object (a scalar declaration, an enum value) meets the model
+            // manager again and threw V8's circular-structure TypeError
+            // (DV-010).
+            const name = typeof thing?.getFullyQualifiedName === 'function' ? thing.getFullyQualifiedName() : JSON.stringify(thing);
+            throw new Error(`Unrecognised element "${name}"`);
         }
     }
 
@@ -92,15 +100,27 @@ class JSONGenerator {
         // initialise Map with $class property
         let map = new Map();
 
+        // BC-05, DV-007: a relationship-typed value is written as a
+        // relationship property is, not as an embedded concept.
+        const relationship = getRelationshipMapValue(mapDeclaration);
+        // The URIs of the values written as relationship text, made in one
+        // engine call on the first value.
+        let uris: (string | undefined)[] | undefined;
+        let index = -1;
+
         obj.forEach((value, key) => {
+            index++;
 
             // don't serialize System Properties, other than $class
             if(ModelUtil.isSystemProperty(key)) {
                 return;
             }
 
-            // Key is always a string, but value might be a ValidatedResource.
-            if (typeof value === 'object') {
+            if (relationship) {
+                const uri = (uris ?? (uris = relationshipMapURIs(this, obj)))[index];
+                value = uri ?? this.convertRelationship(relationship, value, parameters);
+            } else if (typeof value === 'object') {
+                // Key is always a string, but value might be a ValidatedResource.
                 // Resolve the declaration for the map value. Prefer the instance's
                 // own fully-qualified type so that polymorphic values (subclasses of
                 // the map's declared value type) are serialized using their actual
@@ -224,6 +244,8 @@ class JSONGenerator {
      * @return {Object} the text JSON safe representation
      */
     convertToJSON(field, obj) {
+        // Converted here, over the value TS already holds, without an
+        // engine call per primitive.
         switch (field.getType()) {
         case 'DateTime':
         {
@@ -260,41 +282,40 @@ class JSONGenerator {
             // walk the object
             for (let index in obj) {
                 const item = obj[index];
-                if (this.permitResourcesForRelationships && item instanceof Resource) {
-                    let fqi = item.getFullyQualifiedIdentifier();
-                    if (parameters.seenResources.has(fqi)) {
-                        let relationshipText = this.getRelationshipText(relationshipDeclaration, item);
-                        array.push(relationshipText);
-                    } else {
-                        parameters.seenResources.add(fqi);
-                        parameters.stack.push(item, Resource);
-                        const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
-                        array.push(classDecl.accept(this, parameters));
-                        parameters.seenResources.delete(fqi);
-                    }
-                } else {
-                    let relationshipText = this.getRelationshipText(relationshipDeclaration, item);
-                    array.push(relationshipText);
-                }
+                array.push(this.convertRelationship(relationshipDeclaration, item, parameters));
             }
             result = array;
-        } else if (this.permitResourcesForRelationships && obj instanceof Resource) {
-            let fqi = obj.getFullyQualifiedIdentifier();
-            if (parameters.seenResources.has(fqi)) {
-                let relationshipText = this.getRelationshipText(relationshipDeclaration, obj);
-                result = relationshipText;
-            } else {
-                parameters.seenResources.add(fqi);
-                parameters.stack.push(obj, Resource);
-                const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
-                result = classDecl.accept(this, parameters);
-                parameters.seenResources.delete(fqi);
-            }
         } else {
-            let relationshipText = this.getRelationshipText(relationshipDeclaration, obj);
-            result = relationshipText;
+            result = this.convertRelationship(relationshipDeclaration, obj, parameters);
         }
         return result;
+    }
+
+    /**
+     * One relationship value: a resource written in full when
+     * `permitResourcesForRelationships` allows it and it is not already being
+     * written, otherwise its relationship text. A relationship-typed map value
+     * is written here too (BC-05).
+     * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
+     * @param {Identifiable} obj - the relationship or the resource
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the relationship text, or the resource as JSON
+     * @private
+     */
+    convertRelationship(relationshipDeclaration, obj, parameters) {
+        if (this.permitResourcesForRelationships && obj instanceof Resource) {
+            let fqi = obj.getFullyQualifiedIdentifier();
+            if (parameters.seenResources.has(fqi)) {
+                return this.getRelationshipText(relationshipDeclaration, obj);
+            }
+            parameters.seenResources.add(fqi);
+            parameters.stack.push(obj, Resource);
+            const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
+            const result = classDecl.accept(this, parameters);
+            parameters.seenResources.delete(fqi);
+            return result;
+        }
+        return this.getRelationshipText(relationshipDeclaration, obj);
     }
 
     /**
@@ -317,6 +338,42 @@ class JSONGenerator {
             return relationshipOrResource.toURI();
         }
     }
+}
+
+/**
+ * The URIs of a relationship-typed map's values that `convertRelationship`
+ * writes as `toURI()`, made in one engine call: a relationship, or a
+ * resource when `convertResourcesToRelationships` allows it and
+ * `permitResourcesForRelationships` does not write it in full.
+ * @param {JSONGenerator} generator - the generator and its options
+ * @param {Map} obj - the map
+ * @return {Array} per entry, its URI, or `undefined` for a value written the
+ * usual way (or whose identifier is not valid, which throws there)
+ * @private
+ */
+function relationshipMapURIs(generator: JSONGenerator, obj: Map<string, unknown>): (string | undefined)[] {
+    const fields: unknown[] = [];
+    const at: number[] = [];
+    let index = 0;
+    if (!generator.convertResourcesToId) {
+        const resourcesAsText = generator.convertResourcesToRelationships && !generator.permitResourcesForRelationships;
+        obj.forEach((value, key) => {
+            if (value instanceof Identifiable && !ModelUtil.isSystemProperty(key) &&
+                (!(value instanceof Resource) || resourcesAsText)) {
+                fields.push(value.getNamespace(), value.getType(), value.getIdentifier());
+                at.push(index);
+            }
+            index++;
+        });
+    }
+    const result: (string | undefined)[] = new Array(index);
+    if (at.length > 0) {
+        const uris = resourceIdsToURIs(fields);
+        for (let i = 0; i < at.length; i++) {
+            result[at[i]] = uris[i];
+        }
+    }
+    return result;
 }
 
 export { JSONGenerator };

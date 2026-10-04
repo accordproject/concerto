@@ -1,0 +1,85 @@
+diff --git a/concerto-wasm/Cargo.toml b/concerto-wasm/Cargo.toml
+index 14d6489..17332b9 100644
+--- a/concerto-wasm/Cargo.toml
++++ b/concerto-wasm/Cargo.toml
+@@ -23,6 +23,8 @@ license = "Apache-2.0"
+ crate-type = ["cdylib"]
+ 
+ [dependencies]
++# P5-90 THROWAWAY (never merged): talc as the global allocator, to time the typed read.
++talc = { version = "=4.4.3", default-features = false, features = ["lock_api"] }
+ # `js-compat` (P6-01, docs/public-api.md section 4.6): the JS object model and
+ # the seam the binding is built on, which are not in core's default API.
+ accordproject-concerto-core = { path = "../concerto-core", features = ["js-compat"] }
+diff --git a/concerto-wasm/Cargo.lock b/concerto-wasm/Cargo.lock
+index 488947d..7eb5233 100644
+--- a/concerto-wasm/Cargo.lock
++++ b/concerto-wasm/Cargo.lock
+@@ -94,6 +94,7 @@ dependencies = [
+  "js-sys",
+  "serde",
+  "serde_json",
++ "talc",
+  "wasm-bindgen",
+ ]
+ 
+@@ -211,6 +212,15 @@ version = "0.2.189"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+ 
++[[package]]
++name = "lock_api"
++version = "0.4.14"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "224399e74b87b5f3557511d98dff8b14089b3dadafcab6bb93eab67d3aace965"
++dependencies = [
++ "scopeguard",
++]
++
+ [[package]]
+ name = "memchr"
+ version = "2.8.3"
+@@ -283,6 +293,12 @@ version = "1.0.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "04d056b875a9d2e6cb9a61d127afee9ac5999b9f87bcb32079d1318e505be714"
+ 
++[[package]]
++name = "scopeguard"
++version = "1.2.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
++
+ [[package]]
+ name = "semver"
+ version = "1.0.28"
+@@ -372,6 +388,15 @@ dependencies = [
+  "unicode-ident",
+ ]
+ 
++[[package]]
++name = "talc"
++version = "4.4.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "a3ae828aa394de34c7de08f522d1b86bd1c182c668d27da69caadda00590f26d"
++dependencies = [
++ "lock_api",
++]
++
+ [[package]]
+ name = "thiserror"
+ version = "1.0.69"
+diff --git a/concerto-wasm/src/lib.rs b/concerto-wasm/src/lib.rs
+index 064bb15..fb6eb45 100644
+--- a/concerto-wasm/src/lib.rs
++++ b/concerto-wasm/src/lib.rs
+@@ -51,6 +51,10 @@
+ //! Strings cross the boundary as UTF-8, so a lone UTF-16 surrogate becomes
+ //! U+FFFD. No oracle fixture or unit test passes one.
+ 
++// P5-90 THROWAWAY (never merged): talc instead of the default dlmalloc.
++#[global_allocator]
++static ALLOCATOR: talc::TalckWasm = unsafe { talc::TalckWasm::new_global() };
++
+ use std::borrow::Cow;
+ use std::cell::RefCell;
+ use std::collections::HashSet;

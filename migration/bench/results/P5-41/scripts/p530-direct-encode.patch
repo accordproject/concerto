@@ -1,0 +1,63 @@
+--- a/spikes/p530-wasm-profile/Cargo.toml
++++ b/spikes/p530-wasm-profile/Cargo.toml
+@@ -29,6 +29,7 @@
+ # preserve_order; the binding adds float_roundtrip).
+ serde_json = { version = "1.0", features = ["float_roundtrip", "preserve_order"] }
+ wasm-bindgen = { version = "=0.2.128", optional = true }
++serde = "1.0"
+ # Allocator experiments (A/B only, never shipped).
+ dlmalloc = { version = "0.2", features = ["global"], optional = true }
+ talc = { version = "4", default-features = false, features = ["lock_api"], optional = true }
+--- a/spikes/p530-wasm-profile/src/lib.rs
++++ b/spikes/p530-wasm-profile/src/lib.rs
+@@ -67,7 +67,50 @@
+         Some(dcs::extract_decorators(s.mm.as_ref().expect("manager"), &opts).expect("extract"));
+ }
+ 
++/// P5-41 scratch: the direct encoding concerto-wasm now ships.
++struct MmView<'a>(&'a ModelManager);
++impl serde::Serialize for MmView<'_> {
++    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
++        use serde::ser::SerializeMap;
++        let mut m = s.serialize_map(Some(2))?;
++        m.serialize_entry("$class", "concerto.metamodel@1.0.0.Models")?;
++        m.serialize_entry("models", &Asts(self.0))?;
++        m.end()
++    }
++}
++struct Asts<'a>(&'a ModelManager);
++impl serde::Serialize for Asts<'_> {
++    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
++        s.collect_seq(self.0.model_files().map(concerto_core::ModelFile::ast))
++    }
++}
++struct View<'a>(&'a ExtractResult);
++impl serde::Serialize for View<'_> {
++    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
++        use serde::ser::SerializeMap;
++        let mut m = s.serialize_map(Some(3))?;
++        m.serialize_entry("modelManager", &MmView(&self.0.model_manager))?;
++        m.serialize_entry("decoratorCommandSet", &self.0.decorator_command_set)?;
++        m.serialize_entry("vocabularies", &self.0.vocabularies)?;
++        m.end()
++    }
++}
++
++pub fn direct() -> bool {
++    std::env::var("P530_ENCODE").map(|v| v == "direct").unwrap_or(false)
++}
++
++pub fn stage_encode_direct(s: &mut State) {
++    let result = s.result.take().expect("result");
++    s.output = serde_json::to_string(&View(&result)).expect("encodes");
++    drop(result);
++}
++
+ pub fn stage_encode(s: &mut State) {
++    #[cfg(not(target_arch = "wasm32"))]
++    if direct() {
++        return stage_encode_direct(s);
++    }
+     let result = s.result.take().expect("result");
+     let models: Vec<Value> = result
+         .model_manager

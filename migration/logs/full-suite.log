@@ -1,0 +1,368 @@
+9:15:27 AM - error: Undeclared type "docs" in "system@1.0.0.ComposerParticipant". File 'system.cto': 
+IllegalModelException: Undeclared type "docs" in "system@1.0.0.ComposerParticipant". File 'system.cto': 
+    at ModelFile.resolveType (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:101:211)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:48:4)
+    at ParticipantDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at ParticipantDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/declaration.ts:48:51)
+    at ParticipantDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:69:8)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at Object.addComposerModel (/home/user/concerto/packages/concerto-core/test/composer/composermodelutility.js:27:22)
+    at /home/user/concerto/packages/concerto-core/test/introspect/decorators.js:191:22
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/introspect/decorators.js:194:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:30 AM - info: SUCCESS: validated public API against package.json and changelog.txt.
+9:15:30 AM - info: SUCCESS: validated public API against package.json and changelog.txt.
+9:15:30 AM - info: SUCCESS: validated public API against package.json and changelog.txt.
+9:15:30 AM - info: SUCCESS: validated public API against package.json and changelog.txt.
+9:15:31 AM - error: Undeclared type "Hide" in "test@1.0.0.Person.ssn". File 'test.cto': 
+IllegalModelException: Undeclared type "Hide" in "test@1.0.0.Person.ssn". File 'test.cto': 
+    at ModelFile.resolveType (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:101:211)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:48:4)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/property.ts:55:30)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:79:37)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:115:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:116:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:31 AM - error: Undeclared type "Hide" in "test@1.0.0.Person". File 'test.cto': 
+IllegalModelException: Undeclared type "Hide" in "test@1.0.0.Person". File 'test.cto': 
+    at ModelFile.resolveType (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:101:211)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:48:4)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/declaration.ts:48:51)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:69:8)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:127:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:128:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:31 AM - error: Undeclared type "Hide" in "undefined". File 'test.cto': 
+IllegalModelException: Undeclared type "Hide" in "undefined". File 'test.cto': 
+    at ModelFile.resolveType (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:101:211)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:48:4)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:108:23)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:139:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:140:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:31 AM - error: Decorator Hide has invalid decorator argument. Expected boolean. Found string, with value "foo"
+9:15:31 AM - error: Decorator Hide has invalid decorator argument. Expected boolean. Found string, with value "foo" File 'test.cto': 
+IllegalModelException: Decorator Hide has invalid decorator argument. Expected boolean. Found string, with value "foo" File 'test.cto': 
+    at Decorator.handleError (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:46:4)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:71:63)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/property.ts:55:30)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:79:37)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:157:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:158:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:31 AM - error: Decorator Hide has invalid decorator argument. Expected string. Found boolean, with value false
+9:15:31 AM - error: Decorator Hide has invalid decorator argument. Expected string. Found boolean, with value false File 'test.cto': 
+IllegalModelException: Decorator Hide has invalid decorator argument. Expected string. Found boolean, with value false File 'test.cto': 
+    at Decorator.handleError (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:46:4)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:71:63)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/property.ts:55:30)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:79:37)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:172:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:173:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:31 AM - error: Decorator Hide has invalid decorator argument. Expected number. Found boolean, with value false
+9:15:31 AM - error: Decorator Hide has invalid decorator argument. Expected number. Found boolean, with value false File 'test.cto': 
+IllegalModelException: Decorator Hide has invalid decorator argument. Expected number. Found boolean, with value false File 'test.cto': 
+    at Decorator.handleError (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:46:4)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:71:63)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/property.ts:55:30)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:79:37)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:187:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:188:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:31 AM - error: Decorator Hide references a type Name which cannot be assigned to the declared type test@1.0.0.Category
+9:15:31 AM - error: Decorator Hide references a type Name which cannot be assigned to the declared type test@1.0.0.Category File 'test.cto': 
+IllegalModelException: Decorator Hide references a type Name which cannot be assigned to the declared type test@1.0.0.Category File 'test.cto': 
+    at Decorator.handleError (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:46:4)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:74:102)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/property.ts:55:30)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:79:37)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:226:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:227:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:31 AM - error: Decorator Hide has invalid decorator argument. Expected object. Found string, with value "foo"
+9:15:31 AM - error: Decorator Hide has invalid decorator argument. Expected object. Found string, with value "foo" File 'test.cto': 
+IllegalModelException: Decorator Hide has invalid decorator argument. Expected object. Found string, with value "foo" File 'test.cto': 
+    at Decorator.handleError (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:46:4)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:71:63)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/property.ts:55:30)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:79:37)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:243:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:244:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:31 AM - error: Decorator Hide references a type Missing which has not been defined/imported.
+9:15:31 AM - error: Decorator Hide references a type Missing which has not been defined/imported. File 'test.cto': 
+IllegalModelException: Decorator Hide references a type Missing which has not been defined/imported. File 'test.cto': 
+    at Decorator.handleError (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:46:4)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:74:102)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/property.ts:55:30)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:79:37)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:260:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:261:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:31 AM - error: Decorator Hide has too few arguments. Required properties are: [hidden]
+9:15:31 AM - error: Decorator Hide has too few arguments. Required properties are: [hidden] File 'test.cto': 
+IllegalModelException: Decorator Hide has too few arguments. Required properties are: [hidden] File 'test.cto': 
+    at Decorator.handleError (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:46:4)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:71:63)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/property.ts:55:30)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:79:37)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:277:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:278:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+9:15:31 AM - error: Decorator Hide has too many arguments. Properties are: [hidden]
+9:15:31 AM - error: Decorator Hide has too many arguments. Properties are: [hidden] File 'test.cto': 
+IllegalModelException: Decorator Hide has too many arguments. Properties are: [hidden] File 'test.cto': 
+    at Decorator.handleError (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:46:4)
+    at Decorator.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorator.ts:71:63)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/decorated.ts:73:8)
+    at Field.validate (/home/user/concerto/packages/concerto-core/src/introspect/property.ts:55:30)
+    at ConceptDeclaration.validate (/home/user/concerto/packages/concerto-core/src/introspect/classdeclaration.ts:79:37)
+    at ModelFile.validate (/home/user/concerto/packages/concerto-core/src/introspect/modelfile.ts:117:36)
+    at ModelManager.validateModelFiles (/home/user/concerto/packages/concerto-core/src/basemodelmanager.ts:144:157)
+    at /home/user/concerto/packages/concerto-core/test/validateDecorators.js:294:39
+    at Proxy.assertThrows (/home/user/concerto/node_modules/chai/lib/chai/core/assertions.js:2648:7)
+    at Proxy.methodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/addMethod.js:57:25)
+    at Proxy.somethingMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:97:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Proxy.allMethod (/home/user/concerto/node_modules/chai-things/lib/chai-things.js:165:25)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at doAsserterAsyncAndAddThen (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:289:22)
+    at Proxy.<anonymous> (/home/user/concerto/node_modules/chai-as-promised/lib/chai-as-promised.js:255:20)
+    at Proxy.overwritingMethodWrapper (/home/user/concerto/node_modules/chai/lib/chai/utils/overwriteMethod.js:78:33)
+    at Context.<anonymous> (/home/user/concerto/packages/concerto-core/test/validateDecorators.js:295:28)
+    at callFn (/home/user/concerto/node_modules/mocha/lib/runnable.js:364:21)
+    at Test.Runnable.run (/home/user/concerto/node_modules/mocha/lib/runnable.js:352:5)
+    at Runner.runTest (/home/user/concerto/node_modules/mocha/lib/runner.js:677:10)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:800:12
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:592:14)
+    at /home/user/concerto/node_modules/mocha/lib/runner.js:602:7
+    at next (/home/user/concerto/node_modules/mocha/lib/runner.js:485:14)
+    at Immediate._onImmediate (/home/user/concerto/node_modules/mocha/lib/runner.js:570:5)
+    at processImmediate (node:internal/timers:484:21)
+ERROR: Coverage for lines (98.96%) does not meet global threshold (99%)
+ERROR: Coverage for statements (98.95%) does not meet global threshold (99%)
+
+=============================== Coverage summary ===============================
+Statements   : 98.95% ( 3306/3341 )
+Branches     : 95.8% ( 1758/1835 )
+Functions    : 99.18% ( 605/610 )
+Lines        : 98.96% ( 3252/3286 )
+================================================================================

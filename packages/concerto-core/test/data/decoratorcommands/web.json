@@ -67,7 +67,7 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
-                "namespace" : "test",
+                "namespace" : "test@1.0.0",
                 "declaration" : "Person",
                 "property" : "bio"
             },
@@ -97,7 +97,7 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
-                "namespace" : "test",
+                "namespace" : "test@1.0.0",
                 "declaration" : "Person",
                 "property" : "address1"
             },
@@ -112,7 +112,7 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
-                "namespace" : "test",
+                "namespace" : "test@1.0.0",
                 "declaration" : "Person",
                 "property" : "country",
                 "type" : "concerto.metamodel@1.0.0.StringProperty"
@@ -128,7 +128,7 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
-                "namespace" : "test",
+                "namespace" : "test@1.0.0",
                 "declaration" : "Person",
                 "type" : "concerto.metamodel@1.0.0.StringProperty",
                 "properties" : ["address2", "zip"]
@@ -144,7 +144,7 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
-                "namespace" : "test",
+                "namespace" : "test@1.0.0",
                 "declaration" : "Person",
                 "properties" : ["city"]
             },
@@ -159,7 +159,7 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
-                "namespace" : "test"
+                "namespace" : "test@1.0.0"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",

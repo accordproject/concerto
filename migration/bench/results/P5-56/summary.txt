@@ -1,0 +1,28 @@
+TS API ms, DecoratorManager.extractDecorators (en; repeat: removeDecoratorsFromModel false, control: true), per-round medians -> median of 3
+synthetic-large
+  repeat (keep) ts 13.90/15.62/10.44 => 13.90
+  repeat (keep) before 121.78/107.69/141.08 => 121.78
+  repeat (keep) new 110.10/98.83/114.04 => 110.10
+  repeat (keep): new - before -11.68 ms (new/before 0.904); vs TS before 8.76x new 7.92x
+  warm (remove, control) ts 14.20/11.78/10.61 => 11.78
+  warm (remove, control) before 62.24/64.29/55.68 => 62.24
+  warm (remove, control) new 60.82/52.83/62.46 => 60.82
+  warm (remove, control): new - before -1.42 ms (new/before 0.977); vs TS before 5.28x new 5.16x
+conformance
+  repeat (keep) ts 4.43/5.34/4.62 => 4.62
+  repeat (keep) before 46.45/31.90/39.56 => 39.56
+  repeat (keep) new 23.22/20.34/20.35 => 20.35
+  repeat (keep): new - before -19.20 ms (new/before 0.515); vs TS before 8.57x new 4.41x
+  warm (remove, control) ts 3.48/4.04/4.04 => 4.04
+  warm (remove, control) before 25.51/23.52/22.67 => 23.52
+  warm (remove, control) new 22.16/19.80/26.56 => 22.16
+  warm (remove, control): new - before -1.36 ms (new/before 0.942); vs TS before 5.83x new 5.49x
+concerto-core-test-data
+  repeat (keep) ts 11.13/16.61/13.87 => 13.87
+  repeat (keep) before 49.59/52.61/75.89 => 52.61
+  repeat (keep) new 42.50/36.06/39.55 => 39.55
+  repeat (keep): new - before -13.06 ms (new/before 0.752); vs TS before 3.79x new 2.85x
+  warm (remove, control) ts 10.07/7.67/9.29 => 9.29
+  warm (remove, control) before 36.84/31.46/37.04 => 36.84
+  warm (remove, control) new 33.51/30.81/38.56 => 33.51
+  warm (remove, control): new - before -3.33 ms (new/before 0.910); vs TS before 3.97x new 3.61x

@@ -1,0 +1,17 @@
+{
+  "_about": "P5-10d (accordproject/concerto-rust#285): verification re-runs of the P5-10c plan (run-seeds 1001-1010, 100,000 cases each, batch 1000, 25 seeds per op) on the fixed engine, against the same pre-lazy control",
+  "lazy": {
+    "concerto": "72ab01381288bf31b5ca0100e6a2122821348963",
+    "concerto-rust": "ed637c0ee598bcc8fe163463d0fc06721ef597d4",
+    "note": "P5-10d fixes (property $class f2c4ad9, map key and value $class ed637c0) on the integration heads (concerto dafa53e9c, concerto-rust 6d57140); concerto-wasm/pkg built from concerto-rust ed637c0"
+  },
+  "prelazy": {
+    "concerto": "796669d5c1d391c5f40d246143e55150931dd926",
+    "concerto-rust": "5498f61190c98172627046753f040447f62a0141",
+    "note": "integration heads before P5-10a lazy views, with the P5-10c harness; aggregate in prelazy/"
+  },
+  "tsSide": "@accordproject/concerto-core 5.0.0, the frozen oracle reference, via lib/worker.js referenceAdapter()",
+  "corpus": "oracle-corpus-p107-06aa375 canonical pin plus supplement d842c0ab7; CTO cache rebuilt with migration/oracle/bin/build-cto-cache.js",
+  "checkShard": "run-seed 1001 only, fixed lazy engine with CONCERTO_LAZY_VIEWS_CHECK=1 and FUZZ_STDERR_LOG; the worker stderr was empty, so no LAZY-CHECK lines (run-batch.js only appends non-empty stderr); aggregate in check/",
+  "lazyVsPrelazy": "per-case comparison of the raw divergences: 4724 unique divergent cases on each side, 0 only in lazy, 0 only in pre-lazy, 0 signature changes; triage-clusters.json and divergence-summary.json are byte-identical to prelazy/"
+}

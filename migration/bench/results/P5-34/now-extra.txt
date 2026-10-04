@@ -1,0 +1,18 @@
+new ModelManager()                            10.04  modelFileIsCompatibleVersion x3.00, ModelManagerHandle.stageModelFileWithHeader x2.02, ModelManagerHandle.dropStagedModelFile x2.02, new ModelManagerHandle x1.00, ModelManagerHandle.setDangerouslyAllowReservedSystemTypeNamesInUserModels x1.00, ModelManagerHandle.setDecoratorValidation x1.00
+addCTOModel (one file)                         3.00  ModelManagerHandle.stageModelFileWithHeader x1.00, modelFileIsCompatibleVersion x1.00, ModelManagerHandle.validateAndCommitStagedModelFile x1.00
+addModelFile (validated, one file)             1.00  ModelManagerHandle.validateAndCommitStagedModelFile x1.00
+addModelFiles (two files)                      7.00  ModelManagerHandle.stageModelFileWithHeader x2.00, modelFileIsCompatibleVersion x2.00, ModelManagerHandle.commitStagedModelFile x2.00, ModelManagerHandle.validateModelFiles x1.00
+updateModelFile (string)                       5.00  ModelManagerHandle.stageModelFileWithHeader x1.00, modelFileIsCompatibleVersion x1.00, ModelManagerHandle.modelFileValidateStaged x1.00, ModelManagerHandle.dropStagedModelFile x1.00, ModelManagerHandle.updateModelFile x1.00
+deleteModelFile                                1.00  ModelManagerHandle.deleteModelFile x1.00
+validateModelFiles                             1.00  ModelManagerHandle.validateModelFiles x1.00
+MM.getType (1st read)                              0.98  ModelManagerHandle.getTypeName x0.98
+MM.resolveType (1st read)                          0.98  ModelManagerHandle.resolveType x0.98
+MM.derivesFrom                                 1.00  ModelManagerHandle.derivesFrom x1.00
+MM.isAssignableTo                              1.00  ModelManagerHandle.isAssignableTo x1.00
+MM.getNamespaces (1st read)                        0.98  ModelManagerHandle.getNamespaces x0.98
+MM.getModelFileByFileName                      1.00  ModelManagerHandle.modelManagerGetModelFileByFileName x1.00
+MF.getType (registered)                        1.00  ModelManagerHandle.modelFileGetTypeName x1.00
+MF.isLocalType (registered)                    1.00  ModelManagerHandle.modelFileIsLocalType x1.00
+MF.getFullyQualifiedTypeName (registered)      1.00  ModelManagerHandle.modelFileGetFullyQualifiedTypeName x1.00
+MF.getVersion (registered)                     1.00  ModelManagerHandle.modelFileGetVersion x1.00
+MF.getImports (registered)                     1.00  ModelManagerHandle.modelFileGetImports x1.00

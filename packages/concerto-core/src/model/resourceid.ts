@@ -11,91 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import ModelUtils from '../modelutil';
-
-const RESOURCE_SCHEME = 'resource';
-
-/**
- * Parse a URI into its component parts. Implements the subset of the
- * generic URI parsing algorithm (RFC 3986) that ResourceId relies on:
- * fragment, query, scheme, and authority (userinfo/host/port), leaving
- * the remainder as the path.
- * @param {String} uri - The URI to parse.
- * @returns {Object} An object with protocol, username, password, port,
- * query, fragment and path properties.
- * @throws {Error} If the authority contains a non-numeric port.
- * @private
- */
-function parseUri(uri: string) {
-    let s = uri;
-    let fragment: string | null = null;
-    let query: string | null = null;
-    let protocol: string | null = null;
-    let username: string | null = null;
-    let password: string | null = null;
-    let port: string | null = null;
-
-    // fragment: split on the first '#'
-    const hashPos = s.indexOf('#');
-    if (hashPos > -1) {
-        fragment = s.substring(hashPos + 1) || null;
-        s = s.substring(0, hashPos);
-    }
-
-    // query: split on the first '?'
-    const qPos = s.indexOf('?');
-    if (qPos > -1) {
-        query = s.substring(qPos + 1);
-        s = s.substring(0, qPos);
-    }
-
-    // scheme: only recognised if the remainder does not start with '//'
-    if (s.substring(0, 2) !== '//') {
-        const colonPos = s.indexOf(':');
-        if (colonPos > -1) {
-            const candidate = s.substring(0, colonPos);
-            if (/^[a-z][a-z0-9.+-]*$/i.test(candidate)) {
-                protocol = candidate.toLowerCase();
-                s = s.substring(colonPos + 1);
-            }
-        }
-    }
-
-    // authority: only present if the remainder starts with '//'
-    if (s.substring(0, 2) === '//') {
-        s = s.substring(2);
-        const slashPos = s.indexOf('/');
-        const authority = slashPos > -1 ? s.substring(0, slashPos) : s;
-        s = slashPos > -1 ? s.substring(slashPos) : '';
-        let hostport = authority;
-        const atPos = authority.indexOf('@');
-        if (atPos > -1) {
-            const userinfo = authority.substring(0, atPos);
-            hostport = authority.substring(atPos + 1);
-            const uColon = userinfo.indexOf(':');
-            if (uColon > -1) {
-                username = userinfo.substring(0, uColon);
-                password = userinfo.substring(uColon + 1);
-            } else {
-                username = userinfo;
-            }
-        }
-        const pColon = hostport.lastIndexOf(':');
-        if (pColon > -1) {
-            const maybePort = hostport.substring(pColon + 1);
-            if (maybePort !== '') {
-                if (!/^[0-9]+$/.test(maybePort)) {
-                    throw new Error('Invalid port');
-                }
-                port = maybePort;
-            }
-        }
-    }
-
-    const path = s;
-    return { protocol, username, password, port, query, fragment, path };
-}
+import { rust } from '../engineloader';
 
 /**
  * All the identifying properties of a resource.
@@ -149,47 +65,54 @@ class ResourceId {
      * @throws {Error} - On an invalid resource URI.
      */
     static fromURI(uri, legacyNamespace?, legacyType?) {
-        let uriComponents;
-        try {
-            uriComponents = parseUri(uri);
-        } catch (err){
-            throw new Error('Invalid URI: ' + uri);
-        }
-
-        const scheme = uriComponents.protocol;
-        // Accept legacy identifiers with missing URI scheme as valid
-        if (scheme && scheme !== RESOURCE_SCHEME) {
-            throw new Error('Invalid URI scheme: ' + uri);
-        }
-        if (uriComponents.username || uriComponents.password || uriComponents.port || uriComponents.query) {
-            throw new Error('Invalid resource URI format: ' + uri);
-        }
-
-        let namespace, type;
-        let id = uriComponents.fragment;
-        if (!id) {
-            // Legacy format where the whole path is the ID
-            namespace = legacyNamespace;
-            type = legacyType;
-            id = uriComponents.path;
-        } else {
-            const qualifiedType = uriComponents.path;
-            namespace = ModelUtils.getNamespace(qualifiedType);
-            type = ModelUtils.getShortName(qualifiedType);
-        }
-
-        return new ResourceId(namespace, type, decodeURIComponent(id));
+        const result: { namespace: string, type: string, id: string } = rust.resourceIdFromURI(uri, legacyNamespace, legacyType) as any;
+        return new ResourceId(result.namespace, result.type, result.id);
     }
 
     /**
      * URI representation of this identifier.
      * @return {String} A URI.
      */
-    toURI() {
-        const qualifiedType = ModelUtils.getFullyQualifiedName(this.namespace, this.type);
-        return RESOURCE_SCHEME + ':' +  qualifiedType + '#' + encodeURI(this.id);
+    toURI(): string {
+        return rust.resourceIdToURI(this.namespace, this.type, this.id);
     }
 
+}
+
+/**
+ * `ResourceId.fromURI` over many URIs at once, in one engine call: a
+ * relationship-typed map's values are read with one crossing per map
+ * rather than one per value.
+ * @param {String[]} uris - Resource URIs, all read with the same legacy arguments.
+ * @param {String} [legacyNamespace] - Namespace to use for legacy resource identifiers.
+ * @param {String} [legacyType] - Type to use for legacy resource identifiers.
+ * @return {Array} one ResourceId per URI, or `undefined` where the URI does
+ * not parse (or has an empty part): the caller reads that one with
+ * `ResourceId.fromURI`, which throws its error at the same point.
+ * @internal
+ */
+export function resourceIdsFromURIs(uris: string[], legacyNamespace?: string, legacyType?: string): (ResourceId | undefined)[] {
+    const fields = rust.resourceIdsFromURIs(uris, legacyNamespace, legacyType);
+    const result: (ResourceId | undefined)[] = new Array(uris.length);
+    for (let i = 0, at = 0; i < uris.length; i++, at += 3) {
+        const namespace = fields[at], type = fields[at + 1], id = fields[at + 2];
+        // An empty part is left to `fromURI`, whose constructor throws for it.
+        result[i] = namespace && type && id ? new ResourceId(namespace, type, id) : undefined;
+    }
+    return result;
+}
+
+/**
+ * `ResourceId.prototype.toURI` over many identifiers at once, in one engine
+ * call: a relationship-typed map's values are written with one crossing per
+ * map rather than one per value.
+ * @param {String[]} fields - Three slots per identifier: namespace, type and id.
+ * @return {Array} one URI per identifier, or `undefined` where it is not
+ * valid: the caller writes that one the usual way, which throws its error.
+ * @internal
+ */
+export function resourceIdsToURIs(fields: unknown[]): (string | undefined)[] {
+    return rust.resourceIdsToURIs(fields);
 }
 
 export { ResourceId };

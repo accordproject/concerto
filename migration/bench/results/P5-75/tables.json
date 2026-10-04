@@ -1,0 +1,145 @@
+[
+  {
+    "op": "get_namespaces_first",
+    "set": "concerto-core-test-data",
+    "rounds": 3,
+    "tsUs": 0.9970000000000001,
+    "beforeUs": 23.272000000000002,
+    "nowUs": 0.46749999999999997,
+    "beforeXts": 23.342026078234703,
+    "nowXts": 0.46890672016048135,
+    "nowXbefore": 0.02008851839119972
+  },
+  {
+    "op": "get_namespaces_first",
+    "set": "conformance",
+    "rounds": 3,
+    "tsUs": 0.809,
+    "beforeUs": 24.1585,
+    "nowUs": 0.2545,
+    "beforeXts": 29.862175525339925,
+    "nowXts": 0.3145859085290482,
+    "nowXbefore": 0.010534594449158682
+  },
+  {
+    "op": "get_namespaces_first",
+    "set": "synthetic-large",
+    "rounds": 3,
+    "tsUs": 0.13899999999999998,
+    "beforeUs": 1.7959999999999998,
+    "nowUs": 0.23900000000000002,
+    "beforeXts": 12.920863309352518,
+    "nowXts": 1.719424460431655,
+    "nowXbefore": 0.13307349665924278
+  },
+  {
+    "op": "get_namespaces_after_change",
+    "set": "concerto-core-test-data",
+    "rounds": 3,
+    "tsUs": 3.0035,
+    "beforeUs": 34.1875,
+    "nowUs": 2.503,
+    "beforeXts": 11.382553687364743,
+    "nowXts": 0.8333610787414684,
+    "nowXbefore": 0.07321389396709324
+  },
+  {
+    "op": "get_namespaces_after_change",
+    "set": "conformance",
+    "rounds": 3,
+    "tsUs": 1.4169999999999998,
+    "beforeUs": 26.164499999999997,
+    "nowUs": 0.621,
+    "beforeXts": 18.464714184897673,
+    "nowXts": 0.43824982357092457,
+    "nowXbefore": 0.02373444934930918
+  },
+  {
+    "op": "get_namespaces_after_change",
+    "set": "synthetic-large",
+    "rounds": 3,
+    "tsUs": 1.9095,
+    "beforeUs": 8.696,
+    "nowUs": 1.476,
+    "beforeXts": 4.554071746530505,
+    "nowXts": 0.7729772191673213,
+    "nowXbefore": 0.16973321067157315
+  },
+  {
+    "op": "get_namespaces",
+    "set": "concerto-core-test-data",
+    "rounds": 3,
+    "tsUs": 0.7505000000000001,
+    "beforeUs": 0.27149999999999996,
+    "nowUs": 0.24899999999999997,
+    "beforeXts": 0.3617588274483677,
+    "nowXts": 0.3317788141239173,
+    "nowXbefore": 0.9171270718232044
+  },
+  {
+    "op": "get_namespaces",
+    "set": "conformance",
+    "rounds": 3,
+    "tsUs": 0.9065,
+    "beforeUs": 0.265,
+    "nowUs": 0.22599999999999998,
+    "beforeXts": 0.29233314947600664,
+    "nowXts": 0.24931053502482073,
+    "nowXbefore": 0.8528301886792452
+  },
+  {
+    "op": "get_namespaces",
+    "set": "synthetic-large",
+    "rounds": 3,
+    "tsUs": 0.1505,
+    "beforeUs": 0.251,
+    "nowUs": 0.2175,
+    "beforeXts": 1.6677740863787376,
+    "nowXts": 1.4451827242524917,
+    "nowXbefore": 0.8665338645418327
+  },
+  {
+    "op": "add_model_file",
+    "set": "concerto-core-test-data",
+    "rounds": 3,
+    "tsUs": 55.67908571428572,
+    "beforeUs": 141.6339,
+    "nowUs": 143.9532,
+    "beforeXts": 2.543754053843249,
+    "nowXts": 2.5854088326573508,
+    "nowXbefore": 1.0163753169262444
+  },
+  {
+    "op": "add_model_file",
+    "set": "conformance",
+    "rounds": 3,
+    "tsUs": 17.415073170731706,
+    "beforeUs": 72.1009512195122,
+    "nowUs": 73.93364634146342,
+    "beforeXts": 4.140146326843301,
+    "nowXts": 4.245382469349512,
+    "nowXbefore": 1.025418459686774
+  },
+  {
+    "op": "add_model_file",
+    "set": "synthetic-large",
+    "rounds": 3,
+    "tsUs": 1726.5040000000001,
+    "beforeUs": 7059.96,
+    "nowUs": 7376.4625,
+    "beforeXts": 4.089165156871921,
+    "nowXts": 4.272485033339048,
+    "nowXbefore": 1.0448306364342006
+  },
+  {
+    "op": "mm_new",
+    "set": "conformance",
+    "rounds": 3,
+    "tsUs": 77.16899999999998,
+    "beforeUs": 141.82699999999997,
+    "nowUs": 143.653,
+    "beforeXts": 1.8378753126255363,
+    "nowXts": 1.8615376640879113,
+    "nowXbefore": 1.012874840474663
+  }
+]

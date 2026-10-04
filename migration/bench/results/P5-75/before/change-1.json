@@ -1,0 +1,40 @@
+{
+  "tool": "p575-change",
+  "coreDist": "/home/user/wt/P5-75/concerto/packages/concerto-core/dist-before",
+  "coreVersion": "5.0.0",
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "loadavgEnd": [
+    1.73,
+    2.47,
+    3.09
+  ],
+  "samples": 30,
+  "warmup": 5,
+  "results": [
+    {
+      "op": "get_namespaces_after_change",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "namespaces": 37,
+      "medianUs": 57.5715,
+      "samples": 30
+    },
+    {
+      "op": "get_namespaces_after_change",
+      "set": "conformance",
+      "n": 1,
+      "namespaces": 43,
+      "medianUs": 26.164499999999997,
+      "samples": 30
+    },
+    {
+      "op": "get_namespaces_after_change",
+      "set": "synthetic-large",
+      "n": 1,
+      "namespaces": 3,
+      "medianUs": 10.198,
+      "samples": 30
+    }
+  ]
+}

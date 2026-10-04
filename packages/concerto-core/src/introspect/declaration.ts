@@ -14,13 +14,13 @@
 
 import Decorated from './decorated';
 import type { AstNode } from './decorated';
-import ModelUtil from '../modelutil';
 import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
+import { rust, engineViews } from '../engineloader';
 
 /**
  * Declaration defines the structure (model/schema) of composite data.
@@ -60,12 +60,19 @@ class Declaration extends Decorated {
     process() {
         super.process();
 
-        if (!ModelUtil.isValidIdentifier(this.ast.name)){
+        // `modelUtilIsValidIdentifier` and
+        // `modelUtilGetFullyQualifiedName`, read from the
+        // file's view snapshot while its declarations are
+        // built (engine/views.ts).
+        const views = engineViews();
+        if (!views.declarationIsValidIdentifier(this)) {
             throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
         }
-
-        this.name = this.ast.name;
-        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
+        // `declarationIsValidIdentifier` is a plain boolean function, not a
+        // type predicate, so `this.ast.name` is not narrowed from
+        // `string | undefined` by the check above.
+        this.name = this.ast.name as string;
+        this.fqn = views.declarationFullyQualifiedName(this);
     }
 
     /**
@@ -79,17 +86,13 @@ class Declaration extends Decorated {
      */
     validate(...args: any[]) {
         super.validate(...args);
-        const modelFile = this.getModelFile();
-
-        // #648 - check for clashes against imported types
-        if (modelFile.isImportedType(this.getName())) {
-            const dangerouslyAllowReservedSystemTypeNamesInUserModels = Boolean(modelFile.getModelManager()?.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels);
-            if (dangerouslyAllowReservedSystemTypeNamesInUserModels && this.isReservedSystemTypeImport(modelFile, this.getName())) {
-                return;
-            }
-
-            throw new IllegalModelException(`Type '${this.getName()}' clashes with an imported type with the same name.`, this.modelFile, this.ast.location);
-        }
+        // Check for clashes against imported types (accordproject/concerto#648).
+        // The rule runs in the engine (`declarationValidate`) over
+        // this view's collaborators (`getModelFile().isImportedType`, the
+        // manager's `dangerouslyAllowReservedSystemTypeNamesInUserModels`
+        // option and `isReservedSystemTypeImport`), and throws the
+        // IllegalModelException TS throws.
+        rust.declarationValidate(this);
     }
 
     /**
@@ -100,21 +103,12 @@ class Declaration extends Decorated {
      * @returns {boolean} true if the resolved import is a reserved system type
      */
     private isReservedSystemTypeImport(modelFile: ModelFile, typeName: string): boolean {
-        const importedType = modelFile.getType(typeName);
-        if (!importedType || typeof importedType === 'string') {
-            return false;
-        }
-
-        const importedModelFile = importedType.getModelFile();
-        if (!importedModelFile || !importedModelFile.isSystemModelFile()) {
-            return false;
-        }
-
-        return importedType.isConcept()
-            || importedType.isAsset()
-            || importedType.isTransaction()
-            || importedType.isParticipant()
-            || importedType.isEvent();
+        // Decided in Rust (concerto-wasm
+        // `declarationIsReservedSystemTypeImport`) over
+        // `modelFile.getType(typeName)` and the declaration it resolves to:
+        // a concept, asset, transaction, participant or event of a system
+        // model file.
+        return rust.declarationIsReservedSystemTypeImport(modelFile, typeName);
     }
 
     /**

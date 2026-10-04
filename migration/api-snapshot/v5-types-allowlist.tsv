@@ -1,0 +1,7 @@
+# P5-84 (accordproject/concerto-rust#430): public .d.ts member types that may
+# differ from the published concerto-core 5.0.0 by becoming `never`, or `any`
+# where 5.0.0 had a concrete type (guardrails rule 5, see v5-types.mjs).
+# Each row needs a BC row of migration/BREAKING-CHANGES-PLAN.md that makes
+# the change intended. Columns, tab-separated:
+#   key (as v5-types.mjs prints it)  v5.0.0 type  current type  BC-nn  note
+# No rows: every compared member type matches its 5.0.0 kind.

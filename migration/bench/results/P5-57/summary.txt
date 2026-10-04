@@ -1,0 +1,36 @@
+TS API ms, DecoratorManager.extractDecorators (per-round medians -> median of 3)
+synthetic-large
+  ts 12.2/10.8/16.0 => 12.20
+  engine-base 46.4/57.8/55.0 => 55.05
+  engine-new 34.6/34.0/33.6 => 33.96
+  percall-base 45.6/73.5/49.8 => 49.84
+  percall-new 64.0/44.4/41.4 => 44.35
+  ratios vs TS: resident base 4.51x new 2.78x; percall base 4.08x new 3.63x
+  new/base: resident 0.617; percall 0.890
+conformance
+  ts 5.2/3.1/3.9 => 3.94
+  engine-base 7.6/9.4/7.6 => 7.64
+  engine-new 7.1/6.8/8.3 => 7.07
+  percall-base 16.7/19.7/14.4 => 16.65
+  percall-new 18.1/10.0/15.0 => 15.00
+  ratios vs TS: resident base 1.94x new 1.80x; percall base 4.23x new 3.81x
+  new/base: resident 0.925; percall 0.901
+concerto-core-test-data
+  ts 10.7/13.5/12.9 => 12.90
+  engine-base 20.7/27.5/28.0 => 27.54
+  engine-new 17.7/18.0/18.5 => 17.96
+  percall-base 40.5/42.7/33.0 => 40.45
+  percall-new 39.4/26.1/41.2 => 39.43
+  ratios vs TS: resident base 2.13x new 1.39x; percall base 3.14x new 3.06x
+  new/base: resident 0.652; percall 0.975
+
+native p557-native, DCS extract (ExtractAll, locale en) incl. JSON encode, ms (median_us per round -> median of 3), Value route -> direct encoding
+synthetic-large (commands 786, identity checked 12)
+  removeDecoratorsFromModel=false: value 25.54/16.38/24.87 => 24.87; direct 19.70/13.03/19.40 => 19.40; delta -5.47 ms, ratio 0.780
+  removeDecoratorsFromModel=true: value 21.38/14.71/21.55 => 21.38; direct 17.11/11.49/17.14 => 17.11; delta -4.26 ms, ratio 0.801
+conformance (commands 106, identity checked 12)
+  removeDecoratorsFromModel=false: value 3.56/3.65/4.15 => 3.65; direct 3.23/3.52/3.94 => 3.52; delta -0.13 ms, ratio 0.965
+  removeDecoratorsFromModel=true: value 3.32/3.39/3.72 => 3.39; direct 3.26/3.17/3.44 => 3.26; delta -0.13 ms, ratio 0.962
+concerto-core-test-data (commands 539, identity checked 12)
+  removeDecoratorsFromModel=false: value 10.45/10.54/10.36 => 10.45; direct 9.63/9.60/8.66 => 9.60; delta -0.85 ms, ratio 0.919
+  removeDecoratorsFromModel=true: value 8.95/9.33/9.18 => 9.18; direct 8.52/7.72/7.93 => 7.93; delta -1.25 ms, ratio 0.863

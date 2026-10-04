@@ -1,0 +1,519 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [
+    {
+      "$class": "concerto.metamodel@1.0.0.Decorator",
+      "name": "NamespaceDeprecated",
+      "arguments": []
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.Decorator",
+      "name": "Namespace",
+      "arguments": []
+    }
+  ],
+  "namespace": "test@1.0.0",
+  "imports": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ImportType",
+      "name": "Decorator",
+      "namespace": "concerto.decorator@1.0.0"
+    }
+  ],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.StringScalar",
+      "name": "SSN",
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "Declaration",
+          "arguments": []
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "NamespaceDeclaration",
+          "arguments": []
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "argumentsTest",
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "inputString"
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": 2.5
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Editable",
+      "isAbstract": false,
+      "properties": [],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Decorator"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Custom",
+      "isAbstract": false,
+      "properties": [],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Decorator"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Person",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "firstName",
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Custom"
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Type",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "Property"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "lastName",
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Type",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "Property"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "bio",
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Type",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "Property"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "ssn",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "SSN"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "address1",
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Type",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "Property"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "address2",
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Type",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "Property"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "city",
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Type",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "Property"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "country",
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Property",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "DeclarationProperty",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceDeclarationProperty",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceProperty",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceDeclarationPropertyType",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespacePropertyType",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "DeclarationPropertyType",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "PropertyType",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Type",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "Property"
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceDeclarationTypeProperties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Properties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "DeclarationProperties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceDeclarationProperties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceProperties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceTypeProperties",
+              "arguments": []
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "zip",
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Properties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "DeclarationProperties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceDeclarationProperties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceProperties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "DeclarationTypeProperties",
+              "arguments": []
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "dictionary",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Dictionary"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "Editable"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+      "name": "Dictionary",
+      "key": {
+        "$class": "concerto.metamodel@1.0.0.StringMapKeyType",
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "MapElement",
+            "arguments": []
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "DeclarationMapElement",
+            "arguments": []
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "NamespaceDeclarationMapElement",
+            "arguments": []
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "NamespaceMapElement",
+            "arguments": []
+          }
+        ]
+      },
+      "value": {
+        "$class": "concerto.metamodel@1.0.0.StringMapValueType",
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "NamespaceDeclarationTypeMapElement",
+            "arguments": []
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "MapElement",
+            "arguments": []
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "NamespaceTypeMapElement",
+            "arguments": []
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "DeclarationTypeMapElement",
+            "arguments": []
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Type",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "MapValue"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+      "name": "Rolodex",
+      "key": {
+        "$class": "concerto.metamodel@1.0.0.StringMapKeyType",
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "MapElement",
+            "arguments": []
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "NamespaceMapElement",
+            "arguments": []
+          }
+        ]
+      },
+      "value": {
+        "$class": "concerto.metamodel@1.0.0.StringMapValueType",
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "MapElement",
+            "arguments": []
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "NamespaceTypeMapElement",
+            "arguments": []
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Type",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "MapValue"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "Miscellaneous",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "country",
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Property",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceProperty",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Properties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceProperties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "PropertiesType",
+              "arguments": []
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "USA"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "zip",
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Properties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "NamespaceProperties",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "PropertiesType",
+              "arguments": []
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "dictionary"
+        }
+      ]
+    }
+  ]
+}

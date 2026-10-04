@@ -1,0 +1,15 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "test.version@1.0.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Foo",
+      "isAbstract": false,
+      "properties": []
+    }
+  ],
+  "concertoVersion": ">= 1.0.0"
+}

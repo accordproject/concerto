@@ -1,0 +1,10 @@
+# Recorded oracle fixtures are generated output (74 MB, ~15.6k files):
+# regenerate them with the recorder against the frozen reference package
+# (see README.md). They are kept out of the concerto PR on purpose.
+fixtures/
+
+# The CTO -> AST cache follows the same rule: it is generated from the
+# corpus above, so it is regenerated whenever the corpus is (see README.md
+# "CTO -> AST cache for the native harness"). results/cto-cache.json is the
+# small, committed evidence manifest for it.
+cto-cache/

@@ -1,0 +1,31 @@
+{
+  "set": "synthetic-large",
+  "approach": "b-all",
+  "mode": "memory",
+  "coreVersion": "5.0.0",
+  "coreDist": "/home/user/wt/P5-108/concerto/packages/concerto-core/dist",
+  "engineModule": "@accordproject/concerto-engine",
+  "node": "v22.22.2",
+  "platformModels": 1,
+  "held": 100,
+  "before": {
+    "wasmBytes": 7798784,
+    "unfinalized": 0,
+    "rss": 199860224,
+    "heapUsed": 27742792,
+    "external": 10177338,
+    "arrayBuffers": 385204
+  },
+  "after": {
+    "wasmBytes": 13762560,
+    "unfinalized": 100,
+    "rss": 216899584,
+    "heapUsed": 29985992,
+    "external": 16141154,
+    "arrayBuffers": 385204
+  },
+  "wasmBytesPerManager": 59637.76,
+  "rssBytesPerManager": 170393.6,
+  "heapBytesPerManager": 22432,
+  "heldCheck": 100
+}

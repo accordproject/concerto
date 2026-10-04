@@ -1,0 +1,80 @@
+name: migration-guardrails
+
+# P0-02(B): guards the Rust migration's invariants on every PR — see
+# RUST_MIGRATION_PLAN.md §2.1 and §4 (task P0-02). Fails the build if a PR:
+#   - touches packages/concerto-core/test/**, except allow-listed hunks
+#     that relax an exact-message assertion to a class check (P5-09; see
+#     migration/guardrails/test-message-relaxations.tsv), and lines inside
+#     the approved test-case rewrite scopes (P5-33; see
+#     migration/guardrails/test-case-rewrites.tsv)
+#   - changes the `nyc` coverage-threshold block in
+#     packages/concerto-core/package.json
+#   - changes the exported symbol list of packages/concerto-core/src/index.ts
+#   - drifts from the committed concerto-core API (.d.ts) snapshot under
+#     migration/api-snapshot/
+#   - turns a public concerto-core member type into `never`, or into `any`
+#     where the published 5.0.0 had a concrete type, without an allow-list
+#     row naming a BC row, or breaks the `tsc --strict` consumer of the
+#     methods P5-84 restored (migration/api-snapshot/v5-types.mjs,
+#     accordproject/concerto-rust#430)
+#   - leaves the seam ledger out of step with the source: a member, or a
+#     RUST row that makes no engine call, or a PARTIAL row that now does
+#     (migration/ledger/extract-members.js --check, accordproject/concerto-rust#261)
+#   - adds a source comment, in packages/concerto-core/src or in the pinned
+#     concerto-rust checkout's concerto-*/src, that names a migration task id
+#     or a bare or concerto-rust issue number (the comment policy,
+#     migration/guardrails/comment-policy.mjs, accordproject/concerto-rust#459)
+#
+# This is intentionally separate from the package's own CI so it keeps
+# working (and stays easy to find) regardless of how that pipeline evolves
+# during the migration.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check-guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # check-guardrails.mjs diffs against origin/${{ github.base_ref }},
+          # so history back to the merge base must be present.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # concerto-core loads the Rust engine when it is imported, so the build
+      # needs it (accordproject/concerto-rust#259).
+      - name: Build the Rust engine (concerto-wasm)
+        uses: ./.github/actions/concerto-engine
+
+      - name: Install workspace dependencies
+        run: npm ci
+
+      # concerto-core's .d.ts build (API snapshot rule) imports the other
+      # workspace packages, so they must be built first, as build.yml does.
+      - name: Build workspace packages
+        run: npm run build
+
+      - name: Self-test the test-edit relaxation, rewrite and comment-policy guards, and the v5.0.0 .d.ts type check
+        run: node --test migration/guardrails/relaxations.test.mjs migration/guardrails/rewrites.test.mjs migration/guardrails/comment-policy.test.mjs migration/api-snapshot/v5-types.test.mjs
+
+      - name: Check the seam ledger against the source (members, engine calls)
+        run: node migration/ledger/extract-members.js --check migration/ledger/SEAM_LEDGER.tsv
+
+      # Rule 6 scans the concerto-rust checkout the engine action pins
+      # (.github/actions/concerto-engine/action.yml), so that pin must be a
+      # concerto-rust commit that has the comment policy pass: merge the
+      # concerto-rust comment-policy PR first, then bump the pin, before a PR
+      # into main runs this job. concerto-rust's own CI runs the same check on
+      # its PRs (its comment-policy job).
+      - name: Run migration guardrails
+        run: |
+          node migration/bin/check-guardrails.mjs --base-ref "origin/${{ github.base_ref }}" --rust-root ../concerto-rust

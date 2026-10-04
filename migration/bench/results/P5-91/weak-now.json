@@ -1,0 +1,60 @@
+{
+  "coreDist": "/Users/matt/dev/gh/accordproject/concerto-migration/wt/P5-91/concerto/packages/concerto-core/dist",
+  "mode": "weak",
+  "rows": [
+    {
+      "op": "modelfile_new",
+      "set": "concerto-core-test-data",
+      "items": 210,
+      "lookups": 11,
+      "writes": 2.1142857142857143,
+      "inserts": 2.1142857142857143,
+      "finalizerRegisters": 1
+    },
+    {
+      "op": "add_model_file",
+      "set": "concerto-core-test-data",
+      "items": 210,
+      "lookups": 15.257142857142858,
+      "writes": 2.4571428571428573,
+      "inserts": 2.4571428571428573,
+      "finalizerRegisters": 1.0285714285714285
+    },
+    {
+      "op": "modelfile_new",
+      "set": "conformance",
+      "items": 205,
+      "lookups": 11,
+      "writes": 2,
+      "inserts": 2,
+      "finalizerRegisters": 1
+    },
+    {
+      "op": "add_model_file",
+      "set": "conformance",
+      "items": 205,
+      "lookups": 15.073170731707316,
+      "writes": 2.292682926829268,
+      "inserts": 2.292682926829268,
+      "finalizerRegisters": 1.024390243902439
+    },
+    {
+      "op": "modelfile_new",
+      "set": "synthetic-large",
+      "items": 200,
+      "lookups": 11,
+      "writes": 2,
+      "inserts": 2,
+      "finalizerRegisters": 1
+    },
+    {
+      "op": "add_model_file",
+      "set": "synthetic-large",
+      "items": 200,
+      "lookups": 58,
+      "writes": 14,
+      "inserts": 14,
+      "finalizerRegisters": 2
+    }
+  ]
+}

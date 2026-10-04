@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-import { NullUtil } from '@accordproject/concerto-util';
-const { isNull } = NullUtil;
 import Validator from './validator';
 
 // Types needed for TypeScript generation.
@@ -26,6 +24,7 @@ import type { ValidatedElement, NumberDomainValidatorAst } from './validator';
 import type Field from './field';
 import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
+import { rust } from '../engineloader';
 
 /**
  * A Validator to enforce that non null numeric values are between two values.
@@ -35,8 +34,9 @@ import type ScalarDeclaration from './scalardeclaration';
  */
 class NumberValidator extends Validator{
     declare validator: NumberDomainValidatorAst;
-    lowerBound: number | null;
-    upperBound: number | null;
+    // Definitely assigned: by the constructor, or from the engine snapshot.
+    lowerBound!: number | null;
+    upperBound!: number | null;
 
     /**
      * Create a NumberValidator.
@@ -47,40 +47,7 @@ class NumberValidator extends Validator{
      */
     constructor(field: ValidatedElement, ast: NumberDomainValidatorAst) {
         super(field, ast);
-
-        this.lowerBound = null;
-        this.upperBound = null;
-
-        // the hasOwnProperty guards establish that the bound is present
-        if(Object.prototype.hasOwnProperty.call(ast, 'lower')) {
-            this.lowerBound = ast.lower as number;
-        }
-
-        if(Object.prototype.hasOwnProperty.call(ast, 'upper')) {
-            this.upperBound = ast.upper as number;
-        }
-
-        if(this.lowerBound === null && this.upperBound === null) {
-            // can't specify no upper and lower value
-            this.reportError(null, 'Invalid range, lower and-or upper bound must be specified.');
-        } else if (this.lowerBound === null || this.upperBound === null) {
-            // this is fine and means that we don't need to check whether upper > lower
-        } else {
-            if(this.lowerBound > this.upperBound) {
-                this.reportError(null, 'Lower bound must be less than or equal to upper bound.');
-            }
-        }
-
-        if(this.field?.ast?.defaultValue !== undefined) {
-            let value = this.field.ast.defaultValue;
-            if(this.lowerBound !== null && value < this.lowerBound) {
-                this.reportError(null, `Value ${value} is outside lower bound ${this.lowerBound}`);
-            }
-
-            if(this.upperBound !== null && value > this.upperBound) {
-                this.reportError(null, `Value ${value} is outside upper bound ${this.upperBound}`);
-            }
-        }
+        Object.assign(this, rust.numberValidatorNew(this, ast));
     }
 
     /**
@@ -106,15 +73,7 @@ class NumberValidator extends Validator{
      * @private
      */
     validate(identifier: string | null, value: number): void {
-        if(value !== null) {
-            if(this.lowerBound !== null && value < this.lowerBound) {
-                this.reportError(identifier, `Value ${value} is outside lower bound ${this.lowerBound}`);
-            }
-
-            if(this.upperBound !== null && value > this.upperBound) {
-                this.reportError(identifier, `Value ${value} is outside upper bound ${this.upperBound}`);
-            }
-        }
+        rust.numberValidatorValidate(this, identifier, value);
     }
 
     /**
@@ -123,7 +82,7 @@ class NumberValidator extends Validator{
      * @private
      */
     toString(): string {
-        return 'NumberValidator lower: ' + this.lowerBound + ' upper: ' + this.upperBound;
+        return rust.numberValidatorToString(this);
     }
 
     /**
@@ -135,28 +94,7 @@ class NumberValidator extends Validator{
      * validator, false otherwise.
      */
     compatibleWith(other: Validator | null): boolean {
-        if (!(other instanceof NumberValidator)) {
-            return false;
-        }
-        const thisLowerBound = this.getLowerBound();
-        const otherLowerBound = other.getLowerBound();
-        if (isNull(thisLowerBound) && !isNull(otherLowerBound)) {
-            return false;
-        } else if (!isNull(thisLowerBound) && !isNull(otherLowerBound)) {
-            if (thisLowerBound < otherLowerBound) {
-                return false;
-            }
-        }
-        const thisUpperBound = this.getUpperBound();
-        const otherUpperBound = other.getUpperBound();
-        if (isNull(thisUpperBound) && !isNull(otherUpperBound)) {
-            return false;
-        } else if (!isNull(thisUpperBound) && !isNull(otherUpperBound)) {
-            if (thisUpperBound > otherUpperBound) {
-                return false;
-            }
-        }
-        return true;
+        return rust.numberValidatorCompatibleWith(this, other, NumberValidator);
     }
 }
 

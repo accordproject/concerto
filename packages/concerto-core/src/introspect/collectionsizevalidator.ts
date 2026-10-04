@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-import { NullUtil } from '@accordproject/concerto-util';
 import Validator from './validator';
 
 // Types needed for TypeScript generation.
@@ -20,8 +19,7 @@ import Validator from './validator';
 import type { ValidatedElement } from './validator';
 import type { ICollectionSizeValidator } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
-
-const { isNull } = NullUtil;
+import { rust } from '../engineloader';
 
 /**
  * A Validator to enforce that a collection (array or map) has a size within a specified range.
@@ -31,8 +29,9 @@ const { isNull } = NullUtil;
  */
 class CollectionSizeValidator extends Validator {
     declare validator: ICollectionSizeValidator;
-    minSize: number | null;
-    maxSize: number | null;
+    // Definitely assigned: by the constructor, or from the engine snapshot.
+    minSize!: number | null;
+    maxSize!: number | null;
 
     /**
      * Create a CollectionSizeValidator.
@@ -43,18 +42,7 @@ class CollectionSizeValidator extends Validator {
      */
     constructor(field: ValidatedElement, validator: ICollectionSizeValidator) {
         super(field, validator);
-        this.minSize = validator.minSize ?? null;
-        this.maxSize = validator.maxSize ?? null;
-
-        if (isNull(this.minSize) && isNull(this.maxSize)) {
-            this.reportError(field.getName(), 'Invalid collection size, minSize and/or maxSize must be specified.');
-        } else if ((this.minSize ?? 0) < 0 || (this.maxSize ?? 0) < 0) {
-            this.reportError(field.getName(), 'minSize and/or maxSize must be positive integers.');
-        } else if (isNull(this.minSize) || isNull(this.maxSize)) {
-            // this is fine and means that we don't need to check whether minSize > maxSize
-        } else if (this.minSize > this.maxSize) {
-            this.reportError(field.getName(), 'minSize must be less than or equal to maxSize.');
-        }
+        Object.assign(this, rust.collectionSizeValidatorNew(this, validator));
     }
 
     /**
@@ -65,12 +53,7 @@ class CollectionSizeValidator extends Validator {
      * @private
      */
     validate(identifier: string | null, value: number): void {
-        if(!isNull(this.minSize) && value < this.minSize) {
-            this.reportError(identifier, `Collection must contain at least ${this.minSize} elements.`);
-        }
-        if(!isNull(this.maxSize) && value > this.maxSize) {
-            this.reportError(identifier, `Collection must contain no more than ${this.maxSize} elements.`);
-        }
+        rust.collectionSizeValidatorValidate(this, identifier, value);
     }
 
     /**
@@ -98,31 +81,7 @@ class CollectionSizeValidator extends Validator {
      * validator, false otherwise.
      */
     compatibleWith(other: Validator | null): boolean {
-        if (!(other instanceof CollectionSizeValidator)) {
-            return false;
-        }
-
-        const thisMinSize = this.getMinSize();
-        const otherMinSize = other.getMinSize();
-        if (isNull(thisMinSize) && !isNull(otherMinSize)) {
-            return false;
-        } else if (!isNull(thisMinSize) && !isNull(otherMinSize)) {
-            if (thisMinSize < otherMinSize) {
-                return false;
-            }
-        }
-
-        const thisMaxSize = this.getMaxSize();
-        const otherMaxSize = other.getMaxSize();
-        if (isNull(thisMaxSize) && !isNull(otherMaxSize)) {
-            return false;
-        } else if (!isNull(thisMaxSize) && !isNull(otherMaxSize)) {
-            if (thisMaxSize > otherMaxSize) {
-                return false;
-            }
-        }
-
-        return true;
+        return rust.collectionSizeValidatorCompatibleWith(this, other, CollectionSizeValidator);
     }
 }
 

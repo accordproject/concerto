@@ -1,0 +1,23 @@
+now crossings start load 1.33 2.70 3.73
+now crossings done (1.33 2.70 3.73)
+before crossings start load 1.33 2.70 3.73
+before crossings done (1.46 2.71 3.73)
+round 1 ts-ref start load 1.46 2.71 3.73
+round 1 ts-ref end load 1.46 2.71 3.73
+round 1 now start load 1.46 2.71 3.73
+round 1 now end load 1.83 2.76 3.74
+round 1 before start load 1.83 2.76 3.74
+round 1 before end load 2.47 2.87 3.76
+round 2 ts-ref start load 1.65 2.56 3.58
+round 2 ts-ref end load 1.65 2.56 3.58
+round 2 before start load 1.65 2.56 3.58
+round 2 before end load 2.34 2.67 3.59
+round 2 now start load 1.52 1.81 2.76
+round 2 now end load 1.80 1.86 2.77
+round 3 ts-ref start load 1.80 1.86 2.77
+round 3 ts-ref end load 1.80 1.86 2.77
+round 3 now start load 1.80 1.86 2.77
+round 3 now end load 2.00 1.90 2.77
+round 3 before start load 1.43 1.77 2.70
+round 3 before end load 1.96 1.87 2.73
+timed done

@@ -1,0 +1,348 @@
+# Phase 5 gate checklist (task P5-01a)
+
+Maps each PLAN.md §0 done criterion to the exact command that judges it, the
+result that counts as passing, and where the evidence lands. Written so that
+once P4-08 (#67) and every other Phase 4 group lands, `migration/gate/run.mjs`
+(this directory) can run the whole thing mechanically and produce one report.
+
+This file only *checks*. It never fixes product code, never touches
+`packages/concerto-core/test/**`, never edits the canonical oracle corpus or
+`baseline.tsv`, and never changes concerto-validate-rs.
+
+## Maintainer decisions this checklist bakes in
+
+- **P4-12 (NAPI) is closed as not needed.** No criterion below depends on a
+  NAPI addon; the gate is WASM-only for the JS binding leg of §0.3.
+- **concerto-validate-rs is reference-only and is not gated.** `run.mjs`
+  still runs its `cargo test` (via `status.mjs`) for visibility, but a
+  validate-rs failure is never an "unexpected failure" for this gate and
+  never blocks it. D3 (folding it into concerto-rust) has not happened yet.
+- **The canonical corpus is pinned.** Every criterion that touches the
+  oracle uses the corpus at `migration/oracle/fixtures`, which must be the
+  tarball recorded from the draft release
+  `oracle-corpus-p107-06aa375` in `accordproject/concerto-rust`
+  (sha256 `e8a2bf72c7775a2d45123dea7b6ff897823c74a108603f5412251ced2619fce1`,
+  16,704 files, recorded from concerto `06aa375a6`). The gate never records
+  its own corpus (no `record-all.sh`, no `build-cto-cache.js`) and never
+  hand-edits or hand-merges `baseline.tsv` — a mismatch is regenerated with
+  `ORACLE_UPDATE_BASELINE=1` on a full run against the canonical corpus, and
+  a merge conflict on it takes the integration branch's version and
+  regenerates.
+- **The API snapshot must stay byte-identical.** §0.5 is judged by
+  `check-guardrails.mjs` rule 4 (the generated `.d.ts` for concerto-core
+  against the committed `migration/api-snapshot/`), not by inspection.
+- **`CONCERTO_ORACLE_FIXTURES` must be exported** for every command below
+  that touches the Rust engine's own oracle harness (`cargo test --test
+  oracle`) or `status.mjs`'s Rust cargo test/llvm-cov collection, pointed at
+  the canonical corpus (`.../concerto/migration/oracle/fixtures`, the
+  checkout whose `migration/ledger/` is present — see the ledger note
+  below). Worktrees are nested too deep for the harness to find the corpus
+  on its own, and a missing corpus panics naming what it tried; a run
+  without the variable set (from a worktree) is not evidence for §0.3's
+  native leg.
+  **This variable is Rust-only.** The JS-side oracle tools
+  (`migration/oracle/bin/{replay.js,coverage.sh,self-check.js}`) do not read
+  it at all — they always resolve fixtures relative to `migration/oracle/`
+  in whichever concerto checkout they run from, with no override flag on
+  `coverage.sh`. From a worktree, symlink the canonical corpus into place
+  first:
+  ```
+  ln -s <canonical concerto>/migration/oracle/fixtures migration/oracle/fixtures
+  ```
+  A worktree that skips this does not fail loudly — `coverage.sh` and
+  `replay.js` exit 0 against a near-empty corpus and report near-zero
+  coverage (single digits), which looks like a catastrophic regression but
+  is actually just "ran against nothing". Treat a coverage number that low
+  as a setup bug, not a finding, and check the symlink before trusting it.
+- **The oracle's owner attribution needs `migration/ledger/SEAM_LEDGER.tsv`
+  next to the fixtures' grandparent** (`<fixtures>/../../ledger/`). Extract
+  or point the corpus only at a concerto checkout whose `migration/ledger/`
+  is present, or the report's owner breakdown (`stays-ts` vs `unowned`) is
+  silently wrong — pass/fail and `baseline.tsv` are unaffected either way.
+- **`run.mjs`'s rust-mode steps (core-suite-rust, §0.1/§0.2; the oracle
+  WASM/JS-binding leg, §0.3c) resolve and honour `CONCERTO_ENGINE_MODULE`
+  explicitly** (task P5-01c, `accordproject/concerto-rust#250`), rather than
+  only relying on it being inherited from this process's own environment:
+  - If `CONCERTO_ENGINE_MODULE` is already set when `run.mjs` is invoked,
+    that exact path is used and passed through to the step's own
+    subprocess — **and if the file it names does not exist, the step fails
+    loudly** (an `unexpected` item, not a silent `na`/skip). This exists
+    because concerto-core's own fallback — the bare package
+    `@accordproject/concerto-engine` (`packages/concerto-engine/index.js`)
+    — resolves a *hardcoded* path one directory above `--rust-root`'s own
+    default, so from a worktree it can silently load the **shared clone's**
+    (possibly stale) prebuilt engine instead of the one this run is meant
+    to measure; an explicit but broken override must never fall back to
+    that either.
+  - Otherwise it falls back to `--rust-root`'s own default
+    (`<rust-root>/concerto-wasm/pkg/concerto-engine.cjs`, unchanged from
+    before). If that file doesn't exist either, the step is `na` (not built
+    yet), same as before.
+  - Either way, the resolved path and its build time (the file's mtime) are
+    recorded in `report.json` (`steps.<step>.engine_module`) and rendered
+    inline in `report.md`, next to that step's own numbers and in the §0.1/
+    §0.2/§0.3c criteria-summary lines, so a stale or wrong engine is visible
+    without having to dig into the raw logs.
+  - **`status.mjs`'s own rust-mode step honours it too.** `run.mjs`'s
+    `status` step forwards its own resolved `CONCERTO_ENGINE_MODULE` into
+    `status.mjs`'s child env, and `status.mjs`'s
+    `collectCoreTestsRustMode` resolves and honours it the same way (env
+    override wins and fails loudly if missing, else `<rustRoot>/
+    concerto-wasm/pkg/concerto-engine.cjs`) before spawning its own mocha
+    child — so `status.json`'s `metrics.concerto_core_tests.
+    engine_modes.rust` (and the `status` step's own `engine_module` in
+    `report.json`/`report.md`) reflect the same engine as the rest of the
+    run, not `status.mjs`'s hardcoded sibling default, whenever
+    `--rust-root` points elsewhere. A caller that runs `status.mjs`
+    directly (`--at`, the hourly report) still gets its old default
+    behaviour unless it exports `CONCERTO_ENGINE_MODULE` itself.
+
+## §0 criterion → command → evidence
+
+### 1. Behavioural (B) unit tests pass unchanged against the Rust-backed core
+
+- **Command:**
+  ```
+  cd packages/concerto-core
+  CONCERTO_ENGINE=rust \
+  CONCERTO_ENGINE_MODULE=<concerto-rust>/concerto-wasm/pkg/concerto-engine.cjs \
+  npx mocha -r ts-node/register --recursive -t 10000 --reporter json test/ \
+    > mocha-rust.json
+  ```
+  (`run.mjs`'s own `core_suite_rust` step runs exactly this, resolving
+  `CONCERTO_ENGINE_MODULE` itself per the note above if you don't export it;
+  `status.mjs`'s `metrics.concerto_core_tests.by_tag` carries the same
+  numbers for any other caller.)
+- **Expected:** every test tagged `B` in `migration/tags/test-tags.tsv`
+  passes. `test/**` is untouched (never edited to make this true).
+- **Evidence:** `migration/gate/reports/<run>/status.json`
+  → `metrics.concerto_core_tests.by_tag.tally.B`; raw mocha JSON under
+  `migration/gate/reports/<run>/logs/concerto-core/`.
+
+### 2. White-box (W) tests pass unchanged, or are lifted and signed off
+
+- **Command:** same run as §1, tally filtered to tag `W`; cross-checked
+  against `packages/concerto-core/test-lifted/**` (moved from
+  `migration/oracle/lifted/` by accordproject/concerto-rust#252) and the sign-off notes referenced
+  from `migration/ledger/SUMMARY.md` / the P2-10 tracking issues.
+- **Expected:** every `W` test passes via the P1-04 context-trait fallback,
+  **or** has a lifted black-box fixture under `packages/concerto-core/test-lifted/`
+  that a human reviewer signed off (D10). No `W` test is silently skipped.
+- **Evidence:** `status.json` → `metrics.concerto_core_tests.by_tag.tally.W`;
+  a diff of `packages/concerto-core/test-lifted/` file count against the W-test count
+  minus fallback-passing W tests (`run.mjs` reports the gap, not a verdict —
+  the sign-off itself is a human review artifact, not machine-checkable).
+
+### 3. Oracle corpus: coverage of the reference; 0 fail / 0 regressions / 0 harness errors on Rust native + WASM
+
+**Error parity is class, not message** (maintainer decision 2026-09-27, task
+P5-09, accordproject/concerto-rust#253). Rust must throw in the same scenarios
+as TS with the same exception class; the exception message text may differ.
+Both oracle legs below judge on that rule: a fixture whose outcome differs
+only in `error.message` passes (the native report and `replay.js` count it as
+`message_only` and list it under `message_diffs`, for information), while a
+throw/no-throw, class, component, location, value or effects difference is
+still a failure. A message-only difference is never a gate failure and never
+needs a `DIVERGENCES.md` row. The same rule lets a `packages/concerto-core/test/**`
+assertion on exact message text be relaxed to a class check, but only when it
+is listed in `migration/guardrails/test-message-relaxations.tsv` and signed off
+in review (`check-guardrails.mjs` rule 1, §5).
+
+**Corpus currency caveat, found by this task's dry run (2026-09-25).** P2-10
+(#54) and P2-11 (#55) both closed `mig:done`, each reporting corpus-only
+coverage of the reference at or above the unit suite's own figures. Running
+`coverage.sh --with-suite` against the **pinned canonical corpus**
+(`oracle-corpus-p107-06aa375`) today gives statements 95.38%, branches
+95.85%, functions 94.26%, lines 95.34% — branches clears the 94.8% floor,
+but statements/functions/lines fall short of the 99% floor P2-10/P2-11
+reported meeting. The likely explanation, given the corpus is pinned and
+this task must never regenerate it: **the pinned release draft predates
+some of P2-10's or P2-11's lifted fixtures**, i.e. it was cut before those
+tasks' final corpus state landed on the integration branch, or before
+some later fixture addition. This is a call for the maintainer (whether to
+re-cut `oracle-corpus-p107-*` after P2-10/P2-11's fixtures, or accept the
+current pin) — this task does not resolve it and does not touch the
+corpus. See the P5-01a status comment on accordproject/concerto-rust#145
+for the numbers as found.
+
+- **Corpus coverage of the reference (nyc, corpus-only driver):**
+  ```
+  CONCERTO_ORACLE_FIXTURES=<canonical fixtures> \
+  bash migration/oracle/bin/coverage.sh <workdir> --with-suite
+  ```
+  **Expected:** `migration/oracle/results/coverage.json` → `corpus.statements.pct`
+  and `corpus.lines.pct` ≥ 99, `corpus.branches.pct` ≥ 94.8 (the unit suite's
+  own coverage of the reference, §0.3's floor).
+
+  **The `--with-suite` leg runs the v5.0.0 suite, not today's `test/`**
+  (task P5-86, accordproject/concerto-rust#432). §0.3a measures coverage of
+  the frozen v5.0.0 reference, so the suite leg swaps in both `src/` and
+  `test/` from `git archive v5.0.0 -- packages/concerto-core/{src,test}`,
+  runs the v5.0.0 suite over the v5.0.0 source, and moves the workspace
+  `src/` and `test/` back unchanged afterwards. It does not run the
+  workspace `test/`: R1's approved test changes (P5-24 strict DateTime,
+  P5-33 and P5-49 black-box rewrites, P5-50, P5-52 `u`-flag RegExp, P5-63,
+  and the P5-09 allow-list in `migration/guardrails/`) assert R1 behaviour,
+  so they fail against v5.0.0 `src/` by design. Before this change the
+  runner reported FAIL on those failures (28 at the P5-82 gate) even with
+  the floor met. The other option, running today's `test/` and excluding
+  the allow-listed cases, was not taken: it would need a second
+  test-selection list that has to follow every future allow-list row, and
+  the black-box rewrites (P5-33, P5-49) replace whole cases, which an
+  exclusion list cannot map back to their v5.0.0 originals. The suite leg
+  only sets the "covered by suite" marks in `coverage-gaps.json`; the
+  `corpus.*` floor numbers come from leg 1 (corpus → frozen reference) and
+  do not depend on it.
+- **Native (`cargo test`):**
+  ```
+  CONCERTO_ORACLE_FIXTURES=<canonical fixtures> \
+  cargo test --release -p accordproject-concerto-core --test oracle
+  ```
+  (in the concerto-rust checkout, at the integration branch head).
+  **Expected:** `replays_the_oracle_corpus` passes with 0 failures,
+  0 regressions and 0 harness errors against `baseline.tsv` on the canonical
+  corpus plus the supplement. Unsupported fixtures (stays-ts and
+  not-yet-served ops) are reported, by owner, but do not count against the
+  gate (maintainer decision, 2026-09-27, #72).
+- **WASM (JS binding):**
+  ```
+  CONCERTO_ORACLE_FIXTURES=<canonical fixtures> \
+  node migration/oracle/bin/replay.js --engine <path to migration/oracle/lib/rust-adapter.js>
+  ```
+  **Expected:** same as native: 0 failures, 0 regressions and 0 harness
+  errors; unsupported fixtures are reported but not gating.
+- **Evidence:** `migration/oracle/results/{coverage,replay-reference,replay-<engine>}.json`,
+  copied into `migration/gate/reports/<run>/oracle/`.
+
+### 4. At least 70% of concerto-core logic, by weight, runs in Rust (D1)
+
+- **Command:** read the already-built ledger (regenerate only if stale):
+  ```
+  node migration/ledger/build-ledger.js   # only if SEAM_LEDGER.tsv is stale
+  cat migration/ledger/SUMMARY.md         # §1 headline table
+  ```
+- **Expected:** `SUMMARY.md` §1 "RUST+HYBRID weighted share (new D1
+  denominator)" ≥ 70%.
+- **Evidence:** `status.json` → `metrics.ledger.weighted_pct_rust_plus_hybrid`
+  (sourced from `SUMMARY.md`, not re-derived — see `status.mjs`'s own
+  comment on why re-summing `SEAM_LEDGER.tsv` directly reproduces the
+  superseded denominator).
+- **Current result: FAIL, D1 = 45.8%** (after `accordproject/concerto-rust#287`;
+  39.4% at P5-11, `accordproject/concerto-rust#276`, ledger rebuilt with
+  `build-ledger.js` on the integration head `f0f535612`).
+  The P5-01 evidence (85.3%, green) is stale: it predates two
+  reclassifications of rows that make no engine call.
+  - `accordproject/concerto-rust#261` demoted RUST rows with no engine call to
+    PARTIAL (D1 61.5% at #261, 57.4% after P5-10).
+  - P5-11 evaluated every PARTIAL row and every HYBRID row with no engine call.
+    By maintainer decision (2026-09-28, recorded on #276): no more code moves to
+    Rust for now; the 14 port candidates (weight 379.5) stay PARTIAL, deferred;
+    the rest are reclassified TS. The engine-call scan now also counts a call one
+    hop away through a same-module helper or local handle, which keeps 6 HYBRID
+    rows HYBRID.
+  - **D1 stays as defined, with the 70% bar** (the proposed D1′ was not
+    adopted), so §0.4 is reported honestly as FAIL. The maintainer accepts that
+    for now.
+  - The porting pause was lifted on 2026-09-28, and
+    `accordproject/concerto-rust#287` ported the 14 port candidates (PARTIAL →
+    RUST, ledger rebuilt with `build-ledger.js`): **D1 = 45.8%**, still FAIL.
+
+### 5. The public TS API is unchanged (exports, deep paths, `.d.ts` snapshot)
+
+- **Command:**
+  ```
+  node migration/bin/check-guardrails.mjs --base-ref origin/main
+  ```
+- **Expected:** exit 0. Rule 4 (the `.d.ts` snapshot) is the one that
+  actually judges §0.5; rules 1–3 (test/**, nyc thresholds, index.ts export
+  list) are guardrails this task must never trip, not the criterion itself.
+- **Evidence:** guardrails' own stdout/exit code, copied into
+  `migration/gate/reports/<run>/guardrails.log`.
+
+### 6. Rust test strength: llvm-cov ≥ 90% lines; cargo-mutants ≥ 85% catch rate
+
+- **llvm-cov:**
+  ```
+  cargo llvm-cov --workspace --summary-only   # in concerto-rust
+  ```
+  **Expected:** `concerto-core`'s (`accordproject-concerto-core`; `status.json` keys it as `per_crate_lines_pct['concerto-core']`) lines %
+  ≥ 90. Needs the `llvm-tools-preview` rustup component and `cargo-llvm-cov`
+  installed — a missing tool is an environment gap to fix, not a §0 failure,
+  but it means the criterion has **not been judged** and must be reported as
+  such, never silently skipped as "n/a = pass".
+- **cargo-mutants (validation modules only, task P5-06):**
+  ```
+  cargo mutants --package accordproject-concerto-core \
+    -- <validation module paths>
+  ```
+  **Expected:** catch rate ≥ 85%; every surviving mutant becomes a P5-06
+  test-writing task.
+  This is **distinct** from the oracle's own judge self-check
+  (`migration/oracle/results/self-check.json`), which checks that the
+  *oracle judge* catches seeded mutants of the *reference*, not that the
+  Rust *validation code* is well tested by `cargo-mutants`. `run.mjs` reports
+  both under separate labels so they are never conflated.
+- **Evidence:** `status.json` → `metrics.rust['concerto-rust'].llvm_cov`;
+  `migration/gate/reports/<run>/cargo-mutants.json` (new; §0.6's own report,
+  not produced by any existing script yet).
+
+### 7. Upstream conformance: harness current, CI green
+
+- **Command:**
+  ```
+  cd concerto-conformance && npm install && npm run test:semantic
+  ```
+- **Expected:** every scenario with a usable AST fixture passes (62/65 per
+  PLAN.md §1.2 as of the last count; `run.mjs` reports whatever the run
+  says, not a hardcoded number). The conformance **CI job** going green is
+  checked separately, by reading the workflow run for the current head via
+  the GitHub API/MCP tools — `run.mjs` cannot see GitHub Actions status from
+  inside the sandbox, so it reports the local run only and flags the CI
+  check as "read the Actions tab / API for this SHA" rather than guessing.
+- **Evidence:** `status.json` → `metrics.conformance`.
+
+## Also gated, even though it is not numbered in §0
+
+- **WASM size budget.** `concerto-wasm/build.sh` already fails the build
+  itself above `BUDGET` bytes (4 MiB, spike `REPORT.md` §1–2: half of
+  Chromium's 8 MiB synchronous-compile ceiling). `run.mjs` runs the build
+  and reports the optimised module's byte size either way, pass or fail.
+- **WASM smokes.** `concerto-wasm`'s `npm run smoke` (Node + headless
+  Chromium, `scripts/node-smoke.{cjs,mjs}` and `chromium-smoke.mjs`).
+  `run.mjs` runs it and reports each result file under
+  `concerto-wasm/results/smoke-*.json`.
+- **Full `status.mjs` (not `--fast`).** `run.mjs`'s baseline step. Includes
+  the concerto-core suite in both `CONCERTO_ENGINE=ts` and `rust`, Rust
+  `cargo test` + `llvm-cov` for both `concerto-rust` and (visibility only)
+  `concerto-validate-rs`, and conformance.
+
+## Failure classification (used by `run.mjs`'s report)
+
+Classification is failure-driven and lives in `migration/gate/classify.mjs`
+(unit tests: `node --test migration/gate/test/*.test.mjs`). Each failing
+step is broken into failing *items* (a §0 threshold, a mocha test fullTitle,
+a WASM smoke check, an oracle fixture, a WASM build/budget/install leg), and
+each item is one of:
+
+- **expected-pending** — the item matches an entry in one of the small,
+  explicit `KNOWN_*` sets in `classify.mjs`, each naming its owner and
+  reason. As of 2026-09-25 those are: the `ModelLoader #loadModelFromUrl
+  should load models` network test failing with a network-shaped error
+  (owner: the sandboxed environment, not a migration task); the two stale
+  `concerto-wasm` smoke checks (accordproject/concerto-rust#150); and the
+  31 WASM-oracle-leg disagreements filed as P4-09a
+  (accordproject/concerto-rust#157), pinned by fixture path (25
+  DecoratorManager, 6 ModelManager).
+- **unexpected** — anything else, including a failure the runner cannot
+  break down (unparsable output, a failure count that does not match the
+  identified failures, a truncated list, a metric that was not judged).
+  Filed as a new issue, or routed to the owning task's issue, per this
+  task's exit condition.
+
+A step is expected-pending only if every one of its failing items is. P4-08
+(#67) has no entry: nothing currently failing is owned by it (its exit
+condition is its group's B/W tests and oracle fixtures under
+`CONCERTO_ENGINE=rust`, which pass today apart from the network test, and
+`status.mjs` runs `CONCERTO_ENGINE=ts` only). A step whose tool is missing
+is reported as NOT RUN, never as a pass. The report lists any `--skip-*`
+flags used.

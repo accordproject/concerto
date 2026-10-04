@@ -1,0 +1,444 @@
+<title>Concerto Rust Migration Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;750&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (max 1120px) of numbered-by-topic sections; charts in 2-up grids that stack at phone width. */
+:root {
+  --bg: #f5f6f8; --surface: #ffffff; --ink: #121417; --ink-2: #4a505a; --ink-3: #6e7581;
+  --rule: #dfe2e7; --grid: #eceef1; --accent: #2a78d6; --accent-ink: #1c5cab;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
+  --good: #0ca30c; --warn: #fab219; --crit: #d03b3b; --neutral: #9aa1ab;
+  --chip: #e9edf3;
+  --f-display: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121417; --surface: #1a1c20; --ink: #f2f3f5; --ink-2: #c1c6ce; --ink-3: #979ea9;
+  --rule: #30343a; --grid: #262a2f; --accent: #3987e5; --accent-ink: #86b6ef;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --chip: #262a31; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #121417; --surface: #1a1c20; --ink: #f2f3f5; --ink-2: #c1c6ce; --ink-3: #979ea9;
+  --rule: #30343a; --grid: #262a2f; --accent: #3987e5; --accent-ink: #86b6ef;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --chip: #262a31; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; margin: 0; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(26px, 4vw, 36px); font-weight: 750; letter-spacing: -0.02em; line-height: 1.15; }
+h2 { font-size: 21px; font-weight: 750; letter-spacing: -0.01em; }
+h3 { font-size: 15px; font-weight: 600; }
+p { margin: 0; max-width: 72ch; }
+a { color: var(--accent-ink); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono, code { font-family: var(--f-mono); font-size: 0.86em; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+header.top { display: grid; gap: 10px; padding-bottom: 22px; border-bottom: 1px solid var(--rule); }
+header.top .lede { color: var(--ink-2); font-size: 16px; }
+section { padding-block: 34px 6px; display: grid; gap: 16px; }
+section > .head { display: grid; gap: 6px; }
+section > .head p { color: var(--ink-2); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.tile .k { font-size: 13px; color: var(--ink-3); }
+.tile .v { font-family: var(--f-display); font-size: 26px; font-weight: 750; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.tile .v small { font-size: 14px; font-weight: 500; color: var(--ink-3); }
+.tile .n { font-size: 13px; color: var(--ink-2); }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--chip); color: var(--ink-2); width: fit-content; }
+.pill i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--neutral); }
+.pill.ok i { background: var(--good); } .pill.bad i { background: var(--crit); } .pill.warn i { background: var(--warn); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 14px 10px; display: grid; gap: 8px; min-width: 0; }
+.card .sub { font-size: 13px; color: var(--ink-3); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+.sw.blk { height: 10px; width: 10px; border-radius: 2px; }
+.sw.dot { width: 8px; height: 8px; border-radius: 50%; }
+.sw.ring { width: 8px; height: 8px; border-radius: 50%; background: transparent !important; border: 2px solid var(--ink-3); }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { fill: var(--ink-3); font-family: var(--f-mono); font-size: 10.5px; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; padding: 7px 9px; font-size: 12px; line-height: 1.4; box-shadow: 0 4px 14px rgba(0,0,0,.12); min-width: 150px; max-width: 280px; z-index: 5; font-variant-numeric: tabular-nums; }
+.tip b { font-weight: 600; }
+.tip .row { display: flex; justify-content: space-between; gap: 12px; }
+.tip .row span:first-child { color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
+.tip .muted { color: var(--ink-3); }
+.note { font-size: 13px; color: var(--ink-3); max-width: 90ch; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.filters button { font: inherit; font-size: 13px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink-2); border-radius: 99px; padding: 4px 12px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tl { display: grid; gap: 0; border-left: 2px solid var(--rule); margin-left: 6px; }
+.tl .day { font-family: var(--f-mono); font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; padding: 16px 0 6px 18px; position: relative; }
+.tl .day::before { content: ""; position: absolute; left: -7px; top: 20px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--ink-3); }
+.tl .it { display: grid; grid-template-columns: 58px 1fr; gap: 10px; padding: 7px 0 7px 18px; min-width: 0; }
+.tl .it time { font-family: var(--f-mono); font-size: 12px; color: var(--ink-3); padding-top: 2px; font-variant-numeric: tabular-nums; }
+.tl .it .body { min-width: 0; display: grid; gap: 3px; }
+.tl .meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-3); }
+.kind { font-size: 11px; font-weight: 600; letter-spacing: .03em; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--rule); color: var(--ink-2); }
+.kind.decision { border-color: var(--accent); color: var(--accent-ink); }
+.kind.key { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 14px; }
+.list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.list li { display: grid; gap: 2px; padding-left: 14px; border-left: 3px solid var(--rule); }
+.list.w li { border-left-color: var(--good); }
+.list.c li { border-left-color: var(--warn); }
+.list.r li { border-left-color: var(--crit); }
+.list li b { font-weight: 600; }
+.list li span { color: var(--ink-2); font-size: 14px; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; font-size: 13px; min-width: 560px; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--ink-2); font-size: 12px; }
+td.num { text-align: right; font-family: var(--f-mono); }
+.bug-groups { display: grid; gap: 18px; }
+.nowbar { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink-2); padding: 8px 10px; border-radius: 6px; background: var(--chip); font-variant-numeric: tabular-nums; }
+.nowbar b { color: var(--ink); }
+#perf-now table { min-width: 480px; }
+.bug-groups h3 { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.bug-groups h3 small { font-weight: 400; color: var(--ink-3); font-size: 13px; }
+td .id { font-family: var(--f-mono); font-size: 12px; color: var(--ink-3); display: block; }
+table.bugs td:nth-child(2) { min-width: 240px; }
+details { font-size: 13px; }
+details table { margin-top: 8px; }
+details summary { cursor: pointer; color: var(--ink-2); font-size: 13.5px; }
+footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--rule); font-size: 12.5px; color: var(--ink-3); display: grid; gap: 6px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">accordproject · concerto-core → Rust engine · integration branch <span class="mono">claude/tender-pascal-ocwf9q</span></div>
+  <h1>Concerto Rust migration: progress log</h1>
+  <p class="lede" id="lede"></p>
+</header>
+
+<section id="status">
+  <div class="head"><h2>Where it stands</h2><p id="status-note"></p></div>
+  <div class="tiles" id="tiles"></div>
+</section>
+
+<section id="coverage">
+  <div class="head"><h2>Progress burn-down</h2>
+    <p>Three independent series. D1 and the oracle are hourly (UTC); each value is carried forward until the next sourced observation, and dots mark real observations. Nothing is interpolated.</p></div>
+  <div class="grid2">
+    <div class="card"><h3>Share of concerto-core logic in Rust (D1)</h3><div class="sub">Weighted seam-ledger share, % · bar is 70%</div>
+      <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>RUST + HYBRID (D1)</span><span><i class="sw" style="background:var(--s2)"></i>RUST only</span><span><i class="sw" style="background:var(--ink-3)"></i>70% bar</span></div>
+      <div class="chart" id="c-d1"></div></div>
+    <div class="card"><h3>Differential oracle fixtures</h3><div class="sub">Native Rust harness vs TS 5.0.0 reference, fixture count</div>
+      <div class="legend"><span><i class="sw blk" style="background:var(--s1)"></i>pass</span><span><i class="sw blk" style="background:var(--s8)"></i>fail (baselined)</span><span><i class="sw blk" style="background:var(--neutral)"></i>unsupported (stays TS)</span></div>
+      <div class="chart" id="c-oracle"></div></div>
+    <div class="card"><h3>Conformance: Rust-native harness on the integration branch</h3><div class="sub">concerto-conformance scenarios, run by the Rust harness (semantic runner, plus P5-62's instance runner) against concerto-rust <span class="mono">claude/tender-pascal-ocwf9q</span></div>
+      <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>passed</span><span><i class="sw" style="background:var(--ink-3)"></i>total in suite revision</span><span><i class="sw" style="background:var(--s2)"></i>skipped: @skip-rust</span><span><i class="sw" style="background:var(--s4)"></i>skipped: upstream @skip</span><span><i class="sw" style="background:var(--s8)"></i>skipped: missing step or fixture</span><span><i class="sw ring" style="border-color:var(--s7)"></i>JS harness (reference only)</span></div>
+      <div class="chart" id="c-conf"></div>
+      <p class="note">Before P5-62, the gap to 151 was harness coverage, not engine failures: the Rust runner lacked step definitions for the scenarios added by the promotion PRs (34 fail with "a step has no matching definition" when @skip-rust is included), and it had no instance runner, so the 42 instance scenarios never ran. The last point is P5-62's <b>draft harness</b> (conformance#42, not yet merged to conformance main). Labels give the suite revision; the total changed from 81 to 108, 116 and 158 as scenarios were added. JS-harness points are a secondary reference: npm concerto-core 5.0.0 on 27 Sep 08:51Z and the Rust engine build (P5-10c) on 27 Sep 23:31Z; the source does not name the engine for the 25-26 Sep points.</p></div>
+  </div>
+  <p class="note" id="cov-note"></p>
+</section>
+
+<section id="jobs">
+  <div class="head"><h2>Tasks over time</h2><p>Migration issues in accordproject/concerto-rust by lifecycle label, hourly. Tasks deferred to post-migration are excluded from the open stack.</p></div>
+  <div class="grid2">
+    <div class="card"><h3>Open tasks by state</h3>
+      <div class="legend" id="lg-jobs"></div>
+      <div class="chart" id="c-jobs"></div></div>
+    <div class="card"><h3>Cumulative tasks done</h3><div class="sub">Closed with <span class="mono">mig:done</span>; deferred to post-migration shown separately</div>
+      <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>done</span><span><i class="sw" style="background:var(--s2)"></i>post-migration (deferred)</span></div>
+      <div class="chart" id="c-done"></div></div>
+  </div>
+</section>
+
+<section id="perf">
+  <div class="head"><h2>Performance through the TS API</h2>
+    <p>Time with the Rust engine as a multiple of TS concerto-core 5.0.0 (× TS; below 1× is faster than TS), grouped into five kinds of operation. Each chart has one line per representative operation (up to four). Each point is one task's measurement run, plotted at the median across the model sets that run reported (test data, conformance models, synthetic large model, or the 500-instance workload). Log scale.</p>
+    <p class="note">Ratios are strictly comparable only within one run: the lines join different runs, on a laptop (hollow points) or a cloud container (filled points). Only merged work is shown. Lines use TS-API figures only; where a task measured several routes, the default resident or warm path is plotted. Crate-level (native Rust vs TS) figures, such as P5-48's, appear in the tables with their level. Unmerged spikes and superseded figures stay in perf.json. Decorator and DCS operations (decorateModels, extractDecorators, extractVocabularies, DCS validate, getDecorators) are included in the introspection chart, which draws two introspection and two decorator lines; its table lists every operation. No operation fell outside these five categories, so there is no "other" chart.</p></div>
+  <div class="card" id="perf-now"></div>
+  <div class="grid2" id="perf-grid"></div>
+  <p class="note" id="perf-note"></p>
+</section>
+
+<section id="timeline">
+  <div class="head"><h2>Decisions and plan changes</h2><p>Maintainer decisions as recorded on the tracker, with the plan changes that followed. Key turning points are marked.</p></div>
+  <div class="filters" role="group" aria-label="Filter timeline">
+    <button type="button" id="f-all" aria-pressed="true" data-f="all">All</button>
+    <button type="button" id="f-key" aria-pressed="false" data-f="key">Turning points</button>
+    <button type="button" id="f-dec" aria-pressed="false" data-f="decision">Decisions</button>
+    <button type="button" id="f-plan" aria-pressed="false" data-f="plan">Plan changes</button>
+    <button type="button" id="f-bc" aria-pressed="false" data-f="bc">Breaking-change plan</button>
+  </div>
+  <div class="tl" id="tl"></div>
+</section>
+
+<section id="tsbugs">
+  <div class="head"><h2>Bugs found in TypeScript concerto-core</h2>
+    <p>Behaviours of TS concerto-core 5.0.0 that the migration identified as bugs, drawn from DIVERGENCES.md, BREAKING-CHANGES-PLAN.md, the post-migration issues and the fuzzing triage. By default the Rust engine reproduces TS behaviour for parity. Since the maintainer chose a single major release on 29 Sep (R3 folded into R1), most planned fixes moved into R1. A final group lists bugs found in the migration's own layers, which are not TS 5.0.0 bugs. Impact is the risk rating given in the breaking-changes plan.</p></div>
+  <div class="tiles" id="bug-tiles"></div>
+  <div id="bug-groups" class="bug-groups"></div>
+</section>
+
+<section id="wins">
+  <div class="head"><h2>Wins, challenges and open risks</h2></div>
+  <div class="cols">
+    <div class="card"><h3>Wins</h3><ul class="list w" id="l-wins"></ul></div>
+    <div class="card"><h3>Challenges</h3><ul class="list c" id="l-chal"></ul></div>
+    <div class="card"><h3>Open risks</h3><ul class="list r" id="l-risk"></ul></div>
+  </div>
+</section>
+
+<section id="gaps">
+  <div class="head"><h2>Data notes and gaps</h2></div>
+  <ul class="list" id="l-gaps"></ul>
+</section>
+
+<footer id="foot"></footer>
+</div>
+
+<script>
+const D = /*__DATA__*/null;
+const T = D.text;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const HRS = D.hours.map(h => new Date(h));
+const fmtH = d => d.toISOString().slice(5, 16).replace('T', ' ') + 'Z';
+const dayTicks = () => HRS.filter(d => d.getUTCHours() === 0);
+const fmtDay = d => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()] + ' ' + d.getUTCDate();
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+// ---------- text
+$('#lede').textContent = T.lede;
+$('#status-note').textContent = T.status_note;
+$('#tiles').innerHTML = T.tiles.map(t => `<div class="tile"><div class="k">${esc(t.k)}</div><div class="v">${t.v}</div>${t.pill ? `<span class="pill ${t.pill[0]}"><i></i>${esc(t.pill[1])}</span>` : ''}<div class="n">${t.n}</div></div>`).join('');
+$('#cov-note').innerHTML = T.cov_note;
+$('#perf-note').innerHTML = T.perf_note;
+const li = a => a.map(x => `<li><b>${x[0]}</b><span>${x[1]}</span></li>`).join('');
+$('#l-wins').innerHTML = li(T.wins); $('#l-chal').innerHTML = li(T.challenges); $('#l-risk').innerHTML = li(T.risks); $('#l-gaps').innerHTML = li(T.gaps);
+$('#foot').innerHTML = T.footer;
+
+// ---------- chart core
+function frame(el, {h = 210, yMin, yMax, yTicks, yFmt = v => v, log = false, x0 = HRS[0], x1 = HRS[HRS.length - 1], xTicks}) {
+  const W = 520, H = h, m = {l: 44, r: 12, t: 10, b: 24};
+  const svg = document.createElementNS(SVGNS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('role', 'img');
+  const X = t => m.l + (t - x0) / (x1 - x0) * (W - m.l - m.r);
+  const Y = log ? v => H - m.b - (Math.log10(v) - Math.log10(yMin)) / (Math.log10(yMax) - Math.log10(yMin)) * (H - m.t - m.b)
+                : v => H - m.b - (v - yMin) / (yMax - yMin) * (H - m.t - m.b);
+  let g = '';
+  for (const v of yTicks) g += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)" stroke-width="1"/><text x="${m.l - 6}" y="${Y(v) + 3.5}" text-anchor="end">${yFmt(v)}</text>`;
+  for (const d of (xTicks || dayTicks())) g += `<line x1="${X(d)}" x2="${X(d)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--grid)" stroke-width="1"/><text x="${X(d) + 3}" y="${H - m.b + 15}">${fmtDay(d)}</text>`;
+  g += `<line x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}" stroke="var(--rule)" stroke-width="1"/>`;
+  svg.innerHTML = g; el.appendChild(svg);
+  const tip = document.createElement('div'); tip.className = 'tip'; tip.hidden = true; el.appendChild(tip);
+  return {svg, X, Y, W, H, m, tip, add(s) { svg.insertAdjacentHTML('beforeend', s); }};
+}
+function stepPath(F, vals) {
+  let d = '', on = false;
+  vals.forEach((v, i) => {
+    if (v == null) { on = false; return; }
+    const x = F.X(HRS[i]), y = F.Y(v);
+    if (!on) { d += `M${x},${y}`; on = true; } else d += `V${y}H${x}`;
+    if (i === vals.length - 1 || vals[i + 1] == null) d += `H${F.X(new Date(+HRS[i] + 3600e3 * (i === vals.length - 1 ? 0 : 1)))}`;
+  });
+  return d;
+}
+function hover(F, el, rowHtml) {
+  const line = document.createElementNS(SVGNS, 'line');
+  line.setAttribute('stroke', 'var(--ink-3)'); line.setAttribute('stroke-width', '1'); line.setAttribute('stroke-dasharray', '3 3');
+  line.setAttribute('y1', F.m.t); line.setAttribute('y2', F.H - F.m.b); line.style.display = 'none'; F.svg.appendChild(line);
+  const move = ev => {
+    const r = F.svg.getBoundingClientRect(); const sx = (ev.clientX - r.left) / r.width * F.W;
+    let i = Math.round((sx - F.m.l) / (F.W - F.m.l - F.m.r) * (HRS.length - 1)); i = Math.max(0, Math.min(HRS.length - 1, i));
+    const x = F.X(HRS[i]); line.setAttribute('x1', x); line.setAttribute('x2', x); line.style.display = '';
+    F.tip.innerHTML = `<b>${fmtH(HRS[i])}</b>` + rowHtml(i); F.tip.hidden = false;
+    const px = x / F.W * r.width; const tw = F.tip.offsetWidth;
+    F.tip.style.left = (px + 12 + tw > r.width ? px - tw - 12 : px + 12) + 'px'; F.tip.style.top = '6px';
+  };
+  F.svg.addEventListener('pointermove', move); F.svg.addEventListener('pointerleave', () => { F.tip.hidden = true; line.style.display = 'none'; });
+}
+const trow = (color, name, val) => `<div class="row"><span><i class="sw" style="background:${color}"></i>${name}</span><span>${val}</span></div>`;
+function lines(el, series, opt, obsKey) {
+  const F = frame(el, opt);
+  for (const r of (opt.refs || [])) F.add(`<line x1="${F.m.l}" x2="${F.W - F.m.r}" y1="${F.Y(r.v)}" y2="${F.Y(r.v)}" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="5 4"/><text x="${F.W - F.m.r}" y="${F.Y(r.v) - 4}" text-anchor="end">${r.label}</text>`);
+  for (const s of series) {
+    F.add(`<path d="${stepPath(F, s.v)}" fill="none" stroke="${s.c}" stroke-width="2" stroke-linejoin="round"/>`);
+    s.v.forEach((v, i) => { if (v != null && s.o[i]) F.add(`<circle cx="${F.X(HRS[i])}" cy="${F.Y(v)}" r="3.2" fill="${s.c}" stroke="var(--surface)" stroke-width="1.5"/>`); });
+  }
+  hover(F, el, i => series.map(s => trow(s.c, s.n, s.v[i] == null ? '<span class="muted">no data yet</span>' : (opt.tf || (v => v))(s.v[i]) + (s.o[i] ? ' ●' : ''))).join('') + '<div class="muted">● = observed this hour</div>');
+}
+function stack(el, series, opt, extraRows) {
+  const F = frame(el, opt); const n = HRS.length; const base = new Array(n).fill(0);
+  for (const s of series) {
+    const top = s.v.map((v, i) => v == null ? null : base[i] + v);
+    let d = ''; let started = false; const pts = [];
+    for (let i = 0; i < n; i++) { if (top[i] == null) continue; pts.push(i); }
+    if (pts.length) {
+      d = `M${F.X(HRS[pts[0]])},${F.Y(base[pts[0]])}`;
+      for (const i of pts) { const xa = F.X(HRS[i]), xb = F.X(new Date(+HRS[Math.min(i + 1, n - 1)])); d += `L${xa},${F.Y(top[i])}L${xb},${F.Y(top[i])}`; }
+      for (let k = pts.length - 1; k >= 0; k--) { const i = pts[k]; const xa = F.X(HRS[i]), xb = F.X(new Date(+HRS[Math.min(i + 1, n - 1)])); d += `L${xb},${F.Y(base[i])}L${xa},${F.Y(base[i])}`; }
+      d += 'Z';
+      F.add(`<path d="${d}" fill="${s.c}" stroke="var(--surface)" stroke-width="1" stroke-linejoin="round"/>`);
+    }
+    top.forEach((v, i) => { if (v != null) base[i] = v; });
+  }
+  hover(F, el, i => series.slice().reverse().map(s => trow(s.c, s.n, s.v[i] == null ? '–' : s.v[i].toLocaleString('en'))).join('') + (extraRows ? extraRows(i) : ''));
+  return F;
+}
+
+// ---------- coverage
+lines($('#c-d1'), [{n: 'RUST + HYBRID (D1)', c: 'var(--s1)', v: D.d1.v, o: D.d1.o}, {n: 'RUST only', c: 'var(--s2)', v: D.d1.r, o: D.d1.o}],
+  {yMin: 0, yMax: 100, yTicks: [0, 25, 50, 75, 100], yFmt: v => v + '%', tf: v => v.toFixed(1) + '%', refs: [{v: 70, label: '70% bar'}]});
+const or = D.oracle;
+stack($('#c-oracle'), [{n: 'pass', c: 'var(--s1)', v: or.pass}, {n: 'fail (baselined)', c: 'var(--s8)', v: or.fail}, {n: 'unsupported', c: 'var(--neutral)', v: or.uns}],
+  {yMin: 0, yMax: 17000, yTicks: [0, 4000, 8000, 12000, 16000], yFmt: v => (v / 1000) + 'k'},
+  i => or.o[i] ? '<div class="muted">● baseline changed this hour</div>' : '');
+(function () {
+  const el = $('#c-conf'), N = D.confNative, J = D.confJs;
+  const x0 = new Date('2026-09-24T06:00:00Z'), x1 = new Date('2026-09-30T20:00:00Z');
+  const ticks = []; for (let d = 25; d <= 30; d++) ticks.push(new Date(`2026-09-${d}T00:00:00Z`));
+  const F = frame(el, {h: 230, yMin: 0, yMax: 170, yTicks: [0, 40, 80, 120, 160], x0, x1, xTicks: ticks});
+  const step = (key, color, dash) => {
+    let d = '', on = false;
+    N.forEach((o, i) => {
+      const v = o[key]; if (v == null) { on = false; return; }
+      const xa = F.X(new Date(o.ts)), xb = i < N.length - 1 ? F.X(new Date(N[i + 1].ts)) : F.X(new Date('2026-09-30T18:00:00Z'));
+      d += (on ? `V${F.Y(v)}` : `M${xa},${F.Y(v)}`) + `H${xb}`; on = true;
+    });
+    F.add(`<path d="${d}" fill="none" stroke="${color}" stroke-width="2" ${dash ? 'stroke-dasharray="5 4"' : ''}/>`);
+  };
+  step('total', 'var(--ink-3)', true); step('skip_rust', 'var(--s2)'); step('skip_upstream', 'var(--s4)'); step('skip_missing', 'var(--s8)'); step('passed', 'var(--s1)');
+  const marks = [];
+  N.forEach((o, i) => {
+    const x = F.X(new Date(o.ts));
+    for (const [k, c] of [['total', 'var(--ink-3)'], ['skip_rust', 'var(--s2)'], ['skip_upstream', 'var(--s4)'], ['skip_missing', 'var(--s8)'], ['passed', 'var(--s1)']])
+      if (o[k] != null) F.add(`<circle cx="${x}" cy="${F.Y(o[k])}" r="3.4" fill="${c}" stroke="var(--surface)" stroke-width="1.5"/>`);
+    const lab = o.total + (o.draft ? ' · draft harness' : '');
+    F.add(`<text x="${x + (i === N.length - 1 ? -4 : 4)}" y="${F.Y(o.total) - 7}" text-anchor="${i === N.length - 1 ? 'end' : 'start'}" style="fill:var(--ink-2)">${esc(lab)}</text>`);
+    marks.push({x, y: F.Y(o.passed), o, n: true});
+  });
+  J.forEach(o => {
+    const x = F.X(new Date(o.ts)), y = F.Y(o.passed);
+    F.add(`<circle cx="${x}" cy="${y}" r="3.6" fill="var(--surface)" stroke="var(--s7)" stroke-width="1.8"/>`);
+    marks.push({x, y, o, n: false});
+  });
+  F.svg.addEventListener('pointermove', ev => {
+    const r = F.svg.getBoundingClientRect(); const sx = (ev.clientX - r.left) / r.width * F.W, sy = (ev.clientY - r.top) / r.height * F.H;
+    let best = null, bd = 1e9; for (const m of marks) { const d = Math.hypot(m.x - sx, (m.y - sy) * 0.35); if (d < bd) { bd = d; best = m; } }
+    if (!best || bd > 30) { F.tip.hidden = true; return; }
+    const o = best.o, v = x => x == null ? 'not stated' : x;
+    F.tip.innerHTML = best.n
+      ? `<b>Rust-native harness</b> <span class="muted">${esc(o.ts.slice(0, 16).replace('T', ' '))}Z</span>` +
+        trow('var(--s1)', 'passed / run', `${o.passed} / ${o.run}`) + trow('var(--ink-3)', 'total in suite', o.total) +
+        trow('var(--s2)', '@skip-rust', v(o.skip_rust)) + trow('var(--s4)', 'upstream @skip', v(o.skip_upstream)) + trow('var(--s8)', 'missing step/fixture', v(o.skip_missing)) +
+        `<div class="muted">${esc(o.suite)}</div><div class="muted">${esc(o.note)}</div>`
+      : `<b>JS harness (reference)</b> <span class="muted">${esc(o.ts.slice(0, 16).replace('T', ' '))}Z</span>` + trow('var(--s7)', 'passed / total', `${o.passed} / ${o.total}`) +
+        `<div class="muted">engine: ${esc(o.engine)}</div><div class="muted">${esc(o.note)}</div>`;
+    F.tip.hidden = false;
+    const px = best.x / F.W * r.width, tw = F.tip.offsetWidth;
+    F.tip.style.left = (px + 12 + tw > r.width ? px - tw - 12 : px + 12) + 'px'; F.tip.style.top = '6px';
+  });
+  F.svg.addEventListener('pointerleave', () => F.tip.hidden = true);
+})();
+
+// ---------- jobs
+const JS = [['backlog', 'backlog', 'var(--neutral)'], ['ready', 'ready', 'var(--s3)'], ['claimed', 'claimed (in progress)', 'var(--s1)'], ['in_review', 'in review', 'var(--s7)'], ['needs_decision', 'needs decision', 'var(--s4)'], ['blocked', 'blocked', 'var(--s8)']];
+$('#lg-jobs').innerHTML = JS.map(s => `<span><i class="sw blk" style="background:${s[2]}"></i>${s[1]}</span>`).join('');
+const maxOpen = Math.max(...HRS.map((_, i) => JS.reduce((a, s) => a + D.jobs[s[0]][i], 0)));
+stack($('#c-jobs'), JS.map(s => ({n: s[1], c: s[2], v: D.jobs[s[0]]})), {yMin: 0, yMax: Math.ceil(maxOpen / 10) * 10, yTicks: [0, 10, 20, 30, 40, 50].filter(v => v <= Math.ceil(maxOpen / 10) * 10)},
+  i => `<div class="row"><span>total open</span><span>${JS.reduce((a, s) => a + D.jobs[s[0]][i], 0)}</span></div>`);
+lines($('#c-done'), [{n: 'done', c: 'var(--s1)', v: D.jobs.done, o: D.jobs.done.map(() => false)}, {n: 'post-migration', c: 'var(--s2)', v: D.jobs.post_migration, o: D.jobs.done.map(() => false)}],
+  {yMin: 0, yMax: 180, yTicks: [0, 40, 80, 120, 160], tf: v => v});
+
+// ---------- perf by category
+if (D.p572) {
+  const P = D.p572, cats = Object.keys(P.geomean_ts_api);
+  $('#perf-now').innerHTML = `<h3>Current picture: P5-72 same-run sweep, 1 Oct (cloud container)</h3>
+    <div class="sub">One measurement run of three heads (before F1, the P5-60 head 2a6a71754/299935e, and now, after BC-19-a/b), with TS 5.0.0 timed in each round, at crate and TS-API level over 73 op/set rows. Geometric mean of × TS by category; introspection includes decorators/DCS. P5-60 (30 Sep) was the previous current picture; its own run is kept in perf.json.</div>
+    <div class="tablewrap"><table><thead><tr><th>category</th><th>TS API, pre-F1</th><th>TS API, P5-60 head</th><th>TS API, now</th><th>crate-direct, now</th></tr></thead><tbody>` +
+    cats.map(c => `<tr><td>${esc(c)}</td><td class="num">${P.geomean_ts_api[c][0]}×</td><td class="num">${P.geomean_ts_api[c][1]}×</td><td class="num"><b>${P.geomean_ts_api[c][2]}×</b></td><td class="num">${P.geomean_crate_now[c]}×</td></tr>`).join('') +
+    `</tbody></table></div><p class="note">Rows at or below TS 5.0.0 through the TS API: ${P.rows_at_or_below_ts.ts_api[0]} pre-F1, ${P.rows_at_or_below_ts.ts_api[1]} at the P5-60 head, ${P.rows_at_or_below_ts.ts_api[2]} now (of ${P.rows_at_or_below_ts.ts_api[3]}); crate-direct ${P.rows_at_or_below_ts.crate_now[0]} of ${P.rows_at_or_below_ts.crate_now[1]}. BC-19-a and BC-19-b (P5-68, P5-69) removed most of the shape-check cost that made loading worse at the P5-60 head. Source: <a href="${esc(P.source)}" target="_blank" rel="noopener">#413 report</a>; measure-only.</p>`;
+}
+const OPC = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s4)'];
+const PX0 = new Date('2026-09-26T12:00:00Z'), PX1 = new Date('2026-10-01T14:00:00Z');
+const pticks = [new Date('2026-09-27T00:00:00Z'), new Date('2026-09-28T00:00:00Z'), new Date('2026-09-29T00:00:00Z'), new Date('2026-09-30T00:00:00Z'), new Date('2026-10-01T00:00:00Z')];
+const fx = v => v == null ? '–' : v + '×';
+for (const cat of D.perf) {
+  const card = document.createElement('div'); card.className = 'card';
+  const legend = cat.lines.map((l, i) => `<span><i class="sw" style="background:${OPC[i]}"></i>${esc(l.label)}</span>`).join('') + '<span><i class="sw ring"></i>laptop run</span>';
+  const latest = cat.lines.map(l => `${esc(l.label)} ${l.pts[l.pts.length - 1].a}×`).join(' · ');
+  const g = D.p572 && D.p572.geomean_ts_api[cat.cat], gc = D.p572 && D.p572.geomean_crate_now[cat.cat], g0 = D.p560 && D.p560.geomean_ts_api[cat.cat];
+  const now = g ? `<div class="nowbar"><span>Current picture, P5-72 same-run measurement (cloud), geometric mean through the TS API: pre-F1 ${g[0]}×, P5-60 head ${g[1]}×, <b>now ${g[2]}×</b></span><span>crate-direct now <b>${gc}×</b></span>${g0 ? `<span>previous picture (P5-60 run): ${g0[1]}×</span>` : ''}</div>` : '';
+  card.innerHTML = `<h3>${esc(cat.cat[0].toUpperCase() + cat.cat.slice(1))}</h3>${now}<div class="sub">History: latest point per line (median of sets): ${latest}</div><div class="legend">${legend}</div><div class="chart"></div>
+    <details><summary>All ${cat.rows.length} measurements in this category</summary><div class="tablewrap"><table><thead><tr><th>time (UTC)</th><th>task</th><th>level</th><th>operation</th><th>model set</th><th>before</th><th>after</th><th>machine</th><th>run</th></tr></thead><tbody>${cat.rows.map(r => `<tr><td class="mono">${esc(r[0])}</td><td class="mono">${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td><td class="num">${fx(r[5])}</td><td class="num">${fx(r[6])}</td><td>${esc(r[7])}</td><td class="mono">${esc(r[8])}</td></tr>`).join('')}</tbody></table></div></details>`;
+  $('#perf-grid').appendChild(card);
+  const el = card.querySelector('.chart');
+  const all = cat.lines.flatMap(l => l.pts.map(p => p.a));
+  const lo = Math.min(0.5, ...all), hi = Math.max(2, ...all);
+  const yMin = Math.pow(10, Math.floor(Math.log10(lo))), yMax = Math.pow(10, Math.ceil(Math.log10(hi)));
+  const yT = []; for (let e = Math.log10(yMin); e <= Math.log10(yMax) + 1e-9; e++) yT.push(+Math.pow(10, e).toPrecision(1));
+  const F = frame(el, {h: 200, yMin, yMax, yTicks: yT, yFmt: v => v + '×', log: true, x0: PX0, x1: PX1, xTicks: pticks});
+  F.add(`<line x1="${F.m.l}" x2="${F.W - F.m.r}" y1="${F.Y(1)}" y2="${F.Y(1)}" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="6 3"/><text x="${F.m.l + 4}" y="${F.Y(1) - 4}">1× = TS parity</text>`);
+  const marks = [];
+  cat.lines.forEach((l, i) => {
+    const c = OPC[i];
+    const d = l.pts.map((p, k) => `${k ? 'L' : 'M'}${F.X(new Date(p.t))},${F.Y(p.a)}`).join('');
+    F.add(`<path d="${d}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>`);
+    l.pts.forEach(p => {
+      const x = F.X(new Date(p.t)), y = F.Y(p.a), filled = p.m !== 'laptop';
+      F.add(`<circle cx="${x}" cy="${y}" r="4" fill="${filled ? c : 'var(--surface)'}" stroke="${filled ? 'var(--surface)' : c}" stroke-width="${filled ? 1.5 : 2}"/>`);
+      marks.push({x, y, p, l, c});
+    });
+  });
+  F.svg.addEventListener('pointermove', ev => {
+    const r = F.svg.getBoundingClientRect(); const sx = (ev.clientX - r.left) / r.width * F.W, sy = (ev.clientY - r.top) / r.height * F.H;
+    let best = null, bd = 1e9; for (const mk of marks) { const dd = Math.hypot(mk.x - sx, mk.y - sy); if (dd < bd) { bd = dd; best = mk; } }
+    if (!best || bd > 26) { F.tip.hidden = true; return; }
+    const p = best.p;
+    F.tip.innerHTML = `<b>${esc(best.l.label)}</b> <span class="muted">${esc(p.task)} · ${esc(p.t.slice(0, 16).replace('T', ' '))}Z</span>` +
+      trow(best.c, 'median', (p.b != null ? p.b + '× → ' : '') + '<b>' + p.a + '×</b>') +
+      p.sets.map(x => `<div class="muted">${esc(x)}</div>`).join('') +
+      `<div class="muted">${p.m === 'laptop' ? 'laptop' : p.m === 'cloud' ? 'cloud container' : 'machine unknown'} · run ${esc(p.run)}</div>`;
+    F.tip.hidden = false;
+    const px = best.x / F.W * r.width, tw = F.tip.offsetWidth;
+    F.tip.style.left = (px + 12 + tw > r.width ? px - tw - 12 : px + 12) + 'px'; F.tip.style.top = Math.max(0, best.y / F.H * r.height - 20) + 'px';
+  });
+  F.svg.addEventListener('pointerleave', () => F.tip.hidden = true);
+}
+
+// ---------- TS bugs
+const BG = [['fixed', 'Fixed in the Rust engine (R1)', 'ok'], ['sched', 'Scheduled for R1, work in progress', 'warn'], ['pending', 'Ported for parity, fix pending (post-migration issue)', 'warn'], ['won', "Won't fix / accepted", ''], ['unclear', 'Status unclear', ''], ['migration', 'Bugs in the migration layer (not TS 5.0.0), found and fixed', '']];
+const bugs = D.tsbugs;
+$('#bug-tiles').innerHTML = BG.map(g => { const n = bugs.filter(b => b.group === g[0]).length; return `<div class="tile"><div class="k">${esc(g[1])}</div><div class="v">${n}</div></div>`; }).join('');
+$('#bug-groups').innerHTML = BG.map(g => {
+  const rows = bugs.filter(b => b.group === g[0]);
+  if (!rows.length) return `<div><h3>${esc(g[1])} <small>0</small></h3><p class="note">${g[0] === 'won' ? 'No TS bug found during the migration is recorded as won\'t fix. The maintainer-accepted divergences (DV-015, DV-017, DV-018) keep the Rust behaviour, so they are listed as fixed.' : ''}</p></div>`;
+  return `<div><h3>${esc(g[1])} <small>${rows.length}</small></h3><div class="tablewrap"><table class="bugs"><thead><tr><th>Bug</th><th>What goes wrong in TS</th><th>Found by</th><th>Status</th><th>Impact</th><th>Link</th></tr></thead><tbody>` +
+    rows.map(b => `<tr><td><span class="id">${esc(b.id)}</span>${esc(b.title)}</td><td>${esc(b.what)}</td><td>${esc(b.found)}</td><td>${esc(b.status)}</td><td>${esc(b.impact)}</td><td><a href="${esc(b.link)}" target="_blank" rel="noopener">${esc(b.linktext)}</a><span class="id">${esc(b.source)}</span></td></tr>`).join('') + '</tbody></table></div></div>';
+}).join('');
+
+// ---------- timeline
+const KEYSET = new Set(T.key_turns || []);
+function renderTL(f) {
+  let out = '', day = '';
+  for (const x of D.timeline) {
+    const isBC = x.cat === 'bc' || x.cat === 'breaking_change_plan';
+    const isKey = KEYSET.has(x.ts + '|' + x.issue) || x.key;
+    if (f === 'decision' && x.k !== 'decision') continue;
+    if (f === 'plan' && x.k !== 'plan') continue;
+    if (f === 'bc' && !isBC) continue;
+    if (f === 'key' && !isKey) continue;
+    const d = x.ts.slice(0, 10);
+    if (d !== day) { day = d; const dd = new Date(d + 'T00:00:00Z'); out += `<div class="day">${fmtDay(dd)} Sep 2026</div>`; }
+    const link = x.u ? `<a href="${esc(x.u)}" target="_blank" rel="noopener">${x.issue ? '#' + x.issue : 'source'}</a>` : (x.src ? `<span class="mono">${esc(x.src)}</span>` : '');
+    out += `<div class="it"><time>${x.ts.slice(11, 16)}Z</time><div class="body"><div>${esc(x.s)}</div><div class="meta">${isKey ? '<span class="kind key">turning point</span>' : ''}<span class="kind ${x.k === 'decision' ? 'decision' : ''}">${x.k === 'decision' ? 'decision' : 'plan change'}</span>${x.task ? `<span class="mono">${esc(x.task)}</span>` : ''}${link}</div></div></div>`;
+  }
+  $('#tl').innerHTML = out || '<p class="note" style="padding:12px 18px">Nothing in this view.</p>';
+}
+document.querySelectorAll('.filters button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  renderTL(b.dataset.f);
+}));
+renderTL('all');
+</script>

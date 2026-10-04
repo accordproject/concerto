@@ -14,6 +14,11 @@
 
 import { BaseException } from '@accordproject/concerto-util';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type { ValidationDiagnostic } from '../types';
+/* eslint-enable no-unused-vars */
+
 /**
  * Exception thrown when a resource fails to model against the model
  * @extends BaseException
@@ -23,6 +28,13 @@ import { BaseException } from '@accordproject/concerto-util';
  * @private
  */
 class ValidationException extends BaseException {
+    /**
+     * The structured violations behind the exception, when it is about an
+     * instance (accordproject/concerto#1325): the same diagnostics
+     * `validateInstance` reports for it, whose `code`, `path`, `expected`
+     * and `severity` carry no value from the instance. Not enumerable.
+     */
+    declare details?: ValidationDiagnostic[];
 
     /**
      * Create a ValidationException

@@ -12,52 +12,86 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 import semver from 'semver';
-
-// Types needed for TypeScript generation.
-/* eslint-disable no-unused-vars */
-import type { SemVer } from 'semver';
-/* eslint-enable no-unused-vars */
-import Globalize from './globalize';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ModelFile from './introspect/modelfile';
 /* eslint-enable no-unused-vars */
+import { rust, engineViews } from './engineloader';
+import type { EngineBindings } from './engine/bindings';
 
-const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
+// The other pure string-to-value members below cross into the engine once
+// per distinct argument rather than once per call (a model load calls
+// isSystemProperty/isValidIdentifier/getFullyQualifiedName for every
+// property of every declaration). Only string arguments are memoised, and
+// only a result the engine returned (a throw is never cached), so every
+// other call, and every error, goes to the engine. Each
+// member's memo is cleared once it reaches ENGINE_MEMO_LIMIT entries.
+const engineMemo: { [binding: string]: Map<string, unknown> } = {};
+const ENGINE_MEMO_LIMIT = 4096;
 
-const privateReservedProperties = [
-    // Internal use only
-    '$classDeclaration',    // Used to cache a reference to theClass Declaration instance
-    '$namespace',           // Used to cache the namespace for a type
-    '$type',                // Used to cache the type for a type
-    '$modelManager',        // Used to cache a reference to the ModelManager instance
-    '$validator',           // Used to cache a reference to the ResourceValidator instance
-    '$identifierFieldName', // Used for caching the identifier field name
+/** The members memoised by `memoisedEngineCall`, all `(...strings) => value`. */
+type MemoisedBinding = 'modelUtilCapitalizeFirstLetter' | 'modelUtilIsValidIdentifier' | 'modelUtilGetFullyQualifiedName' |
+    'modelUtilRemoveNamespaceVersionFromFullyQualifiedName';
 
-    '$imports',             // Reserved for future use
-    '$superTypes',          // Reserved for future use
+/**
+ * `rust[binding](...args)`, memoised under `key` (see engineMemo).
+ * @param {string} binding - the engine binding to call
+ * @param {string} key - the memo key: the call's string arguments, unambiguously joined
+ * @param {...string} args - the arguments
+ * @return {*} the binding's result
+ * @private
+ */
+function memoisedEngineCall<B extends MemoisedBinding>(binding: B, key: string, ...args: string[]): ReturnType<EngineBindings[B]> {
+    let memo = engineMemo[binding];
+    if (!memo) {
+        memo = engineMemo[binding] = new Map();
+    } else if (memo.has(key)) {
+        return memo.get(key) as ReturnType<EngineBindings[B]>;
+    }
+    const result = (rust[binding] as (...strings: string[]) => ReturnType<EngineBindings[B]>)(...args);
+    if (memo.size >= ENGINE_MEMO_LIMIT) {
+        memo.clear();
+    }
+    memo.set(key, result);
+    return result;
+}
 
-    // Included in serialization
-    '$id',                  // Used for URI identifier
+// The members below that only slice a string, or look one up in a fixed
+// list, answer a string argument here, with the engine's own semantics
+// (concerto-rust `model_util::short_name`, `namespace_of`,
+// `PRIMITIVE_TYPES` and the reserved property lists), rather than crossing
+// into the engine for it. Any other argument, and every error, still goes
+// to the engine.
+const PRIMITIVE_TYPES = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
+const PRIVATE_RESERVED_PROPERTIES = [
+    '$classDeclaration', '$namespace', '$type', '$modelManager', '$validator',
+    '$identifierFieldName', '$imports', '$superTypes', '$id',
 ];
+const ASSIGNABLE_RESERVED_PROPERTIES = ['$identifier', '$timestamp'];
 
-const assignableReservedProperties = [
-    // Included in serialization
-    '$identifier',          // Used for shadowing the identifier field, or where a system identifier is required
-    '$timestamp'            // Used in Event and Transaction prototype classes
-];
-
-const reservedProperties = [
-    // Included in serialization
-    '$class',               // Used for discriminating between instances of different classes
-
-    ...assignableReservedProperties,
-    ...privateReservedProperties
-];
+/**
+ * BC-52: `ModelUtil.isEnum`, `isMap` and `isScalar` resolve
+ * `field.getParent().getModelFile().getType(field.getType())` in the
+ * engine's arena, by the handle of that model file and the field's type
+ * name (a Property, or a MapKeyType or MapValueType, whose parent is the
+ * MapDeclaration); a replaced `getType` method is not called. `undefined`
+ * stands for a type that is not found, as when the model file is outside
+ * the arena (it resolves no type).
+ * @param {Field} field - the field
+ * @param {string} binding - the handle method answering for a found type
+ * @return {boolean|undefined} the answer, or undefined when the type is not found
+ */
+function fieldTypeIs(field, binding: 'modelUtilIsEnum' | 'modelUtilIsMap' | 'modelUtilIsScalar'): boolean | undefined {
+    const modelFile = field.getParent().getModelFile();
+    const type = field.getType();
+    const file = engineViews().modelFileArenaRef(modelFile);
+    if (file === undefined || (type !== null && type !== undefined && typeof type !== 'string')) {
+        return undefined;
+    }
+    return file.handle[binding](file.id, type);
+}
 
 /**
  * Internal Model Utility Class
@@ -72,14 +106,8 @@ class ModelUtil {
      * @param {string} fqn - the source string
      * @return {string} - the string after the last dot
      */
-    static getShortName(fqn) {
-        let result = fqn;
-        let dotIndex = fqn.lastIndexOf('.');
-        if (dotIndex > -1) {
-            result = fqn.substr(dotIndex + 1);
-        }
-
-        return result;
+    static getShortName(fqn): string {
+        return typeof fqn === 'string' ? fqn.substring(fqn.lastIndexOf('.') + 1) : rust.modelUtilGetShortName(fqn);
     }
 
     /**
@@ -88,18 +116,8 @@ class ModelUtil {
      * @return {string} - namespace of the type (everything before the last dot)
      * or the empty string if there is no dot
      */
-    static getNamespace(fqn) {
-        if (!fqn) {
-            throw new Error(Globalize.formatMessage('modelutil-getnamespace-nofnq'));
-        }
-
-        let result = '';
-        let dotIndex = fqn.lastIndexOf('.');
-        if (dotIndex > -1) {
-            result = fqn.substr(0, dotIndex);
-        }
-
-        return result;
+    static getNamespace(fqn): string {
+        return typeof fqn === 'string' && fqn !== '' ? fqn.substring(0, Math.max(fqn.lastIndexOf('.'), 0)) : rust.modelUtilGetNamespace(fqn);
     }
 
     /**
@@ -119,36 +137,32 @@ class ModelUtil {
      * @param {boolean} [options.disableVersionParsing] if false, the version will be parsed
      * @returns {ParseNamespaceResult} the result of parsing
      */
-    static parseNamespace(ns: string, options?: { disableVersionParsing?: boolean }) {
-        if(!ns) {
-            throw new Error('Namespace is null or undefined.');
+    static parseNamespace(ns: string, options?: { disableVersionParsing?: boolean }): {
+        name: string;
+        escapedNamespace?: string;
+        version?: string | null;
+        versionParsed?: unknown;
+    } {
+        // The engine checks the version and returns its result packed into
+        // one string (concerto-wasm modelUtilParseNamespaceChecked),
+        // without calling back into JS. `versionParsed` is then built
+        // here, by semver.parse, which costs far less in JS than a
+        // callback across the boundary. Since BC-41 the engine takes
+        // strict SemVer 2.0.0, which semver.parse accepts too, except
+        // where node-semver's own limits reject it (a component above
+        // Number.MAX_SAFE_INTEGER, or more than 256 characters):
+        // `versionParsed` is then null, as the engine's own is.
+        const packed = rust.modelUtilParseNamespaceChecked(ns, options) as string;
+        const parts = packed.slice(1).split('@');
+        if (packed[0] === 'N') {
+            return { name: parts[0] };
         }
-
-        const parts = ns.split('@');
-        let version: string | SemVer | null = parts[1];
-        if(parts.length > 2) {
-            throw new Error(`Invalid namespace ${ns}`);
-        }
-
-        if(parts.length === 2 && !options?.disableVersionParsing) {
-            // Validate the version using semver
-            if(!semver.valid(parts[1])) {
-                throw new Error(`Invalid namespace ${ns}`);
-            }
-            version = semver.parse(parts[1]);
-        }
-
-        if (options?.disableVersionParsing) {
-            return {
-                name: parts[0],
-            };
-        }
-
+        const version = packed[0] === 'V' ? parts[2] : null;
         return {
             name: parts[0],
-            escapedNamespace: ns.replace('@', '_'),
-            version: parts.length > 1 ? parts[1] : null,
-            versionParsed: parts.length > 1 ? version : null
+            escapedNamespace: parts[1],
+            version,
+            versionParsed: version === null ? null : semver.parse(version),
         };
     }
 
@@ -158,8 +172,8 @@ class ModelUtil {
      * @return {string[]} - the fully qualified names for that import
      * @private
      */
-    static importFullyQualifiedNames(imp) {
-        return MetaModelUtil.importFullyQualifiedNames(imp);
+    static importFullyQualifiedNames(imp): string[] {
+        return rust.modelUtilImportFullyQualifiedNames(imp);
     }
 
     /**
@@ -168,9 +182,8 @@ class ModelUtil {
      * @return {boolean} - true if the type is a primitive
      * @private
      */
-    static isPrimitiveType(typeName) {
-        const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
-        return (primitiveTypes.indexOf(typeName) >= 0);
+    static isPrimitiveType(typeName): boolean {
+        return typeof typeName === 'string' ? PRIMITIVE_TYPES.includes(typeName) : rust.modelUtilIsPrimitiveType(typeName);
     }
 
     /**
@@ -183,21 +196,27 @@ class ModelUtil {
      * @return {boolean} - true if the type can be assigned to the property
      * @private
      */
-    static isAssignableTo(modelFile, typeName, property) {
+    static isAssignableTo(modelFile, typeName, property): any {
+        // BC-52: the type is resolved by the engine from its arena, by the
+        // handle of `modelFile` (engine/views.ts, "Arena handles of views");
+        // a replaced `getType` or `getAllSuperTypeDeclarations` method is
+        // not called. The property's own type is still read through
+        // `getFullyQualifiedTypeName` (the serializer passes a relationship
+        // map value's stand-in), and a direct match or a primitive on either
+        // side is decided here, with no crossing. `typeName` is converted
+        // with `String()`, as the JS-object binding did.
         const propertyTypeName = property.getFullyQualifiedTypeName();
-
-        const isDirectMatch = (typeName === propertyTypeName);
-        if (isDirectMatch || ModelUtil.isPrimitiveType(typeName) || ModelUtil.isPrimitiveType(propertyTypeName)) {
+        const name = String(typeName);
+        const isDirectMatch = name === propertyTypeName;
+        if (isDirectMatch || ModelUtil.isPrimitiveType(name) || ModelUtil.isPrimitiveType(propertyTypeName)) {
             return isDirectMatch;
         }
-
-        const typeDeclaration = modelFile.getType(typeName);
-        if (!typeDeclaration) {
-            throw new Error('Cannot find type ' + typeName);
+        const file = engineViews().modelFileArenaRef(modelFile);
+        if (file === undefined) {
+            // A model file outside the arena resolves no type.
+            throw new Error(`Cannot find type ${name}`);
         }
-
-        return typeDeclaration.getAllSuperTypeDeclarations().
-            some(type => type.getFullyQualifiedName() === propertyTypeName);
+        return file.handle.modelUtilIsAssignableTo(file.id, name, String(propertyTypeName));
     }
 
     /**
@@ -206,8 +225,8 @@ class ModelUtil {
      * @return {string} the string with the first letter capitalized
      * @private
      */
-    static capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
+    static capitalizeFirstLetter(string): string {
+        return typeof string === 'string' ? memoisedEngineCall('modelUtilCapitalizeFirstLetter', string, string) : rust.modelUtilCapitalizeFirstLetter(string);
     }
 
     /**
@@ -216,10 +235,8 @@ class ModelUtil {
      * @return {boolean} true if the field is declared as an enumeration
      * @private
      */
-    static isEnum(field) {
-        const modelFile = field.getParent().getModelFile();
-        const typeDeclaration = modelFile.getType(field.getType());
-        return typeDeclaration?.isEnum();
+    static isEnum(field): any {
+        return fieldTypeIs(field, 'modelUtilIsEnum');
     }
 
     /**
@@ -228,10 +245,8 @@ class ModelUtil {
      * @return {boolean} true if the field is declared as an map
      * @private
      */
-    static isMap(field) {
-        const modelFile = field.getParent().getModelFile();
-        const typeDeclaration = modelFile.getType(field.getType());
-        return typeDeclaration?.isMapDeclaration?.();
+    static isMap(field): any {
+        return fieldTypeIs(field, 'modelUtilIsMap');
     }
 
     /**
@@ -240,10 +255,8 @@ class ModelUtil {
      * @return {boolean} true if the field is declared as an scalar
      * @private
      */
-    static isScalar(field) {
-        const modelFile = field.getParent().getModelFile();
-        const declaration = modelFile.getType(field.getType());
-        return declaration?.isScalarDeclaration?.();
+    static isScalar(field): any {
+        return fieldTypeIs(field, 'modelUtilIsScalar');
     }
 
     /**
@@ -252,7 +265,7 @@ class ModelUtil {
      * @returns {boolean} true if the identifier is valid.
      */
     static isValidIdentifier(name: string | undefined): name is string {
-        return ID_REGEX.test(name as string);
+        return typeof name === 'string' ? memoisedEngineCall('modelUtilIsValidIdentifier', name, name) : rust.modelUtilIsValidIdentifier(name);
     }
 
     /**
@@ -261,12 +274,10 @@ class ModelUtil {
      * @param {string} type - short name of the type.
      * @returns {string} the fully qualified type name.
      */
-    static getFullyQualifiedName(namespace, type) {
-        if (namespace) {
-            return `${namespace}.${type}`;
-        } else {
-            return type;
-        }
+    static getFullyQualifiedName(namespace, type): string {
+        return typeof namespace === 'string' && typeof type === 'string'
+            ? memoisedEngineCall('modelUtilGetFullyQualifiedName', `${namespace.length}:${namespace}${type}`, namespace, type)
+            : rust.modelUtilGetFullyQualifiedName(namespace, type);
     }
 
     /**
@@ -275,14 +286,8 @@ class ModelUtil {
      * @param {string} fqn fully qualified name of a type
      * @returns {string} the fully qualified name minus the namespace version
      */
-    static removeNamespaceVersionFromFullyQualifiedName(fqn) {
-        if(ModelUtil.isPrimitiveType(fqn)) {
-            return fqn;
-        }
-        const ns = ModelUtil.getNamespace(fqn);
-        const { name: namespace } = ModelUtil.parseNamespace(ns);
-        const typeName = ModelUtil.getShortName(fqn);
-        return ModelUtil.getFullyQualifiedName(namespace, typeName);
+    static removeNamespaceVersionFromFullyQualifiedName(fqn): string {
+        return typeof fqn === 'string' ? memoisedEngineCall('modelUtilRemoveNamespaceVersionFromFullyQualifiedName', fqn, fqn) : rust.modelUtilRemoveNamespaceVersionFromFullyQualifiedName(fqn);
     }
 
     /**
@@ -292,8 +297,10 @@ class ModelUtil {
      * @return {Boolean} true if the property is a system property
      * @private
      */
-    static isSystemProperty(propertyName) {
-        return reservedProperties.includes(propertyName);
+    static isSystemProperty(propertyName): boolean {
+        return typeof propertyName === 'string'
+            ? propertyName === '$class' || ASSIGNABLE_RESERVED_PROPERTIES.includes(propertyName) || PRIVATE_RESERVED_PROPERTIES.includes(propertyName)
+            : rust.modelUtilIsSystemProperty(propertyName);
     }
 
     /**
@@ -303,8 +310,8 @@ class ModelUtil {
      * @return {Boolean} true if the property is a system property
      * @private
      */
-    static isPrivateSystemProperty(propertyName) {
-        return privateReservedProperties.includes(propertyName);
+    static isPrivateSystemProperty(propertyName): boolean {
+        return typeof propertyName === 'string' ? PRIVATE_RESERVED_PROPERTIES.includes(propertyName) : rust.modelUtilIsPrivateSystemProperty(propertyName);
     }
 
     /**
@@ -313,12 +320,8 @@ class ModelUtil {
      * @param {Object} key - the Key of the Map Declaration
      * @return {boolean} true if the Key is a valid Map Key
     */
-    static isValidMapKey(key) {
-        return [
-            `${MetaModelNamespace}.StringMapKeyType`,
-            `${MetaModelNamespace}.DateTimeMapKeyType`,
-            `${MetaModelNamespace}.ObjectMapKeyType`,
-        ].includes(key.$class);
+    static isValidMapKey(key): boolean {
+        return rust.modelUtilIsValidMapKey(key);
     }
 
     /**
@@ -327,9 +330,19 @@ class ModelUtil {
      * @param {Object} decl - the Map Key Scalar declaration
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
-    static isValidMapKeyScalar(decl) {
-        return (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.StringScalar`)  ||
-        (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.DateTimeScalar`);
+    static isValidMapKeyScalar(decl): any {
+        // `decl?.isScalarDeclaration?.() && ...`: a nullish declaration is
+        // undefined. BC-52: any other declaration is answered by the engine
+        // from its arena, by the declaration's handle.
+        if (decl === null || decl === undefined) {
+            return undefined;
+        }
+        const views = engineViews();
+        const ref = views.declarationArenaRef(decl);
+        if (ref === undefined) {
+            throw views.notInArena('ModelUtil.isValidMapKeyScalar');
+        }
+        return ref.handle.modelUtilIsValidMapKeyScalar(ref.id);
     }
 
     /**
@@ -338,17 +351,8 @@ class ModelUtil {
      * @param {Object} value - the Value of the Map Declaration
      * @return {boolean} true if the Value is a valid Map Value
      */
-    static isValidMapValue(value) {
-        return [
-            `${MetaModelNamespace}.BooleanMapValueType`,
-            `${MetaModelNamespace}.DateTimeMapValueType`,
-            `${MetaModelNamespace}.StringMapValueType`,
-            `${MetaModelNamespace}.IntegerMapValueType`,
-            `${MetaModelNamespace}.LongMapValueType`,
-            `${MetaModelNamespace}.DoubleMapValueType`,
-            `${MetaModelNamespace}.ObjectMapValueType`,
-            `${MetaModelNamespace}.RelationshipMapValueType`
-        ].includes(value.$class);
+    static isValidMapValue(value): boolean {
+        return rust.modelUtilIsValidMapValue(value);
     }
 }
 

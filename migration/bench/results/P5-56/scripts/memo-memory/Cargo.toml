@@ -1,0 +1,24 @@
+# P5-56 (T2, F-A2, accordproject/concerto-rust#377): measures, natively, the
+# memory the concerto-wasm per-epoch extract memo keeps (the kept source
+# models, result manager, AST text and staged headers), with a counting
+# allocator, on the P5-30 dumped inputs. Measure only; nothing depends on
+# it. Needs a concerto-rust checkout next to this concerto checkout.
+[package]
+name = "p556-memo-memory"
+version = "0.0.0"
+edition = "2024"
+publish = false
+license = "Apache-2.0"
+
+[workspace]
+
+[dependencies]
+accordproject-concerto-core = { path = "../../../../../../../concerto-rust/concerto-core", features = ["js-compat"] }
+serde = "1"
+serde_json = { version = "1.0", features = ["float_roundtrip", "preserve_order"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"

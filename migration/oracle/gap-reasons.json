@@ -1,0 +1,69 @@
+{
+ "note": "Verified reason for every branch of concerto-core src that the unit suite covers but the oracle corpus does not (task P2-11). Keyed <file>:<line>:<branch> as in coverage-gaps.json; bin/coverage-gaps.js merges these into it and reports stale or missing entries. Line numbers are those of the frozen reference (the v5.0.0 src/). The 53 branches P2-11 handed to accordproject/concerto-rust#94 were closed by that task and their entries removed.",
+ "categories": {
+  "stub-only": "The unit suite reaches the branch only through a sinon stub, a sinon stub instance or a monkey-patched method, forcing a state no object built through the public API can be in. Handed to P2-10 (accordproject/concerto-rust#54).",
+  "internal-only": "Reached only by calling an internal (@private) method or constructor directly, with arguments no public operation passes. Handed to P2-10 (accordproject/concerto-rust#54)."
+ },
+ "reasons": {
+  "src/introspect/field.ts:194:8[6]": {
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getScalarField()'s `Unrecognized scalar type` default. ModelFile only builds a ScalarDeclaration for the six scalar $classes (modelfile.ts, the switch in fromAst), so a real scalar field always matches a case. The unit suite forces it with sinon.createStubInstance(ScalarDeclaration) given a hand-made ast.$class FooScalar (test/introspect/scalars.js 'should throw for unknown scalar type'). "
+  },
+  "src/introspect/property.ts:209:14[0]": {
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "Property.getFullyQualifiedTypeName() on a property with no parent. Every Property the public API returns is built by its ClassDeclaration, which always sets the parent. The unit suite forces it with sinon.stub(field, 'getParent') (test/introspect/property_ex.js '#getFullyQualifiedTypeName'). "
+  },
+  "src/introspect/property.ts:213:15[0]": {
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "Property.getFullyQualifiedTypeName() on a property whose parent has no ModelFile. A declaration built by ModelFile always has its model file. The unit suite forces it with sinon.stub(person, 'getModelFile') (test/introspect/property_ex.js). "
+  },
+  "src/introspect/relationshipdeclaration.ts:79:3[0]": {
+   "category": "stub-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "RelationshipDeclaration.validate()'s `points to a missing type` throw. With real objects Property.validate() (called first) already rejects a missing type (`Type ... is not defined`, `No type ... in namespace`, checked against src with a relationship to a missing local, imported and unregistered type), and the other-namespace lookup throws rather than returning null. The unit suite reaches it by replacing modelManager.getType with a function returning null (test/introspect/relationshipdeclaration.js). "
+  },
+  "src/serializer/jsonpopulator.ts:129:7[1]": {
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "JSONPopulator's constructor defaulting strictQualifiedDateTimes when it is undefined. Its only call site, Serializer.fromJSON (serializer.ts:196), always passes a boolean (`options.strictQualifiedDateTimes === true`), so only a direct `new JSONPopulator(...)` reaches it, as test/serializer/jsonpopulator.js does. "
+  },
+  "src/serializer/jsonpopulator.ts:171:15[1]": {
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (parameters.path = new TypedStack('$'))` in visitClassDeclaration. Serializer.fromJSON enters through accept() -> visit(), which seeds parameters.path first (jsonpopulator.ts:144), so the path is always set here; only calling visitClassDeclaration directly without a path reaches it (test/serializer/jsonpopulator.js). Listed not-liftable by P2-10 (root object path injection) in lifted/MAP.tsv."
+  },
+  "src/serializer/jsonpopulator.ts:281:24[1]": {
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in visitField: as line 171, visit() has always seeded the path; only a direct visitField call without one reaches it. Listed not-liftable by P2-10 in lifted/MAP.tsv."
+  },
+  "src/serializer/jsonpopulator.ts:363:32[1]": {
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in convertToObject: reached from visitField after visit() has seeded the path; only a direct call without one reaches it."
+  },
+  "src/serializer/jsonpopulator.ts:439:47[1]": {
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "The right-hand side of `parameters.path ?? (...)` in visitRelationshipDeclaration: as line 171, only a direct call without a seeded path reaches it."
+  },
+  "src/serializer/valuegenerator.ts:102:5[3]": {
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getRange()'s default case for a type other than Long, Integer or Double. InstanceGenerator calls it only for those three types and generateString only with 'Integer'; only a direct call on the value generator reaches it (test/serializer/valuegenerator.js). "
+  },
+  "src/serializer/valuegenerator.ts:171:14[0]": {
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getRegexString()'s `if (!regex) return ''`. Both callers (instancegenerator.ts:145 and :172) check `validator.regex` before calling getRegex, so only a direct getRegex(undefined) on the value generator reaches it (test/serializer/valuegenerator.js). "
+  },
+  "src/serializer/valuegenerator.ts:80:3[0]": {
+   "category": "internal-only",
+   "handed_to": "P2-10 (accordproject/concerto-rust#54)",
+   "reason": "getRange()'s swap when max < min. Its callers pass validator bounds, and model validation already rejects inverted bounds: NumberValidator's constructor throws when lower > upper and StringValidator's when minLength > maxLength (so no model with them can be loaded; see the inverted-bound fixtures earlier in drivers/gaps.spec.js). Only a direct getRange(1.0, 0.0, 'Double') reaches it (test/serializer/valuegenerator.js 'should reverse arguments'). "
+  }
+ }
+}

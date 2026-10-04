@@ -19,7 +19,8 @@ import { NullUtil as Util } from '@accordproject/concerto-util';
 import ModelUtil from '../modelutil';
 import ValidationException from './validationexception';
 import Globalize from '../globalize';
-import dayjs from '../dayjs-setup';
+import { getRelationshipMapValue } from './relationshipmapvalue';
+import { isStrictDateTime } from '../datetimeutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -153,7 +154,9 @@ class ResourceValidator {
             }
             break;
         case 'DateTime':
-            if (!dayjs.utc(value).isValid()) {
+            // BC-43: the same strict rule as a `DateTime` field
+            // (`undefined`, the absence of a value, still passes).
+            if (value !== undefined && !isStrictDateTime(value)) {
                 throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
             }
             break;
@@ -183,12 +186,20 @@ class ResourceValidator {
             throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
         }
 
+        // BC-05, DV-007: a relationship-typed value is checked as a
+        // relationship property is, not as an embedded object.
+        const relationship = getRelationshipMapValue(mapDeclaration);
+
         obj.forEach((value, key) => {
             if (!ModelUtil.isSystemProperty(key)) {
                 // Validate Key
                 this.checkMapType(mapDeclaration.getKey(), key, parameters, mapDeclaration);
                 // Validate Value
-                this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
+                if (relationship) {
+                    this.checkRelationship(parameters, relationship, value);
+                } else {
+                    this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
+                }
             }
         });
 
@@ -393,7 +404,8 @@ class ResourceValidator {
 
         if(field.isPrimitive()) {
             let invalid = false;
-
+            // A typeof/isFinite check over the value TS already holds,
+            // without an engine call per primitive.
             switch(field.getType()) {
             case 'String':
                 if(dataType !== 'string') {
@@ -562,7 +574,9 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: classDeclaration.getFullyQualifiedName(),
-            invalidValue: value.toString()
+            // BC-06: String(), not value.toString(), which is a V8
+            // TypeError for null or undefined (DV-008).
+            invalidValue: String(value)
         }));
     }
 
@@ -578,7 +592,9 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: relationshipDeclaration.getFullyQualifiedTypeName(),
-            invalidValue: value.toString()
+            // BC-06: String(), not value.toString(), which is a V8
+            // TypeError for null or undefined (DV-008).
+            invalidValue: String(value)
         }));
     }
 
@@ -672,10 +688,19 @@ class ResourceValidator {
             typeName += '[]';
         }
 
+        // BC-06: a value that is not Identifiable is named by its JS
+        // type; calling its missing getFullyQualifiedType() was a V8
+        // TypeError (DV-008).
+        let objectType;
+        if (typeof obj?.getFullyQualifiedType === 'function') {
+            objectType = obj.getFullyQualifiedType();
+        } else {
+            objectType = obj === null ? 'null' : typeof obj;
+        }
         throw new ValidationException(formatter({
             resourceId: resourceId,
             propertyName: propName,
-            objectType: obj.getFullyQualifiedType(),
+            objectType,
             fieldType: typeName
         }));
     }

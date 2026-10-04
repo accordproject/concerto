@@ -1,0 +1,391 @@
+{
+ "generated_at": "2026-09-25T18:33:23.486Z",
+ "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
+ "corpus": {
+  "statements": {
+   "pct": 95.38,
+   "covered": 3269,
+   "total": 3427
+  },
+  "branches": {
+   "pct": 95.85,
+   "covered": 1759,
+   "total": 1835
+  },
+  "functions": {
+   "pct": 94.26,
+   "covered": 575,
+   "total": 610
+  },
+  "lines": {
+   "pct": 95.34,
+   "covered": 3215,
+   "total": 3372
+  }
+ },
+ "corpus_src_driver": "the same corpus, bin/replay.js --engine src under nyc (workspace src/ through ts-node)",
+ "corpus_src": {
+  "statements": {
+   "pct": 97.96,
+   "covered": 3363,
+   "total": 3433
+  },
+  "branches": {
+   "pct": 95.7,
+   "covered": 1851,
+   "total": 1934
+  },
+  "functions": {
+   "pct": 94.27,
+   "covered": 576,
+   "total": 611
+  },
+  "lines": {
+   "pct": 97.95,
+   "covered": 3309,
+   "total": 3378
+  }
+ },
+ "corpus_reference_vs_src": {
+  "branch_layout_mismatches": 1082,
+  "branch_hit_disagreements": 163,
+  "disagreements": [
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "2[1]",
+    "reference": 744
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "3[1]",
+    "reference": 222,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "8[2]",
+    "reference": 423
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "8[3]",
+    "reference": 701
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "8[4]",
+    "reference": 746
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "8[5]",
+    "reference": 310
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "9[1]",
+    "reference": 0,
+    "src": 3221
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "11[1]",
+    "reference": 351,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "21[0]",
+    "reference": 0,
+    "src": 3
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "24[0]",
+    "reference": 3,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "25[1]",
+    "reference": 0,
+    "src": 947
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "26[1]",
+    "reference": 7523,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "28[1]",
+    "reference": 845,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "31[1]",
+    "reference": 95
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "32[1]",
+    "reference": 1410
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "33[1]",
+    "reference": 1147
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "39[2]",
+    "reference": 767
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "42[2]",
+    "reference": 736
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "53[1]",
+    "reference": 1344
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "59[1]",
+    "reference": 0,
+    "src": 1760
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "64[2]",
+    "reference": 449
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "66[1]",
+    "reference": 217,
+    "src": 0
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "69[2]",
+    "reference": 3872
+   },
+   {
+    "file": "src/decoratormanager.ts",
+    "branch": "72[2]",
+    "reference": 2479
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "0[1]",
+    "reference": 9
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "2[1]",
+    "reference": 15
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "5[1]",
+    "reference": 13561
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "12[2]",
+    "reference": 193215
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "14[1]",
+    "reference": 2
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "15[1]",
+    "reference": 1
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "16[1]",
+    "reference": 351
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "16[2]",
+    "reference": 157
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "16[3]",
+    "reference": 130
+   },
+   {
+    "file": "src/serializer.ts",
+    "branch": "4[1]",
+    "reference": 847
+   },
+   {
+    "file": "src/serializer.ts",
+    "branch": "8[1]",
+    "reference": 4375
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "1[1]",
+    "reference": 681007
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "6[0]",
+    "reference": 0,
+    "src": 187952
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "9[0]",
+    "reference": 166409,
+    "src": 0
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "11[2]",
+    "reference": 1475444
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "11[3]",
+    "reference": 1240881
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "11[4]",
+    "reference": 1137410
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "11[5]",
+    "reference": 1006381
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "11[6]",
+    "reference": 991581
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "14[0]",
+    "reference": 0,
+    "src": 2731054
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "16[1]",
+    "reference": 534793
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "17[0]",
+    "reference": 5,
+    "src": 0
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "20[0]",
+    "reference": 0,
+    "src": 5
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "23[0]",
+    "reference": 7,
+    "src": 0
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "24[2]",
+    "reference": 117
+   },
+   {
+    "file": "src/introspect/classdeclaration.ts",
+    "branch": "28[1]",
+    "reference": 0,
+    "src": 109538
+   }
+  ]
+ },
+ "unit_suite": {
+  "statements": {
+   "pct": 98.98,
+   "covered": 3401,
+   "total": 3436
+  },
+  "branches": {
+   "pct": 95.7,
+   "covered": 1851,
+   "total": 1934
+  },
+  "functions": {
+   "pct": 99.18,
+   "covered": 606,
+   "total": 611
+  },
+  "lines": {
+   "pct": 98.99,
+   "covered": 3347,
+   "total": 3381
+  }
+ },
+ "unit_suite_source": "nyc run of the unit suite over the workspace src/ (same command as baseline.json)",
+ "baseline_json": {
+  "statements_pct": 98.95,
+  "statements_fraction": "3306/3341",
+  "branches_pct": 95.8,
+  "branches_fraction": "1758/1835",
+  "functions_pct": 99.18,
+  "functions_fraction": "605/610",
+  "lines_pct": 98.96,
+  "lines_fraction": "3252/3286"
+ },
+ "thresholds": {
+  "statements": 99,
+  "branches": 94.8,
+  "functions": 99,
+  "lines": 99
+ },
+ "uncovered_branches": 76,
+ "uncovered_branches_covered_by_suite": 27,
+ "covered_by_suite_by_category": {
+  "unexplained": 16,
+  "stub-only": 3,
+  "internal-only": 8
+ },
+ "covered_by_suite_by_destination": {
+  "not handed off": 16,
+  "P2-10 (accordproject/concerto-rust#54)": 11
+ },
+ "unexplained_covered_by_suite": [
+  "src/decoratormanager.ts:316:9[1]",
+  "src/decoratormanager.ts:409:21[0]",
+  "src/decoratormanager.ts:427:25[1]",
+  "src/decoratormanager.ts:738:59[1]",
+  "src/introspect/classdeclaration.ts:101:6[0]",
+  "src/introspect/classdeclaration.ts:170:14[0]",
+  "src/introspect/classdeclaration.ts:211:20[0]",
+  "src/introspect/classdeclaration.ts:252:28[1]",
+  "src/introspect/classdeclaration.ts:445:45[1]",
+  "src/introspect/classdeclaration.ts:482:48[1]",
+  "src/introspect/declaration.ts:104:4[0]",
+  "src/introspect/declaration.ts:114:8[1]",
+  "src/introspect/decorator.ts:110:2[1]",
+  "src/introspect/scalardeclaration.ts:134:12[0]",
+  "src/introspect/stringvalidator.ts:123:22[0]",
+  "src/serializer/jsonpopulator.ts:374:38[1]"
+ ],
+ "stale_reasons": []
+}

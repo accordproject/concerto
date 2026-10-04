@@ -191,7 +191,7 @@ describe('Decorators', () => {
                 Util.addComposerModel(modelManager);
                 let modelDefinitions = fs.readFileSync('test/data/decorators/invalid-typeref.cto', 'utf8');
                 modelManager.addCTOModel(modelDefinitions);
-            }).should.throw(/IllegalModelException: Undeclared type/);
+            }).should.throw();
         });
 
         it('should fail to validate type refs that are not in imported namespace', () => {

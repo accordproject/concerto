@@ -13,16 +13,15 @@
  */
 
 import Declaration from './declaration';
-import IllegalModelException from './illegalmodelexception';
 import MapValueType from './mapvaluetype';
 import MapKeyType from './mapkeytype';
-import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ModelFile from './modelfile';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
+import { engineViews } from '../engineloader';
 
 /**
  * MapDeclaration defines a Map data structure, which allows storage of a collection
@@ -59,21 +58,16 @@ class MapDeclaration extends Declaration {
     process() {
         super.process();
 
-        if (!this.ast.key || !this.ast.value) {
-            throw new IllegalModelException(`MapDeclaration must contain Key & Value properties ${this.ast.name}`, this.modelFile, this.ast.location);
-        }
-
-        if (!ModelUtil.isValidMapKey(this.ast.key)) {
-            throw new IllegalModelException(`MapDeclaration must contain valid MapKeyType  ${this.ast.name}`, this.modelFile, this.ast.location);
-        }
-
-        if (!ModelUtil.isValidMapValue(this.ast.value)) {
-            throw new IllegalModelException(`MapDeclaration must contain valid MapValueType, for MapDeclaration ${this.ast.name}` , this.modelFile, this.ast.location);
-        }
-
-        // super.process() has already set name and fqn from this.ast.name
-        this.key = new MapKeyType(this, this.ast.key);
-        this.value = new MapValueType(this, this.ast.value);
+        // The `mapDeclarationProcess` check, then the key and value types,
+        // which a lazily built file builds on first read (engine/views.ts
+        // `mapDeclarationProcess`).
+        const key = this.ast.key;
+        const value = this.ast.value;
+        engineViews().mapDeclarationProcess(
+            this,
+            () => new MapKeyType(this, key),
+            () => new MapValueType(this, value),
+        );
     }
 
     /**
@@ -132,6 +126,10 @@ class MapDeclaration extends Declaration {
         return true;
     }
 }
+
+// Built on first read in a lazily built file (engine/views.ts).
+engineViews().installLazyField(MapDeclaration.prototype, 'key');
+engineViews().installLazyField(MapDeclaration.prototype, 'value');
 
 export { MapDeclaration };
 export default MapDeclaration;
