@@ -34,7 +34,7 @@ import { rust } from '../engineloader';
  */
 class NumberValidator extends Validator{
     declare validator: NumberDomainValidatorAst;
-    // Definitely assigned: by the TS body, or from the Rust snapshot.
+    // Definitely assigned: by the constructor, or from the engine snapshot.
     lowerBound!: number | null;
     upperBound!: number | null;
 

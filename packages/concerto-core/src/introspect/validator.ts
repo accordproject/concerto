@@ -75,7 +75,8 @@ class Validator {
 
     /**
      * Reports an instance value that fails the validator (BC-39: a
-     * ValidationException, keeping the errorType; 5.0.0 threw a BaseException).
+     * ValidationException; keeping the errorType; 5.0.0 threw a
+     * BaseException).
      * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
      * @param {string} errorType the type of error

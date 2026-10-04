@@ -58,9 +58,9 @@ class MapDeclaration extends Declaration {
     process() {
         super.process();
 
-        // P5-10b: the `mapDeclarationProcess` check, then the key and value
-        // types, which a lazily built file builds on first read
-        // (engine/views.ts `mapDeclarationProcess`).
+        // The `mapDeclarationProcess` check, then the key and value types,
+        // which a lazily built file builds on first read (engine/views.ts
+        // `mapDeclarationProcess`).
         const key = this.ast.key;
         const value = this.ast.value;
         engineViews().mapDeclarationProcess(
@@ -127,7 +127,7 @@ class MapDeclaration extends Declaration {
     }
 }
 
-// P5-10b: built on first read in a lazily built file (engine/views.ts).
+// Built on first read in a lazily built file (engine/views.ts).
 engineViews().installLazyField(MapDeclaration.prototype, 'key');
 engineViews().installLazyField(MapDeclaration.prototype, 'value');
 

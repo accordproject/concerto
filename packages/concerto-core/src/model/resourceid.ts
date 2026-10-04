@@ -80,9 +80,9 @@ class ResourceId {
 }
 
 /**
- * `ResourceId.fromURI` over many URIs at once, in one engine call (P5-113,
- * accordproject/concerto-rust#480): a relationship-typed map's values are
- * read with one crossing per map rather than one per value.
+ * `ResourceId.fromURI` over many URIs at once, in one engine call: a
+ * relationship-typed map's values are read with one crossing per map
+ * rather than one per value.
  * @param {String[]} uris - Resource URIs, all read with the same legacy arguments.
  * @param {String} [legacyNamespace] - Namespace to use for legacy resource identifiers.
  * @param {String} [legacyType] - Type to use for legacy resource identifiers.
@@ -104,8 +104,8 @@ export function resourceIdsFromURIs(uris: string[], legacyNamespace?: string, le
 
 /**
  * `ResourceId.prototype.toURI` over many identifiers at once, in one engine
- * call (P5-113): a relationship-typed map's values are written with one
- * crossing per map rather than one per value.
+ * call: a relationship-typed map's values are written with one crossing per
+ * map rather than one per value.
  * @param {String[]} fields - Three slots per identifier: namespace, type and id.
  * @return {Array} one URI per identifier, or `undefined` where it is not
  * valid: the caller writes that one the usual way, which throws its error.

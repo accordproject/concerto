@@ -48,12 +48,11 @@ function newMetaModelManager() {
  * @return {object} the validated metamodel instance in JSON
  */
 function validateMetaModel(input) {
-    // P5-11 (accordproject/concerto-rust#287): validated in one engine call
-    // against a metamodel model manager the engine keeps (engine/serializer.ts
-    // `validateMetaModel`), rather than building a metamodel ModelManager,
-    // its Factory and its Serializer on every call. An input the engine
-    // cannot cross (EngineFastPathUnsupported) is validated below, through
-    // the Serializer's own fallback path.
+    // Validated in one engine call against a metamodel model manager the
+    // engine keeps (engine/serializer.ts `validateMetaModel`), rather than
+    // building a metamodel ModelManager, its Factory and its Serializer on
+    // every call. An input the engine cannot cross (EngineFastPathUnsupported)
+    // is validated below, through the Serializer's own fallback path.
     try {
         engineSerializer().validateMetaModel(input);
         return input;
@@ -70,9 +69,9 @@ function validateMetaModel(input) {
         // validate the metaModel
         serializer.fromJSON(input);
     } finally {
-        // P5-97 (accordproject/concerto-rust#448): the manager is this
-        // function's own and nothing built from it escapes, so its engine
-        // handle is released here rather than left to the garbage collector.
+        // The manager is this function's own and nothing built from it
+        // escapes, so its engine handle is released here rather than left
+        // to the garbage collector.
         engineHandles().releaseHandle(metaModelManager.rustHandle);
     }
 

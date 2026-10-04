@@ -15,13 +15,14 @@
 import dayjs from './dayjs-setup';
 
 /**
- * Whether a value is a strict `DateTime` string (P5-24, BC-07/BC-42/BC-43,
- * R1): the `strictQualifiedDateTimes` format, whose date and time fields
- * name a real instant (`Date.parse` rolls `2024-02-30` and `T24:00:00` over
- * and rejects a leap second, so reading the fields back must give the same
- * fields). The Rust engine's rule (`instance::dayjs::strict_instant`): the
- * same regex, then chrono's RFC 3339 calendar checks. The lifted checks in
- * packages/concerto-core/test-lifted/datetimeutil-strict.checks.js compare the two.
+ * Whether a value is a strict `DateTime` string (BC-07/BC-42/BC-43): the
+ * `strictQualifiedDateTimes` format, whose date and time fields name a real
+ * instant (`Date.parse` rolls `2024-02-30` and `T24:00:00` over and rejects
+ * a leap second, so reading the fields back must give the same fields). The
+ * Rust engine's rule (`instance::dayjs::strict_instant`): the same regex,
+ * then chrono's RFC 3339 calendar checks. The lifted checks in
+ * packages/concerto-core/test-lifted/datetimeutil-strict.checks.js compare
+ * the two.
  * @param {*} value the value
  * @returns {boolean} true for a strict `DateTime` string
  * @internal
@@ -37,11 +38,12 @@ export function isStrictDateTime(value): boolean {
 /**
  * Ensures there is a proper current time
  *
- * P5-67 (BC-51, R1): a given `currentTime` must be a strict `DateTime`
- * string (`YYYY-MM-DDTHH:mm:ss`, an optional fraction, then `Z` or
- * `±HH:mm`, naming a real instant), as for every other `DateTime` string;
- * the lenient dayjs and V8 forms are rejected with the same error an
- * unparseable one throws. An omitted (falsy) `currentTime` still means now.
+ * BC-51: a given `currentTime` must be a strict `DateTime` string
+ * (`YYYY-MM-DDTHH:mm:ss`, an optional fraction, then `Z` or `±HH:mm`,
+ * naming a real instant), as for every other `DateTime` string; the
+ * lenient dayjs and V8 forms are rejected with the same error an
+ * unparseable one throws. An omitted (falsy) `currentTime` still means
+ * now.
  *
  * @param {string} [currentTime] - the definition of 'now', a strict
  * `DateTime` string

@@ -154,7 +154,7 @@ class ResourceValidator {
             }
             break;
         case 'DateTime':
-            // P5-24 (BC-43, R1): the same strict rule as a `DateTime` field
+            // BC-43: the same strict rule as a `DateTime` field
             // (`undefined`, the absence of a value, still passes).
             if (value !== undefined && !isStrictDateTime(value)) {
                 throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
@@ -186,8 +186,8 @@ class ResourceValidator {
             throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
         }
 
-        // P5-58 (BC-05, R1; DV-007): a relationship-typed value is checked
-        // as a relationship property is, not as an embedded object.
+        // BC-05, DV-007: a relationship-typed value is checked as a
+        // relationship property is, not as an embedded object.
         const relationship = getRelationshipMapValue(mapDeclaration);
 
         obj.forEach((value, key) => {
@@ -404,9 +404,8 @@ class ResourceValidator {
 
         if(field.isPrimitive()) {
             let invalid = false;
-            // P5-100 (E-2, M2): a typeof/isFinite check over the value TS
-            // already holds, so it no longer crosses into the engine per
-            // primitive (`resourceValidatorPrimitiveValid`).
+            // A typeof/isFinite check over the value TS already holds,
+            // without an engine call per primitive.
             switch(field.getType()) {
             case 'String':
                 if(dataType !== 'string') {
@@ -575,7 +574,7 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: classDeclaration.getFullyQualifiedName(),
-            // BC-06 (R1): String(), not value.toString(), which is a V8
+            // BC-06: String(), not value.toString(), which is a V8
             // TypeError for null or undefined (DV-008).
             invalidValue: String(value)
         }));
@@ -593,7 +592,7 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: relationshipDeclaration.getFullyQualifiedTypeName(),
-            // BC-06 (R1): String(), not value.toString(), which is a V8
+            // BC-06: String(), not value.toString(), which is a V8
             // TypeError for null or undefined (DV-008).
             invalidValue: String(value)
         }));
@@ -689,7 +688,7 @@ class ResourceValidator {
             typeName += '[]';
         }
 
-        // BC-06 (R1): a value that is not Identifiable is named by its JS
+        // BC-06: a value that is not Identifiable is named by its JS
         // type; calling its missing getFullyQualifiedType() was a V8
         // TypeError (DV-008).
         let objectType;

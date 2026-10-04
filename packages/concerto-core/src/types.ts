@@ -32,10 +32,10 @@ export interface ModelManagerOptions {
     regExp?: RegExp;
     /**
      * The strict AST shape check at model load (BC-19, with BC-17, BC-18
-     * and BC-20; on by default since R1): unless this is `false`, a
+     * and BC-20; on by default): unless this is `false`, a
      * ModelFile whose AST does not have the Concerto metamodel's shape is
      * rejected with an IllegalModelException when it is constructed. `true`
-     * also runs `validateAst` in `addModelFile`, as before. `false` is an
+     * also runs `validateAst` in `addModelFile`. `false` is an
      * escape hatch for trusted input only: the shape check is skipped, and
      * code downstream of the load may assume a well-formed AST. A malformed
      * AST still throws an error when it is loaded, never a WASM trap or a

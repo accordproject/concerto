@@ -78,9 +78,10 @@ class JSONGenerator {
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
-            // BC-08 (R1): name the element. JSON.stringify of an introspection
+            // BC-08: name the element. JSON.stringify of an introspection
             // object (a scalar declaration, an enum value) meets the model
-            // manager again and threw V8's circular-structure TypeError (DV-010).
+            // manager again and threw V8's circular-structure TypeError
+            // (DV-010).
             const name = typeof thing?.getFullyQualifiedName === 'function' ? thing.getFullyQualifiedName() : JSON.stringify(thing);
             throw new Error(`Unrecognised element "${name}"`);
         }
@@ -99,11 +100,11 @@ class JSONGenerator {
         // initialise Map with $class property
         let map = new Map();
 
-        // P5-58 (BC-05, R1; DV-007): a relationship-typed value is written as
-        // a relationship property is, not as an embedded concept.
+        // BC-05, DV-007: a relationship-typed value is written as a
+        // relationship property is, not as an embedded concept.
         const relationship = getRelationshipMapValue(mapDeclaration);
-        // P5-113: the URIs of the values written as relationship text, made
-        // in one engine call on the first value.
+        // The URIs of the values written as relationship text, made in one
+        // engine call on the first value.
         let uris: (string | undefined)[] | undefined;
         let index = -1;
 
@@ -243,9 +244,8 @@ class JSONGenerator {
      * @return {Object} the text JSON safe representation
      */
     convertToJSON(field, obj) {
-        // P5-100 (E-2, M2): converted here, over the value TS already holds;
-        // it no longer crosses into the engine per primitive
-        // (`generatorConvertPrimitive`).
+        // Converted here, over the value TS already holds, without an
+        // engine call per primitive.
         switch (field.getType()) {
         case 'DateTime':
         {
@@ -295,7 +295,7 @@ class JSONGenerator {
      * One relationship value: a resource written in full when
      * `permitResourcesForRelationships` allows it and it is not already being
      * written, otherwise its relationship text. A relationship-typed map value
-     * is written here too (P5-58, BC-05).
+     * is written here too (BC-05).
      * @param {RelationshipDeclaration|RelationshipMapValue} relationshipDeclaration - the relationship property, or the map's relationship value
      * @param {Identifiable} obj - the relationship or the resource
      * @param {Object} parameters  - the parameter
@@ -342,9 +342,8 @@ class JSONGenerator {
 
 /**
  * The URIs of a relationship-typed map's values that `convertRelationship`
- * writes as `toURI()`, made in one engine call (P5-113,
- * accordproject/concerto-rust#480): a relationship, or a resource when
- * `convertResourcesToRelationships` allows it and
+ * writes as `toURI()`, made in one engine call: a relationship, or a
+ * resource when `convertResourcesToRelationships` allows it and
  * `permitResourcesForRelationships` does not write it in full.
  * @param {JSONGenerator} generator - the generator and its options
  * @param {Map} obj - the map

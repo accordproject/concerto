@@ -56,7 +56,7 @@ class MapValueType extends Decorated {
      */
     process() {
         super.process();
-        // P5-10b: from the file's view snapshot when it has it.
+        // From the file's view snapshot when it has it.
         this.type = engineViews().mapValueTypeProcess(this);
     }
 

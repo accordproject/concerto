@@ -55,10 +55,8 @@ import { optionalString } from './engineutil';
 import type { EngineHandle, EngineState } from './engine/bindings';
 
 /**
- * P5-100 (M1, accordproject/concerto-rust#454): a new manager's engine
- * state record (`BaseModelManager._engine`; its shape is `EngineState` in
- * src/engine/bindings.d.ts). It replaces the module-level WeakMaps that
- * used to hold the same state by manager, here and in src/engine/.
+ * A new manager's engine state record (`BaseModelManager._engine`,
+ * `EngineState` in src/engine/bindings.d.ts).
  * @return {EngineState} the record, with model version 0 and nothing cached
  * @private
  */
@@ -157,11 +155,10 @@ const DEFAULT_DECORATOR_VALIDATION = {
 // and ignored by fromAst
 const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
 
-// P5-52 (BC-28, R1; accordproject/concerto-rust#373): the `regExp` option
-// (an alternative regular expression engine, such as XRegExp) is no longer
-// supported. Every `regex=` is compiled and evaluated by the Concerto
-// engine, which cannot call a JS constructor. The option is ignored, with
-// one warning per process, rather than rejected.
+// BC-28: the `regExp` option (an alternative regular expression engine such
+// as XRegExp) is ignored, with one warning per process: every `regex=` is
+// compiled and evaluated by the Concerto engine, which cannot call a JS
+// constructor.
 let regExpOptionWarned = false;
 
 /**
@@ -189,11 +186,9 @@ const RUST_PRELOADED_NS = ['concerto.decorator@1.0.0', 'concerto@1.0.0'];
 
 /**
  * A type name argument for an engine read, whose binding takes a `&str` (a
- * JS non-string traps the engine). P5-34 (#330 §2(b)): a non-string gets
- * the error the TS body threw first for it, from the same
- * `ModelUtil.getNamespace` call: an `Error` for null or undefined (v5.0.0's
- * `FQN is invalid.`), and a `TypeError` otherwise. Should that call ever
- * accept a non-string, its string form is sent.
+ * JS non-string traps the engine). A non-string gets the error TS 5.0.0's
+ * `ModelUtil.getNamespace` call threw first for it: an `Error` for null or
+ * undefined (`FQN is invalid.`), and a `TypeError` otherwise.
  * @param {*} name the type name argument
  * @return {string} the name as a string
  * @private
@@ -224,9 +219,9 @@ function typeNameArgument(name: unknown): string {
 class BaseModelManager {
     /**
      * The registered model files, by namespace. Internal and read-only
-     * (P5-34, BC-48): every change goes through this manager's own methods,
-     * which keep `rustHandle` mirroring it. Use `getModelFile`,
-     * `getModelFiles` and `getNamespaces` to read it.
+     * (BC-48): every change goes through this manager's own methods, which
+     * keep `rustHandle` mirroring it. Use `getModelFile`, `getModelFiles`
+     * and `getNamespaces` to read it.
      * @internal
      */
      modelFiles: Record<string, ModelFileInstance>;
@@ -238,44 +233,43 @@ class BaseModelManager {
      decoratorValidation: NonNullable<ModelManagerOptions['decoratorValidation']>;
      metamodelModelFile: ModelFileInstance;
     /**
-     * (P4-08): a live concerto-wasm ModelManagerHandle, mirroring
-     * `modelFiles`: every addModelFile/updateModelFile/deleteModelFile call
-     * this manager makes is written to it, except the registration of the
-     * decorator/root system models, which its own constructor already loads
+     * A live concerto-wasm ModelManagerHandle, mirroring `modelFiles`:
+     * every addModelFile/updateModelFile/deleteModelFile call this manager
+     * makes is written to it, except the registration of the decorator/root
+     * system models, which its own constructor already loads
      * (`_needsRustWrite`). Always set by the end of the constructor.
      * @internal
      */
      rustHandle: EngineHandle;
     /**
-     * (P5-31, accordproject/concerto-rust#341): true only while the
-     * constructor builds `metamodelModelFile`, the cached copy of the
-     * metamodel `validateAst` registers when rustHandle keeps its own copy
-     * after a failed check. `_needsRustWrite` answers false for the
-     * metamodel namespace while it is set, so engine/views.ts
-     * `stageModelFile` keeps no engine stage for that copy in every new
-     * manager. Every other metamodel file, a user's included, is mirrored.
+     * True only while the constructor builds `metamodelModelFile`, the
+     * cached copy of the metamodel `validateAst` registers when rustHandle
+     * keeps its own copy after a failed check. `_needsRustWrite` answers
+     * false for the metamodel namespace while it is set, so
+     * engine/views.ts `stageModelFile` keeps no engine stage for that copy
+     * in every new manager. Every other metamodel file, a user's included,
+     * is mirrored.
      * @internal
      */
      _buildingMetamodelCopy?: boolean;
     /**
-     * (P5-34, accordproject/concerto-rust#344): true only while one of this
-     * manager's own mutators has written `modelFiles` ahead of `rustHandle`:
-     * the batch `addModelFiles` adds before it mirrors them. Reads never
-     * compare the two maps; this flag is the whole mirror check
-     * (`_rustHandleMatchesModelFiles`).
+     * True only while one of this manager's own mutators has written
+     * `modelFiles` ahead of `rustHandle`: the batch `addModelFiles` adds
+     * before it mirrors them. Reads never compare the two maps; this flag is
+     * the whole mirror check (`_rustHandleMatchesModelFiles`).
      * @internal
      */
      _mirrorPending: boolean;
     /**
-     * (P5-34): the rustHandle model file handle of each namespace, cached
-     * when the file is committed (or on first read), for `ModelFile`'s
-     * reads (`_rustModelFileId`). Cleared whenever the engine rebuilds its
-     * model file arena (an update or a delete) or rustHandle is replaced.
+     * The rustHandle model file handle of each namespace, cached when the
+     * file is committed (or on first read), for `ModelFile`'s reads
+     * (`_rustModelFileId`). Cleared whenever the engine rebuilds its model
+     * file arena (an update or a delete) or rustHandle is replaced.
      * @internal
      */
      _modelFileIds: Map<string, number>;
     /**
-     * (P5-34): the system namespaces the current rustHandle loaded itself
+     * The system namespaces the current rustHandle loaded itself
      * (`RUST_PRELOADED_NS`) that `modelFiles` does not hold yet. Registering
      * one writes nothing to rustHandle; every other add, update and delete,
      * a system namespace's included, is mirrored.
@@ -283,10 +277,10 @@ class BaseModelManager {
      */
      _rustPreloaded: Set<string>;
     /**
-     * (P5-100, accordproject/concerto-rust#454): this manager's engine
-     * state: its model version, moved by every change of `modelFiles` or
-     * `rustHandle` and the key of every cached answer, and those cached
-     * answers (`EngineState` in src/engine/bindings.d.ts).
+     * This manager's engine state: its model version, moved by every
+     * change of `modelFiles` or `rustHandle` and the key of every cached
+     * answer, and those cached answers (`EngineState` in
+     * src/engine/bindings.d.ts).
      * @internal
      */
      _engine: EngineState;
@@ -298,8 +292,8 @@ class BaseModelManager {
      * @param {boolean} [options.metamodelValidation] - Unless false, every ModelFile built for this
      * manager has its AST checked against the Concerto metamodel when it is constructed (at model
      * load: fromAst, addModel, addCTOModel, addModelFiles, updateModelFile), and a malformed AST is an
-     * IllegalModelException (BC-19, on by default since R1). When true, addModelFile also runs
-     * validateAst on each new file, as before. false is an escape hatch for trusted input only: the
+     * IllegalModelException (BC-19, on by default). When true, addModelFile also runs
+     * validateAst on each new file. false is an escape hatch for trusted input only: the
      * shape check is skipped, and code downstream of the load may assume a well-formed AST. A
      * malformed AST still throws an error when it is loaded, never a WASM trap or a process crash,
      * unless the loader can read it all the same (a node's $class naming the wrong type, say); the
@@ -312,7 +306,7 @@ class BaseModelManager {
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
     */
     constructor(options?: ModelManagerOptions, processFile?: (fileName: string | null, modelInput: string | unknown) => ModelFileSource) {
-        // P5-35 (BC-47): a ModelFile may be built only for a manager whose
+        // BC-47: a ModelFile may be built only for a manager whose
         // constructor ran; registered before this constructor builds any.
         ModelFile._registerManager(this);
         this._engine = newEngineState();
@@ -330,8 +324,8 @@ class BaseModelManager {
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
         this.rustHandle = this._newRustHandle();
-        // P5-75: the namespace list starts empty with the map; the system
-        // models below are appended as they are registered.
+        // The namespace list starts empty with the map; the system models
+        // below are appended as they are registered.
         this._engine.namespaces = [];
         this.addDecoratorModel();
         this.addRootModel();
@@ -346,9 +340,8 @@ class BaseModelManager {
 
         if(options?.addMetamodel) {
             // Mirrored into rustHandle by `addModelFile` like any other
-            // namespace (P5-31, accordproject/concerto-rust#341):
-            // rustHandle's own constructor loads only `concerto@1.0.0` and
-            // `concerto.decorator@1.0.0`.
+            // namespace: rustHandle's own constructor loads only
+            // `concerto@1.0.0` and `concerto.decorator@1.0.0`.
             this.addModelFile(this.metamodelModelFile);
         }
     }
@@ -373,8 +366,8 @@ class BaseModelManager {
         }
 
         const {rootModelAst, rootModelCto, rootModelFile} = getRootModel();
-        // P5-73: the engine's precomputed verdict applies to this AST while
-        // it is exactly the fixed root model (engine/views.ts `systemModelAsts`).
+        // The engine's precomputed verdict applies to this AST while it is
+        // exactly the fixed root model (engine/views.ts `systemModelAsts`).
         engineViews().markSystemModelAst(rootModelAst);
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
 
@@ -424,10 +417,6 @@ class BaseModelManager {
      * Adds decorator types
      * @private
      */
-    /**
-     * Adds decorator types
-     * @private
-     */
     addDecoratorModel() {
         const getDecoratorModel = decoratorModelModule.getDecoratorModel || decoratorModelModule;
 
@@ -436,8 +425,8 @@ class BaseModelManager {
         }
         const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
 
-        // P5-73: the engine's precomputed verdict applies to this AST while
-        // it is exactly the fixed decorator model (engine/views.ts
+        // The engine's precomputed verdict applies to this AST while it is
+        // exactly the fixed decorator model (engine/views.ts
         // `systemModelAsts`).
         engineViews().markSystemModelAst(decoratorModelAst);
         const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
@@ -450,14 +439,14 @@ class BaseModelManager {
      * namespace but a system model the current `rustHandle` loaded itself
      * and `modelFiles` does not hold yet (`_rustPreloaded`: the decorator
      * and root models `addDecoratorModel`/`addRootModel` register). The
-     * metamodel namespace is written like any other (P5-31,
-     * accordproject/concerto-rust#341), so a manager a user adds the
-     * metamodel to (`newMetaModelManager`, or `addModelFile` of a metamodel
-     * ModelFile) keeps rustHandle in parity and answers its reads from Rust.
-     * The only metamodel copy that is never written is `validateAst`'s own
-     * (`metamodelModelFile`): it is not staged while the constructor builds
-     * it (`_buildingMetamodelCopy`), and `validateAst` registers it in
-     * `this.modelFiles` only when rustHandle already holds its own copy.
+     * metamodel namespace is written like any other, so a manager a user
+     * adds the metamodel to (`newMetaModelManager`, or `addModelFile` of a
+     * metamodel ModelFile) keeps rustHandle in parity and answers its reads
+     * from Rust. The only metamodel copy that is never written is
+     * `validateAst`'s own (`metamodelModelFile`): it is not staged while the
+     * constructor builds it (`_buildingMetamodelCopy`), and `validateAst`
+     * registers it in `this.modelFiles` only when rustHandle already holds
+     * its own copy.
      * @param {string} namespace - the namespace being added, updated or removed
      * @return {boolean} true if `namespace` needs writing to `rustHandle`
      * @private
@@ -471,13 +460,13 @@ class BaseModelManager {
     }
 
     /**
-     * Throws the BC-46 `TypeError` (P5-34, accordproject/concerto-rust#344)
-     * unless `modelFile` is a ModelFile the ModelFile constructor built:
-     * only such a file was loaded by the engine, so only it can be mirrored
-     * into `rustHandle`. A duck-typed object, `Object.create(ModelFile
-     * .prototype)` or a sinon stub instance is rejected. v5.0.0 threw a
-     * `TypeError` for almost every such value too (calling a method it
-     * lacks), and accepted a duck-typed object.
+     * Throws the BC-46 `TypeError` unless `modelFile` is a ModelFile the
+     * ModelFile constructor built: only such a file was loaded by the
+     * engine, so only it can be mirrored into `rustHandle`. A duck-typed
+     * object, `Object.create(ModelFile .prototype)` or a sinon stub
+     * instance is rejected. v5.0.0 threw a `TypeError` for almost every
+     * such value too (calling a method it lacks), and accepted a duck-typed
+     * object.
      * @param {*} modelFile - the argument
      * @param {string} method - the method it was passed to
      * @private
@@ -490,13 +479,12 @@ class BaseModelManager {
     }
 
     /**
-     * The rustHandle write for a model file being added: registers the file
-     * Rust already loaded when the `ModelFile` was constructed (P5-10a lazy
-     * views, engine/views.ts `commitStaged`), or else sends its AST, as
-     * before, and caches the file's rustHandle handle (`_modelFileIds`). A
-     * namespace `_needsRustWrite` excludes is not written (rustHandle loaded
-     * it itself); its stage, if any, is dropped. Any error the write throws
-     * propagates.
+ * The rustHandle write for a model file being added: registers the file the
+ * engine loaded when the `ModelFile` was constructed (`commitStaged`), or
+ * else sends its AST, and caches the file's handle (`_modelFileIds`). A
+ * namespace `_needsRustWrite` excludes is not written (rustHandle loaded it
+ * itself); its stage, if any, is dropped. Any error the write throws
+ * propagates.
      * @param {ModelFile} modelFile - the model file being added
      * @return {boolean} true if the namespace was written to rustHandle
      * @private
@@ -523,14 +511,12 @@ class BaseModelManager {
     }
 
     /**
-     * P5-101 (D-10, M5; accordproject/concerto-rust#455): `_rustMirrorAdd`
-     * for each of `modelFiles`, in order, in one engine call when every one
-     * is written to rustHandle from its stage (engine/views.ts
-     * `commitStagedAll`); otherwise one write per file, as before. Adds each
-     * namespace written to `mirrored`, so the caller can undo them. P5-103:
-     * the one engine call cannot fail part way: its only registration error
-     * is a namespace already registered, which `addModelFiles` rejects
-     * before it mirrors anything.
+ * `_rustMirrorAdd` for each of `modelFiles`, in order: in one engine call
+ * when every one is written from its stage (`commitStagedAll`), else one
+ * write per file. Adds each namespace written to `mirrored`, so the caller
+ * can undo them. The one call cannot fail part way: its only registration
+ * error, a namespace already registered, is rejected by `addModelFiles`
+ * first.
      * @param {ModelFile[]} modelFiles - the model files being added
      * @param {Set<string>} mirrored - the namespaces written, filled in
      * @private
@@ -556,17 +542,13 @@ class BaseModelManager {
     }
 
     /**
-     * P5-101 (D-10, M5; accordproject/concerto-rust#455): `addModelFile(m,
-     * null, null, true)` for each of `modelFiles`, in order, for the
-     * DecoratorManager results (engine/views.ts `adoptStagedModels`, which
-     * decorateModels and every extract use), with the files registered in
-     * rustHandle from their stages in one engine call (`commitStagedAll`)
-     * where each `addModelFile` crossed once. Every file passes
-     * `addModelFile`'s own checks by construction (P5-103 removed the checks
-     * again here): `adoptStagedModels` built each one, with a versioned
-     * namespace no other result file has, into this new, cleared manager,
-     * which writes it to rustHandle. When there is one file, or a file has
-     * no usable stage, each file is added by `addModelFile`, as before.
+ * `addModelFile(m, null, null, true)` for each of `modelFiles`, in order, for
+ * the DecoratorManager results (`adoptStagedModels`), registered from their
+ * stages in one engine call (`commitStagedAll`). Every file passes
+ * `addModelFile`'s checks by construction: `adoptStagedModels` built each,
+ * with a versioned namespace no other result file has, into this new,
+ * cleared manager. With one file, or a file without a usable stage, each
+ * file is added by `addModelFile`.
      * @param {ModelFile[]} modelFiles - the model files being added
      * @private
      * @internal
@@ -599,16 +581,14 @@ class BaseModelManager {
     }
 
     /**
-     * P5-34 (I-5): `addModelFile`'s validation and rustHandle write in one
-     * engine call, for a file staged in `rustHandle` whose `validate` is
-     * `ModelFile`'s own (engine/views.ts `validateAndCommitStaged`); caches
-     * the file's rustHandle handle. Returns false, having changed nothing,
-     * for any other file: the caller then calls `modelFile.validate()` and
-     * `_rustMirrorAdd`, as before. A validation error propagates as
-     * `modelFile.validate()` throws it.
-     * P5-101 (D-9): with `metamodel`, `validateAst`'s check runs first, in
-     * the same engine call; its error is thrown as `validateAst` throws it,
-     * after the same metamodel mirroring (`_mirrorMetamodelLeak`).
+     * `addModelFile`'s validation and rustHandle write in one engine call,
+ * for a file staged in `rustHandle` whose `validate` is `ModelFile`'s own
+ * (`validateAndCommitStaged`); caches the file's handle. False, changing
+ * nothing, for any other file: the caller then calls `modelFile.validate()`
+ * and `_rustMirrorAdd`. A validation error propagates as
+ * `modelFile.validate()` throws it. With `metamodel`, `validateAst`'s check
+ * runs first in the same call, its error thrown as `validateAst` throws it,
+ * after the same metamodel mirroring (`_mirrorMetamodelLeak`).
      * @param {ModelFile} modelFile - the model file being added
      * @param {boolean} [metamodel] - whether to run the metamodel check too
      * @return {boolean} true if the file was validated and written
@@ -641,19 +621,20 @@ class BaseModelManager {
 
     /**
      * The rustHandle write for a model file replacing the one registered
-     * for its namespace: rustHandle holds every registered namespace
-     * (P5-34), so it is always an update, which rebuilds the engine's model
-     * file arena, so every cached handle is dropped (`_modelFileIds`). Any
-     * error the write throws propagates.
+     * for its namespace: rustHandle holds every registered namespace, so it
+     * is always an update, which rebuilds the engine's model file arena, so
+     * every cached handle is dropped (`_modelFileIds`). Any error the write
+     * throws propagates.
      * @param {ModelFile} modelFile - the model file replacing the registered one
      * @private
      * @internal
      */
     _rustMirrorUpdate(modelFile) {
         const namespace = modelFile.getNamespace();
-        // P5-100 (E-6): the file Rust loaded when the ModelFile was
-        // constructed replaces the registered one (engine/views.ts
-        // `updateStaged`); only a file with no usable stage sends its AST.
+        // The file Rust loaded when the ModelFile was constructed
+        // replaces the registered one (engine/views.ts
+        // `updateStaged`); only a file with no usable stage sends
+        // its AST.
         const staged = engineViews().updateStaged(modelFile, this.rustHandle);
         if (staged !== undefined) {
             this._modelFileIds.clear();
@@ -677,10 +658,10 @@ class BaseModelManager {
     /**
      * Whether `rustHandle` currently mirrors `this.modelFiles`: true except
      * while one of this manager's own mutators has written `modelFiles`
-     * ahead of it (`_mirrorPending`, P5-34). `modelFiles` is internal and
-     * read-only (BC-48), and only ModelFiles the ModelFile constructor built
-     * are accepted (BC-46), so every mutator keeps the two in step; this is
-     * a flag read, not a comparison of the two maps.
+     * ahead of it (`_mirrorPending`). `modelFiles` is internal and read-only
+     * (BC-48), and only ModelFiles the ModelFile constructor built are
+     * accepted (BC-46), so every mutator keeps the two in step; this is a
+     * flag read, not a comparison of the two maps.
      * @return {boolean} true if rustHandle mirrors the namespaces TS has
      * @private
      * @internal
@@ -690,14 +671,10 @@ class BaseModelManager {
     }
 
     /**
-     * `rustHandle.modelFileGetTypeName(id, type)` for the registered model
-     * file of `namespace` (handle `id`), as `ModelFile.getType` asks it.
-     * P5-113 (accordproject/concerto-rust#480): an answer the engine gave
-     * since the last model change is kept in the read memo
-     * (`EngineState.readMemo`, as `getType` keeps its own), so a run of
-     * instances of one type (a relationship-typed map's values, each one a
-     * Relationship whose constructor looks its type up) crosses into the
-     * engine once, not once per instance.
+ * `rustHandle.modelFileGetTypeName(id, type)` for the registered model file
+ * of `namespace`, as `ModelFile.getType` asks it, kept in the read memo
+ * until the next model change, so a run of instances of one type crosses
+ * once.
      * @param {string} namespace - the model file's namespace
      * @param {number} id - its rustHandle model file handle
      * @param {string} type - the type name, as `ModelFile.getType` takes it
@@ -724,7 +701,7 @@ class BaseModelManager {
 
     /**
      * The rustHandle handle of the model file for `namespace`: the one
-     * cached when the file was committed (P5-34), or else
+     * cached when the file was committed, or else
      * `rustHandle.modelFileId(namespace)`, then cached until the engine
      * rebuilds its arena (`_modelFileIds`).
      * @param {string} namespace - the namespace to look up
@@ -753,12 +730,10 @@ class BaseModelManager {
         const fileName = modelFile.getName();
         if (!this._mirrorPending && typeof namespace === 'string' &&
             (typeof fileName === 'string' || fileName === undefined || fileName === null)) {
-            // P5-11 (accordproject/concerto-rust#287): the plain Error is
-            // raised by Rust (concerto-wasm `throwAlreadyExists`), naming the
-            // file rustHandle holds under the namespace, which mirrors
-            // this.modelFiles. A batch of addModelFiles not yet mirrored
-            // (`_mirrorPending`) and a file name the binding cannot take
-            // keep the TS message below.
+            // The plain Error is raised by the engine (`throwAlreadyExists`),
+            // naming the file rustHandle holds under the namespace. A batch
+            // not yet mirrored (`_mirrorPending`) and a file name the binding
+            // cannot take keep the TS message below.
             this.rustHandle.throwAlreadyExists(namespace, fileName ?? undefined);
         }
         const existingModelFileName = this.modelFiles[modelFile.getNamespace()].getName();
@@ -797,14 +772,11 @@ class BaseModelManager {
             // unchanged.
             let mirrored = false;
             if (!disableValidation) {
-                // Structural validation against the Metamodel, then
-                // semantic validation of the model file. P4-08 delegated
-                // `ModelFile.validate()` fully to Rust (maintainer decision
-                // 2026-09-26). P5-34 (I-5): a staged file is validated and
-                // written to rustHandle in one engine call; P5-101 (D-9):
-                // with the metamodel check in the same call. Any other file
-                // is checked by `validateAst` and its own `validate()`, then
-                // written.
+                // Structural validation against the metamodel, then
+                // semantic validation, by the engine. A staged file is
+                // validated and written to rustHandle in one engine call,
+                // the metamodel check included; any other file is checked by
+                // `validateAst` and its own `validate()`, then written.
                 const metamodel = !!this.options?.metamodelValidation;
                 mirrored = this._rustValidateAndMirrorAdd(modelFile, metamodel);
                 if (!mirrored) {
@@ -818,10 +790,10 @@ class BaseModelManager {
                 this._rustMirrorAdd(modelFile);
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
-            // P5-75: a new key, appended to the namespace list.
+            // A new key, appended to the namespace list.
             noteNamespaceAdded(this, modelFile.getNamespace());
-            // P5-14, P5-100: a model change moves the model version, which
-            // every cached answer of this manager's is keyed on.
+            // A model change moves the model version, which every cached
+            // answer of this manager's is keyed on.
             this._engine.version++;
         } else {
             this._throwAlreadyExists(modelFile);
@@ -838,22 +810,21 @@ class BaseModelManager {
      * @private
      */
     validateAst(modelFile) {
-        // Delegates to rustHandle.validateAstValue (P4-08b, P5-13;
-        // concerto-wasm), which runs the same version check plus structural
-        // (metamodel) check over the AST alone -- it needs no registered
-        // model file, so it never needs `this.modelFiles`/`rustHandle`
-        // parity the way a read over `this.modelFiles` would, and it builds
-        // no engine-side ModelFile either (the check never reads one, and
-        // its constructor would reject a malformed AST with an
-        // IllegalModelException before the check could throw TS's
-        // MetamodelException). A thrown error already arrives as the mapped
-        // `MetamodelException` (or other TS exception class,
-        // src/engine/errors.ts) via the host error factory, so it
-        // propagates unchanged.
+        // Delegates to rustHandle.validateAstValue (concerto-wasm), which
+        // runs the same version check plus structural (metamodel) check
+        // over the AST alone -- it needs no registered model file, so it
+        // never needs `this.modelFiles`/`rustHandle` parity the way a read
+        // over `this.modelFiles` would, and it builds no engine-side
+        // ModelFile either (the check never reads one, and its constructor
+        // would reject a malformed AST with an IllegalModelException before
+        // the check could throw TS's MetamodelException). A thrown error
+        // already arrives as the mapped `MetamodelException` (or other TS
+        // exception class, src/engine/errors.ts) via the host error
+        // factory, so it propagates unchanged.
         const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
         try {
-            // P5-100 (E-6): over the copy Rust staged when the ModelFile was
-            // constructed, when it has one, rather than the AST sent again.
+            // Over the copy Rust staged when the ModelFile was constructed,
+            // when it has one, rather than the AST sent again.
             if (!engineViews().validateAstStaged(modelFile, this.rustHandle)) {
                 this.rustHandle.validateAstValue(JSON.stringify(modelFile.getAst()));
             }
@@ -864,23 +835,14 @@ class BaseModelManager {
     }
 
     /**
-     * After a failed metamodel check (`validateAst`): rustHandle's own
-     * validate_ast (concerto-core ModelManager::validate_ast) only leaks its
-     * copy of the metamodel when the *structural* check (`deserialize_ast`)
-     * fails after the version check already passed -- a version-mismatch
-     * failure returns before the metamodel is ever inserted, so rustHandle
-     * never registers it. Mirroring the leak unconditionally on every error
-     * would register the metamodel in `this.modelFiles` on a version
-     * mismatch that rustHandle itself never registered, and the two would
-     * no longer mirror each other.
-     * Ask rustHandle for the ground truth instead of re-deriving TS's own
-     * control flow: mirror into `this.modelFiles` only when rustHandle's own
-     * handle now actually holds `MetaModelNamespace`. rustHandle already
-     * holds its own copy in the case that reaches it, so this writes only
-     * this.modelFiles, not rustHandle (P5-31, accordproject/concerto-rust#341):
-     * it is the one metamodel copy that is not mirrored through
-     * `_rustMirrorAdd`. `metamodelModelFile` was never staged
-     * (`_buildingMetamodelCopy`), so there is no stage to drop.
+     * After a failed metamodel check (`validateAst`): the engine registers
+     * its copy of the metamodel only when the structural check fails after
+     * the version check passed (a version mismatch returns before it is
+     * inserted). So `this.modelFiles` takes the metamodel only when
+     * rustHandle now holds `MetaModelNamespace`, keeping the two in step.
+     * This writes only `this.modelFiles`: it is the one metamodel copy not
+     * mirrored through `_rustMirrorAdd`, and `metamodelModelFile` was never
+     * staged (`_buildingMetamodelCopy`), so there is no stage to drop.
      * @param {boolean} alreadyHasMetamodel - whether the manager held the
      * metamodel before the check
      * @private
@@ -968,19 +930,18 @@ class BaseModelManager {
             throw new Error('Model file does not exist');
         } else {
             // Mirrored first, so a mirror error leaves both unchanged.
-            // rustHandle holds every registered namespace (P5-34), the
-            // system models included. `this.modelFiles[namespace]` above
-            // coerces `namespace` to a string key (matching v5.0.0, which
-            // deletes cleanly for a non-string whose string form is a loaded
+            // rustHandle holds every registered namespace, the system models
+            // included. `this.modelFiles[namespace]` above coerces
+            // `namespace` to a string key (matching v5.0.0, which deletes
+            // cleanly for a non-string whose string form is a loaded
             // namespace), but `rustHandle.deleteModelFile` takes a WASM
-            // `&str`: a non-string reaching it traps the engine
-            // (accordproject/concerto-rust#294 follow-up), so its string form
+            // `&str`, and a non-string traps the engine, so its string form
             // is sent. The delete rebuilds the engine's model file arena, so
             // every cached handle is dropped.
             this.rustHandle.deleteModelFile(typeof namespace === 'string' ? namespace : String(namespace));
             this._modelFileIds.clear();
             delete this.modelFiles[namespace];
-            // P5-75: the key TS deletes is `namespace`'s string form.
+            // The key TS deletes is `namespace`'s string form.
             noteNamespaceRemoved(this, String(namespace));
             this._engine.version++;
         }
@@ -1000,8 +961,8 @@ class BaseModelManager {
         Object.assign(originalModelFiles, this.modelFiles);
         let newModelFiles: ModelFileInstance[] = [];
         const mirroredNamespaces = new Set<string>();
-        // P5-75: the namespace list before the batch, appended to once the
-        // batch has succeeded, or kept for the restored map if it fails.
+        // The namespace list before the batch, appended to once the batch
+        // has succeeded, or kept for the restored map if it fails.
         const namespaces = namespaceListOf(this);
 
         try {
@@ -1037,16 +998,16 @@ class BaseModelManager {
                 }
             }
 
-            // Mirror the newly added files into rustHandle (P4-08,
-            // accordproject/concerto-rust#67) *before* validating: this
-            // method adds every file to this.modelFiles directly, in
-            // whatever order the caller gave, precisely so cross-file
-            // dependency order does not matter (see the method doc), and a
-            // file in this batch may import from *another* file in the very
-            // same batch, so every one of them must already be visible to
-            // rustHandle before validateModelFiles() below validates any of
-            // them. Each write is a structural mirror write only (no
-            // validation); validateModelFiles() decides pass/fail.
+            // Mirror the newly added files into rustHandle *before*
+            // validating: this method adds every file to this.modelFiles
+            // directly, in whatever order the caller gave, precisely so
+            // cross-file dependency order does not matter (see the method
+            // doc), and a file in this batch may import from *another* file
+            // in the very same batch, so every one of them must already be
+            // visible to rustHandle before validateModelFiles() below
+            // validates any of them. Each write is a structural mirror
+            // write only (no validation); validateModelFiles() decides
+            // pass/fail.
             this._rustMirrorAddAll(newModelFiles, mirroredNamespaces);
             this._mirrorPending = false;
 
@@ -1055,8 +1016,7 @@ class BaseModelManager {
                 this.validateModelFiles();
             }
 
-            // P5-75: the batch's namespaces, in the order `modelFiles` took
-            // them.
+            // The batch's namespaces, in the order `modelFiles` took them.
             if (namespaces && namespaceListOf(this) === namespaces) {
                 newModelFiles.forEach((m) => namespaces.push(m.getNamespace()));
             }
@@ -1079,8 +1039,7 @@ class BaseModelManager {
             // `newModelFiles` can contain namespaces that were never mirrored
             // at all, and calling `deleteModelFile` on those would throw
             // (rustHandle never heard of them). A delete of a namespace this
-            // batch did mirror propagates its error
-            // (accordproject/concerto-rust#262).
+            // batch did mirror propagates its error.
             newModelFiles.forEach((m) => {
                 if (!mirroredNamespaces.has(m.getNamespace())) {
                     return;
@@ -1088,9 +1047,9 @@ class BaseModelManager {
                 this.rustHandle.deleteModelFile(m.getNamespace());
                 this._modelFileIds.clear();
             });
-            // P5-75: both are back as they were before the batch (a failed
-            // delete above propagates first, dropping the list), so the
-            // list from before the batch holds for the restored map.
+            // Both are back as they were before the batch (a failed delete
+            // above propagates first, dropping the list), so the list from
+            // before the batch holds for the restored map.
             this._engine.namespaces = namespaces;
             throw err;
         } finally {
@@ -1103,12 +1062,11 @@ class BaseModelManager {
      * Validates all models files in this model manager
      */
     validateModelFiles() {
-        // P5-11 (accordproject/concerto-rust#287): every model file is
-        // validated in one Rust call (concerto-wasm `validateModelFiles`)
-        // rather than one `modelFile.validate()` crossing per file; the
-        // first error found is thrown naming the ModelFile of this manager
-        // it was found in, as that file's own validate() does. rustHandle
-        // mirrors every model file (P5-34).
+        // Every model file is validated in one Rust call (concerto-wasm
+        // `validateModelFiles`) rather than one `modelFile.validate()`
+        // crossing per file; the first error found is thrown naming the
+        // ModelFile of this manager it was found in, as that file's own
+        // validate() does. rustHandle mirrors every model file.
         this.rustHandle.validateModelFiles(this.modelFiles);
     }
 
@@ -1135,27 +1093,25 @@ class BaseModelManager {
         try {
             const externalModels = await downloader.downloadExternalDependencies(this.getModelFiles(), options);
 
-            // P5-11 (accordproject/concerto-rust#287): every downloaded
-            // file's view is built first, so a file the ModelFile
-            // constructor rejects fails the update before anything changed.
+            // Every downloaded file's view is built first, so a file
+            // the ModelFile constructor rejects fails the update before
+            // anything changed.
             const views: ModelFileInstance[] = externalModels.map((file) =>
                 new ModelFile(this, file.ast as AstNode, file.definitions, file.fileName));
 
-            // P5-11 (accordproject/concerto-rust#287): rustHandle adds each
-            // file (or replaces the file under its namespace) and validates
-            // every model file, in one call that leaves it unchanged when it
-            // fails (concerto-wasm `updateExternalModels`). Only then do the
-            // views replace this.modelFiles' entries, so a failure leaves
-            // both unchanged. P5-34: rustHandle mirrors every model file, so
-            // this is the only path.
+            // rustHandle adds each file (or replaces the file under its
+            // namespace) and validates every model file, in one call that
+            // leaves it unchanged when it fails (concerto-wasm
+            // `updateExternalModels`). Only then do the views replace
+            // this.modelFiles' entries, so a failure leaves both unchanged.
             try {
                 const next: Record<string, ModelFileInstance> = Object.assign({}, this.modelFiles);
                 views.forEach((mf) => {
                     next[mf.getNamespace()] = mf;
                 });
-                // P5-100 (E-6): from the files Rust loaded when each view was
-                // constructed (engine/views.ts `updateExternalStaged`);
-                // otherwise every AST is sent.
+                // From the files Rust loaded when each view was constructed
+                // (engine/views.ts `updateExternalStaged`); otherwise every
+                // AST is sent.
                 if (!engineViews().updateExternalStaged(views, this.rustHandle, next)) {
                     const sources = views.map((mf) => ({
                         ast: mf.getAst(),
@@ -1171,7 +1127,7 @@ class BaseModelManager {
                 this._modelFileIds.clear();
             }
             views.forEach((mf) => {
-                // P5-75: a namespace new to `modelFiles` is appended to the
+                // A namespace new to `modelFiles` is appended to the
                 // namespace list; a replaced one keeps its place.
                 const isNew = !Object.prototype.hasOwnProperty.call(this.modelFiles, mf.getNamespace());
                 this.modelFiles[mf.getNamespace()] = mf;
@@ -1185,9 +1141,9 @@ class BaseModelManager {
             // Restore original files
             this.modelFiles = {};
             Object.assign(this.modelFiles, originalModelFiles);
-            // P5-75, P5-100: the map was replaced, so the namespace list is
-            // dropped (the next getNamespaces asks the engine) and the model
-            // version moves.
+            // The map was replaced, so the namespace list is dropped (the
+            // next getNamespaces asks the engine) and the model version
+            // moves.
             this._engine.namespaces = undefined;
             this._engine.version++;
             throw err;
@@ -1286,21 +1242,20 @@ class BaseModelManager {
      * @private
      */
     resolveType(context, type): any {
-        // P5-34 (#330 §2(b)): the engine answers every call. A non-string
-        // `type` throws the error v5.0.0 threw (`typeNameArgument`); a
-        // non-string `context` only words the error, so its string form is
-        // sent, as v5.0.0's message formatter used it.
+        // The engine answers every call. A non-string `type` throws the
+        // error TS 5.0.0 threw (`typeNameArgument`); a non-string `context`
+        // only words the error, so its string form is sent.
         const typeName = typeNameArgument(type);
-        // P5-29: a type the engine resolved since the last model change is
-        // answered from the memo (`EngineState.readMemo`), without crossing into
-        // the engine.
+        // A type the engine resolved since the last model change is answered
+        // from the memo (`EngineState.readMemo`), without crossing into the
+        // engine.
         const memo = managerReadMemo(this._engine);
         const resolved = memo.resolvedTypes.get(typeName);
         if (resolved !== undefined) {
             return resolved;
         }
-        // The engine's answer is final, including any error it throws
-        // (accordproject/concerto-rust#262).
+        // The engine's answer is final, including any error it
+        // throws.
         const result: string = this.rustHandle.resolveType(typeof context === 'string' ? context : String(context), typeName);
         if (memo.version === this._engine.version) {
             memo.resolvedTypes.set(typeName, result);
@@ -1310,16 +1265,11 @@ class BaseModelManager {
 
     /**
      * A new concerto-wasm ModelManagerHandle, told this manager's validation
-     * options. P4-08 (accordproject/concerto-rust#67, maintainer decision
-     * 2026-09-26): both TS validation options rustHandle's own validation
-     * was previously blind to (P4-08e/#189 added the decorator-validation
-     * binding; the reserved-system-type-names one already existed) are set
-     * *before* addDecoratorModel/addRootModel mirror anything into it, so
-     * `ModelFile.validate()`'s Rust delegation (introspect/modelfile.ts) and
-     * rustHandle's own add/validate paths see the same options TS's own
-     * validate() body reads from `this.options`/`this.decoratorValidation`.
-     * The constructor and `clearModelFiles` both build rustHandle here
-     * (P5-54, accordproject/concerto-rust#375).
+     * options (`decoratorValidation`,
+     * `dangerouslyAllowReservedSystemTypeNamesInUserModels`) before
+     * addDecoratorModel/addRootModel mirror anything into it, so the engine's
+     * validation reads the same options TS 5.0.0's did. The constructor and
+     * `clearModelFiles` both build rustHandle here.
      * @return {object} the handle
      * @private
      * @internal
@@ -1338,28 +1288,22 @@ class BaseModelManager {
      */
     clearModelFiles() {
         this.modelFiles = {};
-        // Every mirrored model file is gone; rustHandle has no bulk clear,
-        // so start it over the same way `new BaseModelManager()` does.
-        // addDecoratorModel/addRootModel below re-populate TS's
-        // this.modelFiles, and _needsRustWrite skips mirroring them since
-        // the fresh handle's own constructor already has them.
-        // P5-54 (accordproject/concerto-rust#375): the fresh handle gets
-        // this manager's validation options too (`_newRustHandle`), or
-        // `fromAst` (which clears first) and the DecoratorManager paths
-        // validate with the defaults, ignoring `decoratorValidation`.
+        // rustHandle has no bulk clear, so it is replaced as in the
+        // constructor, with this manager's validation options
+        // (`_newRustHandle`). addDecoratorModel/addRootModel below
+        // re-populate this.modelFiles; _needsRustWrite skips mirroring them,
+        // since the fresh handle already has them.
         const replaced = this.rustHandle;
         this.rustHandle = this._newRustHandle();
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
-        // P5-97 (accordproject/concerto-rust#448): the replaced handle is
-        // this manager's alone (a fork has a handle of its own), and nothing
-        // calls it again: its engine memory is released now, not when the
-        // garbage collector gets to its finalizer. Internal only: there is
-        // no public release API.
+        // The replaced handle is this manager's alone (a fork has a handle
+        // of its own), and nothing calls it again: its engine memory is
+        // released now, not when the garbage collector gets to its
+        // finalizer. Internal only: there is no public release API.
         engineHandles().releaseHandle(replaced);
-        // P5-75: a new, empty namespace list for the new map, appended to
-        // as the system models are registered again. P5-100: a new map and
-        // handle are a model change.
+        // A new, empty namespace list, appended to as the system models are
+        // registered again; a new map and handle are a model change.
         this._engine.namespaces = [];
         this._engine.version++;
         this.addDecoratorModel();
@@ -1387,7 +1331,7 @@ class BaseModelManager {
         // Only a string or undefined crosses the boundary: the binding's
         // `Option<String>` turns a JS null into None (which would match an
         // unnamed file, where TS's `=== null` does not), and a number or
-        // object traps the engine. Any other argument takes the TS body.
+        // object traps the engine. Any other argument takes the TS path.
         if (typeof fileName === 'string' || fileName === undefined) {
             const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
             return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
@@ -1400,11 +1344,11 @@ class BaseModelManager {
      * @return {string[]} namespaces - the namespaces that have been registered.
      */
     getNamespaces(): string[] {
-        // P5-75: answered from this manager's namespace list, which every
-        // model change updates in place (`NamespaceList`), so only a
-        // manager without one asks the engine, and then keeps its answer.
-        // Each call gets its own copy, so changing the returned array
-        // reaches neither the list nor the engine.
+        // Answered from this manager's namespace list, which every model
+        // change updates in place (`NamespaceList`), so only a manager
+        // without one asks the engine, and then keeps its answer. Each
+        // call gets its own copy, so changing the returned array reaches
+        // neither the list nor the engine.
         const list = namespaceListOf(this);
         if (list) {
             return list.slice();
@@ -1424,20 +1368,19 @@ class BaseModelManager {
      * @throws {TypeNotFoundException} - if the type cannot be found or is a primitive type.
      */
     getType(qualifiedName): any {
-        // P5-34 (#330 §2(b)): a non-string name throws the error v5.0.0
-        // threw (`typeNameArgument`).
+        // A non-string name throws the error TS 5.0.0 threw
+        // (`typeNameArgument`).
         const name = typeNameArgument(qualifiedName);
-        // P5-29: the fully-qualified name the engine answered since the
-        // last model change is kept (`EngineState.readMemo`); it is still mapped
-        // to its view below on every call.
+        // The fully-qualified name the engine answered since the last model
+        // change is kept (`EngineState.readMemo`); it is still mapped to its
+        // view below on every call.
         const memo = managerReadMemo(this._engine);
         let fqn = memo.typeNames.get(name);
         if (fqn === undefined) {
-            // P5-11 (accordproject/concerto-rust#287): resolved in Rust
-            // (concerto-wasm `getTypeName`), which throws the
-            // TypeNotFoundException TS throws. Rust answers with the
-            // declaration's fully-qualified name, mapped here to its view
-            // in the model file of its namespace.
+            // Resolved in Rust (concerto-wasm `getTypeName`), which
+            // throws the TypeNotFoundException TS throws. Rust answers
+            // with the declaration's fully-qualified name, mapped here to
+            // its view in the model file of its namespace.
             fqn = this.rustHandle.getTypeName(name) as string;
             if (memo.version === this._engine.version) {
                 memo.typeNames.set(name, fqn);
@@ -1587,8 +1530,8 @@ class BaseModelManager {
      * qualified type name, false otherwise.
      */
     derivesFrom(fqt1, fqt2): boolean {
-        // P5-34 (#330 §2(b)): the binding's `&str` parameters cannot take a
-        // non-string (a JS non-string traps the engine). A non-string
+        // The binding's `&str` parameters cannot take a non-string (a JS
+        // non-string traps the engine). A non-string
         // `fqt1` throws what `getType` throws for it; a non-string `fqt2`
         // is no type's name, so the answer is false once `fqt1` is found.
         if (typeof fqt2 !== 'string') {
@@ -1623,10 +1566,9 @@ class BaseModelManager {
      * @returns {boolean} True if fqn is assignable to baseFqn
      */
     isAssignableTo(fqn: string, baseFqn: string): boolean {
-        // P5-34 (#330 §2(b)): the binding's `&str` parameters cannot take a
-        // non-string (a JS non-string traps the engine;
-        // accordproject/concerto-rust#294, follow-up to #262). v5.0.0
-        // answered false for any non-string argument.
+        // The binding's `&str` parameters cannot take a non-string (a JS
+        // non-string traps the engine). TS 5.0.0 answered false for any
+        // non-string argument.
         if (typeof fqn !== 'string' || typeof baseFqn !== 'string') {
             return false;
         }
@@ -1688,8 +1630,7 @@ class BaseModelManager {
     /**
      * Returns a new ModelManager over the same model files as this one,
      * with the same options and decorator factories, without loading or
-     * validating any model file again (P5-97,
-     * accordproject/concerto-rust#448). Unlike a `filter` that keeps every
+     * validating any model file again. Unlike a `filter` that keeps every
      * declaration, every model file is kept, including one with no
      * declarations, and no predicate is called.
      *
@@ -1720,7 +1661,7 @@ class BaseModelManager {
         fork.decoratorFactories = this.decoratorFactories.slice();
         fork.decoratorValidation = this.decoratorValidation;
         fork._mirrorPending = false;
-        // P5-100: the fork's own engine state, nothing cached yet.
+        // The fork's own engine state, nothing cached yet.
         fork._engine = newEngineState();
         // The fork's engine handles are this manager's (`ModelManager::fork`).
         fork._modelFileIds = new Map(this._modelFileIds);
@@ -1774,9 +1715,7 @@ class BaseModelManager {
      * decorator and root models, and the metamodel under `addMetamodel`)
      * are kept whole: the predicate is not called on their declarations
      * (an import of one is always kept), and this manager's copies are not
-     * added again (BC-53, P5-108,
-     * accordproject/concerto-rust#466; v5.0.0 re-added the decorator
-     * model and threw).
+     * added again (BC-53; v5.0.0 re-added the decorator model and threw).
      *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @param {Object} [options] - options for the filter method
