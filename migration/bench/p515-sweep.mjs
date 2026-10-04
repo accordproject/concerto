@@ -20,7 +20,8 @@
 //
 // Inputs: fixtures/p515/<set>.json from p515-prepare.mjs, and (P5-109) the
 // pseudo-set `p5109`, whose models and instances are built in this file
-// (pass it in --sets; the default sets leave it out).
+// (pass it in --sets; the default sets leave it out), and (P5-121) the
+// pseudo-set `p5121`, built the same way.
 
 import fs from 'fs';
 import os from 'os';
@@ -573,6 +574,60 @@ const OPS = {
     // match `get_type_p5109` / `resolve_type_p5109`.
     get_type_other_mutated: p5109Read('getType', 'other'),
     resolve_type_other_mutated: p5109Read('resolveType', 'other'),
+    // ---- P5-121 (accordproject/concerto-rust#497): the pseudo-set `p5121` ----
+    // Rows for P5-114's robustness fixes (accordproject/concerto-rust#484).
+    // An op's `maxSamples` / `maxWarmup` cap --samples / --warmup for it
+    // (a head without the fix takes seconds per pass).
+    //
+    // fromJSON of a `Holder` whose String map has 100,000 numeric-string
+    // keys ("0".."99999"), one document per pass (R2C-2's linear
+    // Object.keys ordering), and the same with 100,000 non-numeric keys
+    // ("k0".."k99999") for reference.
+    from_json_numkeys: p5121FromJson('numkeys'),
+    from_json_strkeys: p5121FromJson('strkeys'),
+    // fromJSON, toJSON and validateInstance of a chain of `Node`s nested
+    // 200 deep, ten documents per pass: past serde_json's recursion limit,
+    // so the engine falls back to the TS visitor path (R2D-1). TS 5.0.0's
+    // validateInstance row is fromJSON + validate(), as for P5-89's rows.
+    from_json_deep: p5121FromJson('deep'),
+    to_json_deep: {
+        family: 'serializer', setOnly: 'p5121',
+        setup: (d) => {
+            const { serializer, items } = p5121FromJson('deep').setup(d);
+            return { serializer, items: items.map((json) => serializer.fromJSON(json)) };
+        },
+        n: (c) => c.items.length,
+        run: (c) => {
+            for (const r of c.items) {
+                c.serializer.toJSON(r);
+            }
+        },
+    },
+    validate_instance_deep: {
+        family: 'instance', setOnly: 'p5121',
+        setup: (d) => {
+            const mm = p5121Manager();
+            const items = d.deep;
+            if (typeof mm.validateInstance === 'function') {
+                const r = mm.validateInstance(items[0]);
+                if (!r.valid) {
+                    throw new Error(`unexpected verdict: ${JSON.stringify(r.errors).slice(0, 300)}`);
+                }
+                return { items, check: (json) => mm.validateInstance(json) };
+            }
+            if (isEngineDist) {
+                throw new Error('ModelManager.validateInstance is not in this dist');
+            }
+            const serializer = new Serializer(new Factory(mm), mm);
+            return { items, check: (json) => serializer.fromJSON(json).validate() };
+        },
+        n: (c) => c.items.length,
+        run: (c) => {
+            for (const json of c.items) {
+                c.check(json);
+            }
+        },
+    },
 };
 
 // ---- P5-109 (accordproject/concerto-rust#469): the `p5109` pseudo-set ----
@@ -761,6 +816,90 @@ function p5109Read(method, mutate) {
     };
 }
 
+// ---- P5-121 (accordproject/concerto-rust#497): the `p5121` pseudo-set ----
+const P5121_KEYS = 100000;
+const P5121_DEPTH = 200;
+const P5121_CTO = {
+    'p5121.cto': `namespace p5121@1.0.0
+map StringMap {
+  o String
+  o String
+}
+concept Holder identified by hid {
+  o String hid
+  o StringMap entries
+}
+concept Node {
+  o String v
+  o Node child optional
+}
+`,
+};
+
+/**
+ * The `p5121` pseudo-set: its instance documents.
+ * @return {object} the set's data
+ */
+function p5121Set() {
+    const NS = 'p5121@1.0.0';
+    const holder = (key) => ({
+        $class: `${NS}.Holder`, hid: 'h0',
+        entries: Object.fromEntries(Array.from({ length: P5121_KEYS }, (_, i) => [key(i), 'v'])),
+    });
+    const chain = (j) => {
+        let node = { $class: `${NS}.Node`, v: `d${j}-${P5121_DEPTH - 1}` };
+        for (let i = P5121_DEPTH - 2; i >= 0; i--) {
+            node = { $class: `${NS}.Node`, v: `d${j}-${i}`, child: node };
+        }
+        return node;
+    };
+    return {
+        numkeys: [holder((i) => String(i))],
+        strkeys: [holder((i) => `k${i}`)],
+        deep: Array.from({ length: 10 }, (_, j) => chain(j)),
+    };
+}
+
+/**
+ * A manager of the `p5121` model.
+ * @return {object} the manager
+ */
+function p5121Manager() {
+    const mm = newManager();
+    for (const [name, cto] of Object.entries(P5121_CTO)) {
+        mm.addCTOModel(cto, name);
+    }
+    return mm;
+}
+
+/**
+ * The op for fromJSON of the `p5121` documents `key` names, after checking
+ * that every document reads. The 100,000-key documents cap the samples.
+ * @param {string} key `numkeys`, `strkeys` or `deep`
+ * @return {object} the op
+ */
+function p5121FromJson(key) {
+    return {
+        family: 'serializer', setOnly: 'p5121',
+        ...(key === 'deep' ? {} : { maxSamples: 10, maxWarmup: 2 }),
+        setup: (d) => {
+            const mm = p5121Manager();
+            const serializer = new Serializer(new Factory(mm), mm);
+            const items = d[key];
+            for (const json of items) {
+                serializer.fromJSON(json);
+            }
+            return { serializer, items };
+        },
+        n: (c) => c.items.length,
+        run: (c) => {
+            for (const json of c.items) {
+                c.serializer.fromJSON(json);
+            }
+        },
+    };
+}
+
 /**
  * P5-106: the class declarations the set's `pairs` name, each once, in the
  * order first named, on a manager of the set's models.
@@ -785,8 +924,9 @@ function selected() {
             if (OPS[op].setOnly && OPS[op].setOnly !== set) {
                 continue;
             }
-            // P5-109: the `p5109` pseudo-set has only its own ops.
-            if (!OPS[op].setOnly && set === 'p5109') {
+            // P5-109: the `p5109` pseudo-set (and P5-121's `p5121`) has
+            // only its own ops.
+            if (!OPS[op].setOnly && (set === 'p5109' || set === 'p5121')) {
                 continue;
             }
             out.push([op, set]);
@@ -816,12 +956,12 @@ function commit() {
  * @return {object} the summary (lib/stats.mjs)
  */
 function timeWithPre(def, ctx, n) {
-    for (let i = 0; i < args.warmup; i++) {
+    for (let i = 0; i < warmupOf(def); i++) {
         def.pre(ctx);
         def.run(ctx);
     }
     const times = [];
-    for (let i = 0; i < args.samples; i++) {
+    for (let i = 0; i < samplesOf(def); i++) {
         def.pre(ctx);
         const t0 = process.hrtime.bigint();
         def.run(ctx);
@@ -830,8 +970,17 @@ function timeWithPre(def, ctx, n) {
     return summarise(times, n);
 }
 
+// P5-121: an op's `maxSamples` / `maxWarmup` cap --samples / --warmup.
+function samplesOf(def) {
+    return Math.min(args.samples, def.maxSamples ?? Infinity);
+}
+function warmupOf(def) {
+    return Math.min(args.warmup, def.maxWarmup ?? Infinity);
+}
+
+const PSEUDO_SETS = { p5109: p5109Set, p5121: p5121Set };
 const data = {};
-const get = (set) => (data[set] = data[set] || (set === 'p5109' ? p5109Set() : loadSet(set)));
+const get = (set) => (data[set] = data[set] || (PSEUDO_SETS[set] ? PSEUDO_SETS[set]() : loadSet(set)));
 const results = [];
 
 if (args.mode === 'loop') {
@@ -870,7 +1019,7 @@ for (const [op, set] of selected()) {
     }
     const n = def.n(ctx);
     if (args.mode === 'count') {
-        for (let i = 0; i < args.warmup; i++) {
+        for (let i = 0; i < warmupOf(def); i++) {
             if (def.pre) {
                 def.pre(ctx);
             }
@@ -880,7 +1029,7 @@ for (const [op, set] of selected()) {
         for (const k of Object.keys(live)) {
             delete live[k];
         }
-        const reps = Math.max(3, args.samples);
+        const reps = Math.max(3, samplesOf(def));
         // P5-109: with `pre`, only the crossings and the time of `run` count
         // (each pass's counter deltas are added up here).
         const stats = def.pre ? {} : live;
@@ -918,7 +1067,7 @@ for (const [op, set] of selected()) {
             ` (${((100 * inEngineUs) / wallUs).toFixed(0)}%)  top: ${bindings.slice(0, 3).map((b) => `${b.name} x${b.perItem.toFixed(1)}`).join(', ')}`,
         );
     } else {
-        const s = def.pre ? timeWithPre(def, ctx, n) : timeit(() => def.run(ctx), { samples: args.samples, warmup: args.warmup, n });
+        const s = def.pre ? timeWithPre(def, ctx, n) : timeit(() => def.run(ctx), { samples: samplesOf(def), warmup: warmupOf(def), n });
         const medianUs = s.median_ms * 1000;
         results.push({ op, family: def.family, set, n, medianUs, ...s });
         console.log(`${op.padEnd(22)} ${set.padEnd(24)} n=${String(n).padStart(4)} ${medianUs.toFixed(2).padStart(10)} us/item cv ${(s.cv * 100).toFixed(1)}%`);
