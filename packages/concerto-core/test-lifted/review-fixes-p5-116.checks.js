@@ -205,13 +205,14 @@ module.exports = [
     },
     {
         id: 'P5116-A2-001',
-        covers: 'R2A-2, R2A-3: with A extends B extends Missing (validation off), derivesFrom(A, B) is true, and the walk past B throws from derivesFrom and isAssignableTo alike',
+        covers: 'R2A-2, R2A-3: with A extends B extends Missing (validation off), derivesFrom(A, B) is true, and the walk past B throws from derivesFrom and isAssignableTo alike, also against a non-string target',
         run: (core) => {
             const mm = new core.ModelManager();
             addAst(core, mm, model('d@1.0.0', [concept('A', 'B'), concept('B', 'Missing')]), true);
             return {
                 derivesFromB: probe(() => mm.derivesFrom('d@1.0.0.A', 'd@1.0.0.B')),
                 derivesFromConcept: probe(() => mm.derivesFrom('d@1.0.0.A', 'concerto@1.0.0.Concept')),
+                derivesFromNonString: probe(() => mm.derivesFrom('d@1.0.0.A', 42)),
                 assignableToB: probe(() => mm.isAssignableTo('d@1.0.0.A', 'd@1.0.0.B')),
                 assignableToConcept: probe(() => mm.isAssignableTo('d@1.0.0.A', 'concerto@1.0.0.Concept')),
                 assignableToNonString: probe(() => mm.isAssignableTo('d@1.0.0.A', 42)),
@@ -221,6 +222,7 @@ module.exports = [
         expect: { ok: {
             derivesFromB: ['ok', true],
             derivesFromConcept: ['throws', 'IllegalModelException'],
+            derivesFromNonString: ['throws', 'IllegalModelException'],
             assignableToB: ['ok', true],
             assignableToConcept: ['throws', 'IllegalModelException'],
             assignableToNonString: ['throws', 'IllegalModelException'],
