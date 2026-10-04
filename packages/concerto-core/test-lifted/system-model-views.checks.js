@@ -158,6 +158,85 @@ const WRITES = [
     'addModelWithDefinitions',
 ];
 
+const METAMODEL_NS = 'concerto.metamodel@1.0.0';
+
+/**
+ * The error class `fn` throws, or 'ok'.
+ * @param {Function} fn the call
+ * @returns {string} the outcome
+ */
+function outcome(fn) {
+    try {
+        fn();
+        return 'ok';
+    } catch (e) {
+        return e.constructor.name;
+    }
+}
+
+/**
+ * What a manager's `metamodelModelFile` answers, and the property's shape.
+ * @param {object} mm the model manager
+ * @returns {object} the record
+ */
+function metamodelCopy(mm) {
+    const enumerable = Object.keys(mm).includes('metamodelModelFile');
+    const copy = mm.metamodelModelFile;
+    const descriptor = Object.getOwnPropertyDescriptor(mm, 'metamodelModelFile');
+    return {
+        enumerable,
+        own: descriptor !== undefined && descriptor.enumerable && 'value' in descriptor && descriptor.value === copy,
+        stable: mm.metamodelModelFile === copy,
+        isModelFile: copy.constructor === mm.getModelFile('concerto@1.0.0').constructor,
+        manager: copy.getModelManager() === mm,
+        namespace: copy.getNamespace(),
+        name: copy.getName(),
+        definitions: copy.getDefinitions(),
+        version: copy.getVersion(),
+        system: copy.isSystemModelFile(),
+        keys: keyOrder(copy.getAst()).length,
+        declarations: copy.getAllDeclarations().map((d) => d.getFullyQualifiedName()),
+        decorators: copy.getDecorators().map((d) => [d.getName(), d.getArguments()]),
+        registered: mm.getModelFile(METAMODEL_NS) === copy,
+    };
+}
+
+/** Three models, the second importing the first, for `fromAst`. */
+const FROM_AST_CTO = [
+    'namespace org.p5124.a@1.0.0\nconcept A { o String a }\n',
+    'namespace org.p5124.b@1.0.0\nimport org.p5124.a@1.0.0.{A}\nconcept B extends A { o String b }\n',
+    'namespace org.p5124.c@1.0.0\nconcept C { o Integer c }\n',
+];
+
+/**
+ * The `Models` AST of `FROM_AST_CTO`.
+ * @param {object} core the loaded core
+ * @returns {object} the AST, with the system models
+ */
+function fromAstSource(core) {
+    const mm = new core.ModelManager();
+    FROM_AST_CTO.forEach((cto, i) => mm.addCTOModel(cto, `m${i}.cto`));
+    return mm.getAst(false, true);
+}
+
+/**
+ * What `fromAst` leaves in `mm`, and the outcome of the call.
+ * @param {object} mm the model manager
+ * @param {object} ast the `Models` AST
+ * @param {object} [options] fromAst's options
+ * @returns {object} the record
+ */
+function loadFromAst(mm, ast, options) {
+    const result = outcome(() => mm.fromAst(ast, options));
+    return {
+        result,
+        namespaces: mm.getNamespaces(),
+        ast: JSON.stringify(mm.getAst(false, true)),
+        names: mm.getModelFiles().map((f) => f.getName()),
+        types: mm.getModelFiles().map((f) => f.getAllDeclarations().map((d) => d.getFullyQualifiedName())),
+    };
+}
+
 module.exports = [
     {
         id: 'P5124-VIEW-001',
@@ -387,5 +466,236 @@ module.exports = [
             ];
         },
         expect: { ok: EXPECT.serialization },
+    },
+
+    {
+        id: 'P5124-MM-001',
+        covers: 'P5-124: a new ModelManager\'s metamodelModelFile, built on first read, is an enumerable own property holding a metamodel ModelFile of the manager, as v5.0.0\'s, with and without the shape check and under addMetamodel',
+        run: (core) => [undefined, { metamodelValidation: false }, { metamodelValidation: true }, { addMetamodel: true }]
+            .map((options) => metamodelCopy(new core.ModelManager(options))),
+        expect: { ok: [
+            EXPECT.metamodelCopy,
+            EXPECT.metamodelCopy,
+            EXPECT.metamodelCopy,
+            { ...EXPECT.metamodelCopy, registered: true },
+        ] },
+    },
+    {
+        id: 'P5124-MM-002',
+        covers: 'P5-124: metamodelModelFile is built with none of the decorator factories added after construction, keeps its value across clearModelFiles(), and can be assigned, as in v5.0.0',
+        run: (core) => {
+            let calls = 0;
+            const mm = new core.ModelManager();
+            mm.addDecoratorFactory({ newDecorator: () => {
+                calls++;
+                return null;
+            } });
+            const copy = mm.metamodelModelFile;
+            const decorators = copy.getDecorators().map((d) => d.constructor.name);
+            const copyCalls = calls;
+            // The root model's decorator, registered again.
+            mm.clearModelFiles();
+            const kept = mm.metamodelModelFile === copy;
+            const assigned = new core.ModelManager();
+            assigned.metamodelModelFile = copy;
+            return [copyCalls, decorators, calls, kept, assigned.metamodelModelFile === copy, Object.keys(assigned).includes('metamodelModelFile')];
+        },
+        expect: { ok: [0, ['Decorator'], 1, true, true, true] },
+    },
+    {
+        id: 'P5124-MM-003',
+        covers: 'P5-124: when the engine keeps its metamodel copy after a failed metamodel check, the manager registers its metamodelModelFile, built then, unstaged, with every declaration',
+        run: (core) => {
+            const mm = new core.ModelManager({ metamodelValidation: true });
+            if (typeof mm._mirrorMetamodelLeak !== 'function') {
+                return 'no engine';
+            }
+            // As rustHandle answers once a failed check left its copy
+            // registered (no AST the loader reads fails the engine's check
+            // after its version check, BC-19).
+            const modelFileId = mm.rustHandle.modelFileId;
+            mm.rustHandle.modelFileId = (namespace) => (namespace === METAMODEL_NS ? 0 : modelFileId.call(mm.rustHandle, namespace));
+            const writes = countCalls(mm.rustHandle, WRITES);
+            const built = Object.getOwnPropertyDescriptor(mm, 'metamodelModelFile').get !== undefined;
+            mm._mirrorMetamodelLeak(false);
+            const copy = mm.getModelFile(METAMODEL_NS);
+            return [built, writes, copy === mm.metamodelModelFile, copy.getModelManager() === mm,
+                copy.getAllDeclarations().length, mm.getNamespaces()];
+        },
+        expect: { ok: [
+            true,
+            Object.fromEntries(WRITES.map((name) => [name, 0])),
+            true,
+            true,
+            62,
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', METAMODEL_NS],
+        ] },
+        reference: { ok: 'no engine' },
+    },
+    {
+        id: 'P5124-OPT-001',
+        covers: 'P5-124: the decoratorValidation and dangerouslyAllowReservedSystemTypeNamesInUserModels options apply as in v5.0.0, at their defaults and set, before and after clearModelFiles()',
+        run: (core) => {
+            const UNDECLARED = 'namespace test.opt@1.0.0\n@Undeclared\nconcept Person { o String name }\n';
+            const WRONG_ARGUMENT = 'namespace test.opt@1.0.0\nconcept Info { o String note }\n@Info(1)\nconcept Person { o String name }\n';
+            const RESERVED = 'namespace test.opt@1.0.0\nconcept Concept { o String name }\n';
+            const variants = [
+                undefined,
+                {},
+                { decoratorValidation: {} },
+                { decoratorValidation: { missingDecorator: undefined, invalidDecorator: '' } },
+                { decoratorValidation: { missingDecorator: 'error' } },
+                { decoratorValidation: { invalidDecorator: 'error' } },
+                { decoratorValidation: { missingDecorator: 'warn', invalidDecorator: 'warn' } },
+                { dangerouslyAllowReservedSystemTypeNamesInUserModels: false },
+                { dangerouslyAllowReservedSystemTypeNamesInUserModels: true },
+            ];
+            return variants.map((options) => [false, true].map((clear) => [UNDECLARED, WRONG_ARGUMENT, RESERVED].map((cto) => {
+                const mm = new core.ModelManager(options);
+                if (clear) {
+                    mm.clearModelFiles();
+                }
+                return outcome(() => mm.addCTOModel(cto, 'opt.cto'));
+            })));
+        },
+        expect: { ok: EXPECT.options },
+    },
+    {
+        id: 'P5124-OPT-002',
+        covers: 'P5-124: a new or cleared engine handle is told only the validation options that differ from its defaults',
+        run: (core) => {
+            if (typeof new core.ModelManager()._newRustHandle !== 'function') {
+                return 'no engine';
+            }
+            const proto = core.req('engineloader').rust.ModelManagerHandle.prototype;
+            const SETTERS = ['setDangerouslyAllowReservedSystemTypeNamesInUserModels', 'setDecoratorValidation'];
+            const originals = SETTERS.map((name) => proto[name]);
+            const counts = countCalls(proto, SETTERS);
+            try {
+                return [
+                    undefined,
+                    { decoratorValidation: { missingDecorator: undefined, invalidDecorator: null } },
+                    { decoratorValidation: { invalidDecorator: 'warn' } },
+                    { dangerouslyAllowReservedSystemTypeNamesInUserModels: true },
+                ].map((options) => {
+                    SETTERS.forEach((name) => {
+                        counts[name] = 0;
+                    });
+                    const mm = new core.ModelManager(options);
+                    mm.clearModelFiles();
+                    return { ...counts };
+                });
+            } finally {
+                SETTERS.forEach((name, i) => {
+                    proto[name] = originals[i];
+                });
+            }
+        },
+        expect: { ok: [
+            { setDangerouslyAllowReservedSystemTypeNamesInUserModels: 0, setDecoratorValidation: 0 },
+            { setDangerouslyAllowReservedSystemTypeNamesInUserModels: 0, setDecoratorValidation: 0 },
+            { setDangerouslyAllowReservedSystemTypeNamesInUserModels: 0, setDecoratorValidation: 2 },
+            { setDangerouslyAllowReservedSystemTypeNamesInUserModels: 2, setDecoratorValidation: 0 },
+        ] },
+        reference: { ok: 'no engine' },
+    },
+    {
+        id: 'P5124-AST-001',
+        covers: 'P5-124: fromAst() registers the files in order, with their names, declarations and AST, as v5.0.0 did, on a new manager, on one holding models, with validation off and with the shape check off',
+        run: (core) => {
+            const ast = fromAstSource(core);
+            const used = withUserModel(core);
+            return [
+                loadFromAst(new core.ModelManager(), ast),
+                loadFromAst(used, ast),
+                loadFromAst(new core.ModelManager(), ast, { disableValidation: true }),
+                loadFromAst(new core.ModelManager({ metamodelValidation: false }), ast),
+                loadFromAst(new core.ModelManager(), { $class: 'concerto.metamodel@1.0.0.Models', models: [ast.models[2]] }),
+            ];
+        },
+        expect: { ok: EXPECT.fromAst },
+    },
+    {
+        id: 'P5124-AST-002',
+        covers: 'P5-124: when fromAst() throws (a duplicate or unversioned namespace, a malformed model, an unresolved import), the files added before the failing one are registered, as in v5.0.0',
+        run: (core) => {
+            const ast = fromAstSource(core);
+            const models = ast.models.filter((m) => !['concerto@1.0.0', 'concerto.decorator@1.0.0'].includes(m.namespace));
+            const of = (list) => ({ $class: 'concerto.metamodel@1.0.0.Models', models: list });
+            const unversioned = { ...models[2], namespace: 'org.p5124.unversioned' };
+            const malformed = { ...models[2], namespace: 'org.p5124.bad@1.0.0', declarations: [{ $class: 'concerto.metamodel@1.0.0.ConceptDeclaration' }] };
+            const missingImport = of([models[1], models[2]]);
+            return [
+                of([models[0], models[2], models[0]]),
+                of([models[0], unversioned, models[2]]),
+                of([models[0], models[2], malformed]),
+                missingImport,
+            ].map((input) => {
+                const mm = new core.ModelManager();
+                const record = loadFromAst(mm, input);
+                delete record.ast;
+                return record;
+            });
+        },
+        expect: { ok: EXPECT.fromAstErrors },
+    },
+    {
+        id: 'P5124-AST-003',
+        covers: 'P5-124: a subclass\'s addModelFile is called by fromAst() for each file, in order, as in v5.0.0',
+        run: (core) => {
+            const calls = [];
+            /** A manager recording its addModelFile calls. */
+            class Tracking extends core.ModelManager {
+                /**
+                 * Records the call, then adds the file.
+                 * @param {object} modelFile the model file
+                 * @param {string} [cto] the CTO text
+                 * @param {string} [fileName] the file name
+                 * @param {boolean} [disableValidation] whether validation is skipped
+                 * @returns {object} the added file
+                 */
+                addModelFile(modelFile, cto, fileName, disableValidation) {
+                    calls.push([modelFile.getNamespace(), cto, fileName, disableValidation]);
+                    return super.addModelFile(modelFile, cto, fileName, disableValidation);
+                }
+            }
+            const mm = new Tracking();
+            calls.splice(0);
+            mm.fromAst(fromAstSource(core));
+            return [calls, mm.getNamespaces()];
+        },
+        expect: { ok: EXPECT.fromAstSubclass },
+    },
+    {
+        id: 'P5124-AST-004',
+        covers: 'P5-124: fromAst() commits a run of files in one engine call',
+        run: (core) => {
+            const mm = new core.ModelManager();
+            if (typeof mm._newRustHandle !== 'function') {
+                return 'no engine';
+            }
+            const ast = fromAstSource(core);
+            const newRustHandle = mm._newRustHandle;
+            const counts = [];
+            mm._newRustHandle = function () {
+                const handle = newRustHandle.call(this);
+                counts.push(countCalls(handle, WRITES));
+                return handle;
+            };
+            mm.fromAst(ast);
+            return [counts, mm.getNamespaces()];
+        },
+        expect: { ok: [
+            [{
+                stageModelFileBytes: 3,
+                dropStagedModelFile: 0,
+                commitStagedModelFile: 0,
+                commitStagedModelFiles: 1,
+                validateAndCommitStagedModelFile: 0,
+                addModelWithDefinitions: 0,
+            }],
+            ['concerto.decorator@1.0.0', 'concerto@1.0.0', 'org.p5124.a@1.0.0', 'org.p5124.b@1.0.0', 'org.p5124.c@1.0.0'],
+        ] },
+        reference: { ok: 'no engine' },
     },
 ];

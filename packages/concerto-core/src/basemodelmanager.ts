@@ -192,6 +192,48 @@ function warnRegExpOptionIgnored() {
 const RUST_PRELOADED_NS = ['concerto.decorator@1.0.0', 'concerto@1.0.0'];
 
 /**
+ * Installs `manager.metamodelModelFile`, `validateAst`'s cached copy of the
+ * metamodel, as an accessor that builds it on first read: it is read only
+ * after a failed metamodel check (`_mirrorMetamodelLeak`), under
+ * `addMetamodel`, and by `fork()`. The property keeps v5.0.0's shape: an
+ * enumerable own property, a metamodel ModelFile of `manager`, replaced by
+ * a plain data property once built or assigned. The copy is built as
+ * v5.0.0's constructor built it: from the metamodel AST (never from
+ * another manager's copy, so a fork does not keep its source reachable),
+ * not staged (`_buildingMetamodelCopy`), and with none of the manager's
+ * decorator factories, which v5.0.0's constructor had not been given yet.
+ * The constructor and `fork()` both install it.
+ * @param {BaseModelManager} manager the manager
+ * @private
+ */
+function installLazyMetamodelCopy(manager: BaseModelManager): void {
+    const define = (value: ModelFileInstance) => {
+        Object.defineProperty(manager, 'metamodelModelFile', { value, writable: true, enumerable: true, configurable: true });
+    };
+    Object.defineProperty(manager, 'metamodelModelFile', {
+        configurable: true,
+        enumerable: true,
+        get() {
+            let copy: ModelFileInstance;
+            const factories = manager.decoratorFactories;
+            manager.decoratorFactories = [];
+            manager._buildingMetamodelCopy = true;
+            try {
+                copy = new ModelFile(manager, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace) as ModelFileInstance;
+            } finally {
+                manager._buildingMetamodelCopy = false;
+                manager.decoratorFactories = factories;
+            }
+            define(copy);
+            return copy;
+        },
+        set(value) {
+            define(value);
+        },
+    });
+}
+
+/**
  * A type name argument for an engine read, whose binding takes a `&str` (a
  * JS non-string traps the engine). A non-string gets the error TS 5.0.0's
  * `ModelUtil.getNamespace` call threw first for it: an `Error` for null or
@@ -238,7 +280,7 @@ class BaseModelManager {
      decoratorFactories: DecoratorFactory[];
      options: ModelManagerOptions | undefined;
      decoratorValidation: NonNullable<ModelManagerOptions['decoratorValidation']>;
-     metamodelModelFile: ModelFileInstance;
+     metamodelModelFile!: ModelFileInstance;
     /**
      * A live concerto-wasm ModelManagerHandle, mirroring `modelFiles`:
      * every addModelFile/updateModelFile/deleteModelFile call this manager
@@ -249,8 +291,9 @@ class BaseModelManager {
      */
      rustHandle: EngineHandle;
     /**
-     * True only while the constructor builds `metamodelModelFile`, the
-     * cached copy of the metamodel `validateAst` registers when rustHandle
+     * True only while `metamodelModelFile` is built (on first read,
+     * `installLazyMetamodelCopy`), the cached copy of the metamodel
+     * `validateAst` registers when rustHandle
      * keeps its own copy after a failed check. `_needsRustWrite` answers
      * false for the metamodel namespace while it is set, so
      * engine/views-staging.ts `stageModelFile` keeps no engine stage for that copy
@@ -337,18 +380,17 @@ class BaseModelManager {
         this.addDecoratorModel();
         this.addRootModel();
 
-        // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
-        this._buildingMetamodelCopy = true;
-        try {
-            this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace);
-        } finally {
-            this._buildingMetamodelCopy = false;
-        }
+        // A copy of the Metamodel ModelFile for use when validating the
+        // structure of ModelFiles later, built on first read
+        // (`installLazyMetamodelCopy`).
+        this._buildingMetamodelCopy = false;
+        installLazyMetamodelCopy(this);
 
         if(options?.addMetamodel) {
-            // Mirrored into rustHandle by `addModelFile` like any other
-            // namespace: rustHandle's own constructor loads only
-            // `concerto@1.0.0` and `concerto.decorator@1.0.0`.
+            // Built now, by this read, and mirrored into rustHandle by
+            // `addModelFile` like any other namespace: rustHandle's own
+            // constructor loads only `concerto@1.0.0` and
+            // `concerto.decorator@1.0.0`.
             this.addModelFile(this.metamodelModelFile);
         }
     }
@@ -499,8 +541,8 @@ class BaseModelManager {
      * adds the metamodel to (`newMetaModelManager`, or `addModelFile` of a
      * metamodel ModelFile) keeps rustHandle in parity and answers its reads
      * from Rust. The only metamodel copy that is never written is
-     * `validateAst`'s own (`metamodelModelFile`): it is not staged while the
-     * constructor builds it (`_buildingMetamodelCopy`), and `validateAst`
+     * `validateAst`'s own (`metamodelModelFile`): it is not staged while it
+     * is built (`_buildingMetamodelCopy`), and `validateAst`
      * registers it in `this.modelFiles` only when rustHandle already holds
      * its own copy.
      * @param {string} namespace - the namespace being added, updated or removed
@@ -1322,7 +1364,8 @@ class BaseModelManager {
     /**
      * A new concerto-wasm ModelManagerHandle, told this manager's validation
      * options (`decoratorValidation`,
-     * `dangerouslyAllowReservedSystemTypeNamesInUserModels`) before
+     * `dangerouslyAllowReservedSystemTypeNamesInUserModels`) that differ from
+     * a new handle's defaults before
      * addDecoratorModel/addRootModel mirror anything into it, so the engine's
      * validation reads the same options TS 5.0.0's did. The constructor and
      * `clearModelFiles` both build rustHandle here.
@@ -1332,10 +1375,18 @@ class BaseModelManager {
      */
     _newRustHandle(): EngineHandle {
         const handle = new rust.ModelManagerHandle();
-        handle.setDangerouslyAllowReservedSystemTypeNamesInUserModels(
-            !!this.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels
-        );
-        handle.setDecoratorValidation(this.decoratorValidation);
+        // A new handle has both options off (concerto-wasm handle.rs), so
+        // a setter is called only to turn one on. The engine reads each
+        // decorator validation level by truthiness (`level_option`); a value
+        // other than an object is passed on as it is.
+        if (this.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels) {
+            handle.setDangerouslyAllowReservedSystemTypeNamesInUserModels(true);
+        }
+        const validation = this.decoratorValidation;
+        if (typeof validation !== 'object' || validation === null ||
+            validation.missingDecorator || validation.invalidDecorator) {
+            handle.setDecoratorValidation(validation);
+        }
         return handle;
     }
 
@@ -1654,12 +1705,42 @@ class BaseModelManager {
      */
     fromAst(ast: IModels, options?: { disableValidation?: boolean }) {
         this.clearModelFiles();
-        ast.models.forEach( (model: IModel) => {
-            if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
-                const modelFile = new ModelFile( this, model );
-                this.addModelFile( modelFile, null, null, true );
+        // Each file is added as `addModelFile(modelFile, null, null, true)`
+        // adds it, in order. While `addModelFile` is this class's own, a run
+        // of files that pass its checks (a versioned namespace not yet
+        // registered, written to rustHandle) is committed from their stages
+        // in one engine call (`_addStagedModelFiles`). The run is committed
+        // before any other file is added and before an error propagates, so
+        // the files registered when one throws are those v5.0.0 had added.
+        const batching = this.addModelFile === BaseModelManager.prototype.addModelFile;
+        let run: ModelFileInstance[] = [];
+        const runNamespaces = new Set<string>();
+        const commitRun = () => {
+            if (run.length > 0) {
+                const files = run;
+                run = [];
+                runNamespaces.clear();
+                this._addStagedModelFiles(files);
             }
-        });
+        };
+        try {
+            ast.models.forEach( (model: IModel) => {
+                if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
+                    const modelFile = new ModelFile( this, model ) as ModelFileInstance;
+                    const namespace = modelFile.getNamespace();
+                    if (batching && modelFile.getVersion() && !this.modelFiles[namespace] &&
+                        !runNamespaces.has(namespace) && this._needsRustWrite(namespace)) {
+                        run.push(modelFile);
+                        runNamespaces.add(namespace);
+                    } else {
+                        commitRun();
+                        this.addModelFile( modelFile, null, null, true );
+                    }
+                }
+            });
+        } finally {
+            commitRun();
+        }
         if (!options?.disableValidation) {
             this.validateModelFiles();
         }
@@ -1731,28 +1812,9 @@ class BaseModelManager {
         fork._rustPreloaded = new Set(this._rustPreloaded);
         fork.rustHandle = this.rustHandle.fork();
         fork._buildingMetamodelCopy = false;
-        // `validateAst`'s cached metamodel copy, built as the constructor
-        // builds it, on first use (it is read only when a metamodel check
-        // fails). It is built from the metamodel AST, not from this
-        // manager's copy, so the fork never keeps this manager reachable.
-        Object.defineProperty(fork, 'metamodelModelFile', {
-            configurable: true,
-            enumerable: true,
-            get() {
-                let view;
-                fork._buildingMetamodelCopy = true;
-                try {
-                    view = new ModelFile(fork, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace);
-                } finally {
-                    fork._buildingMetamodelCopy = false;
-                }
-                Object.defineProperty(fork, 'metamodelModelFile', { value: view, writable: true, enumerable: true, configurable: true });
-                return view;
-            },
-            set(value) {
-                Object.defineProperty(fork, 'metamodelModelFile', { value, writable: true, enumerable: true, configurable: true });
-            },
-        });
+        // `validateAst`'s cached metamodel copy, built on first use as the
+        // constructor's is (`installLazyMetamodelCopy`).
+        installLazyMetamodelCopy(fork);
         const handle = fork.rustHandle;
         for (const namespace of Object.keys(this.modelFiles)) {
             const source = this.modelFiles[namespace];
