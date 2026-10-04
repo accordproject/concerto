@@ -12,16 +12,9 @@
  * limitations under the License.
  */
 
-// The one loader through which public modules reach the engine (src/engine/,
-// shipped as JavaScript only, not public API). Every export is `@internal`.
-//
-// Bundler safety: the specifier is never a literal and the bare `require` is
-// never named, so esbuild, rollup and browserify leave it alone; webpack
-// keeps only the `__non_webpack_require__` branch.
-//
-// `module.require` is tried first so real Node CJS never loads the ESM
-// engine build (scripts/build-esm.js sets `globalThis.module`); then
-// `globalThis.module.require` (vite-node), then `createRequire`.
+// The one route from public modules to the engine; every export is `@internal`.
+// Bundler safety: no literal specifier and no named bare `require`.
+// `module.require` first, so Node CJS never loads the ESM engine build.
 
 import { createRequire } from 'module';
 import type {

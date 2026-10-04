@@ -48,8 +48,7 @@ function newMetaModelManager() {
  * @return {object} the validated metamodel instance in JSON
  */
 function validateMetaModel(input) {
-    // One engine call against the engine's own metamodel manager; an input
-    // the engine cannot carry is validated below, through the Serializer.
+    // One engine call; an input it cannot carry goes through the Serializer below.
     try {
         engineSerializer().validateMetaModel(input);
         return input;

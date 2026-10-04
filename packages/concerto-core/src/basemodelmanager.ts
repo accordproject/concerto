@@ -1121,8 +1121,7 @@ class BaseModelManager {
         this.rustHandle = this._newRustHandle();
         this._modelFileIds = new Map();
         this._rustPreloaded = new Set(RUST_PRELOADED_NS);
-        // Released now: the handle is this manager's alone. A file still
-        // staged in it is guarded by the view snapshot and stage finalizer.
+        // Safe: the handle is this manager's alone; staged files keep snapshots.
         engineHandles().releaseHandle(replaced);
         this._engine.namespaces = [];
         this._engine.version++;
@@ -1387,8 +1386,7 @@ class BaseModelManager {
      */
     fromAst(ast: IModels, options?: { disableValidation?: boolean }) {
         this.clearModelFiles();
-        // Runs of files are committed in one engine call, flushed before any
-        // other add or error, so a throw leaves what TS had added.
+        // Runs commit in one engine call, so a throw leaves what TS had added.
         const batching = this.addModelFile === BaseModelManager.prototype.addModelFile;
         let run: ModelFileInstance[] = [];
         const runNamespaces = new Set<string>();

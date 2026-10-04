@@ -248,9 +248,8 @@ class ClassDeclaration extends Declaration {
                 if(this.superType) {
                     const superType = this.getModelFile().getType(this.superType);
                     if (superType && superType.isIdentified() ) {
-                        // A system-identified class needs a system-identified
-                        // super type; any other may not redeclare an
-                        // explicit identifier.
+                        // System-identified needs a system-identified super type;
+                        // any other may not redeclare an explicit identifier.
                         if (this.isSystemIdentified() ? !superType.isSystemIdentified() : superType.isExplicitlyIdentified()) {
                             throw new IllegalModelException(`Super class ${superType.getFullyQualifiedName()} has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
                         }
@@ -338,8 +337,7 @@ class ClassDeclaration extends Declaration {
      * @return {string} the name of the id field for this class or null if it does not exist
      */
     getIdentifierFieldName(): string | null {
-        // One engine call, memoised per view until the models change. BC-50:
-        // replacing ClassDeclaration methods at runtime does not change it.
+        // BC-50: memoised; replacing ClassDeclaration methods does not change it.
         return engineViews().classDeclarationGetIdentifierFieldName(this) as string | null;
     }
 
@@ -394,8 +392,7 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} subclass declarations.
      */
     getAssignableClassDeclarations(): ClassDeclaration[] {
-        // BC-52: answered by the engine; a replaced `getSuperType` or
-        // `getModelFiles` method is not called.
+        // BC-52: a replaced `getSuperType` or `getModelFiles` is not called.
         const views = engineViews();
         const ref = views.declarationArenaRef(this);
         if (ref === undefined) {

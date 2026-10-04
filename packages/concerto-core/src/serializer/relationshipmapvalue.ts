@@ -31,8 +31,7 @@ export interface RelationshipMapValue {
 }
 
 /**
- * The relationship a map's values hold, or `null` when the map's value type
- * is not a relationship.
+ * The relationship a map's values hold, or `null` if they are not relationships.
  * @param {MapDeclaration} mapDeclaration - the map declaration
  * @return {RelationshipMapValue|null} the relationship, or null
  * @private

@@ -34,9 +34,7 @@ import type { RelationshipMapValue } from './relationshipmapvalue';
 const debug = createDebug('concerto:JSONPopulator');
 
 /**
- * BC-42: whether a strict-format `DateTime` string names a real instant.
- * `Date.parse` rolls `2024-02-30` and `T24:00:00` over, so the fields must
- * read back unchanged.
+ * BC-42: whether a strict `DateTime` string names a real instant (no rollover).
  * @param {string} json a string matching the strict `DateTime` format
  * @returns {boolean} true when the fields name a real instant
  * @private

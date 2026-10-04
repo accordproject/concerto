@@ -21,9 +21,7 @@ import type ModelFile from './introspect/modelfile';
 import { rust, engineViews } from './engineloader';
 import type { EngineBindings } from './engine/bindings';
 
-// Pure string-to-value engine calls, memoised per distinct string argument
-// (a model load calls them per property). Throws are never cached; each memo
-// is cleared at ENGINE_MEMO_LIMIT entries.
+// Pure engine calls memoised per string argument; throws are never cached.
 const engineMemo: { [binding: string]: Map<string, unknown> } = {};
 const ENGINE_MEMO_LIMIT = 4096;
 
@@ -53,9 +51,7 @@ function memoisedEngineCall<B extends MemoisedBinding>(binding: B, key: string, 
     return result;
 }
 
-// String-slicing and fixed-list members answer a string argument here with
-// the engine's semantics; any other argument, and every error, goes to the
-// engine.
+// A string argument is answered here with the engine's semantics; else the engine.
 const PRIMITIVE_TYPES = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
 // Strict SemVer `major.minor.patch`, each component fitting the engine's u64.
 const PLAIN_VERSION = /^(0|[1-9]\d{0,18})\.(0|[1-9]\d{0,18})\.(0|[1-9]\d{0,18})$/;
@@ -133,9 +129,7 @@ class ModelUtil {
         version?: string | null;
         versionParsed?: unknown;
     } {
-        // The engine checks the version and packs its result into one string;
-        // `versionParsed` is built here. BC-41: where node-semver's limits reject a
-        // strict SemVer version, `versionParsed` is null, as the engine's is.
+        // BC-41: `versionParsed` is null where node-semver rejects a strict SemVer version.
         const packed = rust.modelUtilParseNamespaceChecked(ns, options) as string;
         const parts = packed.slice(1).split('@');
         if (packed[0] === 'N') {
@@ -181,9 +175,8 @@ class ModelUtil {
      * @private
      */
     static isAssignableTo(modelFile, typeName, property): any {
-        // BC-52: resolved by the engine from its arena; a replaced `getType` or
-        // `getAllSuperTypeDeclarations` is not called. Direct matches and
-        // primitives are decided here.
+        // BC-52: resolved by the engine; a replaced `getType` or
+        // `getAllSuperTypeDeclarations` is not called.
         const propertyTypeName = property.getFullyQualifiedTypeName();
         const name = String(typeName);
         const isDirectMatch = name === propertyTypeName;
@@ -205,8 +198,7 @@ class ModelUtil {
      * @private
      */
     static capitalizeFirstLetter(string): string {
-        // A lone high surrogate from `charAt(0)` is left as it is by
-        // `toUpperCase`, as the engine leaves a non-BMP first character.
+        // As the engine: a lone high surrogate from `charAt(0)` is left as it is.
         return typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : rust.modelUtilCapitalizeFirstLetter(string);
     }
 
@@ -323,8 +315,7 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
     static isValidMapKeyScalar(decl): any {
-        // A nullish declaration is undefined; BC-52: any other is answered by the
-        // engine.
+        // BC-52: answered by the engine, except a nullish declaration.
         if (decl === null || decl === undefined) {
             return undefined;
         }

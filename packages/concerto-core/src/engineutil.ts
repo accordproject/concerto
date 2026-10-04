@@ -12,12 +12,10 @@
  * limitations under the License.
  */
 
-// Engine helpers shared by public modules and src/engine/, with no imports,
-// so they never load the engine. Every export is `@internal`.
+// Engine helpers with no imports, so they never load the engine; `@internal`.
 
 /**
- * The brand of a fast-path fallback signal; a registered symbol survives
- * minifiers and duplicate module copies.
+ * A fast-path fallback signal's brand: a registered symbol, so module copies agree.
  * @internal
  */
 export const FAST_PATH_UNSUPPORTED: unique symbol = Symbol.for('@accordproject/concerto-core:EngineFastPathUnsupported') as any;

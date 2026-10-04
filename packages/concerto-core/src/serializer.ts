@@ -126,8 +126,7 @@ class Serializer {
             throw new Error(Globalize.formatMessage('serializer-tojson-notcobject'));
         }
 
-        // Fast path: one engine call for the whole document; the visitors run
-        // for what the engine cannot carry (a cycle, a shared reference).
+        // Fast path: one engine call; the visitors handle cycles and shared references.
         options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
         try {
             return engineSerializer().fastToJson(this.modelManager, resource, options);

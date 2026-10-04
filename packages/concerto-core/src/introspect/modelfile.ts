@@ -138,10 +138,8 @@ class ModelFile extends Decorated {
             this.external = fileName.startsWith('@');
         }
 
-        // The AST is loaded into the engine once, here; if it loads, the
-        // declarations are built on first use, else eagerly so TS throws.
-        // BC-19 (with BC-17, BC-20): unless `metamodelValidation: false`,
-        // a malformed AST is an IllegalModelException before it is walked.
+        // Declarations are lazy if the engine loads the AST, else eager so TS throws.
+        // BC-19: unless `metamodelValidation: false`, a malformed AST is an IllegalModelException.
         let lazy: boolean;
         if (shared !== null) {
             lazy = views.adoptSharedView(this, shared.source, shared.stage, shared.committed);
@@ -309,8 +307,7 @@ class ModelFile extends Decorated {
      */
     _isRegistered(): boolean {
         const manager = this.modelManager;
-        // A detached file (such as `filter()`'s result) must never answer
-        // from another file's mirror of the same namespace.
+        // A detached file (`filter()`'s result) must not answer from another's mirror.
         if (manager.modelFiles[this.namespace] !== this) {
             return false;
         }
@@ -331,8 +328,7 @@ class ModelFile extends Decorated {
      * @returns {Boolean} true if this is a system model file
      */
     isSystemModelFile(): boolean {
-        // A registered file counts only `concerto@` namespaces, as the
-        // engine does; otherwise bare `concerto` is a system namespace too.
+        // As the engine, bare `concerto` is a system namespace only if unregistered.
         return this.namespace.startsWith('concerto@') || (this.namespace === 'concerto' && !this._isRegistered());
     }
 
@@ -911,8 +907,7 @@ class ModelFile extends Decorated {
      * @internal
      */
     _fromAstHeader(ast: AstNode) {
-        // Read and checked by the engine in TS's order, with TS's error
-        // classes; a header read when the file was staged is applied as is.
+        // Checked by the engine in TS's order, with TS's error classes.
         const views = engineViews();
         if (!views.applyStagedHeaders(this, ast)) {
             rust.modelFileFromAstHeader(this, ast);
@@ -1062,8 +1057,7 @@ class ModelFile extends Decorated {
             };
             const handles = engineHandles();
             const target: EngineHandle | undefined = modelManager.rustHandle;
-            // An unchanged file is staged, shared, in a distinct target's
-            // rustHandle; any other result comes back as an AST.
+            // An unchanged file is shared into a distinct target; else an AST comes back.
             const staged = target !== undefined && target !== manager.rustHandle;
             const result: string | undefined = handles.withEngineCallbacks(
                 () => staged

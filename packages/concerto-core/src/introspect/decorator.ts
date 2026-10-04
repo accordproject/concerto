@@ -88,8 +88,7 @@ class Decorator {
     handleError(level: string | undefined, err: string | Error): void {
         Logger.dispatch(level as string, err);
         if (level === 'error') {
-            // BC-14: a caught IllegalModelException is thrown as it is, and a
-            // caught Error gives its message (TS wrapped it, doubling the prefix).
+            // BC-14: an IllegalModelException is rethrown as is; an Error gives its message.
             if (err instanceof IllegalModelException) {
                 throw err;
             }

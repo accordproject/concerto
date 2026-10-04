@@ -126,8 +126,7 @@ class ResourceValidator {
         if (!ModelUtil.isPrimitiveType(type.getType())) {
 
             // thing might be a Concept, Scalar String, Scalar DateTime.
-            // DV-023: resolved through the map's model file, imports included
-            // (TS looked only at the file's own declarations).
+            // DV-023: resolved through the map's model file, imports included.
             let thing = mapDeclaration.getModelFile().getType(type.getType()) ?? undefined;
 
             // if Key or Value is Scalar, get the Base Type of the Scalar for primitive validation.
@@ -154,8 +153,7 @@ class ResourceValidator {
             }
             break;
         case 'DateTime':
-            // BC-43: the same strict rule as a `DateTime` field
-            // (`undefined`, the absence of a value, still passes).
+            // BC-43: as a `DateTime` field (`undefined` still passes).
             if (value !== undefined && !isStrictDateTime(value)) {
                 throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
             }
