@@ -80,6 +80,12 @@ interface SharedViewSource {
 let sharedViewSource: SharedViewSource | null = null;
 
 /**
+ * The engine header of the fixed system model view `ModelFile._systemView`
+ * is building; read and cleared by the constructor it calls.
+ */
+let systemViewHeader: unknown[] | null = null;
+
+/**
  * Class representing a Model File. A Model File contains a single namespace
  * and a set of model elements: assets, transactions etc.
  *
@@ -119,6 +125,9 @@ class ModelFile extends Decorated {
         // Set only for `ModelFile._sharedView`'s own call.
         const shared = sharedViewSource;
         sharedViewSource = null;
+        // Set only for `ModelFile._systemView`'s own call.
+        const systemHeader = systemViewHeader;
+        systemViewHeader = null;
         // BC-47: only a BaseModelManager has the engine mirror this
         // ModelFile is loaded, read and validated through.
         if (typeof modelManager !== 'object' || modelManager === null || !engineManagers.has(modelManager)) {
@@ -173,10 +182,14 @@ class ModelFile extends Decorated {
         // IllegalModelException before any part of it is walked. A view of a
         // file another manager already loaded (`_sharedView`) shares the
         // engine-side file and copies its header, and is neither checked nor
-        // staged again.
+        // staged again. A view of a fixed system model the manager's
+        // rustHandle loaded itself (`_systemView`) takes the engine's header
+        // for it and reads that file, with no engine call.
         let lazy: boolean;
         if (shared !== null) {
             lazy = views.adoptSharedView(this, shared.source, shared.stage, shared.committed);
+        } else if (systemHeader !== null) {
+            lazy = views.adoptSystemView(this, systemHeader);
         } else {
             const checkedText: string | object | undefined = views.checkAstShape(this);
             lazy = views.stageModelFile(this, checkedText);
@@ -245,6 +258,37 @@ class ModelFile extends Decorated {
             return new ModelFile(manager, ast ?? source.ast, definitions, source.fileName);
         } finally {
             sharedViewSource = null;
+        }
+    }
+
+    /**
+     * A new ModelFile of `manager` that is a view of the fixed decorator or
+     * root model, `ast` as its helper returns it, over the copy `manager`'s
+     * rustHandle loaded itself (concerto-wasm `ModelManagerHandle::new`):
+     * nothing is checked, staged or sent to the engine. The header is the
+     * engine's for the model's fixed text (`systemViewHeader`, asked once
+     * per process), and the declaration views are built on first use from
+     * the file rustHandle holds, as for a committed file. Undefined, building
+     * nothing, when the engine has no header for `ast`; the caller then
+     * builds the file with the constructor.
+     * @param {BaseModelManager} manager the manager the view belongs to
+     * @param {object} ast the fixed system model's AST, this view's own copy
+     * @param {string} definitions the model's CTO text
+     * @param {string} fileName the model's file name
+     * @return {ModelFile|undefined} the view, or undefined
+     * @private
+     * @internal
+     */
+    static _systemView(manager: BaseModelManager, ast: AstNode, definitions: string, fileName: string): ModelFile | undefined {
+        const header = engineViews().systemViewHeader(ast);
+        if (header === undefined) {
+            return undefined;
+        }
+        systemViewHeader = header;
+        try {
+            return new ModelFile(manager, ast, definitions, fileName);
+        } finally {
+            systemViewHeader = null;
         }
     }
 

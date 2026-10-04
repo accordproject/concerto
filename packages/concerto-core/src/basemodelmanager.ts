@@ -21,8 +21,8 @@ import Factory from './factory';
 import ModelFile from './introspect/modelfile';
 import ModelUtil from './modelutil';
 import Serializer from './serializer';
-import rootModelModule from './rootmodelhelper';
-import decoratorModelModule from './decoratormodelhelper';
+import rootModelModule, { getRootModel as fixedGetRootModel } from './rootmodelhelper';
+import decoratorModelModule, { getDecoratorModel as fixedGetDecoratorModel } from './decoratormodelhelper';
 import type { ModelFileSource, ModelManagerOptions, ValidateInstanceOptions, ValidationResult } from './types';
 import type Resource from './model/resource';
 import type { AstNode } from './introspect/decorated';
@@ -186,8 +186,9 @@ function warnRegExpOptionIgnored() {
 }
 
 // The system namespaces a new rustHandle loads itself (concerto-wasm
-// `ModelManagerHandle::new`), as `addDecoratorModel` and `addRootModel` then
-// register them in `modelFiles`.
+// `ModelManagerHandle::new`), which `addDecoratorModel` and `addRootModel`
+// then register in `modelFiles` as views of those copies
+// (`_adoptPreloadedModel`).
 const RUST_PRELOADED_NS = ['concerto.decorator@1.0.0', 'concerto@1.0.0'];
 
 /**
@@ -375,6 +376,11 @@ class BaseModelManager {
         // The engine's precomputed verdict applies to this AST while it is
         // exactly the fixed root model (engine/views-staging.ts `systemModelAsts`).
         engineViews().markSystemModelAst(rootModelAst);
+        // The copy rustHandle loaded itself is adopted as a view
+        // (`_adoptPreloadedModel`), unless the helper was replaced.
+        if (getRootModel === fixedGetRootModel && this._adoptPreloadedModel(rootModelAst, rootModelCto, rootModelFile)) {
+            return;
+        }
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
 
         this.addModelFile(m, rootModelCto, rootModelFile, true);
@@ -435,9 +441,53 @@ class BaseModelManager {
         // exactly the fixed decorator model (engine/views-staging.ts
         // `systemModelAsts`).
         engineViews().markSystemModelAst(decoratorModelAst);
+        // The copy rustHandle loaded itself is adopted as a view
+        // (`_adoptPreloadedModel`), unless the helper was replaced.
+        if (getDecoratorModel === fixedGetDecoratorModel &&
+            this._adoptPreloadedModel(decoratorModelAst, decoratorModelCto, decoratorModelFile)) {
+            return;
+        }
         const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
 
         this.addModelFile(m, decoratorModelCto, decoratorModelFile, true);
+    }
+
+    /**
+     * Registers the fixed decorator or root model, `ast` as its helper
+     * returned it, as a view of the copy the current rustHandle loaded
+     * itself (`ModelFile._systemView`): no ModelFile is built from the AST,
+     * and nothing is staged, dropped or written to rustHandle. Only for a
+     * namespace rustHandle loaded and `modelFiles` does not hold yet
+     * (`_rustPreloaded`), and only while `addModelFile` is this class's own:
+     * an override (a subclass's, or a spy on the instance) is called for
+     * the system models as v5.0.0 called it. False, changing nothing,
+     * otherwise, and the caller adds the model with `addModelFile` as any
+     * other file, which throws for a namespace already declared, as v5.0.0
+     * did.
+     * @param {object} ast the fixed system model's AST
+     * @param {string} cto the model's CTO text
+     * @param {string} fileName the model's file name
+     * @return {boolean} true if the model was registered
+     * @private
+     * @internal
+     */
+    _adoptPreloadedModel(ast: AstNode, cto: string, fileName: string): boolean {
+        const namespace = ast.namespace as string;
+        if (!this._rustPreloaded.has(namespace) || this.addModelFile !== BaseModelManager.prototype.addModelFile) {
+            return false;
+        }
+        const m = ModelFile._systemView(this, ast, cto, fileName) as ModelFileInstance | undefined;
+        /* istanbul ignore if: the engine answers for the fixed system models' text */
+        if (m === undefined) {
+            return false;
+        }
+        this.modelFiles[namespace] = m;
+        this._rustPreloaded.delete(namespace);
+        // A new key, appended to the namespace list, and a model change, as
+        // `addModelFile` notes them.
+        noteNamespaceAdded(this, namespace);
+        this._engine.version++;
+        return true;
     }
 
     /**
@@ -1297,8 +1347,8 @@ class BaseModelManager {
         // rustHandle has no bulk clear, so it is replaced as in the
         // constructor, with this manager's validation options
         // (`_newRustHandle`). addDecoratorModel/addRootModel below
-        // re-populate this.modelFiles; _needsRustWrite skips mirroring them,
-        // since the fresh handle already has them.
+        // re-populate this.modelFiles with views of the copies the fresh
+        // handle loaded itself (`_adoptPreloadedModel`).
         const replaced = this.rustHandle;
         this.rustHandle = this._newRustHandle();
         this._modelFileIds = new Map();

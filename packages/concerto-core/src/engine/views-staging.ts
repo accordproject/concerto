@@ -497,6 +497,59 @@ function adoptSharedView(modelFile: any, source: any, stage?: Stage, committed?:
     return lazy;
 }
 
+/**
+ * The parsed header of each fixed system model, by namespace, for the views
+ * of the copies a new rustHandle loads itself (`systemViewHeader`).
+ */
+const preloadedSystemHeaders = new Map<string, StagedHeader>();
+
+/**
+ * The header of `ast`, the fixed decorator or root model as its helper
+ * returns it, for a view of the copy a new rustHandle loaded itself
+ * (`ModelFile._systemView`). Asked of the engine once per namespace and
+ * process (`systemModelFileHeader`, which answers only for a system model's
+ * exact text); undefined if it does not answer.
+ */
+function systemViewHeader(ast: any): StagedHeader | undefined {
+    const namespace = ast.namespace;
+    let header = preloadedSystemHeaders.get(namespace);
+    if (header === undefined) {
+        const answer = rust.systemModelFileHeader(stableAstText(ast));
+        /* istanbul ignore if: the engine answers for the fixed system models' text */
+        if (typeof answer !== 'string') {
+            return undefined;
+        }
+        header = JSON.parse(answer) as StagedHeader;
+        preloadedSystemHeaders.set(namespace, header);
+    }
+    return header;
+}
+
+/**
+ * The load step for a view of a fixed system model the manager's rustHandle
+ * loaded itself (`ModelFile._systemView`), with no engine call: the header
+ * is `header` (`systemViewHeader`), the engine-side file is the one
+ * rustHandle holds, and the declaration views are built from it on first
+ * use. The AST counts as shape checked (BC-19) unless the manager turned
+ * the check off, as `stageModelFile` leaves a fixed system model's. False
+ * when the manager has decorator factories (BC-24): the view is then built
+ * eagerly, as `stageModelFile` leaves it.
+ */
+function adoptSystemView(modelFile: any, header: StagedHeader): boolean {
+    const manager = modelFile.modelManager;
+    const state = fileState(modelFile);
+    state.committed = manager.rustHandle;
+    if (manager.options?.metamodelValidation !== false) {
+        state.shapeChecked = modelFile.ast;
+    }
+    if (hasDecoratorFactories(manager)) {
+        return false;
+    }
+    state.stagedHeader = header;
+    state.lazy = true;
+    return true;
+}
+
 /** Copies `source`'s recorded `getImports()` names to `modelFile`. */
 function copyImportNames(modelFile: any, source: any): void {
     const names = recordedImportNames(source);
@@ -844,6 +897,7 @@ function validateLoaded(modelFile: any, handle: any): boolean {
 export {
     adoptSharedView,
     adoptStagedModels,
+    adoptSystemView,
     applyStagedFileHeader,
     applyStagedHeaders,
     checkAstShape,
@@ -855,6 +909,7 @@ export {
     recordImportNames,
     recordedImportNames,
     stageModelFile,
+    systemViewHeader,
     updateExternalStaged,
     updateStaged,
     validateAndCommitStaged,
