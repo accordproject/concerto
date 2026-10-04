@@ -5,7 +5,8 @@
 //
 //   node --expose-gc migration/bench/p597-server.mjs --approach a|b|b-all|c --set S
 //       [--core-dist DIR] [--mode time|memory|soak] [--concurrency N]
-//       [--requests R] [--warmup W] [--held K] [--seconds S] [--out FILE]
+//       [--requests R] [--warmup W] [--held K] [--seconds S]
+//       [--sample-seconds T] [--out FILE]
 //
 // Approaches (one request = make a manager, add the user model, validate a
 // user instance and a platform instance):
@@ -27,9 +28,15 @@
 // --mode memory  K managers made and held (each with its user model), after
 //                a GC: the growth of the engine's WASM memory
 //                (memory.buffer.byteLength) and of RSS, per manager.
-// --mode soak    approach c at N for S seconds; every second, WASM memory,
-//                RSS, JS heap, the requests done and the managers made but
-//                not yet finalized by the garbage collector, as a timeline.
+// --mode soak    the approach at N for S seconds; every T seconds (default
+//                1), WASM memory, RSS, JS heap, the requests done and the
+//                managers made but not yet finalized by the garbage
+//                collector, as a timeline. P5-97 ran approach c only; P5-120
+//                (accordproject/concerto-rust#495) runs a on TS 5.0.0 and a
+//                and c on the engine, at T = 5. The GC pauses (a
+//                PerformanceObserver on 'gc' entries) are counted by kind,
+//                with their total, p95 and max, and the cumulative count and
+//                total pause go into every timeline sample.
 //
 // Inputs: fixtures/p515/<set>.json from p515-prepare.mjs, the P5-72 sets,
 // whose models are the platform models and whose instances are the platform
@@ -40,7 +47,7 @@ import fs from 'fs';
 import path from 'path';
 import url from 'url';
 import { createRequire } from 'module';
-import { performance } from 'perf_hooks';
+import { performance, PerformanceObserver, constants as perfConstants } from 'perf_hooks';
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -50,7 +57,7 @@ function parseArgs(argv) {
     const a = {
         coreDist: path.join(REPO_ROOT, 'packages', 'concerto-core', 'dist'),
         approach: 'c', set: 'conformance', mode: 'time', concurrency: 1, requests: 500, warmup: 50,
-        held: 100, seconds: 60, out: null,
+        held: 100, seconds: 60, sampleSeconds: 1, out: null,
     };
     for (let i = 0; i < argv.length; i++) {
         const k = argv[i];
@@ -64,6 +71,7 @@ function parseArgs(argv) {
         else if (k === '--warmup') { a.warmup = Number(v()); }
         else if (k === '--held') { a.held = Number(v()); }
         else if (k === '--seconds') { a.seconds = Number(v()); }
+        else if (k === '--sample-seconds') { a.sampleSeconds = Number(v()); }
         else if (k === '--out') { a.out = v(); }
         else { throw new Error(`unknown argument: ${k}`); }
     }
@@ -237,8 +245,64 @@ function snapshot() {
     return {
         wasmBytes: engineMemory ? engineMemory.buffer.byteLength : null,
         unfinalized: made - finalized,
-        rss: m.rss, heapUsed: m.heapUsed, external: m.external, arrayBuffers: m.arrayBuffers,
+        rss: m.rss, heapUsed: m.heapUsed, heapTotal: m.heapTotal, external: m.external, arrayBuffers: m.arrayBuffers,
     };
+}
+
+// GC pauses by kind (P5-120): every 'gc' performance entry's duration, kept
+// in a growable Float64Array per kind so a long soak stays cheap.
+const GC_KINDS = {
+    [perfConstants.NODE_PERFORMANCE_GC_MINOR]: 'minor',
+    [perfConstants.NODE_PERFORMANCE_GC_MAJOR]: 'major',
+    [perfConstants.NODE_PERFORMANCE_GC_INCREMENTAL]: 'incremental',
+    [perfConstants.NODE_PERFORMANCE_GC_WEAKCB]: 'weakcb',
+};
+const gcPauses = {};
+let gcCount = 0;
+let gcTotalMs = 0;
+function recordGc(kind, ms) {
+    let g = gcPauses[kind];
+    if (!g) {
+        g = gcPauses[kind] = { n: 0, buf: new Float64Array(1024) };
+    }
+    if (g.n === g.buf.length) {
+        const bigger = new Float64Array(g.buf.length * 2);
+        bigger.set(g.buf);
+        g.buf = bigger;
+    }
+    g.buf[g.n++] = ms;
+    gcCount++;
+    gcTotalMs += ms;
+}
+function startGcObserver() {
+    const obs = new PerformanceObserver((list) => {
+        for (const e of list.getEntries()) {
+            const kind = e.detail && e.detail.kind !== undefined ? e.detail.kind : e.kind;
+            recordGc(GC_KINDS[kind] || `kind${kind}`, e.duration);
+        }
+    });
+    obs.observe({ entryTypes: ['gc'] });
+    return obs;
+}
+function gcSummary() {
+    const stats = (xs) => {
+        const sorted = Float64Array.from(xs).sort();
+        const total = sorted.reduce((a, x) => a + x, 0);
+        return {
+            count: sorted.length, totalMs: total, meanMs: sorted.length ? total / sorted.length : null,
+            p95Ms: quantile(sorted, 0.95), maxMs: sorted.length ? sorted[sorted.length - 1] : null,
+        };
+    };
+    const byKind = {};
+    const all = new Float64Array(gcCount);
+    let k = 0;
+    for (const [kind, g] of Object.entries(gcPauses)) {
+        const xs = g.buf.subarray(0, g.n);
+        byKind[kind] = stats(xs);
+        all.set(xs, k);
+        k += xs.length;
+    }
+    return { all: stats(all.subarray(0, k)), byKind };
 }
 
 async function main() {
@@ -295,9 +359,11 @@ async function main() {
         let done = 0;
         let stop = false;
         const t0 = performance.now();
+        const sample = () => ({ t: (performance.now() - t0) / 1000, done, gcCount, gcTotalMs, ...snapshot() });
+        const gcObserver = startGcObserver();
         const sampler = setInterval(() => {
-            timeline.push({ t: (performance.now() - t0) / 1000, done, ...snapshot() });
-        }, 1000);
+            timeline.push(sample());
+        }, args.sampleSeconds * 1000);
         const worker = async () => {
             let i = 0;
             while (!stop) {
@@ -309,8 +375,14 @@ async function main() {
         await Promise.all(Array.from({ length: args.concurrency }, worker));
         clearTimeout(deadline);
         clearInterval(sampler);
-        timeline.push({ t: (performance.now() - t0) / 1000, done, ...snapshot() });
-        Object.assign(result, { concurrency: args.concurrency, seconds: args.seconds, requests: done, timeline });
+        // Let the observer deliver the last GC entries before summarising.
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        timeline.push(sample());
+        gcObserver.disconnect();
+        Object.assign(result, {
+            concurrency: args.concurrency, seconds: args.seconds, sampleSeconds: args.sampleSeconds,
+            requests: done, throughputPerS: done / timeline[timeline.length - 1].t, gc: gcSummary(), timeline,
+        });
     } else {
         throw new Error(`unknown mode ${args.mode}`);
     }
