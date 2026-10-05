@@ -21,7 +21,8 @@
 // Inputs: fixtures/p515/<set>.json from p515-prepare.mjs, and (P5-109) the
 // pseudo-set `p5109`, whose models and instances are built in this file
 // (pass it in --sets; the default sets leave it out), and (P5-121) the
-// pseudo-set `p5121`, built the same way.
+// pseudo-set `p5121`, built the same way. (P5-131) `from_ast_fresh` and
+// `get_ast` run on the three sets.
 
 import fs from 'fs';
 import os from 'os';
@@ -516,6 +517,32 @@ const OPS = {
                 decl.getDirectSubclasses();
             }
         },
+    },
+    // ---- P5-131 (accordproject/concerto-rust#508) ---------------------------
+    // Rows for P5-124 and P5-125 that the ops above do not reach. They run on
+    // the three sets but are not P5-96 rows (p5131-table.mjs reports them on
+    // their own). Per item = per model file of the set.
+    //
+    // P5-124: `fromAst` on a fresh manager (the constructor, `clear()` and
+    // the system-model path it re-runs, then the set's models), one
+    // `{ $class: Models, models }` AST of the set's files.
+    from_ast_fresh: {
+        family: 'load',
+        setup: (d) => ({ ast: { $class: 'concerto.metamodel@1.0.0.Models', models: d.models.map((m) => m.ast) }, files: d.models.length }),
+        n: (c) => c.files,
+        run: (c) => {
+            const mm = newManager();
+            mm.fromAst(c.ast);
+            return mm;
+        },
+    },
+    // P5-125 (item 13): `getAst(true)` (resolved names) of a manager of the
+    // set's models, the same manager every time.
+    get_ast: {
+        family: 'introspect',
+        setup: (d) => ({ mm: managerOf(d.models), files: d.models.length }),
+        n: (c) => c.files,
+        run: (c) => c.mm.getAst(true),
     },
     // ---- P5-109 (accordproject/concerto-rust#469): the pseudo-set `p5109` ----
     // Rows for the scenarios the review round (P5-97..P5-102) changed that
