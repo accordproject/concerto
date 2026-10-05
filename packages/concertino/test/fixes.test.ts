@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ConcertinoConverter, convertToConcertino, convertToMetamodel } from '../src/';
 import { getNamespace, getShortName } from '../src/names';
+import * as R from '../src/runtime';
 import { checkSchema, isValid } from '../src/schema';
 import schema from '../src/spec/concertino.schema.json';
 
@@ -273,23 +274,38 @@ describe('converter fixes', () => {
             'concept D {}',
         ].join('\n'));
         const concertino = expectLosslessRoundTrip(metamodel);
-        // Since 5.1.0 every term is in vocabulary, wherever it is, and
-        // decoratorOrder keeps the source order when it is not the usual one.
+        // vocabulary and metadata are as 5.0.0 wrote them: a term that is not
+        // in leading position stays in metadata. Since 5.1.0, fullVocabulary
+        // also has every term, and decoratorOrder keeps the source order.
         const P = concertino.declarations['v@1.0.0.P'];
-        expect(P.vocabulary).toStrictEqual({ additionalTerms: { participantName: 'some value' } });
-        expect(P.metadata).toStrictEqual({ M1: ['some value'] });
+        expect(P).not.toHaveProperty('vocabulary');
+        expect(P.metadata).toStrictEqual({ M1: ['some value'], Term_participantName: ['some value'] });
+        expect(P.fullVocabulary).toStrictEqual({ additionalTerms: { participantName: 'some value' } });
         expect(P.decoratorOrder).toStrictEqual(['M1', 'Term_participantName']);
         const C = concertino.declarations['v@1.0.0.C'];
-        expect(C.vocabulary).toStrictEqual({ label: 'label', additionalTerms: { x: 'x' } });
-        expect(C.metadata).toStrictEqual({ M2: null });
+        // 5.0.0 kept a label after an additional term in metadata.
+        expect(C.vocabulary).toStrictEqual({ additionalTerms: { x: 'x' } });
+        expect(C.metadata).toStrictEqual({ Term: ['label'], M2: null });
+        expect(C.fullVocabulary).toStrictEqual({ label: 'label', additionalTerms: { x: 'x' } });
         expect(C.decoratorOrder).toStrictEqual(['Term_x', 'Term', 'M2']);
-        expect(C.properties.s.vocabulary).toStrictEqual({ label: 'late' });
+        expect(C.properties.s).not.toHaveProperty('vocabulary');
+        expect(C.properties.s.metadata).toStrictEqual({ M3: null, Term: ['late'] });
+        expect(C.properties.s.fullVocabulary).toStrictEqual({ label: 'late' });
         expect(C.properties.s.decoratorOrder).toStrictEqual(['M3', 'Term']);
+        // A 5.1.0 reader reads every term as vocabulary, and no term as metadata.
+        const m = R.load(concertino);
+        expect(R.getVocabulary(m, 'v@1.0.0.P')).toStrictEqual({ additionalTerms: { participantName: 'some value' } });
+        expect(R.getDecorators(m, 'v@1.0.0.P')).toStrictEqual({ M1: ['some value'] });
+        expect(R.getVocabulary(m, 'v@1.0.0.C')).toStrictEqual({ label: 'label', additionalTerms: { x: 'x' } });
+        expect(R.getDecorators(m, 'v@1.0.0.C')).toStrictEqual({ M2: null });
+        expect(R.getVocabulary(m, 'v@1.0.0.C', 's')).toStrictEqual({ label: 'late' });
+        expect(R.getDecorators(m, 'v@1.0.0.C', 's')).toStrictEqual({ M3: null });
         // The usual order (label, terms, then the rest) needs no decoratorOrder.
         const D = concertino.declarations['v@1.0.0.D'];
         expect(D.vocabulary).toStrictEqual({ label: 'a', additionalTerms: { b: 'b' } });
         expect(D.metadata).toStrictEqual({ M4: [1] });
         expect(D).not.toHaveProperty('decoratorOrder');
+        expect(D).not.toHaveProperty('fullVocabulary');
     });
 
     it('should keep type-reference decorator arguments without a namespace', () => {

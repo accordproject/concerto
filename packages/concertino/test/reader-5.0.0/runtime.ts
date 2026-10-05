@@ -34,17 +34,8 @@
  *   event declared without `extends` (Concertino's `prototype`), and so the
  *   system identifier `$identifier` of an asset or participant declared
  *   without `identified`;
- * - whether a property's type is an enum or a map, by looking the type up
- *   (format 5.1.0 also flags it, with `isEnum` and `isMap`).
- *
- * Format 5.1.0 is additive, so it writes `$timestamp` as an own property of
- * each transaction and event, as 5.0.0 did, and marks it with
- * `systemInheritedFrom`; this layer reads such a property as inherited from
- * that system type, as concerto-core does. Likewise it reads the vocabulary
- * from `fullVocabulary` when there is one (see decorators.ts).
- *
- * `load` reads documents of Concertino format major version 5 (any 5.x.y)
- * and throws a `ConcertinoVersionError` for any other version.
+ * - whether a property's type is an enum or a map (`isEnum` is in the
+ *   format but the converter never sets it), by looking the type up.
  */
 /* eslint-disable no-use-before-define */
 /* eslint-disable valid-jsdoc */
@@ -52,11 +43,7 @@
 import type {
     IConcertino, IConcertinoDeclaration, IConcertinoConceptDeclaration, IConcertinoProperty,
     IConcertinoEnumDeclaration, IConcertinoMapDeclaration,
-} from './spec/concertino.metamodel@5.1.0';
-import { checkConcertinoVersion } from './version';
-import { metadataOf, vocabularyOf } from './decorators';
-
-export { CONCERTINO_VERSION, CONCERTINO_MAJOR_VERSION, ConcertinoVersionError, checkConcertinoVersion } from './version';
+} from './spec/concertino.metamodel@5.0.0';
 
 export const SYSTEM_NS = 'concerto@1.0.0';
 const PRIMITIVES = new Set(['String', 'Boolean', 'DateTime', 'Double', 'Integer', 'Long']);
@@ -89,21 +76,13 @@ const sys = (identified: boolean, timestamped: boolean): IConcertinoConceptDecla
     return { type: 'ConceptDeclaration', isAbstract: true, properties } as IConcertinoConceptDeclaration;
 };
 
-/**
- * The system model, with the system properties concerto-core gives its
- * types: `$identifier` on Asset and Participant, `$timestamp` on Transaction
- * and Event (concerto-core adds the latter; rootmodel.json declares none).
- * A document does not write the `$identifier` an asset or participant
- * inherits, so it is read from here. A document writes `$timestamp` as an
- * own property of each transaction and event; format 5.1.0 marks it with
- * `systemInheritedFrom`, so that it is listed as inherited from here.
- */
+/** The system model, as concerto-core's rootmodel.json declares it (R1: no $timestamp property there). */
 const SYSTEM: Record<string, IConcertinoConceptDeclaration> = {
     [`${SYSTEM_NS}.Concept`]: sys(false, false),
     [`${SYSTEM_NS}.Asset`]: sys(true, false),
     [`${SYSTEM_NS}.Participant`]: sys(true, false),
-    [`${SYSTEM_NS}.Transaction`]: sys(false, true),
-    [`${SYSTEM_NS}.Event`]: sys(false, true),
+    [`${SYSTEM_NS}.Transaction`]: sys(false, false),
+    [`${SYSTEM_NS}.Event`]: sys(false, false),
 };
 const PROTOTYPE_SUPER: Record<string, string> = {
     AssetDeclaration: `${SYSTEM_NS}.Asset`,
@@ -116,10 +95,8 @@ const PROTOTYPE_SUPER: Record<string, string> = {
  * Load a Concertino document.
  * @param doc the document (ConcertinoConverter.fromConcertoMetamodel output, or JSON built ahead of time)
  * @returns the model
- * @throws {ConcertinoVersionError} when `metadata.concertinoVersion` is missing, malformed, or not major version 5
  */
 export function load(doc: IConcertino): Model {
-    checkConcertinoVersion(doc);
     const decls = new Map<string, IConcertinoDeclaration>(Object.entries(SYSTEM));
     for (const [fqn, d] of Object.entries(doc.declarations)) {
         decls.set(fqn, d);
@@ -221,13 +198,6 @@ export function getAssignableTypes(m: Model, fqn: string): string[] {
 }
 
 /**
- * Whether a property is declared by the declaration that lists it: not
- * inherited (`inheritedFrom`), and not a system property inherited from a
- * system type (`systemInheritedFrom`, format 5.1.0).
- */
-const isOwn = (p: IConcertinoProperty) => !p.inheritedFrom && !p.systemInheritedFrom;
-
-/**
  * The properties: own first, then inherited, nearest super type first (concerto-core getProperties order).
  * The system properties ($identifier, $timestamp) of the implicit system super type are included.
  * @param own only the declaration's own properties
@@ -238,19 +208,19 @@ export function getProperties(m: Model, fqn: string, own = false): IConcertinoPr
         return [];
     }
     if (own) {
-        return Object.values(d.properties).filter(isOwn);
+        return Object.values(d.properties).filter((p) => !p.inheritedFrom);
     }
     let list = m.props.get(fqn);
     if (list) {
         return list;
     }
     const all = Object.values(d.properties);
-    list = all.filter(isOwn);
+    list = all.filter((p) => !p.inheritedFrom);
     const seen = new Set(list.map((p) => p.name));
     for (const sup of getSuperTypes(m, fqn)) {
         const sd = m.decls.get(sup) as IConcertinoConceptDeclaration | undefined;
         for (const p of Object.values(sd?.properties || {})) {
-            if (isOwn(p) && !seen.has(p.name)) {
+            if (!p.inheritedFrom && !seen.has(p.name)) {
                 // Prefer the copy on `fqn` (it has the scalar resolved onto it).
                 list.push((d.properties as any)[p.name] || p);
                 seen.add(p.name);
@@ -324,19 +294,17 @@ export function getMapTypes(m: Model, fqn: string): { key: string; value: string
 /**
  * Decorators (non-vocabulary) of a declaration, or of one of its properties
  * (`metadata`: name -> argument values), and the vocabulary (`@Term`, `@Term_*`).
- * Format 5.1.0's `fullVocabulary` is read in place of `vocabulary` when there
- * is one, and the 5.0.0 copies of its terms are left out of the metadata.
  */
 export function getDecorators(m: Model, fqn: string, property?: string): Record<string, unknown[] | null> {
     const d = m.decls.get(fqn) as any;
     const target = property === undefined ? d : property in (d?.values || {}) ? d.values[property] : getProperty(m, fqn, property);
-    return (metadataOf(target) as Record<string, unknown[] | null> | undefined) || {};
+    return (target && target.metadata) || {};
 }
 
 export function getVocabulary(m: Model, fqn: string, property?: string): { label?: string; additionalTerms?: Record<string, string> } {
     const d = m.decls.get(fqn) as any;
     const target = property === undefined ? d : property in (d?.values || {}) ? d.values[property] : getProperty(m, fqn, property);
-    return (vocabularyOf(target) as { label?: string; additionalTerms?: Record<string, string> } | undefined) || {};
+    return (target && target.vocabulary) || {};
 }
 
 /** The model-level decorators of a namespace, as the AST holds them. */

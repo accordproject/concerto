@@ -81,9 +81,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "com.test.models@1.2.3.AuditEvent": {
       "properties": {
         "$timestamp": {
-          "inheritedFrom": "concerto@1.0.0.Transaction",
           "isSystem": true,
           "name": "$timestamp",
+          "systemInheritedFrom": "concerto@1.0.0.Transaction",
           "type": "DateTime",
         },
       },
@@ -357,12 +357,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "org.acme.base@1.0.0.AbstractAsset": {
       "isAbstract": true,
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "stringProperty": {
           "default": "defaultString",
           "isIdentifier": true,
@@ -408,12 +402,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "org.acme.base@1.0.0.BaseAsset": {
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "booleanArrayProperty": {
           "isArray": true,
           "isOptional": true,
@@ -549,12 +537,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         ],
       },
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Participant",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "stringProperty": {
           "isIdentifier": true,
           "metadata": {
@@ -581,12 +563,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.base@1.0.0.BaseAsset",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "anotherStringProperty": {
           "default": "defaultString",
           "name": "anotherStringProperty",
@@ -732,12 +708,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.base@1.0.0.BaseAsset",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "anotherStringProperty": {
           "default": "defaultString",
           "inheritedFrom": "org.acme.base@1.0.0.DerivedAsset",
@@ -885,9 +855,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "org.acme.base@1.0.0.MyBasicTransaction": {
       "properties": {
         "$timestamp": {
-          "inheritedFrom": "concerto@1.0.0.Transaction",
           "isSystem": true,
           "name": "$timestamp",
+          "systemInheritedFrom": "concerto@1.0.0.Transaction",
           "type": "DateTime",
         },
       },
@@ -901,9 +871,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "org.acme.base@1.0.0.MyTransaction": {
       "properties": {
         "$timestamp": {
-          "inheritedFrom": "concerto@1.0.0.Transaction",
           "isSystem": true,
           "name": "$timestamp",
+          "systemInheritedFrom": "concerto@1.0.0.Transaction",
           "type": "DateTime",
         },
         "myAsset": {
@@ -924,9 +894,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       ],
       "properties": {
         "$timestamp": {
-          "inheritedFrom": "concerto@1.0.0.Transaction",
           "isSystem": true,
           "name": "$timestamp",
+          "systemInheritedFrom": "concerto@1.0.0.Transaction",
           "type": "DateTime",
         },
         "anotherBaseAsset": {
@@ -960,12 +930,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         ],
       },
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Participant",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "address": {
           "name": "address",
           "type": "org.acme.base@1.0.0.UnitedStatesAddress",
@@ -985,12 +949,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "org.acme.base@1.0.0.SimpleAsset": {
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "stringProperty": {
           "isIdentifier": true,
           "name": "stringProperty",
@@ -1150,9 +1108,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "org.acme.hr@1.0.0.ChangeOfAddress": {
       "properties": {
         "$timestamp": {
-          "inheritedFrom": "concerto@1.0.0.Transaction",
           "isSystem": true,
           "name": "$timestamp",
+          "systemInheritedFrom": "concerto@1.0.0.Transaction",
           "type": "DateTime",
         },
         "Person": {
@@ -1239,9 +1197,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "org.acme.hr@1.0.0.CompanyEvent": {
       "properties": {
         "$timestamp": {
-          "inheritedFrom": "concerto@1.0.0.Event",
           "isSystem": true,
           "name": "$timestamp",
+          "systemInheritedFrom": "concerto@1.0.0.Event",
           "type": "DateTime",
         },
       },
@@ -1266,12 +1224,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.hr@1.0.0.Person",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Participant",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "company": {
           "name": "company",
           "type": "org.acme.hr@1.0.0.Company",
@@ -1393,12 +1345,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         ],
       },
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Participant",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "companyAssets": {
           "isArray": true,
           "name": "companyAssets",
@@ -1568,12 +1514,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "resource": null,
       },
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "serialNumber": {
           "isIdentifier": true,
           "name": "serialNumber",
@@ -1625,12 +1565,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.hr@1.0.0.Equipment",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "make": {
           "isEnum": true,
           "name": "make",
@@ -1668,12 +1602,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.hr@1.0.0.Person",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Participant",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "companyAssets": {
           "inheritedFrom": "org.acme.hr@1.0.0.Employee",
           "isArray": true,
@@ -1807,9 +1735,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       ],
       "properties": {
         "$timestamp": {
-          "inheritedFrom": "concerto@1.0.0.Event",
           "isSystem": true,
           "name": "$timestamp",
+          "systemInheritedFrom": "concerto@1.0.0.Event",
           "type": "DateTime",
         },
         "employee": {
@@ -1831,12 +1759,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "resource": null,
       },
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Participant",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "dob": {
           "name": "dob",
           "type": "DateTime",
@@ -2338,12 +2260,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "comment": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
           "name": "comment",
@@ -2383,12 +2299,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "axyAddress": {
           "name": "axyAddress",
           "type": "String",
@@ -2426,12 +2336,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "clientName": {
           "name": "clientName",
           "type": "String",
@@ -2478,12 +2382,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
@@ -2521,12 +2419,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "bxberCode": {
           "name": "bxberCode",
           "type": "String",
@@ -2575,12 +2467,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "billWeekStartDay": {
           "name": "billWeekStartDay",
           "type": "Long",
@@ -2706,12 +2592,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
@@ -2754,12 +2634,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "comment": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
           "name": "comment",
@@ -2799,12 +2673,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
@@ -2846,12 +2714,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.Some",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "agycoms": {
           "isArray": true,
           "name": "agycoms",
@@ -2918,12 +2780,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "comment": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
           "name": "comment",
@@ -2963,12 +2819,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "demos": {
           "isArray": true,
           "name": "demos",
@@ -3004,12 +2854,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
@@ -3061,12 +2905,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "cost": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "cost",
@@ -3161,12 +2999,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
@@ -3219,9 +3051,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "xx.yy.zz@1.0.0.BaseTransaction": {
       "properties": {
         "$timestamp": {
-          "inheritedFrom": "concerto@1.0.0.Transaction",
           "isSystem": true,
           "name": "$timestamp",
+          "systemInheritedFrom": "concerto@1.0.0.Transaction",
           "type": "DateTime",
         },
       },
@@ -3234,12 +3066,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "xx.yy.zz@1.0.0.BxblineTransmission": {
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "bxbcoms": {
           "isArray": true,
           "name": "bxbcoms",
@@ -3278,12 +3104,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "xx.yy.zz@1.0.0.Par1": {
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Participant",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "bool1": {
           "name": "bool1",
           "type": "Boolean",
@@ -3323,12 +3143,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "xx.yy.zz@1.0.0.Par2": {
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Participant",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "address": {
           "name": "address",
           "type": "String",
@@ -3352,12 +3166,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "xx.yy.zz@1.0.0.Some": {
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "uuid": {
           "isIdentifier": true,
           "name": "uuid",
@@ -3376,12 +3184,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "cost": {
           "name": "cost",
           "type": "Long",
@@ -3460,12 +3262,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "comment": {
           "name": "comment",
           "type": "String",
@@ -3504,12 +3300,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "cn": {
           "name": "cn",
           "type": "String",
@@ -3563,12 +3353,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "continuation": {
           "name": "continuation",
           "type": "String",
@@ -3603,12 +3387,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "cn": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
           "name": "cn",
@@ -3669,12 +3447,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "xx.yy.zz@1.0.0.SomeRecord": {
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "id": {
           "name": "id",
           "type": "String",
@@ -3698,12 +3470,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "xx.yy.zz@1.0.0.SomeSss": {
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Participant",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "bb": {
           "isRelationship": true,
           "name": "bb",
@@ -3733,12 +3499,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "xx.yy.zz@1.0.0.SomeTransmission": {
       "properties": {
-        "$identifier": {
-          "inheritedFrom": "concerto@1.0.0.Asset",
-          "isSystem": true,
-          "name": "$identifier",
-          "type": "String",
-        },
         "aa": {
           "isRelationship": true,
           "name": "aa",
@@ -3770,9 +3530,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "xx.yy.zz@1.0.0.UpdateOrderEvent": {
       "properties": {
         "$timestamp": {
-          "inheritedFrom": "concerto@1.0.0.Event",
           "isSystem": true,
           "name": "$timestamp",
+          "systemInheritedFrom": "concerto@1.0.0.Event",
           "type": "DateTime",
         },
         "transmission": {
@@ -3794,9 +3554,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       ],
       "properties": {
         "$timestamp": {
-          "inheritedFrom": "concerto@1.0.0.Transaction",
           "isSystem": true,
           "name": "$timestamp",
+          "systemInheritedFrom": "concerto@1.0.0.Transaction",
           "type": "DateTime",
         },
         "aa": {

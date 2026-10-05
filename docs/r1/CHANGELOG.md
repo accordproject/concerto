@@ -81,14 +81,22 @@ at concerto `574faa716` and concerto-rust `bfa4a55` (2026-10-02). The
   instances, with R1's rules and concerto-core's exception classes).
   `ConcertinoConverter.isValid` stays, over the precompiled checks.
 - **Added: Concertino format 5.1.0 and its versioning policy (additive;
-  P5-130).** `metadata.concertinoVersion` follows semantic versioning: minor
-  versions only add optional fields, and `./runtime` and `./validate` read
-  every 5.x document and throw a `ConcertinoVersionError` for another major
-  version. The converter writes 5.1.0, which adds each concept's implicit
-  system super types (`systemSuperTypes`) and inherited system properties
-  (`$identifier`, `$timestamp`, marked `isSystem`), `isEnum` and `isMap` on
-  properties, and `decoratorOrder`, so that every `@Term` and `@Term_*`
-  decorator is in `vocabulary`. 5.0.0 documents still read the same way.
+  P5-130, P5-133).** `metadata.concertinoVersion` follows semantic
+  versioning: minor versions only add optional fields, and `./runtime` and
+  `./validate` read every 5.x document and throw a `ConcertinoVersionError`
+  for another major version. The converter writes 5.1.0, which is strictly
+  additive: every field 5.0.0 knows is written as 5.0.0 wrote it, so a 5.0.0
+  reader reads a 5.1.0 document as it reads the 5.0.0 document of the same
+  model, and the corrected description is in new optional fields only:
+  each concept's implicit system super types (`systemSuperTypes`, from which
+  a reader adds the inherited `$identifier`); `$timestamp`, still an own
+  property, marked `isSystem` and `systemInheritedFrom` its system type;
+  `isEnum` and `isMap` on properties; and `fullVocabulary` with
+  `decoratorOrder`, which hold every `@Term` and `@Term_*` decorator while
+  `metadata` keeps a term that is not in leading position, as 5.0.0 did.
+  5.1.0 readers read these fields, which gives concerto-core's own and
+  inherited properties and the complete vocabulary; 5.0.0 documents still
+  read the same way.
 
 ### Performance
 
@@ -159,8 +167,9 @@ reason, who is affected and the upgrade step for each one.
   `concertino.metamodel@1.0.0-alpha.7`, and its format types moved from
   `dist/spec/concertino.metamodel@5.0.0` to
   `dist/spec/concertino.metamodel@5.1.0`. Nothing in the package used them;
-  only a deep import through its `./dist/*` export reached them. Import the
-  types from the package root. (P5-130)
+  only a deep import through its `./dist/*` export reached them, and such an
+  import now fails. Import the types from the package root. The concertino
+  README and the migration guide (Deep imports) say so too. (P5-130)
 
 ### Dates
 
