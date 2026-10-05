@@ -181,9 +181,9 @@ export function validateVocabularyYaml(yamlStr: string): { errors: VocabularyVal
     validateNamespace(pairs, errors);
 
     // <validation> top-level 'locale' field
-    //   required; must match BCP-47 format /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/
-    //   invalid: missing, null, `en_GB`, `not-a-locale`
-    //   valid: `en`, `en-GB`, `en-gb`, `fr`, `zh-CN`
+    //   required; must be a valid BCP-47 tag as accepted by bcp47.parse
+    //   invalid: missing, null, underscore separator (e.g. `en_GB`), malformed subtags (e.g. `en-12`)
+    //   valid: `en`, `en-GB`, `zh-Hant-HK`, `de-DE-u-co-phonebk`, `x-custom`
     validateLocale(pairs, errors);
 
     // <validation> top-level 'declarations' field
