@@ -9,8 +9,10 @@
 
 import fs from 'fs';
 import path from 'path';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const [dir, ...rest] = process.argv.slice(2);
+requireRawInputs(dir);
 if (!dir) {
     console.error('usage: p528-table.mjs <out dir> [--json]');
     process.exit(2);

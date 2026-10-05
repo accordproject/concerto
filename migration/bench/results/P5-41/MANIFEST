@@ -1,0 +1,93 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-41
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-41
+dir	migration/bench/results/P5-41
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-41.tgz
+sha256	2e7f13e201152b3e5efb92d1d4f9a7fa1634e7e4792009174c6bdfb40a749db6
+tar_sha256	7499fc53b1f4688f2c5d519df265dd895562ba269f6459499d6f2b90cff87fe4
+files	77
+bytes	43328
+archived:
+env.txt
+loads.txt
+r1/binding-base-concerto-core-test-data.json
+r1/binding-base-conformance.json
+r1/binding-base-synthetic-large.json
+r1/binding-new-concerto-core-test-data.json
+r1/binding-new-conformance.json
+r1/binding-new-synthetic-large.json
+r1/count-alloc-direct-concerto-core-test-data.json
+r1/count-alloc-direct-conformance.json
+r1/count-alloc-direct-synthetic-large.json
+r1/count-alloc-old-concerto-core-test-data.json
+r1/count-alloc-old-conformance.json
+r1/count-alloc-old-synthetic-large.json
+r1/native-dlmalloc-direct-concerto-core-test-data.json
+r1/native-dlmalloc-direct-conformance.json
+r1/native-dlmalloc-direct-synthetic-large.json
+r1/native-dlmalloc-old-concerto-core-test-data.json
+r1/native-dlmalloc-old-conformance.json
+r1/native-dlmalloc-old-synthetic-large.json
+r1/native-glibc-direct-concerto-core-test-data.json
+r1/native-glibc-direct-conformance.json
+r1/native-glibc-direct-synthetic-large.json
+r1/native-glibc-old-concerto-core-test-data.json
+r1/native-glibc-old-conformance.json
+r1/native-glibc-old-synthetic-large.json
+r1/sweep-engine-base.json
+r1/sweep-engine-new.json
+r1/sweep-percall-base.json
+r1/sweep-percall-new.json
+r1/sweep-ts.json
+r2/binding-base-concerto-core-test-data.json
+r2/binding-base-conformance.json
+r2/binding-base-synthetic-large.json
+r2/binding-new-concerto-core-test-data.json
+r2/binding-new-conformance.json
+r2/binding-new-synthetic-large.json
+r2/native-dlmalloc-direct-concerto-core-test-data.json
+r2/native-dlmalloc-direct-conformance.json
+r2/native-dlmalloc-direct-synthetic-large.json
+r2/native-dlmalloc-old-concerto-core-test-data.json
+r2/native-dlmalloc-old-conformance.json
+r2/native-dlmalloc-old-synthetic-large.json
+r2/native-glibc-direct-concerto-core-test-data.json
+r2/native-glibc-direct-conformance.json
+r2/native-glibc-direct-synthetic-large.json
+r2/native-glibc-old-concerto-core-test-data.json
+r2/native-glibc-old-conformance.json
+r2/native-glibc-old-synthetic-large.json
+r2/sweep-engine-base.json
+r2/sweep-engine-new.json
+r2/sweep-percall-base.json
+r2/sweep-percall-new.json
+r2/sweep-ts.json
+r3/binding-base-concerto-core-test-data.json
+r3/binding-base-conformance.json
+r3/binding-base-synthetic-large.json
+r3/binding-new-concerto-core-test-data.json
+r3/binding-new-conformance.json
+r3/binding-new-synthetic-large.json
+r3/native-dlmalloc-direct-concerto-core-test-data.json
+r3/native-dlmalloc-direct-conformance.json
+r3/native-dlmalloc-direct-synthetic-large.json
+r3/native-dlmalloc-old-concerto-core-test-data.json
+r3/native-dlmalloc-old-conformance.json
+r3/native-dlmalloc-old-synthetic-large.json
+r3/native-glibc-direct-concerto-core-test-data.json
+r3/native-glibc-direct-conformance.json
+r3/native-glibc-direct-synthetic-large.json
+r3/native-glibc-old-concerto-core-test-data.json
+r3/native-glibc-old-conformance.json
+r3/native-glibc-old-synthetic-large.json
+r3/sweep-engine-base.json
+r3/sweep-engine-new.json
+r3/sweep-percall-base.json
+r3/sweep-percall-new.json
+r3/sweep-ts.json

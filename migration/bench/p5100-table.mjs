@@ -8,8 +8,10 @@
 //   node migration/bench/p5100-table.mjs <dir> [--json]
 import fs from 'node:fs';
 import path from 'node:path';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const dir = process.argv[2];
+requireRawInputs(dir);
 const asJson = process.argv.includes('--json');
 const rounds = [1, 2, 3].filter((r) => fs.existsSync(path.join(dir, 'after', `time-${r}.json`)));
 const read = (side, r) => {

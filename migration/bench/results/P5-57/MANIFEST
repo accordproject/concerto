@@ -1,0 +1,43 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-57
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-57
+dir	migration/bench/results/P5-57
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-57.tgz
+sha256	71efddd17855b8deec0cd0ac8572bb46783891105b3f51c578668e266ab2f9a4
+tar_sha256	bca4f997cf1931025578e945d80036a9e9900a3570d4ec6d01318cd45b42ce6b
+files	27
+bytes	25528
+archived:
+env.txt
+eq.txt
+loads.txt
+r1/native-concerto-core-test-data.json
+r1/native-conformance.json
+r1/native-synthetic-large.json
+r1/sweep-engine-base.json
+r1/sweep-engine-new.json
+r1/sweep-percall-base.json
+r1/sweep-percall-new.json
+r1/sweep-ts.json
+r2/native-concerto-core-test-data.json
+r2/native-conformance.json
+r2/native-synthetic-large.json
+r2/sweep-engine-base.json
+r2/sweep-engine-new.json
+r2/sweep-percall-base.json
+r2/sweep-percall-new.json
+r2/sweep-ts.json
+r3/native-concerto-core-test-data.json
+r3/native-conformance.json
+r3/native-synthetic-large.json
+r3/sweep-engine-base.json
+r3/sweep-engine-new.json
+r3/sweep-percall-base.json
+r3/sweep-percall-new.json
+r3/sweep-ts.json

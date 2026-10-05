@@ -1,0 +1,39 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-48
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-48
+dir	migration/bench/results/P5-48
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-48.tgz
+sha256	ac9dec147b75eca28c09a47724529d25843139dbadd52fa62c67bf2242d58d33
+tar_sha256	f50c7e30485beaa3ccad55f3989d81194d3e616ead2c16eabcf027448cc8a729
+files	23
+bytes	74838
+archived:
+native-alloc-after.tsv
+native-alloc-before.tsv
+timed/before-1.json
+timed/before-2.json
+timed/before-3.json
+timed/before-crossings.json
+timed/crate-before-1.tsv
+timed/crate-before-2.tsv
+timed/crate-before-3.tsv
+timed/crate-now-1.tsv
+timed/crate-now-2.tsv
+timed/crate-now-3.tsv
+timed/now-1.json
+timed/now-2.json
+timed/now-3.json
+timed/now-crossings.json
+timed/ts-reference-5.0.0-1.json
+timed/ts-reference-5.0.0-2.json
+timed/ts-reference-5.0.0-3.json
+wasm-size-after.json
+wasm-size-before.json
+wasm-stages-after.txt
+wasm-stages-before.txt

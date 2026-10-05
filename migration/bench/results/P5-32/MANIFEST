@@ -1,0 +1,20 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-32
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-32
+dir	migration/bench/results/P5-32
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-32.tgz
+sha256	e0f04a41c64b4c35c2f2f4ddb350babe94aed914164d87b4813f6e78a6c8e41d
+tar_sha256	b5e196c9ceb03e2970aabdf6ad87073dc350eaf59cf210daf631cb6732f54588
+files	4
+bytes	102371
+archived:
+before-crossings.json
+before-getters.txt
+now-crossings.json
+now-getters.txt

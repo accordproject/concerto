@@ -8,8 +8,10 @@
 
 import fs from 'fs';
 import path from 'path';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const dir = process.argv[2];
+requireRawInputs(dir);
 const asJson = process.argv.includes('--json');
 const SIDES = ['ts', 'before', 'now'];
 const OPS = ['get_namespaces_first', 'get_namespaces_after_change', 'get_namespaces', 'add_model_file', 'mm_new'];

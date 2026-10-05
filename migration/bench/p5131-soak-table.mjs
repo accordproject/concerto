@@ -21,11 +21,13 @@
 import fs from 'fs';
 import path from 'path';
 import url from 'url';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
 const OUT = path.resolve(argv[0] && !argv[0].startsWith('--') ? argv[0] : path.join(__dirname, 'results', 'P5-131', 'soak'));
 const P5120 = path.resolve(argv.includes('--p5120') ? argv[argv.indexOf('--p5120') + 1] : path.join(__dirname, 'results', 'P5-120', 'soak'));
+requireRawInputs(OUT, P5120);
 const REL = path.relative(path.join(__dirname), OUT).split(path.sep).join('/');
 const SETS = ['conformance', 'synthetic-large'];
 const SIDES = [

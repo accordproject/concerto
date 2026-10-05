@@ -1,0 +1,136 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-108
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-108
+dir	migration/bench/results/P5-108
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-108.tgz
+sha256	59073088837413a9093729b18de1ce16cd5c7b52aeafc1a3bdead32c18f04802
+tar_sha256	bf02e511aab18f24ab7835110d26efff9a15254187a55a6d4f122f3bb95d4e8b
+files	120
+bytes	97928
+archived:
+memory/after-b-all-concerto-core-test-data.json
+memory/after-b-all-conformance.json
+memory/after-b-all-synthetic-large.json
+memory/after-b-concerto-core-test-data.json
+memory/after-b-conformance.json
+memory/after-b-synthetic-large.json
+memory/after-c-concerto-core-test-data.json
+memory/after-c-conformance.json
+memory/after-c-synthetic-large.json
+memory/ts5-a-concerto-core-test-data.json
+memory/ts5-a-conformance.json
+memory/ts5-a-synthetic-large.json
+time/after-b-all-concerto-core-test-data-n1-r1.json
+time/after-b-all-concerto-core-test-data-n1-r2.json
+time/after-b-all-concerto-core-test-data-n1-r3.json
+time/after-b-all-concerto-core-test-data-n16-r1.json
+time/after-b-all-concerto-core-test-data-n16-r2.json
+time/after-b-all-concerto-core-test-data-n16-r3.json
+time/after-b-all-concerto-core-test-data-n64-r1.json
+time/after-b-all-concerto-core-test-data-n64-r2.json
+time/after-b-all-concerto-core-test-data-n64-r3.json
+time/after-b-all-conformance-n1-r1.json
+time/after-b-all-conformance-n1-r2.json
+time/after-b-all-conformance-n1-r3.json
+time/after-b-all-conformance-n16-r1.json
+time/after-b-all-conformance-n16-r2.json
+time/after-b-all-conformance-n16-r3.json
+time/after-b-all-conformance-n64-r1.json
+time/after-b-all-conformance-n64-r2.json
+time/after-b-all-conformance-n64-r3.json
+time/after-b-all-synthetic-large-n1-r1.json
+time/after-b-all-synthetic-large-n1-r2.json
+time/after-b-all-synthetic-large-n1-r3.json
+time/after-b-all-synthetic-large-n16-r1.json
+time/after-b-all-synthetic-large-n16-r2.json
+time/after-b-all-synthetic-large-n16-r3.json
+time/after-b-all-synthetic-large-n64-r1.json
+time/after-b-all-synthetic-large-n64-r2.json
+time/after-b-all-synthetic-large-n64-r3.json
+time/after-b-concerto-core-test-data-n1-r1.json
+time/after-b-concerto-core-test-data-n1-r2.json
+time/after-b-concerto-core-test-data-n1-r3.json
+time/after-b-concerto-core-test-data-n16-r1.json
+time/after-b-concerto-core-test-data-n16-r2.json
+time/after-b-concerto-core-test-data-n16-r3.json
+time/after-b-concerto-core-test-data-n64-r1.json
+time/after-b-concerto-core-test-data-n64-r2.json
+time/after-b-concerto-core-test-data-n64-r3.json
+time/after-b-conformance-n1-r1.json
+time/after-b-conformance-n1-r2.json
+time/after-b-conformance-n1-r3.json
+time/after-b-conformance-n16-r1.json
+time/after-b-conformance-n16-r2.json
+time/after-b-conformance-n16-r3.json
+time/after-b-conformance-n64-r1.json
+time/after-b-conformance-n64-r2.json
+time/after-b-conformance-n64-r3.json
+time/after-b-synthetic-large-n1-r1.json
+time/after-b-synthetic-large-n1-r2.json
+time/after-b-synthetic-large-n1-r3.json
+time/after-b-synthetic-large-n16-r1.json
+time/after-b-synthetic-large-n16-r2.json
+time/after-b-synthetic-large-n16-r3.json
+time/after-b-synthetic-large-n64-r1.json
+time/after-b-synthetic-large-n64-r2.json
+time/after-b-synthetic-large-n64-r3.json
+time/after-c-concerto-core-test-data-n1-r1.json
+time/after-c-concerto-core-test-data-n1-r2.json
+time/after-c-concerto-core-test-data-n1-r3.json
+time/after-c-concerto-core-test-data-n16-r1.json
+time/after-c-concerto-core-test-data-n16-r2.json
+time/after-c-concerto-core-test-data-n16-r3.json
+time/after-c-concerto-core-test-data-n64-r1.json
+time/after-c-concerto-core-test-data-n64-r2.json
+time/after-c-concerto-core-test-data-n64-r3.json
+time/after-c-conformance-n1-r1.json
+time/after-c-conformance-n1-r2.json
+time/after-c-conformance-n1-r3.json
+time/after-c-conformance-n16-r1.json
+time/after-c-conformance-n16-r2.json
+time/after-c-conformance-n16-r3.json
+time/after-c-conformance-n64-r1.json
+time/after-c-conformance-n64-r2.json
+time/after-c-conformance-n64-r3.json
+time/after-c-synthetic-large-n1-r1.json
+time/after-c-synthetic-large-n1-r2.json
+time/after-c-synthetic-large-n1-r3.json
+time/after-c-synthetic-large-n16-r1.json
+time/after-c-synthetic-large-n16-r2.json
+time/after-c-synthetic-large-n16-r3.json
+time/after-c-synthetic-large-n64-r1.json
+time/after-c-synthetic-large-n64-r2.json
+time/after-c-synthetic-large-n64-r3.json
+time/ts5-a-concerto-core-test-data-n1-r1.json
+time/ts5-a-concerto-core-test-data-n1-r2.json
+time/ts5-a-concerto-core-test-data-n1-r3.json
+time/ts5-a-concerto-core-test-data-n16-r1.json
+time/ts5-a-concerto-core-test-data-n16-r2.json
+time/ts5-a-concerto-core-test-data-n16-r3.json
+time/ts5-a-concerto-core-test-data-n64-r1.json
+time/ts5-a-concerto-core-test-data-n64-r2.json
+time/ts5-a-concerto-core-test-data-n64-r3.json
+time/ts5-a-conformance-n1-r1.json
+time/ts5-a-conformance-n1-r2.json
+time/ts5-a-conformance-n1-r3.json
+time/ts5-a-conformance-n16-r1.json
+time/ts5-a-conformance-n16-r2.json
+time/ts5-a-conformance-n16-r3.json
+time/ts5-a-conformance-n64-r1.json
+time/ts5-a-conformance-n64-r2.json
+time/ts5-a-conformance-n64-r3.json
+time/ts5-a-synthetic-large-n1-r1.json
+time/ts5-a-synthetic-large-n1-r2.json
+time/ts5-a-synthetic-large-n1-r3.json
+time/ts5-a-synthetic-large-n16-r1.json
+time/ts5-a-synthetic-large-n16-r2.json
+time/ts5-a-synthetic-large-n16-r3.json
+time/ts5-a-synthetic-large-n64-r1.json
+time/ts5-a-synthetic-large-n64-r2.json
+time/ts5-a-synthetic-large-n64-r3.json

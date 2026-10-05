@@ -1,0 +1,113 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-40
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-40
+dir	migration/bench/results/P5-40
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-40.tgz
+sha256	1870875fd1f9c76c40087c71c05be5fe5fd2a07d3f0894bf2e3a10816b8e09ab
+tar_sha256	a5b41e29bf9748131c6528e21c40da9ccbd8c9c3b81a4d5ae1de6f10de6429dc
+files	97
+bytes	54550
+archived:
+env.txt
+eq.txt
+loads-wasm-stages.txt
+loads.txt
+r1/binding-base-concerto-core-test-data.json
+r1/binding-base-conformance.json
+r1/binding-base-synthetic-large.json
+r1/binding-new-concerto-core-test-data.json
+r1/binding-new-conformance.json
+r1/binding-new-synthetic-large.json
+r1/count-alloc-base-concerto-core-test-data.json
+r1/count-alloc-base-conformance.json
+r1/count-alloc-base-synthetic-large.json
+r1/count-alloc-new-concerto-core-test-data.json
+r1/count-alloc-new-conformance.json
+r1/count-alloc-new-synthetic-large.json
+r1/native-dlmalloc-base-concerto-core-test-data.json
+r1/native-dlmalloc-base-conformance.json
+r1/native-dlmalloc-base-synthetic-large.json
+r1/native-dlmalloc-new-concerto-core-test-data.json
+r1/native-dlmalloc-new-conformance.json
+r1/native-dlmalloc-new-synthetic-large.json
+r1/native-glibc-base-concerto-core-test-data.json
+r1/native-glibc-base-conformance.json
+r1/native-glibc-base-synthetic-large.json
+r1/native-glibc-new-concerto-core-test-data.json
+r1/native-glibc-new-conformance.json
+r1/native-glibc-new-synthetic-large.json
+r1/sweep-engine-base.json
+r1/sweep-engine-new.json
+r1/sweep-percall-base.json
+r1/sweep-percall-new.json
+r1/sweep-ts.json
+r1/wasm-stages-base-concerto-core-test-data.json
+r1/wasm-stages-base-conformance.json
+r1/wasm-stages-base-synthetic-large.json
+r1/wasm-stages-new-concerto-core-test-data.json
+r1/wasm-stages-new-conformance.json
+r1/wasm-stages-new-synthetic-large.json
+r2/binding-base-concerto-core-test-data.json
+r2/binding-base-conformance.json
+r2/binding-base-synthetic-large.json
+r2/binding-new-concerto-core-test-data.json
+r2/binding-new-conformance.json
+r2/binding-new-synthetic-large.json
+r2/native-dlmalloc-base-concerto-core-test-data.json
+r2/native-dlmalloc-base-conformance.json
+r2/native-dlmalloc-base-synthetic-large.json
+r2/native-dlmalloc-new-concerto-core-test-data.json
+r2/native-dlmalloc-new-conformance.json
+r2/native-dlmalloc-new-synthetic-large.json
+r2/native-glibc-base-concerto-core-test-data.json
+r2/native-glibc-base-conformance.json
+r2/native-glibc-base-synthetic-large.json
+r2/native-glibc-new-concerto-core-test-data.json
+r2/native-glibc-new-conformance.json
+r2/native-glibc-new-synthetic-large.json
+r2/sweep-engine-base.json
+r2/sweep-engine-new.json
+r2/sweep-percall-base.json
+r2/sweep-percall-new.json
+r2/sweep-ts.json
+r2/wasm-stages-base-concerto-core-test-data.json
+r2/wasm-stages-base-conformance.json
+r2/wasm-stages-base-synthetic-large.json
+r2/wasm-stages-new-concerto-core-test-data.json
+r2/wasm-stages-new-conformance.json
+r2/wasm-stages-new-synthetic-large.json
+r3/binding-base-concerto-core-test-data.json
+r3/binding-base-conformance.json
+r3/binding-base-synthetic-large.json
+r3/binding-new-concerto-core-test-data.json
+r3/binding-new-conformance.json
+r3/binding-new-synthetic-large.json
+r3/native-dlmalloc-base-concerto-core-test-data.json
+r3/native-dlmalloc-base-conformance.json
+r3/native-dlmalloc-base-synthetic-large.json
+r3/native-dlmalloc-new-concerto-core-test-data.json
+r3/native-dlmalloc-new-conformance.json
+r3/native-dlmalloc-new-synthetic-large.json
+r3/native-glibc-base-concerto-core-test-data.json
+r3/native-glibc-base-conformance.json
+r3/native-glibc-base-synthetic-large.json
+r3/native-glibc-new-concerto-core-test-data.json
+r3/native-glibc-new-conformance.json
+r3/native-glibc-new-synthetic-large.json
+r3/sweep-engine-base.json
+r3/sweep-engine-new.json
+r3/sweep-percall-base.json
+r3/sweep-percall-new.json
+r3/sweep-ts.json
+r3/wasm-stages-base-concerto-core-test-data.json
+r3/wasm-stages-base-conformance.json
+r3/wasm-stages-base-synthetic-large.json
+r3/wasm-stages-new-concerto-core-test-data.json
+r3/wasm-stages-new-conformance.json
+r3/wasm-stages-new-synthetic-large.json

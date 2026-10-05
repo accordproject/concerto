@@ -13,10 +13,12 @@
 import fs from 'fs';
 import path from 'path';
 import url from 'url';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
 const OUT = argv[0] && !argv[0].startsWith('--') ? argv[0] : path.join(__dirname, 'results', 'P5-131');
+requireRawInputs(OUT);
 const asJson = argv.includes('--json');
 const SETS = ['concerto-core-test-data', 'conformance', 'synthetic-large'];
 const SHORT = { 'concerto-core-test-data': 'core-test-data', conformance: 'conformance', 'synthetic-large': 'synthetic-large' };

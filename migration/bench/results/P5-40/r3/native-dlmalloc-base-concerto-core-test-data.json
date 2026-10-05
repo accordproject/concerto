@@ -1,1 +1,0 @@
-{"parse":{"medianUs":1099.175,"minUs":927.032},"rebuild":{"medianUs":3855.074,"minUs":3178.563},"extract":{"medianUs":10450.483999999999,"minUs":7454.446},"encode":{"medianUs":2143.893,"minUs":1639.248},"drop":{"medianUs":1817.142,"minUs":1478.023},"total":{"medianUs":19133.759},"microAllocNsPerRound":349.97638,"microSipHashNsPerKey":13.588563,"microMemcpyNsPer4KiB":43.35633}

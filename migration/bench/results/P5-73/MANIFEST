@@ -1,0 +1,73 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-73
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-73
+dir	migration/bench/results/P5-73
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-73.tgz
+sha256	2e46c18bc915a8e3dba558548edf550d1bd1ab9fbff29816367c6e1026c235ff
+tar_sha256	0e3d93d52ef352d1e145b71c852404e573bbb3ac8a6939ca38df4d17728255dd
+files	57
+bytes	89313
+archived:
+sweep/before/crossings.json
+sweep/before/rust-engine-1-add_model_file.json
+sweep/before/rust-engine-1-mm_new.json
+sweep/before/rust-engine-1-modelfile_new.json
+sweep/before/rust-engine-2-add_model_file.json
+sweep/before/rust-engine-2-mm_new.json
+sweep/before/rust-engine-2-modelfile_new.json
+sweep/before/rust-engine-3-add_model_file.json
+sweep/before/rust-engine-3-mm_new.json
+sweep/before/rust-engine-3-modelfile_new.json
+sweep/before/ts-reference-5.0.0-1-add_model_file.json
+sweep/before/ts-reference-5.0.0-1-mm_new.json
+sweep/before/ts-reference-5.0.0-1-modelfile_new.json
+sweep/before/ts-reference-5.0.0-2-add_model_file.json
+sweep/before/ts-reference-5.0.0-2-mm_new.json
+sweep/before/ts-reference-5.0.0-2-modelfile_new.json
+sweep/before/ts-reference-5.0.0-3-add_model_file.json
+sweep/before/ts-reference-5.0.0-3-mm_new.json
+sweep/before/ts-reference-5.0.0-3-modelfile_new.json
+sweep/now-mmvoff/crossings.json
+sweep/now-mmvoff/rust-engine-1-add_model_file.json
+sweep/now-mmvoff/rust-engine-1-mm_new.json
+sweep/now-mmvoff/rust-engine-1-modelfile_new.json
+sweep/now-mmvoff/rust-engine-2-add_model_file.json
+sweep/now-mmvoff/rust-engine-2-mm_new.json
+sweep/now-mmvoff/rust-engine-2-modelfile_new.json
+sweep/now-mmvoff/rust-engine-3-add_model_file.json
+sweep/now-mmvoff/rust-engine-3-mm_new.json
+sweep/now-mmvoff/rust-engine-3-modelfile_new.json
+sweep/now-mmvoff/ts-reference-5.0.0-1-add_model_file.json
+sweep/now-mmvoff/ts-reference-5.0.0-1-mm_new.json
+sweep/now-mmvoff/ts-reference-5.0.0-1-modelfile_new.json
+sweep/now-mmvoff/ts-reference-5.0.0-2-add_model_file.json
+sweep/now-mmvoff/ts-reference-5.0.0-2-mm_new.json
+sweep/now-mmvoff/ts-reference-5.0.0-2-modelfile_new.json
+sweep/now-mmvoff/ts-reference-5.0.0-3-add_model_file.json
+sweep/now-mmvoff/ts-reference-5.0.0-3-mm_new.json
+sweep/now-mmvoff/ts-reference-5.0.0-3-modelfile_new.json
+sweep/now/crossings.json
+sweep/now/rust-engine-1-add_model_file.json
+sweep/now/rust-engine-1-mm_new.json
+sweep/now/rust-engine-1-modelfile_new.json
+sweep/now/rust-engine-2-add_model_file.json
+sweep/now/rust-engine-2-mm_new.json
+sweep/now/rust-engine-2-modelfile_new.json
+sweep/now/rust-engine-3-add_model_file.json
+sweep/now/rust-engine-3-mm_new.json
+sweep/now/rust-engine-3-modelfile_new.json
+sweep/now/ts-reference-5.0.0-1-add_model_file.json
+sweep/now/ts-reference-5.0.0-1-mm_new.json
+sweep/now/ts-reference-5.0.0-1-modelfile_new.json
+sweep/now/ts-reference-5.0.0-2-add_model_file.json
+sweep/now/ts-reference-5.0.0-2-mm_new.json
+sweep/now/ts-reference-5.0.0-2-modelfile_new.json
+sweep/now/ts-reference-5.0.0-3-add_model_file.json
+sweep/now/ts-reference-5.0.0-3-mm_new.json
+sweep/now/ts-reference-5.0.0-3-modelfile_new.json

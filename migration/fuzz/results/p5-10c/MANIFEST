@@ -1,0 +1,21 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh fuzz-p5-10c
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	fuzz-p5-10c
+dir	migration/fuzz/results/p5-10c
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	fuzz-p5-10c.tgz
+sha256	02f32ebb7a11d3453354ee4b2720ee2c2582711a9a4b487c8302796ea90c8d69
+tar_sha256	724ccb92e37412012bba728bc60345ffee1d1909a92f15dc47335180d147c2c3
+files	5
+bytes	354051
+archived:
+check/lazy-check-stderr.txt
+check/triage-clusters.json
+lazy-only-clusters.json
+prelazy/triage-clusters.json
+triage-clusters.json

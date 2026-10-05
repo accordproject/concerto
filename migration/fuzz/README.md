@@ -139,7 +139,13 @@ test/
                 with the same or a different class/message, genuine harness errors
                 per side) and codec.js's tagging of engine errors raised while
                 inputs are decoded.
-results/
+results/              raw outputs (the *.jsonl files, triage-clusters.json and the
+                      other files .gitignore excludes) are not committed since
+                      P5-135: they are draft-release assets named in each
+                      directory's MANIFEST; restore them with
+                      `sh migration/bench/bin/fetch-results.sh fuzz-root` (or
+                      fuzz-stage2, fuzz-p5-10c, fuzz-p5-10d). See
+                      migration/bench/README.md, "Raw results".
   run-*.json          one run's summary: ran = agree + divergences +
                       expectedDivergences + harnessErrorCases, overall and by op,
                       plus harnessErrorsTs/harnessErrorsRust per side.

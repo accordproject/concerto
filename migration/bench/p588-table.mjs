@@ -11,9 +11,11 @@
 import path from 'path';
 import url from 'url';
 import { execFileSync } from 'child_process';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const [outDir, ...rest] = process.argv.slice(2);
+requireRawInputs(outDir);
 if (!outDir) {
     console.error('usage: p588-table.mjs <out dir> [--json]');
     process.exit(2);

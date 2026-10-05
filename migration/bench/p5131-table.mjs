@@ -23,6 +23,7 @@ import fs from 'fs';
 import path from 'path';
 import url from 'url';
 import { execFileSync } from 'child_process';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -36,6 +37,7 @@ const P596 = opt('--p5121') || path.join(__dirname, 'results', 'P5-121', 'tables
 const TYPEDREAD = opt('--typedread');
 const BUNDLE = opt('--bundle');
 const P596_BUNDLE = opt('--p5121-bundle') || path.join(__dirname, 'results', 'P5-121', 'bundle', 'bundle-sizes.json');
+requireRawInputs(outDir, P596, TYPEDREAD, BUNDLE, P596_BUNDLE);
 
 const report = (side) => JSON.parse(execFileSync(process.execPath, [path.join(__dirname, 'p515-report.mjs'), path.join(outDir, side), '--json'], { encoding: 'utf8', maxBuffer: 1 << 26 }));
 const now = report('now');

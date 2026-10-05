@@ -1,3 +1,0 @@
-main-now     importMs 11.5, initMs 33.3, firstMs 68.5
-main-before  importMs 81.4, initMs 0.0, firstMs 104.4
-worker-now   firstMs 164.6, secondMs 2.4, initMs 162.3

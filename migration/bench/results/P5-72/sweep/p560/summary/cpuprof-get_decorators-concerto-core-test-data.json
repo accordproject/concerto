@@ -1,1 +1,0 @@
-{"file":"migration/bench/results/P5-72/sweep/p560/cpuprof/get_decorators-concerto-core-test-data/CPU.20261001.075747.16351.0.001.cpuprofile","totalMs":3934.575,"stages":{"other":99.6,"gc":0.4},"topFrames":[["other | p515MeasuredLoop bench/p515-sweep.mjs",82],["other | run bench/p515-sweep.mjs",17.6],["gc | (garbage collector) ",0.4]]}

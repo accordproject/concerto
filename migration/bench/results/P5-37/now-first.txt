@@ -1,7 +1,0 @@
-fromJSON (first after a model change)                  9.00  ModelManagerHandle.getTypeName x2.00, ModelManagerHandle.modelFileGetTypeName x2.00, classDeclarationGetIdentifierFieldNameWalk x2.00, ModelManagerHandle.serializerFromJsonCompact x1.00, ModelManagerHandle.modelFileId x1.00, modelFileViewSnapshot x1.00
-fromJSON (first on a new manager)                      9.00  ModelManagerHandle.getTypeName x2.00, modelFileViewSnapshot x2.00, ModelManagerHandle.modelFileGetTypeName x2.00, classDeclarationGetIdentifierFieldNameWalk x2.00, ModelManagerHandle.serializerFromJsonCompact x1.00
-fromJSON (repeat)                                      1.00  ModelManagerHandle.serializerFromJsonCompact x1.00
-toJSON (first after a model change)                    1.00  ModelManagerHandle.serializerToJson x1.00
-toJSON (repeat)                                        1.00  ModelManagerHandle.serializerToJson x1.00
-Resource.validate (first after a model change)         2.96  classDeclarationGetIdentifierFieldNameWalk x1.96, ModelManagerHandle.validateResourceBinary x1.00
-Resource.validate (repeat)                             1.00  ModelManagerHandle.validateResourceBinary x1.00

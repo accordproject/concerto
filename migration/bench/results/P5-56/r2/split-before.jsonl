@@ -1,3 +1,0 @@
-{"set":"synthetic-large","nomemo":true,"samples":30,"total_ms":74.95,"engine_call_ms":23.44,"check_ast_shape_ms":43.97,"rest_ms":3.5}
-{"set":"conformance","nomemo":true,"samples":30,"total_ms":31.39,"engine_call_ms":8.06,"check_ast_shape_ms":16.28,"rest_ms":6.44}
-{"set":"concerto-core-test-data","nomemo":true,"samples":30,"total_ms":45.07,"engine_call_ms":15.39,"check_ast_shape_ms":24.35,"rest_ms":5.01}

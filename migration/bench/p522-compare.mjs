@@ -11,8 +11,10 @@
 // drift between the two sweeps cancels out of the ratios.
 
 import fs from 'fs';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const [beforeFile, nowFile, ...rest] = process.argv.slice(2);
+requireRawInputs(beforeFile, nowFile);
 if (!beforeFile || !nowFile) {
     console.error('usage: p522-compare.mjs <before.json> <now.json> [--json]');
     process.exit(2);

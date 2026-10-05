@@ -1,0 +1,32 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-94
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-94
+dir	migration/bench/results/P5-94
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-94.tgz
+sha256	715762a55bdf957e693467fa7f809efa1e59d7b550aedfde6e1143486583f9d7
+tar_sha256	79506c1e66d6cfed9c70f2fdb69e4411a386746c39edc68add0cdd02a2c85966
+files	16
+bytes	69014
+archived:
+alloc-after.jsonl
+alloc-before.jsonl
+cpuprof/after-add_model_file-concerto-core-test-data.split.json
+cpuprof/after-add_model_file-conformance.split.json
+cpuprof/after-add_model_file-synthetic-large.split.json
+cpuprof/after-extract_cold-concerto-core-test-data.split.json
+cpuprof/after-extract_cold-conformance.split.json
+cpuprof/after-extract_cold-synthetic-large.split.json
+cpuprof/before-add_model_file-concerto-core-test-data.split.json
+cpuprof/before-add_model_file-conformance.split.json
+cpuprof/before-add_model_file-synthetic-large.split.json
+cpuprof/before-extract_cold-concerto-core-test-data.split.json
+cpuprof/before-extract_cold-conformance.split.json
+cpuprof/before-extract_cold-synthetic-large.split.json
+gc-after.jsonl
+gc-before.jsonl

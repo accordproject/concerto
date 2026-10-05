@@ -7,8 +7,10 @@
 //   node migration/bench/p573-table.mjs <out dir> [--json]
 import fs from 'fs';
 import path from 'path';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const dir = path.resolve(process.argv[2]);
+requireRawInputs(dir);
 const json = process.argv.includes('--json');
 const SIDES = ['before', 'now', 'now-mmvoff'];
 const median = (xs) => {
