@@ -1,0 +1,1 @@
+{"file":"/home/user/wt/P5-131/concerto/migration/bench/results/P5-131/sweep/now/cpuprof/get_ast-concerto-core-test-data/CPU.20261005.093659.20962.0.001.cpuprofile","totalMs":15.89,"stages":{"gc":78.4,"other":21.6},"topFrames":[["gc | (garbage collector) ",78.4],["other | (anon) lib/metamodelutil.js",21.6]]}

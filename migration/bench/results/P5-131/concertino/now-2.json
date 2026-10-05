@@ -1,0 +1,164 @@
+{
+  "tool": "p5131-concertino",
+  "side": "now",
+  "coreDist": "/home/user/wt/P5-131/concerto/packages/concerto-core/dist",
+  "concertinoDist": null,
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "loadavgEnd": [
+    1.85,
+    2.11,
+    1.86
+  ],
+  "samples": 30,
+  "warmup": 5,
+  "results": [
+    {
+      "op": "validate",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "medianUs": 59.81627916666667,
+      "cv": 0.3297267375655061
+    },
+    {
+      "op": "validate_instance",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "medianUs": 48.58104166666667,
+      "cv": 0.24431315191102096
+    },
+    {
+      "op": "get_type",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "medianUs": 0.6780064935064936,
+      "cv": 0.2549192115943988
+    },
+    {
+      "op": "derives_from",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "medianUs": 1.0331006493506496,
+      "cv": 0.42814421605041947
+    },
+    {
+      "op": "is_assignable_to",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "medianUs": 1.0799772727272727,
+      "cv": 0.15502253268140725
+    },
+    {
+      "op": "get_properties",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "medianUs": 1.4494448051948052,
+      "cv": 0.636825927549276
+    },
+    {
+      "op": "to_concertino",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "medianUs": 7052.6225,
+      "cv": 0.23183903503223519
+    },
+    {
+      "op": "validate",
+      "set": "conformance",
+      "n": 44,
+      "medianUs": 17.427670454545456,
+      "cv": 0.18014296549611852
+    },
+    {
+      "op": "validate_instance",
+      "set": "conformance",
+      "n": 44,
+      "medianUs": 24.337068181818182,
+      "cv": 0.38901225553358326
+    },
+    {
+      "op": "get_type",
+      "set": "conformance",
+      "n": 52,
+      "medianUs": 1.028576923076923,
+      "cv": 0.927901721099114
+    },
+    {
+      "op": "derives_from",
+      "set": "conformance",
+      "n": 52,
+      "medianUs": 0.7498846153846154,
+      "cv": 0.7476386348399665
+    },
+    {
+      "op": "is_assignable_to",
+      "set": "conformance",
+      "n": 52,
+      "medianUs": 0.9202884615384616,
+      "cv": 0.6517672442331099
+    },
+    {
+      "op": "get_properties",
+      "set": "conformance",
+      "n": 52,
+      "medianUs": 1.600019230769231,
+      "cv": 0.6680433537936328
+    },
+    {
+      "op": "to_concertino",
+      "set": "conformance",
+      "n": 1,
+      "medianUs": 1757.227,
+      "cv": 0.39614388972006304
+    },
+    {
+      "op": "validate",
+      "set": "synthetic-large",
+      "n": 300,
+      "medianUs": 27.816643333333335,
+      "cv": 0.21248370708347233
+    },
+    {
+      "op": "validate_instance",
+      "set": "synthetic-large",
+      "n": 300,
+      "medianUs": 22.591884999999998,
+      "cv": 0.21780240452950742
+    },
+    {
+      "op": "get_type",
+      "set": "synthetic-large",
+      "n": 301,
+      "medianUs": 0.40780398671096346,
+      "cv": 0.8101252546900494
+    },
+    {
+      "op": "derives_from",
+      "set": "synthetic-large",
+      "n": 301,
+      "medianUs": 0.7509053156146178,
+      "cv": 0.23088359540901945
+    },
+    {
+      "op": "is_assignable_to",
+      "set": "synthetic-large",
+      "n": 301,
+      "medianUs": 0.8792541528239203,
+      "cv": 0.18542736444976743
+    },
+    {
+      "op": "get_properties",
+      "set": "synthetic-large",
+      "n": 301,
+      "medianUs": 0.6492159468438539,
+      "cv": 0.8535624533964549
+    },
+    {
+      "op": "to_concertino",
+      "set": "synthetic-large",
+      "n": 1,
+      "medianUs": 6323.210999999999,
+      "cv": 0.1982801891477134
+    }
+  ]
+}

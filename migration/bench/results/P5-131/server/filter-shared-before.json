@@ -1,0 +1,48 @@
+{
+  "dist": "/home/user/wt/P5-131/before/concerto/packages/concerto-core/dist",
+  "results": [
+    {
+      "set": "concerto-core-test-data",
+      "files": 35,
+      "stage": 18,
+      "staged": 0,
+      "ast": 15,
+      "none": 2,
+      "reStaged": [
+        "com.composer@1.0.0",
+        "com.hyperledger.composer.animaltracking@1.0.0",
+        "com.hyperledger.testing@1.0.0",
+        "com.testing.parent@1.0.0",
+        "composer.base@1.0.0",
+        "composer@1.0.0",
+        "ibm.procurement.contingentLabor@1.0.0",
+        "org.accordproject.test@1.0.0",
+        "org.acme.base@1.0.0",
+        "org.acme.biznet@1.0.0",
+        "org.acme.core@1.0.0",
+        "org.acme@1.0.0",
+        "stdlib.base@1.0.0",
+        "stdlib.proforma@1.0.0",
+        "xx.yy.zz@1.0.0"
+      ]
+    },
+    {
+      "set": "conformance",
+      "files": 41,
+      "stage": 41,
+      "staged": 0,
+      "ast": 0,
+      "none": 0,
+      "reStaged": []
+    },
+    {
+      "set": "synthetic-large",
+      "files": 1,
+      "stage": 1,
+      "staged": 0,
+      "ast": 0,
+      "none": 0,
+      "reStaged": []
+    }
+  ]
+}

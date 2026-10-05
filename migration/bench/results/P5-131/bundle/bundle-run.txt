@@ -1,0 +1,18 @@
+esbuild 0.27.7; KB = 1000 B
+| entry | engine | keepNames | raw | gzip | brotli | shipped with the .wasm raw / gz / br | runs | same output as v5 |
+|---|---|---|---:|---:|---:|---|---|---|
+| E1 | v5.0.0 | on | 387.9 | 94.3 | 67.7 | - | ok | - |
+| E1 | rust | on | 618.9 | 158.1 | 123.3 | 4209.2 / 1308.9 / 872.3 | ok | yes |
+| E1 | v5.0.0 | off | 371.7 | 89.5 | 63.9 | - | ok | - |
+| E1 | rust | off | 586.0 | 149.1 | 115.6 | 4176.3 / 1299.9 / 864.6 | ok | yes |
+| E2 | v5.0.0 | on | 388.0 | 94.4 | 67.7 | - | ok | - |
+| E2 | rust | on | 618.9 | 158.2 | 123.4 | 4209.2 / 1309.0 / 872.4 | ok | yes |
+| E2 | v5.0.0 | off | 371.7 | 89.6 | 64.0 | - | ok | - |
+| E2 | rust | off | 586.1 | 149.1 | 115.5 | 4176.3 / 1299.9 / 864.6 | ok | yes |
+| E3 | v5.0.0 | on | 386.2 | 94.2 | 67.5 | - | ok | - |
+| E3 | rust | on | 617.2 | 158.0 | 123.2 | 4207.4 / 1308.8 / 872.3 | ok | yes |
+| E3 | v5.0.0 | off | 370.0 | 89.4 | 63.7 | - | ok | - |
+| E3 | rust | off | 584.3 | 148.9 | 115.5 | 4174.6 / 1299.7 / 864.5 | ok | yes |
+
+JS without the engine package (E1, keepNames): 564.9 / 150.3 / 116.4; without keepNames 536.8 / 141.3 / 109.3
+.wasm 3590.3 / 1150.8 / 749.0; base64 4787.0 / 1674.4 / 1080.5; concerto-engine.mjs 1.0 / 0.5 / 0.4; concerto-engine.cjs raw 154.4
