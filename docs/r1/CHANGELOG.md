@@ -80,6 +80,14 @@ at concerto `574faa716` and concerto-rust `bfa4a55` (2026-10-02). The
   `./validate` (`validate`, `normalise`, `check` and `toJSON` of plain JSON
   instances, with R1's rules and concerto-core's exception classes).
   `ConcertinoConverter.isValid` stays, over the precompiled checks.
+- **Added: `@accordproject/concertino/resolve` and the browser CTO pipeline
+  (additive; P5-128).** `resolveModels` turns concerto-cto ASTs into the
+  resolved AST the converter needs, as `ModelManager.getAst(true)` does, and
+  reports the name resolution errors concerto-core reports, with its
+  exception classes. concerto-cto, `./resolve` and the converter take CTO
+  text to Concertino in a browser without concerto-core or the engine (about
+  39 KiB gzip). [Concerto in the browser](./BROWSER.md) says what runs where
+  in the Concerto playground, the template playground and form UIs.
 - **Added: Concertino format 5.1.0 and its versioning policy (additive;
   P5-130, P5-133).** `metadata.concertinoVersion` follows semantic
   versioning: minor versions only add optional fields, and `./runtime` and
@@ -338,10 +346,10 @@ release:
   AST-only entry points). Until those are decided, BC-32 ships as described
   above.
 - The rest of the Concertino web story, P5-78 (accordproject/concerto-rust#420,
-  decided 2026-10-04): the `./resolve` subpath and the browser CTO pipeline
-  (P5-128, #505) and `ModelManager.toConcertino()` (P5-129, #506, BC-54) are
-  still to come. The `./schema`, `./runtime` and `./validate` subpaths and
-  format 5.1.0 are in R1 (see What's new).
+  decided 2026-10-04): `ModelManager.toConcertino()` (P5-129, #506, BC-54) is
+  still to come. The `./schema`, `./runtime`, `./validate` and `./resolve`
+  subpaths, the browser CTO pipeline and format 5.1.0 are in R1 (see What's
+  new).
 - The P5-80 spike (accordproject/concerto-rust#424): a cached
   per-generation validation plan for instance validation and serialisation.
   Analysis only.

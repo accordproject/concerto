@@ -68,8 +68,11 @@ grep -rnE "length *= *\[ *, *\]" --include=*.cto .
 - **Pending:** an asynchronous `await init()` entry for browsers and smaller
   engine builds are proposed in P5-39 (accordproject/concerto-rust#349). They
   wait on a maintainer decision and are **not in R1** as this guide is written.
-  The browser story also waits on the Concertino spike, P5-78
-  (accordproject/concerto-rust#420).
+  For browser use without concerto-core or the engine (Concertino, and the
+  CTO pipeline through `@accordproject/concertino/resolve`), and for what
+  runs on the main thread or in a worker in the playgrounds, see
+  [Concerto in the browser](./BROWSER.md) (P5-78 decisions A1 and A2,
+  accordproject/concerto-rust#420).
 
 ### Deep imports (BC-34)
 
