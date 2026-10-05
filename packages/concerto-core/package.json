@@ -37,6 +37,7 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@accordproject/concerto-vocabulary": "5.0.0",
     "@istanbuljs/nyc-config-typescript": "1.0.2",
     "@types/jest": "28.1.1",
     "@types/node": "18.11.18",
@@ -72,6 +73,7 @@
     "yargs": "17.3.1"
   },
   "dependencies": {
+    "@accordproject/concertino": "5.0.0",
     "@accordproject/concerto-cto": "5.0.0",
     "@accordproject/concerto-engine": "0.0.0",
     "@accordproject/concerto-metamodel": "^3.17.0",

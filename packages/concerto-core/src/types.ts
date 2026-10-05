@@ -242,3 +242,33 @@ export interface InstanceGeneratorParameters {
     stack?: TypedStack<Typed>;
     seen?: string[];
 }
+
+/**
+ * A vocabulary source for `ModelManager.toConcertino`: concerto-vocabulary's
+ * `VocabularyManager` has this method. concerto-core takes the object, not
+ * the package, because concerto-vocabulary depends on concerto-core.
+ */
+export interface ConcertinoVocabularySource {
+    /** Returns the decorator command set that adds the `@Term` and `@Term_*` decorators of `locale`. */
+    generateDecoratorCommands(modelManager: BaseModelManager, locale: string): unknown;
+}
+
+/**
+ * Options of `ModelManager.toConcertino` (BC-54).
+ */
+export interface ToConcertinoOptions {
+    /**
+     * Export only these namespaces, with every namespace they import,
+     * directly or not. Each must be a user model of the manager. Defaults to
+     * every user model.
+     */
+    namespaces?: string[];
+    /** Decorator command sets applied first, with `DecoratorManager.decorateModels`. */
+    decoratorCommandSets?: unknown;
+    /** A vocabulary manager, applied after the decorator command sets, for `locale`. */
+    vocabularyManager?: ConcertinoVocabularySource;
+    /** The locale of the vocabulary, required with `vocabularyManager`. */
+    locale?: string;
+    /** The options `DecoratorManager.decorateModels` is called with, for the decorator command sets and the vocabulary. */
+    decorateOptions?: object;
+}

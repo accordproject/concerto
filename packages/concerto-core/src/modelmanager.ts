@@ -15,7 +15,10 @@
 import { Parser } from '@accordproject/concerto-cto';
 
 import BaseModelManager from './basemodelmanager';
-import type { ModelFileSource, ModelManagerOptions } from './types';
+import DecoratorManager from './decoratormanager';
+import IllegalModelException from './introspect/illegalmodelexception';
+import { concertinoModule } from './engineloader';
+import type { ModelFileSource, ModelManagerOptions, ToConcertinoOptions } from './types';
 
 import debugLib from 'debug';
 const debug = debugLib('concerto:BaseModelManager');
@@ -77,6 +80,85 @@ class ModelManager extends BaseModelManager {
         debug(NAME, 'addCTOModel', cto, fileName);
 
         return this.addModel(cto, cto, fileName, disableValidation);
+    }
+
+    /**
+     * Converts the models of this ModelManager to a Concertino document
+     * (`@accordproject/concertino`, format version 5.1.0; BC-54).
+     *
+     * The decorator command sets (`options.decoratorCommandSets`) are
+     * applied first, then the vocabulary of `options.locale`
+     * (`options.vocabularyManager`, a concerto-vocabulary
+     * `VocabularyManager`), so that their decorators and `@Term`
+     * vocabulary are in the document; this ModelManager is not changed.
+     * The models are then resolved and converted with concertino's
+     * resolver (`@accordproject/concertino/resolve`) and converter.
+     *
+     * Concertino holds no system model and fetches nothing: external models
+     * must already be loaded (`updateExternalModels`).
+     *
+     * @param {object} [options] - options
+     * @param {string[]} [options.namespaces] - export only these namespaces and the
+     * namespaces they import, directly or not; each must be a user model of this ModelManager
+     * @param {*} [options.decoratorCommandSets] - a DecoratorCommandSet, or an array of them, applied first
+     * @param {object} [options.vocabularyManager] - a VocabularyManager, whose decorator commands for
+     * `options.locale` are applied after the decorator command sets
+     * @param {string} [options.locale] - the vocabulary locale, required with `options.vocabularyManager`
+     * @param {object} [options.decorateOptions] - the options `DecoratorManager.decorateModels` is called with
+     * @return {object} the Concertino document (`IConcertino` in `@accordproject/concertino`)
+     * @throws {Error} if a namespace in `options.namespaces` is not a user model of this ModelManager,
+     * or `options.vocabularyManager` is given without `options.locale`
+     * @throws {IllegalModelException} if the models do not resolve (a model loaded without validation)
+     */
+    toConcertino(options: ToConcertinoOptions = {}): any {
+        let modelManager: BaseModelManager = this;
+        const decorateOptions = () => ({ ...options.decorateOptions });
+        if (options.decoratorCommandSets) {
+            modelManager = DecoratorManager.decorateModels(modelManager, options.decoratorCommandSets, decorateOptions());
+        }
+        if (options.vocabularyManager) {
+            if (typeof options.locale !== 'string') {
+                throw new Error('toConcertino: options.locale is required with options.vocabularyManager');
+            }
+            const commands = options.vocabularyManager.generateDecoratorCommands(modelManager, options.locale);
+            modelManager = DecoratorManager.decorateModels(modelManager, commands, decorateOptions());
+        }
+
+        let models = modelManager.getAst(false, false).models;
+        if (options.namespaces !== undefined) {
+            const byNamespace = new Map(models.map(m => [m.namespace, m]));
+            const keep = new Set<string>();
+            const pending = [...options.namespaces];
+            for (const namespace of pending) {
+                if (!byNamespace.has(namespace)) {
+                    throw new Error(`Model file for namespace ${namespace} not found`);
+                }
+            }
+            while (pending.length > 0) {
+                const namespace = pending.pop() as string;
+                if (keep.has(namespace) || !byNamespace.has(namespace)) {
+                    continue; // already kept, or a system model
+                }
+                keep.add(namespace);
+                for (const imp of byNamespace.get(namespace)!.imports ?? []) {
+                    pending.push(imp.namespace);
+                }
+            }
+            models = models.filter(m => keep.has(m.namespace));
+        }
+
+        const { models: resolved, diagnostics } = concertinoModule('/resolve').resolveModels(models);
+        if (diagnostics.length > 0) {
+            const first = diagnostics[0];
+            // The resolver's other class, Error, is for problems (unversioned or
+            // wildcard imports, aliases to primitives) that a ModelFile already
+            // rejects when it is built, with or without validation.
+            /* istanbul ignore next */
+            throw first.errorClass === 'IllegalModelException'
+                ? new IllegalModelException(first.message)
+                : new Error(first.message);
+        }
+        return concertinoModule('').convertToConcertino(resolved);
     }
 
 }

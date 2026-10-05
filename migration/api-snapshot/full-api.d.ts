@@ -3528,7 +3528,7 @@ export default ModelLoader;
 
 // ==== modelmanager.d.ts ====
 import BaseModelManager from './basemodelmanager';
-import type { ModelManagerOptions } from './types';
+import type { ModelManagerOptions, ToConcertinoOptions } from './types';
 import type ModelFile from './introspect/modelfile';
 /**
  * Manages the Concerto model files in CTO format.
@@ -3562,6 +3562,35 @@ declare class ModelManager extends BaseModelManager {
      * @return {ModelFile} The newly added model file (internal).
      */
     addCTOModel(cto: string, fileName?: string, disableValidation?: boolean): ModelFile;
+    /**
+     * Converts the models of this ModelManager to a Concertino document
+     * (`@accordproject/concertino`, format version 5.1.0; BC-54).
+     *
+     * The decorator command sets (`options.decoratorCommandSets`) are
+     * applied first, then the vocabulary of `options.locale`
+     * (`options.vocabularyManager`, a concerto-vocabulary
+     * `VocabularyManager`), so that their decorators and `@Term`
+     * vocabulary are in the document; this ModelManager is not changed.
+     * The models are then resolved and converted with concertino's
+     * resolver (`@accordproject/concertino/resolve`) and converter.
+     *
+     * Concertino holds no system model and fetches nothing: external models
+     * must already be loaded (`updateExternalModels`).
+     *
+     * @param {object} [options] - options
+     * @param {string[]} [options.namespaces] - export only these namespaces and the
+     * namespaces they import, directly or not; each must be a user model of this ModelManager
+     * @param {*} [options.decoratorCommandSets] - a DecoratorCommandSet, or an array of them, applied first
+     * @param {object} [options.vocabularyManager] - a VocabularyManager, whose decorator commands for
+     * `options.locale` are applied after the decorator command sets
+     * @param {string} [options.locale] - the vocabulary locale, required with `options.vocabularyManager`
+     * @param {object} [options.decorateOptions] - the options `DecoratorManager.decorateModels` is called with
+     * @return {object} the Concertino document (`IConcertino` in `@accordproject/concertino`)
+     * @throws {Error} if a namespace in `options.namespaces` is not a user model of this ModelManager,
+     * or `options.vocabularyManager` is given without `options.locale`
+     * @throws {IllegalModelException} if the models do not resolve (a model loaded without validation)
+     */
+    toConcertino(options?: ToConcertinoOptions): any;
 }
 export { ModelManager };
 export default ModelManager;
@@ -4812,4 +4841,32 @@ export interface InstanceGeneratorParameters {
     includeOptionalFields: boolean;
     stack?: TypedStack<Typed>;
     seen?: string[];
+}
+/**
+ * A vocabulary source for `ModelManager.toConcertino`: concerto-vocabulary's
+ * `VocabularyManager` has this method. concerto-core takes the object, not
+ * the package, because concerto-vocabulary depends on concerto-core.
+ */
+export interface ConcertinoVocabularySource {
+    /** Returns the decorator command set that adds the `@Term` and `@Term_*` decorators of `locale`. */
+    generateDecoratorCommands(modelManager: BaseModelManager, locale: string): unknown;
+}
+/**
+ * Options of `ModelManager.toConcertino` (BC-54).
+ */
+export interface ToConcertinoOptions {
+    /**
+     * Export only these namespaces, with every namespace they import,
+     * directly or not. Each must be a user model of the manager. Defaults to
+     * every user model.
+     */
+    namespaces?: string[];
+    /** Decorator command sets applied first, with `DecoratorManager.decorateModels`. */
+    decoratorCommandSets?: unknown;
+    /** A vocabulary manager, applied after the decorator command sets, for `locale`. */
+    vocabularyManager?: ConcertinoVocabularySource;
+    /** The locale of the vocabulary, required with `vocabularyManager`. */
+    locale?: string;
+    /** The options `DecoratorManager.decorateModels` is called with, for the decorator command sets and the vocabulary. */
+    decorateOptions?: object;
 }

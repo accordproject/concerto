@@ -476,6 +476,47 @@ cannot see into. No production use was found for any of them.
 - **What to do:** add model files to their `ModelManager` before asking these
   questions, and change the model instead of patching it.
 
+### New: `ModelManager.toConcertino` (BC-54)
+
+This is an addition, not a breaking change. It replaces the usual way of
+producing Concertino from a model manager:
+
+Before:
+
+```js
+const { convertToConcertino } = require('@accordproject/concertino');
+
+const decorated = DecoratorManager.decorateModels(modelManager, dcs);
+const vocabularyCommands = vocabularyManager.generateDecoratorCommands(decorated, 'en');
+const concertino = convertToConcertino(
+    DecoratorManager.decorateModels(decorated, vocabularyCommands).getAst(true));
+```
+
+After:
+
+```js
+const concertino = modelManager.toConcertino({
+    decoratorCommandSets: dcs,      // a DecoratorCommandSet, or an array of them
+    vocabularyManager,              // a concerto-vocabulary VocabularyManager
+    locale: 'en',                   // required with vocabularyManager
+    namespaces: ['org.acme@1.0.0'], // optional: these and the namespaces they import
+});
+```
+
+- The decorator command sets are applied first, then the vocabulary; the
+  manager itself is not changed. `decorateOptions` is passed to
+  `DecoratorManager.decorateModels` for both.
+- The models are resolved by `@accordproject/concertino/resolve`, as in the
+  browser, not by `getAst(true)`, so a decorator with a primitive type
+  reference (`@Foo(String)`) no longer stops the conversion.
+- Concertino fetches nothing and holds no system model: load external models
+  first (`updateExternalModels`). A namespace in `namespaces` that is not a
+  user model of the manager, including `concerto@1.0.0` and
+  `concerto.decorator@1.0.0`, throws `Error`.
+- `@accordproject/concertino` is now a dependency of concerto-core. It is
+  loaded at the first call, from Node; in a browser, use the CTO pipeline in
+  [Concerto in the browser](./BROWSER.md) instead.
+
 ---
 
 ## Servers and many managers
@@ -638,5 +679,5 @@ These proposals do not ship in R1. They are listed in the
 [changelog](./CHANGELOG.md#not-in-r1): BC-04, BC-09, BC-21, BC-24 (the
 factory-timing part), BC-27, BC-33, BC-35, BC-44, BC-49, the P5-39
 decisions on browser async `init()` and engine size with their follow-ups
-(P5-44 to P5-47), the Concertino spike (P5-78, #420), and the P5-80 and
-P5-81 spikes (#424, #425).
+(P5-44 to P5-47), the concerto-cli command for Concertino (P5-78, #420,
+decision A5), and the P5-80 and P5-81 spikes (#424, #425).

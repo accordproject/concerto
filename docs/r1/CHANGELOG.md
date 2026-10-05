@@ -88,6 +88,20 @@ at concerto `574faa716` and concerto-rust `bfa4a55` (2026-10-02). The
   text to Concertino in a browser without concerto-core or the engine (about
   39 KiB gzip). [Concerto in the browser](./BROWSER.md) says what runs where
   in the Concerto playground, the template playground and form UIs.
+- **Added: `ModelManager.toConcertino(options?)` (additive; BC-54,
+  P5-129).** The supported way to produce Concertino from a model manager,
+  for example at build time for a form UI. It applies the decorator command
+  sets (`decoratorCommandSets`) and then the vocabulary of `locale`
+  (`vocabularyManager`, a concerto-vocabulary `VocabularyManager`) to a copy
+  of the models, resolves them with `@accordproject/concertino/resolve` and
+  returns the Concertino document (format 5.1.0). `namespaces` exports only
+  those namespaces and the ones they import, directly or not. Unlike
+  `convertToConcertino(modelManager.getAst(true))`, it accepts a decorator
+  with a primitive type reference (`@Foo(String)`). An unknown or system
+  namespace, or a `vocabularyManager` without a `locale`, throws `Error`.
+  concerto-core now depends on `@accordproject/concertino` (which still does
+  not depend on concerto-core at run time). See the
+  [migration guide](./MIGRATION-GUIDE.md#new-modelmanagertoconcertino-bc-54).
 - **Added: Concertino format 5.1.0 and its versioning policy (additive;
   P5-130, P5-133).** `metadata.concertinoVersion` follows semantic
   versioning: minor versions only add optional fields, and `./runtime` and
@@ -345,11 +359,12 @@ release:
   unreferenced engine exports) and P5-47 (#368, the CTO parser out of
   AST-only entry points). Until those are decided, BC-32 ships as described
   above.
-- The rest of the Concertino web story, P5-78 (accordproject/concerto-rust#420,
-  decided 2026-10-04): `ModelManager.toConcertino()` (P5-129, #506, BC-54) is
-  still to come. The `./schema`, `./runtime`, `./validate` and `./resolve`
-  subpaths, the browser CTO pipeline and format 5.1.0 are in R1 (see What's
-  new).
+- The concerto-cli command that produces Concertino from CTO files (P5-78,
+  accordproject/concerto-rust#420, decision A5): concerto-cli is released
+  from its own repository, and where the command goes is still to be
+  decided. `ModelManager.toConcertino()` (BC-54), the `./schema`,
+  `./runtime`, `./validate` and `./resolve` subpaths, the browser CTO
+  pipeline and format 5.1.0 are in R1 (see What's new).
 - The P5-80 spike (accordproject/concerto-rust#424): a cached
   per-generation validation plan for instance validation and serialisation.
   Analysis only.
