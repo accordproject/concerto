@@ -1,0 +1,1973 @@
+{
+  "tool": "p515-sweep",
+  "mode": "count",
+  "coreDist": "/home/user/wt/P5-131/concerto/packages/concerto-core/dist",
+  "coreVersion": "5.0.0",
+  "commit": "873af74a8",
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "loadavgEnd": [
+    1.68,
+    1.65,
+    1.52
+  ],
+  "samples": 10,
+  "warmup": 2,
+  "results": [
+    {
+      "op": "mm_new",
+      "family": "load",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 211.1383,
+      "crossings": 1,
+      "inEngineUs": 30.550900000000002,
+      "bindings": [
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 30.550900000000002
+        }
+      ]
+    },
+    {
+      "op": "modelfile_new",
+      "family": "load",
+      "set": "concerto-core-test-data",
+      "n": 35,
+      "wallUs": 112.06177428571429,
+      "crossings": 1,
+      "inEngineUs": 64.79524285714285,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 64.79524285714285
+        }
+      ]
+    },
+    {
+      "op": "modelfile_new",
+      "family": "load",
+      "set": "conformance",
+      "n": 41,
+      "wallUs": 49.305902439024386,
+      "crossings": 1,
+      "inEngineUs": 28.35709756097561,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 28.35709756097561
+        }
+      ]
+    },
+    {
+      "op": "modelfile_new",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 6848.2092,
+      "crossings": 1,
+      "inEngineUs": 2091.2857,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 2091.2857
+        }
+      ]
+    },
+    {
+      "op": "add_model_file",
+      "family": "load",
+      "set": "concerto-core-test-data",
+      "n": 35,
+      "wallUs": 135.8452257142857,
+      "crossings": 2.0285714285714285,
+      "inEngineUs": 90.59018,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 49.31866285714286
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 40.706199999999995
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 0.02857142857142857,
+          "usPerItem": 0.5653171428571429
+        }
+      ]
+    },
+    {
+      "op": "add_model_file",
+      "family": "load",
+      "set": "conformance",
+      "n": 41,
+      "wallUs": 63.23985853658537,
+      "crossings": 2.024390243902439,
+      "inEngineUs": 37.45439512195122,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 23.931778048780487
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 13.257134146341462
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 0.024390243902439025,
+          "usPerItem": 0.2654829268292683
+        }
+      ]
+    },
+    {
+      "op": "add_model_file",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 4318.6929,
+      "crossings": 3,
+      "inEngineUs": 3189.3887999999997,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 1609.7391
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 1562.7747
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 16.875
+        }
+      ]
+    },
+    {
+      "op": "add_cto_model",
+      "family": "load",
+      "set": "concerto-core-test-data",
+      "n": 35,
+      "wallUs": 831.9689171428572,
+      "crossings": 2.0285714285714285,
+      "inEngineUs": 141.53974571428571,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 97.33694571428572
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 43.58784857142857
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 0.02857142857142857,
+          "usPerItem": 0.6149514285714286
+        }
+      ]
+    },
+    {
+      "op": "add_cto_model",
+      "family": "load",
+      "set": "conformance",
+      "n": 41,
+      "wallUs": 271.15098292682933,
+      "crossings": 2.024390243902439,
+      "inEngineUs": 51.91348292682927,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 35.89284146341463
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 15.348153658536587
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 0.024390243902439025,
+          "usPerItem": 0.6724878048780488
+        }
+      ]
+    },
+    {
+      "op": "add_cto_model",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 32413.131100000002,
+      "crossings": 3,
+      "inEngineUs": 4214.219000000001,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 2279.4632
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 1903.7116
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 31.0442
+        }
+      ]
+    },
+    {
+      "op": "from_json",
+      "family": "serializer",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 83.51163416666667,
+      "crossings": 1,
+      "inEngineUs": 49.34860750000001,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompactBytes",
+          "perItem": 1,
+          "usPerItem": 49.34860750000001
+        }
+      ]
+    },
+    {
+      "op": "from_json",
+      "family": "serializer",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 38.04598636363636,
+      "crossings": 1,
+      "inEngineUs": 14.258879545454546,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompactBytes",
+          "perItem": 1,
+          "usPerItem": 14.258879545454546
+        }
+      ]
+    },
+    {
+      "op": "from_json",
+      "family": "serializer",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 26.642767666666668,
+      "crossings": 1,
+      "inEngineUs": 16.010426333333335,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompactBytes",
+          "perItem": 1,
+          "usPerItem": 16.010426333333335
+        }
+      ]
+    },
+    {
+      "op": "to_json",
+      "family": "serializer",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 43.634278333333334,
+      "crossings": 1,
+      "inEngineUs": 28.17464833333333,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerToJsonBytes",
+          "perItem": 1,
+          "usPerItem": 28.17464833333333
+        }
+      ]
+    },
+    {
+      "op": "to_json",
+      "family": "serializer",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 12.069590909090909,
+      "crossings": 1,
+      "inEngineUs": 7.729397727272727,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerToJsonBytes",
+          "perItem": 1,
+          "usPerItem": 7.729397727272727
+        }
+      ]
+    },
+    {
+      "op": "to_json",
+      "family": "serializer",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 21.895795333333332,
+      "crossings": 1,
+      "inEngineUs": 14.124396666666668,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerToJsonBytes",
+          "perItem": 1,
+          "usPerItem": 14.124396666666668
+        }
+      ]
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 10.335844999999999,
+      "crossings": 0.06666666666666667,
+      "inEngineUs": 0.23134166666666667,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyById",
+          "perItem": 0.06666666666666667,
+          "usPerItem": 0.23134166666666667
+        }
+      ]
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 5.072420454545455,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "new_resource",
+      "family": "serializer",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 6.424396,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "validate",
+      "family": "instance",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 34.031955,
+      "crossings": 1,
+      "inEngineUs": 17.908836666666666,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateResourceBinary",
+          "perItem": 1,
+          "usPerItem": 17.908836666666666
+        }
+      ]
+    },
+    {
+      "op": "validate",
+      "family": "instance",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 17.601245454545456,
+      "crossings": 1,
+      "inEngineUs": 4.1439,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateResourceBinary",
+          "perItem": 1,
+          "usPerItem": 4.1439
+        }
+      ]
+    },
+    {
+      "op": "validate",
+      "family": "instance",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 11.047668333333332,
+      "crossings": 1,
+      "inEngineUs": 6.74921,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateResourceBinary",
+          "perItem": 1,
+          "usPerItem": 6.74921
+        }
+      ]
+    },
+    {
+      "op": "set_property_value",
+      "family": "instance",
+      "set": "concerto-core-test-data",
+      "n": 582,
+      "wallUs": 5.1733786941580755,
+      "crossings": 0.19415807560137457,
+      "inEngineUs": 1.7454477663230241,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyById",
+          "perItem": 0.19415807560137457,
+          "usPerItem": 1.7454477663230241
+        }
+      ]
+    },
+    {
+      "op": "set_property_value",
+      "family": "instance",
+      "set": "conformance",
+      "n": 60,
+      "wallUs": 1.8725699999999998,
+      "crossings": 0.21666666666666667,
+      "inEngineUs": 0.43656,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyById",
+          "perItem": 0.21666666666666667,
+          "usPerItem": 0.43656
+        }
+      ]
+    },
+    {
+      "op": "set_property_value",
+      "family": "instance",
+      "set": "synthetic-large",
+      "n": 1499,
+      "wallUs": 1.6425428952635088,
+      "crossings": 0.19946631087391595,
+      "inEngineUs": 0.497309472981988,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyById",
+          "perItem": 0.19946631087391595,
+          "usPerItem": 0.497309472981988
+        }
+      ]
+    },
+    {
+      "op": "add_array_value",
+      "family": "instance",
+      "set": "concerto-core-test-data",
+      "n": 55,
+      "wallUs": 36.48587272727273,
+      "crossings": 0.6181818181818182,
+      "inEngineUs": 1.5220018181818182,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyById",
+          "perItem": 0.5818181818181818,
+          "usPerItem": 1.3598636363636363
+        },
+        {
+          "name": "ModelManagerHandle.modelUtilIsAssignableTo",
+          "perItem": 0.03636363636363636,
+          "usPerItem": 0.16213818181818185
+        }
+      ]
+    },
+    {
+      "op": "add_array_value",
+      "family": "instance",
+      "set": "conformance",
+      "n": 2,
+      "wallUs": 25.0418,
+      "crossings": 1,
+      "inEngineUs": 1.6856,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyById",
+          "perItem": 1,
+          "usPerItem": 1.6856
+        }
+      ]
+    },
+    {
+      "op": "add_array_value",
+      "family": "instance",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 4.798869333333333,
+      "crossings": 1,
+      "inEngineUs": 1.6213403333333334,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validatePropertyById",
+          "perItem": 1,
+          "usPerItem": 1.6213403333333334
+        }
+      ]
+    },
+    {
+      "op": "validate_instance",
+      "family": "instance",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 76.68013416666668,
+      "crossings": 1,
+      "inEngineUs": 51.093625833333334,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateInstanceBytes",
+          "perItem": 1,
+          "usPerItem": 51.093625833333334
+        }
+      ]
+    },
+    {
+      "op": "validate_instance",
+      "family": "instance",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 26.699295454545457,
+      "crossings": 1,
+      "inEngineUs": 10.635022727272728,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateInstanceBytes",
+          "perItem": 1,
+          "usPerItem": 10.635022727272728
+        }
+      ]
+    },
+    {
+      "op": "validate_instance",
+      "family": "instance",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 24.103294,
+      "crossings": 1,
+      "inEngineUs": 16.089867666666667,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateInstanceBytes",
+          "perItem": 1,
+          "usPerItem": 16.089867666666667
+        }
+      ]
+    },
+    {
+      "op": "validate_instance_or_throw",
+      "family": "instance",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "wallUs": 78.4252275,
+      "crossings": 1,
+      "inEngineUs": 45.8894225,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompactBytes",
+          "perItem": 1,
+          "usPerItem": 45.8894225
+        }
+      ]
+    },
+    {
+      "op": "validate_instance_or_throw",
+      "family": "instance",
+      "set": "conformance",
+      "n": 44,
+      "wallUs": 39.60961136363636,
+      "crossings": 1,
+      "inEngineUs": 13.608049999999999,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompactBytes",
+          "perItem": 1,
+          "usPerItem": 13.608049999999999
+        }
+      ]
+    },
+    {
+      "op": "validate_instance_or_throw",
+      "family": "instance",
+      "set": "synthetic-large",
+      "n": 300,
+      "wallUs": 32.81399066666666,
+      "crossings": 1,
+      "inEngineUs": 17.986266333333333,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompactBytes",
+          "perItem": 1,
+          "usPerItem": 17.986266333333333
+        }
+      ]
+    },
+    {
+      "op": "dcs_decorate",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 34293.731,
+      "crossings": 4,
+      "inEngineUs": 33228.2751,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsDecorateModels",
+          "perItem": 1,
+          "usPerItem": 32314.3475
+        },
+        {
+          "name": "checkAstShape",
+          "perItem": 1,
+          "usPerItem": 741.7214
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 1,
+          "usPerItem": 153.326
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 18.880200000000002
+        }
+      ]
+    },
+    {
+      "op": "dcs_decorate",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 14291.0683,
+      "crossings": 4,
+      "inEngineUs": 13267.795900000001,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsDecorateModels",
+          "perItem": 1,
+          "usPerItem": 12881.0244
+        },
+        {
+          "name": "checkAstShape",
+          "perItem": 1,
+          "usPerItem": 288.4493
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 1,
+          "usPerItem": 79.5246
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 18.7976
+        }
+      ]
+    },
+    {
+      "op": "dcs_decorate",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 54883.1555,
+      "crossings": 4,
+      "inEngineUs": 53333.85040000001,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsDecorateModels",
+          "perItem": 1,
+          "usPerItem": 51394.288700000005
+        },
+        {
+          "name": "checkAstShape",
+          "perItem": 1,
+          "usPerItem": 1755.3418000000001
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 161.5759
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 22.644
+        }
+      ]
+    },
+    {
+      "op": "dcs_validate",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 22039.114,
+      "crossings": 41,
+      "inEngineUs": 17349.595100000002,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsValidate",
+          "perItem": 1,
+          "usPerItem": 10679.516300000001
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 2,
+          "usPerItem": 3023.4667999999997
+        },
+        {
+          "name": "ModelManagerHandle.addModelWithDefinitions",
+          "perItem": 34,
+          "usPerItem": 2109.0007
+        },
+        {
+          "name": "ModelManagerHandle.validateModelFiles",
+          "perItem": 1,
+          "usPerItem": 1037.4158
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 2,
+          "usPerItem": 447.164
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 53.0315
+        }
+      ]
+    },
+    {
+      "op": "dcs_validate",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 14874.162699999999,
+      "crossings": 48,
+      "inEngineUs": 13148.932299999997,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsValidate",
+          "perItem": 1,
+          "usPerItem": 8341.016099999999
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 2,
+          "usPerItem": 3074.3195
+        },
+        {
+          "name": "ModelManagerHandle.addModelWithDefinitions",
+          "perItem": 41,
+          "usPerItem": 986.9384
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 2,
+          "usPerItem": 429.85040000000004
+        },
+        {
+          "name": "ModelManagerHandle.validateModelFiles",
+          "perItem": 1,
+          "usPerItem": 273.364
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 43.4439
+        }
+      ]
+    },
+    {
+      "op": "dcs_validate",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 34866.1096,
+      "crossings": 8,
+      "inEngineUs": 33171.4295,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsValidate",
+          "perItem": 1,
+          "usPerItem": 25561.5175
+        },
+        {
+          "name": "ModelManagerHandle.validateAndCommitStagedModelFile",
+          "perItem": 2,
+          "usPerItem": 3102.3449
+        },
+        {
+          "name": "ModelManagerHandle.addModelWithDefinitions",
+          "perItem": 1,
+          "usPerItem": 2270.9986
+        },
+        {
+          "name": "ModelManagerHandle.validateModelFiles",
+          "perItem": 1,
+          "usPerItem": 1739.1236999999999
+        },
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 2,
+          "usPerItem": 442.1383
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 55.3065
+        }
+      ]
+    },
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 4532.232099999999,
+      "crossings": 3,
+      "inEngineUs": 3768.2781999999997,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 3626.0564
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 1,
+          "usPerItem": 120.5912
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 21.630599999999998
+        }
+      ]
+    },
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 1626.8918999999999,
+      "crossings": 3,
+      "inEngineUs": 1074.2243999999998,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 1006.9521
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 1,
+          "usPerItem": 52.9225
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 14.3498
+        }
+      ]
+    },
+    {
+      "op": "extract_decorators",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 6513.8953,
+      "crossings": 3,
+      "inEngineUs": 5858.8297,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 5688.4655
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 143.56289999999998
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 26.801299999999998
+        }
+      ]
+    },
+    {
+      "op": "extract_vocabularies",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 2925.3057999999996,
+      "crossings": 3,
+      "inEngineUs": 2303.3017999999997,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 2170.3698
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 1,
+          "usPerItem": 116.8032
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 16.1288
+        }
+      ]
+    },
+    {
+      "op": "extract_vocabularies",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 1350.4055,
+      "crossings": 3,
+      "inEngineUs": 877.4791,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 811.9814
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 1,
+          "usPerItem": 52.902
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 12.5957
+        }
+      ]
+    },
+    {
+      "op": "extract_vocabularies",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 5468.3817,
+      "crossings": 3,
+      "inEngineUs": 4989.308400000001,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 4816.6472
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 153.5765
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 19.0847
+        }
+      ]
+    },
+    {
+      "op": "extract_cold",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 14478.921900000001,
+      "crossings": 3,
+      "inEngineUs": 13420.390399999998,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 13191.061099999999
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 1,
+          "usPerItem": 203.5075
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 25.8218
+        }
+      ]
+    },
+    {
+      "op": "extract_cold",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 7185.3517999999995,
+      "crossings": 3,
+      "inEngineUs": 6242.8289,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 6119.5013
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 1,
+          "usPerItem": 101.3099
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 22.0177
+        }
+      ]
+    },
+    {
+      "op": "extract_cold",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 26182.6663,
+      "crossings": 3,
+      "inEngineUs": 25245.420000000002,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 24999.4137
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 216.4949
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 29.511400000000002
+        }
+      ]
+    },
+    {
+      "op": "extract_keep",
+      "family": "decorator",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 6979.7974,
+      "crossings": 3,
+      "inEngineUs": 6279.9809000000005,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 6076.4489
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 1,
+          "usPerItem": 176.1081
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 27.4239
+        }
+      ]
+    },
+    {
+      "op": "extract_keep",
+      "family": "decorator",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 2391.7558,
+      "crossings": 3,
+      "inEngineUs": 1871.0163,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 1798.5758
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 1,
+          "usPerItem": 57.753699999999995
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 14.6868
+        }
+      ]
+    },
+    {
+      "op": "extract_keep",
+      "family": "decorator",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 10555.9597,
+      "crossings": 3,
+      "inEngineUs": 10195.4867,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.dcsExtract",
+          "perItem": 1,
+          "usPerItem": 9981.653
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 179.9296
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 1,
+          "usPerItem": 33.9041
+        }
+      ]
+    },
+    {
+      "op": "get_type",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 0.8849136363636364,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_type",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 0.7767480769230769,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_type",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 0.9080601328903654,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 0.16159285714285712,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 0.1450423076923077,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 0.2374279069767442,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_decorators",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 163,
+      "wallUs": 0.18130490797546014,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_decorators",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 58,
+      "wallUs": 0.1749,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_decorators",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 303,
+      "wallUs": 0.22186963696369635,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 1.1549,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 1.1703,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 0.2755,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_type_first",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 1.887225974025974,
+      "crossings": 1,
+      "inEngineUs": 0.9038571428571429,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getTypeName",
+          "perItem": 1,
+          "usPerItem": 0.9038571428571429
+        }
+      ]
+    },
+    {
+      "op": "get_type_first",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 1.8379499999999998,
+      "crossings": 1,
+      "inEngineUs": 0.8651884615384616,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getTypeName",
+          "perItem": 1,
+          "usPerItem": 0.8651884615384616
+        }
+      ]
+    },
+    {
+      "op": "get_type_first",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 1.9071398671096345,
+      "crossings": 1,
+      "inEngineUs": 1.006736877076412,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getTypeName",
+          "perItem": 1,
+          "usPerItem": 1.006736877076412
+        }
+      ]
+    },
+    {
+      "op": "resolve_type_first",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 1.5437123376623376,
+      "crossings": 1,
+      "inEngineUs": 1.1735707792207792,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.resolveType",
+          "perItem": 1,
+          "usPerItem": 1.1735707792207792
+        }
+      ]
+    },
+    {
+      "op": "resolve_type_first",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 1.6017076923076925,
+      "crossings": 1,
+      "inEngineUs": 1.3082826923076922,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.resolveType",
+          "perItem": 1,
+          "usPerItem": 1.3082826923076922
+        }
+      ]
+    },
+    {
+      "op": "resolve_type_first",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 2.4015259136212626,
+      "crossings": 1,
+      "inEngineUs": 1.264500996677741,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.resolveType",
+          "perItem": 1,
+          "usPerItem": 1.264500996677741
+        }
+      ]
+    },
+    {
+      "op": "get_namespaces_first",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 1,
+      "wallUs": 0.6991,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces_first",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 1,
+      "wallUs": 0.7232000000000001,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_namespaces_first",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 0.701,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "derives_from",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 4.12931948051948,
+      "crossings": 1,
+      "inEngineUs": 1.7144402597402597,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.derivesFrom",
+          "perItem": 1,
+          "usPerItem": 1.7144402597402597
+        }
+      ]
+    },
+    {
+      "op": "derives_from",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 2.1321596153846154,
+      "crossings": 1,
+      "inEngineUs": 1.4836538461538462,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.derivesFrom",
+          "perItem": 1,
+          "usPerItem": 1.4836538461538462
+        }
+      ]
+    },
+    {
+      "op": "derives_from",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 2.7497468438538206,
+      "crossings": 1,
+      "inEngineUs": 1.3683362126245848,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.derivesFrom",
+          "perItem": 1,
+          "usPerItem": 1.3683362126245848
+        }
+      ]
+    },
+    {
+      "op": "is_assignable_to",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "wallUs": 1.4698227272727273,
+      "crossings": 1,
+      "inEngineUs": 1.1416071428571428,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.isAssignableTo",
+          "perItem": 1,
+          "usPerItem": 1.1416071428571428
+        }
+      ]
+    },
+    {
+      "op": "is_assignable_to",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 52,
+      "wallUs": 1.7758211538461537,
+      "crossings": 1,
+      "inEngineUs": 1.3176846153846153,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.isAssignableTo",
+          "perItem": 1,
+          "usPerItem": 1.3176846153846153
+        }
+      ]
+    },
+    {
+      "op": "is_assignable_to",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 301,
+      "wallUs": 2.380448504983389,
+      "crossings": 1,
+      "inEngineUs": 1.219194019933555,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.isAssignableTo",
+          "perItem": 1,
+          "usPerItem": 1.219194019933555
+        }
+      ]
+    },
+    {
+      "op": "get_assignable_class_declarations",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 160,
+      "wallUs": 7.8726925,
+      "crossings": 1,
+      "inEngineUs": 5.581021875,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.classDeclarationGetAssignableClassDeclarations",
+          "perItem": 1,
+          "usPerItem": 5.581021875
+        }
+      ]
+    },
+    {
+      "op": "get_assignable_class_declarations",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 53,
+      "wallUs": 12.554698113207547,
+      "crossings": 1,
+      "inEngineUs": 9.059605660377358,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.classDeclarationGetAssignableClassDeclarations",
+          "perItem": 1,
+          "usPerItem": 9.059605660377358
+        }
+      ]
+    },
+    {
+      "op": "get_assignable_class_declarations",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 302,
+      "wallUs": 3.219127152317881,
+      "crossings": 1,
+      "inEngineUs": 1.463083774834437,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.classDeclarationGetAssignableClassDeclarations",
+          "perItem": 1,
+          "usPerItem": 1.463083774834437
+        }
+      ]
+    },
+    {
+      "op": "get_direct_subclasses",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "n": 160,
+      "wallUs": 2.5532081250000003,
+      "crossings": 1,
+      "inEngineUs": 1.14776,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.classDeclarationGetDirectSubclasses",
+          "perItem": 1,
+          "usPerItem": 1.14776
+        }
+      ]
+    },
+    {
+      "op": "get_direct_subclasses",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 53,
+      "wallUs": 2.1791150943396227,
+      "crossings": 1,
+      "inEngineUs": 1.046,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.classDeclarationGetDirectSubclasses",
+          "perItem": 1,
+          "usPerItem": 1.046
+        }
+      ]
+    },
+    {
+      "op": "get_direct_subclasses",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 302,
+      "wallUs": 1.873626490066225,
+      "crossings": 1,
+      "inEngineUs": 0.8425811258278146,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.classDeclarationGetDirectSubclasses",
+          "perItem": 1,
+          "usPerItem": 0.8425811258278146
+        }
+      ]
+    },
+    {
+      "op": "from_ast_fresh",
+      "family": "load",
+      "set": "concerto-core-test-data",
+      "n": 35,
+      "wallUs": 293.49912857142857,
+      "crossings": 1.114285714285714,
+      "inEngineUs": 236.56616857142856,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 175.1189457142857
+        },
+        {
+          "name": "ModelManagerHandle.validateModelFiles",
+          "perItem": 0.02857142857142857,
+          "usPerItem": 51.66970285714286
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 0.02857142857142857,
+          "usPerItem": 8.735951428571429
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 0.05714285714285714,
+          "usPerItem": 1.0415685714285714
+        }
+      ]
+    },
+    {
+      "op": "from_ast_fresh",
+      "family": "load",
+      "set": "conformance",
+      "n": 41,
+      "wallUs": 117.16676585365855,
+      "crossings": 1.0975609756097562,
+      "inEngineUs": 79.68496829268294,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 60.037719512195125
+        },
+        {
+          "name": "ModelManagerHandle.validateModelFiles",
+          "perItem": 0.024390243902439025,
+          "usPerItem": 16.05018048780488
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFiles",
+          "perItem": 0.024390243902439025,
+          "usPerItem": 2.720682926829268
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 0.04878048780487805,
+          "usPerItem": 0.8763853658536587
+        }
+      ]
+    },
+    {
+      "op": "from_ast_fresh",
+      "family": "load",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 11424.2712,
+      "crossings": 5,
+      "inEngineUs": 9419.8461,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.stageModelFileBytes",
+          "perItem": 1,
+          "usPerItem": 7001.4004
+        },
+        {
+          "name": "ModelManagerHandle.validateModelFiles",
+          "perItem": 1,
+          "usPerItem": 2247.775
+        },
+        {
+          "name": "ModelManagerHandle.commitStagedModelFile",
+          "perItem": 1,
+          "usPerItem": 105.9086
+        },
+        {
+          "name": "new ModelManagerHandle",
+          "perItem": 2,
+          "usPerItem": 64.7621
+        }
+      ]
+    },
+    {
+      "op": "get_ast",
+      "family": "introspect",
+      "set": "concerto-core-test-data",
+      "error": "Error: Name Missing not found"
+    },
+    {
+      "op": "get_ast",
+      "family": "introspect",
+      "set": "conformance",
+      "n": 41,
+      "wallUs": 15.65620975609756,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_ast",
+      "family": "introspect",
+      "set": "synthetic-large",
+      "n": 1,
+      "wallUs": 2117.9028,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "from_json_map",
+      "family": "serializer",
+      "set": "p5109",
+      "n": 10,
+      "wallUs": 1658.50638,
+      "crossings": 1,
+      "inEngineUs": 661.57289,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompactBytes",
+          "perItem": 1,
+          "usPerItem": 661.57289
+        }
+      ]
+    },
+    {
+      "op": "from_json_relmap",
+      "family": "serializer",
+      "set": "p5109",
+      "n": 10,
+      "wallUs": 10259.53192,
+      "crossings": 1,
+      "inEngineUs": 5630.45212,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompactBytes",
+          "perItem": 1,
+          "usPerItem": 5630.45212
+        }
+      ]
+    },
+    {
+      "op": "to_json_map",
+      "family": "serializer",
+      "set": "p5109",
+      "n": 10,
+      "wallUs": 862.5429300000001,
+      "crossings": 1,
+      "inEngineUs": 393.97279,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerToJsonBytes",
+          "perItem": 1,
+          "usPerItem": 393.97279
+        }
+      ]
+    },
+    {
+      "op": "to_json_relmap",
+      "family": "serializer",
+      "set": "p5109",
+      "n": 10,
+      "wallUs": 6354.95275,
+      "crossings": 1,
+      "inEngineUs": 4165.56501,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerToJsonBytes",
+          "perItem": 1,
+          "usPerItem": 4165.56501
+        }
+      ]
+    },
+    {
+      "op": "validate_instance_collect_all",
+      "family": "instance",
+      "set": "p5109",
+      "n": 100,
+      "wallUs": 49.081297,
+      "crossings": 1,
+      "inEngineUs": 36.077965,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateInstanceBytes",
+          "perItem": 1,
+          "usPerItem": 36.077965
+        }
+      ]
+    },
+    {
+      "op": "validate_instance_first_error",
+      "family": "instance",
+      "set": "p5109",
+      "n": 100,
+      "wallUs": 18.888896,
+      "crossings": 1,
+      "inEngineUs": 11.818104,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateInstanceBytes",
+          "perItem": 1,
+          "usPerItem": 11.818104
+        }
+      ]
+    },
+    {
+      "op": "get_type_p5109",
+      "family": "introspect",
+      "set": "p5109",
+      "n": 200,
+      "wallUs": 0.8770125000000001,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type_p5109",
+      "family": "introspect",
+      "set": "p5109",
+      "n": 200,
+      "wallUs": 0.088089,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "get_type_after_update",
+      "family": "introspect",
+      "set": "p5109",
+      "n": 200,
+      "wallUs": 4.0922925,
+      "crossings": 1,
+      "inEngineUs": 1.1553319999999998,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.getTypeName",
+          "perItem": 1,
+          "usPerItem": 1.1553319999999998
+        }
+      ]
+    },
+    {
+      "op": "resolve_type_after_update",
+      "family": "introspect",
+      "set": "p5109",
+      "n": 200,
+      "wallUs": 1.4727329999999998,
+      "crossings": 1,
+      "inEngineUs": 1.1950255,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.resolveType",
+          "perItem": 1,
+          "usPerItem": 1.1950255
+        }
+      ]
+    },
+    {
+      "op": "get_type_other_mutated",
+      "family": "introspect",
+      "set": "p5109",
+      "n": 200,
+      "wallUs": 0.5967210000000001,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "resolve_type_other_mutated",
+      "family": "introspect",
+      "set": "p5109",
+      "n": 200,
+      "wallUs": 0.060299,
+      "crossings": 0,
+      "inEngineUs": 0,
+      "bindings": []
+    },
+    {
+      "op": "from_json_numkeys",
+      "family": "serializer",
+      "set": "p5121",
+      "n": 1,
+      "wallUs": 184915.9179,
+      "crossings": 1,
+      "inEngineUs": 90914.2211,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompactBytes",
+          "perItem": 1,
+          "usPerItem": 90914.2211
+        }
+      ]
+    },
+    {
+      "op": "from_json_strkeys",
+      "family": "serializer",
+      "set": "p5121",
+      "n": 1,
+      "wallUs": 206336.06,
+      "crossings": 1,
+      "inEngineUs": 93479.8761,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompactBytes",
+          "perItem": 1,
+          "usPerItem": 93479.8761
+        }
+      ]
+    },
+    {
+      "op": "from_json_deep",
+      "family": "serializer",
+      "set": "p5121",
+      "n": 10,
+      "wallUs": 3161.33737,
+      "crossings": 2,
+      "inEngineUs": 770.27997,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateResourceBinary",
+          "perItem": 1,
+          "usPerItem": 428.6739
+        },
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompact",
+          "perItem": 1,
+          "usPerItem": 341.60607
+        }
+      ]
+    },
+    {
+      "op": "to_json_deep",
+      "family": "serializer",
+      "set": "p5121",
+      "n": 10,
+      "wallUs": 2705.75132,
+      "crossings": 399,
+      "inEngineUs": 880.13621,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.serializerToJson",
+          "perItem": 1,
+          "usPerItem": 738.9743599999999
+        },
+        {
+          "name": "ModelManagerHandle.modelUtilIsEnum",
+          "perItem": 199,
+          "usPerItem": 71.09797
+        },
+        {
+          "name": "ModelManagerHandle.modelUtilIsMap",
+          "perItem": 199,
+          "usPerItem": 70.06388000000001
+        }
+      ]
+    },
+    {
+      "op": "validate_instance_deep",
+      "family": "instance",
+      "set": "p5121",
+      "n": 10,
+      "wallUs": 3519.25828,
+      "crossings": 3,
+      "inEngineUs": 1074.99916,
+      "bindings": [
+        {
+          "name": "ModelManagerHandle.validateResourceBinary",
+          "perItem": 1,
+          "usPerItem": 402.23965000000004
+        },
+        {
+          "name": "ModelManagerHandle.validateInstance",
+          "perItem": 1,
+          "usPerItem": 358.4904
+        },
+        {
+          "name": "ModelManagerHandle.serializerFromJsonCompact",
+          "perItem": 1,
+          "usPerItem": 314.26911
+        }
+      ]
+    }
+  ]
+}

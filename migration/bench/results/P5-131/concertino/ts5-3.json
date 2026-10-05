@@ -1,0 +1,122 @@
+{
+  "tool": "p5131-concertino",
+  "side": "ts5",
+  "coreDist": "/home/user/wt/P5-131/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+  "concertinoDist": null,
+  "node": "v22.22.2",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "loadavgEnd": [
+    1.85,
+    2.11,
+    1.86
+  ],
+  "samples": 30,
+  "warmup": 5,
+  "results": [
+    {
+      "op": "validate",
+      "set": "concerto-core-test-data",
+      "n": 120,
+      "medianUs": 64.65012083333332,
+      "cv": 0.17172305043030925
+    },
+    {
+      "op": "get_type",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "medianUs": 0.4249772727272727,
+      "cv": 0.24158230041810633
+    },
+    {
+      "op": "derives_from",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "medianUs": 0.6590844155844156,
+      "cv": 0.6037608791115603
+    },
+    {
+      "op": "is_assignable_to",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "medianUs": 1.9800162337662337,
+      "cv": 0.45030171368666044
+    },
+    {
+      "op": "get_properties",
+      "set": "concerto-core-test-data",
+      "n": 154,
+      "medianUs": 3.2748181818181816,
+      "cv": 0.36212405530293035
+    },
+    {
+      "op": "validate",
+      "set": "conformance",
+      "n": 44,
+      "medianUs": 17.380204545454546,
+      "cv": 0.9117262727771459
+    },
+    {
+      "op": "get_type",
+      "set": "conformance",
+      "n": 52,
+      "medianUs": 0.5372211538461539,
+      "cv": 0.7684546044473816
+    },
+    {
+      "op": "derives_from",
+      "set": "conformance",
+      "n": 52,
+      "medianUs": 0.7339615384615384,
+      "cv": 0.14589098011639426
+    },
+    {
+      "op": "is_assignable_to",
+      "set": "conformance",
+      "n": 52,
+      "medianUs": 1.2779615384615386,
+      "cv": 0.6042878690015002
+    },
+    {
+      "op": "get_properties",
+      "set": "conformance",
+      "n": 52,
+      "medianUs": 1.4334134615384615,
+      "cv": 1.5421919673599052
+    },
+    {
+      "op": "validate",
+      "set": "synthetic-large",
+      "n": 300,
+      "medianUs": 34.04171,
+      "cv": 0.3058817058475737
+    },
+    {
+      "op": "get_type",
+      "set": "synthetic-large",
+      "n": 301,
+      "medianUs": 0.5455166112956811,
+      "cv": 0.06845153787234605
+    },
+    {
+      "op": "derives_from",
+      "set": "synthetic-large",
+      "n": 301,
+      "medianUs": 0.711671096345515,
+      "cv": 0.21682602490343755
+    },
+    {
+      "op": "is_assignable_to",
+      "set": "synthetic-large",
+      "n": 301,
+      "medianUs": 1.3186295681063125,
+      "cv": 0.3379661247501112
+    },
+    {
+      "op": "get_properties",
+      "set": "synthetic-large",
+      "n": 301,
+      "medianUs": 1.29071926910299,
+      "cv": 0.20497390527197792
+    }
+  ]
+}

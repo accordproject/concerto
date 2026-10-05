@@ -1,0 +1,3 @@
+concerto-core-test-data: document 94289 bytes, 164 declarations; 120 of 120 instances validate
+conformance: document 15169 bytes, 58 declarations; 44 of 44 instances validate
+synthetic-large: document 199008 bytes, 303 declarations; 300 of 300 instances validate
