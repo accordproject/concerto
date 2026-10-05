@@ -173,9 +173,10 @@ reason, who is affected and the upgrade step for each one.
 - **Node.js 20.19+ (on 20.x) or 22.12+ is required** in every package
   (`engines.node` is `^20.19.0 || >=22.12.0`). Node.js 18 is no longer
   supported. (BC-31)
-- **Browsers must `await init()` before they use the engine, and need a
-  bundler, or a host that supplies a synchronous `require`, to load
-  concerto-core.** The browser ESM build does not instantiate the engine when
+- **Browsers must `await init()` before they use the engine, and must
+  also supply the engine host (the generated engine-host registry from the
+  worker recipe, or an equivalent synchronous `require`), because a bundler
+  alone does not resolve the engine modules.** The browser ESM build does not instantiate the engine when
   it is imported. Call `await init()` from `@accordproject/concerto-engine`
   first, or run concerto-core in a module Worker as the worker recipe in
   [BROWSER.md](./BROWSER.md) shows. `init()` fetches and compiles the raw

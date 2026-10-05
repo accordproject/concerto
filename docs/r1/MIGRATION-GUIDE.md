@@ -68,9 +68,10 @@ grep -rnE "length *= *\[ *, *\]" --include=*.cto .
   `packages/concerto-engine/README.md` and
   [Concerto in the browser](./BROWSER.md)).
 - **Still needed:** concerto-core's browser build loads its engine modules
-  through a synchronous `require`. Use a bundler, which resolves them at
-  build time, or supply a synchronous `require` on `globalThis.module`
-  before concerto-core is first imported. That `require` must resolve
+  through a synchronous `require`. A bundler alone does not resolve
+  them, because the specifiers are not literal. Supply the engine host: the
+  generated engine-host registry from the worker recipe, or an equivalent
+  synchronous `require` on `globalThis.module`, imported before concerto-core. That `require` must resolve
   `./engine`, `../engine`, `./engine/<subpath>` and `../engine/<subpath>`
   (for example `./engine/views` and `../engine/views`) to the matching
   `dist/esm-browser/engine/*.mjs` modules, and resolve the engine's own
