@@ -17,7 +17,7 @@ JSON need only the Node.js upgrade. Check the following:
 
 1. **Node.js version.** Run `node --version`. You need 20.19 or later on the 20.x
    line, or 22.12 or later.
-2. **Browser use without a bundler.** See [Packaging](#packaging).
+2. **Browser use, with or without a bundler.** See [Browsers](#browsers-bc-32).
 3. **Dates.** Do your instances, default values or `DateTimeUtil.setCurrentTime`
    calls use anything other than `YYYY-MM-DDTHH:mm:ss[.SSS]` followed by `Z` or
    `±HH:mm`?
