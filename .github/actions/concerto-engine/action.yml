@@ -26,7 +26,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: accordproject/concerto-rust
-        ref: fa65a37265f8636b31a6982633498a56e252f5ac
+        ref: 85655b1c46cdd99806b8e0224208030257f7e6e8
         path: .concerto-rust
 
     # actions/checkout only writes inside the workspace; the engine link
@@ -68,5 +68,6 @@ runs:
         npm run build
         test -f pkg/concerto-engine.cjs
         test -f pkg/concerto-engine.mjs
+        test -f pkg/concerto-engine.node.mjs
         test -f pkg/concerto_wasm.wasm
         echo "pkg-dir=$(pwd)/pkg" >> "$GITHUB_OUTPUT"

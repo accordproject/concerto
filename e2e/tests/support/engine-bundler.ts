@@ -80,7 +80,9 @@ export function engineModules(): string[] {
  * Call it before anything imports a concerto-core module.
  *
  * It sets `globalThis.module` / `globalThis.require` to a synchronous
- * `require` backed by a registry of modules loaded up front with `import()`:
+ * `require` backed by a registry of modules loaded up front with `import()`,
+ * then calls the engine's explicit `await init()` (BC-32), as a host must
+ * before the first engine-backed call:
  *   - `@accordproject/concerto-engine` (src/engine/rust.ts);
  *   - `./engine`, `../engine` and `../engine/<subpath>` (the views'
  *     `loadEngine`, read through scripts/browser-module-shim.js);
@@ -130,9 +132,11 @@ export async function installEngineBundler(page: Page, baseUrl: string): Promise
         // read is not recorded in `requested`.
         (globalThis as any).__concertoBundler = { requested, bundled };
 
-        // The engine bytes are inlined and instantiated synchronously by this
-        // module at import time (concerto-wasm/scripts/inline.mjs).
-        bundled.set('@accordproject/concerto-engine', await import(`${baseUrl}/concerto-engine/concerto-engine.mjs`));
+        // The engine's browser loader instantiates nothing when it is
+        // imported (BC-32): the explicit `await init()` below fetches and
+        // compiles the .wasm, after the engine modules are loaded.
+        const engine = await import(`${baseUrl}/concerto-engine/concerto-engine.mjs`);
+        bundled.set('@accordproject/concerto-engine', engine);
         for (const name of modules) {
             bundled.set(`engine/${name}`, await import(`${baseUrl}/concerto-core/engine/${name}.mjs`));
         }
@@ -145,5 +149,9 @@ export async function installEngineBundler(page: Page, baseUrl: string): Promise
         for (const specifier of requires) {
             bundled.set(specifier, await import(`${baseUrl}/concerto-core/engine/${specifier}`));
         }
+        // What the host does before the first engine-backed call: concerto-core
+        // is loaded already (its error factory, given to `setHost`, is kept by
+        // the loader until now).
+        await engine.init();
     }, { baseUrl, modules: engineModules(), requires: engineRequires() });
 }
