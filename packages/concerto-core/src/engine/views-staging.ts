@@ -379,11 +379,7 @@ function stageLoadedModelFile(modelFile: any, checkedText?: CheckedAst): boolean
         // BC-24: decorator factories keep the eager path.
         const factories = manager.getDecoratorFactories();
         if (Array.isArray(factories) && factories.length > 0) {
-            if (checkedText === undefined) {
-                readUnchecked(modelFile, handle);
-            } else {
-                completeShapeCheck(modelFile, astText(modelFile.ast, checkedText));
-            }
+            stageEager(modelFile, handle, checkedText);
             return false;
         }
         const ast = modelFile.ast;
@@ -566,13 +562,26 @@ function copyImportNames(modelFile: any, source: any): void {
 }
 
 /**
- * With decorator factories and the shape check off, reads the AST only to
- * throw `unreadableAst` for one the engine cannot read.
+ * `stageLoadedModelFile`'s read of a file built eagerly (decorator
+ * factories, BC-24): the AST is loaded once, with any pending shape check
+ * folded in, and stays staged, so its construction snapshot
+ * (`heldViewSnapshot`) and its add read the stage rather than the AST's
+ * text again. With the check off, an AST the engine cannot read throws
+ * here (`unreadableAst`).
  */
-function readUnchecked(modelFile: any, handle: any): void {
-    const staged = JSON.parse(handle.stageModelFileBytes(utf8Text(JSON.stringify(modelFile.ast)),
-        optionalString(modelFile.definitions), optionalString(modelFile.fileName), 0));
-    handle.dropStagedModelFile(staged[0]);
+function stageEager(modelFile: any, handle: any, checkedText?: CheckedAst): void {
+    const ast = modelFile.ast;
+    const state = fileState(modelFile);
+    const text = checkedText === undefined ? JSON.stringify(ast) : astText(ast, checkedText);
+    const checked = checkedText !== undefined && state.shapePending !== undefined;
+    const staged: StagedHeader = JSON.parse(handle.stageModelFileBytes(utf8Text(text),
+        optionalString(modelFile.definitions), optionalString(modelFile.fileName), checked ? STAGE_CHECKED : 0));
+    if (checked) {
+        shapeCheckPassed(modelFile, text, state);
+    }
+    const stage = { handle, id: staged[0] as number };
+    state.stage = stage;
+    stageFinalizer?.register(modelFile, stage, stage);
 }
 
 /**
@@ -707,6 +716,30 @@ function adoptStagedModels(newModelManager: any, ast: any, staged: any[], valida
     }
 }
 
+/**
+ * The ModelFile of `newModelManager` that `ModelFile.filter` builds over
+ * `ast`, the engine-written filtered AST, whose file the engine staged in
+ * the new manager's rustHandle (`staged` is `[stageId, ...header]`): it
+ * takes that stage, unchecked (BC-19, as a DecoratorManager result), rather
+ * than loading the AST again. A stage it does not take is dropped.
+ */
+function adoptFilteredStage(newModelManager: any, ast: any, staged: any[], fileName: string | null | undefined): any {
+    const { default: ModelFile } = modelFileModule();
+    const handle = newModelManager.rustHandle;
+    prestaged.set(ast, { handle, id: staged[0], header: staged.length > 1 ? staged as StagedHeader : undefined });
+    trustedAst = ast;
+    try {
+        return new ModelFile(newModelManager, ast, undefined, fileName);
+    } finally {
+        trustedAst = null;
+        const prestage = prestaged.get(ast);
+        if (prestage !== undefined) {
+            prestaged.delete(ast);
+            handle.dropStagedModelFile(prestage.id);
+        }
+    }
+}
+
 /** Forgets `modelFile`'s stage, returning it if it was staged in `handle`. */
 function takeStage(modelFile: any, handle: any): Stage | undefined {
     const state = stateOf(modelFile);
@@ -833,6 +866,31 @@ function updateStaged(modelFile: any, handle: any): number | undefined {
         return undefined;
     }
     state!.committed = handle;
+    return id;
+}
+
+/**
+ * `updateModelFile`'s validation and write from `modelFile`'s stage in one
+ * engine call; undefined, changing nothing, when there is no usable stage.
+ * A validation error is thrown as `ModelFile.validate` throws it, and leaves
+ * the file staged.
+ */
+function validateAndUpdateStaged(modelFile: any, handle: any): number | undefined {
+    const state = stateOf(modelFile);
+    const stage = state?.stage;
+    if (!stage || stage.handle !== handle) {
+        return undefined;
+    }
+    let id: number | undefined;
+    try {
+        id = handle.validateAndUpdateStagedModelFile(stage.id);
+    } catch (e) {
+        throw modelFile._engineValidationError(e);
+    }
+    if (id !== undefined) {
+        takeStageOf(state!, handle);
+        state!.committed = handle;
+    }
     return id;
 }
 
@@ -971,6 +1029,7 @@ function validateLoaded(modelFile: any, handle: any): boolean {
 }
 
 export {
+    adoptFilteredStage,
     adoptSharedView,
     adoptStagedModels,
     adoptSystemView,
@@ -989,6 +1048,7 @@ export {
     updateExternalStaged,
     updateStaged,
     validateAndCommitStaged,
+    validateAndUpdateStaged,
     validateAstStaged,
     validateLoaded,
 };

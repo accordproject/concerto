@@ -162,9 +162,18 @@ class ModelFile extends Decorated {
         } else {
             this.fromAst(this.ast);
         }
-        // Check version compatibility (a view's source was checked)
+        // Check version compatibility (a view's source was checked). The
+        // engine's load of a lazily built file whose AST passed the shape
+        // check (or was engine-written) checked a string range already, with
+        // the same error, and accepts it verbatim.
         if (shared === null) {
-            this.isCompatibleVersion();
+            const range = (this.ast as any).concertoVersion;
+            if (lazy && typeof range === 'string' && range !== '' && views.isShapeChecked(this) &&
+                this.isCompatibleVersion === ModelFile.prototype.isCompatibleVersion) {
+                this.concertoVersion = range;
+            } else {
+                this.isCompatibleVersion();
+            }
         }
 
         if (lazy) {
@@ -615,8 +624,7 @@ class ModelFile extends Decorated {
     getFullyQualifiedTypeName(type) {
         const id = typeof type === 'string' ? this._rustHandleId() : undefined;
         if (id !== undefined) {
-            const manager = this.modelManager;
-            return manager.rustHandle.modelFileGetFullyQualifiedTypeName(id, type) ?? null;
+            return this.modelManager._modelFileFullyQualifiedTypeName(this.namespace, id, type) ?? null;
         }
         // is the type a primitive?
         if(!ModelUtil.isPrimitiveType(type)) {
@@ -1070,6 +1078,10 @@ class ModelFile extends Decorated {
                 return null;
             }
             const filtered = JSON.parse(result);
+            if (filtered.staged !== undefined) {
+                // The engine staged the filtered file in the new manager.
+                return engineViews().adoptFilteredStage(modelManager, filtered.ast, filtered.staged, this.fileName);
+            }
             if (filtered.stage !== undefined) {
                 // As in TS, the view gets its own shallow copy of the AST.
                 const ast = {

@@ -20,7 +20,7 @@
 // (`TypeCache`) are cached per model version.
 
 import { rust } from './index';
-import { encodeValue, encodeBytes, decodeParsed, materializeCompact, newTypeCache } from './serializer-codec';
+import { TAG, encodeValue, encodeBytes, decodeParsed, materializeCompact, newTypeCache } from './serializer-codec';
 import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import Factory from '../factory';
 
@@ -118,17 +118,42 @@ function optionsText(options: SerializerOptions): string {
     return text;
 }
 
+/**
+ * A document's wire encoding that `validateInstance` already wrote, for the
+ * `fastFromJson` call `withPreparedWire` makes over that same object.
+ */
+let preparedWire: { object: unknown; wire: Uint8Array | string } | null = null;
+
+/**
+ * Runs `fn`, whose `Serializer.fromJSON(object)` call sends `wire` (the
+ * compact bytes, or the wire text, of `object`) instead of encoding `object`
+ * again. Only for an object no one else can have changed since `wire` was
+ * written.
+ */
+function withPreparedWire<T>(object: unknown, wire: Uint8Array | string, fn: () => T): T {
+    preparedWire = { object, wire };
+    try {
+        return fn();
+    } finally {
+        preparedWire = null;
+    }
+}
+
 /** `Serializer.fromJSON`'s fast path. */
 function fastFromJson(modelManager: BaseModelManager, jsonObject: unknown, options: SerializerOptions) {
+    const prepared = preparedWire;
+    preparedWire = null;
     const cached = cachedHandleFor(modelManager);
     const { handle } = cached;
     let text;
     try {
         // Compact binary where it can be, else text.
-        const bytes = encodeBytes(jsonObject);
-        text = bytes !== undefined
-            ? handle.serializerFromJsonCompactBytes(bytes, optionsText(options), fromJsonEnv)
-            : handle.serializerFromJsonCompact(JSON.stringify(encodeValue(jsonObject)), optionsText(options), fromJsonEnv);
+        const wire = prepared !== null && prepared.object === jsonObject ? prepared.wire : encodeBytes(jsonObject);
+        text = typeof wire === 'string'
+            ? handle.serializerFromJsonCompact(wire, optionsText(options), fromJsonEnv)
+            : wire !== undefined
+                ? handle.serializerFromJsonCompactBytes(wire, optionsText(options), fromJsonEnv)
+                : handle.serializerFromJsonCompact(JSON.stringify(encodeValue(jsonObject)), optionsText(options), fromJsonEnv);
     } catch (err) {
         throw asUnsupported(err);
     }
@@ -150,8 +175,10 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
     } catch (err) {
         throw asUnsupported(err);
     }
-    // Decoded in place, as fromJSON's result is.
-    return decodeParsed(JSON.parse(text), modelManager, cached.types);
+    // Decoded in place, as fromJSON's result is. Text with no wire tag
+    // anywhere (most results) decodes to itself, so it is not walked.
+    const parsed = JSON.parse(text);
+    return text.indexOf(TAG) < 0 ? parsed : decodeParsed(parsed, modelManager, cached.types);
 }
 
 /**
@@ -161,10 +188,16 @@ function fastToJson(modelManager: BaseModelManager, resource: unknown, options: 
  */
 function validateMetaModel(input: unknown): void {
     try {
-        rust.validateMetaModelInstance(JSON.stringify(encodeValue(input)), 'serializer');
+        // Compact binary where it can be, else text, as `fastFromJson` sends it.
+        const bytes = encodeBytes(input);
+        if (bytes !== undefined) {
+            rust.validateMetaModelInstanceBytes(bytes, 'serializer');
+        } else {
+            rust.validateMetaModelInstance(JSON.stringify(encodeValue(input)), 'serializer');
+        }
     } catch (err) {
         throw asUnsupported(err);
     }
 }
 
-export { asUnsupported, fastFromJson, fastToJson, handleFor, optionsText, validateMetaModel };
+export { asUnsupported, fastFromJson, fastToJson, handleFor, optionsText, validateMetaModel, withPreparedWire };

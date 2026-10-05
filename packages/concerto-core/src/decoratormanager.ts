@@ -19,10 +19,8 @@ import semver from 'semver';
 import { jsonToYaml, yamlToJson } from './dcsconverter';
 import IllegalModelException from './introspect/illegalmodelexception';
 
-// Types needed for TypeScript generation.
-/* eslint-disable no-unused-vars */
-import type ModelFile from './introspect/modelfile';
-/* eslint-enable no-unused-vars */
+import ModelFile from './introspect/modelfile';
+import { Parser } from '@accordproject/concerto-cto';
 import { rust, engineViews } from './engineloader';
 
 const DCS_VERSION = '0.4.0';
@@ -181,6 +179,32 @@ function assignDeep(target, source) {
     return target;
 }
 
+/** The file name `validate` registers `DCS_MODEL` under. */
+const DCS_MODEL_FILE_NAME = 'decoratorcommands@0.3.0.cto';
+
+/** `DCS_MODEL` parsed (as `addCTOModel` parses it), once. */
+let dcsModelAst: unknown;
+
+/**
+ * A copy of `value`, plain JSON data from the parser, with `undefined`
+ * members kept.
+ * @param {*} value the value to copy
+ * @return {*} the copy
+ */
+function copyAst(value: any): any {
+    if (Array.isArray(value)) {
+        return value.map(copyAst);
+    }
+    if (value !== null && typeof value === 'object') {
+        const out = {};
+        for (const key of Object.keys(value)) {
+            out[key] = copyAst(value[key]);
+        }
+        return out;
+    }
+    return value;
+}
+
 /**
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
@@ -209,10 +233,13 @@ class DecoratorManager {
         if (modelFiles) {
             validationModelManager.addModelFiles(modelFiles);
         }
-        validationModelManager.addCTOModel(
-            DCS_MODEL,
-            'decoratorcommands@0.3.0.cto'
-        );
+        // `addCTOModel(DCS_MODEL, DCS_MODEL_FILE_NAME)`, with the constant
+        // model parsed once; each manager gets its own copy of the AST.
+        if (dcsModelAst === undefined) {
+            dcsModelAst = Parser.parse(DCS_MODEL, DCS_MODEL_FILE_NAME, { skipLocationNodes: undefined });
+        }
+        const dcsModelFile = new ModelFile(validationModelManager, copyAst(dcsModelAst), DCS_MODEL, DCS_MODEL_FILE_NAME);
+        validationModelManager.addModelFile(dcsModelFile, DCS_MODEL, DCS_MODEL_FILE_NAME);
         // The structural check only; validationModelManager is returned unchanged.
         engineViews().decoratorManagerValidate(validationModelManager, decoratorCommandSet);
         return validationModelManager;

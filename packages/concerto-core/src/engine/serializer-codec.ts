@@ -562,6 +562,6 @@ function decodeTagged(v) {
     }
 }
 
-export { typedCtorName, modelClasses, encodeValue, encodeBytes, decodeParsed, materializeCompact, checkString };
+export { TAG, typedCtorName, modelClasses, encodeValue, encodeBytes, decodeParsed, materializeCompact, checkString };
 export type { TypeCache };
 export { newTypeCache };
