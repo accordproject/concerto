@@ -107,7 +107,7 @@ class VocabularyManager {
                 throw new Error(errors.map(e => e.message).join(', '));
             }
         }
-        const voc = new Vocabulary(this, options?.enableSafeVocabParsing ? parseVocabularyYaml(contents) : YAML.parse(contents));
+        const voc = new Vocabulary(this, options?.enableSafeVocabParsing ? parseVocabularyYaml(contents) : YAML.parse(contents), { skipLocaleValidation: !!this.options.enableVocValidator });
 
         if (this.vocabularies[voc.getIdentifier()]) {
             throw new Error('Vocabulary has already been added.');
