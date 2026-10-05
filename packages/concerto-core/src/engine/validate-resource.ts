@@ -302,11 +302,13 @@ function visitorIsCheaper(field, value): boolean {
     if (t !== 'string' && t !== 'number' && t !== 'boolean') {
         return false;
     }
+    // isPrimitive first: isTypeEnum and isTypeScalar are false for a
+    // primitive field, and need an engine call for any other.
     return typeof field.isField === 'function' && field.isField() &&
         !field.isArray() &&
+        field.isPrimitive() &&
         !field.isTypeEnum() &&
         !field.isTypeScalar() &&
-        field.isPrimitive() &&
         field.getValidator() === null;
 }
 

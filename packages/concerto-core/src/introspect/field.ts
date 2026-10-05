@@ -102,11 +102,13 @@ class Field extends Property {
         if (this.isPrimitive()) {
             return false;
         } else {
-            this.getParent()
-                .getModelFile().resolveType( 'property ' + this.getFullyQualifiedName(), this.getType());
-            const type = this.getParent()
-                .getModelFile()
-                .getType(this.getType());
+            const modelFile = this.getParent().getModelFile();
+            const type = modelFile.getType(this.getType());
+            // getType is null exactly when resolveType throws: resolved
+            // only then, for its error.
+            if (type === null) {
+                modelFile.resolveType( 'property ' + this.getFullyQualifiedName(), this.getType());
+            }
             return type.isScalarDeclaration?.();
         }
     }

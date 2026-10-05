@@ -79,6 +79,7 @@ export interface EngineHandle {
     validateAstValue(ast: string): void;
     validateAstStaged(stage: number): boolean;
     updateStagedModelFile(stage: number): number | undefined;
+    validateAndUpdateStagedModelFile(stage: number): number | undefined;
     updateExternalModelsStaged(stages: Uint32Array, model_files: any): boolean;
     stagedModelFileViewSnapshot(stage: number, namespace?: string | null): string | undefined;
     modelFileViewSnapshotOf(model_file: number, namespace?: string | null): string | undefined;
@@ -102,6 +103,8 @@ export interface EngineState {
         resolvedTypes: Map<string, string>;
         /** `ModelFile.getType` answers, by namespace and then type. */
         fileTypeNames: Map<string, Map<string, string | undefined>>;
+        /** `ModelFile.getFullyQualifiedTypeName` answers, by namespace and then type. */
+        fileFullyQualifiedTypeNames: Map<string, Map<string, string | undefined>>;
     } | undefined;
     /** The namespaces in `getNamespaces()` order, or undefined when the engine must be asked. */
     namespaces: string[] | undefined;
@@ -147,9 +150,6 @@ export interface EngineBindings {
     declarationValidate(declaration: object): void;
     declarationIsReservedSystemTypeImport(modelFile: object, typeName: string): boolean;
     classDeclarationResolveSuperType(classDeclaration: object): ClassDeclaration | null;
-    classDeclarationGetSuperType(classDeclaration: object): string | null;
-    classDeclarationGetSuperTypeDeclaration(classDeclaration: object): ClassDeclaration | null;
-    classDeclarationGetAllSuperTypeDeclarations(classDeclaration: object): ClassDeclaration[];
     classDeclarationGetNestedProperty(classDeclaration: object, propertyPath: string): Property;
     propertyValidate(property: object, classDeclaration: object): void;
     relationshipDeclarationValidate(relationship: object, classDeclaration: object): void;
@@ -202,6 +202,7 @@ export interface EngineInternals {
     validateTakeError(): any;
     /** Validates a wire-encoded metamodel instance on the engine's resident metamodel manager. */
     validateMetaModelInstance(jsonText: string, preset: 'strict' | 'default' | 'serializer'): void;
+    validateMetaModelInstanceBytes(bytes: Uint8Array, preset: 'strict' | 'default' | 'serializer'): void;
     checkAstShape(ast: string): void;
     systemModelFileHeader(ast: string): string | undefined;
 }
@@ -234,6 +235,9 @@ export interface EngineViewsModule {
     commitStaged(modelFile: object, handle: EngineHandle): number | undefined;
     commitStagedAll(modelFiles: object[], handle: EngineHandle): ArrayLike<number> | undefined;
     validateAndCommitStaged(modelFile: object, handle: EngineHandle, metamodel?: boolean): number | undefined;
+    validateAndUpdateStaged(modelFile: object, handle: EngineHandle): number | undefined;
+    adoptFilteredStage(newModelManager: object, ast: object, staged: unknown[], fileName: string | null | undefined): any;
+    isShapeChecked(modelFile: object): boolean;
     dropStaged(modelFile: object, handle: EngineHandle): void;
     updateStaged(modelFile: object, handle: EngineHandle): number | undefined;
     validateAstStaged(modelFile: object, handle: EngineHandle): boolean;

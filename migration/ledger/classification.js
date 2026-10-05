@@ -523,6 +523,12 @@ const P5_11 = {
         'ClassDeclaration.isSystemIdentified': { c: 'TS', r: R.fwd },
         'ClassDeclaration.isExplicitlyIdentified': { c: 'TS', r: R.fieldRead },
         'ClassDeclaration.getOwnProperties': { c: 'TS', r: R.fieldRead },
+        // Survey item 9 of accordproject/concerto-rust#502 (maintainer-approved
+        // 2026-10-04): the bindings only read JS fields and called JS methods
+        // back, so the TS 5.0.0 bodies are restored.
+        'ClassDeclaration.getSuperTypeDeclaration': { c: 'TS', r: 'TS 5.0.0 body: reads the view\'s superType/superTypeDeclaration fields, else calls _resolveSuperType (counted there); a crossing only read them back (accordproject/concerto-rust#502, maintainer-approved 2026-10-04)' },
+        'ClassDeclaration.getSuperType': { c: 'TS', r: R.fwd.replace(R.p511, 'Restored TS 5.0.0 body (accordproject/concerto-rust#502, maintainer-approved 2026-10-04)') },
+        'ClassDeclaration.getAllSuperTypeDeclarations': { c: 'TS', r: 'TS 5.0.0 loop over getSuperTypeDeclaration with BC-11\'s cycle check (the same IllegalModelException the engine raises); a crossing only called the JS methods back (accordproject/concerto-rust#502, maintainer-approved 2026-10-04)' },
     },
     'src/introspect/collectionsizevalidator.ts': {
         'CollectionSizeValidator.getMinSize': { c: 'TS', r: R.fieldRead },
@@ -745,7 +751,9 @@ const P5_64 = {
         // P5-28 staged headers and P5-10a staging.
         'recordImportNames': { c: 'TS', r: R.shim564 + ' (lazy views: records the import names Rust computed at staging)' },
         'recordedImportNames': { c: 'TS', r: R.shim564 + ' (lazy views: reads the recorded import names)' },
-        'readUnchecked': { c: 'TS', r: R.shim564 + ' (lazy views: reads a staged field without the check-mode comparison)' },
+        'stageEager': { c: 'TS', r: R.shim564 + ' (lazy views: stages a file built eagerly under decorator factories, so its construction snapshot and add read the stage)' },
+        'adoptFilteredStage': { c: 'TS', r: R.shim564 + ' (ModelFile.filter: builds the filtered file over the stage Rust made in the result manager)' },
+        'validateAndUpdateStaged': { c: 'TS', r: R.shim564 + ' (updateModelFile: validates and writes a staged file on its handle, mapping the error to the file)' },
         'applyStagedFileHeader': { c: 'TS', r: R.shim564 + ' (P5-28: applies the header Rust computed at staging to the ModelFile view)' },
         'takePrestaged': { c: 'TS', r: R.shim564 + ' (P5-28: takes a stage made before the ModelFile view existed)' },
         'adoptStagedModels': { c: 'TS', r: R.shim564 + ' (P5-27: registers the model files Rust staged for a DCS result manager)' },

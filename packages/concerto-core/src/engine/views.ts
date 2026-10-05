@@ -69,6 +69,7 @@ export {
 } from './views-lazy';
 
 export {
+    adoptFilteredStage,
     adoptSharedView,
     adoptSystemView,
     applyStagedFileHeader,
@@ -86,9 +87,14 @@ export {
     updateExternalStaged,
     updateStaged,
     validateAndCommitStaged,
+    validateAndUpdateStaged,
     validateAstStaged,
     validateLoaded,
 } from './views-staging';
+
+export {
+    isShapeChecked,
+} from './views-state';
 
 export {
     classDeclarationGetIdentifierFieldName,

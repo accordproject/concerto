@@ -46,6 +46,22 @@ function declarationKindOf(type: string): string {
 }
 
 /**
+ * BC-11's error for a cyclic super type chain, as the engine's chain walks
+ * raise it (`classdeclaration-circularinheritance`, naming no model file).
+ * @param {ClassDeclaration[]} cycle the declarations from the one met again
+ * @param {ClassDeclaration} repeated the declaration met again
+ * @return {IllegalModelException} the error
+ */
+function circularInheritance(cycle: ClassDeclaration[], repeated: ClassDeclaration): IllegalModelException {
+    const name = String(repeated.fqn);
+    const names = cycle.map((declaration) => String(declaration.fqn));
+    names.push(name);
+    const err = new IllegalModelException(`The super type chain of "${name}" is circular: ${names.join(' -> ')}.`);
+    Object.defineProperty(err, 'needsModelFile', { value: false, enumerable: false, writable: true, configurable: true });
+    return err;
+}
+
+/**
  * ClassDeclaration defines the structure (model/schema) of composite data.
  * It is composed of a set of Properties, may have an identifying field, and may
  * have a super-type.
@@ -376,7 +392,11 @@ class ClassDeclaration extends Declaration {
      * @return {string} the FQN name of the super type or null
      */
     getSuperType(): string | null {
-        return rust.classDeclarationGetSuperType(this) as string | null;
+        const superTypeDeclaration = this.getSuperTypeDeclaration();
+        if (superTypeDeclaration) {
+            return superTypeDeclaration.getFullyQualifiedName();
+        }
+        return null;
     }
 
     /**
@@ -384,7 +404,15 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration} the super type declaration, or null if there is no super type.
      */
     getSuperTypeDeclaration(): ClassDeclaration | null {
-        return rust.classDeclarationGetSuperTypeDeclaration(this) as ClassDeclaration | null;
+        if (!this.superType) {
+            // No super type.
+            return null;
+        } else if (!this.superTypeDeclaration) {
+            // Super type that hasn't been resolved yet.
+            return this._resolveSuperType();
+        }
+        // Resolved super type.
+        return this.superTypeDeclaration;
     }
 
     /**
@@ -421,7 +449,18 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} super-type declarations.
      */
     getAllSuperTypeDeclarations(): ClassDeclaration[] {
-        return rust.classDeclarationGetAllSuperTypeDeclarations(this) as ClassDeclaration[];
+        const results: ClassDeclaration[] = [];
+        const chain: ClassDeclaration[] = [this];
+        for (let type = this.getSuperTypeDeclaration(); type; type = type.getSuperTypeDeclaration()) {
+            // BC-11: a declaration met again is a cyclic chain.
+            const start = chain.indexOf(type);
+            if (start >= 0) {
+                throw circularInheritance(chain.slice(start), type);
+            }
+            chain.push(type);
+            results.push(type);
+        }
+        return results;
     }
 
     /**

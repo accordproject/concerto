@@ -83,6 +83,7 @@ function managerReadMemo(state: EngineState): NonNullable<EngineState['readMemo'
             typeNames: new Map(),
             resolvedTypes: new Map(),
             fileTypeNames: new Map(),
+            fileFullyQualifiedTypeNames: new Map(),
         };
     }
     return memo;
@@ -209,6 +210,18 @@ function installLazyMetamodelCopy(manager: BaseModelManager): void {
 }
 
 /**
+ * Makes `modelFile` the plain value of `modelFiles[namespace]`, in place of
+ * a fork's lazy view accessor.
+ * @param {object} modelFiles a manager's `modelFiles`
+ * @param {string} namespace the namespace
+ * @param {ModelFile} modelFile its model file
+ * @private
+ */
+function ownModelFile(modelFiles: Record<string, ModelFileInstance>, namespace: string, modelFile: ModelFileInstance): void {
+    Object.defineProperty(modelFiles, namespace, { value: modelFile, writable: true, enumerable: true, configurable: true });
+}
+
+/**
  * A type name for a `&str` binding; a non-string throws as TS did.
  * @param {*} name the type name argument
  * @return {string} the name as a string
@@ -307,7 +320,11 @@ class BaseModelManager {
         installLazyMetamodelCopy(this);
 
         if(options?.addMetamodel) {
-            this.addModelFile(this.metamodelModelFile);
+            // Registered, so built as any added file is (staged, unlike the
+            // lazy copy): the add validates and writes it in one engine call.
+            const copy = new ModelFile(this, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace) as ModelFileInstance;
+            this.metamodelModelFile = copy;
+            this.addModelFile(copy);
         }
     }
 
@@ -632,6 +649,34 @@ class BaseModelManager {
     }
 
     /**
+     * `rustHandle.modelFileGetFullyQualifiedTypeName`, memoised until the next
+     * model change: the answer depends only on the file's imports and
+     * declarations.
+     * @param {string} namespace - the model file's namespace
+     * @param {number} id - its rustHandle model file handle
+     * @param {string} type - the type name, as `ModelFile.getFullyQualifiedTypeName` takes it
+     * @return {string|undefined} the engine's answer
+     * @private
+     * @internal
+     */
+    _modelFileFullyQualifiedTypeName(namespace: string, id: number, type: string): string | undefined {
+        const memo = managerReadMemo(this._engine);
+        let byType = memo.fileFullyQualifiedTypeNames.get(namespace);
+        if (byType === undefined) {
+            byType = new Map();
+            memo.fileFullyQualifiedTypeNames.set(namespace, byType);
+        }
+        if (byType.has(type)) {
+            return byType.get(type);
+        }
+        const name: string | undefined = this.rustHandle.modelFileGetFullyQualifiedTypeName(id, type);
+        if (memo.version === this._engine.version) {
+            byType.set(type, name);
+        }
+        return name;
+    }
+
+    /**
      * The engine handle of the model file for `namespace`, cached.
      * @param {string} namespace - the namespace to look up
      * @return {number|undefined} its model file handle, or undefined
@@ -807,6 +852,18 @@ class BaseModelManager {
         }
         if (!modelFile.getVersion()) {
             throw new Error(`Cannot update with an unversioned namespace: ${modelFile.getNamespace()}`);
+        }
+        // A staged file is validated and written in one engine call.
+        const namespace = modelFile.getNamespace();
+        if (!disableValidation && modelFile.validate === ModelFile.prototype.validate) {
+            const id = engineViews().validateAndUpdateStaged(modelFile, this.rustHandle);
+            if (id !== undefined) {
+                this._modelFileIds.clear();
+                this._modelFileIds.set(namespace, id);
+                this.modelFiles[namespace] = modelFile;
+                this._engine.version++;
+                return modelFile;
+            }
         }
         if (!disableValidation) {
             modelFile.validate();
@@ -1147,8 +1204,9 @@ class BaseModelManager {
      * @private
      */
     getModelFileByFileName(fileName): ModelFile {
-        // Only a string or undefined crosses (null would match an unnamed file).
-        if (typeof fileName === 'string' || fileName === undefined) {
+        // A string is matched against the names TS holds, as TS 5.0.0 does;
+        // only undefined crosses (null would match an unnamed file).
+        if (fileName === undefined) {
             const namespace = this.rustHandle.modelManagerGetModelFileByFileName(fileName);
             return namespace === undefined ? undefined as unknown as ModelFile : this.modelFiles[namespace];
         }
@@ -1433,10 +1491,20 @@ class BaseModelManager {
             models: [] as IModel[],
         };
         const modelFiles = this.getModelFiles(includeConcertoNamespaces);
+        // With BaseModelManager's own `resolveMetaModel`, `getAst` and
+        // `getModelFiles`, the prior models it reads are the same for every
+        // file, so they are read once, not once per file.
+        const proto = BaseModelManager.prototype;
+        const priorModels = resolve && this.resolveMetaModel === proto.resolveMetaModel &&
+            this.getAst === proto.getAst && this.getModelFiles === proto.getModelFiles
+            ? this.getAst(false, true)
+            : undefined;
         modelFiles.forEach((thisModelFile) => {
             let metaModel = thisModelFile.getAst();
             if (resolve) {
-                metaModel = this.resolveMetaModel(metaModel);
+                metaModel = priorModels !== undefined
+                    ? MetaModelUtil.resolveLocalNames(priorModels, metaModel) as IModel
+                    : this.resolveMetaModel(metaModel);
             }
             result.models.push(metaModel);
         });
@@ -1484,9 +1552,34 @@ class BaseModelManager {
         fork._buildingMetamodelCopy = false;
         installLazyMetamodelCopy(fork);
         const handle = fork.rustHandle;
+        // Each view is built on its first read (BC-48: `modelFiles` is
+        // internal), as a fork typically reads few of them, and as it would
+        // have been built here: with the fork's decorator factories of now.
+        const factories = fork.decoratorFactories.slice();
         for (const namespace of Object.keys(this.modelFiles)) {
             const source = this.modelFiles[namespace];
-            fork.modelFiles[namespace] = ModelFile._sharedView(fork, source, source.getDefinitions(), undefined, handle) as ModelFileInstance;
+            const definitions = source.getDefinitions();
+            Object.defineProperty(fork.modelFiles, namespace, {
+                configurable: true,
+                enumerable: true,
+                get(this: Record<string, ModelFileInstance>) {
+                    const current = fork.decoratorFactories;
+                    fork.decoratorFactories = factories;
+                    let view: ModelFileInstance;
+                    try {
+                        view = ModelFile._sharedView(fork, source, definitions, undefined, handle) as ModelFileInstance;
+                    } finally {
+                        fork.decoratorFactories = current;
+                    }
+                    ownModelFile(this, namespace, view);
+                    return view;
+                },
+                // Every writer reads the namespace first, which replaces this accessor.
+                /* istanbul ignore next */
+                set(this: Record<string, ModelFileInstance>, value: ModelFileInstance) {
+                    ownModelFile(this, namespace, value);
+                },
+            });
         }
         // A registered metamodel copy stays the fork's registered view.
         const copy = Object.getOwnPropertyDescriptor(this, 'metamodelModelFile');

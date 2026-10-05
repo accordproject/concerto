@@ -22,7 +22,8 @@
 // built on first read; `validateInstanceOrThrow` throws with the
 // diagnostics as `details`.
 
-import { asUnsupported, handleFor, optionsText } from './serializer';
+import { asUnsupported, handleFor, optionsText, withPreparedWire } from './serializer';
+import Serializer from '../serializer';
 import { encodeBytes, encodeValue } from './serializer-codec';
 import { EngineFastPathUnsupported, isFastPathUnsupported } from './util';
 import TypeNotFoundException from '../typenotfoundexception';
@@ -63,20 +64,25 @@ function fromJsonOptions(modelManager: BaseModelManager, options: ValidateInstan
  */
 function documentOf(json: unknown): { object: any; wire: Uint8Array | string | undefined } {
     const object = typeof json === 'string' ? JSON.parse(json) : json;
+    return { object, wire: wireOf(object) };
+}
+
+/** `documentOf`'s wire encoding of the parsed document `object`. */
+function wireOf(object: any): Uint8Array | string | undefined {
     const bytes = encodeBytes(object);
     if (bytes !== undefined) {
-        return { object, wire: bytes.slice() };
+        return bytes.slice();
     }
     let encoded;
     try {
         encoded = encodeValue(object);
     } catch (err) {
         if (isFastPathUnsupported(err)) {
-            return { object, wire: undefined };
+            return undefined;
         }
         throw err;
     }
-    return { object, wire: JSON.stringify(encoded) };
+    return JSON.stringify(encoded);
 }
 
 /**
@@ -257,33 +263,46 @@ function validateInstance(modelManager: BaseModelManager, json: unknown, options
         result.resource = null;
         return result;
     }
+    // Parsed here from JSON text, the document is ours alone, so the
+    // resource is read from the wire encoding the engine just validated.
+    const ours = typeof json === 'string';
     let resource;
     Object.defineProperty(result, 'resource', {
         enumerable: true,
         configurable: true,
-        get: () => resource ?? (resource = modelManager.getSerializer().fromJSON(withClass(doc.object, fqn), merged)),
+        get: () => resource ?? (resource = hydrate(modelManager, doc, merged, fqn, ours)),
     });
     return result;
 }
 
+/**
+ * The resource `fromJSON` builds for a valid document; with `ours` (the
+ * document is unchanged since `doc.wire` was written) and the Serializer's
+ * own `fromJSON`, the document is not encoded again.
+ */
+function hydrate(modelManager: BaseModelManager, doc, merged: any, fqn: string | undefined, ours: boolean): any {
+    const serializer = modelManager.getSerializer();
+    const object = withClass(doc.object, fqn);
+    if (ours && object === doc.object && doc.wire !== undefined && serializer.fromJSON === Serializer.prototype.fromJSON) {
+        return withPreparedWire(object, doc.wire, () => serializer.fromJSON(object, merged));
+    }
+    return serializer.fromJSON(object, merged);
+}
+
 /** `validateInstanceOrThrow`; returns the resource, or `null` with `hydrate: false`. */
 function validateInstanceOrThrow(modelManager: BaseModelManager, json: unknown, options: ValidateInstanceOptions = {}, fqn?: string): any {
-    const doc = documentOf(json);
+    const object = typeof json === 'string' ? JSON.parse(json) : json;
     const merged = fromJsonOptions(modelManager, options);
-    const viaFromJson = () => {
-        const { resource, error } = routed(modelManager, doc, merged, fqn);
-        if (error !== undefined) {
-            throw withDetails(error, options, doc);
-        }
-        return options.hydrate === false ? null : resource;
-    };
-    if (doc.wire === undefined) {
-        return viaFromJson();
-    }
-    const object = doc.object;
-    // A document of its own type (or none) goes straight to fromJSON.
+    // A document of its own type (or none) goes straight to fromJSON, which
+    // encodes it itself, so it is not encoded here first; one that fromJSON
+    // must route takes its visitor path there, as `routed` would send it.
     const sameType = fqn === undefined || (object && typeof object === 'object' && (!object.$class || object.$class === fqn));
-    if (options.hydrate === false || !sameType) {
+    const direct = options.hydrate !== false && sameType;
+    const doc = { object, wire: direct ? undefined : wireOf(object) };
+    if (!direct) {
+        if (doc.wire === undefined) {
+            return viaFromJson(modelManager, doc, merged, options, fqn);
+        }
         let out;
         try {
             out = engineCall(modelManager, doc, merged, fqn, THROW);
@@ -291,16 +310,44 @@ function validateInstanceOrThrow(modelManager: BaseModelManager, json: unknown, 
             throw withDetails(err, options, doc);
         }
         if (out === UNSUPPORTED) {
-            return viaFromJson();
+            return viaFromJson(modelManager, doc, merged, options, fqn);
         }
         if (options.hydrate === false) {
             return null;
         }
     }
     try {
-        return modelManager.getSerializer().fromJSON(withClass(object, fqn), merged);
+        // Without `direct`, nothing ran since the document was encoded:
+        // fromJSON sends those bytes.
+        return direct
+            ? modelManager.getSerializer().fromJSON(withClass(object, fqn), merged)
+            : hydrate(modelManager, doc, merged, fqn, true);
     } catch (err) {
+        if (direct && isRouted(object)) {
+            routedDiagnostics(err);
+        }
         throw withDetails(err, options, doc);
+    }
+}
+
+/** `validateInstanceOrThrow` of a routed document, through `fromJSON` (`routed`). */
+function viaFromJson(modelManager: BaseModelManager, doc, merged: any, options: ValidateInstanceOptions, fqn?: string): any {
+    const { resource, error } = routed(modelManager, doc, merged, fqn);
+    if (error !== undefined) {
+        throw withDetails(error, options, doc);
+    }
+    return options.hydrate === false ? null : resource;
+}
+
+/**
+ * Whether `routed` would have sent `object` to `fromJSON`: the wire cannot
+ * carry it. False when encoding it throws (fromJSON threw that error).
+ */
+function isRouted(object: any): boolean {
+    try {
+        return wireOf(object) === undefined;
+    } catch {
+        return false;
     }
 }
 

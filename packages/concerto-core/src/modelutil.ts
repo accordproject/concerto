@@ -26,7 +26,7 @@ const engineMemo: { [binding: string]: Map<string, unknown> } = {};
 const ENGINE_MEMO_LIMIT = 4096;
 
 /** The members memoised by `memoisedEngineCall`, all `(...strings) => value`. */
-type MemoisedBinding = 'modelUtilIsValidIdentifier' | 'modelUtilGetFullyQualifiedName';
+type MemoisedBinding = 'modelUtilIsValidIdentifier';
 
 /**
  * `rust[binding](...args)`, memoised under `key`.
@@ -248,9 +248,11 @@ class ModelUtil {
      * @returns {string} the fully qualified type name.
      */
     static getFullyQualifiedName(namespace, type): string {
-        return typeof namespace === 'string' && typeof type === 'string'
-            ? memoisedEngineCall('modelUtilGetFullyQualifiedName', `${namespace.length}:${namespace}${type}`, namespace, type)
-            : rust.modelUtilGetFullyQualifiedName(namespace, type);
+        // Two strings join in TS: cheaper than any lookup.
+        if (typeof namespace === 'string' && typeof type === 'string') {
+            return namespace === '' ? type : namespace + '.' + type;
+        }
+        return rust.modelUtilGetFullyQualifiedName(namespace, type);
     }
 
     /**
