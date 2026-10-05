@@ -1,0 +1,454 @@
+{
+  "concertino": {
+    "validate": [
+      {
+        "set": "concerto-core-test-data",
+        "instances": 120,
+        "total": 120,
+        "concertinoUs": 27.365099999999998,
+        "engineFromJsonUs": 59.81627916666667,
+        "engineValidateInstanceUs": 48.58104166666667,
+        "ts5Us": 64.65012083333332
+      },
+      {
+        "set": "conformance",
+        "instances": 44,
+        "total": 44,
+        "concertinoUs": 3.185386363636364,
+        "engineFromJsonUs": 17.026170454545458,
+        "engineValidateInstanceUs": 24.337068181818182,
+        "ts5Us": 25.15456818181818
+      },
+      {
+        "set": "synthetic-large",
+        "instances": 300,
+        "total": 300,
+        "concertinoUs": 6.325489999999999,
+        "engineFromJsonUs": 26.34048166666667,
+        "engineValidateInstanceUs": 21.869883333333334,
+        "ts5Us": 22.020829999999997
+      }
+    ],
+    "runtime": [
+      {
+        "op": "get_type",
+        "set": "concerto-core-test-data",
+        "n": 154,
+        "concertinoUs": 0.07439610389610389,
+        "engineUs": 0.6780064935064936,
+        "ts5Us": 0.8321785714285714
+      },
+      {
+        "op": "get_type",
+        "set": "conformance",
+        "n": 52,
+        "concertinoUs": 0.05439423076923077,
+        "engineUs": 1.028576923076923,
+        "ts5Us": 0.9411826923076924
+      },
+      {
+        "op": "get_type",
+        "set": "synthetic-large",
+        "n": 301,
+        "concertinoUs": 0.05559302325581396,
+        "engineUs": 0.4214568106312292,
+        "ts5Us": 0.5566079734219269
+      },
+      {
+        "op": "derives_from",
+        "set": "concerto-core-test-data",
+        "n": 154,
+        "concertinoUs": 0.3475941558441558,
+        "engineUs": 1.1454155844155844,
+        "ts5Us": 1.242168831168831
+      },
+      {
+        "op": "derives_from",
+        "set": "conformance",
+        "n": 52,
+        "concertinoUs": 0.27707692307692305,
+        "engineUs": 0.7523557692307693,
+        "ts5Us": 1.3222115384615383
+      },
+      {
+        "op": "derives_from",
+        "set": "synthetic-large",
+        "n": 301,
+        "concertinoUs": 0.25697674418604644,
+        "engineUs": 0.7509053156146178,
+        "ts5Us": 0.711671096345515
+      },
+      {
+        "op": "is_assignable_to",
+        "set": "concerto-core-test-data",
+        "n": 154,
+        "concertinoUs": 0.4136623376623377,
+        "engineUs": 1.1599545454545455,
+        "ts5Us": 1.9800162337662337
+      },
+      {
+        "op": "is_assignable_to",
+        "set": "conformance",
+        "n": 52,
+        "concertinoUs": 0.29139423076923077,
+        "engineUs": 0.9202884615384616,
+        "ts5Us": 2.263048076923077
+      },
+      {
+        "op": "is_assignable_to",
+        "set": "synthetic-large",
+        "n": 301,
+        "concertinoUs": 0.2872591362126246,
+        "engineUs": 0.871593023255814,
+        "ts5Us": 1.6146395348837208
+      },
+      {
+        "op": "get_properties",
+        "set": "concerto-core-test-data",
+        "n": 154,
+        "concertinoUs": 0.1545487012987013,
+        "engineUs": 1.2689383116883117,
+        "ts5Us": 3.2748181818181816
+      },
+      {
+        "op": "get_properties",
+        "set": "conformance",
+        "n": 52,
+        "concertinoUs": 0.12604807692307693,
+        "engineUs": 1.600019230769231,
+        "ts5Us": 2.4092019230769233
+      },
+      {
+        "op": "get_properties",
+        "set": "synthetic-large",
+        "n": 301,
+        "concertinoUs": 0.08699169435215948,
+        "engineUs": 0.6414651162790699,
+        "ts5Us": 1.307812292358804
+      }
+    ],
+    "toConcertino": [
+      {
+        "set": "concerto-core-test-data",
+        "files": 35,
+        "docBytes": 94289,
+        "declarations": 164,
+        "toConcertinoUs": 4661.170500000001,
+        "loadUs": 85.4205
+      },
+      {
+        "set": "conformance",
+        "files": 41,
+        "docBytes": 15169,
+        "declarations": 58,
+        "toConcertinoUs": 1433.7735,
+        "loadUs": 14.222
+      },
+      {
+        "set": "synthetic-large",
+        "files": 1,
+        "docBytes": 199008,
+        "declarations": 303,
+        "toConcertinoUs": 5882.3975,
+        "loadUs": 76.648
+      }
+    ]
+  },
+  "concertinoBundles": [
+    {
+      "subpath": ".",
+      "raw": 159875,
+      "gzip": 18501,
+      "newFunction": false
+    },
+    {
+      "subpath": "./schema",
+      "raw": 141151,
+      "gzip": 13279,
+      "newFunction": false
+    },
+    {
+      "subpath": "./runtime",
+      "raw": 5659,
+      "gzip": 2218,
+      "newFunction": false
+    },
+    {
+      "subpath": "./validate",
+      "raw": 20128,
+      "gzip": 6709,
+      "newFunction": false
+    },
+    {
+      "subpath": "./resolve",
+      "raw": 6059,
+      "gzip": 2276,
+      "newFunction": false
+    },
+    {
+      "subpath": "./validate + { load }",
+      "raw": 20318,
+      "gzip": 6781,
+      "newFunction": false
+    },
+    {
+      "subpath": "CTO pipeline: concerto-cto Parser + ./resolve + convertToConcertino",
+      "raw": 173534,
+      "gzip": 39657,
+      "newFunction": false
+    },
+    {
+      "subpath": "CTO pipeline + load + validate (CTO and JSON in, validated instance out)",
+      "raw": 192639,
+      "gzip": 45446,
+      "newFunction": false
+    }
+  ],
+  "load": [
+    {
+      "side": "now",
+      "kind": "core-require",
+      "target": "/home/user/wt/P5-131/concerto/packages/concerto-core/dist",
+      "reps": 20,
+      "firstMs": 193.37326099999999,
+      "loadMs": 158.5443405,
+      "startupMs": 66.3296845,
+      "firstMsMin": 159.375936,
+      "firstMsMax": 240.22006000000002
+    },
+    {
+      "side": "now",
+      "kind": "core-import",
+      "target": "/home/user/wt/P5-131/concerto/packages/concerto-core/dist",
+      "reps": 20,
+      "firstMs": 225.78506549999997,
+      "loadMs": 194.107369,
+      "startupMs": 59.024442,
+      "firstMsMin": 192.01337999999998,
+      "firstMsMax": 297.70495100000005
+    },
+    {
+      "side": "now",
+      "kind": "engine-require",
+      "target": "/home/user/wt/P5-131/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+      "reps": 20,
+      "firstMs": 45.8310635,
+      "loadMs": 24.0793315,
+      "startupMs": 57.0755155,
+      "firstMsMin": 40.25841700000001,
+      "firstMsMax": 61.366686
+    },
+    {
+      "side": "now",
+      "kind": "engine-import",
+      "target": "/home/user/wt/P5-131/concerto-rust/concerto-wasm/pkg/concerto-engine.node.mjs",
+      "reps": 20,
+      "firstMs": 45.742138499999996,
+      "loadMs": 24.2299215,
+      "startupMs": 58.334073000000004,
+      "firstMsMin": 41.956241999999996,
+      "firstMsMax": 65.55702299999999
+    },
+    {
+      "side": "before",
+      "kind": "core-require",
+      "target": "/home/user/wt/P5-131/before/concerto/packages/concerto-core/dist",
+      "reps": 20,
+      "firstMs": 212.888649,
+      "loadMs": 175.553113,
+      "startupMs": 56.673448,
+      "firstMsMin": 192.117862,
+      "firstMsMax": 257.20202700000004
+    },
+    {
+      "side": "before",
+      "kind": "core-import",
+      "target": "/home/user/wt/P5-131/before/concerto/packages/concerto-core/dist",
+      "reps": 20,
+      "firstMs": 264.57216300000005,
+      "loadMs": 225.60161900000003,
+      "startupMs": 62.6819395,
+      "firstMsMin": 242.74163700000003,
+      "firstMsMax": 339.695148
+    },
+    {
+      "side": "before",
+      "kind": "engine-require",
+      "target": "/home/user/wt/P5-131/before/concerto-rust/concerto-wasm/pkg/concerto-engine.cjs",
+      "reps": 20,
+      "firstMs": 77.4947375,
+      "loadMs": 59.3820075,
+      "startupMs": 65.24392800000001,
+      "firstMsMin": 69.272685,
+      "firstMsMax": 90.44874700000001
+    },
+    {
+      "side": "before",
+      "kind": "engine-import",
+      "target": "/home/user/wt/P5-131/before/concerto-rust/concerto-wasm/pkg/concerto-engine.mjs",
+      "reps": 20,
+      "firstMs": 85.52278249999999,
+      "loadMs": 65.074137,
+      "startupMs": 59.594884,
+      "firstMsMin": 73.1984,
+      "firstMsMax": 104.51305699999999
+    },
+    {
+      "side": "ts5",
+      "kind": "core-require",
+      "target": "/home/user/wt/P5-131/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+      "reps": 20,
+      "firstMs": 134.14676749999998,
+      "loadMs": 129.21594649999997,
+      "startupMs": 58.0477335,
+      "firstMsMin": 110.54772100000001,
+      "firstMsMax": 183.16286799999997
+    },
+    {
+      "side": "ts5",
+      "kind": "core-import",
+      "target": "/home/user/wt/P5-131/concerto/migration/oracle/reference/node_modules/@accordproject/concerto-core/dist",
+      "reps": 20,
+      "firstMs": 187.2915935,
+      "loadMs": 179.879004,
+      "startupMs": 67.76427000000001,
+      "firstMsMin": 150.127834,
+      "firstMsMax": 225.5619
+    }
+  ],
+  "sizes": {
+    "tool": "p5131-load",
+    "mode": "sizes",
+    "now": {
+      "pkg": "/home/user/wt/P5-131/concerto-rust/concerto-wasm/pkg",
+      "files": {
+        "concerto-engine.cjs": {
+          "raw": 154438,
+          "gzip": 22209,
+          "brotli": 18635
+        },
+        "concerto-engine.mjs": {
+          "raw": 1011,
+          "gzip": 505,
+          "brotli": 412
+        },
+        "concerto-engine.node.mjs": {
+          "raw": 378,
+          "gzip": 238,
+          "brotli": 207
+        },
+        "concerto_wasm.wasm": {
+          "raw": 3590253,
+          "gzip": 1150797,
+          "brotli": 749044
+        },
+        "package.json": {
+          "raw": 548,
+          "gzip": 264,
+          "brotli": 233
+        },
+        "web/concerto_wasm.d.ts": {
+          "raw": 60035,
+          "gzip": 14342,
+          "brotli": 12650
+        },
+        "web/concerto_wasm.js": {
+          "raw": 154291,
+          "gzip": 22338,
+          "brotli": 18759
+        },
+        "web/package.json": {
+          "raw": 21,
+          "gzip": 41,
+          "brotli": 25
+        }
+      },
+      "wasmBase64": {
+        "raw": 4787004,
+        "gzip": 1674396,
+        "brotli": 1080533
+      }
+    },
+    "before": {
+      "pkg": "/home/user/wt/P5-131/before/concerto-rust/concerto-wasm/pkg",
+      "files": {
+        "concerto-engine.cjs": {
+          "raw": 4926843,
+          "gzip": 1687899,
+          "brotli": 1091530
+        },
+        "concerto-engine.mjs": {
+          "raw": 4771897,
+          "gzip": 1666647,
+          "brotli": 1076885
+        },
+        "concerto_wasm.wasm": {
+          "raw": 3578272,
+          "gzip": 1145447,
+          "brotli": 747478
+        },
+        "package.json": {
+          "raw": 400,
+          "gzip": 235,
+          "brotli": 184
+        },
+        "web/concerto_wasm.d.ts": {
+          "raw": 60075,
+          "gzip": 14406,
+          "brotli": 12669
+        },
+        "web/concerto_wasm.js": {
+          "raw": 155555,
+          "gzip": 22360,
+          "brotli": 18852
+        },
+        "web/concerto_wasm_bg.wasm": {
+          "raw": 3906005,
+          "gzip": 1166321,
+          "brotli": 735527
+        },
+        "web/concerto_wasm_bg.wasm.d.ts": {
+          "raw": 13306,
+          "gzip": 1426,
+          "brotli": 1278
+        },
+        "web/package.json": {
+          "raw": 21,
+          "gzip": 41,
+          "brotli": 25
+        }
+      },
+      "wasmBase64": {
+        "raw": 4771032,
+        "gzip": 1665974,
+        "brotli": 1076557
+      }
+    }
+  },
+  "browser": [
+    {
+      "case": "main-now",
+      "reps": 10,
+      "importMs": 11.5,
+      "initMs": 33.34999999962747,
+      "firstMs": 68.45000000018626,
+      "errors": []
+    },
+    {
+      "case": "main-before",
+      "reps": 10,
+      "importMs": 81.3999999994412,
+      "initMs": 0.049999999813735485,
+      "firstMs": 104.3999999994412,
+      "errors": []
+    },
+    {
+      "case": "worker-now",
+      "reps": 10,
+      "firstMs": 164.59999999962747,
+      "secondMs": 2.3500000005587935,
+      "initMs": 162.29999999981374,
+      "errors": []
+    }
+  ]
+}
