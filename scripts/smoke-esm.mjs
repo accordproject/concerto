@@ -76,7 +76,7 @@ check('model round-trips through Factory and Serializer', () => {
     // registered, which is the one module-level side effect in the tree and so
     // the thing most at risk from tree shaking.
     assert.strictEqual(typeof resource.when.utcOffset, 'function');
-    assert.strictEqual(serializer.toJSON(resource).when, json.when);
+    assert.strictEqual(serializer.toJSON(resource, { utcOffset: 0 }).when, json.when);
     assert.strictEqual(ModelUtil.getNamespace('smoke@1.0.0.Ping'), 'smoke@1.0.0');
 });
 
