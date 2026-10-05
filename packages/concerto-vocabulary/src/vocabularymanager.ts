@@ -107,7 +107,13 @@ class VocabularyManager {
                 throw new Error(errors.map(e => e.message).join(', '));
             }
         }
-        const voc = new Vocabulary(this, options?.enableSafeVocabParsing ? parseVocabularyYaml(contents) : YAML.parse(contents), { skipLocaleValidation: !!this.options.enableVocValidator });
+        // when the validator has run, input is guaranteed to be structurally clean — all values are
+        // explicit strings, no flow collections, no aliases — so parseVocabularyYaml's defensive
+        // coercions are unnecessary and YAML.parse produces identical output at lower cost.
+        // when the validator is off, preserve the existing parse behaviour.
+        const useRawParse = this.options.enableVocValidator || !options?.enableSafeVocabParsing;
+        const parsed = useRawParse ? YAML.parse(contents) : parseVocabularyYaml(contents);
+        const voc = new Vocabulary(this, parsed, { skipLocaleValidation: !!this.options.enableVocValidator });
 
         if (this.vocabularies[voc.getIdentifier()]) {
             throw new Error('Vocabulary has already been added.');
