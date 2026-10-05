@@ -51,26 +51,38 @@ grep -rnE "length *= *\[ *, *\]" --include=*.cto .
 
 ### Browsers (BC-32)
 
-- **Why:** a browser cannot load an ES module synchronously, and the engine is
-  loaded synchronously. So the browser ESM build
-  (`dist/esm-browser/index.mjs`) does not load the engine by itself.
+- **Why:** a browser cannot load an ES module synchronously, and the engine
+  is a WebAssembly module that a browser must fetch and compile. So the
+  browser ESM build (`dist/esm-browser/index.mjs`) does not instantiate the
+  engine when it is imported. In R1 the engine's browser loader has an
+  explicit asynchronous `init()`.
 - **Who:** anyone using `@accordproject/concerto-core` in a browser.
-- **What to do:** use a bundler, which resolves the engine modules at build
-  time. Without a bundler, the page must supply a synchronous `require` on
-  `globalThis.module` before concerto-core is first imported. That `require`
-  must resolve `./engine`, `../engine`, `./engine/<subpath>` and
-  `../engine/<subpath>` (for example `./engine/views` and `../engine/views`)
-  to the matching `dist/esm-browser/engine/*.mjs` modules, and resolve the
-  engine's own imports to the same module instances the public graph uses.
-  `e2e/tests/wasm-engine.spec.ts` shows the pattern. Allow for about
-  2.93-3.05 MB of WebAssembly before compression (P5-72 and P5-76 in
-  `migration/bench/RESULTS.md`).
-- **Pending:** an asynchronous `await init()` entry for browsers and smaller
-  engine builds are proposed in P5-39 (accordproject/concerto-rust#349). They
-  wait on a maintainer decision and are **not in R1** as this guide is written.
-  For browser use without concerto-core or the engine (Concertino, and the
-  CTO pipeline through `@accordproject/concertino/resolve`), and for what
-  runs on the main thread or in a worker in the playgrounds, see
+- **What to do:** call `await init()` from `@accordproject/concerto-engine`
+  before anything that reaches the engine. concerto-core can be imported
+  first. `init()` is idempotent, and it fetches `concerto_wasm.wasm` from
+  next to the loader unless you pass `init({ module_or_path })` (a URL, a
+  `Response`, the bytes or a compiled `WebAssembly.Module`). Ship the `.wasm`
+  with your bundle; Vite and webpack 5 emit it as an asset. The recommended
+  setup is to run concerto-core in a module Worker, which keeps the fetch and
+  compile off the main thread (see the worker recipe in
+  `packages/concerto-engine/README.md` and
+  [Concerto in the browser](./BROWSER.md)).
+- **Still needed:** concerto-core's browser build loads its engine modules
+  through a synchronous `require`. A bundler alone does not resolve
+  them, because the specifiers are not literal. Supply the engine host: the
+  generated engine-host registry from the worker recipe, or an equivalent
+  synchronous `require` on `globalThis.module`, imported before concerto-core. That `require` must resolve
+  `./engine`, `../engine`, `./engine/<subpath>` and `../engine/<subpath>`
+  (for example `./engine/views` and `../engine/views`) to the matching
+  `dist/esm-browser/engine/*.mjs` modules, and resolve the engine's own
+  imports to the same module instances the public graph uses. The worker
+  example shows the pattern, and `e2e/tests/wasm-engine.spec.ts` and
+  `e2e/tests/engine-worker.spec.ts` run it.
+- **Size:** the engine is 3,590,253 bytes of WebAssembly (about 3.6 MB; 1.15
+  MB with gzip, 749 KB with brotli; `migration/bench/RESULTS.md`).
+- **Without concerto-core or the engine:** Concertino and the CTO pipeline
+  through `@accordproject/concertino/resolve` need neither. For what runs on
+  the main thread or in a worker in the playgrounds, see
   [Concerto in the browser](./BROWSER.md) (P5-78 decisions A1 and A2,
   accordproject/concerto-rust#420).
 
@@ -677,7 +689,5 @@ or the return value changes. Update your code if it catches the old class.
 
 These proposals do not ship in R1. They are listed in the
 [changelog](./CHANGELOG.md#not-in-r1): BC-04, BC-09, BC-21, BC-24 (the
-factory-timing part), BC-27, BC-33, BC-35, BC-44, BC-49, the P5-39
-decisions on browser async `init()` and engine size with their follow-ups
-(P5-44 to P5-47), the concerto-cli command for Concertino (P5-78, #420,
+factory-timing part), BC-27, BC-33, BC-35, BC-44, BC-49, the concerto-cli command for Concertino (P5-78, #420,
 decision A5), and the P5-80 and P5-81 spikes (#424, #425).

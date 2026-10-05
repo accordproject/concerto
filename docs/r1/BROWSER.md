@@ -13,7 +13,7 @@ browser loader (BC-32).
 |---|---|---|---|
 | Read a model and check instances (forms, viewers) | a **prebuilt Concertino** document, with `@accordproject/concertino/runtime` and `./validate` | no | about 7 KiB |
 | Edit CTO: parse, resolve imports, report resolution errors, show Concertino | the **CTO pipeline**: `@accordproject/concerto-cto`, then `@accordproject/concertino/resolve`, then the converter | no | about 39 KiB (44 KiB with `./runtime` and `./validate`) |
-| Full model validation, `Serializer`, `Factory`, codegen, template engines | **concerto-core and the engine, in a module Worker** (or bundled for the page) | yes | 3.4 MB of WebAssembly, fetched and compiled by `await init()` |
+| Full model validation, `Serializer`, `Factory`, codegen, template engines | **concerto-core and the engine, in a module Worker** (or bundled for the page) | yes | 3.6 MB of WebAssembly (1.15 MB gzip), fetched and compiled by `await init()` |
 
 Sizes are from `node packages/concertino/scripts/bundleSizes.js` (esbuild,
 ESM, browser, minified, es2022). None of the Concertino and concerto-cto
