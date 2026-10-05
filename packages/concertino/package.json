@@ -81,6 +81,12 @@
       "import": "./dist/esm/validate.mjs",
       "require": "./dist/validate.js"
     },
+    "./resolve": {
+      "types": "./dist/resolve.d.ts",
+      "browser": "./dist/esm-browser/resolve.mjs",
+      "import": "./dist/esm/resolve.mjs",
+      "require": "./dist/resolve.js"
+    },
     "./package.json": "./package.json",
     "./dist/*": "./dist/*"
   },

@@ -61,7 +61,7 @@ The format version is not the npm package version: the package is released with 
 npm install @accordproject/concertino
 ```
 
-Import from the package root and its subpaths (`./schema`, `./runtime`, `./validate`). The package still exports `./dist/*`, but the files under it are not an API: since R1 it no longer ships the pre-release format types `dist/spec/concertino.metamodel@4.0.0-alpha.2` and `dist/spec/concertino.metamodel@1.0.0-alpha.7`, and the format types moved from `dist/spec/concertino.metamodel@5.0.0` to `dist/spec/concertino.metamodel@5.1.0`, so a deep import of one of those paths fails. Import the format types (`IConcertino` and so on) from `@accordproject/concertino` instead.
+Import from the package root and its subpaths (`./schema`, `./runtime`, `./validate`, `./resolve`). The package still exports `./dist/*`, but the files under it are not an API: since R1 it no longer ships the pre-release format types `dist/spec/concertino.metamodel@4.0.0-alpha.2` and `dist/spec/concertino.metamodel@1.0.0-alpha.7`, and the format types moved from `dist/spec/concertino.metamodel@5.0.0` to `dist/spec/concertino.metamodel@5.1.0`, so a deep import of one of those paths fails. Import the format types (`IConcertino` and so on) from `@accordproject/concertino` instead.
 
 ## Usage
 
@@ -153,6 +153,28 @@ It follows the Rust engine's plain-JSON route step for step (concerto-core 5 on 
 
 The options are the Serializer's `validate`, `utcOffset`, `strictQualifiedDateTimes` and `acceptResourcesForRelationships`, plus `newId` and `now` for generated identifiers and timestamps. Not covered: instance generation (`Factory`), `rejectUnknownKeys`, `rejectRequiredNull`, and the Serializer's `toJSON` options for relationships.
 
+### Resolving CTO in the browser
+
+The `./resolve` subpath turns the ASTs of concerto-cto's parser into the resolved AST the converter needs (what `ModelManager.getAst(true)` gives), with no concerto-core or engine. With it, CTO text becomes Concertino in a browser:
+
+```javascript
+const { Parser } = require('@accordproject/concerto-cto');
+const { resolveModels } = require('@accordproject/concertino/resolve');
+const { convertToConcertino } = require('@accordproject/concertino');
+
+const { models, diagnostics } = resolveModels(ctoFiles.map((cto) => Parser.parse(cto)));
+if (diagnostics.length === 0) {
+    const concertino = convertToConcertino(models);
+}
+```
+
+`resolveModels(models, options)` takes an array of model ASTs (or a `Models` AST) and returns `{ models, diagnostics }`. It resolves every type reference to its namespace (with `resolvedName` for an aliased import), and makes the checks concerto-core makes while it resolves names: versioned namespaces and imports, no wildcard imports, imported namespaces and types that exist, no two versions of one namespace, unique and valid declaration names, no clash with an imported or system type, every referenced type declared or imported, and no circular or self inheritance. Each diagnostic has a `code`, a `message` and, in `errorClass`, the class of the exception concerto-core throws for the same problem (`IllegalModelException` or `Error`). The input is not changed.
+
+- `failFast: true` throws a `ResolutionError` at the first problem, named as that exception class, instead of collecting them all.
+- `importAliasing: false` rejects `{Foo as Bar}` imports (default `true`).
+
+It makes 17 of the 46 model checks concerto-core makes. The rest (field names, which declarations may extend which, identifiers, relationships, validators, defaults, decorators and so on) need concerto-core, so a model with no diagnostics can still fail full validation. Nothing is fetched: pass every imported model, external ones included. See [Concerto in the browser](../../docs/r1/BROWSER.md) for where each check runs in the playgrounds and form UIs.
+
 ### Bundle sizes
 
 Each subpath bundled for the browser on its own (esbuild: ESM, browser platform, minified, es2022; `node scripts/bundleSizes.js` after a build). None contains `new Function`, so all run under a strict Content-Security-Policy.
@@ -164,6 +186,9 @@ Each subpath bundled for the browser on its own (esbuild: ESM, browser platform,
 | `./runtime` | 5.5 | 2.2 |
 | `./validate` | 19.7 | 6.6 |
 | `./validate` and `load` from `./runtime` | 19.8 | 6.6 |
+| `./resolve` | 5.9 | 2.2 |
+| CTO pipeline: concerto-cto `Parser`, `./resolve` and `convertToConcertino` | 169.5 | 38.7 |
+| CTO pipeline, then `load` and `validate` (CTO and JSON in, a validated instance out) | 188.1 | 44.4 |
 
 ## Model Size
 

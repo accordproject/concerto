@@ -173,6 +173,7 @@ describe('entry points', () => {
             'export { isValid, checkSchema } from "./schema";',
             'export * from "./runtime";',
             'export * from "./validate";',
+            'export * from "./resolve";',
         ]) {
             const code = await bundle(entry);
             expect(code).not.toMatch(/new Function/);
@@ -191,7 +192,7 @@ describe('entry points', () => {
     it('should list every subpath in the bundle size script', () => {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { subpaths } = require('../scripts/bundleSizes.js');
-        expect(subpaths()).toStrictEqual(['.', './schema', './runtime', './validate']);
+        expect(subpaths()).toStrictEqual(['.', './schema', './runtime', './validate', './resolve']);
     });
 });
 

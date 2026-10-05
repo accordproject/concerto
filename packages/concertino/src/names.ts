@@ -43,3 +43,19 @@ export function getNamespace(fqn: string): string {
     const i = fqn.lastIndexOf('.');
     return i < 0 ? '' : fqn.substring(0, i);
 }
+
+const VERSIONED = /^([^@]+)@(.+)$/;
+
+/**
+ * Split a namespace into its name and version (`a.b@1.0.0` gives
+ * `{ name: 'a.b', version: '1.0.0' }`).
+ * @param {string} ns - The namespace.
+ * @returns {object} The name and the version (`version` undefined when absent).
+ */
+export function parseNamespace(ns: string): { name: string; version?: string } {
+    const m = VERSIONED.exec(ns);
+    return m ? { name: m[1], version: m[2] } : { name: ns };
+}
+
+/** The Concerto primitive type names. */
+export const PRIMITIVES = new Set(['String', 'Boolean', 'DateTime', 'Double', 'Integer', 'Long']);
