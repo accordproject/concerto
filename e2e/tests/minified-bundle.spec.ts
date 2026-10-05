@@ -156,6 +156,8 @@ ${steps.join('\n')}
 import { ModelManager, Factory, Serializer } from '${posix(path.join(CORE_ESM_BROWSER_DIR, 'index.mjs'))}';
 import { BaseException } from '${posix(UTIL_ESM_BROWSER_INDEX)}';
 import { ValidationException } from '${posix(path.join(CORE_ESM_BROWSER_DIR, 'serializer', 'validationexception.mjs'))}';
+// The engine's explicit init (BC-32), which the page awaits before run().
+export { init } from '${posix(path.join(WASM_PKG_DIR, 'concerto-engine.mjs'))}';
 
 const calls = globalThis.__engineCalls;
 // Each fast path has a text binding and a bytes binding; engine/serializer.ts
@@ -275,6 +277,9 @@ test.describe('concerto-core in a minified production bundle (no keepNames)', ()
             logLevel: 'silent',
         });
         bundleText = fs.readFileSync(path.join(outDir, 'bundle.mjs'), 'utf8');
+        // The engine's browser loader fetches `new URL('./concerto_wasm.wasm',
+        // import.meta.url)`, which esbuild leaves relative to the bundle.
+        fs.copyFileSync(path.join(WASM_PKG_DIR, 'concerto_wasm.wasm'), path.join(outDir, 'concerto_wasm.wasm'));
         server = await startEsmServer([{ prefix: '/bundle/', dir: outDir }]);
     });
 
@@ -298,6 +303,7 @@ test.describe('concerto-core in a minified production bundle (no keepNames)', ()
 
         const result = await page.evaluate(async ({ url, model, carJson }) => {
             const bundle = await import(url);
+            await bundle.init();
             return bundle.run(model, carJson);
         }, { url: `${server.baseUrl}/bundle/bundle.mjs`, model: MODEL, carJson: CAR_JSON });
 
