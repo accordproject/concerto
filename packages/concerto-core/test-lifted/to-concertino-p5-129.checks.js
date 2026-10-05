@@ -27,7 +27,8 @@
  *   `@accordproject/concertino/resolve`, `convertToConcertino`);
  * - TC-003: a decorator with a primitive type reference (`@Foo(String)`),
  *   for which `getAst(true)` throws;
- * - TC-004, TC-005: namespace filtering, with the import closure;
+ * - TC-004, TC-005, TC-012: namespace filtering, with the import closure
+ *   (TC-012: a model from an AST with no `imports`);
  * - TC-006 to TC-008: decorator command sets and vocabulary, applied in that
  *   order, with the source manager unchanged;
  * - TC-009 to TC-011: the error classes (unknown or system namespace, a
@@ -336,6 +337,20 @@ concept Q { o Missing m }`, 'u.cto', true);
             return probe(() => mm.toConcertino());
         },
         expect: { ok: ['throws', 'IllegalModelException'] },
+        reference: NO_METHOD,
+    },
+    {
+        id: 'TC-012',
+        covers: 'toConcertino namespaces: a model loaded from an AST with no imports',
+        run: (core) => probe(() => {
+            const mm = new core.ModelManager();
+            mm.fromAst({ $class: `${MM}.Models`, models: [{
+                $class: `${MM}.Model`, namespace: 'n@1.0.0',
+                declarations: [{ $class: `${MM}.ConceptDeclaration`, name: 'N', isAbstract: false, properties: [] }],
+            }] });
+            return Object.keys(mm.toConcertino({ namespaces: ['n@1.0.0'] }).declarations);
+        }),
+        expect: { ok: ['ok', ['n@1.0.0.N']] },
         reference: NO_METHOD,
     },
 ];

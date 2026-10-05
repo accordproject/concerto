@@ -150,6 +150,10 @@ class ModelManager extends BaseModelManager {
         const { models: resolved, diagnostics } = concertinoModule('/resolve').resolveModels(models);
         if (diagnostics.length > 0) {
             const first = diagnostics[0];
+            // The resolver's other class, Error, is for problems (unversioned or
+            // wildcard imports, aliases to primitives) that a ModelFile already
+            // rejects when it is built, with or without validation.
+            /* istanbul ignore next */
             throw first.errorClass === 'IllegalModelException'
                 ? new IllegalModelException(first.message)
                 : new Error(first.message);

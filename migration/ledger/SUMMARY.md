@@ -131,17 +131,17 @@ without a ledger rebuild fails the build.
 | | members | loc | weight | share of weight |
 |---|---|---|---|---|
 | RUST | 67 | 703 | 769 | 8.9% |
-| HYBRID | 93 | 1931 | 2131 | 24.7% |
+| HYBRID | 93 | 1931 | 2131 | 24.6% |
 | PARTIAL | 59 | 611 | 699.5 | 8.1% |
-| TS | 546 | 5272 | 5045 | 58.4% |
-| **total** | 765 | 8517 | 8644.5 | 100% |
+| TS | 546 | 5276 | 5049 | 58.4% |
+| **total** | 765 | 8521 | 8648.5 | 100% |
 
 * **RUST+HYBRID weighted share (new D1 denominator): 33.9%**, HYBRID at full weight
   (confirmed, accordproject/concerto-rust#32). D1 target: >= 70%. **NOT met.**
   PARTIAL rows (section 5b) are not in the numerator.
   Denominator excludes constant markers and `accept()` visitor entry points
   (60 members, weight 90) as not-logic, per the maintainer's
-  decision on open question 2 below. New total weight: 8554.5 (was 8644.5).
+  decision on open question 2 below. New total weight: 8558.5 (was 8648.5).
   D1 stays as defined, with the 70% bar, by maintainer decision (accordproject/concerto-rust#276,
   2026-09-28): the proposed D1′ was not adopted, and the gate reports §0.4 as FAIL at this figure.
 * **Old figure (previous denominator, all 765 members): 33.5%.**
@@ -167,7 +167,7 @@ By weight category:
 | category | members | loc | weight | RUST w | HYBRID w | PARTIAL w | TS w |
 |---|---|---|---|---|---|---|---|
 | glue (x0.5) | 365 | 1280 | 640 | 37 | 49 | 40.5 | 513.5 |
-| logic (x1) | 324 | 5702 | 5702 | 423 | 1335 | 272 | 3672 |
+| logic (x1) | 324 | 5706 | 5706 | 423 | 1335 | 272 | 3676 |
 | validation (x1.5) | 76 | 1535 | 2302.5 | 309 | 747 | 387 | 859.5 |
 
 ## 2. By planned task
@@ -197,7 +197,7 @@ By weight category:
 | P5-100 | 3 | 6 | 0 |
 | P5-10a | 8 | 83.5 | 0 |
 | P5-10b | 28 | 324 | 0 |
-| P5-129 | 1 | 46 | 0 |
+| P5-129 | 1 | 50 | 0 |
 | P5-12c | 3 | 73 | 3 |
 | P5-14 | 4 | 54.5 | 0 |
 | P5-19 | 2 | 26 | 0 |
@@ -275,7 +275,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | model/typed.ts | 12 | 0 / 0 / 0 / 12 | 78 | 0 / 0 / 0 / 78 | 0.0% | - |
 | model/validatedresource.ts | 4 | 0 / 3 / 0 / 1 | 75 | 0 / 73 / 0 / 2 | 97.3% | P5-12c |
 | modelloader.ts | 3 | 0 / 0 / 0 / 3 | 56 | 0 / 0 / 0 / 56 | 0.0% | - |
-| modelmanager.ts | 4 | 0 / 0 / 0 / 4 | 64.5 | 0 / 0 / 0 / 64.5 | 0.0% | P2-08+P4-08, P5-129 |
+| modelmanager.ts | 4 | 0 / 0 / 0 / 4 | 68.5 | 0 / 0 / 0 / 68.5 | 0.0% | P2-08+P4-08, P5-129 |
 | modelutil.ts | 20 | 14 / 0 / 6 / 0 | 126 | 84.5 / 0 / 41.5 / 0 | 67.1% | P2-01+P4-03 |
 | rootmodelhelper.ts | 1 | 0 / 0 / 0 / 1 | 16 | 0 / 0 / 0 / 16 | 0.0% | P2-08+P4-08 |
 | securityexception.ts | 1 | 0 / 0 / 0 / 1 | 1.5 | 0 / 0 / 0 / 1.5 | 0.0% | P1-05+P4-02 |
@@ -291,7 +291,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 4. TS items (stay in TypeScript) with reasons
 
-546 members, weight 5045 (58.4%).
+546 members, weight 5049 (58.4%).
 
 ### 4a. Grouped by reason
 
@@ -314,9 +314,9 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust (lazy views: reads a file's one-call Rust view snapshot into per-node lookups) | 1 | 75 | `engine/views-batch.ts` computeBatch |
 | trivial accessor: returns a field of the view, which P5-10 lazy views fill from the Rust snapshot (or the wrapped AST); a Rust crossing (0.2-1.4 us) costs 2-30x the read (0.1-0.2 us). Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 43 | 70 | `basemodelmanager.ts` BaseModelManager.getDecoratorValidation; `introspect/classdeclaration.ts` ClassDeclaration.isAbstract; `introspect/classdeclaration.ts` ClassDeclaration.isExplicitlyIdentified; `introspect/classdeclaration.ts` ClassDeclaration.getOwnProperties; `introspect/collectionsizevalidator.ts` CollectionSizeValidator.getMinSize; `introspect/collectionsizevalidator.ts` CollectionSizeValidator.getMaxSize; `introspect/declaration.ts` Declaration.getModelFile; `introspect/declaration.ts` Declaration.getName; `introspect/declaration.ts` Declaration.getFullyQualifiedName; `introspect/decorator.ts` Decorator.getParent; `introspect/decorator.ts` Decorator.getName; `introspect/decorator.ts` Decorator.getArguments; `introspect/field.ts` Field.getValidator; `introspect/field.ts` Field.getDefaultValue; `introspect/introspector.ts` Introspector.getModelManager; `introspect/mapdeclaration.ts` MapDeclaration.getKey; `introspect/mapdeclaration.ts` MapDeclaration.getValue; `introspect/mapkeytype.ts` MapKeyType.getParent; `introspect/mapkeytype.ts` MapKeyType.getType; `introspect/mapvaluetype.ts` MapValueType.getParent; `introspect/mapvaluetype.ts` MapValueType.getType; `introspect/modelfile.ts` ModelFile.isExternal; `introspect/modelfile.ts` ModelFile.getModelManager; `introspect/modelfile.ts` ModelFile.getNamespace; `introspect/modelfile.ts` ModelFile.getName; `introspect/modelfile.ts` ModelFile.getAllDeclarations; `introspect/modelfile.ts` ModelFile.getDefinitions; `introspect/modelfile.ts` ModelFile.getAst; `introspect/modelfile.ts` ModelFile.getConcertoVersion; `introspect/numbervalidator.ts` NumberValidator.getLowerBound; `introspect/numbervalidator.ts` NumberValidator.getUpperBound; `introspect/property.ts` Property.getParent; `introspect/property.ts` Property.getName; `introspect/property.ts` Property.getType; `introspect/property.ts` Property.isOptional; `introspect/property.ts` Property.isArray; `introspect/property.ts` Property.getSizeValidator; `introspect/scalardeclaration.ts` ScalarDeclaration.getType; `introspect/scalardeclaration.ts` ScalarDeclaration.getValidator; `introspect/scalardeclaration.ts` ScalarDeclaration.getDefaultValue; `introspect/stringvalidator.ts` StringValidator.getMinLength; `introspect/stringvalidator.ts` StringValidator.getMaxLength; `introspect/validator.ts` Validator.getFieldOrScalarDeclaration |
 | async file/URL loading orchestration (fs, FileLoader, concerto-cto Parser); all model work goes through the ledgered ModelManager methods it calls | 3 | 56 | `modelloader.ts` ModelLoader.addModel; `modelloader.ts` ModelLoader.loadModelManager; `modelloader.ts` ModelLoader.loadModelManagerFromModelFiles |
+| BC-54 (P5-129): orchestration over DecoratorManager.decorateModels (RUST) and getAst, then @accordproject/concertino's JS resolver and converter; Concertino is a JS package, and a Rust-owned to_concertino waits for a stable format (decision A5) | 1 | 50 | `modelmanager.ts` ModelManager.toConcertino |
 | visitor fallback path: runs only when Serializer.fromJSON/toJSON hit EngineFastPathUnsupported (a lone surrogate, a cycle or a wire shape the codec rejects) or when a caller drives the visitor directly; the fast path runs the same work in Rust in one call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (Rust serializer.rs carries the same checks and messages) | 2 | 48 | `serializer/jsonpopulator.ts` getAssignableProperties; `serializer/jsonpopulator.ts` validateProperties |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-28: applies the header Rust computed at staging to the ModelFile view) | 1 | 46 | `engine/views-staging.ts` applyStagedFileHeader |
-| BC-54 (P5-129): orchestration over DecoratorManager.decorateModels (RUST) and getAst, then @accordproject/concertino's JS resolver and converter; Concertino is a JS package, and a Rust-owned to_concertino waits for a stable format (decision A5) | 1 | 46 | `modelmanager.ts` ModelManager.toConcertino |
 | fixed-data builder: returns or adds a fixed system model/field definition (rootmodel.json/decoratormodel.json are duplicated in concerto-rust src/); no model logic to port. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) | 5 | 44 | `decoratormodelhelper.ts` getDecoratorModel; `introspect/classdeclaration.ts` ClassDeclaration.addTimestampField; `introspect/classdeclaration.ts` ClassDeclaration.addIdentifierField; `introspect/metamodel.ts` newMetaModelManager; `rootmodelhelper.ts` getRootModel |
 | engine shim (P4-02/P5-02): plumbing that loads or calls the Rust engine, not ported TS model logic; the model behaviour itself runs in Rust. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-27: registers the model files Rust staged for a DCS result manager) | 1 | 43 | `engine/views-staging.ts` adoptStagedModels |
 | visitor fallback path: runs only when Serializer.fromJSON/toJSON hit EngineFastPathUnsupported (a lone surrogate, a cycle or a wire shape the codec rejects) or when a caller drives the visitor directly; the fast path runs the same work in Rust in one call. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) (P5-58: the relationship property and relationship map value path) | 2 | 42 | `serializer/jsongenerator.ts` JSONGenerator.convertRelationship; `serializer/jsonpopulator.ts` JSONPopulator.convertRelationship |
@@ -958,7 +958,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 | modelmanager.ts | (function) | ctoProcessFile | function | 11 | 11 | processFile callback is the pluggable parse seam: CTO text is parsed by concerto-cto in JS (tests stub Parser.parse); the resulting AST is what crosses into Rust |
 | modelmanager.ts | ModelManager | constructor | ctor | 3 | 1.5 | subclass wiring only: passes the CTO processFile callback to BaseModelManager |
 | modelmanager.ts | ModelManager | addCTOModel | method | 6 | 6 | orchestration: parses CTO text through the JS processFile callback (concerto-cto) and forwards to RUST members, where the Rust work is counted; this body makes no engine call. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) (then addModelFile) |
-| modelmanager.ts | ModelManager | toConcertino | method | 46 | 46 | BC-54 (P5-129): orchestration over DecoratorManager.decorateModels (RUST) and getAst, then @accordproject/concertino's JS resolver and converter; Concertino is a JS package, and a Rust-owned to_concertino waits for a stable format (decision A5) |
+| modelmanager.ts | ModelManager | toConcertino | method | 50 | 50 | BC-54 (P5-129): orchestration over DecoratorManager.decorateModels (RUST) and getAst, then @accordproject/concertino's JS resolver and converter; Concertino is a JS package, and a Rust-owned to_concertino waits for a stable format (decision A5) |
 | rootmodelhelper.ts | (function) | getRootModel | function | 16 | 16 | fixed-data builder: returns or adds a fixed system model/field definition (rootmodel.json/decoratormodel.json are duplicated in concerto-rust src/); no model logic to port. Stays TS by maintainer decision (accordproject/concerto-rust#276, 2026-09-28) |
 | securityexception.ts | SecurityException | constructor | ctor | 3 | 1.5 | exception class must stay a JS Error subclass (instanceof / class checks in ~81 assertions, M tests construct it directly); Rust supplies kind/code/params/location and the P4-02 error mapper instantiates this class |
 | serializer.ts | (function) | warnLenientDateTimesIgnored | function | 13 | 13 | JS process warning (P5-24): strictQualifiedDateTimes: false is ignored; no model logic. Classified at the P5-64 re-audit (accordproject/concerto-rust#401) |
@@ -1052,7 +1052,7 @@ Columns: members; count RUST / HYBRID / PARTIAL / TS; total weight; weight RUST 
 
 ## 5. HYBRID items with reasons
 
-93 members, weight 2131 (24.7%).
+93 members, weight 2131 (24.6%).
 
 | file | class | member | weight | what stays in JS |
 |---|---|---|---|---|

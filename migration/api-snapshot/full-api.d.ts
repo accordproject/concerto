@@ -4852,7 +4852,7 @@ export interface ConcertinoVocabularySource {
     generateDecoratorCommands(modelManager: BaseModelManager, locale: string): unknown;
 }
 /**
- * Options of `ModelManager.toConcertino` (BC-54, P5-129).
+ * Options of `ModelManager.toConcertino` (BC-54).
  */
 export interface ToConcertinoOptions {
     /**
