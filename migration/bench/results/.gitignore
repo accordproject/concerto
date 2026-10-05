@@ -1,0 +1,27 @@
+# P5-135 (accordproject/concerto-rust#516): raw benchmark outputs are not
+# committed. They go into a tarball on a draft release
+# (bin/archive-results.mjs, then gh release upload; bin/fetch-results.sh
+# restores them), and only the files below stay in git: summaries, charts,
+# logs and scripts. This mirrors keepInGit() in bin/archive-results.mjs,
+# which also keeps a chart only while it is under 200 KB.
+*
+!*/
+!.gitignore
+!MANIFEST
+!*.md
+!tables.json
+!*-tables.json
+!*.svg
+!run-log.txt
+!*-run-log.txt
+!timed-loads.txt
+!summary.txt
+!*.sh
+!*.cjs
+!*.mjs
+!*.js
+!*.py
+!*.patch
+!*.rs
+!Cargo.toml
+!Cargo.lock

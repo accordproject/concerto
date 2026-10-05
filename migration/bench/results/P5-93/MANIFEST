@@ -1,0 +1,58 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-93
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-93
+dir	migration/bench/results/P5-93
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-93.tgz
+sha256	6e3511661271cc53c977b6eef043a4340b20ee2eaad491f5259a60e0fa118dbb
+tar_sha256	f61752a9d949fe39b171193ec68d9ba263299c8b0f3e3b24eba167201cc340b7
+files	42
+bytes	46749
+archived:
+ir.tsv
+timed/after-1-add_cto_model.json
+timed/after-1-add_model_file.json
+timed/after-1-modelfile_new.json
+timed/after-2-add_cto_model.json
+timed/after-2-add_model_file.json
+timed/after-2-modelfile_new.json
+timed/after-3-add_cto_model.json
+timed/after-3-add_model_file.json
+timed/after-3-modelfile_new.json
+timed/before-1-add_cto_model.json
+timed/before-1-add_model_file.json
+timed/before-1-modelfile_new.json
+timed/before-2-add_cto_model.json
+timed/before-2-add_model_file.json
+timed/before-2-modelfile_new.json
+timed/before-3-add_cto_model.json
+timed/before-3-add_model_file.json
+timed/before-3-modelfile_new.json
+timed/native-after-1.tsv
+timed/native-after-2.tsv
+timed/native-after-3.tsv
+timed/native-alloc-after.tsv
+timed/native-alloc-before.tsv
+timed/native-before-1.tsv
+timed/native-before-2.tsv
+timed/native-before-3.tsv
+timed/ts-1-add_cto_model.json
+timed/ts-1-add_model_file.json
+timed/ts-1-modelfile_new.json
+timed/ts-2-add_cto_model.json
+timed/ts-2-add_model_file.json
+timed/ts-2-modelfile_new.json
+timed/ts-3-add_cto_model.json
+timed/ts-3-add_model_file.json
+timed/ts-3-modelfile_new.json
+timed/typedread-after-1.json
+timed/typedread-after-2.json
+timed/typedread-after-3.json
+timed/typedread-before-1.json
+timed/typedread-before-2.json
+timed/typedread-before-3.json

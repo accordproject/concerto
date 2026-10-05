@@ -1,9 +1,0 @@
-gate ok after 300s: load 0.15 2.96 3.86
-round 1 start 0.15 2.96 3.86
-round 1 end 0.41 2.88 3.82
-gate ok after 300s: load 0.41 2.88 3.82
-round 2 start 0.41 2.88 3.82
-round 2 end 0.54 2.79 3.77
-gate ok after 300s: load 0.54 2.79 3.77
-round 3 start 0.54 2.79 3.77
-round 3 end 0.67 2.67 3.71

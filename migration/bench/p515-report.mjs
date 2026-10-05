@@ -12,8 +12,10 @@
 
 import fs from 'fs';
 import path from 'path';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const [outDir, ...rest] = process.argv.slice(2);
+requireRawInputs(outDir);
 if (!outDir) {
     console.error('usage: p515-report.mjs <out dir> [--json]');
     process.exit(2);
@@ -126,27 +128,35 @@ const rows = keys.map((k) => {
 });
 rows.sort((a, b) => (b.apiVsTs || 0) - (a.apiVsTs || 0));
 
+// P5-135: no process.exit() after the JSON. Exiting straight away can cut
+// piped stdout short (pipes are asynchronous on macOS), and the table
+// scripts read this output through a pipe.
 if (asJson) {
     console.log(JSON.stringify({ rounds, rows }, null, 2));
-    process.exit(0);
+} else {
+    printTable();
 }
-const f = (x, d = 2) => (Number.isFinite(x) ? x.toFixed(d) : '-');
-const us = (x) => (Number.isFinite(x) ? (x >= 1000 ? `${(x / 1000).toFixed(2)} ms` : `${x.toFixed(x < 10 ? 2 : 1)} us`) : '-');
-const pct = (x) => (Number.isFinite(x) ? `${Math.round(x)}%` : '-');
-console.log(`Rounds: ${rounds.join(', ') || 'none'}. Ratios are Rust / TS 5.0.0 (> 1 = slower than TS).\n`);
-console.log('| op | set | TS 5.0.0 | crate | x TS crate | TS API | x TS API | crossings/item | in-engine | TS-API stages | crate alloc+free / clone / hash |');
-console.log('|---|---|---:|---:|---:|---:|---:|---:|---:|---|---|');
-for (const r of rows) {
-    const stages = r.stages ? Object.entries(r.stages).slice(0, 3).map(([k, v]) => `${k} ${v}%`).join(', ') : '-';
-    const nat = r.native ? `${pct(r.native.allocFree)} / ${pct(r.native.clone)} / ${pct(r.native.hash)}${r.native.set !== r.set ? ` (${r.native.set})` : ''}` : '-';
-    const crateCell = Number.isFinite(r.crateRebuildUs) ? `${us(r.crateUs)} (rebuild ${us(r.crateRebuildUs)})` : us(r.crateUs);
-    const crateX = Number.isFinite(r.crateRebuildVsTs) ? `${f(r.crateVsTs)} (${f(r.crateRebuildVsTs)})` : f(r.crateVsTs);
-    console.log(`| ${r.op} | ${r.set} | ${us(r.tsRefUs)} | ${crateCell} | ${crateX} | ${us(r.rustApiUs)} | ${f(r.apiVsTs)} | ${f(r.crossingsPerItem, 1)} | ${pct(100 * r.inEngineShare)} | ${stages} | ${nat} |`);
-}
-const errs = rows.filter((r) => r.errors.length);
-if (errs.length) {
-    console.log('\nErrors:');
-    for (const r of errs) {
-        console.log(`- ${r.op}/${r.set}: ${[...new Set(r.errors)].join('; ')}`);
+
+/** Prints the markdown table (the default, without --json). */
+function printTable() {
+    const f = (x, d = 2) => (Number.isFinite(x) ? x.toFixed(d) : '-');
+    const us = (x) => (Number.isFinite(x) ? (x >= 1000 ? `${(x / 1000).toFixed(2)} ms` : `${x.toFixed(x < 10 ? 2 : 1)} us`) : '-');
+    const pct = (x) => (Number.isFinite(x) ? `${Math.round(x)}%` : '-');
+    console.log(`Rounds: ${rounds.join(', ') || 'none'}. Ratios are Rust / TS 5.0.0 (> 1 = slower than TS).\n`);
+    console.log('| op | set | TS 5.0.0 | crate | x TS crate | TS API | x TS API | crossings/item | in-engine | TS-API stages | crate alloc+free / clone / hash |');
+    console.log('|---|---|---:|---:|---:|---:|---:|---:|---:|---|---|');
+    for (const r of rows) {
+        const stages = r.stages ? Object.entries(r.stages).slice(0, 3).map(([k, v]) => `${k} ${v}%`).join(', ') : '-';
+        const nat = r.native ? `${pct(r.native.allocFree)} / ${pct(r.native.clone)} / ${pct(r.native.hash)}${r.native.set !== r.set ? ` (${r.native.set})` : ''}` : '-';
+        const crateCell = Number.isFinite(r.crateRebuildUs) ? `${us(r.crateUs)} (rebuild ${us(r.crateRebuildUs)})` : us(r.crateUs);
+        const crateX = Number.isFinite(r.crateRebuildVsTs) ? `${f(r.crateVsTs)} (${f(r.crateRebuildVsTs)})` : f(r.crateVsTs);
+        console.log(`| ${r.op} | ${r.set} | ${us(r.tsRefUs)} | ${crateCell} | ${crateX} | ${us(r.rustApiUs)} | ${f(r.apiVsTs)} | ${f(r.crossingsPerItem, 1)} | ${pct(100 * r.inEngineShare)} | ${stages} | ${nat} |`);
+    }
+    const errs = rows.filter((r) => r.errors.length);
+    if (errs.length) {
+        console.log('\nErrors:');
+        for (const r of errs) {
+            console.log(`- ${r.op}/${r.set}: ${[...new Set(r.errors)].join('; ')}`);
+        }
     }
 }

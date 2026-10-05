@@ -27,10 +27,13 @@ below) - both harnesses load byte-identical models.
   workspace root's `package.json`/lockfile - these ~70 lines do the same
   job tinybench would have.
 - `fixtures/model-sets/` - the committed AST fixtures (see below).
-- `results/` - JSON output from past `run-ts.mjs` runs (one file per run,
-  named by timestamp). `RESULTS.md` in this directory holds the committed
-  baseline table (see "Baseline" below); `results/*.json` is the detail
-  behind the numbers there.
+- `results/` - one directory per benchmark task (`results/<run>/`), plus
+  the JSON output of past `run-ts.mjs` runs (one file per run, named by
+  timestamp). `RESULTS.md` in this directory holds the committed
+  baseline table (see "Baseline" below). Only each run's summaries are in
+  git; its raw outputs are a release asset (see "Raw results" below).
+- `bin/archive-results.mjs`, `bin/fetch-results.sh` - move a run's raw
+  outputs to a release asset, and restore them (see "Raw results" below).
 
 ## Fixtures
 
@@ -169,6 +172,65 @@ instability in the harness. What matters for the exit condition is that
 machine reproduce every workload's median within about 10-15% (see
 `results/RESULTS.md`'s "Reproducibility" note). On a quieter, dedicated
 machine, expect materially tighter per-run CVs too.
+
+## Raw results
+
+Since P5-135 (accordproject/concerto-rust#516) raw benchmark and fuzz
+outputs are not committed. They go into a tarball on a **draft** release
+of `accordproject/concerto-rust`, like the oracle corpus, and only the
+summaries stay in git, so results stay reproducible without thousands of
+raw files in the tree.
+
+- **Committed, per run:** `RESULTS.md`'s section; the run's summaries
+  (`tables.md`, `tables.json`, `*-tables.json` and the other `*.md`);
+  charts (`*.svg`, under 200 KB); `run-log.txt` and `timed-loads.txt`;
+  `summary.txt`; the run's own scripts; and a `MANIFEST`.
+- **Release asset:** everything else - sweep JSON, criterion estimates,
+  V8 profiles, soak samples, typed-read and dhat dumps, bundle and load
+  measurements, and anything else the table scripts read. For fuzz runs
+  (`migration/fuzz/results/`), the per-case `*.jsonl` files and the
+  triage clusters; `run-summary.json`, `divergence-summary.json`,
+  `commits.json`, `state.json` and `run-42.json` stay in git.
+- `results/.gitignore` and `../fuzz/results/.gitignore` allow only the
+  committed kinds, so a new run's raw files can't be committed by
+  accident. `bin/archive-results.mjs` applies the same rule.
+- `MANIFEST` (one per archived directory) names the release, the asset,
+  its sha256 (and the sha256 of the uncompressed tar, which does not
+  depend on the gzip build), the file count and every archived path.
+
+The first archive is the draft release
+`migration-results-archive-2026-10-05`: one asset per directory
+(`bench-<run>.tgz`, `bench-root.tgz` for the top-level `run-ts.mjs` JSON,
+`fuzz-<run>.tgz`, `fuzz-root.tgz`, and `tags-mocha-results.tgz` /
+`logs-mocha-results.tgz` for the two generated mocha JSON files under
+`migration/tags/` and `migration/logs/`).
+
+To restore raw outputs, for example before re-running a table script:
+
+```sh
+sh migration/bench/bin/fetch-results.sh P5-131 P5-121   # or bench-P5-131, fuzz-stage2, all
+```
+
+It downloads each asset with `gh release download` (a draft, so it needs
+a GitHub login that can see it), checks the sha256 against `MANIFEST` and
+extracts into the run's directory. The table scripts check their inputs
+first: when an archived input is missing they stop with the
+`fetch-results.sh` command to run, instead of failing obscurely or
+printing empty rows. For example, P5-131's tables need `P5-131` and,
+for the cross-run columns, `P5-121`.
+
+A new benchmark run: write the raw outputs under `results/<run>/` as
+usual, commit the summaries, and archive the rest:
+
+```sh
+node migration/bench/bin/archive-results.mjs --release <draft release> --out <dir> --remove migration/bench/results/<run>
+gh release upload <draft release> -R accordproject/concerto-rust <dir>/bench-<run>.tgz   # or gh release create <tag> --draft
+git add migration/bench/results/<run>/MANIFEST
+```
+
+The tarball is deterministic (sorted entries, fixed mtime, uid/gid 0,
+`gzip -n -9`). Never publish the draft releases, and never delete or
+change an existing release's assets: a MANIFEST pins each sha256.
 
 ## Baseline
 

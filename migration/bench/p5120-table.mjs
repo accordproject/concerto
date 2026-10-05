@@ -15,9 +15,11 @@
 import fs from 'fs';
 import path from 'path';
 import url from 'url';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const OUT = path.resolve(process.argv[2] || path.join(__dirname, 'results', 'P5-120'));
+requireRawInputs(OUT);
 const SETS = ['conformance', 'synthetic-large'];
 const SIDES = [
     ['ts5-a', 'TS 5.0.0, new manager per request', '#d1495b'],

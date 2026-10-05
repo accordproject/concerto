@@ -8,8 +8,10 @@
 
 import fs from 'fs';
 import path from 'path';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const OUT = process.argv[2] || 'migration/bench/results/P5-108';
+requireRawInputs(OUT);
 const SETS = ['concerto-core-test-data', 'conformance', 'synthetic-large'];
 const NS = [1, 16, 64];
 const SIDES = [

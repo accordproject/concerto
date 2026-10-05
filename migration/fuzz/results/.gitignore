@@ -1,0 +1,16 @@
+# P5-135 (accordproject/concerto-rust#516): raw fuzz outputs (the per-case
+# *.jsonl files, triage clusters, shard directories' other files) are not
+# committed. They go into a tarball on a draft release
+# (migration/bench/bin/archive-results.mjs, then gh release upload;
+# migration/bench/bin/fetch-results.sh restores them). Only the run
+# summaries below stay in git; this mirrors keepInGit() in archive-results.mjs.
+*
+!*/
+!.gitignore
+!MANIFEST
+!*.md
+!run-summary.json
+!divergence-summary.json
+!commits.json
+!state.json
+!run-42.json

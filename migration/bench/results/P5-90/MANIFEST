@@ -1,0 +1,89 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-90
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-90
+dir	migration/bench/results/P5-90
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-90.tgz
+sha256	17414086b40f3626783d356a32776ba42ac37f061fba27892e30c21d80a2c37d
+tar_sha256	44246caa17b7ae7e9efa07af0f68fc293ea85c227c3d8ad64412ac7f7defaea4
+files	73
+bytes	209144
+archived:
+count/dlmalloc.json
+count/talc.json
+cpuprof/dlmalloc-add_cto_model-concerto-core-test-data.split.json
+cpuprof/dlmalloc-add_cto_model-conformance.split.json
+cpuprof/dlmalloc-add_cto_model-synthetic-large.split.json
+cpuprof/dlmalloc-add_model_file-concerto-core-test-data.split.json
+cpuprof/dlmalloc-add_model_file-conformance.split.json
+cpuprof/dlmalloc-add_model_file-synthetic-large.split.json
+cpuprof/dlmalloc-extract_cold-concerto-core-test-data.split.json
+cpuprof/dlmalloc-extract_cold-conformance.split.json
+cpuprof/dlmalloc-extract_cold-synthetic-large.split.json
+cpuprof/dlmalloc-modelfile_new-concerto-core-test-data.split.json
+cpuprof/dlmalloc-modelfile_new-conformance.split.json
+cpuprof/dlmalloc-modelfile_new-synthetic-large.split.json
+cpuprof/talc-modelfile_new-concerto-core-test-data.split.json
+cpuprof/talc-modelfile_new-conformance.split.json
+cpuprof/talc-modelfile_new-synthetic-large.split.json
+dhat/concerto-core-test-data.json
+dhat/concerto-core-test-data.txt
+dhat/conformance.json
+dhat/conformance.txt
+dhat/synthetic-large.json
+dhat/synthetic-large.txt
+timed/native-1.tsv
+timed/native-2.tsv
+timed/native-3.tsv
+timed/native-alloc.tsv
+timed/rust-1-add_cto_model.json
+timed/rust-1-add_model_file.json
+timed/rust-1-extract_cold.json
+timed/rust-1-modelfile_new.json
+timed/rust-2-add_cto_model.json
+timed/rust-2-add_model_file.json
+timed/rust-2-extract_cold.json
+timed/rust-2-modelfile_new.json
+timed/rust-3-add_cto_model.json
+timed/rust-3-add_model_file.json
+timed/rust-3-extract_cold.json
+timed/rust-3-modelfile_new.json
+timed/ts-1-add_cto_model.json
+timed/ts-1-add_model_file.json
+timed/ts-1-extract_cold.json
+timed/ts-1-modelfile_new.json
+timed/ts-2-add_cto_model.json
+timed/ts-2-add_model_file.json
+timed/ts-2-extract_cold.json
+timed/ts-2-modelfile_new.json
+timed/ts-3-add_cto_model.json
+timed/ts-3-add_model_file.json
+timed/ts-3-extract_cold.json
+timed/ts-3-modelfile_new.json
+timed/typedread-dlmalloc-1.json
+timed/typedread-dlmalloc-2.json
+timed/typedread-dlmalloc-3.json
+timed/typedread-talc-1.json
+timed/typedread-talc-2.json
+timed/typedread-talc-3.json
+weak/alone-1-add_model_file.json
+weak/alone-1-mm_new.json
+weak/alone-1-modelfile_new.json
+weak/alone-2-add_model_file.json
+weak/alone-2-mm_new.json
+weak/alone-2-modelfile_new.json
+weak/one-process-1.json
+weak/one-process-2.json
+weak/probe-alone-add_model_file-sweep.json
+weak/probe-alone-add_model_file.json
+weak/probe-alone-mm_new-sweep.json
+weak/probe-alone-mm_new.json
+weak/probe-alone-modelfile_new-sweep.json
+weak/probe-alone-modelfile_new.json
+weak/probe-one-process-sweep.json
+weak/probe-one-process.json

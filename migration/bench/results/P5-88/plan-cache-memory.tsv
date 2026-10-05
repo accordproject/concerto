@@ -1,6 +1,0 @@
-base concerto-core-test-data	model_bytes=903223	cache_bytes=951073
-base conformance	model_bytes=270156	cache_bytes=399403
-base synthetic-large	model_bytes=1618767	cache_bytes=2000854
-now concerto-core-test-data	model_bytes=903223	cache_bytes=1193861	plans=120	plan_props=716
-now conformance	model_bytes=270156	cache_bytes=429747	plans=44	plan_props=62
-now synthetic-large	model_bytes=1618767	cache_bytes=2588402	plans=300	plan_props=1799

@@ -6,8 +6,10 @@
 
 import fs from 'fs';
 import path from 'path';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const dir = process.argv[2];
+requireRawInputs(dir);
 const read = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
 const median = (xs) => { const s = xs.slice().sort((a, b) => a - b); return s[Math.floor(s.length / 2)]; };
 const pct = (now, before) => `${((now / before - 1) * 100).toFixed(1)}%`;

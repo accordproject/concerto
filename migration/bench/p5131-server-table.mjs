@@ -16,6 +16,7 @@
 import fs from 'fs';
 import path from 'path';
 import url from 'url';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -24,6 +25,8 @@ const opt = (k) => {
     return i >= 0 ? argv[i + 1] : null;
 };
 const OUT = argv[0] && !argv[0].startsWith('--') ? argv[0] : path.join(__dirname, 'results', 'P5-131', 'server');
+requireRawInputs(OUT, path.join(__dirname, 'results', 'P5-109', 'server', 'time'), path.join(__dirname, 'results', 'P5-121', 'server', 'time'),
+    opt('--shared-now'), opt('--shared-before'));
 const SETS = ['concerto-core-test-data', 'conformance', 'synthetic-large'];
 const NS = [1, 16, 64];
 const SIDES = [

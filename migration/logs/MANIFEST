@@ -1,0 +1,17 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh logs-mocha-results
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	logs-mocha-results
+dir	migration/logs
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	logs-mocha-results.tgz
+sha256	91f2c104fd92407a3f40a0ffac359824729c22784e6bbf85278948d89f543335
+tar_sha256	108bda38ec59a9e602785e9ea61b90590ba825e41c87b23b68d8f4dcc71e9a13
+files	1
+bytes	965598
+archived:
+mocha-results.json

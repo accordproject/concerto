@@ -1,0 +1,70 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-29
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-29
+dir	migration/bench/results/P5-29
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-29.tgz
+sha256	12322f71261692ab47457626976485d5b33f5ee62585102daba1beff3ade7b32
+tar_sha256	f4bfcce28a885ce61055fc9cab972a4316d57711dc3c0a4a0748e3274c2b936d
+files	54
+bytes	181689
+archived:
+before/rust-engine-1.json
+before/rust-engine-2.json
+before/rust-engine-3.json
+before/summary/cpuprof-get_namespaces-concerto-core-test-data.json
+before/summary/cpuprof-get_namespaces-conformance.json
+before/summary/cpuprof-get_namespaces-synthetic-large.json
+before/summary/cpuprof-get_namespaces_first-concerto-core-test-data.json
+before/summary/cpuprof-get_namespaces_first-conformance.json
+before/summary/cpuprof-get_namespaces_first-synthetic-large.json
+before/summary/cpuprof-get_type-concerto-core-test-data.json
+before/summary/cpuprof-get_type-conformance.json
+before/summary/cpuprof-get_type-synthetic-large.json
+before/summary/cpuprof-get_type_first-concerto-core-test-data.json
+before/summary/cpuprof-get_type_first-conformance.json
+before/summary/cpuprof-get_type_first-synthetic-large.json
+before/summary/cpuprof-resolve_type-concerto-core-test-data.json
+before/summary/cpuprof-resolve_type-conformance.json
+before/summary/cpuprof-resolve_type-synthetic-large.json
+before/summary/cpuprof-resolve_type_first-concerto-core-test-data.json
+before/summary/cpuprof-resolve_type_first-conformance.json
+before/summary/cpuprof-resolve_type_first-synthetic-large.json
+before/summary/crossings.json
+before/ts-reference-5.0.0-1.json
+before/ts-reference-5.0.0-2.json
+before/ts-reference-5.0.0-3.json
+compare.json
+now/rust-engine-1.json
+now/rust-engine-2.json
+now/rust-engine-3.json
+now/summary/cpuprof-get_namespaces-concerto-core-test-data.json
+now/summary/cpuprof-get_namespaces-conformance.json
+now/summary/cpuprof-get_namespaces-synthetic-large.json
+now/summary/cpuprof-get_namespaces_first-concerto-core-test-data.json
+now/summary/cpuprof-get_namespaces_first-conformance.json
+now/summary/cpuprof-get_namespaces_first-synthetic-large.json
+now/summary/cpuprof-get_type-concerto-core-test-data.json
+now/summary/cpuprof-get_type-conformance.json
+now/summary/cpuprof-get_type-synthetic-large.json
+now/summary/cpuprof-get_type_first-concerto-core-test-data.json
+now/summary/cpuprof-get_type_first-conformance.json
+now/summary/cpuprof-get_type_first-synthetic-large.json
+now/summary/cpuprof-resolve_type-concerto-core-test-data.json
+now/summary/cpuprof-resolve_type-conformance.json
+now/summary/cpuprof-resolve_type-synthetic-large.json
+now/summary/cpuprof-resolve_type_first-concerto-core-test-data.json
+now/summary/cpuprof-resolve_type_first-conformance.json
+now/summary/cpuprof-resolve_type_first-synthetic-large.json
+now/summary/crossings.json
+now/ts-reference-5.0.0-1.json
+now/ts-reference-5.0.0-2.json
+now/ts-reference-5.0.0-3.json
+profile-loads.txt
+report-before.json
+report-now.json

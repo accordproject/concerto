@@ -1,0 +1,77 @@
+# P5-135 (accordproject/concerto-rust#516): this directory's raw outputs are
+# not in git. They are the tarball below, an asset of a draft release.
+# Restore them (into this directory) with
+#   sh migration/bench/bin/fetch-results.sh bench-P5-27
+# tar_sha256 is the sha256 of the uncompressed tarball, which does not
+# depend on the gzip build.
+name	bench-P5-27
+dir	migration/bench/results/P5-27
+repo	accordproject/concerto-rust
+release	migration-results-archive-2026-10-05
+asset	bench-P5-27.tgz
+sha256	3c1f1255e93b230137c771209fca98d228c8d6b2a14085d0155f2dd2eaae84b9
+tar_sha256	c7818837af7e7879716f27d342b4b4579630a8cee7fdd82a9261f2de2dd4c812
+files	61
+bytes	192591
+archived:
+before/rust-engine-1.json
+before/rust-engine-2.json
+before/rust-engine-3.json
+before/summary/cpuprof-dcs_decorate-concerto-core-test-data.json
+before/summary/cpuprof-dcs_decorate-conformance.json
+before/summary/cpuprof-dcs_decorate-synthetic-large.json
+before/summary/cpuprof-dcs_validate-concerto-core-test-data.json
+before/summary/cpuprof-dcs_validate-conformance.json
+before/summary/cpuprof-dcs_validate-synthetic-large.json
+before/summary/cpuprof-extract_decorators-concerto-core-test-data.json
+before/summary/cpuprof-extract_decorators-conformance.json
+before/summary/cpuprof-extract_decorators-synthetic-large.json
+before/summary/cpuprof-extract_vocabularies-concerto-core-test-data.json
+before/summary/cpuprof-extract_vocabularies-conformance.json
+before/summary/cpuprof-extract_vocabularies-synthetic-large.json
+before/summary/crossings.json
+compare.json
+now/rust-engine-1.json
+now/rust-engine-2.json
+now/rust-engine-3.json
+now/summary/cpuprof-dcs_decorate-concerto-core-test-data.json
+now/summary/cpuprof-dcs_decorate-conformance.json
+now/summary/cpuprof-dcs_decorate-synthetic-large.json
+now/summary/cpuprof-dcs_validate-concerto-core-test-data.json
+now/summary/cpuprof-dcs_validate-conformance.json
+now/summary/cpuprof-dcs_validate-synthetic-large.json
+now/summary/cpuprof-extract_decorators-concerto-core-test-data.json
+now/summary/cpuprof-extract_decorators-conformance.json
+now/summary/cpuprof-extract_decorators-synthetic-large.json
+now/summary/cpuprof-extract_vocabularies-concerto-core-test-data.json
+now/summary/cpuprof-extract_vocabularies-conformance.json
+now/summary/cpuprof-extract_vocabularies-synthetic-large.json
+now/summary/crossings.json
+profile-loads.txt
+report-before.json
+report-now.json
+ts-reference-5.0.0-1.json
+ts-reference-5.0.0-2.json
+ts-reference-5.0.0-3.json
+validate/before/rust-engine-1.json
+validate/before/rust-engine-2.json
+validate/before/rust-engine-3.json
+validate/before/summary/cpuprof-dcs_validate-concerto-core-test-data.json
+validate/before/summary/cpuprof-dcs_validate-conformance.json
+validate/before/summary/cpuprof-dcs_validate-synthetic-large.json
+validate/before/summary/crossings.json
+validate/before/ts-reference-5.0.0-1.json
+validate/before/ts-reference-5.0.0-2.json
+validate/before/ts-reference-5.0.0-3.json
+validate/now/rust-engine-1.json
+validate/now/rust-engine-2.json
+validate/now/rust-engine-3.json
+validate/now/summary/cpuprof-dcs_validate-concerto-core-test-data.json
+validate/now/summary/cpuprof-dcs_validate-conformance.json
+validate/now/summary/cpuprof-dcs_validate-synthetic-large.json
+validate/now/summary/crossings.json
+validate/now/ts-reference-5.0.0-1.json
+validate/now/ts-reference-5.0.0-2.json
+validate/now/ts-reference-5.0.0-3.json
+validate/report-before.json
+validate/report-now.json

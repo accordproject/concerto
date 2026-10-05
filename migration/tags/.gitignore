@@ -1,0 +1,5 @@
+# P5-135 (accordproject/concerto-rust#516): run-tagging.sh's mocha JSON is
+# generated on demand (tag-tests.mjs reads it; nothing reads it at check
+# time). The last committed copy is the tags-mocha-results asset named in
+# MANIFEST (migration/bench/bin/fetch-results.sh tags-mocha-results).
+mocha-results.json

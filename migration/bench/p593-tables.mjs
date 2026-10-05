@@ -11,8 +11,10 @@
 
 import fs from 'fs';
 import path from 'path';
+import { requireRawInputs } from './lib/raw-inputs.mjs';
 
 const R = process.argv[2] || 'migration/bench/results/P5-93';
+requireRawInputs(R);
 const OPS = ['modelfile_new', 'add_model_file', 'add_cto_model'];
 const SETS = ['concerto-core-test-data', 'conformance', 'synthetic-large'];
 const rd = (f) => JSON.parse(fs.readFileSync(path.join(R, f), 'utf8'));

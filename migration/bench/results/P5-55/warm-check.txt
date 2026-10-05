@@ -1,9 +1,0 @@
-P5-55 follow-up warm check (after the timed run, same machine, quiet: load 1.39 1.50 1.54, nothing else running).
-The timed run's synthetic-large warm medians (before 34.68, new 39.80) have per-round spreads of 29-36 and 29-41 ms,
-so warm synthetic-large was re-run alone with more samples, alternating before/new three times:
-  node migration/bench/p515-sweep.mjs --ops extract_decorators --sets synthetic-large --samples 60 --warmup 10
-  (before: CONCERTO_ENGINE_MODULE=scripts/before.cjs P555_REAL_ENGINE=<engine>; new: CONCERTO_ENGINE_MODULE=<engine>)
-before 30.62 ms (cv 27.8%)   new 28.06 ms (cv 24.2%)
-before 27.55 ms (cv 19.4%)   new 28.43 ms (cv 21.4%)
-before 25.74 ms (cv 14.2%)   new 26.01 ms (cv 19.7%)
-median: before 27.55, new 28.06 (new/before 1.02): the warm call is unchanged within the noise.
