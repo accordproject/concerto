@@ -184,8 +184,8 @@ export function validateVocabularyYaml(yamlStr: string): { errors: VocabularyVal
     validateLocale(pairs, errors);
 
     // <validation> top-level 'declarations' field
-    //   required; must be a YAML sequence (block or flow array)
-    //   invalid: missing, null, scalar, mapping
+    //   required; must be a block-style YAML sequence
+    //   invalid: missing, null, scalar, mapping, flow sequence (e.g. declarations: [])
     //   valid: a block sequence `declarations:\n  - Vehicle: ...`
     validateDeclarations(pairs, errors);
 
