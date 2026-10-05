@@ -10,7 +10,12 @@
   },
   "main": "index.js",
   "exports": {
-    "import": "./index.mjs",
+    "browser": "./browser.mjs",
+    "node": {
+      "import": "./index.mjs",
+      "require": "./index.js"
+    },
+    "import": "./browser.mjs",
     "require": "./index.js"
   },
   "repository": {

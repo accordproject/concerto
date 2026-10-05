@@ -34,6 +34,12 @@ import { installEngineBundler, WASM_PKG_DIR } from './support/engine-bundler';
 // must be able to return. Only Node ESM (dist/esm/index.mjs) resolves the
 // engine without outside help.
 //
+// The engine's browser loader instantiates nothing when it is imported:
+// the host calls its explicit, idempotent `await init()`, which fetches the
+// raw .wasm, before the first engine-backed call (BC-32). The stand-in does
+// that after loading concerto-core's engine modules; this test checks that
+// `init()` is idempotent and that the .wasm was fetched once.
+//
 // The engine is served from the concerto-rust checkout next to this one
 // (packages/concerto-engine/README.md), where CI provides it
 // (.github/actions/concerto-engine). concerto-core loads the engine when it
@@ -121,6 +127,22 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
             const scalarDeclaration = modelManager.getType('test@1.0.0.PositiveInteger');
             const validator = scalarDeclaration.getValidator();
 
+            // BC-32: the explicit init() is idempotent, and the .wasm was
+            // fetched once, by the stand-in's call.
+            const engine = (globalThis as any).__concertoBundler.bundled.get('@accordproject/concerto-engine');
+            const initIdempotent = engine.init() === engine.init();
+            await engine.init();
+            const wasmFetches = performance.getEntriesByType('resource')
+                .filter((entry) => entry.name.endsWith('/concerto_wasm.wasm')).length;
+            // An engine error reaches the page through the error factory
+            // concerto-core gave setHost before init() ran.
+            let engineError: string | undefined;
+            try {
+                modelManager.addCTOModel('namespace bad@1.0.0\nconcept A extends Missing {}\n', 'bad.cto');
+            } catch (err) {
+                engineError = (err as Error).constructor.name;
+            }
+
             return {
                 // Which engine specifiers engineloader.ts asked the bundler
                 // stand-in for: proof the results below came through it.
@@ -144,8 +166,10 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
                 // src/engine/rust.ts got from the bundler stand-in, taken
                 // from its registry rather than through `require` so the
                 // read is not counted in viewEngineRequests.
-                hashSeed: (globalThis as any).__concertoBundler.bundled
-                    .get('@accordproject/concerto-engine').hashSeed(),
+                hashSeed: engine.hashSeed(),
+                initIdempotent,
+                wasmFetches,
+                engineError,
             };
         }, server.baseUrl);
 
@@ -163,6 +187,9 @@ test.describe('Concerto rust mode with the WASM engine in a browser (bundler sta
             lowerBound: 0,
             upperBound: null,
             hashSeed: { source: 'crypto', probe: expect.stringMatching(/^[0-9a-f]{16}$/) },
+            initIdempotent: true,
+            wasmFetches: 1,
+            engineError: 'IllegalModelException',
         });
     });
 });

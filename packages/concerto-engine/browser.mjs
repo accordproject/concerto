@@ -13,9 +13,9 @@
  */
 
 // @accordproject/concerto-engine, linked locally (decision D9: not
-// published): re-exports the Node ESM loader that concerto-rust's
+// published): re-exports the browser loader that concerto-rust's
 // concerto-wasm/build.sh writes, from a concerto-rust checkout next to this
-// one. It reads the raw .wasm with readFileSync and is ready once imported;
-// its init() resolves at once. See README.md.
+// one. Nothing is instantiated until `await init()`, which fetches the raw
+// .wasm (BC-32). See README.md.
 
-export * from '../../../concerto-rust/concerto-wasm/pkg/concerto-engine.node.mjs';
+export * from '../../../concerto-rust/concerto-wasm/pkg/concerto-engine.mjs';
