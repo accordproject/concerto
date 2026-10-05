@@ -292,6 +292,12 @@ describe('validateVocabularyYaml', () => {
             errors.some(e => e.path === 'declarations[0]').should.be.true;
         });
 
+        it('reports an error when a declaration value uses a YAML alias', () => {
+            const yaml = loadFixture(INVALID, 'declaration_alias_value.voc');
+            const { errors } = validateVocabularyYaml(yaml);
+            errors.some(e => e.message.includes('alias')).should.be.true;
+        });
+
         it('accepts declaration entries that are mappings', () => {
             const yaml = loadFixture(VALID, 'org.acme@1.0.0_en.voc');
             const { errors } = validateVocabularyYaml(yaml);

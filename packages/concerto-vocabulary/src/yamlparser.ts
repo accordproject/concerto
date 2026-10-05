@@ -27,6 +27,18 @@ function isNonEmptyStringScalar(node: unknown): boolean {
     return YAML.isScalar(node) && typeof (node as YAML.Scalar).value === 'string' && ((node as YAML.Scalar).value as string).length > 0;
 }
 
+function checkValueIsString(value: unknown, path: string, errors: VocabularyValidationError[]): boolean {
+    if (YAML.isAlias(value as YAML.Node)) {
+        errors.push({ path, message: `${path} must not use a YAML alias` });
+        return false;
+    }
+    if (!isNonEmptyStringScalar(value)) {
+        errors.push({ path, message: `${path} must be a non-empty string scalar` });
+        return false;
+    }
+    return true;
+}
+
 function findPair(pairs: Pairs, key: string): YAML.Pair | undefined {
     return pairs.find(p => YAML.isScalar(p.key) && (p.key as YAML.Scalar).value === key) as YAML.Pair | undefined;
 }
@@ -44,8 +56,8 @@ function validateNamespace(pairs: Pairs, errors: VocabularyValidationError[]): v
     const pair = findPair(pairs, 'namespace');
     if (!pair) {
         errors.push({ path: 'namespace', message: 'namespace is required' });
-    } else if (!isNonEmptyStringScalar(pair.value)) {
-        errors.push({ path: 'namespace', message: 'namespace must be a non-empty string scalar' });
+    } else {
+        checkValueIsString(pair.value, 'namespace', errors);
     }
 }
 
@@ -57,9 +69,7 @@ function validateTopLevelNonStructuralValues(pairs: Pairs, errors: VocabularyVal
     for (const pair of pairs) {
         const key = YAML.isScalar(pair.key) ? (pair.key as YAML.Scalar).value as string : null;
         if (!key || STRUCTURAL_KEYS.has(key)) continue;
-        if (!isNonEmptyStringScalar(pair.value)) {
-            errors.push({ path: key, message: `'${key}' must be a non-empty string scalar` });
-        }
+        checkValueIsString(pair.value, key, errors);
     }
 }
 
@@ -80,9 +90,7 @@ function validatePropertyEntries(seq: YAML.YAMLSeq, declIndex: number, errors: V
         for (const pair of propPairs) {
             const key = YAML.isScalar(pair.key) ? (pair.key as YAML.Scalar).value as string : null;
             if (!key) continue;
-            if (!isNonEmptyStringScalar(pair.value)) {
-                errors.push({ path: `${path}.${key}`, message: `${path}.${key} must be a non-empty string scalar` });
-            }
+            checkValueIsString(pair.value, `${path}.${key}`, errors);
         }
     });
 }
@@ -104,9 +112,7 @@ function validateDeclarationEntries(seq: YAML.YAMLSeq, errors: VocabularyValidat
         const primaryPair = declPairs[0];
         if (primaryPair) {
             const key = YAML.isScalar(primaryPair.key) ? (primaryPair.key as YAML.Scalar).value as string : null;
-            if (key && !isNonEmptyStringScalar(primaryPair.value)) {
-                errors.push({ path: `declarations[${i}].${key}`, message: `declarations[${i}].${key} must be a non-empty string scalar` });
-            }
+            if (key) checkValueIsString(primaryPair.value, `declarations[${i}].${key}`, errors);
         }
         for (const pair of declPairs.slice(1)) {
             const key = YAML.isScalar(pair.key) ? (pair.key as YAML.Scalar).value as string : null;
@@ -121,9 +127,7 @@ function validateDeclarationEntries(seq: YAML.YAMLSeq, errors: VocabularyValidat
                 }
                 continue;
             }
-            if (!isNonEmptyStringScalar(pair.value)) {
-                errors.push({ path: `declarations[${i}].${key}`, message: `declarations[${i}].${key} must be a non-empty string scalar` });
-            }
+            checkValueIsString(pair.value, `declarations[${i}].${key}`, errors);
         }
     });
 }
@@ -146,13 +150,12 @@ function validateLocale(pairs: Pairs, errors: VocabularyValidationError[]): void
     const pair = findPair(pairs, 'locale');
     if (!pair) {
         errors.push({ path: 'locale', message: 'locale is required' });
-    } else if (!isNonEmptyStringScalar(pair.value)) {
-        errors.push({ path: 'locale', message: 'locale must be a non-empty string scalar' });
-    } else {
-        const val = (pair.value as YAML.Scalar).value as string;
-        if (!bcp47.parse(val)) {
-            errors.push({ path: 'locale', message: `locale is not a valid BCP-47 tag: '${val}'` });
-        }
+        return;
+    }
+    if (!checkValueIsString(pair.value, 'locale', errors)) return;
+    const val = (pair.value as YAML.Scalar).value as string;
+    if (!bcp47.parse(val)) {
+        errors.push({ path: 'locale', message: `locale is not a valid BCP-47 tag: '${val}'` });
     }
 }
 
