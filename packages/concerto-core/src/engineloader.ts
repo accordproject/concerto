@@ -69,3 +69,17 @@ export function engineValidateInstance(): EngineValidateInstanceModule {
 export function engineHandles(): EngineHandlesModule {
     return engineModules['./engine/handles'] ?? loadEngine('./engine/handles');
 }
+
+/**
+ * `@accordproject/concertino` (`subpath` '') or one of its subpaths
+ * ('/resolve'), loaded at first use by `ModelManager.toConcertino` (BC-54).
+ * concerto-core depends on concertino, never the other way at run time; it is
+ * not imported when concerto-core loads, because concertino's build runs
+ * concerto-core (its types are generated with concerto-codegen).
+ * @param {string} subpath '' or a subpath, such as '/resolve'
+ * @return {*} the module
+ * @internal
+ */
+export function concertinoModule(subpath: '' | '/resolve'): any {
+    return loadEngine(`@accordproject/concertino${subpath}`);
+}

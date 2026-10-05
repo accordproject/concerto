@@ -149,7 +149,8 @@ module.exports = {
             'validateInstanceOrThrow': { c: 'HYBRID', p: 'P5-89', r: 'one engine validateInstance call per document in throw mode, or Serializer.fromJSON for a document of its own type; the validation itself runs in Rust' },
         },
     },
-    'src/engineloader.ts': { c: 'TS', t: NONE, p: NONE, r: 'the one engine loader of the public modules (P5-100, E-3): requires src/engine/ modules once, through a non-literal specifier, and exposes the bindings and the engine modules typed; no model logic' },
+    'src/engineloader.ts': { c: 'TS', t: NONE, p: NONE, r: 'the one engine loader of the public modules (P5-100, E-3): requires src/engine/ modules once, through a non-literal specifier, and exposes the bindings and the engine modules typed; no model logic',
+        m: { concertinoModule: { r: 'BC-54 (P5-129): loads @accordproject/concertino (or a subpath) at first use through the same non-literal require, for ModelManager.toConcertino; no model logic' } } },
     'src/engine/errors.ts': { c: 'TS', t: NONE, p: NONE, r: 'JS error-class mapping for engine results: builds the TS exception (IllegalModelException/TypeNotFoundException/ValidationException/MetamodelException/Error/TypeError) for an engine error payload {kind, code, params, message, location}; Rust decides the kind and renders the message, this only picks the constructor' },
     'src/engine/handles.ts': { c: 'TS', t: NONE, p: NONE, r: 'engine handle release bookkeeping (releaseHandle, withEngineCallbacks; P5-97); no model logic' },
     'src/engine/index.ts': { c: 'TS', t: NONE, p: NONE, r: 'engine loader entry point: requires rust.ts and re-exports the loaded engine; no model logic' },
@@ -364,6 +365,7 @@ module.exports = {
         m: {
             'ModelManager.constructor': { r: 'subclass wiring only: passes the CTO processFile callback to BaseModelManager' },
             'ModelManager.addCTOModel': { c: 'TS', p: 'P2-08+P4-08', r: R.fwdParse + ' (then addModelFile)' },
+            'ModelManager.toConcertino': { c: 'TS', p: 'P5-129', r: 'BC-54 (P5-129): orchestration over DecoratorManager.decorateModels (RUST) and getAst, then @accordproject/concertino\'s JS resolver and converter; Concertino is a JS package, and a Rust-owned to_concertino waits for a stable format (decision A5)' },
         },
     },
     'src/modelutil.ts': {
