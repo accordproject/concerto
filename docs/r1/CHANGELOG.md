@@ -173,11 +173,14 @@ reason, who is affected and the upgrade step for each one.
 - **Node.js 20.19+ (on 20.x) or 22.12+ is required** in every package
   (`engines.node` is `^20.19.0 || >=22.12.0`). Node.js 18 is no longer
   supported. (BC-31)
-- **Browsers need a bundler, or a host that supplies a synchronous `require`,
-  to load the engine.** The browser ESM build does not load the engine module
-  by itself, and the engine adds about 2.93-3.05 MB before compression. The async
-  `init()` entry and the size reductions are pending a maintainer decision
-  (P5-39) and are not in R1 as written. (BC-32)
+- **Browsers must `await init()` before they use the engine, and need a
+  bundler, or a host that supplies a synchronous `require`, to load
+  concerto-core.** The browser ESM build does not instantiate the engine when
+  it is imported. Call `await init()` from `@accordproject/concerto-engine`
+  first, or run concerto-core in a module Worker as the worker recipe in
+  [BROWSER.md](./BROWSER.md) shows. `init()` fetches and compiles the raw
+  `concerto_wasm.wasm`, which is 3,590,253 bytes (about 3.6 MB; 1.15 MB with
+  gzip, 749 KB with brotli). (BC-32)
 - **The `./dist/*` export of `@accordproject/concerto-core` is removed.**
   5.0.0 exported it. In R1, deep imports such as
   `@accordproject/concerto-core/dist/serializer/jsonpopulator` fail with
@@ -353,12 +356,6 @@ release:
 - BC-35: deprecating `Globalize`, or generating its messages from the engine.
 - BC-44: the `utcOffset` units. The option behaves as in 5.x.
 - BC-49: deprecating the per-declaration `validate()` methods.
-- The P5-39 decisions (accordproject/concerto-rust#349): the browser async
-  `init()` and the engine size reductions, and the follow-ups that wait on
-  them: P5-44 (#365, the size wins), P5-45 (#366, async init), P5-46 (#367,
-  unreferenced engine exports) and P5-47 (#368, the CTO parser out of
-  AST-only entry points). Until those are decided, BC-32 ships as described
-  above.
 - The concerto-cli command that produces Concertino from CTO files (P5-78,
   accordproject/concerto-rust#420, decision A5): concerto-cli is released
   from its own repository, and where the command goes is still to be
