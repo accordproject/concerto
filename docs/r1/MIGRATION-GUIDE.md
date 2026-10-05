@@ -31,7 +31,7 @@ JSON need only the Node.js upgrade. Check the following:
 grep -rnE "strictQualifiedDateTimes|regExp *:|metamodelValidation|setCurrentTime" .
 grep -rnE "\.modelFiles\b|DecoratorExtractor|processType|isValidIdentifier" .
 grep -rnE "name *=== *['\"]BaseException['\"]|instanceof +TypeError" .
-grep -rnE "@accordproject/concerto-core/(dist|src)/" .
+grep -rnE "@accordproject/concerto-core/(dist|src)/|@accordproject/concertino/dist/" .
 grep -rnE "length *= *\[ *, *\]" --include=*.cto .
 ```
 
@@ -87,8 +87,15 @@ grep -rnE "length *= *\[ *, *\]" --include=*.cto .
   that the path is not exported. TypeScript type imports from
   `.../dist/...` fail in the same way under `moduleResolution` `node16`,
   `nodenext` or `bundler`. Only concerto-core changes: the other packages keep
-  their `./dist/*` export in R1.
-- **What to do:** import from the package root.
+  their `./dist/*` export in R1. `@accordproject/concertino` keeps it too, but
+  no longer ships the pre-release format types
+  `dist/spec/concertino.metamodel@4.0.0-alpha.2` and
+  `dist/spec/concertino.metamodel@1.0.0-alpha.7`, and its format types moved
+  from `dist/spec/concertino.metamodel@5.0.0` to
+  `dist/spec/concertino.metamodel@5.1.0` (P5-130), so a deep import of one of
+  those paths fails with a module-not-found error.
+- **What to do:** import from the package root. For Concertino, import the
+  format types (`IConcertino` and so on) from `@accordproject/concertino`.
 
   | 5.0.0 deep import (under `@accordproject/concerto-core/dist/`) | R1 |
   |---|---|

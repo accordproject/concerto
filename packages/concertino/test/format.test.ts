@@ -79,7 +79,7 @@ describe('format version', () => {
         expect(readme.match(/"concertinoVersion": "[^"]*"/g)).toStrictEqual([`"concertinoVersion": "${CONCERTINO_VERSION}"`]);
         // Every field the spec adds in 5.1.0 is in the schema.
         const schema = readFileSync(join(__dirname, '..', 'src', 'spec', 'concertino.schema.json'), 'utf8');
-        for (const field of ['systemSuperTypes', 'decoratorOrder', 'isMap', 'isSystem', 'isEnum']) {
+        for (const field of ['systemSuperTypes', 'decoratorOrder', 'fullVocabulary', 'isMap', 'isSystem', 'systemInheritedFrom', 'isEnum']) {
             expect(schema, field).toContain(`"${field}"`);
         }
     });
@@ -140,6 +140,7 @@ describe('5.1.0 additive fixes', () => {
     const doc = expectLosslessRoundTrip(resolved);
     const classes = [...decls.entries()].filter(([fqn, d]) => !R.isSystemType(fqn) && d.isClassDeclaration?.() && !d.isEnum());
     const props = (fqn: string) => doc.declarations[fqn].properties as Record<string, any>;
+    const m = R.load(doc);
 
     it('should cover every kind of class declaration', () => {
         expect(classes.map(([fqn]) => fqn).sort()).toStrictEqual(Object.keys(doc.declarations)
@@ -157,34 +158,49 @@ describe('5.1.0 additive fixes', () => {
         expect(doc.declarations[`${NS}.Plain`].systemSuperTypes).toStrictEqual(['concerto@1.0.0.Concept']);
     });
 
-    it('should list the properties getProperties lists, with the same identifier', () => {
+    it('should give the properties getProperties lists, with the same identifier, to a 5.1.0 reader', () => {
         for (const [fqn, d] of classes) {
-            const p = props(fqn);
-            expect(Object.keys(p).sort(), fqn).toStrictEqual(d.getProperties().map((x: any) => x.getName()).sort());
-            expect(Object.keys(p).filter((k) => !p[k].inheritedFrom).sort(), fqn)
+            expect(R.getProperties(m, fqn).map((x) => x.name).sort(), fqn).toStrictEqual(d.getProperties().map((x: any) => x.getName()).sort());
+            expect(R.getProperties(m, fqn, true).map((x) => x.name).sort(), fqn)
                 .toStrictEqual(d.getOwnProperties().map((x: any) => x.getName()).sort());
-            expect(Object.keys(p).filter((k) => p[k].isIdentifier), fqn)
-                .toStrictEqual(d.getIdentifierFieldName() ? [d.getIdentifierFieldName()] : []);
+            expect(R.getIdentifierFieldName(m, fqn), fqn).toBe(d.getIdentifierFieldName() ?? null);
+            // From the document alone: the properties not inherited
+            // (inheritedFrom) or system-inherited (systemInheritedFrom) are the
+            // own ones, and the system super types add the inherited $identifier.
+            const p = props(fqn);
+            expect(Object.keys(p).filter((k) => !p[k].inheritedFrom && !p[k].systemInheritedFrom).sort(), fqn)
+                .toStrictEqual(d.getOwnProperties().map((x: any) => x.getName()).sort());
+            const systemIdentified = doc.declarations[fqn].systemSuperTypes.some((t: string) => /\.(Asset|Participant)$/.test(t));
+            expect([...Object.keys(p), ...(systemIdentified && !('$identifier' in p) ? ['$identifier'] : [])].sort(), fqn)
+                .toStrictEqual(d.getProperties().map((x: any) => x.getName()).sort());
         }
     });
 
-    it('should write $timestamp and $identifier as system properties, inherited from the system type', () => {
+    it('should write $timestamp as 5.0.0 did, marked as a system property inherited from the system type', () => {
+        // As 5.0.0 wrote it (an own property, no inheritedFrom), plus the 5.1.0 fields.
         for (const fqn of [`${NS}.Transfer`, `${NS}.BigTransfer`]) {
-            expect(props(fqn).$timestamp).toStrictEqual({ name: '$timestamp', type: 'DateTime', inheritedFrom: 'concerto@1.0.0.Transaction', isSystem: true });
+            expect(props(fqn).$timestamp).toStrictEqual({ name: '$timestamp', type: 'DateTime', isSystem: true, systemInheritedFrom: 'concerto@1.0.0.Transaction' });
+            expect(R.getProperties(m, fqn).slice(-1)[0]).toBe(props(fqn).$timestamp);
         }
-        expect(props(`${NS}.Derived`).$timestamp).toStrictEqual({ name: '$timestamp', type: 'DateTime', inheritedFrom: 'concerto@1.0.0.Event', isSystem: true });
+        expect(props(`${NS}.Derived`).$timestamp).toStrictEqual({ name: '$timestamp', type: 'DateTime', isSystem: true, systemInheritedFrom: 'concerto@1.0.0.Event' });
+        // The $identifier inherited from the system type is not written, as in 5.0.0;
+        // a 5.1.0 reader adds it from systemSuperTypes.
+        for (const fqn of [`${NS}.Anonymous`, `${NS}.Visitor`, `${NS}.Car`, `${NS}.Person`, `${NS}.Token`]) {
+            expect(props(fqn), fqn).not.toHaveProperty('$identifier');
+        }
         // System-identified: the inherited $identifier is the identifier.
-        expect(props(`${NS}.Anonymous`).$identifier).toStrictEqual({
-            name: '$identifier', type: 'String', inheritedFrom: 'concerto@1.0.0.Participant', isSystem: true, isIdentifier: true,
-        });
+        expect(R.getProperty(m, `${NS}.Anonymous`, '$identifier')).toMatchObject({ name: '$identifier', type: 'String', isIdentifier: true });
+        expect(R.getIdentifierFieldName(m, `${NS}.Anonymous`)).toBe('$identifier');
         // Identified by a field: the inherited $identifier is not the identifier.
-        expect(props(`${NS}.Car`).$identifier).toStrictEqual({ name: '$identifier', type: 'String', inheritedFrom: 'concerto@1.0.0.Asset', isSystem: true });
+        expect(R.getProperty(m, `${NS}.Car`, '$identifier')).toMatchObject({ name: '$identifier', type: 'String' });
+        expect(R.getIdentifierFieldName(m, `${NS}.Car`)).toBe('vin');
         // `identified`: an own $identifier, as before, now marked as a system property.
         expect(props(`${NS}.Address`).$identifier).toStrictEqual({ name: '$identifier', type: 'String', isIdentifier: true, isSystem: true });
         expect(props(`${NS}.HomeAddress`).$identifier.inheritedFrom).toBe(`${NS}.Address`);
         for (const [fqn] of classes) {
             for (const [name, p] of Object.entries(props(fqn))) {
                 expect(!!p.isSystem, `${fqn}.${name}`).toBe(name === '$identifier' || name === '$timestamp');
+                expect(!!p.systemInheritedFrom, `${fqn}.${name}`).toBe(name === '$timestamp');
             }
         }
     });
@@ -193,7 +209,7 @@ describe('5.1.0 additive fixes', () => {
         let flagged = 0;
         for (const [fqn, d] of classes) {
             for (const property of d.getProperties()) {
-                const p = props(fqn)[property.getName()];
+                const p = R.getProperty(m, fqn, property.getName()) as any;
                 const type = ['$identifier', '$timestamp'].includes(property.getName()) ? undefined : decls.get(property.getFullyQualifiedTypeName());
                 expect(!!p.isEnum, `${fqn}.${p.name}`).toBe(!!type?.isEnum?.());
                 expect(!!p.isMap, `${fqn}.${p.name}`).toBe(!!type?.isMapDeclaration?.());
@@ -219,23 +235,36 @@ describe('5.1.0 additive fixes', () => {
         expect(whole.m.isMap).toBe(true);
     });
 
-    it('should put every vocabulary term in vocabulary, and keep the decorator order', () => {
+    it('should keep metadata as 5.0.0 did, put every vocabulary term in fullVocabulary, and keep the decorator order', () => {
+        // A term that is not in leading position stays in metadata, as in
+        // 5.0.0; fullVocabulary (since 5.1.0) has every term.
         const nickname = props(`${NS}.Anonymous`).nickname;
-        expect(nickname.vocabulary).toStrictEqual({ label: 'Nickname' });
-        expect(nickname.metadata).toStrictEqual({ Hidden: null });
+        expect(nickname).not.toHaveProperty('vocabulary');
+        expect(nickname.metadata).toStrictEqual({ Hidden: null, Term: ['Nickname'] });
+        expect(nickname.fullVocabulary).toStrictEqual({ label: 'Nickname' });
         expect(nickname.decoratorOrder).toStrictEqual(['Hidden', 'Term']);
         // The inherited copy keeps them too.
-        expect(props(`${NS}.Visitor`).nickname.vocabulary).toStrictEqual({ label: 'Nickname' });
+        expect(props(`${NS}.Visitor`).nickname.fullVocabulary).toStrictEqual({ label: 'Nickname' });
         const car = doc.declarations[`${NS}.Car`];
-        expect(car.vocabulary).toStrictEqual({ label: 'A car', additionalTerms: { plural: 'Cars' } });
-        expect(car.metadata).toStrictEqual({ Fast: null });
+        expect(car).not.toHaveProperty('vocabulary');
+        expect(car.metadata).toStrictEqual({ Fast: null, Term: ['A car'], Term_plural: ['Cars'] });
+        expect(car.fullVocabulary).toStrictEqual({ label: 'A car', additionalTerms: { plural: 'Cars' } });
         expect(car.decoratorOrder).toStrictEqual(['Fast', 'Term', 'Term_plural']);
         const green = doc.declarations[`${NS}.Colour`].values.GREEN;
-        expect(green).toStrictEqual({ vocabulary: { label: 'Green colour' }, metadata: { Deprecated: null }, decoratorOrder: ['Deprecated', 'Term'] });
-        // In the usual order there is no decoratorOrder.
+        expect(green).toStrictEqual({
+            metadata: { Deprecated: null, Term: ['Green colour'] }, fullVocabulary: { label: 'Green colour' }, decoratorOrder: ['Deprecated', 'Term'],
+        });
+        // In the usual order there is no decoratorOrder and no fullVocabulary.
         expect(doc.declarations[`${NS}.Colour`].values.RED).toStrictEqual({ vocabulary: { label: 'Red colour' } });
         expect(doc.declarations[`${NS}.Person`]).not.toHaveProperty('decoratorOrder');
-        expect(R.getVocabulary(R.load(doc), `${NS}.Car`)).toStrictEqual({ label: 'A car', additionalTerms: { plural: 'Cars' } });
+        expect(doc.declarations[`${NS}.Person`]).not.toHaveProperty('fullVocabulary');
+        // A 5.1.0 reader reads every term as vocabulary, and no term as metadata.
+        expect(R.getVocabulary(m, `${NS}.Car`)).toStrictEqual({ label: 'A car', additionalTerms: { plural: 'Cars' } });
+        expect(R.getDecorators(m, `${NS}.Car`)).toStrictEqual({ Fast: null });
+        expect(R.getVocabulary(m, `${NS}.Visitor`, 'nickname')).toStrictEqual({ label: 'Nickname' });
+        expect(R.getDecorators(m, `${NS}.Visitor`, 'nickname')).toStrictEqual({ Hidden: null });
+        expect(R.getVocabulary(m, `${NS}.Colour`, 'GREEN')).toStrictEqual({ label: 'Green colour' });
+        expect(R.getDecorators(m, `${NS}.Colour`, 'GREEN')).toStrictEqual({ Deprecated: null });
     });
 
     it('should keep the decorator order of every decorated element, repeated decorators included', () => {
@@ -266,10 +295,17 @@ describe('5.1.0 additive fixes', () => {
         expect(d['o@1.0.0.M'].key.decoratorOrder).toStrictEqual(['A', 'Term']);
         expect(d['o@1.0.0.M'].value.decoratorOrder).toStrictEqual(['B', 'Term']);
         expect(d['o@1.0.0.S'].decoratorOrder).toStrictEqual(['A', 'Term']);
-        // A repeated term stays in metadata, after the first one in vocabulary.
-        expect(d['o@1.0.0.D'].vocabulary).toStrictEqual({ label: 'dup', additionalTerms: { q: 'a' } });
+        // As 5.0.0 wrote them: metadata keeps one entry per name, the last.
+        expect(d['o@1.0.0.D']).not.toHaveProperty('vocabulary');
         expect(d['o@1.0.0.D'].metadata).toStrictEqual({ B: ['1'], Term: ['dup2'], Term_q: ['b'] });
+        // The first of a repeated term is in fullVocabulary, the repeat stays in metadata.
+        expect(d['o@1.0.0.D'].fullVocabulary).toStrictEqual({ label: 'dup', additionalTerms: { q: 'a' } });
         expect(d['o@1.0.0.D'].decoratorOrder).toStrictEqual(['B', 'Term', 'Term', 'Term_q', 'Term_q']);
+        const m = R.load(convertToConcertino(clone(parsed as IModels)));
+        expect(R.getVocabulary(m, 'o@1.0.0.D')).toStrictEqual({ label: 'dup', additionalTerms: { q: 'a' } });
+        expect(R.getDecorators(m, 'o@1.0.0.D')).toStrictEqual({ B: ['1'], Term: ['dup2'], Term_q: ['b'] });
+        expect(R.getVocabulary(m, 'o@1.0.0.C')).toStrictEqual({ additionalTerms: { x: 'x', y: 'y' }, label: 'l' });
+        expect(R.getDecorators(m, 'o@1.0.0.C')).toStrictEqual({ A: null, B: null });
     });
 });
 

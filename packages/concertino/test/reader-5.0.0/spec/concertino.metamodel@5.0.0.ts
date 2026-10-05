@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-// Generated code for namespace: concertino.metamodel@5.1.0
+// Generated code for namespace: concertino.metamodel@5.0.0
 
 // imports
 
@@ -41,8 +41,6 @@ export interface IConcertinoDeclaration extends IConcept {
    type: string;
    vocabulary?: IVocabulary;
    metadata?: MetadataMap;
-   decoratorOrder?: string[];
-   fullVocabulary?: IVocabulary;
 }
 
 export type ConcertinoDeclarationUnion = IConcertinoConceptDeclaration | 
@@ -55,7 +53,6 @@ export interface IConcertinoConceptDeclaration extends IConcertinoDeclaration {
    extends?: string[];
    isAbstract?: boolean;
    prototype?: Prototype;
-   systemSuperTypes?: string[];
 }
 
 export enum Prototype {
@@ -74,8 +71,6 @@ export type EnumValueMap = Record<string, IConcertinoEnumValue>;
 export interface IConcertinoEnumValue extends IConcept {
    vocabulary?: IVocabulary;
    metadata?: MetadataMap;
-   decoratorOrder?: string[];
-   fullVocabulary?: IVocabulary;
 }
 
 export interface IConcertinoScalarDeclaration extends IConcertinoDeclaration {
@@ -126,16 +121,12 @@ export interface IMapKey extends IConcept {
    type: string;
    vocabulary?: IVocabulary;
    metadata?: MetadataMap;
-   decoratorOrder?: string[];
-   fullVocabulary?: IVocabulary;
 }
 
 export interface IMapValue extends IConcept {
    type: string;
    vocabulary?: IVocabulary;
    metadata?: MetadataMap;
-   decoratorOrder?: string[];
-   fullVocabulary?: IVocabulary;
    isRelationship?: boolean;
 }
 
@@ -150,14 +141,9 @@ export interface IConcertinoProperty extends IConcept {
    inheritedFrom?: string;
    isCircular?: boolean;
    isEnum?: boolean;
-   isMap?: boolean;
-   isSystem?: boolean;
-   systemInheritedFrom?: string;
    size?: [number | null, number | null];
    vocabulary?: IVocabulary;
    metadata?: MetadataMap;
-   decoratorOrder?: string[];
-   fullVocabulary?: IVocabulary;
 }
 
 export type ConcertinoPropertyUnion = IConcertinoStringProperty | 

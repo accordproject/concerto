@@ -9,10 +9,12 @@
  * runtime and validator subpaths of @accordproject/concertino reject a
  * document of another major version.
  *
- * 5.1.0 (additive): ConcertinoConceptDeclaration.systemSuperTypes;
- * ConcertinoProperty.isMap and isSystem (and isEnum, which 5.0.0 declared but
- * never wrote); decoratorOrder on every decorated element; inherited system
- * identifiers ($identifier from concerto@1.0.0.Asset and Participant).
+ * 5.1.0 (additive: a 5.0.0 reader reads a 5.1.0 document as it reads the
+ * 5.0.0 document of the same model, since every field it knows is written as
+ * 5.0.0 wrote it): ConcertinoConceptDeclaration.systemSuperTypes;
+ * ConcertinoProperty.isMap, isSystem and systemInheritedFrom (and isEnum,
+ * which 5.0.0 declared but never wrote); decoratorOrder and fullVocabulary on
+ * every decorated element.
  */
 namespace concertino.metamodel@5.1.0
 
@@ -82,11 +84,29 @@ abstract concept ConcertinoDeclaration {
   /**
    * The names of the element's decorators in their source order (since
    * 5.1.0). Written only when that order is not the order a reader rebuilds
-   * from `vocabulary` (`@Term`, then the `@Term_*` additional terms) followed
-   * by `metadata`, for example for `@Foo @Term("x")`. A name repeats when a
-   * decorator does.
+   * from the vocabulary (`@Term`, then the `@Term_*` additional terms)
+   * followed by `metadata`, for example for `@Foo @Term("x")`, and always
+   * with `fullVocabulary`. A name repeats when a decorator does.
+   *
+   * A 5.1.0 reader rebuilds the decorators in this order, taking for each
+   * name the vocabulary term of that name first (from `fullVocabulary` when
+   * there is one, else `vocabulary`), then the `metadata` entry. A
+   * `metadata` entry for a term that `fullVocabulary` holds and `vocabulary`
+   * does not, whose name this list names once, is the 5.0.0 copy of that term
+   * (see `fullVocabulary`), and is not a decorator of its own.
    */
   o String[] decoratorOrder optional
+  /**
+   * Every vocabulary term of the element (`@Term("label")`, `@Term()`,
+   * `@Term_key("term")`), wherever it is among the decorators (since 5.1.0).
+   * Written only when it is not `vocabulary`: `vocabulary` and `metadata` are
+   * written as 5.0.0 wrote them, which keeps a term that is not in leading
+   * position (`@Foo @Term("x")`, say) in `metadata` under its own name. A
+   * 5.1.0 reader reads the vocabulary from `fullVocabulary` when it is there,
+   * and leaves those 5.0.0 copies out of the metadata (see `decoratorOrder`);
+   * a 5.0.0 reader keeps reading `vocabulary` and `metadata`.
+   */
+  o Vocabulary fullVocabulary optional
 }
 
 /**
@@ -102,6 +122,14 @@ concept ConcertinoConceptDeclaration extends ConcertinoDeclaration {
    * `concerto@1.0.0.Asset`, `Participant`, `Transaction` or `Event` for the
    * prototypes, then `concerto@1.0.0.Concept`. `extends` followed by
    * `systemSuperTypes` is concerto-core's getAllSuperTypeDeclarations().
+   *
+   * `concerto@1.0.0.Asset` and `Participant` declare the system property
+   * `$identifier` (String), which a declaration with one of them here
+   * inherits; it is the identifier when no other property is. 5.0.0 did not
+   * write this inherited property and 5.1.0 does not either, so a 5.1.0
+   * reader adds it from here. (`$timestamp`, which `concerto@1.0.0.Transaction`
+   * and `Event` declare, is written as 5.0.0 wrote it: see
+   * `ConcertinoProperty.systemInheritedFrom`.)
    */
   o FullyQualifiedName[] systemSuperTypes optional
 }
@@ -135,6 +163,7 @@ concept ConcertinoEnumValue {
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
   o String[] decoratorOrder optional // since 5.1.0, as ConcertinoDeclaration.decoratorOrder
+  o Vocabulary fullVocabulary optional // since 5.1.0, as ConcertinoDeclaration.fullVocabulary
 }
 
 /**
@@ -186,6 +215,7 @@ concept MapKey {
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
   o String[] decoratorOrder optional // since 5.1.0, as ConcertinoDeclaration.decoratorOrder
+  o Vocabulary fullVocabulary optional // since 5.1.0, as ConcertinoDeclaration.fullVocabulary
 }
 
 /**
@@ -196,6 +226,7 @@ concept MapValue {
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
   o String[] decoratorOrder optional // since 5.1.0, as ConcertinoDeclaration.decoratorOrder
+  o Vocabulary fullVocabulary optional // since 5.1.0, as ConcertinoDeclaration.fullVocabulary
   o Boolean isRelationship optional // For relationship map values
 }
 
@@ -220,11 +251,22 @@ abstract concept ConcertinoProperty {
    * but it is populated by the system (a generated identifier or timestamp).
    */
   o Boolean isSystem optional
+  /**
+   * Since 5.1.0: the system type a system property is inherited from, for
+   * `$timestamp` (`concerto@1.0.0.Transaction` or `Event`). 5.0.0 wrote
+   * `$timestamp` as an own property of each transaction and event, with no
+   * `inheritedFrom`, and 5.1.0 still does; concerto-core lists it among the
+   * inherited properties, after the own ones. A 5.1.0 reader treats a
+   * property with `systemInheritedFrom` as inherited from that type.
+   * `inheritedFrom` keeps its 5.0.0 meaning.
+   */
+  o FullyQualifiedName systemInheritedFrom optional
   @CodeGen_TypeScript_Override("[number | null, number | null]")
   o Integer[] size optional
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
   o String[] decoratorOrder optional // since 5.1.0, as ConcertinoDeclaration.decoratorOrder
+  o Vocabulary fullVocabulary optional // since 5.1.0, as ConcertinoDeclaration.fullVocabulary
 }
 
 concept ConcertinoStringProperty extends ConcertinoProperty {

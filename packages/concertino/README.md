@@ -21,9 +21,9 @@ The Concertino format provides several advantages:
 - **Strict Mode By Default**: Namespaces are always versioned.
 - **Support for Partial Models** Allowing client applications to filter models to tailor payloads for their use cases.
 - **Lossless Conversion** Concertino is designed for 100% lossless roundtrip conversion with Concerto models.
-- **System Types Included**: each concept lists its implicit system super types (`concerto@1.0.0.Asset`, `Concept` and so on) and the system properties it inherits from them (`$identifier`, `$timestamp`), marked `isSystem`.
+- **System Types Included**: each concept lists its implicit system super types (`concerto@1.0.0.Asset`, `Concept` and so on) in `systemSuperTypes`. The `$timestamp` of a transaction or event is marked `isSystem`, with the system type it is inherited from in `systemInheritedFrom`; the `$identifier` an asset or participant inherits follows from `systemSuperTypes` (`./runtime` lists both where concerto-core does).
 - **Property Kinds**: properties whose type is an enum or a map declared in the document are flagged `isEnum` or `isMap`.
-- **Complete Vocabulary**: every `@Term` and `@Term_*` decorator is in `vocabulary`, wherever it is among an element's decorators.
+- **Complete Vocabulary**: every `@Term` and `@Term_*` decorator is in `fullVocabulary` when one is not in leading position (`vocabulary` then has only the leading ones, as in 5.0.0), and `decoratorOrder` keeps the decorators' source order.
 
 > Concerto (Metamodel) → Concertino → Concerto (Metamodel)
 
@@ -39,18 +39,29 @@ The format version follows [semantic versioning](https://semver.org):
 
 `load` (`./runtime`) and every `./validate` entry point accept a document of major version 5 (any `5.x.y`) and throw a `ConcertinoVersionError` for a missing or malformed `concertinoVersion` or another major version, such as the pre-release `4.0.0-alpha.2` format. `checkConcertinoVersion(document)` runs the same check on its own. The schema check (`isValid`) is strict: it describes this package's version, so it rejects a field from a later minor version.
 
+Format 5.1.0 is strictly additive: every field a 5.0.0 reader knows is written as 5.0.0 wrote it, so a 5.0.0 reader reads a 5.1.0 document exactly as it reads the 5.0.0 document of the same model (the same own and inherited properties, metadata and vocabulary, and the same metamodel back). The corrected description is in the new optional fields only, which a 5.1.0 reader (`./runtime`, `./validate` and the converter back to the metamodel) reads:
+
+- `$timestamp` stays an own property of each transaction and event, with no `inheritedFrom`, as in 5.0.0. 5.1.0 marks it `isSystem`, and names the system type it is inherited from (`concerto@1.0.0.Transaction` or `Event`) in `systemInheritedFrom`; a 5.1.0 reader lists it among the inherited properties, after the own ones, as concerto-core does. `inheritedFrom` keeps its 5.0.0 meaning.
+- The `$identifier` an asset or participant inherits from `concerto@1.0.0.Asset` or `Participant` is not written to `properties`, as in 5.0.0; a 5.1.0 reader adds it from `systemSuperTypes` (it is the identifier when no other property is).
+- A vocabulary term that is not in leading position (`@Foo @Term("x")`, say) stays in `metadata` under its own name, as in 5.0.0. 5.1.0 also writes every term of the element to `fullVocabulary`, with the decorators' source order in `decoratorOrder`. A 5.1.0 reader reads the vocabulary from `fullVocabulary` and leaves those 5.0.0 copies out of the metadata, so that converting back to the metamodel does not repeat a decorator.
+- `isEnum`, which 5.0.0 declared but never wrote, is written with the meaning 5.0.0 gave it (the type is an enum declared in the document).
+
+`test/additive.test.ts` checks this over every model set the tests use: it reads each 5.1.0 document with a pinned copy of the 5.0.0 reader, converter and schema (`test/reader-5.0.0`), and compares what it reads with what it reads from the 5.0.0 document. Reading a 5.1.0 document with the 5.0.0 *schema check* is the exception: that check is strict and rejects the fields 5.1.0 adds.
+
 The format version is not the npm package version: the package is released with the rest of the Concerto monorepo, and a new major release of the package does not change the format version.
 
 | format version | changes |
 |---|---|
 | 5.0.0 | the format of Concertino 5.0.0 |
-| 5.1.0 | additive: `systemSuperTypes` on concept declarations; the inherited system properties (`$identifier` of assets and participants, `$timestamp` of transactions and events, now inherited from the system type rather than an own property), marked `isSystem`; `isEnum` (declared in 5.0.0 but never written) and `isMap` on properties; `decoratorOrder` on every decorated element, so that every vocabulary term goes to `vocabulary` (5.0.0 kept a term that was not in leading position in `metadata`) |
+| 5.1.0 | additive (every 5.0.0 field written as 5.0.0 wrote it): `systemSuperTypes` on concept declarations, from which a reader adds the `$identifier` an asset or participant inherits; `isSystem` on the system properties `$timestamp` and `$identifier`, and `systemInheritedFrom` on `$timestamp` (still an own property, as in 5.0.0), naming the system type it is inherited from; `isEnum` (declared in 5.0.0 but never written) and `isMap` on properties; `fullVocabulary` (every vocabulary term, written when a term is not in leading position, which `metadata` still holds as in 5.0.0) and `decoratorOrder` (the decorators' source order) on every decorated element |
 
 ## Installation
 
 ```bash
 npm install @accordproject/concertino
 ```
+
+Import from the package root and its subpaths (`./schema`, `./runtime`, `./validate`). The package still exports `./dist/*`, but the files under it are not an API: since R1 it no longer ships the pre-release format types `dist/spec/concertino.metamodel@4.0.0-alpha.2` and `dist/spec/concertino.metamodel@1.0.0-alpha.7`, and the format types moved from `dist/spec/concertino.metamodel@5.0.0` to `dist/spec/concertino.metamodel@5.1.0`, so a deep import of one of those paths fails. Import the format types (`IConcertino` and so on) from `@accordproject/concertino` instead.
 
 ## Usage
 
@@ -121,7 +132,7 @@ getIdentifierFieldName(model, 'org.example.models@1.0.0.Person'); // null: not i
 | `getEnumValues`, `getMapTypes` | the enum's values, `MapDeclaration.getKey` / `getValue` |
 | `getDecorators`, `getVocabulary`, `getNamespaceDecorators` | decorators of a declaration, property or enum value; `@Term` vocabulary; model-level decorators |
 
-Differences from concerto-core: `getSuperTypes` leaves out `concerto@1.0.0.Concept` (every class derives from it, and `derivesFrom` says so), `isClass` is false for enums, type names are always fully qualified (map key and value types included), and the system properties `$identifier` and `$timestamp` can come in another order. A 5.0.0 document lists `$timestamp` as an own property of transactions and events; from format 5.1.0 it is inherited from the system type, as in concerto-core.
+Differences from concerto-core: `getSuperTypes` leaves out `concerto@1.0.0.Concept` (every class derives from it, and `derivesFrom` says so), `isClass` is false for enums, type names are always fully qualified (map key and value types included), and the system properties `$identifier` and `$timestamp` can come in another order. A 5.0.0 document lists `$timestamp` as an own property of transactions and events. A 5.1.0 document does too, and marks it with `systemInheritedFrom`, so that `getProperties(m, fqn, true)` leaves it out and `getProperties` lists it after the own properties, inherited from the system type, as concerto-core does.
 
 ### Validating instances
 
@@ -148,10 +159,10 @@ Each subpath bundled for the browser on its own (esbuild: ESM, browser platform,
 
 | subpath | raw (KiB) | gzip (KiB) |
 |---|---:|---:|
-| `.` (every export) | 126.4 | 16.2 |
-| `./schema` | 108.6 | 11.3 |
-| `./runtime` | 5.0 | 1.9 |
-| `./validate` | 19.7 | 6.5 |
+| `.` (every export) | 156.1 | 18.1 |
+| `./schema` | 137.8 | 13.0 |
+| `./runtime` | 5.5 | 2.2 |
+| `./validate` | 19.7 | 6.6 |
 | `./validate` and `load` from `./runtime` | 19.8 | 6.6 |
 
 ## Model Size
