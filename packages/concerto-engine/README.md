@@ -15,6 +15,7 @@ this one**:
 <dir>/concerto-rust/concerto-wasm/pkg/            the built package
     concerto-engine.cjs                           `require` (index.js)
     concerto-engine.mjs                           `import`  (index.mjs)
+    concerto_wasm.wasm                            the module concerto-engine.cjs reads
 ```
 
 Build it with:
@@ -25,10 +26,14 @@ npm install          # binaryen (wasm-opt) and Playwright, for the smokes
 npm run build        # needs the wasm32-unknown-unknown target and wasm-bindgen-cli 0.2.128
 ```
 
-Both loaders carry the `.wasm` inline and instantiate it synchronously when
-they are loaded. To use a build somewhere else, set `CONCERTO_ENGINE_MODULE`
-to its `concerto-engine.cjs`; the shim then loads that path instead of this
-package.
+Both loaders instantiate the engine synchronously when they are loaded.
+`concerto-engine.cjs`, which concerto-core loads in Node, reads the raw
+`concerto_wasm.wasm` next to it with `readFileSync`; `concerto-engine.mjs`,
+the browser loader, still carries the `.wasm` inline as base64 until
+BC-32's `await init()` (accordproject/concerto-rust#366). To use a build
+somewhere else, set `CONCERTO_ENGINE_MODULE` to its `concerto-engine.cjs`
+(with its `concerto_wasm.wasm` next to it); the shim then loads that path
+instead of this package.
 
 concerto-core loads the engine when it is imported and declares this package
 as a dependency, so concerto does not build or test without it. CI provides

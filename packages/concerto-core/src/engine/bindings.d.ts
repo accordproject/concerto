@@ -60,7 +60,6 @@ export interface EngineHandle {
     modelFileId(namespace: string): number | undefined;
     modelFileIsLocalType(model_file: number, type_name: string): boolean;
     modelFileResolveType(model_file: number, context: string, type_name: string, file_location: any, view: any): void;
-    modelFileSnapshot(model_file: number): string;
     modelFileValidate(model_file: number): void;
     modelFileValidateDetached(ast: string, definitions?: string | null, file_name?: string | null): void;
     modelFileValidateStaged(stage: number): boolean;
