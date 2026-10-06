@@ -16,6 +16,7 @@ import Resource from '../model/resource';
 import Typed from '../model/typed';
 import ModelUtil from '../modelutil';
 import { NullUtil as Util } from '@accordproject/concerto-util';
+import dayjs from '../dayjs-setup';
 
 /**
  * Converts the contents of a Resource to JSON. The parameters
@@ -99,27 +100,37 @@ class JSONGenerator {
                 return;
             }
 
-            // Key is always a string, but value might be a ValidatedResource.
-            if (typeof value === 'object') {
-                // Resolve the declaration for the map value. Prefer the instance's
-                // own fully-qualified type so that polymorphic values (subclasses of
-                // the map's declared value type) are serialized using their actual
-                // declaration. Fall back to the map's declared value type - honouring
-                // imports - for instances that do not expose a fully-qualified type
-                // (e.g. those created by the populator). Either way the value concept
-                // may live in another namespace, so resolve it via the model manager
-                // rather than the map's own model file.
-                const modelFile = mapDeclaration.getModelFile();
-                const valueType = typeof value.getFullyQualifiedType === 'function'
-                    ? value.getFullyQualifiedType()
-                    : modelFile.getFullyQualifiedTypeName(mapDeclaration.getValue().getType());
-                const decl = modelFile.getModelManager().getType(valueType);
+            // Key is always a string, but value might be a ValidatedResource, DateTime, or primitive.
+            if (!Util.isNull(value)) {
+                if (typeof value === 'object' && typeof value.isBefore === 'function') {
+                    value = this.formatDateTime(value);
+                } else if (typeof value === 'object') {
+                    const modelFile = mapDeclaration.getModelFile();
+                    const isPrimitive = ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType());
+                    const isScalar = ModelUtil.isScalar(mapDeclaration.getValue());
+                    if (!isPrimitive && !isScalar) {
+                        // Resolve the declaration for the map value. Prefer the instance's
+                        // own fully-qualified type so that polymorphic values (subclasses of
+                        // the map's declared value type) are serialized using their actual
+                        // declaration. Fall back to the map's declared value type - honouring
+                        // imports - for instances that do not expose a fully-qualified type
+                        // (e.g. those created by the populator). Either way the value concept
+                        // may live in another namespace, so resolve it via the model manager
+                        // rather than the map's own model file.
+                        const valueType = typeof value.getFullyQualifiedType === 'function'
+                            ? value.getFullyQualifiedType()
+                            : modelFile.getFullyQualifiedTypeName(mapDeclaration.getValue().getType());
+                        const decl = modelFile.getModelManager().getType(valueType);
 
-                // convert declaration to JSON representation
-                parameters.stack.push(value);
-                const jsonValue = decl.accept(this, parameters);
+                        if (decl && !decl.isScalarDeclaration?.()) {
+                            // convert declaration to JSON representation
+                            parameters.stack.push(value);
+                            const jsonValue = decl.accept(this, parameters);
 
-                value = jsonValue;
+                            value = jsonValue;
+                        }
+                    }
+                }
             }
 
             map.set(key, value);
@@ -217,6 +228,19 @@ class JSONGenerator {
     }
 
     /**
+     * Formats a DateTime object to an ISO-8601 string respecting utcOffset.
+     * @param {Object} obj - the dayjs instance to format
+     * @return {string} the formatted DateTime string
+     * @private
+     */
+    formatDateTime(obj) {
+        const dayjsObj = typeof obj.utc === 'function' ? obj.utc() : dayjs.utc(obj);
+        const objWithOffset = dayjsObj.utcOffset(this.utcOffset);
+        const inZ = objWithOffset.utcOffset() === 0;
+        return objWithOffset.format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]' : 'Z'}`);
+    }
+
+    /**
      * Converts to JSON safe format.
      *
      * @param {Field} field - the field declaration of the object
@@ -227,9 +251,7 @@ class JSONGenerator {
         switch (field.getType()) {
         case 'DateTime':
         {
-            const objWithOffset = obj.utc().utcOffset(this.utcOffset);
-            const inZ = objWithOffset.utcOffset() === 0;
-            return objWithOffset.format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]': 'Z'}`);
+            return this.formatDateTime(obj);
         }
         case 'Integer':
         case 'Long': {

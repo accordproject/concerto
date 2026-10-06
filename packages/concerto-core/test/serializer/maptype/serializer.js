@@ -22,6 +22,7 @@ const Util = require('../../composer/composermodelutility');
 
 require('chai').should();
 const sinon = require('sinon');
+const dayjs = require('dayjs');
 
 describe('Serializer', () => {
 
@@ -312,6 +313,72 @@ describe('Serializer', () => {
             resource.birthday.should.be.an.instanceOf(Map);
             resource.birthday.get('Bob').should.equal('2023-10-28T01:02:03Z');
             resource.birthday.get('Alice').should.equal('2024-10-28T01:02:03Z');
+        });
+
+        it('should serialize a map with dayjs DateTime values (#1546)', () => {
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
+
+            concept.birthday = new Map();
+            concept.birthday.set('Bob', dayjs('2023-10-28T01:02:03.000Z'));
+            concept.birthday.set('Alice', dayjs('2024-10-28T01:02:03.000Z'));
+
+            const json = serializer.toJSON(concept);
+
+            json.should.deep.equal({
+                $class: 'org.acme.sample@1.0.0.Concepts',
+                birthday: {
+                    Bob: '2023-10-28T01:02:03.000Z',
+                    Alice: '2024-10-28T01:02:03.000Z'
+                }
+            });
+        });
+
+        it('should serialize a map with dayjs DateTime scalar values (#1546)', () => {
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
+
+            concept.celebration = new Map();
+            concept.celebration.set('BobBirthday', dayjs('2022-11-28T01:02:03.000Z'));
+
+            const json = serializer.toJSON(concept);
+
+            json.should.deep.equal({
+                $class: 'org.acme.sample@1.0.0.Concepts',
+                celebration: {
+                    BobBirthday: '2022-11-28T01:02:03.000Z'
+                }
+            });
+        });
+
+        it('should serialize a map with null value without throwing TypeNotFoundException (#1546)', () => {
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
+
+            concept.birthday = new Map();
+            concept.birthday.set('Bob', null);
+
+            const json = serializer.toJSON(concept, { validate: false });
+
+            json.should.deep.equal({
+                $class: 'org.acme.sample@1.0.0.Concepts',
+                birthday: {
+                    Bob: null
+                }
+            });
+        });
+
+        it('should serialize a map with dayjs DateTime values respecting custom utcOffset (#1546)', () => {
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
+
+            concept.birthday = new Map();
+            concept.birthday.set('Bob', dayjs('2023-10-28T01:02:03.000Z'));
+
+            const json = serializer.toJSON(concept, { utcOffset: 330 });
+
+            json.should.deep.equal({
+                $class: 'org.acme.sample@1.0.0.Concepts',
+                birthday: {
+                    Bob: '2023-10-28T06:32:03.000+05:30'
+                }
+            });
         });
 
         it('should serialize -> deserialize with a Map <String, Scalar>', () => {
