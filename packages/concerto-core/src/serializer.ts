@@ -19,6 +19,7 @@ import JSONGenerator from './serializer/jsongenerator';
 import JSONPopulator from './serializer/jsonpopulator';
 import Typed from './model/typed';
 import ResourceValidator from './serializer/resourcevalidator';
+import MetaModelException from './metamodelexception';
 
 const { utcOffset: defaultUtcOffset } = DateTimeUtil.setCurrentTime();
 const baseDefaultOptions = {
@@ -30,7 +31,7 @@ const baseDefaultOptions = {
 /* eslint-disable no-unused-vars */
 import type Factory from './factory';
 import type BaseModelManager from './basemodelmanager';
-import type { SerializerOptions } from './types';
+import type { SerializerOptions, DeserializeOptions } from './types';
 import type { JsonPopulatorParameters } from './serializer/jsonpopulator';
 import type Resource from './model/resource';
 /* eslint-enable no-unused-vars */
@@ -45,14 +46,15 @@ import type Resource from './model/resource';
 class Serializer {
     factory: Factory;
     modelManager: BaseModelManager;
-    defaultOptions: SerializerOptions;
+    defaultOptions: SerializerOptions & DeserializeOptions;
+
     /**
      * Create a Serializer.
      * @param {Factory} factory - The Factory to use to create instances
      * @param {ModelManager} modelManager - The ModelManager to use for validation etc.
      * @param {object} [options] - Serializer options
      */
-    constructor(factory: Factory, modelManager: BaseModelManager, options?: SerializerOptions) {
+    constructor(factory: Factory, modelManager: BaseModelManager, options?: SerializerOptions & DeserializeOptions) {
         if(!factory) {
             throw new Error(Globalize.formatMessage('serializer-constructor-factorynull'));
         } else if(!modelManager) {
@@ -68,7 +70,7 @@ class Serializer {
      * Set the default options for the serializer.
      * @param {Object} newDefaultOptions The new default options for the serializer.
      */
-    setDefaultOptions(newDefaultOptions: SerializerOptions) {
+    setDefaultOptions(newDefaultOptions: SerializerOptions & DeserializeOptions) {
         // Combine the specified default options with the base default
         this.defaultOptions = Object.assign({}, baseDefaultOptions, newDefaultOptions);
     }
@@ -96,7 +98,7 @@ class Serializer {
      * @throws {Error} - throws an exception if resource is not an instance of
      * Resource or fails validation.
      */
-    toJSON(resource, options?) {
+    toJSON(resource: Typed, options?: SerializerOptions) {
         // correct instance type
         if(!(resource instanceof Typed)) {
             throw new Error(Globalize.formatMessage('serializer-tojson-notcobject'));
@@ -143,23 +145,50 @@ class Serializer {
      *
      * @param {Object} jsonObject The JavaScript Object for a Resource
      * @param {Object} [options] - the optional serialization options
-     * @param {boolean} options.acceptResourcesForRelationships - handle JSON objects
+     * @param {boolean} [options.acceptResourcesForRelationships] - handle JSON objects
      * in the place of strings for relationships, defaults to false.
-     * @param {boolean} options.validate - validate the structure of the Resource
+     * @param {boolean} [options.validate] - validate the structure of the Resource
      * with its model prior to serialization (default to true)
      * @param {number} [options.utcOffset] - UTC Offset for DateTime values.
      * @param {boolean} [options.strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
+     * @param {boolean} [options.rejectUnknownKeys] - error on extra fields not in the model.
+     * @param {boolean} [options.rejectRequiredNull] - fail fast when a required field is explicitly null.
      * @return {Resource} The new populated resource
      */
-    fromJSON(jsonObject, options?) {
+    fromJSON(jsonObject: Record<string, any>, options?: SerializerOptions & DeserializeOptions): Resource {
         // set default options
         options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
 
         if(!jsonObject.$class) {
-            throw new Error('Invalid JSON data. Does not contain a $class type identifier.');
+            throw new MetaModelException('Invalid JSON data. Does not contain a $class type identifier.');
         }
 
         const classDeclaration = this.modelManager.getType(jsonObject.$class);
+
+        // 1. Reject unknown keys if requested
+        if (options?.rejectUnknownKeys) {
+            const modelProperties = classDeclaration.getProperties().map((p: any) => p.getName());
+            const unknownKeys = Object.keys(jsonObject).filter(
+                (key) => !modelProperties.includes(key) && !key.startsWith('$')
+            );
+            if (unknownKeys.length > 0) {
+                throw new MetaModelException(
+                    `Unknown key(s) [${unknownKeys.join(', ')}] found in object of type ${classDeclaration.getFullyQualifiedName()}`
+                );
+            }
+        }
+
+        // 2. Reject required fields explicitly set to null
+        if (options?.rejectRequiredNull) {
+            for (const prop of classDeclaration.getProperties()) {
+                const propName = prop.getName();
+                if (!prop.isOptional() && jsonObject[propName] === null) {
+                    throw new MetaModelException(
+                        `Type violation at $.${propName}: Required field '${propName}' cannot be null`
+                    );
+                }
+            }
+        }
 
         // create a new instance, using the identifier field name as the ID.
         let resource;
@@ -176,9 +205,9 @@ class Serializer {
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
         } else if (classDeclaration.isMapDeclaration?.()) {
-            throw new Error('Attempting to create a Map declaration is not supported.');
+            throw new MetaModelException('Attempting to create a Map declaration is not supported.');
         } else if (classDeclaration.isEnum()) {
-            throw new Error('Attempting to create an ENUM declaration is not supported.');
+            throw new MetaModelException('Attempting to create an ENUM declaration is not supported.');
         } else {
             resource = this.factory.newResource( classDeclaration.getNamespace(),
                 classDeclaration.getName(),
@@ -188,8 +217,8 @@ class Serializer {
         // populate the resource based on the jsonObject
         // by walking the classDeclaration
         const parameters: JsonPopulatorParameters = {
-            jsonStack: new TypedStack(jsonObject),
-            resourceStack: new TypedStack(resource),
+            jsonStack: new TypedStack(jsonObject) as any,
+            resourceStack: new TypedStack(resource)as any,
             modelManager: this.modelManager,
             factory: this.factory,
         };
