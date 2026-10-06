@@ -76,6 +76,7 @@ class ValidatedResource extends Resource {
         parameters.stack = new TypedStack(value);
         parameters.modelManager = this.getModelManager();
         parameters.rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        parameters.path = `$.${propName}`;
         field.accept(this.$validator, parameters);
         super.setPropertyValue(propName,value);
     }
@@ -111,6 +112,7 @@ class ValidatedResource extends Resource {
             stack: new TypedStack(newArray),
             modelManager: this.getModelManager(),
             rootResourceIdentifier: this.getFullyQualifiedIdentifier(),
+            path: `$.${propName}`,
         };
         field.accept(this.$validator, parameters);
         super.addArrayValue(propName, value);
@@ -127,6 +129,7 @@ class ValidatedResource extends Resource {
         parameters.stack = new TypedStack(this);
         parameters.modelManager = this.getModelManager();
         parameters.rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        parameters.path = '$';
         classDeclaration.accept(this.$validator, parameters);
     }
 }
