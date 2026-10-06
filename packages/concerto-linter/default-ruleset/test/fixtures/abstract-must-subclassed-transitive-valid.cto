@@ -1,0 +1,13 @@
+namespace org.example@1.0.0
+
+abstract concept Animal {
+  o String name
+}
+
+abstract concept Mammal extends Animal {
+  o Boolean warmBlooded
+}
+
+concept Dog extends Mammal {
+  o String breed
+}
