@@ -17,6 +17,8 @@ import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import Vocabulary from './vocabulary';
 import { ModelUtil, ModelManager } from '@accordproject/concerto-core';
 import { parseVocabularyYaml } from './yamlparser';
+import { validateVocabularyYaml } from './vocabularyvalidator';
+
 
 const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.4.0';
 
@@ -41,17 +43,20 @@ function camelCaseToSentence(text: string): string {
 class VocabularyManager {
     public vocabularies: Record<string, Vocabulary>;
     public missingTermGenerator: any;
+    private options: any;
 
     /**
      * Create the VocabularyManager
-     * @param {*} [options] options to configure vocabulary lookup
-     * @param {*} [options.missingTermGenerator] A function to call for missing terms. The function
+     * @param {VocabularyManagerOptions} [options] options to configure vocabulary lookup
+     * @param {Function} [options.missingTermGenerator] A function to call for missing terms. The function
      * should accept namespace, locale, declarationName, propertyName as arguments
+     * @param {boolean} [options.enableVocValidator] When true, validates vocabulary YAML before parsing
      * @constructor
      */
     constructor(options?: any) {
         this.vocabularies = {}; // key is namespace/locale, value is a Vocabulary object
-        this.missingTermGenerator = options ? options.missingTermGenerator : null;
+        this.missingTermGenerator = options?.missingTermGenerator ?? null;
+        this.options = options ?? {};
     }
 
     /**
@@ -97,7 +102,19 @@ class VocabularyManager {
         if (!contents) {
             throw new Error('Vocabulary contents must be specified');
         }
-        const voc = new Vocabulary(this, options?.enableSafeVocabParsing ? parseVocabularyYaml(contents) : YAML.parse(contents));
+        if (this.options.enableVocValidator) {
+            const { errors } = validateVocabularyYaml(contents);
+            if (errors.length > 0) {
+                throw new Error(errors.map(e => e.message).join(', '));
+            }
+        }
+        // when the validator has run, input is guaranteed to be structurally clean — all values are
+        // explicit strings, no flow collections, no aliases — so parseVocabularyYaml's defensive
+        // coercions are unnecessary and YAML.parse produces identical output at lower cost.
+        // when the validator is off, preserve the existing parse behaviour.
+        const useRawParse = this.options.enableVocValidator || !options?.enableSafeVocabParsing;
+        const parsed = useRawParse ? YAML.parse(contents) : parseVocabularyYaml(contents);
+        const voc = new Vocabulary(this, parsed, { skipLocaleValidation: !!this.options.enableVocValidator });
 
         if (this.vocabularies[voc.getIdentifier()]) {
             throw new Error('Vocabulary has already been added.');

@@ -1,0 +1,8 @@
+namespace: org.acme@1.0.0
+locale: en
+declarations:
+  - Vehicle: A road vehicle
+    properties:
+      - vin: Vehicle Identification Number
+        tooltip:
+          - VIN

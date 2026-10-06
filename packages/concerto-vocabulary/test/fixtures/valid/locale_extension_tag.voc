@@ -1,0 +1,4 @@
+namespace: org.acme@1.0.0
+locale: de-DE-u-co-phonebk
+declarations:
+  - Vehicle: Ein Straßenfahrzeug

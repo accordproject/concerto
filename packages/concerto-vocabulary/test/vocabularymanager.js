@@ -541,4 +541,25 @@ declarations:
         voc.getTerm('Active').should.equal('true');
         voc.getTerm('Count').should.equal('42');
     });
+
+    it('addVocabulary - enableVocValidator accepts valid YAML', () => {
+        const yaml = `namespace: org.test@1.0.0
+locale: en
+declarations:
+  - Vehicle: A road vehicle
+`;
+        const vm = new VocabularyManager({ enableVocValidator: true });
+        const voc = vm.addVocabulary(yaml);
+        voc.getTerm('Vehicle').should.equal('A road vehicle');
+    });
+
+    it('addVocabulary - enableVocValidator throws on invalid YAML', () => {
+        const yaml = `namespace: org.test@1.0.0
+locale: en
+declarations:
+  - Vehicle: true
+`;
+        const vm = new VocabularyManager({ enableVocValidator: true });
+        (() => vm.addVocabulary(yaml)).should.throw();
+    });
 });
