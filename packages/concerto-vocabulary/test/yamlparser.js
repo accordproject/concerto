@@ -19,7 +19,7 @@ const path = require('path');
 const chai = require('chai');
 chai.should();
 
-const { validateVocabularyYaml } = require('../src/yamlparser');
+const { validateVocabularyYaml } = require('../src/vocabularyvalidator');
 
 const INVALID = path.join(__dirname, 'fixtures/invalid');
 const VALID = path.join(__dirname, 'fixtures/valid');

@@ -16,7 +16,8 @@ import YAML from 'yaml';
 import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import Vocabulary from './vocabulary';
 import { ModelUtil, ModelManager } from '@accordproject/concerto-core';
-import { parseVocabularyYaml, validateVocabularyYaml } from './yamlparser';
+import { parseVocabularyYaml } from './yamlparser';
+import { validateVocabularyYaml } from './vocabularyvalidator';
 
 
 const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.4.0';
