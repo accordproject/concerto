@@ -14,6 +14,32 @@
 
 import { ComparerFactory } from '../comparer';
 
+const mapDeclarationAdded: ComparerFactory = (context) => ({
+    compareMapDeclaration: (a, b) => {
+        if (a || !b) {
+            return;
+        }
+        context.report({
+            key: 'map-declaration-added',
+            message: `The map "${b.getName()}" was added`,
+            element: b
+        });
+    }
+});
+
+const mapDeclarationRemoved: ComparerFactory = (context) => ({
+    compareMapDeclaration: (a, b) => {
+        if (!a || b) {
+            return;
+        }
+        context.report({
+            key: 'map-declaration-removed',
+            message: `The map "${a.getName()}" was removed`,
+            element: a
+        });
+    }
+});
+
 const mapDeclarationTypeChanged: ComparerFactory = (context) => ({
     compareMapDeclaration: (a, b) => {
 
@@ -39,4 +65,4 @@ const mapDeclarationTypeChanged: ComparerFactory = (context) => ({
     },
 });
 
-export const mapDeclarationComparerFactories = [mapDeclarationTypeChanged];
+export const mapDeclarationComparerFactories = [mapDeclarationAdded, mapDeclarationRemoved, mapDeclarationTypeChanged];
