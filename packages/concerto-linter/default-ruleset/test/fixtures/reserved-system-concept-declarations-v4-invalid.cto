@@ -1,0 +1,9 @@
+namespace org.example@1.0.0
+
+asset Asset identified by assetId {
+  o String assetId
+}
+
+event Event {
+  o String eventId optional
+}
