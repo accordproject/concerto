@@ -68,7 +68,7 @@ class JSONGenerator {
             return this.visitClassDeclaration(thing, parameters);
         } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
-        }else if (thing.isMapDeclaration?.()) {
+        } else if (thing.isMapDeclaration?.()) {
             return this.visitMapDeclaration(thing, parameters);
         } else if (thing.isTypeScalar?.()) {
             return this.visitField(thing.getScalarField(), parameters);
@@ -95,31 +95,36 @@ class JSONGenerator {
         obj.forEach((value, key) => {
 
             // don't serialize System Properties, other than $class
-            if(ModelUtil.isSystemProperty(key)) {
+            if (ModelUtil.isSystemProperty(key)) {
                 return;
             }
 
             // Key is always a string, but value might be a ValidatedResource.
-            if (typeof value === 'object') {
-                // Resolve the declaration for the map value. Prefer the instance's
-                // own fully-qualified type so that polymorphic values (subclasses of
-                // the map's declared value type) are serialized using their actual
-                // declaration. Fall back to the map's declared value type - honouring
-                // imports - for instances that do not expose a fully-qualified type
-                // (e.g. those created by the populator). Either way the value concept
-                // may live in another namespace, so resolve it via the model manager
-                // rather than the map's own model file.
-                const modelFile = mapDeclaration.getModelFile();
-                const valueType = typeof value.getFullyQualifiedType === 'function'
-                    ? value.getFullyQualifiedType()
-                    : modelFile.getFullyQualifiedTypeName(mapDeclaration.getValue().getType());
-                const decl = modelFile.getModelManager().getType(valueType);
+            if (!Util.isNull(value) && typeof value === 'object') {
+                const mapValueDecl = mapDeclaration.getValue();
 
-                // convert declaration to JSON representation
-                parameters.stack.push(value);
-                const jsonValue = decl.accept(this, parameters);
+                if (ModelUtil.isPrimitiveType(mapValueDecl.getType())) {
+                    value = this.convertToJSON(mapValueDecl, value);
+                } else {
+                    // Resolve the declaration for the map value. Prefer the instance's
+                    // own fully-qualified type so that polymorphic values (subclasses of
+                    // the map's declared value type) are serialized using their actual
+                    // declaration. Fall back to the map's declared value type - honouring
+                    // imports - for instances that do not expose a fully-qualified type
+                    // (e.g. those created by the populator). Either way the value concept
+                    // may live in another namespace, so resolve it via the model manager
+                    // rather than the map's own model file.
+                    const modelFile = mapDeclaration.getModelFile();
+                    const valueType = typeof value.getFullyQualifiedType === 'function'
+                        ? value.getFullyQualifiedType()
+                        : modelFile.getFullyQualifiedTypeName(mapValueDecl.getType());
+                    const decl = modelFile.getModelManager().getType(valueType);
 
-                value = jsonValue;
+                    // convert declaration to JSON representation
+                    parameters.stack.push(value);
+                    const jsonValue = decl.accept(this, parameters);
+                    value = jsonValue;
+                }
             }
 
             map.set(key, value);
@@ -147,7 +152,7 @@ class JSONGenerator {
 
         if (obj.isIdentifiable() && this.deduplicateResources) {
             id = obj.toURI();
-            if( parameters.dedupeResources.has(id)) {
+            if (parameters.dedupeResources.has(id)) {
                 return id;
             }
             else {
@@ -156,7 +161,7 @@ class JSONGenerator {
         }
 
         result.$class = classDeclaration.getFullyQualifiedName();
-        if(this.deduplicateResources && id) {
+        if (this.deduplicateResources && id) {
             result.$id = id;
         }
 
@@ -225,22 +230,22 @@ class JSONGenerator {
      */
     convertToJSON(field, obj) {
         switch (field.getType()) {
-        case 'DateTime':
-        {
-            const objWithOffset = obj.utc().utcOffset(this.utcOffset);
-            const inZ = objWithOffset.utcOffset() === 0;
-            return objWithOffset.format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]': 'Z'}`);
-        }
-        case 'Integer':
-        case 'Long': {
-            return obj;
-        }
-        case 'Double':
-        case 'Boolean':
-        default:
-        {
-            return obj;
-        }
+            case 'DateTime':
+                {
+                    const objWithOffset = obj.utc().utcOffset(this.utcOffset);
+                    const inZ = objWithOffset.utcOffset() === 0;
+                    return objWithOffset.format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]' : 'Z'}`);
+                }
+            case 'Integer':
+            case 'Long': {
+                return obj;
+            }
+            case 'Double':
+            case 'Boolean':
+            default:
+                {
+                    return obj;
+                }
         }
     }
 
