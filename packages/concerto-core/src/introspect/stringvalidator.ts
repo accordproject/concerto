@@ -60,15 +60,16 @@ class StringValidator extends Validator{
             this.minLength = lengthValidator?.minLength;
             this.maxLength = lengthValidator?.maxLength;
 
-            if(this.minLength === null && this.maxLength === null) {
+            if ((this.minLength === null || this.minLength === undefined) &&
+                (this.maxLength === null || this.maxLength === undefined)) {
                 // can't specify no upper and lower value
-                this.reportError(field.getName(), 'Invalid string length, minLength and-or maxLength must be specified.');
+                this.reportModelError('Invalid string length, minLength and-or maxLength must be specified.');
             } else if ((this.minLength ?? 0) < 0 || (this.maxLength ?? 0) < 0) {
-                this.reportError(field.getName(), 'minLength and-or maxLength must be positive integers.');
+                this.reportModelError('minLength and-or maxLength must be positive integers.');
             } else if (this.minLength === null || this.maxLength === null) {
                 // this is fine and means that we don't need to check whether minLength > maxLength
-            } else if(this.minLength !== undefined && this.maxLength !== undefined && this.minLength > this.maxLength) {
-                this.reportError(field.getName(), 'minLength must be less than or equal to maxLength.');
+            } else if (this.minLength !== undefined && this.maxLength !== undefined && this.minLength > this.maxLength) {
+                this.reportModelError('minLength must be less than or equal to maxLength.');
             }
         }
 
@@ -81,11 +82,14 @@ class StringValidator extends Validator{
                 this.regex = new CustomRegExp(validator.pattern, validator.flags);
             }
             catch (exception) {
-                this.reportError(field.getName(), (exception as Error).message, ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
+                this.reportModelError(
+                    (exception as Error).message,
+                    ErrorCodes.REGEX_VALIDATOR_EXCEPTION
+                );
             }
         }
 
-        if(this.field?.ast?.defaultValue) {
+        if (this.field?.ast?.defaultValue) {
             this.validate(field.getName(), this.field.ast.defaultValue);
         }
     }
@@ -98,17 +102,17 @@ class StringValidator extends Validator{
      * @private
      */
     validate(identifier: string | null, value: string): void {
-        if(value !== null) {
+        if (value !== null) {
             //Enforce string length rule first
-            if(this.minLength !== null && this.minLength !== undefined && value.length < this.minLength) {
-                this.reportError(identifier, `The string length of '${value}' should be at least ${this.minLength} characters.`);
+            if (this.minLength !== null && this.minLength !== undefined && value.length < this.minLength) {
+                this.reportValidationError(identifier, `The string length of '${value}' should be at least ${this.minLength} characters.`);
             }
-            if(this.maxLength !== null && this.maxLength !== undefined && value.length > this.maxLength) {
-                this.reportError(identifier, `The string length of '${value}' should not exceed ${this.maxLength} characters.`);
+            if (this.maxLength !== null && this.maxLength !== undefined && value.length > this.maxLength) {
+                this.reportValidationError(identifier, `The string length of '${value}' should not exceed ${this.maxLength} characters.`);
             }
 
             if (this.regex && !this.matchesRegex(value)) {
-                this.reportError(identifier, `Value '${value}' failed to match validation regex: ${this.regex}`);
+                this.reportValidationError(identifier, `Value '${value}' failed to match validation regex: ${this.regex}`);
             }
         }
     }

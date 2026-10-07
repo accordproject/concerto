@@ -1376,6 +1376,10 @@ StringRegexValidator
 
 StringLengthValidator
    = "length" __ "=" __ "[" __ minLength:$SignedInteger? __ "," __ maxLength:$SignedInteger? __ "]" {
+    if (!minLength && !maxLength) {
+      error('At least one length bound must be specified');
+    }
+
     const result = {
       $class: `${metamodelNamespace}.StringLengthValidator`
     };
@@ -1385,7 +1389,7 @@ StringLengthValidator
     if (maxLength) {
       result.maxLength = parseInt(maxLength);
     }
-   	return result;
+    return result;
   }
 
 CollectionSizeValidator

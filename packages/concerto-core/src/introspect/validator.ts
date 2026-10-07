@@ -12,7 +12,9 @@
  * limitations under the License.
  */
 
-import { BaseException, ErrorCodes } from '@accordproject/concerto-util';
+import { ErrorCodes } from '@accordproject/concerto-util';
+import IllegalModelException from './illegalmodelexception';
+import ValidationException from '../serializer/validationexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -78,8 +80,34 @@ class Validator {
      * @param {string} errorType the type of error
      * @throws {Error} throws an error to report the message
      */
-    reportError(id: string | null, msg: string, errorType: string = ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION): never {
-        throw new BaseException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg, undefined, errorType);
+
+    reportModelError(msg: string, errorType: string = ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION): never {
+        const field = this.getFieldOrScalarDeclaration();
+        const fieldName = field.getName();
+
+        const message = `Validator error for field '${fieldName}'. ${field.getFullyQualifiedName()}: ${msg}`;
+
+        const exception = new IllegalModelException(
+            message,
+            field.getModelFile(),
+            field.ast?.location
+        );
+
+        exception.errorType = errorType;
+
+        throw exception;
+    }
+
+    reportValidationError(id: string | null, msg: string, errorType: string = ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION): never {
+        const field = this.getFieldOrScalarDeclaration();
+
+        const message = `Validator error for field \`${id}\`. ${field.getFullyQualifiedName()}: ${msg}`;
+
+        const exception = new ValidationException(message);
+
+        exception.errorType = errorType;
+
+        throw exception;
     }
 
     /**
@@ -88,7 +116,7 @@ class Validator {
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
      */
-    accept(visitor,parameters) {
+    accept(visitor, parameters) {
         return visitor.visit(this, parameters);
     }
 
