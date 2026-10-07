@@ -237,6 +237,22 @@ describe('JSONPopulator', () => {
             value.should.equal(32768);
         });
 
+        it('should not convert to integers from Infinity', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Integer');
+            (() => {
+                jsonPopulator.convertToObject(field, Infinity, {});
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Integer`/);
+        });
+
+        it('should not convert to integers from -Infinity', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Integer');
+            (() => {
+                jsonPopulator.convertToObject(field, -Infinity, {});
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Integer`/);
+        });
+
         it('should not convert to longs from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');
@@ -273,6 +289,22 @@ describe('JSONPopulator', () => {
             field.getType.returns('Long');
             (() => {
                 jsonPopulator.convertToObject(field, 32.768, {});
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
+        });
+
+        it('should not convert to longs from Infinity', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Long');
+            (() => {
+                jsonPopulator.convertToObject(field, Infinity, {});
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
+        });
+
+        it('should not convert to longs from -Infinity', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Long');
+            (() => {
+                jsonPopulator.convertToObject(field, -Infinity, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
         });
 

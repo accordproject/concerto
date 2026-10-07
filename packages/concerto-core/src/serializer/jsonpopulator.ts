@@ -387,7 +387,7 @@ class JSONPopulator {
         case 'Long': {
             const num = json;
             if (typeof num === 'number') {
-                if (Math.trunc(num) !== num) {
+                if (!Number.isFinite(num) || Math.trunc(num) !== num) {
                     throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
                 } else {
                     result = num;
