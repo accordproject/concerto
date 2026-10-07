@@ -30,7 +30,7 @@ class Vocabulary {
      * @param {VocabularyManager} vocabularyManager - the manager for this vocabulary
      * @param {object} voc - the JSON representation of the vocabulary
      */
-    constructor(vocabularyManager: VocabularyManager, voc: any) {
+    constructor(vocabularyManager: VocabularyManager, voc: any, options?: { skipLocaleValidation?: boolean }) {
         if(!vocabularyManager) {
             throw new Error('VocabularyManager must be specified');
         }
@@ -50,7 +50,9 @@ class Vocabulary {
             throw new Error('A vocabulary must specify a locale');
         }
 
-        Vocabulary.validateLocale(voc.locale);
+        if (!options?.skipLocaleValidation) {
+            Vocabulary.validateLocale(voc.locale);
+        }
 
         this.vocabularyManager = vocabularyManager;
         this.content = voc;

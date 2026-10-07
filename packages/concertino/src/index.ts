@@ -19,11 +19,10 @@
  */
 /* eslint-disable valid-jsdoc */
 import { IModels } from '@accordproject/concerto-metamodel';
-import { IConcertino } from './spec/concertino.metamodel@4.0.0-alpha.2';
-import schema from './spec/concertino.schema.json';
+import { IConcertino } from './spec/concertino.metamodel@5.0.0';
 import { convertToConcertino } from './concertinoSerializer';
 import { convertToMetamodel } from './metamodelSerializer';
-import Ajv, { ValidateFunction } from 'ajv';
+import { checkSchema, SchemaError } from './schema';
 
 /**
  * Conversion options for Concertino format.
@@ -40,8 +39,7 @@ export interface ConcertinoOptions {
  */
 export class ConcertinoConverter {
     private options: ConcertinoOptions;
-    private validate?: ValidateFunction;
-    private ajv: Ajv;
+    private errors: SchemaError[] | null;
 
     /**
      * Creates a new instance of ConcertinoConverter.
@@ -52,7 +50,7 @@ export class ConcertinoConverter {
             version: '5.0.0',
             ...options
         };
-        this.ajv = new Ajv();
+        this.errors = null;
     }
 
     /**
@@ -77,20 +75,25 @@ export class ConcertinoConverter {
         return convertToMetamodel(concertino);
     }
 
+    /**
+     * Check a Concertino document against the Concertino JSON schema.
+     * The schema is compiled at build time, so this needs no ajv and no
+     * `new Function` at run time. To check documents without the converter,
+     * use `isValid` or `checkSchema` from `@accordproject/concertino/schema`.
+     * @param concertino - The Concertino document to check.
+     * @returns True when the document is valid.
+     */
     public isValid(concertino: IConcertino): boolean {
-        return this.getValidator()(concertino);
+        this.errors = checkSchema(concertino);
+        return this.errors === null;
     }
 
-    public getValidationErrors() {
-        return this.validate?.errors ?? null;
-    }
-
-    private getValidator(): ValidateFunction {
-        if (!this.validate) {
-            this.validate = this.ajv.compile(schema);
-        }
-
-        return this.validate;
+    /**
+     * The schema errors of the last `isValid` call.
+     * @returns The errors, or null when that document was valid or `isValid` was not called yet.
+     */
+    public getValidationErrors(): SchemaError[] | null {
+        return this.errors;
     }
 
 }
@@ -99,4 +102,5 @@ export class ConcertinoConverter {
 export { convertToConcertino, convertToMetamodel };
 
 // Export types
+export type { SchemaError };
 export * from './spec/concertino.metamodel@5.0.0';

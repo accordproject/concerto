@@ -69,7 +69,9 @@ describe('concertino roundtripping (sample models)', () => {
 });
 
 describe('concertino edge cases and error handling', () => {
-    it('should lazily compile the validator', () => {
+    it('should validate without compiling the schema at run time', () => {
+        // The schema is compiled at build time (scripts/generateSchemaValidator.js),
+        // so ajv never compiles anything when the package runs.
         const compileSpy = vi.spyOn(Ajv.prototype, 'compile');
         const converter = new ConcertinoConverter();
         const ast = {
@@ -81,20 +83,16 @@ describe('concertino edge cases and error handling', () => {
             }],
         };
 
-        expect(compileSpy).not.toHaveBeenCalled();
         expect(converter.getValidationErrors()).toBeNull();
 
         const concertino = converter.fromConcertoMetamodel(ast);
-        expect(compileSpy).not.toHaveBeenCalled();
         expect(converter.toConcertoMetamodel(concertino)).toStrictEqual(ast);
-        expect(compileSpy).not.toHaveBeenCalled();
 
         expect(converter.isValid(concertino)).toBe(true);
-        expect(compileSpy).toHaveBeenCalledTimes(1);
         expect(converter.getValidationErrors()).toBeNull();
 
         expect(converter.isValid(concertino)).toBe(true);
-        expect(compileSpy).toHaveBeenCalledTimes(1);
+        expect(compileSpy).not.toHaveBeenCalled();
     });
 
     it('should roundtrip sourceUri', () => {

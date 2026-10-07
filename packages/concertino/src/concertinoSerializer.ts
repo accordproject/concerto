@@ -114,7 +114,47 @@ export function determineScalarType(declaration: IScalarDeclaration): ScalarType
 }
 
 /**
+ * The declared name a resolved TypeIdentifier points at. An aliased import
+ * (`import a@1.0.0.{Foo as Bar}`) resolves to `name: 'Bar'` and
+ * `resolvedName: 'Foo'`, and Concertino names the declared type
+ * (`a@1.0.0.Foo`); `a@1.0.0.Bar` does not exist.
+ * @param typeIdentifier The type identifier.
+ * @returns The declared short name.
+ */
+function declaredName(typeIdentifier: { name: string; resolvedName?: string }): string {
+    return typeIdentifier.resolvedName ?? typeIdentifier.name;
+}
+
+/**
+ * Whether a decorator can be written to Concertino's `vocabulary` and read
+ * back as the same decorator. `@Term("label")` and `@Term_key("term")` can.
+ * So can `@Term()`, as a null label. Anything else named `Term` or `Term_*`
+ * (no argument list, other argument types or counts) is written to
+ * `metadata` instead, which keeps the arguments as they are.
+ * @param decorator The decorator.
+ * @returns True when the decorator is a vocabulary term.
+ */
+function isVocabularyTerm(decorator: any): boolean {
+    const args = decorator.arguments;
+    if (!Array.isArray(args)) {
+        return false;
+    }
+    const isStringArgument = args.length === 1 && args[0]?.$class === 'concerto.metamodel@1.0.0.DecoratorString' && typeof args[0].value === 'string';
+    if (decorator.name === 'Term') {
+        return args.length === 0 || isStringArgument;
+    }
+    return decorator.name.startsWith('Term_') && isStringArgument;
+}
+
+/**
  * Extracts vocabulary and metadata from decorators.
+ *
+ * Concertino reads decorators back in this order: the vocabulary label, the
+ * additional terms, then the metadata entries. So a term goes to
+ * `vocabulary` only while that order holds (no metadata entry before it, and
+ * for the label no additional term before it). A term after that goes to
+ * `metadata` under its own name, so the decorators come back in their
+ * original order.
  * @param decorators The decorators array.
  * @returns The extracted info.
  */
@@ -123,17 +163,22 @@ function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: IVocabula
     const metadata: MetadataMap = {};
 
     decorators.forEach((decorator) => {
-        if (decorator.name === 'Term') {
-            vocabulary.label = decorator.arguments[0]?.value || null;
-        } else if (decorator.name.startsWith('Term_')) {
-            const key = decorator.name.split('_')[1];
+        const inOrder = Object.keys(metadata).length === 0;
+        if (decorator.name === 'Term' && inOrder && !vocabulary.additionalTerms && !('label' in vocabulary) && isVocabularyTerm(decorator)) {
+            vocabulary.label = decorator.arguments.length === 0 ? null : decorator.arguments[0].value;
+        } else if (decorator.name.startsWith('Term_') && inOrder && isVocabularyTerm(decorator) &&
+            !Object.prototype.hasOwnProperty.call(vocabulary.additionalTerms ?? {}, decorator.name.substring('Term_'.length))) {
+            // The key is everything after `Term_`, so `@Term_my_type` keeps `my_type`.
+            const key = decorator.name.substring('Term_'.length);
             vocabulary.additionalTerms = vocabulary.additionalTerms || {};
-            vocabulary.additionalTerms[key] = decorator.arguments[0]?.value || null;
+            vocabulary.additionalTerms[key] = decorator.arguments[0].value;
         } else {
             metadata[decorator.name] = (decorator.arguments
                 ? decorator.arguments.map((arg: DecoratorLiteralUnion) => {
                     if ('type' in arg && arg.$class === 'concerto.metamodel@1.0.0.DecoratorTypeReference') {
-                        const result: {type: string, isArray?: boolean } = { type: `${arg.type.namespace}.${arg.type.name}` };
+                        // A primitive or unresolved type reference (`@Foo(String)`) has no namespace.
+                        const type = arg.type.namespace ? `${arg.type.namespace}.${declaredName(arg.type)}` : declaredName(arg.type);
+                        const result: {type: string, isArray?: boolean } = { type };
                         if (arg.isArray){
                             result.isArray = true;
                         }
@@ -178,7 +223,7 @@ function transformEnumValues(properties: IEnumProperty[]): EnumValueMap {
  */
 export function determinePropertyType(property: PropertyUnion, { modelNamespace }: { modelNamespace: string }): string {
     if ('type' in property) {
-        return `${property.type.namespace || modelNamespace}.${property.type.name}`;
+        return `${property.type.namespace || modelNamespace}.${declaredName(property.type)}`;
     }
     const propertyType = PROPERTY_TYPE_MAP[property.$class];
     if (!propertyType) {
@@ -202,7 +247,8 @@ function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion,
             }
         } else if (
             ['Integer', 'IntegerScalar', 'Long', 'LongScalar', 'Double', 'DoubleScalar'].includes(propertyEntry.type) &&
-            'lower' in property.validator
+            // A one-sided range (`range=[,10]`) has only one of the bounds.
+            ('lower' in property.validator || 'upper' in property.validator)
         ) {
             const lower = property.validator.lower === undefined ? null : property.validator.lower;
             const upper = property.validator.upper === undefined ? null : property.validator.upper;
@@ -264,7 +310,7 @@ function transformProperties(
 function mapKeyTypeToString(key: MapKeyTypeUnion, { modelNamespace }: { modelNamespace: string }): string {
     let keyType = KEY_TYPE_MAP[key.$class];
     if (!keyType && 'type' in key) {
-        keyType = `${key.type.namespace || modelNamespace}.${key.type.name}`;
+        keyType = `${key.type.namespace || modelNamespace}.${declaredName(key.type)}`;
     }
     return keyType;
 }
@@ -281,7 +327,7 @@ function mapValueTypeToObject(
 ): { type: string; isRelationship?: boolean } {
     let valueType = VALUE_TYPE_MAP[value.$class];
     if (!valueType && 'type' in value) {
-        valueType = `${value.type.namespace || modelNamespace}.${value.type.name}`;
+        valueType = `${value.type.namespace || modelNamespace}.${declaredName(value.type)}`;
     }
     const result: { type: string; isRelationship?: boolean } = { type: valueType };
     if (value.$class.endsWith('RelationshipMapValueType')) {
@@ -358,7 +404,7 @@ function transformConceptDeclaration(declaration: IConceptDeclaration, context: 
     }
     if (declaration.superType) {
         const superTypeNamespace = declaration.superType.namespace || context.modelNamespace;
-        result.extends = [`${superTypeNamespace}.${declaration.superType.name}`];
+        result.extends = [`${superTypeNamespace}.${declaredName(declaration.superType)}`];
     }
     if (declaration.isAbstract) {
         result.isAbstract = true;
@@ -499,7 +545,8 @@ function convertToConcertino(metamodel: IModels): IConcertino {
                                 // Works for other number scalar types too. We pick the Integer type to satisfy the compiler
                                 (newProperty as IConcertinoIntegerProperty).range = (scalarDecl as IConcertinoIntegerScalarDeclaration).range;
                             }
-                            if ('default' in scalarDecl && scalarDecl.default) {
+                            if ('default' in scalarDecl && scalarDecl.default !== undefined && scalarDecl.default !== null) {
+                                // Falsy defaults (0, false, '') are defaults too
                                 // Works for other number scalar types too. We pick the Integer type to satisfy the compiler
                                 (newProperty as IConcertinoIntegerProperty).default = (scalarDecl as IConcertinoIntegerScalarDeclaration).default;
                             }
