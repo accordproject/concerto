@@ -19,6 +19,9 @@ const { ModelManager } = require('../../../src/modelmanager');
 const { Resource } = require('../../../src/model/resource');
 const { Serializer } = require('../../../src/serializer');
 const Util = require('../../composer/composermodelutility');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 require('chai').should();
 const sinon = require('sinon');
@@ -1102,6 +1105,282 @@ describe('Serializer', () => {
 
             // round-trips back to the same JSON
             xnsSerializer.toJSON(resource).should.deep.equal(json);
+        });
+    });
+
+    describe('Map keys and values type validation (#1560)', () => {
+        let typeModelManager;
+        let typeFactory;
+        let typeSerializer;
+
+        beforeEach(() => {
+            typeModelManager = new ModelManager({ strict: true });
+            typeModelManager.addCTOModel(`
+            namespace org.lib@1.0.0
+            concept Addr {
+                o String street
+            }
+            scalar Upper extends String regex=/^[A-Z]+$/
+            `, 'lib.cto');
+
+            typeModelManager.addCTOModel(`
+            namespace org.acme.types@1.0.0
+            import org.lib@1.0.0.{Addr, Upper}
+
+            scalar Code extends String regex=/^[A-Z]+$/
+            scalar Name extends String
+
+            map StrToInt {
+                o String
+                o Integer
+            }
+
+            map StrToLong {
+                o String
+                o Long
+            }
+
+            map StrToDouble {
+                o String
+                o Double
+            }
+
+            map StrToBool {
+                o String
+                o Boolean
+            }
+
+            map StrToDate {
+                o String
+                o DateTime
+            }
+
+            map StrToName {
+                o String
+                o Name
+            }
+
+            map CodeToStr {
+                o Code
+                o String
+            }
+
+            map StrToAddr {
+                o String
+                o Addr
+            }
+
+            map UpperToStr {
+                o Upper
+                o String
+            }
+
+            map StrToUpper {
+                o String
+                o Upper
+            }
+
+            concept Container {
+                o StrToInt intMap optional
+                o StrToLong longMap optional
+                o StrToDouble doubleMap optional
+                o StrToBool boolMap optional
+                o StrToDate dateMap optional
+                o StrToName nameMap optional
+                o CodeToStr codeMap optional
+                o StrToAddr addrMap optional
+                o UpperToStr upperMap optional
+                o StrToUpper upperValMap optional
+            }
+            `, 'types.cto');
+
+            typeFactory = new Factory(typeModelManager);
+            typeSerializer = new Serializer(typeFactory, typeModelManager);
+        });
+
+        it('should accept valid Integer and reject non-integer values', () => {
+            const valid = typeSerializer.fromJSON({
+                $class: 'org.acme.types@1.0.0.Container',
+                intMap: { k: 42 }
+            });
+            valid.intMap.get('k').should.equal(42);
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    intMap: { k: 'abc' }
+                });
+            }).should.throw(/Expected Type of Integer but found 'abc'/);
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    intMap: { k: 1.5 }
+                });
+            }).should.throw(/Expected Type of Integer but found '1.5'/);
+        });
+
+        it('should accept valid Long and reject non-long values', () => {
+            const valid = typeSerializer.fromJSON({
+                $class: 'org.acme.types@1.0.0.Container',
+                longMap: { k: 100 }
+            });
+            valid.longMap.get('k').should.equal(100);
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    longMap: { k: 'abc' }
+                });
+            }).should.throw(/Expected Type of Long but found 'abc'/);
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    longMap: { k: 2.5 }
+                });
+            }).should.throw(/Expected Type of Long but found '2.5'/);
+        });
+
+        it('should accept valid Double and reject non-number values', () => {
+            const valid = typeSerializer.fromJSON({
+                $class: 'org.acme.types@1.0.0.Container',
+                doubleMap: { k: 3.14 }
+            });
+            valid.doubleMap.get('k').should.equal(3.14);
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    doubleMap: { k: 'abc' }
+                });
+            }).should.throw(/Expected Type of Double but found 'abc'/);
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    doubleMap: { k: Infinity }
+                });
+            }).should.throw(/Expected Type of Double/);
+        });
+
+        it('should accept valid Boolean and reject non-boolean values', () => {
+            const valid = typeSerializer.fromJSON({
+                $class: 'org.acme.types@1.0.0.Container',
+                boolMap: { k: true }
+            });
+            valid.boolMap.get('k').should.equal(true);
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    boolMap: { k: 'true' }
+                });
+            }).should.throw(/Expected Type of Boolean/);
+        });
+
+        it('should accept valid DateTime and reject numbers, booleans, and non-date strings', () => {
+            const valid = typeSerializer.fromJSON({
+                $class: 'org.acme.types@1.0.0.Container',
+                dateMap: { k: '2023-01-01T00:00:00.000Z' }
+            });
+            valid.dateMap.get('k').should.equal('2023-01-01T00:00:00.000Z');
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    dateMap: { k: true }
+                });
+            }).should.throw(/Expected Type of DateTime but found 'true'/);
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    dateMap: { k: 1 }
+                });
+            }).should.throw(/Expected Type of DateTime but found '1'/);
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    dateMap: { k: 'invalid-date' }
+                });
+            }).should.throw(/Expected Type of DateTime/);
+        });
+
+        it('should unwrap scalar value slot even when key is not a scalar', () => {
+            const valid = typeSerializer.fromJSON({
+                $class: 'org.acme.types@1.0.0.Container',
+                nameMap: { k: 'Alice' }
+            });
+            valid.nameMap.get('k').should.equal('Alice');
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    nameMap: { k: 42 }
+                });
+            }).should.throw(/Expected Type of String but found '42'/);
+        });
+
+        it('should apply scalar validators on map keys', () => {
+            const valid = typeSerializer.fromJSON({
+                $class: 'org.acme.types@1.0.0.Container',
+                codeMap: { ABC: 'val' }
+            });
+            valid.codeMap.get('ABC').should.equal('val');
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    codeMap: { lower: 'val' }
+                });
+            }).should.throw(/failed to match validation regex/);
+        });
+
+        it('should validate imported concept in map value slot', () => {
+            const valid = typeSerializer.fromJSON({
+                $class: 'org.acme.types@1.0.0.Container',
+                addrMap: { k: { $class: 'org.lib@1.0.0.Addr', street: '1 Main St' } }
+            });
+            valid.addrMap.get('k').street.should.equal('1 Main St');
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    addrMap: { k: { $class: 'org.lib@1.0.0.Addr' } }
+                });
+            }).should.throw(/missing the required field "street"/);
+        });
+
+        it('should resolve and validate imported scalar in map key slot', () => {
+            const valid = typeSerializer.fromJSON({
+                $class: 'org.acme.types@1.0.0.Container',
+                upperMap: { ABC: 'val' }
+            });
+            valid.upperMap.get('ABC').should.equal('val');
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    upperMap: { abc: 'val' }
+                });
+            }).should.throw(/failed to match validation regex/);
+        });
+
+        it('should apply scalar validators on map values', () => {
+            const valid = typeSerializer.fromJSON({
+                $class: 'org.acme.types@1.0.0.Container',
+                upperValMap: { k: 'ABC' }
+            });
+            valid.upperValMap.get('k').should.equal('ABC');
+
+            (() => {
+                typeSerializer.fromJSON({
+                    $class: 'org.acme.types@1.0.0.Container',
+                    upperValMap: { k: 'abc' }
+                });
+            }).should.throw(/failed to match validation regex/);
         });
     });
 });
