@@ -214,11 +214,11 @@ class JSONPopulator {
             }
 
             if (!ModelUtil.isPrimitiveType(mapDeclaration.getKey().getType())) {
-                key = this.processMapType(mapDeclaration, parameters, key, mapDeclaration.getKey().getType());
+                key = this.processMapType(mapDeclaration, parameters, key, mapDeclaration.getKey().getType(), mapDeclaration.getKey());
             }
 
             if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
-                value = this.processMapType(mapDeclaration, parameters, value, mapDeclaration.getValue().getType());
+                value = this.processMapType(mapDeclaration, parameters, value, mapDeclaration.getValue().getType(), mapDeclaration.getValue());
             }
 
             map.set(key, value);
@@ -233,10 +233,15 @@ class JSONPopulator {
      * @param {Object} parameters  - the parameter
      * @param {Object} value - the key or value belonging to the Map Entry.
      * @param {Object} type - the Type associated with the Key or Value Map Entry.
+     * @param {Object} [mapProperty] - the MapKeyType or MapValueType declaration.
      * @return {Object} value - the key or value belonging to the Map Entry.
      * @private
      */
-    processMapType(mapDeclaration, parameters: JsonPopulatorParameters, value, type) {
+    processMapType(mapDeclaration, parameters: JsonPopulatorParameters, value, type, mapProperty = mapDeclaration.getValue()) {
+        if (mapProperty?.isRelationship?.()) {
+            return this.processRelationship(mapProperty, value, parameters);
+        }
+
         let decl;
         // The map's key/value concept may be imported from another namespace, so it
         // is not necessarily present in the map's own model file. Resolve it via the
@@ -429,6 +434,48 @@ class JSONPopulator {
     }
 
     /**
+     * Helper to populate a Relationship or permitted Resource.
+     * @param {RelationshipDeclaration|MapValueType} relationshipDeclaration - the relationship declaration
+     * @param {*} jsonObj - the JSON value
+     * @param {JsonPopulatorParameters} parameters - the parameters
+     * @return {Relationship|Resource} the populated relationship or resource
+     * @private
+     */
+    processRelationship(relationshipDeclaration, jsonObj, parameters: JsonPopulatorParameters) {
+        let typeFQN = relationshipDeclaration.getFullyQualifiedTypeName();
+        let defaultNamespace = ModelUtil.getNamespace(typeFQN);
+        if(!defaultNamespace) {
+            defaultNamespace = relationshipDeclaration.getNamespace();
+        }
+        let defaultType = ModelUtil.getShortName(typeFQN);
+
+        if (typeof jsonObj === 'string') {
+            return Relationship.fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );
+        } else if (typeof jsonObj === 'object' && jsonObj !== null) {
+            const jsonObjAsObject = jsonObj as { [key: string]: unknown, $class: string };
+            if (!this.acceptResourcesForRelationships) {
+                throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
+            }
+
+            // this isn't a relationship, but it might be an object!
+            if(!jsonObjAsObject.$class) {
+                throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonObj + ' for relationship ' + relationshipDeclaration );
+            }
+            const classDeclaration = parameters.modelManager.getType(jsonObjAsObject.$class);
+
+            // create a new instance, using the identifier field name as the ID.
+            let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
+                classDeclaration.getName(), jsonObjAsObject[classDeclaration.getIdentifierFieldName()] );
+            parameters.jsonStack.push(jsonObjAsObject);
+            parameters.resourceStack.push(subResource);
+            classDeclaration.accept(this, parameters);
+            return subResource;
+        } else {
+            throw new Error('Invalid JSON data. Found a value that is not a string or object: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
+        }
+    }
+
+    /**
      * Visitor design pattern
      * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
@@ -440,13 +487,6 @@ class JSONPopulator {
         let jsonObj = parameters.jsonStack.pop();
         let result: any = null;
 
-        let typeFQN = relationshipDeclaration.getFullyQualifiedTypeName();
-        let defaultNamespace = ModelUtil.getNamespace(typeFQN);
-        if(!defaultNamespace) {
-            defaultNamespace = relationshipDeclaration.getNamespace();
-        }
-        let defaultType = ModelUtil.getShortName(typeFQN);
-
         if(relationshipDeclaration.isArray()) {
             if(!Array.isArray(jsonObj)) {
                 const path = parameters.path?.stack.join('');
@@ -456,55 +496,11 @@ class JSONPopulator {
             const jsonArray = jsonObj as { [key: string]: unknown, $class: string }[];
             for(let n=0; n < jsonArray.length; n++) {
                 let jsonItem = jsonArray[n];
-                if (typeof jsonItem === 'string') {
-                    result.push(Relationship.fromURI(parameters.modelManager, jsonItem, defaultNamespace, defaultType ));
-                } else {
-                    if (!this.acceptResourcesForRelationships) {
-                        throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
-                    }
-
-                    // this isn't a relationship, but it might be an object!
-                    if(!jsonItem.$class) {
-                        throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonItem + ' for relationship ' + relationshipDeclaration );
-                    }
-
-                    const classDeclaration = parameters.modelManager.getType(jsonItem.$class);
-
-                    // create a new instance, using the identifier field name as the ID.
-                    let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
-                        classDeclaration.getName(), jsonItem[classDeclaration.getIdentifierFieldName()] );
-                    parameters.jsonStack.push(jsonItem);
-                    parameters.resourceStack.push(subResource);
-                    classDeclaration.accept(this, parameters);
-                    result.push(subResource);
-                }
+                result.push(this.processRelationship(relationshipDeclaration, jsonItem, parameters));
             }
         }
         else {
-            if (typeof jsonObj === 'string') {
-                result = Relationship.fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );
-            } else if (typeof jsonObj === 'object' && jsonObj !== null) {
-                const jsonObjAsObject = jsonObj as { [key: string]: unknown, $class: string };
-                if (!this.acceptResourcesForRelationships) {
-                    throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
-                }
-
-                // this isn't a relationship, but it might be an object!
-                if(!jsonObjAsObject.$class) {
-                    throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonObj + ' for relationship ' + relationshipDeclaration );
-                }
-                const classDeclaration = parameters.modelManager.getType(jsonObjAsObject.$class);
-
-                // create a new instance, using the identifier field name as the ID.
-                let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
-                    classDeclaration.getName(), jsonObjAsObject[classDeclaration.getIdentifierFieldName()] );
-                parameters.jsonStack.push(jsonObjAsObject);
-                parameters.resourceStack.push(subResource);
-                classDeclaration.accept(this, parameters);
-                result = subResource;
-            } else {
-                throw new Error('Invalid JSON data. Found a value that is not a string or object: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
-            }
+            result = this.processRelationship(relationshipDeclaration, jsonObj, parameters);
         }
         return result;
     }

@@ -99,8 +99,9 @@ class JSONGenerator {
                 return;
             }
 
-            // Key is always a string, but value might be a ValidatedResource.
-            if (typeof value === 'object') {
+            if (mapDeclaration.getValue().isRelationship()) {
+                value = this.processRelationship(mapDeclaration.getValue(), value, parameters);
+            } else if (typeof value === 'object') {
                 // Resolve the declaration for the map value. Prefer the instance's
                 // own fully-qualified type so that polymorphic values (subclasses of
                 // the map's declared value type) are serialized using their actual
@@ -245,6 +246,35 @@ class JSONGenerator {
     }
 
     /**
+     * Process a relationship or permitted resource to its JSON representation.
+     * @param {RelationshipDeclaration|MapValueType} relationshipDeclaration - the declaration
+     * @param {*} obj - the object
+     * @param {Object} parameters - the parameters
+     * @returns {*} the serialized value
+     * @private
+     */
+    processRelationship(relationshipDeclaration, obj, parameters) {
+        let result;
+        if (this.permitResourcesForRelationships && obj instanceof Resource) {
+            let fqi = obj.getFullyQualifiedIdentifier();
+            if (parameters.seenResources.has(fqi)) {
+                let relationshipText = this.getRelationshipText(relationshipDeclaration, obj);
+                result = relationshipText;
+            } else {
+                parameters.seenResources.add(fqi);
+                parameters.stack.push(obj, Resource);
+                const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
+                result = classDecl.accept(this, parameters);
+                parameters.seenResources.delete(fqi);
+            }
+        } else {
+            let relationshipText = this.getRelationshipText(relationshipDeclaration, obj);
+            result = relationshipText;
+        }
+        return result;
+    }
+
+    /**
      * Visitor design pattern
      * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
@@ -260,39 +290,11 @@ class JSONGenerator {
             // walk the object
             for (let index in obj) {
                 const item = obj[index];
-                if (this.permitResourcesForRelationships && item instanceof Resource) {
-                    let fqi = item.getFullyQualifiedIdentifier();
-                    if (parameters.seenResources.has(fqi)) {
-                        let relationshipText = this.getRelationshipText(relationshipDeclaration, item);
-                        array.push(relationshipText);
-                    } else {
-                        parameters.seenResources.add(fqi);
-                        parameters.stack.push(item, Resource);
-                        const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
-                        array.push(classDecl.accept(this, parameters));
-                        parameters.seenResources.delete(fqi);
-                    }
-                } else {
-                    let relationshipText = this.getRelationshipText(relationshipDeclaration, item);
-                    array.push(relationshipText);
-                }
+                array.push(this.processRelationship(relationshipDeclaration, item, parameters));
             }
             result = array;
-        } else if (this.permitResourcesForRelationships && obj instanceof Resource) {
-            let fqi = obj.getFullyQualifiedIdentifier();
-            if (parameters.seenResources.has(fqi)) {
-                let relationshipText = this.getRelationshipText(relationshipDeclaration, obj);
-                result = relationshipText;
-            } else {
-                parameters.seenResources.add(fqi);
-                parameters.stack.push(obj, Resource);
-                const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
-                result = classDecl.accept(this, parameters);
-                parameters.seenResources.delete(fqi);
-            }
         } else {
-            let relationshipText = this.getRelationshipText(relationshipDeclaration, obj);
-            result = relationshipText;
+            result = this.processRelationship(relationshipDeclaration, obj, parameters);
         }
         return result;
     }

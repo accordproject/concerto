@@ -122,6 +122,11 @@ class ResourceValidator {
      */
     checkMapType(type, value, parameters, mapDeclaration, ) {
 
+        if (type.isRelationship?.()) {
+            this.checkRelationship(parameters, type, value);
+            return;
+        }
+
         if (!ModelUtil.isPrimitiveType(type.getType())) {
 
             // thing might be a Concept, Scalar String, Scalar DateTime
@@ -578,7 +583,7 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: relationshipDeclaration.getFullyQualifiedTypeName(),
-            invalidValue: value.toString()
+            invalidValue: value !== null && value !== undefined ? value.toString() : '' + value
         }));
     }
 

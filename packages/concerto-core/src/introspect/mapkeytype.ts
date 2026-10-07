@@ -157,6 +157,27 @@ class MapKeyType extends Decorated {
     }
 
     /**
+     * Returns the name of the parent map.
+     *
+     * @return {string} the name of the parent map
+     */
+    getName(): string {
+        return this.parent.getName();
+    }
+
+    /**
+     * Returns the fully qualified type of this map key.
+     * @return {string} the fully qualified type name
+     */
+    getFullyQualifiedTypeName(): string {
+        if (ModelUtil.isPrimitiveType(this.type)) {
+            return this.type;
+        }
+
+        return this.getModelFile().getFullyQualifiedTypeName(this.type);
+    }
+
+    /**
      * Return the namespace of this map key.
      * @return {string} namespace - a namespace.
      */

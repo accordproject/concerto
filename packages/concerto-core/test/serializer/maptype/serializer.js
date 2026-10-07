@@ -1104,5 +1104,230 @@ describe('Serializer', () => {
             xnsSerializer.toJSON(resource).should.deep.equal(json);
         });
     });
+
+    describe('Map with relationship values', () => {
+        let relModelManager;
+        let relFactory;
+        let relSerializer;
+
+        beforeEach(() => {
+            relModelManager = new ModelManager({ strict: true });
+            relModelManager.addCTOModel(`
+            namespace org.acme.rel@1.0.0
+
+            participant Person identified by name {
+                o String name
+            }
+
+            map RelMap {
+                o String
+                --> Person
+            }
+
+            concept Container {
+                o RelMap relMap optional
+                --> Person single optional
+            }
+            `, 'rel.cto');
+
+            relFactory = new Factory(relModelManager);
+            relSerializer = new Serializer(relFactory, relModelManager);
+        });
+
+        it('should deserialize and serialize relationship map value with URI reference', () => {
+            const json = {
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: 'resource:org.acme.rel@1.0.0.Person#Alice'
+                }
+            };
+            const resource = relSerializer.fromJSON(json);
+            resource.relMap.should.be.an.instanceOf(Map);
+            const rel = resource.relMap.get('alice');
+            rel.isRelationship().should.be.true;
+            rel.getIdentifier().should.equal('Alice');
+            rel.getFullyQualifiedType().should.equal('org.acme.rel@1.0.0.Person');
+
+            const outputJson = relSerializer.toJSON(resource);
+            outputJson.should.deep.equal(json);
+        });
+
+        it('should deserialize relationship map value with bare identifier and serialize to URI', () => {
+            const json = {
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: 'Alice'
+                }
+            };
+            const resource = relSerializer.fromJSON(json);
+            const rel = resource.relMap.get('alice');
+            rel.isRelationship().should.be.true;
+            rel.getIdentifier().should.equal('Alice');
+
+            const outputJson = relSerializer.toJSON(resource);
+            outputJson.should.deep.equal({
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: 'resource:org.acme.rel@1.0.0.Person#Alice'
+                }
+            });
+        });
+
+        it('should serialize relationship map value with convertResourcesToId: true', () => {
+            const json = {
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: 'resource:org.acme.rel@1.0.0.Person#Alice'
+                }
+            };
+            const resource = relSerializer.fromJSON(json);
+            const outputJson = relSerializer.toJSON(resource, { convertResourcesToId: true });
+            outputJson.should.deep.equal({
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: 'Alice'
+                }
+            });
+        });
+
+        it('should throw when relationship map value is an embedded object without acceptResourcesForRelationships', () => {
+            const json = {
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: {
+                        $class: 'org.acme.rel@1.0.0.Person',
+                        name: 'Alice'
+                    }
+                }
+            };
+            (() => {
+                relSerializer.fromJSON(json);
+            }).should.throw(/Invalid JSON data/);
+        });
+
+        it('should throw when relationship map value is not a string or object', () => {
+            const json = {
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: 123
+                }
+            };
+            (() => {
+                relSerializer.fromJSON(json);
+            }).should.throw(/Invalid JSON data.*Found a value that is not a string or object/);
+        });
+
+        it('should throw when embedded object has no $class property', () => {
+            const json = {
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: { name: 'Alice' }
+                }
+            };
+            (() => {
+                relSerializer.fromJSON(json, { acceptResourcesForRelationships: true });
+            }).should.throw(/Invalid JSON data.*Does not contain a \$class/);
+        });
+
+        it('should accept embedded resource with acceptResourcesForRelationships and serialize embedded with permitResourcesForRelationships', () => {
+            const json = {
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: {
+                        $class: 'org.acme.rel@1.0.0.Person',
+                        name: 'Alice'
+                    }
+                }
+            };
+            const resource = relSerializer.fromJSON(json, { acceptResourcesForRelationships: true, validate: false });
+            resource.relMap.get('alice').getIdentifier().should.equal('Alice');
+
+            const outputJson = relSerializer.toJSON(resource, { permitResourcesForRelationships: true });
+            outputJson.should.deep.equal({
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: {
+                        $class: 'org.acme.rel@1.0.0.Person',
+                        $identifier: 'Alice',
+                        name: 'Alice'
+                    }
+                }
+            });
+        });
+
+        it('should accept embedded resource with acceptResourcesForRelationships and convert to URI with convertResourcesToRelationships', () => {
+            const json = {
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: {
+                        $class: 'org.acme.rel@1.0.0.Person',
+                        name: 'Alice'
+                    }
+                }
+            };
+            const resource = relSerializer.fromJSON(json, { acceptResourcesForRelationships: true, validate: false });
+
+            const outputJson = relSerializer.toJSON(resource, { convertResourcesToRelationships: true });
+            outputJson.should.deep.equal({
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: 'resource:org.acme.rel@1.0.0.Person#Alice'
+                }
+            });
+        });
+
+        it('should throw when serializing embedded resource in map value without permit or convert flags', () => {
+            const json = {
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: {
+                        $class: 'org.acme.rel@1.0.0.Person',
+                        name: 'Alice'
+                    }
+                }
+            };
+            const resource = relSerializer.fromJSON(json, { acceptResourcesForRelationships: true, validate: false });
+            (() => {
+                relSerializer.toJSON(resource, { validate: false });
+            }).should.throw(/Did not find a relationship for/);
+        });
+
+        it('should throw ValidationException when serializing embedded resource with default validate: true', () => {
+            const json = {
+                $class: 'org.acme.rel@1.0.0.Container',
+                relMap: {
+                    alice: {
+                        $class: 'org.acme.rel@1.0.0.Person',
+                        name: 'Alice'
+                    }
+                }
+            };
+            const resource = relSerializer.fromJSON(json, { acceptResourcesForRelationships: true, validate: false });
+            (() => {
+                relSerializer.toJSON(resource);
+            }).should.throw(/Expected a "Relationship"/);
+        });
+
+        it('should validate relationship map value when resource.validate() is called', () => {
+            const container = relFactory.newConcept('org.acme.rel@1.0.0', 'Container');
+            const rel = relFactory.newRelationship('org.acme.rel@1.0.0', 'Person', 'Alice');
+            container.relMap = new Map();
+            container.relMap.set('alice', rel);
+
+            (() => {
+                container.validate();
+            }).should.not.throw();
+        });
+
+        it('should throw ValidationException when relationship map value is not a Relationship during validate', () => {
+            const container = relFactory.newConcept('org.acme.rel@1.0.0', 'Container');
+            container.relMap = new Map();
+            container.relMap.set('alice', 'invalid-string-not-relationship');
+
+            (() => {
+                container.validate();
+            }).should.throw(/Expected a "Relationship"/);
+        });
+    });
 });
 

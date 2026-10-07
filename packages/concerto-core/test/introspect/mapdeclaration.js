@@ -756,6 +756,51 @@ describe('MapDeclaration', () => {
             declaration.getValue().getNamespace().should.equal('com.acme@1.0.0');
         });
     });
+
+    describe('#getName and #getFullyQualifiedTypeName', () => {
+        it('should return name and FQN for primitive key and value', () => {
+            let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.string.cto', MapDeclaration);
+            declaration.getKey().getName().should.equal('Dictionary');
+            declaration.getKey().getFullyQualifiedTypeName().should.equal('String');
+            declaration.getValue().getName().should.equal('Dictionary');
+            declaration.getValue().getFullyQualifiedTypeName().should.equal('String');
+            declaration.getValue().isRelationship().should.be.false;
+        });
+
+        it('should return FQN for complex type and recognize relationships', () => {
+            const mm = new ModelManager({ strict: true });
+            mm.addCTOModel(`
+            namespace org.acme.maptest@1.0.0
+            participant User identified by userId {
+                o String userId
+            }
+            map UserMap {
+                o String
+                --> User
+            }
+            `, 'test.cto');
+            const mapDecl = mm.getType('org.acme.maptest@1.0.0.UserMap');
+            mapDecl.getValue().isRelationship().should.be.true;
+            mapDecl.getValue().getName().should.equal('UserMap');
+            mapDecl.getValue().getFullyQualifiedTypeName().should.equal('org.acme.maptest@1.0.0.User');
+        });
+
+        it('should throw IllegalModelException if relationship points to non-identified concept', () => {
+            const mm = new ModelManager({ strict: true });
+            (() => {
+                mm.addCTOModel(`
+                namespace org.acme.maptest@1.0.0
+                concept NonIdentified {
+                    o String field
+                }
+                map InvalidMap {
+                    o String
+                    --> NonIdentified
+                }
+                `, 'invalid.cto');
+            }).should.throw(IllegalModelException, /must be to a class that has an identifier/);
+        });
+    });
 });
 
 describe('MapDeclration - Test for MapDeclrations using Import Aliasing', () => {
