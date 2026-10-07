@@ -73,9 +73,17 @@ class MapValueType extends Decorated {
             const decl = this.modelFile.getType(this.ast.type.name);
 
             // All declarations, with the exception of MapDeclarations, are valid Values.
-            if(decl.isMapDeclaration?.()) {
+            if(decl?.isMapDeclaration?.()) {
                 throw new IllegalModelException(
                     `MapDeclaration as Map Type Value is not supported: ${this.type}`
+                );
+            }
+
+            if(this.isRelationship() && decl && !decl.isIdentified?.()) {
+                throw new IllegalModelException(
+                    `Relationship ${this.getName()} must be to a class that has an identifier, but this is to ${this.getFullyQualifiedTypeName()}`,
+                    this.modelFile,
+                    this.ast.location
                 );
             }
         }
@@ -185,6 +193,36 @@ class MapValueType extends Decorated {
      */
     isValue(): boolean {
         return true;
+    }
+
+    /**
+     * Returns the name of the parent map.
+     *
+     * @return {string} the name of the parent map
+     */
+    getName(): string {
+        return this.parent.getName();
+    }
+
+    /**
+     * Returns the fully qualified type of this map value.
+     * @return {string} the fully qualified type name
+     */
+    getFullyQualifiedTypeName(): string {
+        if (ModelUtil.isPrimitiveType(this.type)) {
+            return this.type;
+        }
+
+        return this.getModelFile().getFullyQualifiedTypeName(this.type);
+    }
+
+    /**
+     * Returns true if this class is the definition of a relationship.
+     *
+     * @return {boolean} true if the class is a relationship
+     */
+    isRelationship(): boolean {
+        return this.ast.$class === `${MetaModelNamespace}.RelationshipMapValueType`;
     }
 
     /**
