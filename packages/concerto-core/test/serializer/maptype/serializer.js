@@ -1104,5 +1104,55 @@ describe('Serializer', () => {
             xnsSerializer.toJSON(resource).should.deep.equal(json);
         });
     });
+
+    describe('# non-object JSON for Map fields (#1549)', () => {
+        // The 'Dictionary' map (String->String) is defined in the beforeEach model.
+
+        it('should throw ValidationException when a string is passed for a Map field', () => {
+            (() => {
+                serializer.fromJSON({
+                    $class: 'org.acme.sample@1.0.0.Concepts',
+                    dict: 'hello'
+                });
+            }).should.throw(/Expected value at path `\$\.dict` to be a map of type `Dictionary`/);
+        });
+
+        it('should throw ValidationException when a number is passed for a Map field', () => {
+            (() => {
+                serializer.fromJSON({
+                    $class: 'org.acme.sample@1.0.0.Concepts',
+                    dict: 42
+                });
+            }).should.throw(/Expected value at path `\$\.dict` to be a map of type `Dictionary`/);
+        });
+
+        it('should throw ValidationException when a boolean is passed for a Map field', () => {
+            (() => {
+                serializer.fromJSON({
+                    $class: 'org.acme.sample@1.0.0.Concepts',
+                    dict: true
+                });
+            }).should.throw(/Expected value at path `\$\.dict` to be a map of type `Dictionary`/);
+        });
+
+        it('should throw ValidationException when an array is passed for a Map field', () => {
+            (() => {
+                serializer.fromJSON({
+                    $class: 'org.acme.sample@1.0.0.Concepts',
+                    dict: ['foo', 'bar']
+                });
+            }).should.throw(/Expected value at path `\$\.dict` to be a map of type `Dictionary`/);
+        });
+
+        it('should deserialize a valid plain object Map without throwing', () => {
+            const result = serializer.fromJSON({
+                $class: 'org.acme.sample@1.0.0.Concepts',
+                dict: { greeting: 'hello', farewell: 'goodbye' }
+            });
+            result.dict.should.be.an.instanceOf(Map);
+            result.dict.get('greeting').should.equal('hello');
+            result.dict.get('farewell').should.equal('goodbye');
+        });
+    });
 });
 

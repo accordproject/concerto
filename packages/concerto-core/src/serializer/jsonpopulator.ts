@@ -199,6 +199,18 @@ class JSONPopulator {
         const jsonObj = parameters.jsonStack.pop() as Record<string, unknown>;
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
+        // Reject non-plain-object JSON values (strings, numbers, booleans, arrays, null).
+        // JavaScript's Object.entries() silently accepts all of these:
+        //   - a string "hello" produces { '0':'h', '1':'e', ... } entries → corrupted Map
+        //   - an array ["a","b"] produces { '0':'a', '1':'b' } entries → corrupted Map
+        //   - a number or boolean produces [] entries → silently empty Map
+        // Every other Concerto field type throws ValidationException on type mismatch
+        // (see #1313 for the equivalent fix on array fields); Map fields must do the same.
+        if (typeof jsonObj !== 'object' || jsonObj === null || Array.isArray(jsonObj)) {
+            const path = parameters.path?.stack.join('');
+            throw new ValidationException(`Expected value at path \`${path}\` to be a map of type \`${mapDeclaration.getName()}\``);
+        }
+
         // Throws if Map contains reserved properties - a Map containing reserved Properties should not be serialized.
         getAssignableProperties(jsonObj, mapDeclaration);
 
