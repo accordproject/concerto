@@ -121,48 +121,67 @@ class ResourceValidator {
      * @private
      */
     checkMapType(type, value, parameters, mapDeclaration, ) {
+        let typeName = type.getType();
+        let thing;
 
-        if (!ModelUtil.isPrimitiveType(type.getType())) {
+        if (!ModelUtil.isPrimitiveType(typeName)) {
+            const modelFile = mapDeclaration.getModelFile();
+            const fqn = modelFile.getFullyQualifiedTypeName(typeName);
+            thing = parameters.modelManager.getType(fqn);
 
-            // thing might be a Concept, Scalar String, Scalar DateTime
-            let thing = mapDeclaration.getModelFile()
-                .getAllDeclarations()
-                .find(decl => decl.name === type.getType());
-
-            // if Key or Value is Scalar, get the Base Type of the Scalar for primitive validation.
-            if (ModelUtil.isScalar(mapDeclaration.getKey())) {
-                type = thing.getType();
-            }
-
-            if (thing?.isClassDeclaration?.()) {
+            if (thing?.isEnum?.() || thing?.isClassDeclaration?.()) {
                 parameters.stack.push(value);
                 thing.accept(this, parameters);
                 return;
             }
-        } else {
-            // otherwise its a primitive
-            type = type.getType();
 
+            if (thing?.isScalarDeclaration?.()) {
+                typeName = thing.getType();
+            }
         }
 
         // validate the primitive
-        switch(type) {
+        switch(typeName) {
         case 'String':
             if (typeof value !== 'string') {
                 throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of String but found '${value}' instead.`);
             }
             break;
         case 'DateTime':
-            if (!dayjs.utc(value).isValid()) {
+            if (typeof value !== 'string' || !dayjs.utc(value).isValid()) {
                 throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
             }
             break;
         case 'Boolean':
             if (typeof value !== 'boolean') {
-                const type = typeof value;
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Boolean but found ${type} instead, for value '${value}'.`);
+                const valType = typeof value;
+                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Boolean but found ${valType} instead, for value '${value}'.`);
             }
             break;
+        case 'Integer':
+            if (typeof value !== 'number' || !isFinite(value) || !Number.isInteger(value)) {
+                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Integer but found '${value}' instead.`);
+            }
+            break;
+        case 'Long':
+            if (typeof value !== 'number' || !isFinite(value) || !Number.isInteger(value)) {
+                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Long but found '${value}' instead.`);
+            }
+            break;
+        case 'Double':
+            if (typeof value !== 'number' || !isFinite(value)) {
+                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Double but found '${value}' instead.`);
+            }
+            break;
+        }
+
+        // apply scalar validator if present
+        if (thing?.isScalarDeclaration?.()) {
+            const validator = thing.getValidator();
+            if (validator !== null) {
+                const identifier = parameters.currentIdentifier || parameters.rootResourceIdentifier || mapDeclaration.getFullyQualifiedName();
+                validator.validate(identifier, value);
+            }
         }
     }
 

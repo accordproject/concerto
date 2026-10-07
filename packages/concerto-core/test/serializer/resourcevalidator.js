@@ -517,6 +517,47 @@ describe('ResourceValidator', function () {
                 resourceValidator.visitClassDeclaration(conceptDeclaration,parameters);
             }).should.throw('Instance "undefined" has a property named "$numberOfWipers", which is not declared in "org.acme.l1@1.0.0.Data".');
         });
+
+        it('should allow omitting required property if it has a default value', () => {
+            const defaultModel = `namespace org.acme.defaultval@1.0.0
+            concept DefaultItem {
+                o String status default="ACTIVE"
+            }`;
+            modelManager.addCTOModel(defaultModel);
+            const data = factory.newConcept('org.acme.defaultval@1.0.0', 'DefaultItem');
+            delete data.status;
+            const typedStack = new TypedStack(data);
+            const decl = modelManager.getType('org.acme.defaultval@1.0.0.DefaultItem');
+            const parameters = { stack: typedStack, modelManager: modelManager, rootResourceIdentifier: 'ABC' };
+            (() => {
+                resourceValidator.visitClassDeclaration(decl, parameters);
+            }).should.not.throw();
+        });
+
+        it('should allow omitting $identifier when identifierFieldName is not $identifier', () => {
+            const shadowModel = `namespace org.acme.shadow@1.0.0
+            asset BaseItem {
+            }
+            asset ShadowItem identified by customId extends BaseItem {
+                o String customId
+            }`;
+            modelManager.addCTOModel(shadowModel);
+            const data = factory.newResource('org.acme.shadow@1.0.0', 'ShadowItem', 'item1');
+            const proxy = new Proxy(data, {
+                get(target, prop) {
+                    if (prop === '$identifier') {
+                        return undefined;
+                    }
+                    return target[prop];
+                }
+            });
+            const typedStack = new TypedStack(proxy);
+            const decl = modelManager.getType('org.acme.shadow@1.0.0.ShadowItem');
+            const parameters = { stack: typedStack, modelManager: modelManager, rootResourceIdentifier: 'ABC' };
+            (() => {
+                resourceValidator.visitClassDeclaration(decl, parameters);
+            }).should.not.throw();
+        });
     });
 
     describe('#reportFieldTypeViolation', () => {
@@ -600,6 +641,14 @@ describe('ResourceValidator', function () {
             (() => {
                 resourceValidator.checkRelationship(parameters, {}, mockResource);
             }).should.not.throw();
+        });
+
+        it('should throw if target type is not identifiable', () => {
+            resourceValidator.options.convertResourcesToRelationships = true;
+            mockClassDeclaration.getIdentifierFieldName.returns(null);
+            (() => {
+                resourceValidator.checkRelationship(parameters, {}, mockResource);
+            }).should.throw('Cannot have a relationship to a field that is not identifiable.');
         });
     });
 
