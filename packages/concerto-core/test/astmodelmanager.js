@@ -15,6 +15,7 @@
 'use strict';
 
 const { AstModelManager } = require('../src/astmodelmanager');
+const { IllegalModelException } = require('../src/introspect/illegalmodelexception');
 
 const chai = require('chai');
 chai.should();
@@ -75,6 +76,37 @@ describe('AstModelManager', () => {
             modelManager.addModel(modelContent, null, 'test.cto');
 
             modelManager.getModelFile('org.example.test@1.0.0').should.not.be.undefined;
+        });
+
+        it('should throw IllegalModelException for a null decorator', () => {
+            const modelContent = {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.acme@1.0.0',
+                'imports': [],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'A',
+                        'isAbstract': false,
+                        'properties': [
+                            {
+                                '$class': 'concerto.metamodel@1.0.0.StringProperty',
+                                'name': 's',
+                                'isArray': false,
+                                'isOptional': false,
+                                'decorators': [null]
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            (() => {
+                modelManager.addModel(modelContent, null, 'a.cto');
+            }).should.throw(
+                IllegalModelException,
+                /Decorator cannot be null or undefined/
+            );
         });
     });
 

@@ -20,6 +20,7 @@ const { ClassDeclaration } = require('../../src/introspect/classdeclaration');
 const { ModelFile } = require('../../src/introspect/modelfile');
 const { Property } = require('../../src/introspect/property');
 const { ModelManager } = require('../../src/modelmanager');
+const { IllegalModelException } = require('../../src/introspect/illegalmodelexception');
 
 const should = require('chai').should();
 const sinon = require('sinon');
@@ -101,6 +102,20 @@ describe('Property', () => {
                     name: '1st',
                 });
             }).should.throw(/Invalid property name '1st'/);
+        });
+
+        it('should throw for a relationship property without a type', () => {
+            (() => {
+                new Property(mockClassDeclaration, {
+                    $class: `${MetaModelNamespace}.RelationshipProperty`,
+                    name: 'r',
+                    isArray: false,
+                    isOptional: false
+                });
+            }).should.throw(
+                IllegalModelException,
+                /RelationshipProperty must contain property 'type', for property r/
+            );
         });
 
     });
