@@ -14,6 +14,7 @@
 
 import dayjs from '../dayjs-setup';
 import { NullUtil as Util } from '@accordproject/concerto-util';
+import ValidationException from '../serializer/validationexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -167,6 +168,9 @@ class Typed {
                     this.setPropertyValue(field.getName(), (defaultValue === true));
                 } else if (type === 'DateTime') {
                     const dateTime = dayjs.utc(defaultValue);
+                    if (!dateTime.isValid()) {
+                        throw new ValidationException(`Invalid default value '${defaultValue}' for DateTime field '${field.getName()}'.`);
+                    }
                     this.setPropertyValue(field.getName(), dateTime);
                 } else {
                     // following precident set in jsonpopulator.js - if we get this far the field should be an enum

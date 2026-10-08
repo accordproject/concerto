@@ -130,6 +130,18 @@ describe('Typed', () => {
             typed.double.should.equal(0.0);
         });
 
+        it('should throw a ValidationException when DateTime default is invalid', () => {
+            modelManager.addCTOModel(`namespace org.acme.defaults@1.0.0
+            concept DefaultAsset {
+                o DateTime invalidDate default="FOO"
+            }`);
+            const classDecl = modelManager.getType('org.acme.defaults@1.0.0.DefaultAsset');
+            const typed = new Typed(modelManager, classDecl, 'org.acme.defaults@1.0.0', 'DefaultAsset');
+            (() => typed.assignFieldDefaults()).should.throw(
+                /Invalid default value 'FOO' for DateTime field 'invalidDate'\./
+            );
+        });
+
     });
 
 });
