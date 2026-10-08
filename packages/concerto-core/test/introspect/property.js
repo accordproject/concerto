@@ -46,7 +46,7 @@ describe('Property', () => {
                     $class: `${MetaModelNamespace}.StringProperty`,
                     name: null
                 });
-            }).should.throw(/No name for type/);
+            }).should.throw(/Invalid property name 'null'/);
         });
 
         it('should not throw for an identifier named null', () => {
