@@ -198,6 +198,8 @@ class Field extends Property {
         fieldAst.name = this.ast.name;
         this.scalarField = new Field(this.getParent(), fieldAst);
         this.scalarField.array = this.isArray();
+        // the size validator belongs to the property, not to the scalar declaration
+        this.scalarField.sizeValidator = this.getSizeValidator();
         return this.scalarField;
     }
 }

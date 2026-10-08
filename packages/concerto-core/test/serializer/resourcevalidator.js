@@ -700,5 +700,69 @@ describe('ResourceValidator', function () {
             const serializer = new Serializer(factory, modelManager);
             (() => serializer.toJSON(team)).should.throw(/no more than 3 elements/);
         });
+
+        const scalarSizeModel = `namespace org.acme.scalarsize@1.0.0
+        scalar Tag extends String
+        scalar Score extends Integer range=[0,100]
+        concept Board {
+            o Tag[] tags size=[1,2]
+            o Score[] scores size=[2,3]
+        }`;
+
+        it('should pass validation when scalar arrays are within bounds', () => {
+            modelManager.addCTOModel(scalarSizeModel);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.fromJSON({
+                $class: 'org.acme.scalarsize@1.0.0.Board',
+                tags: ['a', 'b'],
+                scores: [1, 2]
+            })).should.not.throw();
+        });
+
+        it('should reject scalar array below minSize', () => {
+            modelManager.addCTOModel(scalarSizeModel);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.fromJSON({
+                $class: 'org.acme.scalarsize@1.0.0.Board',
+                tags: [],
+                scores: [1, 2]
+            })).should.throw(/at least 1 elements/);
+        });
+
+        it('should reject scalar array above maxSize', () => {
+            modelManager.addCTOModel(scalarSizeModel);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.fromJSON({
+                $class: 'org.acme.scalarsize@1.0.0.Board',
+                tags: ['a', 'b', 'c', 'd'],
+                scores: [1, 2]
+            })).should.throw(/no more than 2 elements/);
+        });
+
+        it('should reject scalar array above maxSize when serializing', () => {
+            modelManager.addCTOModel(scalarSizeModel);
+            const board = factory.newConcept('org.acme.scalarsize@1.0.0', 'Board', undefined, { disableValidation: true });
+            board.tags = ['a'];
+            board.scores = [1, 2, 3, 4];
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.toJSON(board)).should.throw(/no more than 3 elements/);
+        });
+
+        it('should reject adding an item past maxSize of a scalar array', () => {
+            modelManager.addCTOModel(scalarSizeModel);
+            const board = factory.newConcept('org.acme.scalarsize@1.0.0', 'Board');
+            board.setPropertyValue('tags', ['a', 'b']);
+            (() => board.addArrayValue('tags', 'c')).should.throw(/no more than 2 elements/);
+        });
+
+        it('should still apply the scalar validator to items of a sized scalar array', () => {
+            modelManager.addCTOModel(scalarSizeModel);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.fromJSON({
+                $class: 'org.acme.scalarsize@1.0.0.Board',
+                tags: ['a'],
+                scores: [1, 500]
+            })).should.throw(/outside upper bound/);
+        });
     });
 });
