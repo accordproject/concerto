@@ -150,6 +150,25 @@ describe('JSONPopulator', () => {
             }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
         });
 
+        it('should reject impossible dates (e.g. Feb 30, non-leap Feb 29) when strictQualifiedDateTimes is true', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, '2024-02-30T00:00:00Z', {});
+            }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
+            (() => {
+                jsonPopulator.convertToObject(field, '2023-02-29T00:00:00Z', {});
+            }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
+        });
+
+        it('should reject T24:00:00 when strictQualifiedDateTimes is true', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, '2024-01-01T24:00:00Z', {});
+            }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
+        });
+
         it('should convert to dates from dayjs objects', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');

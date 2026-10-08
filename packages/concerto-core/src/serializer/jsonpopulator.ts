@@ -18,6 +18,7 @@ import Relationship from '../model/relationship';
 import ModelUtil from '../modelutil';
 import ValidationException from './validationexception';
 import dayjs from '../dayjs-setup';
+import { isValidDateTime } from '../datetimeutil';
 import type Factory from '../factory';
 import type BaseModelManager from '../basemodelmanager';
 import type Declaration from '../introspect/declaration';
@@ -372,9 +373,14 @@ class JSONPopulator {
             } else if (!this.strictQualifiedDateTimes){
                 result = dayjs.utc(json).utcOffset(this.utcOffset);
             } else if (this.strictQualifiedDateTimes){
-                if (json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)){
-                    result = dayjs.utc(json);
-                } else {
+                const match = json.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d+)?)(Z|[+-]\d{2}:\d{2})$/);
+                if (match) {
+                    const second = match[6].split('.')[0];
+                    if (isValidDateTime(match[1], match[2], match[3], match[4], match[5], second, match[7])) {
+                        result = dayjs.utc(json);
+                    }
+                }
+                if (!result) {
                     throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
                 }
             }
