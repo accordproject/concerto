@@ -45,6 +45,23 @@ describe('ModelUtil', function () {
         });
     });
 
+    describe('#isValidIdentifier', function() {
+
+        it('should return false for undefined', function() {
+            ModelUtil.isValidIdentifier(undefined).should.equal(false);
+        });
+
+        it('should return false for null', function() {
+            ModelUtil.isValidIdentifier(null).should.equal(false);
+        });
+
+        it('should preserve valid identifier strings "undefined" and "null"', function() {
+            ModelUtil.isValidIdentifier('undefined').should.equal(true);
+            ModelUtil.isValidIdentifier('null').should.equal(true);
+        });
+
+    });
+
     describe('#getShortName', function() {
 
         it('should handle a name with a namespace', function() {

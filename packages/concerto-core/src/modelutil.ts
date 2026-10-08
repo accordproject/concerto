@@ -120,19 +120,19 @@ class ModelUtil {
      * @returns {ParseNamespaceResult} the result of parsing
      */
     static parseNamespace(ns: string, options?: { disableVersionParsing?: boolean }) {
-        if(!ns) {
+        if (!ns) {
             throw new Error('Namespace is null or undefined.');
         }
 
         const parts = ns.split('@');
         let version: string | SemVer | null = parts[1];
-        if(parts.length > 2) {
+        if (parts.length > 2) {
             throw new Error(`Invalid namespace ${ns}`);
         }
 
-        if(parts.length === 2 && !options?.disableVersionParsing) {
+        if (parts.length === 2 && !options?.disableVersionParsing) {
             // Validate the version using semver
-            if(!semver.valid(parts[1])) {
+            if (!semver.valid(parts[1])) {
                 throw new Error(`Invalid namespace ${ns}`);
             }
             version = semver.parse(parts[1]);
@@ -251,8 +251,9 @@ class ModelUtil {
      * @param {string} name - the name of the identifier to test.
      * @returns {boolean} true if the identifier is valid.
      */
-    static isValidIdentifier(name: string | undefined): name is string {
-        return ID_REGEX.test(name as string);
+
+    static isValidIdentifier(name: string | undefined | null): name is string {
+        return typeof name === 'string' && ID_REGEX.test(name);
     }
 
     /**
@@ -276,7 +277,7 @@ class ModelUtil {
      * @returns {string} the fully qualified name minus the namespace version
      */
     static removeNamespaceVersionFromFullyQualifiedName(fqn) {
-        if(ModelUtil.isPrimitiveType(fqn)) {
+        if (ModelUtil.isPrimitiveType(fqn)) {
             return fqn;
         }
         const ns = ModelUtil.getNamespace(fqn);
@@ -328,8 +329,8 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
     static isValidMapKeyScalar(decl) {
-        return (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.StringScalar`)  ||
-        (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.DateTimeScalar`);
+        return (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.StringScalar`) ||
+            (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.DateTimeScalar`);
     }
 
     /**
