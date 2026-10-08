@@ -690,6 +690,10 @@ describe('Serializer', () => {
 
                 // Other
                 ['2022-11-28T01:02:03.987-08', 'YYYY-MM-DDTHH:mm:ss.SSS-HH'],
+                ['2024-02-30T00:00:00Z', 'Impossible date Feb 30'],
+                ['2023-02-29T00:00:00Z', 'Impossible date non-leap Feb 29'],
+                ['2024-01-01T24:00:00Z', 'Hour 24:00'],
+                ['2024-04-31T00:00:00Z', 'Impossible date April 31'],
 
             ];
 
