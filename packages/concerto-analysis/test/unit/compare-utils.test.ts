@@ -1,4 +1,4 @@
-import { ClassDeclaration, ModelFile, ModelManager, Property, Validator, Field }  from '@accordproject/concerto-core';
+import { ClassDeclaration, ModelFile, ModelManager, Property, Validator, Field } from '@accordproject/concerto-core';
 import { getDeclarationType, getPropertyType, getValidatorType } from '../../src/compare-utils';
 
 // This test suite should disappear once we port concerto-core to TypeScript because the error branches will be enforced by the transpiler.
@@ -21,7 +21,11 @@ const modelAst = {
 
 const modelFile = new ModelFile(modelManager, asAst(modelAst), null, 'test.cto');
 
-const classDeclaration = new ClassDeclaration(modelFile, asAst(modelAst));
+const classDeclaration = new ClassDeclaration(modelFile, {
+    $class: 'concerto.metamodel@1.0.0.ClassDeclaration',
+    name: 'ClassDeclaration',
+    properties: []
+});
 const property = new Property(classDeclaration, asAst(propertyAst));
 const field = new Field(classDeclaration, asAst(propertyAst));
 const validator = new Validator(field, asAst({}));
