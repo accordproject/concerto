@@ -47,13 +47,13 @@ class CollectionSizeValidator extends Validator {
         this.maxSize = validator.maxSize ?? null;
 
         if (isNull(this.minSize) && isNull(this.maxSize)) {
-            this.reportError(field.getName(), 'Invalid collection size, minSize and/or maxSize must be specified.');
+            this.reportModelError('Invalid collection size, minSize and/or maxSize must be specified.');
         } else if ((this.minSize ?? 0) < 0 || (this.maxSize ?? 0) < 0) {
-            this.reportError(field.getName(), 'minSize and/or maxSize must be positive integers.');
+            this.reportModelError('minSize and/or maxSize must be positive integers.');
         } else if (isNull(this.minSize) || isNull(this.maxSize)) {
             // this is fine and means that we don't need to check whether minSize > maxSize
         } else if (this.minSize > this.maxSize) {
-            this.reportError(field.getName(), 'minSize must be less than or equal to maxSize.');
+            this.reportModelError('minSize must be less than or equal to maxSize.');
         }
     }
 
@@ -65,11 +65,11 @@ class CollectionSizeValidator extends Validator {
      * @private
      */
     validate(identifier: string | null, value: number): void {
-        if(!isNull(this.minSize) && value < this.minSize) {
-            this.reportError(identifier, `Collection must contain at least ${this.minSize} elements.`);
+        if (!isNull(this.minSize) && value < this.minSize) {
+            this.reportValidationError(identifier, `Collection must contain at least ${this.minSize} elements.`);
         }
-        if(!isNull(this.maxSize) && value > this.maxSize) {
-            this.reportError(identifier, `Collection must contain no more than ${this.maxSize} elements.`);
+        if (!isNull(this.maxSize) && value > this.maxSize) {
+            this.reportValidationError(identifier, `Collection must contain no more than ${this.maxSize} elements.`);
         }
     }
 
