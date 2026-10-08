@@ -72,14 +72,31 @@ class MapValueType extends Decorated {
 
             const decl = this.modelFile.getType(this.ast.type.name);
 
+            if (!decl) {
+                if (this.isRelationship()) {
+                    const targetName = this.getFullyQualifiedTypeName() || `${this.getNamespace()}.${this.type}`;
+                    throw new IllegalModelException(
+                        `Relationship ${this.getName()} points to a missing type ${targetName}`,
+                        this.modelFile,
+                        this.ast.location
+                    );
+                } else {
+                    this.modelFile.resolveType(
+                        `map ${this.parent.getFullyQualifiedName()}`,
+                        this.type,
+                        this.ast.location
+                    );
+                }
+            }
+
             // All declarations, with the exception of MapDeclarations, are valid Values.
-            if(decl?.isMapDeclaration?.()) {
+            if(decl.isMapDeclaration?.()) {
                 throw new IllegalModelException(
                     `MapDeclaration as Map Type Value is not supported: ${this.type}`
                 );
             }
 
-            if(this.isRelationship() && decl && !decl.isIdentified?.()) {
+            if(this.isRelationship() && !decl.isIdentified?.()) {
                 throw new IllegalModelException(
                     `Relationship ${this.getName()} must be to a class that has an identifier, but this is to ${this.getFullyQualifiedTypeName()}`,
                     this.modelFile,

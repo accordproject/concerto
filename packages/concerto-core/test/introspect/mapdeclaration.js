@@ -30,6 +30,7 @@ const fs = require('fs');
 const path = require('path');
 
 const sinon = require('sinon');
+require('chai').should();
 const expect = require('chai').expect;
 
 
@@ -799,6 +800,32 @@ describe('MapDeclaration', () => {
                 }
                 `, 'invalid.cto');
             }).should.throw(IllegalModelException, /must be to a class that has an identifier/);
+        });
+
+        it('should throw IllegalModelException if relationship points to missing type', () => {
+            const mm = new ModelManager({ strict: true });
+            (() => {
+                mm.addCTOModel(`
+                namespace org.acme.maptest@1.0.0
+                map InvalidMap {
+                    o String
+                    --> MissingType
+                }
+                `, 'invalid.cto');
+            }).should.throw(IllegalModelException, /points to a missing type/);
+        });
+
+        it('should throw IllegalModelException if map object value points to missing type', () => {
+            const mm = new ModelManager({ strict: true });
+            (() => {
+                mm.addCTOModel(`
+                namespace org.acme.maptest@1.0.0
+                map InvalidMap {
+                    o String
+                    o MissingType
+                }
+                `, 'invalid.cto');
+            }).should.throw(IllegalModelException);
         });
     });
 });
