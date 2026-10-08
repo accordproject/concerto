@@ -69,11 +69,15 @@ class MapValueType extends Decorated {
      */
     validate() {
         if (!ModelUtil.isPrimitiveType(this.type)) {
+            this.modelFile.resolveType(
+                `the value of map ${this.parent.getFullyQualifiedName()}`,
+                this.type
+            );
 
-            const decl = this.modelFile.getType(this.ast.type.name);
+            const decl = this.modelFile.getType(this.type);
 
             // All declarations, with the exception of MapDeclarations, are valid Values.
-            if(decl.isMapDeclaration?.()) {
+            if (decl?.isMapDeclaration?.()) {
                 throw new IllegalModelException(
                     `MapDeclaration as Map Type Value is not supported: ${this.type}`
                 );

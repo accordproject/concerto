@@ -486,6 +486,19 @@ describe('MapDeclaration', () => {
                 decl.validate();
             }).should.throw(/MapDeclaration as Map Type Value is not supported:/);
         });
+
+        it('should throw for an undeclared map value type', () => {
+            (() => {
+                const mm = new ModelManager();
+                mm.addCTOModel(`
+                    namespace org.acme@1.0.0
+                    map M { o String o Missing }
+                `, 'test.cto');
+            }).should.throw(
+                IllegalModelException,
+                /Undeclared type "Missing" in "the value of map org.acme@1.0.0.M"/
+            );
+        });
     });
 
     describe('#accept', () => {

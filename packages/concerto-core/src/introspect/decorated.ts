@@ -100,6 +100,15 @@ class Decorated {
             const hasFactories = factories && factories.length > 0;
             for(let n=0; n < this.ast.decorators.length; n++ ) {
                 let thing = this.ast.decorators[n];
+
+                if (!thing) {
+                    throw new IllegalModelException(
+                        'Decorator cannot be null or undefined',
+                        this.getModelFile(),
+                        this.ast.location
+                    );
+                }
+
                 let decorator;
                 if (hasFactories) {
                     for (let factory of factories) {
