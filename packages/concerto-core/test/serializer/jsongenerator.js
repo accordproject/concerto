@@ -315,6 +315,34 @@ describe('JSONGenerator', () => {
 
     });
 
+    describe('#visitMapDeclaration', () => {
+        it('should serialize maps containing DateTime values without throwing TypeNotFoundException', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(`namespace org.example.schedule@1.0.0
+            map ScheduleMap {
+              o String
+              o DateTime
+            }
+            concept Calendar {
+              o ScheduleMap events
+            }`);
+
+            const localFactory = new Factory(mm);
+            const { Serializer } = require('../../src/serializer');
+            const serializer = new Serializer(localFactory, mm);
+
+            const calendar = localFactory.newConcept('org.example.schedule@1.0.0', 'Calendar');
+            const events = new Map();
+
+            events.set('kickoff', dayjs.utc('2025-01-01T12:00:00.000Z'));
+            calendar.events = events;
+
+            const json = serializer.toJSON(calendar);
+
+            json.events.kickoff.should.equal('2025-01-01T12:00:00.000Z');
+        });
+    });
+
     describe('#visitField', () => {
 
         let isEnumStub;

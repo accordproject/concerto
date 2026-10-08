@@ -15,8 +15,7 @@
 import { getDeclarationType } from '../compare-utils';
 import { ComparerFactory } from '../comparer';
 
-// todo rename to declaration.ts , rename all classDeclaration -> declaration
-const classDeclarationAdded: ComparerFactory = (context) => ({
+const declarationAdded: ComparerFactory = (context) => ({
     compareClassDeclaration: (a, b) => {
         if (a || !b) {
             return;
@@ -30,7 +29,7 @@ const classDeclarationAdded: ComparerFactory = (context) => ({
     }
 });
 
-const classDeclarationRemoved: ComparerFactory = (context) => ({
+const declarationRemoved: ComparerFactory = (context) => ({
     compareClassDeclaration: (a, b) => {
         if (!a || b) {
             return;
@@ -44,7 +43,7 @@ const classDeclarationRemoved: ComparerFactory = (context) => ({
     }
 });
 
-const classDeclarationTypeChanged: ComparerFactory = (context) => ({
+const declarationTypeChanged: ComparerFactory = (context) => ({
     compareClassDeclaration: (a, b) => {
         if (!a || !b) {
             return;
@@ -62,4 +61,8 @@ const classDeclarationTypeChanged: ComparerFactory = (context) => ({
     }
 });
 
-export const classDeclarationComparerFactories = [classDeclarationAdded, classDeclarationRemoved, classDeclarationTypeChanged];
+export const declarationComparerFactories = [
+    declarationAdded,
+    declarationRemoved,
+    declarationTypeChanged
+];
