@@ -1290,5 +1290,40 @@ concept Bar {
                 ['concerto@1.0.0.Concept','test@1.0.0.Person','child@1.0.0.Used', 'cousin@1.0.0.AlsoUsed'].includes(declaration.getFullyQualifiedName()));
             filtered.validateModelFiles();
         });
+
+        it('should filter with filter(() => true) without throwing already declared for built-in models', () => {
+            modelManager.addCTOModel(`namespace org.acme@1.0.0
+            concept Person { o String name }
+            concept Other {}`, 'test.cto');
+            const filtered = modelManager.filter(() => true);
+            filtered.getNamespaces().should.include('org.acme@1.0.0');
+            filtered.getNamespaces().should.include('concerto.decorator@1.0.0');
+            filtered.getNamespaces().should.include('concerto@1.0.0');
+            filtered.validateModelFiles();
+        });
+
+        it('should filter models extending Decorator when predicate targets user namespace', () => {
+            modelManager.addCTOModel(`namespace org.acme@1.0.0
+            import concerto.decorator@1.0.0.Decorator
+            concept Person { o String name }
+            concept MyDeco extends Decorator {}`, 'test.cto');
+            const filtered = modelManager.filter(d => d.getNamespace() === 'org.acme@1.0.0');
+            filtered.getNamespaces().should.include('org.acme@1.0.0');
+            filtered.validateModelFiles();
+            const person = filtered.getType('org.acme@1.0.0.Person');
+            const myDeco = filtered.getType('org.acme@1.0.0.MyDeco');
+            person.getName().should.equal('Person');
+            myDeco.getName().should.equal('MyDeco');
+        });
+
+        it('should filter with filter(() => true) when addMetamodel option is enabled', () => {
+            const mmWithMetamodel = new ModelManager({ strict: true, addMetamodel: true });
+            mmWithMetamodel.addCTOModel(`namespace org.acme@1.0.0
+            concept Person { o String name }`, 'test.cto');
+            const filtered = mmWithMetamodel.filter(() => true);
+            filtered.getNamespaces().should.include('org.acme@1.0.0');
+            filtered.getNamespaces().should.include('concerto.metamodel@1.0.0');
+            filtered.validateModelFiles();
+        });
     });
 });

@@ -911,7 +911,7 @@ class BaseModelManager {
         const filteredModels: ModelFileInstance[] = [];
 
         for (const modelFile of Object.values(this.modelFiles) as ModelFileInstance[]) {
-            if (modelFile.isSystemModelFile()) {
+            if (modelFile.isSystemModelFile() || modelManager.getModelFile(modelFile.getNamespace())) {
                 continue;
             }
             const filtered = modelFile.filter(predicate, modelManager);
