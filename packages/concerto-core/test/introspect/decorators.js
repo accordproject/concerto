@@ -180,6 +180,38 @@ describe('Decorators', () => {
             }).should.throw(/Duplicate decorator/);
         });
 
+        it('should not duplicate the error message when validating an undefined type', () => {
+            let error;
+            try {
+                const modelManager = new ModelManager({
+                    decoratorValidation: {
+                        missingDecorator: 'error'
+                    }
+                });
+                Util.addComposerModel(modelManager);
+                const modelDefinitions = fs.readFileSync('test/data/decorators/invalid-typeref.cto', 'utf8');
+                modelManager.addCTOModel(modelDefinitions);
+            } catch (err) {
+                error = err;
+            }
+            error.should.be.an.instanceOf(Error);
+            error.message.should.match(/Undeclared type "docs" in "system@1.0.0.ComposerParticipant"/);
+            (error.message.match(/IllegalModelException:/g) || []).length.should.equal(0);
+            (error.message.match(/File 'system\.cto'/g) || []).length.should.equal(1);
+        });
+
+
+        it('should continue when a decorated type is missing and validation is set to warning', () => {
+            const modelManager = new ModelManager({
+                decoratorValidation: {
+                    missingDecorator: 'warning'
+                }
+            });
+            Util.addComposerModel(modelManager);
+            const modelDefinitions = fs.readFileSync('test/data/decorators/invalid-typeref.cto', 'utf8');
+
+            (() => modelManager.addCTOModel(modelDefinitions)).should.not.throw();
+        });
         it('should fail to validate type refs that are not defined locally', () => {
 
             (() => {
@@ -191,7 +223,7 @@ describe('Decorators', () => {
                 Util.addComposerModel(modelManager);
                 let modelDefinitions = fs.readFileSync('test/data/decorators/invalid-typeref.cto', 'utf8');
                 modelManager.addCTOModel(modelDefinitions);
-            }).should.throw(/IllegalModelException: Undeclared type/);
+            }).should.throw(/Undeclared type "docs" in "system@1.0.0.ComposerParticipant"/);
         });
 
         it('should fail to validate type refs that are not in imported namespace', () => {
@@ -227,7 +259,7 @@ describe('Decorators', () => {
 
         it('should let a factory specify a decorator implementation', () => {
 
-            const decoratorFactory = new(class MyDecoratorFactory extends DecoratorFactory {
+            const decoratorFactory = new (class MyDecoratorFactory extends DecoratorFactory {
                 /**
                  * Process the decorator, and return a specific implementation class for that
                  * decorator, or return null if this decorator is not handled by this processor.
@@ -240,7 +272,7 @@ describe('Decorators', () => {
                     if (ast.name !== 'bar') {
                         return null;
                     }
-                    return new(class MyDecorator extends Decorator {
+                    return new (class MyDecorator extends Decorator {
                         /**
                          * Create a Decorator.
                          * @param {ClassDeclaration | Property} parent - the owner of this property
