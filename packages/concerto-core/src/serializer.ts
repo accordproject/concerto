@@ -155,7 +155,7 @@ class Serializer {
         // set default options
         options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
 
-        if(!jsonObject.$class) {
+        if(!jsonObject?.$class || typeof jsonObject.$class !== 'string') {
             throw new Error('Invalid JSON data. Does not contain a $class type identifier.');
         }
 
