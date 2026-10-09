@@ -562,7 +562,7 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: classDeclaration.getFullyQualifiedName(),
-            invalidValue: value.toString()
+            invalidValue: String(value)
         }));
     }
 
@@ -578,7 +578,7 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: relationshipDeclaration.getFullyQualifiedTypeName(),
-            invalidValue: value.toString()
+            invalidValue: String(value)
         }));
     }
 
@@ -672,10 +672,14 @@ class ResourceValidator {
             typeName += '[]';
         }
 
+        const objectType = typeof obj?.getFullyQualifiedType === 'function'
+            ? obj.getFullyQualifiedType()
+            : (obj === null || obj === undefined ? String(obj) : typeof obj);
+
         throw new ValidationException(formatter({
             resourceId: resourceId,
             propertyName: propName,
-            objectType: obj.getFullyQualifiedType(),
+            objectType: objectType,
             fieldType: typeName
         }));
     }
