@@ -269,26 +269,26 @@ class DecoratorManager {
         decoratorCommandSet.commands.map((decoratorCommand, index) => {
             const dcsWithIndex = new DcsIndexWrapper(decoratorCommand, index);
             switch (true) {
-            case !!decoratorCommand?.target?.type:
-                this.addDcsWithIndexToMap(typeCommandsMap, decoratorCommand.target.type, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.property:
-                this.addDcsWithIndexToMap(propertyCommandsMap, decoratorCommand.target.property, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.properties:
-                decoratorCommand.target.properties.forEach((property) => {
-                    this.addDcsWithIndexToMap(propertyCommandsMap, property, dcsWithIndex);
-                });
-                break;
-            case !!decoratorCommand?.target?.mapElement:
-                this.addDcsWithIndexToMap(mapElementCommandsMap, decoratorCommand.target.mapElement, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.declaration:
-                this.addDcsWithIndexToMap(declarationCommandsMap, decoratorCommand.target.declaration, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.namespace:
-                this.addDcsWithIndexToMap(namespaceCommandsMap, decoratorCommand.target.namespace, dcsWithIndex);
-                break;
+                case !!decoratorCommand?.target?.type:
+                    this.addDcsWithIndexToMap(typeCommandsMap, decoratorCommand.target.type, dcsWithIndex);
+                    break;
+                case !!decoratorCommand?.target?.property:
+                    this.addDcsWithIndexToMap(propertyCommandsMap, decoratorCommand.target.property, dcsWithIndex);
+                    break;
+                case !!decoratorCommand?.target?.properties:
+                    decoratorCommand.target.properties.forEach((property) => {
+                        this.addDcsWithIndexToMap(propertyCommandsMap, property, dcsWithIndex);
+                    });
+                    break;
+                case !!decoratorCommand?.target?.mapElement:
+                    this.addDcsWithIndexToMap(mapElementCommandsMap, decoratorCommand.target.mapElement, dcsWithIndex);
+                    break;
+                case !!decoratorCommand?.target?.declaration:
+                    this.addDcsWithIndexToMap(declarationCommandsMap, decoratorCommand.target.declaration, dcsWithIndex);
+                    break;
+                case !!decoratorCommand?.target?.namespace:
+                    this.addDcsWithIndexToMap(namespaceCommandsMap, decoratorCommand.target.namespace, dcsWithIndex);
+                    break;
             }
         });
 
@@ -334,8 +334,17 @@ class DecoratorManager {
             );
             const factory = new Factory(validationModelManager);
             const serializer = new Serializer(factory, validationModelManager);
+
             decoratorCommandSets.forEach((commandSet) => {
-                serializer.fromJSON(commandSet);
+                const resource = serializer.fromJSON(commandSet);
+                const classDeclaration = resource.getClassDeclaration();
+
+                if (classDeclaration.getName() !== 'DecoratorCommandSet') {
+                    throw new Error(
+                        'Invalid decorator command set: expected DecoratorCommandSet'
+                    );
+                }
+
                 if (shouldValidateCommands) {
                     commandSet.commands.forEach((command) => {
                         DecoratorManager.validateCommand(
@@ -417,7 +426,7 @@ class DecoratorManager {
                 })
                 : []);
         }).filter(i => i.namespace);
-        const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(combinedDecoratorCommandSet);
+        const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap } = this.getDecoratorMaps(combinedDecoratorCommandSet);
         const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, true) : modelManager.getAst(true, true);
         const decoratedAst = rfdc(ast);
         decoratedAst.models.forEach((model) => {
@@ -439,7 +448,7 @@ class DecoratorManager {
                     this.executeNamespaceCommand(model, dcsWithIndex.getCommand());
                 });
 
-                if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
+                if ($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
                     const mapDecoratorCommandSets: DcsIndexWrapper[] = [];
                     this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.key.$class);
                     this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.value.$class);
@@ -490,10 +499,10 @@ class DecoratorManager {
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {ExtractDecoratorsResult} - a new model manager with the decorations removed and a list of extracted decorator jsons and vocab yamls
      */
-    static extractDecorators(modelManager,options) {
+    static extractDecorators(modelManager, options) {
         options = {
             removeDecoratorsFromModel: false,
-            locale:'en',
+            locale: 'en',
             ...options
         };
         const sourceAst = modelManager.getAst(true, true);
@@ -513,10 +522,10 @@ class DecoratorManager {
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
      */
-    static extractVocabularies(modelManager,options) {
+    static extractVocabularies(modelManager, options) {
         options = {
             removeDecoratorsFromModel: false,
-            locale:'en',
+            locale: 'en',
             ...options
         };
         const sourceAst = modelManager.getAst(true, true);
@@ -535,10 +544,10 @@ class DecoratorManager {
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
      */
-    static extractNonVocabDecorators(modelManager,options) {
+    static extractNonVocabDecorators(modelManager, options) {
         options = {
             removeDecoratorsFromModel: false,
-            locale:'en',
+            locale: 'en',
             ...options
         };
         const sourceAst = modelManager.getAst(true);
@@ -580,8 +589,7 @@ class DecoratorManager {
         }
         if (command.target.namespace && !modelFile) {
             throw new Error(
-                `Decorator Command references namespace "${
-                    command.target.namespace
+                `Decorator Command references namespace "${command.target.namespace
                 }" which does not exist: ${JSON.stringify(command, null, 2)}`
             );
         }
@@ -642,7 +650,7 @@ class DecoratorManager {
      * @param {string} type the command type
      * @param {*} newDecorator the decorator to add
      */
-    static applyDecoratorForMapElement(element, target, declaration, type, newDecorator ) {
+    static applyDecoratorForMapElement(element, target, declaration, type, newDecorator) {
         const decl = element === 'KEY' ? declaration.key : declaration.value;
         if (target.type) {
             if (this.falsyOrEqual(target.type, decl.$class)) {
@@ -713,7 +721,7 @@ class DecoratorManager {
         const uniqueDecoratorNames = new Set();
         decoratedAst.decorators.forEach(d => {
             const decoratorName = d.name;
-            if(!uniqueDecoratorNames.has(decoratorName)) {
+            if (!uniqueDecoratorNames.has(decoratorName)) {
                 uniqueDecoratorNames.add(decoratorName);
             } else {
                 throw new IllegalModelException(
@@ -734,8 +742,8 @@ class DecoratorManager {
     static executeNamespaceCommand(model, command) {
         const { target, decorator, type } = command;
         if (Object.keys(target).length === 2 && target.namespace) {
-            const { name } = ModelUtil.parseNamespace( model.namespace );
-            if(this.falsyOrEqual(target.namespace, [model.namespace, name])) {
+            const { name } = ModelUtil.parseNamespace(model.namespace);
+            if (this.falsyOrEqual(target.namespace, [model.namespace, name])) {
                 this.applyDecorator(model, type, decorator);
             }
         }
@@ -753,21 +761,21 @@ class DecoratorManager {
     static executeCommand(namespace, declaration, command, property?, options?) {
         const { target, decorator, type } = command;
         // the namespace version is already validated in the decorateModels method
-        const { name } = ModelUtil.parseNamespace( namespace, { disableVersionParsing: true } );
-        if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
+        const { name } = ModelUtil.parseNamespace(namespace, { disableVersionParsing: true });
+        if (this.falsyOrEqual(target.namespace, [namespace, name]) &&
             this.falsyOrEqual(target.declaration, [declaration.name])) {
 
             if (declaration.$class === `${MetaModelNamespace}.MapDeclaration`) {
                 if (target.mapElement) {
                     switch (target.mapElement) {
-                    case 'KEY':
-                    case 'VALUE':
-                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
-                        break;
-                    case 'KEY_VALUE':
-                        this.applyDecoratorForMapElement('KEY', target, declaration, type, decorator);
-                        this.applyDecoratorForMapElement('VALUE', target, declaration, type, decorator);
-                        break;
+                        case 'KEY':
+                        case 'VALUE':
+                            this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
+                            break;
+                        case 'KEY_VALUE':
+                            this.applyDecoratorForMapElement('KEY', target, declaration, type, decorator);
+                            this.applyDecoratorForMapElement('VALUE', target, declaration, type, decorator);
+                            break;
                     }
                 } else if (target.type) {
                     if (this.falsyOrEqual(target.type, declaration.key.$class)) {
@@ -782,7 +790,7 @@ class DecoratorManager {
             } else if (!(target.property || target.properties || target.type)) {
                 this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target);
             } else {
-                if(property) {
+                if (property) {
                     this.executePropertyCommand(property, command);
                 }
             }
@@ -798,7 +806,7 @@ class DecoratorManager {
      */
     static executePropertyCommand(property, command) {
         const { target, decorator, type } = command;
-        if(target.properties || target.property || target.type) {
+        if (target.properties || target.property || target.type) {
             if (
                 this.falsyOrEqual(
                     target.property ? target.property : target.properties,
@@ -840,7 +848,7 @@ class DecoratorManager {
      * @param {object} jsonInput the DCS JSON as parsed object
      * @return {string} the corresponding YAML string
      */
-    static jsonToYaml(jsonInput){
+    static jsonToYaml(jsonInput) {
         this.validate(jsonInput);
         return jsonToYaml(jsonInput);
     }
@@ -851,7 +859,7 @@ class DecoratorManager {
      * @param {string} yamlInput the DCS JSON as parsed object
      * @return {object} the corresponding JSON object
      */
-    static yamlToJson(yamlInput){
+    static yamlToJson(yamlInput) {
         const jsonOutput = yamlToJson(yamlInput);
         this.validate(jsonOutput);
         return jsonOutput;
