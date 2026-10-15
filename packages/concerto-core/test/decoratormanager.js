@@ -155,6 +155,33 @@ describe('DecoratorManager', () => {
                 {validate: true});
             decoratedModelManager.should.not.be.null;
         });
+        it('should reject a user-defined DecoratorCommandSet type', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            testModelManager.addCTOModel(
+                'namespace org.acme@1.0.0\nconcept DecoratorCommandSet {}',
+                'user-defined.cto'
+            );
+
+            const dcs = {
+                $class: 'org.acme@1.0.0.DecoratorCommandSet'
+            };
+
+            let error;
+            try {
+                DecoratorManager.decorateModels(testModelManager, dcs, { validate: true });
+            } catch (err) {
+                error = err;
+            }
+
+            chai.expect(error).to.be.instanceOf(Error);
+            chai.expect(error).not.to.be.instanceOf(TypeError);
+            chai.expect(error.message).to.equal(
+                'Expected a DecoratorCommandSet, received "org.acme@1.0.0.DecoratorCommandSet".'
+            );
+        });
 
         it('should support semantic validation', async function() {
             const testModelManager = new ModelManager();
