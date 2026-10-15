@@ -148,7 +148,7 @@ class Serializer {
      * @param {boolean} options.validate - validate the structure of the Resource
      * with its model prior to serialization (default to true)
      * @param {number} [options.utcOffset] - UTC Offset for DateTime values.
-     * @param {boolean} [options.strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
+     * @param {boolean} [options.strictQualifiedDateTimes=true] - Only allow fully-qualified date-times with offsets.
      * @return {Resource} The new populated resource
      */
     fromJSON(jsonObject, options?) {
@@ -193,7 +193,7 @@ class Serializer {
             modelManager: this.modelManager,
             factory: this.factory,
         };
-        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, false, options.utcOffset, options.strictQualifiedDateTimes === true);
+        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, false, options.utcOffset, options.strictQualifiedDateTimes !== false);
         classDeclaration.accept(populator, parameters);
 
         // validate the resource against the model

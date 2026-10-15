@@ -155,10 +155,10 @@ describe('JSONPopulator', () => {
             field.getType.returns('DateTime');
             (() => {
                 jsonPopulator.convertToObject(field, '2024-02-30T00:00:00Z', {});
-            }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
+            }).should.throw(ValidationException, /is not a valid date-time/);
             (() => {
                 jsonPopulator.convertToObject(field, '2023-02-29T00:00:00Z', {});
-            }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
+            }).should.throw(ValidationException, /is not a valid date-time/);
         });
 
         it('should reject T24:00:00 when strictQualifiedDateTimes is true', () => {
@@ -166,7 +166,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('DateTime');
             (() => {
                 jsonPopulator.convertToObject(field, '2024-01-01T24:00:00Z', {});
-            }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
+            }).should.throw(ValidationException, /is not a valid date-time/);
         });
 
         it('should convert to dates from dayjs objects', () => {
