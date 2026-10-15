@@ -625,6 +625,100 @@ describe('DecoratorManager', () => {
         });
     });
 
+    describe('#decorateModelsNew', function() {
+        it('should produce identical output to decorateModels for test.cto', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/possible-decorator-command-targets.json'), 'utf-8');
+            const oldResult = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
+            const newResult = DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
+            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            chai.expect(newCTO).to.equal(oldCTO);
+        });
+
+        it('should produce identical output to decorateModels for web.json', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const oldResult = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
+            const newResult = DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
+            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            chai.expect(newCTO).to.equal(oldCTO);
+        });
+
+        it('should produce identical output for map-declaration commands', async function() {
+            const testModelManager = new ModelManager({skipLocationNodes: true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8');
+            const oldResult = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
+            const newResult = DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
+            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            chai.expect(newCTO).to.equal(oldCTO);
+        });
+
+        it('should return the original model manager when no decorator command sets are provided', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            let decoratedModelManager = DecoratorManager.decorateModelsNew(testModelManager, []);
+            decoratedModelManager.should.not.be.null;
+        });
+
+        it('should support skipValidationAndResolution', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const oldResult = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), {skipValidationAndResolution: true});
+            const newResult = DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), {skipValidationAndResolution: true});
+            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            chai.expect(newCTO).to.equal(oldCTO);
+        });
+
+        it('should produce identical output for decorators with typed arguments', async function() {
+            const testModelManager = new ModelManager();
+            testModelManager.addCTOModel(`namespace org.acme.categories@1.0.0
+                abstract concept Category {}
+                concept HR extends Category {}
+            `, 'categories.cto');
+            testModelManager.addCTOModel(`namespace org.acme.decorators@1.0.0
+                import concerto.decorator@1.0.0.Decorator
+                concept Form extends Decorator {
+                    o String key
+                    o String value
+                    o Concept category
+                }
+            `, 'decorators.cto');
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/validated.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'validated.cto');
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/validated.json'), 'utf-8');
+            const opts = {validate: true, validateCommands: true, migrate: true, defaultNamespace: 'org.acme.decorators@1.0.0'};
+            const oldResult = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), opts);
+            const newResult = DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), opts);
+            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            chai.expect(newCTO).to.equal(oldCTO);
+        });
+
+        it('should throw when skipValidationAndResolution conflicts with explicit false options', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            (() => DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), {
+                skipValidationAndResolution: true,
+                disableMetamodelResolution: false
+            })).should.throw(/skipValidationAndResolution/);
+        });
+    });
+
     describe('#validateCommand', function() {
         it('should detect invalid type', async function() {
             // load a model to decorate

@@ -31,7 +31,7 @@ import { jsonToYaml, yamlToJson } from './dcsconverter';
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ModelFile from './introspect/modelfile';
-import type { DecoratorCommand } from './types';
+import type { DecoratorCommand, DecoratorCommandTarget } from './types';
 /* eslint-enable no-unused-vars */
 
 const DCS_VERSION = '0.4.0';
@@ -126,6 +126,24 @@ function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
     const { name } = ModelUtil.parseNamespace(modelFile.getNamespace());
     return name === unversionedNamespace;
 }
+
+interface IndexedCommand {
+    command: DecoratorCommand;
+    index: number;
+}
+
+interface NamespaceBucket {
+    modelCommands: IndexedCommand[];
+    byDeclaration: Map<string, IndexedCommand[]>;
+    wildcardCommands: IndexedCommand[];
+}
+
+interface CommandIndex {
+    byNamespace: Map<string, NamespaceBucket>;
+    wildcardNs: NamespaceBucket;
+    hasWildcardNamespace: boolean;
+}
+
 
 /**
  * Helper class to wrap the decorator command and the index of the command
@@ -302,6 +320,108 @@ class DecoratorManager {
     }
 
     /**
+     * @private
+     */
+    private static buildCommandIndex(commands: DecoratorCommand[]): CommandIndex {
+        const index: CommandIndex = {
+            byNamespace: new Map(),
+            wildcardNs: { modelCommands: [], byDeclaration: new Map(), wildcardCommands: [] },
+            hasWildcardNamespace: false,
+        };
+
+        for (let i = 0; i < commands.length; i++) {
+            const command = commands[i];
+            const target: DecoratorCommandTarget = command.target;
+            const entry: IndexedCommand = { command, index: i };
+
+            let ns: NamespaceBucket;
+            if (target.namespace) {
+                let b = index.byNamespace.get(target.namespace);
+                if (!b) {
+                    b = { modelCommands: [], byDeclaration: new Map(), wildcardCommands: [] };
+                    index.byNamespace.set(target.namespace, b);
+                }
+                ns = b;
+            } else {
+                index.hasWildcardNamespace = true;
+                ns = index.wildcardNs;
+            }
+
+            if (target.namespace && !target.declaration && !target.property
+                && !target.properties && !target.type && !target.mapElement) {
+                ns.modelCommands.push(entry);
+            } else if (target.declaration) {
+                let list = ns.byDeclaration.get(target.declaration);
+                if (!list) { list = []; ns.byDeclaration.set(target.declaration, list); }
+                list.push(entry);
+            } else {
+                ns.wildcardCommands.push(entry);
+            }
+        }
+
+        return index;
+    }
+
+    /**
+     * @private
+     */
+    private static applyCommandsToDeclaration(decl, commands: IndexedCommand[]) {
+        const isMap = decl.$class === `${MetaModelNamespace}.MapDeclaration`;
+        const hasProperties = decl.properties && decl.properties.length > 0;
+        let propertyCommands: IndexedCommand[] | null = null;
+
+        for (const ic of commands) {
+            const { target, type, decorator } = ic.command;
+            if (target.mapElement) {
+                if (isMap) {
+                    const elements = target.mapElement === 'KEY_VALUE' ? ['KEY', 'VALUE'] : [target.mapElement];
+                    for (const el of elements) {
+                        const mapPart = el === 'KEY' ? decl.key : decl.value;
+                        if (!target.type || mapPart.$class.includes(target.type)) {
+                            this.applyDecorator(mapPart, type, decorator);
+                        }
+                    }
+                }
+            } else if (target.type && !target.property && !target.properties) {
+                if (isMap) {
+                    if (decl.key.$class.includes(target.type)) {
+                        this.applyDecorator(decl.key, type, decorator);
+                    }
+                    if (decl.value.$class.includes(target.type)) {
+                        this.applyDecorator(decl.value, type, decorator);
+                    }
+                }
+                if (hasProperties) { (propertyCommands ??= []).push(ic); }
+            } else if (target.property || target.properties || target.type) {
+                if (hasProperties) { (propertyCommands ??= []).push(ic); }
+            } else {
+                this.applyDecorator(decl, type, decorator);
+            }
+        }
+
+        if (propertyCommands) {
+            for (let i = 0; i < decl.properties.length; i++) {
+                let property = decl.properties[i];
+                let cloned = false;
+                for (const ic of propertyCommands) {
+                    const { target, type, decorator } = ic.command;
+                    const nameMatch = target.property
+                        ? target.property === property.name
+                        : !target.properties || target.properties.includes(property.name);
+                    if (nameMatch && (!target.type || target.type === property.$class)) {
+                        if (!cloned) {
+                            property = { ...property, decorators: property.decorators ? [...property.decorators] : undefined };
+                            decl.properties[i] = property;
+                            cloned = true;
+                        }
+                        this.applyDecorator(property, type, decorator);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Migrate or validate the DecoratorCommandSet object if the options are set as true
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet a DecoratorCommandSet object, or an array of DecoratorCommandSet objects
@@ -475,6 +595,118 @@ class DecoratorManager {
         newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
         return newModelManager;
     }
+
+    /**
+     * Optimized version of decorateModels that uses a hierarchical command index
+     * to skip models and declarations that have no matching commands.
+     * Same API and output as decorateModels.
+     * @param {ModelManager} modelManager the input model manager
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object, or an array of DecoratorCommandSet objects
+     * @param {object} [options] - same options as decorateModels
+     * @returns {ModelManager} a new model manager with the decorations applied
+     */
+    static decorateModelsNew(modelManager, decoratorCommandSet, options?) {
+        if (!decoratorCommandSet || decoratorCommandSet?.length === 0) {
+            return modelManager;
+        }
+        const decoratorCommandSets = Array.isArray(decoratorCommandSet)
+            ? decoratorCommandSet
+            : [decoratorCommandSet];
+
+        if (options?.skipValidationAndResolution) {
+            if (options?.disableMetamodelResolution === false || options?.disableMetamodelValidation === false) {
+                throw new Error('skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false');
+            }
+            options.disableMetamodelResolution = true;
+            options.disableMetamodelValidation = true;
+        }
+
+        this.migrateAndValidate(modelManager, decoratorCommandSets, options?.migrate, options?.validate, options?.validateCommands);
+
+        const combinedCommands: DecoratorCommand[] = decoratorCommandSets.flatMap(cs => cs.commands);
+
+        const decoratorImports = combinedCommands.flatMap((command: any) => {
+            return [{
+                $class: `${MetaModelNamespace}.ImportType`,
+                name: command.decorator.name,
+                namespace: command.decorator.namespace ? command.decorator.namespace : options?.defaultNamespace
+            }].concat(command.decorator.arguments ? command.decorator.arguments?.filter(a => a.type)
+                .map(a => {
+                    return {
+                        $class: `${MetaModelNamespace}.ImportType`,
+                        name: a.type.name,
+                        namespace: a.type.namespace ? a.type.namespace : options?.defaultNamespace
+                    };
+                })
+                : []);
+        }).filter(i => i.namespace);
+
+        const commandIndex = this.buildCommandIndex(combinedCommands);
+        const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, true) : modelManager.getAst(true, true);
+        const decoratedAst = { ...ast, models: [...ast.models] };
+
+        decoratedAst.models.forEach((model, modelIndex) => {
+            const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
+
+            const nsBuckets: NamespaceBucket[] = [];
+            const b1 = commandIndex.byNamespace.get(model.namespace);
+            const b2 = commandIndex.byNamespace.get(namespaceName);
+            if (b1) nsBuckets.push(b1);
+            if (b2 && b2 !== b1) nsBuckets.push(b2);
+            if (commandIndex.hasWildcardNamespace) nsBuckets.push(commandIndex.wildcardNs);
+
+            if (nsBuckets.length === 0) { return; } // No applicable decorators for this model's namespace
+
+            const clonedModel = { ...model };
+            decoratedAst.models[modelIndex] = clonedModel;
+
+            const neededImports = decoratorImports.filter(i => i.namespace !== clonedModel.namespace);
+            clonedModel.imports = clonedModel.imports ? clonedModel.imports.concat(neededImports) : neededImports;
+
+            const modelCmds: IndexedCommand[] = [];
+            for (const nsB of nsBuckets) {
+                for (const cmd of nsB.modelCommands) { modelCmds.push(cmd); }
+            }
+            if (modelCmds.length > 0) {
+                if (model.decorators) { clonedModel.decorators = [...model.decorators]; }
+                modelCmds.sort((a, b) => a.index - b.index);
+                for (const ic of modelCmds) {
+                    this.applyDecorator(clonedModel, ic.command.type, ic.command.decorator);
+                }
+            }
+
+            if (!clonedModel.declarations) { return; }
+            clonedModel.declarations = [...model.declarations];
+
+            clonedModel.declarations.forEach((decl, declIndex) => {
+                const commands: IndexedCommand[] = [];
+                let sources = 0;
+                for (const nsB of nsBuckets) {
+                    const specific = nsB.byDeclaration.get(decl.name);
+                    if (specific) { commands.push(...specific); sources++; }
+                    if (nsB.wildcardCommands.length > 0) { commands.push(...nsB.wildcardCommands); sources++; }
+                }
+                if (commands.length === 0) { return; }
+                if (sources > 1) { commands.sort((a, b) => a.index - b.index); }
+
+                const clonedDecl = { ...decl };
+                if (decl.decorators) { clonedDecl.decorators = [...decl.decorators]; }
+                if (decl.properties) { clonedDecl.properties = [...decl.properties]; }
+                if (decl.key) { clonedDecl.key = { ...decl.key, decorators: decl.key.decorators ? [...decl.key.decorators] : undefined }; }
+                if (decl.value) { clonedDecl.value = { ...decl.value, decorators: decl.value.decorators ? [...decl.value.decorators] : undefined }; }
+                clonedModel.declarations[declIndex] = clonedDecl;
+
+                this.applyCommandsToDeclaration(clonedDecl, commands);
+            });
+        });
+
+        const newModelManager = new ModelManager({
+            decoratorValidation: modelManager.getDecoratorValidation()
+        });
+        newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
+        return newModelManager;
+    }
+
     /**
      * @typedef ExtractDecoratorsResult
      * @type {object}
