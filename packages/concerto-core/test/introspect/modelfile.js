@@ -1021,6 +1021,20 @@ describe('ModelFile', () => {
             const depImport = ast.imports.find(imp => imp.namespace === 'org.dep@1.0.0');
             should.not.exist(depImport);
         });
+
+        it('should retain imports from built-in decorator model even if predicate drops them', () => {
+            modelManager.addCTOModel(`namespace org.test3@1.0.0
+            import concerto.decorator@1.0.0.Decorator
+            concept MyDeco extends Decorator {}
+            `, 'test3.cto');
+
+            const modelFile = modelManager.getModelFile('org.test3@1.0.0');
+            const filtered = modelFile.filter(decl => decl.getNamespace() === 'org.test3@1.0.0', modelManager);
+
+            const filteredAst = filtered.getAst();
+            const decoratorImport = filteredAst.imports.find(imp => imp.namespace === 'concerto.decorator@1.0.0');
+            should.exist(decoratorImport);
+        });
     });
 
 });
