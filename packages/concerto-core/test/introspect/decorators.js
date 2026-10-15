@@ -199,8 +199,30 @@ describe('Decorators', () => {
             (error.message.match(/IllegalModelException:/g) || []).length.should.equal(0);
             (error.message.match(/File 'system\.cto'/g) || []).length.should.equal(1);
         });
-
-
+        it('should not duplicate the error message when decorator has an invalid argument', () => {
+            let error;
+            try {
+                const modelManager = new ModelManager({
+                    strict: true,
+                    decoratorValidation: {
+                        missingDecorator: 'error',
+                        invalidDecorator: 'error'
+                    }
+                });
+                modelManager.addCTOModel(`namespace org.acme@1.0.0
+concept Foo {
+  o String x
+}
+@Foo(1)
+concept A {}`, 'test.cto');
+            } catch (err) {
+                error = err;
+            }
+            error.should.be.an.instanceOf(Error);
+            error.message.should.match(/Decorator Foo has invalid decorator argument/);
+            (error.message.match(/IllegalModelException:/g) || []).length.should.equal(0);
+            (error.message.match(/File 'test\.cto'/g) || []).length.should.equal(1);
+        });
         it('should continue when a decorated type is missing and validation is set to warning', () => {
             const modelManager = new ModelManager({
                 decoratorValidation: {
