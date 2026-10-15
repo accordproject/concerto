@@ -602,6 +602,14 @@ describe('ResourceValidator', function () {
                 resourceValidator.checkRelationship(parameters, {}, mockResource);
             }).should.not.throw();
         });
+
+        it('should throw if target type is not identifiable', () => {
+            resourceValidator.options.convertResourcesToRelationships = true;
+            mockClassDeclaration.getIdentifierFieldName.returns(null);
+            (() => {
+                resourceValidator.checkRelationship(parameters, {}, mockResource);
+            }).should.throw('Cannot have a relationship to a field that is not identifiable.');
+        });
     });
 
     describe('#collectionSizeValidator', () => {

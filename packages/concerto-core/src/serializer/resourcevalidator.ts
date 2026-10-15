@@ -122,6 +122,11 @@ class ResourceValidator {
      */
     checkMapType(type, value, parameters, mapDeclaration, ) {
 
+        if (type.isRelationship?.()) {
+            this.checkRelationship(parameters, type, value);
+            return;
+        }
+
         if (!ModelUtil.isPrimitiveType(type.getType())) {
 
             // thing might be a Concept, Scalar String, Scalar DateTime
