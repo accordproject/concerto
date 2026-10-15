@@ -44,7 +44,8 @@ class InstanceGenerator {
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing) );
+            const name = thing?.getFullyQualifiedName?.() || thing?.getName?.() || String(thing);
+            throw new Error('Unrecognised ' + name);
         }
     }
 
