@@ -279,8 +279,8 @@ const propertyDefaultChanged: ComparerFactory = (context) => ({
 
         if (aDefaultValue === bDefaultValue) {return;}
 
-        const changeType = !aDefaultValue ? 'added'
-            : !bDefaultValue ? 'removed' : 'changed';
+        const changeType = aDefaultValue === null ? 'added'
+            : bDefaultValue === null ? 'removed' : 'changed';
         const classDeclarationType = getDeclarationType(a.getParent());
         context.report({
             key: `property-default-value-${changeType}`,

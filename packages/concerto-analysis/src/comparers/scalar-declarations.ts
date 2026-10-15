@@ -78,13 +78,13 @@ const scalarDefaultValueChanged: ComparerFactory = (context) => ({
 
         if (aDefaultValue === bDefaultValue) {return;}
 
-        if (!aDefaultValue && bDefaultValue) {
+        if (aDefaultValue === null) {
             context.report({
                 key: 'scalar-default-value-added',
                 message: `Default value "${bDefaultValue}" added to scalar "${a.getName()}"`,
                 element: a.getName()
             });
-        } else if (aDefaultValue && !bDefaultValue) {
+        } else if (bDefaultValue === null) {
             context.report({
                 key: 'scalar-default-value-removed',
                 message: `Default value "${aDefaultValue}" removed from scalar "${a.getName()}"`,
