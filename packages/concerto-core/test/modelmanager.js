@@ -1325,5 +1325,19 @@ concept Bar {
             filtered.getNamespaces().should.include('concerto.metamodel@1.0.0');
             filtered.validateModelFiles();
         });
+
+        it('should never call predicate on built-in declarations', () => {
+            const mmWithMetamodel = new ModelManager({ strict: true, addMetamodel: true });
+            mmWithMetamodel.addCTOModel(`namespace org.acme@1.0.0
+            concept Person { o String name }`, 'test.cto');
+
+            const visitedDeclarations = [];
+            mmWithMetamodel.filter(decl => {
+                visitedDeclarations.push(decl.getFullyQualifiedName());
+                return true;
+            });
+
+            visitedDeclarations.should.deep.equal(['org.acme@1.0.0.Person']);
+        });
     });
 });
