@@ -136,28 +136,39 @@ class Decorator {
         const validationOptions = mm.getDecoratorValidation();
 
         if (validationOptions.missingDecorator || validationOptions.invalidDecorator) {
+            // this throws if the type does not exist
             try {
-                // this throws if the type does not exist
                 mf.resolveType(decoratedName, this.getName(), this.ast.location);
-                const decoratorDecl = mf.getType(this.getName());
-                const requiredProperties = decoratorDecl.getProperties().filter(p => !p.isOptional());
-                const optionalProperties = decoratorDecl.getProperties().filter(p => p.isOptional());
-                const allProperties = [...requiredProperties, ...optionalProperties];
-                if (this.getArguments().length < requiredProperties.length) {
-                    const err = `Decorator ${this.getName()} has too few arguments. Required properties are: [${requiredProperties.map(p => p.getName()).join()}]`;
+            } catch (err) {
+                if (
+                    validationOptions.missingDecorator === 'error' &&
+                    err instanceof IllegalModelException
+                ) {
+                    throw err;
+                }
+                this.handleError(validationOptions.missingDecorator, err as Error);
+                return;
+            }
+
+            const decoratorDecl = mf.getType(this.getName());
+            const requiredProperties = decoratorDecl.getProperties().filter(p => !p.isOptional());
+            const optionalProperties = decoratorDecl.getProperties().filter(p => p.isOptional());
+            const allProperties = [...requiredProperties, ...optionalProperties];
+            if (this.getArguments().length < requiredProperties.length) {
+                const err = `Decorator ${this.getName()} has too few arguments. Required properties are: [${requiredProperties.map(p => p.getName()).join()}]`;
+                this.handleError(validationOptions.invalidDecorator, err);
+            }
+            const args = this.getArguments();
+            for (let n = 0; n < args.length; n++) {
+                const arg = args[n];
+                if (n > allProperties.length - 1) {
+                    const err = `Decorator ${this.getName()} has too many arguments. Properties are: [${allProperties.map(p => p.getName()).join()}]`;
                     this.handleError(validationOptions.invalidDecorator, err);
                 }
-                const args = this.getArguments();
-                for (let n = 0; n < args.length; n++) {
-                    const arg = args[n];
-                    if (n > allProperties.length - 1) {
-                        const err = `Decorator ${this.getName()} has too many arguments. Properties are: [${allProperties.map(p => p.getName()).join()}]`;
-                        this.handleError(validationOptions.invalidDecorator, err);
-                    }
-                    else {
-                        const property = allProperties[n];
-                        const argType = typeof arg;
-                        switch (property.getType()) {
+                else {
+                    const property = allProperties[n];
+                    const argType = typeof arg;
+                    switch (property.getType()) {
                         case 'Integer':
                         case 'Double':
                         case 'Long':
@@ -200,12 +211,8 @@ class Decorator {
                             }
                             break;
                         }
-                        }
                     }
                 }
-            }
-            catch (err) {
-                this.handleError(validationOptions.missingDecorator, err as Error);
             }
         }
     }
