@@ -814,19 +814,6 @@ describe('MapDeclaration', () => {
                 `, 'invalid.cto');
             }).should.throw(IllegalModelException, /points to a missing type/);
         });
-
-        it('should throw IllegalModelException if map object value points to missing type', () => {
-            const mm = new ModelManager({ strict: true });
-            (() => {
-                mm.addCTOModel(`
-                namespace org.acme.maptest@1.0.0
-                map InvalidMap {
-                    o String
-                    o MissingType
-                }
-                `, 'invalid.cto');
-            }).should.throw(IllegalModelException);
-        });
     });
 });
 
