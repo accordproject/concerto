@@ -20,6 +20,7 @@ const { Relationship } = require('../src/model/relationship');
 const { Resource } = require('../src/model/resource');
 const { Serializer } = require('../src/serializer');
 const { TypeNotFoundException } = require('../src/typenotfoundexception');
+const { ValidationException } = require('../src/serializer/validationexception');
 const Util = require('./composer/composermodelutility');
 
 const should = require('chai').should();
@@ -579,7 +580,7 @@ describe('Serializer', () => {
             dateTests.forEach(([dateValue, message, expected, utcOffset]) => {
                 it(`should accept date-time values with the format '${message}' and offset '${utcOffset}'`, () => {
                     json.date = dateValue;
-                    const options = utcOffset !== undefined ? { utcOffset } : {};
+                    const options = utcOffset !== undefined ? { utcOffset, strictQualifiedDateTimes: false } : { strictQualifiedDateTimes: false };
                     const result = serializer.toJSON(serializer.fromJSON(json, options), options);
                     result.date.should.equal(expected || DEFAULT_EXPECTED_VALUE);
                 });
@@ -603,7 +604,7 @@ describe('Serializer', () => {
                 it(`should not accept invalid dates or dateTime values, ${message}`, () => {
                     json.date = dateValue;
                     (() => {
-                        const options = { utcOffset };
+                        const options = { utcOffset, strictQualifiedDateTimes: false };
                         serializer.toJSON(serializer.fromJSON(json, options), options);
                     }).should.throw('Expected value at path `$.date` to be of type `DateTime`');
                 });
@@ -690,6 +691,10 @@ describe('Serializer', () => {
 
                 // Other
                 ['2022-11-28T01:02:03.987-08', 'YYYY-MM-DDTHH:mm:ss.SSS-HH'],
+                ['2024-02-30T00:00:00Z', 'Impossible date Feb 30'],
+                ['2023-02-29T00:00:00Z', 'Impossible date non-leap Feb 29'],
+                ['2024-01-01T24:00:00Z', 'Hour 24:00'],
+                ['2024-04-31T00:00:00Z', 'Impossible date April 31'],
 
             ];
 
@@ -701,6 +706,22 @@ describe('Serializer', () => {
                         serializer.toJSON(serializer.fromJSON(json, options), options);
                     }).should.throw('Expected value at path `$.date` to be of type `DateTime`');
                 });
+            });
+        });
+
+        describe('default fromJSON datetime strictness', () => {
+            it('should reject date-only strings by default', () => {
+                json.date = '2024-05-01';
+                (() => {
+                    serializer.fromJSON(json);
+                }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
+            });
+
+            it('should reject impossible dates by default', () => {
+                json.date = '2024-02-30T00:00:00Z';
+                (() => {
+                    serializer.fromJSON(json);
+                }).should.throw(ValidationException, /is not a valid date-time/);
             });
         });
     });
