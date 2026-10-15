@@ -28,7 +28,7 @@ describe('Declaration', () => {
 
     beforeEach(() => {
         modelFile = sinon.createStubInstance(ModelFile);
-        declaration = new Declaration(modelFile, { ast: true });
+        declaration = new Declaration(modelFile, { name: 'Declaration' });
     });
 
     describe('#constructor', () => {
@@ -37,6 +37,12 @@ describe('Declaration', () => {
             (() => {
                 new Declaration(null);
             }).should.throw(/ast not specified/);
+        });
+
+        it('should throw for an invalid class name', () => {
+            (() => {
+                new Declaration(modelFile, { name: null });
+            }).should.throw(/Invalid class name 'null'/);
         });
 
     });

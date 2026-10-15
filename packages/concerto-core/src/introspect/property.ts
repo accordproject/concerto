@@ -88,9 +88,6 @@ class Property extends Decorated {
 
         this.name = this.ast.name;
 
-        if(!this.name) {
-            throw new Error('No name for type ' + JSON.stringify(this.ast));
-        }
 
         switch (this.ast.$class) {
         case `${MetaModelNamespace}.EnumProperty`:
