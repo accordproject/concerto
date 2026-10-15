@@ -62,6 +62,21 @@ describe('ModelUtil', function () {
 
     });
 
+    describe('#isScalar', function() {
+        it('should return true for scalar field and falsy for primitive field', function() {
+            const mm = new ModelManager();
+            mm.addCTOModel(`namespace org.test@1.0.0
+            scalar MyString extends String
+            concept Foo {
+                o MyString scalarField
+                o String primitiveField
+            }`, 'test.cto');
+            const decl = mm.getType('org.test@1.0.0.Foo');
+            Boolean(ModelUtil.isScalar(decl.getProperty('scalarField'))).should.be.true;
+            Boolean(ModelUtil.isScalar(decl.getProperty('primitiveField'))).should.be.false;
+        });
+    });
+
     describe('#getShortName', function() {
 
         it('should handle a name with a namespace', function() {
