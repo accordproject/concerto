@@ -404,15 +404,46 @@ class DecoratorManager {
         }
 
         if (propertyCommands) {
+            const byName = new Map<string, IndexedCommand[]>();
+            const byType = new Map<string, IndexedCommand[]>();
+            const wildcards: IndexedCommand[] = [];
+
+            for (const ic of propertyCommands) {
+                const { target } = ic.command;
+                if (target.property) {
+                    let list = byName.get(target.property);
+                    if (!list) { list = []; byName.set(target.property, list); }
+                    list.push(ic);
+                } else if (target.properties) {
+                    for (const p of target.properties) {
+                        let list = byName.get(p);
+                        if (!list) { list = []; byName.set(p, list); }
+                        list.push(ic);
+                    }
+                } else if (target.type) {
+                    let list = byType.get(target.type);
+                    if (!list) { list = []; byType.set(target.type, list); }
+                    list.push(ic);
+                } else {
+                    wildcards.push(ic);
+                }
+            }
+
             for (let i = 0; i < decl.properties.length; i++) {
                 let property = decl.properties[i];
+                const matched: IndexedCommand[] = [];
+                const nameMatched = byName.get(property.name);
+                if (nameMatched) { matched.push(...nameMatched); }
+                const typeMatched = byType.get(property.$class);
+                if (typeMatched) { matched.push(...typeMatched); }
+                if (wildcards.length > 0) { matched.push(...wildcards); }
+                if (matched.length === 0) { continue; }
+                if (matched.length > 1) { matched.sort((a, b) => a.index - b.index); }
+
                 let cloned = false;
-                for (const ic of propertyCommands) {
+                for (const ic of matched) {
                     const { target, type, decorator } = ic.command;
-                    const nameMatch = target.property
-                        ? target.property === property.name
-                        : !target.properties || target.properties.includes(property.name);
-                    if (nameMatch && (!target.type || target.type === property.$class)) {
+                    if (!target.type || target.type === property.$class) {
                         if (!cloned) {
                             property = { ...property, decorators: property.decorators ? [...property.decorators] : undefined };
                             decl.properties[i] = property;
