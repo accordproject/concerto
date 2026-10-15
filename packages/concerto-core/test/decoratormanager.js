@@ -707,6 +707,72 @@ describe('DecoratorManager', () => {
             chai.expect(newCTO).to.equal(oldCTO);
         });
 
+        it('should produce identical output across multiple namespaces including untargeted ones', async function() {
+            const testModelManager = new ModelManager();
+            testModelManager.addCTOModel(`namespace ns.a@1.0.0
+                concept Foo { o String bar }
+            `, 'a.cto');
+            testModelManager.addCTOModel(`namespace ns.b@1.0.0
+                concept Baz { o String qux }
+            `, 'b.cto');
+            const dcs = {
+                $class: 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet',
+                name: 'test',
+                version: '1.0.0',
+                commands: [{
+                    $class: 'org.accordproject.decoratorcommands@0.4.0.Command',
+                    type: 'UPSERT',
+                    target: {
+                        $class: 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                        namespace: 'ns.a@1.0.0',
+                        declaration: 'Foo'
+                    },
+                    decorator: {
+                        $class: 'concerto.metamodel@1.0.0.Decorator',
+                        name: 'Tagged',
+                        arguments: []
+                    }
+                }]
+            };
+            const oldResult = DecoratorManager.decorateModels(testModelManager, dcs);
+            const newResult = DecoratorManager.decorateModelsNew(testModelManager, dcs);
+            const oldA = Printer.toCTO(oldResult.getModelFile('ns.a@1.0.0').getAst()).trimEnd();
+            const newA = Printer.toCTO(newResult.getModelFile('ns.a@1.0.0').getAst()).trimEnd();
+            chai.expect(newA).to.equal(oldA);
+            const oldB = Printer.toCTO(oldResult.getModelFile('ns.b@1.0.0').getAst()).trimEnd();
+            const newB = Printer.toCTO(newResult.getModelFile('ns.b@1.0.0').getAst()).trimEnd();
+            chai.expect(newB).to.equal(oldB);
+        });
+
+        it('should not decorate declarations when command target has no targeting fields', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = {
+                $class: 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet',
+                name: 'test',
+                version: '1.0.0',
+                commands: [{
+                    $class: 'org.accordproject.decoratorcommands@0.4.0.Command',
+                    type: 'UPSERT',
+                    target: {
+                        $class: 'org.accordproject.decoratorcommands@0.4.0.CommandTarget'
+                    },
+                    decorator: {
+                        $class: 'concerto.metamodel@1.0.0.Decorator',
+                        name: 'Ghost',
+                        arguments: []
+                    }
+                }]
+            };
+            const oldResult = DecoratorManager.decorateModels(testModelManager, dcs);
+            const newResult = DecoratorManager.decorateModelsNew(testModelManager, dcs);
+            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
+            chai.expect(newCTO).to.equal(oldCTO);
+            chai.expect(newCTO).to.not.include('Ghost');
+        });
+
         it('should throw when skipValidationAndResolution conflicts with explicit false options', async function() {
             const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');

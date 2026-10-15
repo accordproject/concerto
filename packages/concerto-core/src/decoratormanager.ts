@@ -347,7 +347,11 @@ class DecoratorManager {
                 ns = index.wildcardNs;
             }
 
-            if (target.namespace && !target.declaration && !target.property
+            const hasTarget = target.namespace || target.declaration || target.property
+                || target.properties || target.type || target.mapElement;
+            if (!hasTarget) {
+                continue;
+            } else if (target.namespace && !target.declaration && !target.property
                 && !target.properties && !target.type && !target.mapElement) {
                 ns.modelCommands.push(entry);
             } else if (target.declaration) {
