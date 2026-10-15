@@ -736,6 +736,7 @@ class DecoratorManager {
         });
 
         const newModelManager = new ModelManager({
+            ...modelManager.options,
             decoratorValidation: modelManager.getDecoratorValidation()
         });
         newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
