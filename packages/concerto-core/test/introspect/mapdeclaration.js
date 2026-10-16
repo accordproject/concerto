@@ -825,7 +825,7 @@ describe('MapDeclaration', () => {
                     --> MissingType
                 }
                 `, 'invalid.cto');
-            }).should.throw(IllegalModelException, /points to a missing type/);
+            }).should.throw(IllegalModelException, /Undeclared type "MissingType"/);
         });
     });
 });

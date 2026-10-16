@@ -77,15 +77,6 @@ class MapValueType extends Decorated {
             const decl = this.modelFile.getType(this.type);
 
             if (this.isRelationship()) {
-                if (!decl) {
-                    const targetName = this.getFullyQualifiedTypeName() || `${this.getNamespace()}.${this.type}`;
-                    throw new IllegalModelException(
-                        `Relationship ${this.getName()} points to a missing type ${targetName}`,
-                        this.modelFile,
-                        this.ast.location
-                    );
-                }
-
                 if (!decl.isIdentified?.()) {
                     throw new IllegalModelException(
                         `Relationship ${this.getName()} must be to a class that has an identifier, but this is to ${this.getFullyQualifiedTypeName()}`,
