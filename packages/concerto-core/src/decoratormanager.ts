@@ -727,8 +727,8 @@ class DecoratorManager {
                 const clonedDecl = { ...decl };
                 if (decl.decorators) { clonedDecl.decorators = [...decl.decorators]; }
                 if (decl.properties) { clonedDecl.properties = [...decl.properties]; }
-                if (decl.key) { clonedDecl.key = { ...decl.key, decorators: decl.key.decorators ? [...decl.key.decorators] : undefined }; }
-                if (decl.value) { clonedDecl.value = { ...decl.value, decorators: decl.value.decorators ? [...decl.value.decorators] : undefined }; }
+                if (decl.key) { clonedDecl.key = { ...decl.key }; if (decl.key.decorators) { clonedDecl.key.decorators = [...decl.key.decorators]; } }
+                if (decl.value) { clonedDecl.value = { ...decl.value }; if (decl.value.decorators) { clonedDecl.value.decorators = [...decl.value.decorators]; } }
                 clonedModel.declarations[declIndex] = clonedDecl;
 
                 this.applyCommandsToDeclaration(clonedDecl, commands);
