@@ -206,7 +206,7 @@ describe('ModelManager', () => {
 
             const bar = {
                 $class : 'org.acme@1.0.0.Bar',
-                foo : '😊'
+                foo : 'Ã°Å¸ËœÅ '
             };
 
             const factory = new Factory(modelManagerWithOptions);
@@ -273,6 +273,27 @@ describe('ModelManager', () => {
 
     });
 
+    describe('canonical namespace versions', () => {
+        it('should reject a non-canonical namespace version in ModelFile construction', () => {
+            const ast = {
+                $class: `${MetaModelNamespace}.Model`,
+                namespace: 'org.acme@v1.0.0',
+                undeclared: []
+            };
+
+            (() => new ModelFile(modelManager, ast)).should.throw(/Invalid namespace/);
+        });
+
+        it('should reject a namespace version with trailing whitespace in ModelFile construction', () => {
+            const ast = {
+                $class: `${MetaModelNamespace}.Model`,
+                namespace: 'org.acme@1.0.0 ',
+                undeclared: []
+            };
+
+            (() => new ModelFile(modelManager, ast)).should.throw(/Invalid namespace/);
+        });
+    });
     describe('#addModel', () => {
         it('should throw for a bad metamodel AST', () => {
             const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
@@ -285,6 +306,7 @@ describe('ModelManager', () => {
                 basemodelmanager.addModel(ast, undefined, 'origFile');
             }).should.throw('Unexpected properties for type concerto.metamodel@1.0.0.Model: undeclared');
         });
+
 
         it('should reject a non-canonical namespace version when adding a model', () => {
             const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
