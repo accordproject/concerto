@@ -20,18 +20,12 @@ import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import semver from 'semver';
 import DecoratorExtractor from './decoratorextractor';
 import IllegalModelException from './introspect/illegalmodelexception';
-import rfdcLib from 'rfdc';
-const rfdc = rfdcLib({
-    circles: true,
-    proto: false,
-});
-
 import { jsonToYaml, yamlToJson } from './dcsconverter';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ModelFile from './introspect/modelfile';
-import type { DecoratorCommand } from './types';
+import type { DecoratorCommand, DecoratorCommandTarget } from './types';
 /* eslint-enable no-unused-vars */
 
 const DCS_VERSION = '0.4.0';
@@ -101,20 +95,6 @@ concept DecoratorCommandSet {
 `;
 
 /**
- * Intersection of two string arrays
- * @param {string[]} a the first array
- * @param {string[]} b the second array
- * @returns {string[]} returns the intersection of a and b (i.e. an
- * array of the elements they have in common)
- */
-function intersect(a, b) {
-    const setA = new Set(a);
-    const setB = new Set(b);
-    const intersection = new Set([...setA].filter((x) => setB.has(x)));
-    return Array.from(intersection);
-}
-
-/**
  * Returns true if the unversioned namespace for a model
  * file is equal to a target
  * @param {ModelFile} modelFile the model file to test
@@ -128,40 +108,40 @@ function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
 }
 
 /**
- * Helper class to wrap the decorator command and the index of the command
+ * A decorator command paired with its original index in the flattened command list,
+ * used to preserve application order when commands are grouped by target.
  * @private
  */
-class DcsIndexWrapper {
+interface IndexedCommand {
     command: DecoratorCommand;
     index: number;
-
-    /**
-     * Create the DcsIndexWrapper.
-     * @constructor
-     * @param {*} command - the decorator command
-     * @param {number} index - the index of the command
-     */
-    constructor(command: DecoratorCommand, index: number) {
-        this.command = command;
-        this.index = index;
-    }
-
-    /**
-     * Get the decorator command.
-     * @returns {*} The decorator command.
-     */
-    getCommand(): DecoratorCommand {
-        return this.command;
-    }
-
-    /**
-     * Get the index of the command.
-     * @returns {number} The index of the command.
-     */
-    getIndex(): number {
-        return this.index;
-    }
 }
+
+/**
+ * Commands grouped for a single namespace. Commands targeting a specific declaration
+ * go into byDeclaration; commands with no declaration target (wildcards) go into
+ * wildcardCommands and are applied to every declaration in the namespace.
+ * modelCommands target the namespace itself (e.g. namespace-level decorators).
+ * @private
+ */
+interface NamespaceBucket {
+    modelCommands: IndexedCommand[];
+    byDeclaration: Map<string, IndexedCommand[]>;
+    wildcardCommands: IndexedCommand[];
+}
+
+/**
+ * Hierarchical index built from a flattened command list. Commands are bucketed
+ * first by namespace (or into wildcardNs if no namespace is specified), then
+ * within each namespace by declaration name or as wildcards.
+ * @private
+ */
+interface CommandIndex {
+    byNamespace: Map<string, NamespaceBucket>;
+    wildcardNs: NamespaceBucket;
+    hasWildcardNamespace: boolean;
+}
+
 
 /**
  * Utility functions to work with
@@ -237,68 +217,148 @@ class DecoratorManager {
     }
 
     /**
-     * Add decorator commands set with index object to the coresponding target map
-     * @param {*} targetMap the target map to add the command to
-     * @param {targetKey} targetKey the target key to add the command to
-     * @param {DcsIndexWrapper} dcsWithIndex the command to add
+     * Builds a hierarchical index from a flat list of decorator commands.
+     * Commands are bucketed by namespace, then by declaration name within
+     * each namespace. Commands with no namespace go into a wildcard bucket
+     * applied to all namespaces. Commands with no declaration go into a
+     * per-namespace wildcard list applied to all declarations.
+     * @param {DecoratorCommand[]} commands the flattened command list
+     * @returns {CommandIndex} the hierarchical command index
      * @private
      */
-    static addDcsWithIndexToMap(targetMap, targetKey, dcsWithIndex) {
-        const targetCommands = targetMap.get(targetKey);
-        if (targetCommands) {
-            targetCommands.push(dcsWithIndex);
-        } else {
-            targetMap.set(targetKey, [dcsWithIndex]);
+    private static buildCommandIndex(commands: DecoratorCommand[]): CommandIndex {
+        const index: CommandIndex = {
+            byNamespace: new Map(),
+            wildcardNs: { modelCommands: [], byDeclaration: new Map(), wildcardCommands: [] },
+            hasWildcardNamespace: false,
+        };
+
+        for (let i = 0; i < commands.length; i++) {
+            const command = commands[i];
+            const target: DecoratorCommandTarget = command.target;
+            const entry: IndexedCommand = { command, index: i };
+
+            let ns: NamespaceBucket;
+            if (target.namespace) {
+                let b = index.byNamespace.get(target.namespace);
+                if (!b) {
+                    b = { modelCommands: [], byDeclaration: new Map(), wildcardCommands: [] };
+                    index.byNamespace.set(target.namespace, b);
+                }
+                ns = b;
+            } else {
+                index.hasWildcardNamespace = true;
+                ns = index.wildcardNs;
+            }
+
+            const hasTarget = target.namespace || target.declaration || target.property
+                || target.properties || target.type || target.mapElement;
+            if (!hasTarget) {
+                continue;
+            } else if (target.namespace && !target.declaration && !target.property
+                && !target.properties && !target.type && !target.mapElement) {
+                ns.modelCommands.push(entry);
+            } else if (target.declaration) {
+                let list = ns.byDeclaration.get(target.declaration);
+                if (!list) { list = []; ns.byDeclaration.set(target.declaration, list); }
+                list.push(entry);
+            } else {
+                ns.wildcardCommands.push(entry);
+            }
         }
+
+        return index;
     }
 
-
     /**
-     * Creates five different maps to index decorator command sets by target type and returns them
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
-     * @returns {Object} object with all the decorator command maps based on the target
+     * Applies a set of indexed commands to a single declaration. Handles map elements,
+     * type-targeted commands, property-targeted commands, and declaration-level commands.
+     * Property commands are indexed by name and type for O(1) lookup per property.
+     * @param {object} decl the declaration AST node (already cloned by the caller)
+     * @param {IndexedCommand[]} commands the commands to apply, pre-sorted by index
      * @private
      */
-    static getDecoratorMaps(decoratorCommandSet) {
-        const namespaceCommandsMap = new Map();
-        const declarationCommandsMap = new Map();
-        const propertyCommandsMap = new Map();
-        const mapElementCommandsMap = new Map();
-        const typeCommandsMap = new Map();
+    private static applyCommandsToDeclaration(decl, commands: IndexedCommand[]) {
+        const isMap = decl.$class === `${MetaModelNamespace}.MapDeclaration`;
+        const hasProperties = decl.properties && decl.properties.length > 0;
+        let propertyCommands: IndexedCommand[] | null = null;
 
-        decoratorCommandSet.commands.map((decoratorCommand, index) => {
-            const dcsWithIndex = new DcsIndexWrapper(decoratorCommand, index);
-            switch (true) {
-            case !!decoratorCommand?.target?.type:
-                this.addDcsWithIndexToMap(typeCommandsMap, decoratorCommand.target.type, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.property:
-                this.addDcsWithIndexToMap(propertyCommandsMap, decoratorCommand.target.property, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.properties:
-                decoratorCommand.target.properties.forEach((property) => {
-                    this.addDcsWithIndexToMap(propertyCommandsMap, property, dcsWithIndex);
-                });
-                break;
-            case !!decoratorCommand?.target?.mapElement:
-                this.addDcsWithIndexToMap(mapElementCommandsMap, decoratorCommand.target.mapElement, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.declaration:
-                this.addDcsWithIndexToMap(declarationCommandsMap, decoratorCommand.target.declaration, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.namespace:
-                this.addDcsWithIndexToMap(namespaceCommandsMap, decoratorCommand.target.namespace, dcsWithIndex);
-                break;
+        for (const ic of commands) {
+            const { target, type, decorator } = ic.command;
+            if (target.mapElement) {
+                if (isMap) {
+                    const elements = target.mapElement === 'KEY_VALUE' ? ['KEY', 'VALUE'] : [target.mapElement];
+                    for (const el of elements) {
+                        const mapPart = el === 'KEY' ? decl.key : decl.value;
+                        if (!target.type || mapPart.$class.includes(target.type)) {
+                            this.applyDecorator(mapPart, type, decorator);
+                        }
+                    }
+                }
+            } else if (target.type && !target.property && !target.properties) {
+                if (isMap) {
+                    if (decl.key.$class.includes(target.type)) {
+                        this.applyDecorator(decl.key, type, decorator);
+                    }
+                    if (decl.value.$class.includes(target.type)) {
+                        this.applyDecorator(decl.value, type, decorator);
+                    }
+                }
+                if (hasProperties) { (propertyCommands ??= []).push(ic); }
+            } else if (target.property || target.properties || target.type) {
+                if (hasProperties) { (propertyCommands ??= []).push(ic); }
+            } else {
+                this.applyDecorator(decl, type, decorator);
             }
-        });
+        }
 
-        return {
-            namespaceCommandsMap,
-            declarationCommandsMap,
-            propertyCommandsMap,
-            mapElementCommandsMap,
-            typeCommandsMap
-        };
+        if (propertyCommands) {
+            const byName = new Map<string, IndexedCommand[]>();
+            const byType = new Map<string, IndexedCommand[]>();
+
+            for (const ic of propertyCommands) {
+                const { target } = ic.command;
+                if (target.property) {
+                    let list = byName.get(target.property);
+                    if (!list) { list = []; byName.set(target.property, list); }
+                    list.push(ic);
+                } else if (target.properties) {
+                    for (const p of target.properties) {
+                        let list = byName.get(p);
+                        if (!list) { list = []; byName.set(p, list); }
+                        list.push(ic);
+                    }
+                } else if (target.type) {
+                    let list = byType.get(target.type);
+                    if (!list) { list = []; byType.set(target.type, list); }
+                    list.push(ic);
+                }
+            }
+
+            for (let i = 0; i < decl.properties.length; i++) {
+                let property = decl.properties[i];
+                const matched: IndexedCommand[] = [];
+                const nameMatched = byName.get(property.name);
+                if (nameMatched) { matched.push(...nameMatched); }
+                const typeMatched = byType.get(property.$class);
+                if (typeMatched) { matched.push(...typeMatched); }
+                if (matched.length === 0) { continue; }
+                if (matched.length > 1) { matched.sort((a, b) => a.index - b.index); }
+
+                let cloned = false;
+                for (const ic of matched) {
+                    const { target, type, decorator } = ic.command;
+                    if (!target.type || target.type === property.$class) {
+                        if (!cloned) {
+                            property = { ...property, decorators: property.decorators ? [...property.decorators] : undefined };
+                            decl.properties[i] = property;
+                            cloned = true;
+                        }
+                        this.applyDecorator(property, type, decorator);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -349,20 +409,9 @@ class DecoratorManager {
     }
 
     /**
-     * Adds decorator commands with index to the array passed
-     * @param {DcsIndexWrapper[]} array the array to add the command to
-     * @param {*} map the target map to add the command to
-     * @param {key} key the target key to add the command to
-     * @private
-     */
-    static pushMapValues(array, map, key) {
-        for (const value of map.get(key) || []) {
-            array.push(value);
-        }
-    }
-
-    /**
-     * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager
+     * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager.
+     * Uses a hierarchical command index to skip models and declarations with no matching commands,
+     * and selective cloning instead of deep-cloning the entire AST.
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object, or an array of DecoratorCommandSet objects
      * @param {object} [options] - decorator models options
@@ -395,14 +444,9 @@ class DecoratorManager {
 
         this.migrateAndValidate(modelManager, decoratorCommandSets, options?.migrate, options?.validate, options?.validateCommands);
 
-        // Flatten commands across all command sets so decorators can be applied in a single AST scan.
-        const combinedDecoratorCommandSet = {
-            commands: decoratorCommandSets.flatMap(commandSet => commandSet.commands)
-        };
+        const combinedCommands: DecoratorCommand[] = decoratorCommandSets.flatMap(cs => cs.commands);
 
-        // we create synthetic imports for all decorator declarations
-        // along with any of their type reference arguments
-        const decoratorImports = combinedDecoratorCommandSet.commands.flatMap(command => {
+        const decoratorImports = combinedCommands.flatMap((command: any) => {
             return [{
                 $class: `${MetaModelNamespace}.ImportType`,
                 name: command.decorator.name,
@@ -417,64 +461,74 @@ class DecoratorManager {
                 })
                 : []);
         }).filter(i => i.namespace);
-        const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(combinedDecoratorCommandSet);
+
+        const commandIndex = this.buildCommandIndex(combinedCommands);
         const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, true) : modelManager.getAst(true, true);
-        const decoratedAst = rfdc(ast);
-        decoratedAst.models.forEach((model) => {
-            // remove the imports for types defined in this namespace
-            const neededImports = decoratorImports.filter(i => i.namespace !== model.namespace);
-            // add the imports for decorators, in case they get added below
-            model.imports = model.imports ? model.imports.concat(neededImports) : neededImports;
+        const decoratedAst = { ...ast, models: [...ast.models] };
+
+        decoratedAst.models.forEach((model, modelIndex) => {
             const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
-            model.declarations.forEach((decl) => {
-                const declarationDecoratorCommandSets: DcsIndexWrapper[] = [];
-                const { name: declarationName, $class: $classForDeclaration } = decl;
-                this.pushMapValues(declarationDecoratorCommandSets, declarationCommandsMap, declarationName);
-                this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, model.namespace);
-                this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, namespaceName);
-                this.pushMapValues(declarationDecoratorCommandSets, typeCommandsMap, $classForDeclaration);
-                const sortedDeclarationDecoratorCommandSets = declarationDecoratorCommandSets.sort((declDcs1, declDcs2) => declDcs1.getIndex() - declDcs2.getIndex());
-                sortedDeclarationDecoratorCommandSets.forEach(dcsWithIndex => {
-                    this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), null, options);
-                    this.executeNamespaceCommand(model, dcsWithIndex.getCommand());
-                });
 
-                if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
-                    const mapDecoratorCommandSets: DcsIndexWrapper[] = [];
-                    this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.key.$class);
-                    this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.value.$class);
-                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'KEY');
-                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'VALUE');
-                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'KEY_VALUE');
-                    const sortedMapDecoratorCommandSets = mapDecoratorCommandSets.sort((mapDcs1, mapDcs2) => mapDcs1.getIndex() - mapDcs2.getIndex());
-                    sortedMapDecoratorCommandSets.forEach(dcsWithIndex => {
-                        this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand());
-                    });
+            const nsBuckets: NamespaceBucket[] = [];
+            const b1 = commandIndex.byNamespace.get(model.namespace);
+            const b2 = commandIndex.byNamespace.get(namespaceName);
+            if (b1) nsBuckets.push(b1);
+            if (b2 && b2 !== b1) nsBuckets.push(b2);
+            if (commandIndex.hasWildcardNamespace) nsBuckets.push(commandIndex.wildcardNs);
+
+            if (nsBuckets.length === 0) { return; } // No applicable decorators for this model's namespace
+
+            const clonedModel = { ...model };
+            decoratedAst.models[modelIndex] = clonedModel;
+
+            const neededImports = decoratorImports.filter(i => i.namespace !== clonedModel.namespace);
+            clonedModel.imports = clonedModel.imports ? clonedModel.imports.concat(neededImports) : neededImports;
+
+            const modelCmds: IndexedCommand[] = [];
+            for (const nsB of nsBuckets) {
+                for (const cmd of nsB.modelCommands) { modelCmds.push(cmd); }
+            }
+            if (modelCmds.length > 0) {
+                if (model.decorators) { clonedModel.decorators = [...model.decorators]; }
+                modelCmds.sort((a, b) => a.index - b.index);
+                for (const ic of modelCmds) {
+                    this.applyDecorator(clonedModel, ic.command.type, ic.command.decorator);
                 }
+            }
 
-                // scalars are declarations but do not have properties
-                if (decl.properties) {
-                    decl.properties.forEach((property) => {
-                        const propertyDecoratorCommandSets: DcsIndexWrapper[] = [];
-                        const { name: propertyName, $class: $classForProperty } = property;
-                        this.pushMapValues(propertyDecoratorCommandSets, propertyCommandsMap, propertyName);
-                        this.pushMapValues(propertyDecoratorCommandSets, typeCommandsMap, $classForProperty);
-                        const sortedPropertyDecoratorCommandSets = propertyDecoratorCommandSets.sort((propertyDcs1, propertyDcs2) => propertyDcs1.getIndex() - propertyDcs2.getIndex());
-                        sortedPropertyDecoratorCommandSets.forEach(dcsWithIndex => {
-                            this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), property);
-                        });
-                    });
+            if (!clonedModel.declarations) { return; }
+            clonedModel.declarations = [...model.declarations];
+
+            clonedModel.declarations.forEach((decl, declIndex) => {
+                const commands: IndexedCommand[] = [];
+                let sources = 0;
+                for (const nsB of nsBuckets) {
+                    const specific = nsB.byDeclaration.get(decl.name);
+                    if (specific) { commands.push(...specific); sources++; }
+                    if (nsB.wildcardCommands.length > 0) { commands.push(...nsB.wildcardCommands); sources++; }
                 }
+                if (commands.length === 0) { return; }
+                if (sources > 1) { commands.sort((a, b) => a.index - b.index); }
 
+                const clonedDecl = { ...decl };
+                if (decl.decorators) { clonedDecl.decorators = [...decl.decorators]; }
+                if (decl.properties) { clonedDecl.properties = [...decl.properties]; }
+                if (decl.key) { clonedDecl.key = { ...decl.key }; if (decl.key.decorators) { clonedDecl.key.decorators = [...decl.key.decorators]; } }
+                if (decl.value) { clonedDecl.value = { ...decl.value }; if (decl.value.decorators) { clonedDecl.value.decorators = [...decl.value.decorators]; } }
+                clonedModel.declarations[declIndex] = clonedDecl;
+
+                this.applyCommandsToDeclaration(clonedDecl, commands);
             });
         });
 
         const newModelManager = new ModelManager({
+            ...modelManager.options,
             decoratorValidation: modelManager.getDecoratorValidation()
         });
         newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
         return newModelManager;
     }
+
     /**
      * @typedef ExtractDecoratorsResult
      * @type {object}
@@ -634,42 +688,6 @@ class DecoratorManager {
 
 
     /**
-     * Applies a new decorator to the Map element
-     * @private
-     * @param {string} element the element to apply the decorator to
-     * @param {string} target the command target
-     * @param {*} declaration the map declaration
-     * @param {string} type the command type
-     * @param {*} newDecorator the decorator to add
-     */
-    static applyDecoratorForMapElement(element, target, declaration, type, newDecorator ) {
-        const decl = element === 'KEY' ? declaration.key : declaration.value;
-        if (target.type) {
-            if (this.falsyOrEqual(target.type, decl.$class)) {
-                this.applyDecorator(decl, type, newDecorator);
-            }
-        } else {
-            this.applyDecorator(decl, type, newDecorator);
-        }
-    }
-
-    /**
-     * Compares two arrays. If the first argument is falsy
-     * the function returns true.
-     * @param {string | string[] | null} test the value to test
-     * @param {string[]} values the values to compare
-     * @returns {Boolean} true if the test is falsy or the intersection of
-     * the test and values arrays is not empty (i.e. they have values in common)
-     */
-    static falsyOrEqual(test, values) {
-        return Array.isArray(test)
-            ? intersect(test, values).length > 0
-            : test
-                ? values.includes(test)
-                : true;
-    }
-
-    /**
      * Applies a decorator to a decorated model element.
      * @param {*} decorated the type to apply the decorator to
      * @param {string} type the command type
@@ -722,116 +740,6 @@ class DecoratorManager {
                 );
             }
         });
-    }
-
-    /**
-     * Executes a Command against a Model Namespace, adding
-     * decorators to the Namespace.
-     * @private
-     * @param {*} model the model
-     * @param {*} command the Command object from the dcs
-     */
-    static executeNamespaceCommand(model, command) {
-        const { target, decorator, type } = command;
-        if (Object.keys(target).length === 2 && target.namespace) {
-            const { name } = ModelUtil.parseNamespace( model.namespace );
-            if(this.falsyOrEqual(target.namespace, [model.namespace, name])) {
-                this.applyDecorator(model, type, decorator);
-            }
-        }
-    }
-
-    /**
-     * Executes a Command against a Declaration, adding
-     * decorators to the Declaration, or its properties, as required.
-     * @param {string} namespace the namespace for the declaration
-     * @param {*} declaration the class declaration
-     * @param {*} command the Command object from the dcs
-     * @param {*} [property] the property of a declaration, optional, to be passed if the command is for a property
-     * @param {object} [options] - execute command options
-     */
-    static executeCommand(namespace, declaration, command, property?, options?) {
-        const { target, decorator, type } = command;
-        // the namespace version is already validated in the decorateModels method
-        const { name } = ModelUtil.parseNamespace( namespace, { disableVersionParsing: true } );
-        if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
-            this.falsyOrEqual(target.declaration, [declaration.name])) {
-
-            if (declaration.$class === `${MetaModelNamespace}.MapDeclaration`) {
-                if (target.mapElement) {
-                    switch (target.mapElement) {
-                    case 'KEY':
-                    case 'VALUE':
-                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
-                        break;
-                    case 'KEY_VALUE':
-                        this.applyDecoratorForMapElement('KEY', target, declaration, type, decorator);
-                        this.applyDecoratorForMapElement('VALUE', target, declaration, type, decorator);
-                        break;
-                    }
-                } else if (target.type) {
-                    if (this.falsyOrEqual(target.type, declaration.key.$class)) {
-                        this.applyDecorator(declaration.key, type, decorator);
-                    }
-                    if (this.falsyOrEqual(target.type, declaration.value.$class)) {
-                        this.applyDecorator(declaration.value, type, decorator);
-                    }
-                } else {
-                    this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target);
-                }
-            } else if (!(target.property || target.properties || target.type)) {
-                this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target);
-            } else {
-                if(property) {
-                    this.executePropertyCommand(property, command);
-                }
-            }
-        }
-    }
-
-    /**
-     * Executes a Command against a Property, adding
-     * decorators to the Property as required.
-     * @param {*} property the property
-     * @param {*} command the Command object from the
-     * org.accordproject.decoratorcommands model
-     */
-    static executePropertyCommand(property, command) {
-        const { target, decorator, type } = command;
-        if(target.properties || target.property || target.type) {
-            if (
-                this.falsyOrEqual(
-                    target.property ? target.property : target.properties,
-                    [property.name]
-                ) &&
-                this.falsyOrEqual(target.type, [property.$class])
-            ) {
-                this.applyDecorator(property, type, decorator);
-            }
-        }
-    }
-
-    /**
-     * Applies the decorator on top of the namespace or else on all declarations
-     * within the namespace.
-     * @private
-     * @param {*} declaration the type to apply the decorator to
-     * @param {string} type the command type
-     * @param {*} decorator the decorator to add
-     * @param {*} target the target object for the decorator
-     */
-    static checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target) {
-        if (target.declaration) {
-            this.applyDecorator(declaration, type, decorator);
-        }
-    }
-
-    /**
-     * Legacy method. Kept for compatibility. Returns true.
-     *  @returns {Boolean} true
-     */
-    static isNamespaceTargetEnabled() {
-        return true;
     }
 
     /**

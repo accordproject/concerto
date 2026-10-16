@@ -29,32 +29,6 @@ chai.use(require('chai-as-promised'));
 
 describe('DecoratorManager', () => {
 
-    describe('#falsyOrEqual', function() {
-        it('should match null', async function() {
-            DecoratorManager.falsyOrEqual( null, ['one']).should.be.true;
-        });
-
-        it('should match undefined', async function() {
-            DecoratorManager.falsyOrEqual( undefined, ['one']).should.be.true;
-        });
-
-        it('should match token', async function() {
-            DecoratorManager.falsyOrEqual( 'one', ['one']).should.be.true;
-        });
-
-        it('should match token array', async function() {
-            DecoratorManager.falsyOrEqual( ['one', 'two'], ['one', 'three']).should.be.true;
-        });
-
-        it('should match token', async function() {
-            DecoratorManager.falsyOrEqual( 'one', ['one']).should.be.true;
-        });
-
-        it('should not match token', async function() {
-            DecoratorManager.falsyOrEqual( 'one', ['two']).should.be.false;
-        });
-    });
-
     describe('#validate', function() {
         it('should support syntax validation', async function() {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
@@ -622,6 +596,32 @@ describe('DecoratorManager', () => {
                 DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true, disableMetamodelValidation: true});
             }).to.throw('Duplicate decorator Hide');
+        });
+
+        it('should not decorate declarations when command target has no targeting fields', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = {
+                $class: 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet',
+                name: 'test',
+                version: '1.0.0',
+                commands: [{
+                    $class: 'org.accordproject.decoratorcommands@0.4.0.Command',
+                    type: 'UPSERT',
+                    target: {
+                        $class: 'org.accordproject.decoratorcommands@0.4.0.CommandTarget'
+                    },
+                    decorator: {
+                        $class: 'concerto.metamodel@1.0.0.Decorator',
+                        name: 'Ghost',
+                        arguments: []
+                    }
+                }]
+            };
+            const result = DecoratorManager.decorateModels(testModelManager, dcs);
+            const cto = Printer.toCTO(result.getModelFile('test@1.0.0').getAst()).trimEnd();
+            chai.expect(cto).to.not.include('Ghost');
         });
     });
 
@@ -1241,56 +1241,6 @@ describe('DecoratorManager', () => {
             chai.expect(propEntry.myField).to.equal('myField');
             // Term_ extension key must be present alongside it
             chai.expect(propEntry.desc).to.equal('my desc');
-        });
-    });
-
-    describe('#executePropertyCommand', () => {
-        let property;
-        let command;
-
-        beforeEach(() => {
-            property = {
-                '$class': 'concerto.metamodel@1.0.0.StringProperty',
-                'name': 'firstName',
-                'isArray': false,
-                'isOptional': false,
-                'decorators': []
-            };
-
-            command = {
-                '$class' : 'org.accordproject.decoratorcommands@0.4.0.Command',
-                'type' : 'UPSERT',
-                'target' : {
-                    '$class' : 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
-                    'namespace' : 'test@1.0.0'
-                },
-                'decorator' : {
-                    '$class' : 'concerto.metamodel@1.0.0.Decorator',
-                    'name' : 'Form',
-                    'arguments' : [
-                        {
-                            '$class' : 'concerto.metamodel@1.0.0.DecoratorString',
-                            'value' : 'inputType'
-                        },
-                        {
-                            '$class' : 'concerto.metamodel@1.0.0.DecoratorString',
-                            'value' : 'text'
-                        }
-                    ]
-                }
-            };
-        });
-
-        it('should not apply decorator to the property if target property does not match', () => {
-            DecoratorManager.executePropertyCommand(property, command);
-            chai.expect(property.decorators).to.have.lengthOf(0);
-        });
-
-        it('should apply decorator to the property if target property matches', () => {
-            command.target.type = 'concerto.metamodel@1.0.0.StringProperty';
-            DecoratorManager.executePropertyCommand(property, command);
-            chai.expect(property.decorators).to.have.lengthOf(1);
-            chai.expect(property.decorators[0].name).to.equal('Form');
         });
     });
 
