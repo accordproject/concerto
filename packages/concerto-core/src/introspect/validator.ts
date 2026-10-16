@@ -75,17 +75,15 @@ class Validator {
     }
 
     /**
-     * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
      * @param {string} errorType the type of error
-     * @throws {Error} throws an error to report the message
+     * @throws {IllegalModelException} throws an IllegalModelException to report the message
      */
-
     reportModelError(msg: string, errorType: string = ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION): never {
         const field = this.getFieldOrScalarDeclaration();
         const fieldName = field.getName();
 
-        const message = `Validator error for field '${fieldName}'. ${field.getFullyQualifiedName()}: ${msg}`;
+        const message = `Validator error for field \`${fieldName}\`. ${field.getFullyQualifiedName()}: ${msg}`;
 
         const exception = new IllegalModelException(
             message,
@@ -98,10 +96,17 @@ class Validator {
         throw exception;
     }
 
+    /**
+     * @param {string | null} id the identifier of the instance being validated
+     * @param {string} msg the exception message
+     * @param {string} errorType the type of error
+     * @throws {ValidationException} throws a ValidationException to report the message
+     */
     reportValidationError(id: string | null, msg: string, errorType: string = ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION): never {
         const field = this.getFieldOrScalarDeclaration();
+        const fieldName = field.getName();
 
-        const message = `Validator error for field \`${id}\`. ${field.getFullyQualifiedName()}: ${msg}`;
+        const message = `Validator error for field \`${fieldName}\` (instance \`${id}\`). ${field.getFullyQualifiedName()}: ${msg}`;
 
         const exception = new ValidationException(message);
 
