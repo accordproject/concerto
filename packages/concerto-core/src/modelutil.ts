@@ -130,13 +130,16 @@ class ModelUtil {
             throw new Error(`Invalid namespace ${ns}`);
         }
 
+
         if (parts.length === 2 && !options?.disableVersionParsing) {
-            // Validate the version using semver
-            if (!semver.valid(parts[1])) {
+            // Require the exact canonical SemVer representation.
+            const parsedVersion = semver.parse(parts[1]);
+            if (!parsedVersion || parsedVersion.version !== parts[1].split("+")[0]) {
                 throw new Error(`Invalid namespace ${ns}`);
             }
             version = semver.parse(parts[1]);
         }
+
 
         if (options?.disableVersionParsing) {
             return {

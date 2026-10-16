@@ -286,6 +286,18 @@ describe('ModelManager', () => {
             }).should.throw('Unexpected properties for type concerto.metamodel@1.0.0.Model: undeclared');
         });
 
+        it('should reject a non-canonical namespace version when adding a model', () => {
+            const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
+            const ast = {
+                $class: `${MetaModelNamespace}.Model`,
+                namespace: 'org.acme@v1.0.0',
+                undeclared: []
+            };
+
+            (() => {
+                basemodelmanager.addModel(ast, undefined, 'origFile');
+            }).should.throw(/Invalid namespace/);
+        });
         it('should throw when using an unknown metamodel version', () => {
             const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
             const ast = {
