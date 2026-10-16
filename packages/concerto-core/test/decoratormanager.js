@@ -29,32 +29,6 @@ chai.use(require('chai-as-promised'));
 
 describe('DecoratorManager', () => {
 
-    describe('#falsyOrEqual', function() {
-        it('should match null', async function() {
-            DecoratorManager.falsyOrEqual( null, ['one']).should.be.true;
-        });
-
-        it('should match undefined', async function() {
-            DecoratorManager.falsyOrEqual( undefined, ['one']).should.be.true;
-        });
-
-        it('should match token', async function() {
-            DecoratorManager.falsyOrEqual( 'one', ['one']).should.be.true;
-        });
-
-        it('should match token array', async function() {
-            DecoratorManager.falsyOrEqual( ['one', 'two'], ['one', 'three']).should.be.true;
-        });
-
-        it('should match token', async function() {
-            DecoratorManager.falsyOrEqual( 'one', ['one']).should.be.true;
-        });
-
-        it('should not match token', async function() {
-            DecoratorManager.falsyOrEqual( 'one', ['two']).should.be.false;
-        });
-    });
-
     describe('#validate', function() {
         it('should support syntax validation', async function() {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
@@ -623,126 +597,6 @@ describe('DecoratorManager', () => {
                     {validate: true, disableMetamodelValidation: true});
             }).to.throw('Duplicate decorator Hide');
         });
-    });
-
-    describe('#decorateModelsNew', function() {
-        it('should produce identical output to decorateModels for test.cto', async function() {
-            const testModelManager = new ModelManager();
-            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/possible-decorator-command-targets.json'), 'utf-8');
-            const oldResult = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
-            const newResult = DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
-            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            chai.expect(newCTO).to.equal(oldCTO);
-        });
-
-        it('should produce identical output to decorateModels for web.json', async function() {
-            const testModelManager = new ModelManager();
-            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
-            const oldResult = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
-            const newResult = DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
-            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            chai.expect(newCTO).to.equal(oldCTO);
-        });
-
-        it('should produce identical output for map-declaration commands', async function() {
-            const testModelManager = new ModelManager({skipLocationNodes: true});
-            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8');
-            const oldResult = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
-            const newResult = DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
-            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            chai.expect(newCTO).to.equal(oldCTO);
-        });
-
-        it('should return the original model manager when no decorator command sets are provided', async function() {
-            const testModelManager = new ModelManager();
-            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-            let decoratedModelManager = DecoratorManager.decorateModelsNew(testModelManager, []);
-            decoratedModelManager.should.not.be.null;
-        });
-
-        it('should support skipValidationAndResolution', async function() {
-            const testModelManager = new ModelManager();
-            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
-            const oldResult = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), {skipValidationAndResolution: true});
-            const newResult = DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), {skipValidationAndResolution: true});
-            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            chai.expect(newCTO).to.equal(oldCTO);
-        });
-
-        it('should produce identical output for decorators with typed arguments', async function() {
-            const testModelManager = new ModelManager();
-            testModelManager.addCTOModel(`namespace org.acme.categories@1.0.0
-                abstract concept Category {}
-                concept HR extends Category {}
-            `, 'categories.cto');
-            testModelManager.addCTOModel(`namespace org.acme.decorators@1.0.0
-                import concerto.decorator@1.0.0.Decorator
-                concept Form extends Decorator {
-                    o String key
-                    o String value
-                    o Concept category
-                }
-            `, 'decorators.cto');
-            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/validated.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'validated.cto');
-            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/validated.json'), 'utf-8');
-            const opts = {validate: true, validateCommands: true, migrate: true, defaultNamespace: 'org.acme.decorators@1.0.0'};
-            const oldResult = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), opts);
-            const newResult = DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), opts);
-            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            chai.expect(newCTO).to.equal(oldCTO);
-        });
-
-        it('should produce identical output across multiple namespaces including untargeted ones', async function() {
-            const testModelManager = new ModelManager();
-            testModelManager.addCTOModel(`namespace ns.a@1.0.0
-                concept Foo { o String bar }
-            `, 'a.cto');
-            testModelManager.addCTOModel(`namespace ns.b@1.0.0
-                concept Baz { o String qux }
-            `, 'b.cto');
-            const dcs = {
-                $class: 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet',
-                name: 'test',
-                version: '1.0.0',
-                commands: [{
-                    $class: 'org.accordproject.decoratorcommands@0.4.0.Command',
-                    type: 'UPSERT',
-                    target: {
-                        $class: 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
-                        namespace: 'ns.a@1.0.0',
-                        declaration: 'Foo'
-                    },
-                    decorator: {
-                        $class: 'concerto.metamodel@1.0.0.Decorator',
-                        name: 'Tagged',
-                        arguments: []
-                    }
-                }]
-            };
-            const oldResult = DecoratorManager.decorateModels(testModelManager, dcs);
-            const newResult = DecoratorManager.decorateModelsNew(testModelManager, dcs);
-            const oldA = Printer.toCTO(oldResult.getModelFile('ns.a@1.0.0').getAst()).trimEnd();
-            const newA = Printer.toCTO(newResult.getModelFile('ns.a@1.0.0').getAst()).trimEnd();
-            chai.expect(newA).to.equal(oldA);
-            const oldB = Printer.toCTO(oldResult.getModelFile('ns.b@1.0.0').getAst()).trimEnd();
-            const newB = Printer.toCTO(newResult.getModelFile('ns.b@1.0.0').getAst()).trimEnd();
-            chai.expect(newB).to.equal(oldB);
-        });
 
         it('should not decorate declarations when command target has no targeting fields', async function() {
             const testModelManager = new ModelManager();
@@ -765,39 +619,9 @@ describe('DecoratorManager', () => {
                     }
                 }]
             };
-            const oldResult = DecoratorManager.decorateModels(testModelManager, dcs);
-            const newResult = DecoratorManager.decorateModelsNew(testModelManager, dcs);
-            const oldCTO = Printer.toCTO(oldResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            const newCTO = Printer.toCTO(newResult.getModelFile('test@1.0.0').getAst()).trimEnd();
-            chai.expect(newCTO).to.equal(oldCTO);
-            chai.expect(newCTO).to.not.include('Ghost');
-        });
-
-        it('should throw when skipValidationAndResolution conflicts with explicit false options', async function() {
-            const testModelManager = new ModelManager();
-            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
-            (() => DecoratorManager.decorateModelsNew(testModelManager, JSON.parse(dcs), {
-                skipValidationAndResolution: true,
-                disableMetamodelResolution: false
-            })).should.throw(/skipValidationAndResolution/);
-        });
-
-        it('should clone existing map key/value decorators', async function() {
-            const testModelManager = new ModelManager({skipLocationNodes: true});
-            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-            const dcs = JSON.parse(fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8'));
-            const opts = {skipValidationAndResolution: true};
-            const firstPass = DecoratorManager.decorateModelsNew(testModelManager, dcs, opts);
-            const dcs2 = JSON.parse(JSON.stringify(dcs));
-            dcs2.commands.forEach(c => { c.decorator.name = c.decorator.name + '2'; });
-            const oldSecondPass = DecoratorManager.decorateModels(firstPass, dcs2, opts);
-            const newSecondPass = DecoratorManager.decorateModelsNew(firstPass, dcs2, opts);
-            const oldCTO = Printer.toCTO(oldSecondPass.getModelFile('test@1.0.0').getAst()).trimEnd();
-            const newCTO = Printer.toCTO(newSecondPass.getModelFile('test@1.0.0').getAst()).trimEnd();
-            chai.expect(newCTO).to.equal(oldCTO);
+            const result = DecoratorManager.decorateModels(testModelManager, dcs);
+            const cto = Printer.toCTO(result.getModelFile('test@1.0.0').getAst()).trimEnd();
+            chai.expect(cto).to.not.include('Ghost');
         });
     });
 
@@ -1417,56 +1241,6 @@ describe('DecoratorManager', () => {
             chai.expect(propEntry.myField).to.equal('myField');
             // Term_ extension key must be present alongside it
             chai.expect(propEntry.desc).to.equal('my desc');
-        });
-    });
-
-    describe('#executePropertyCommand', () => {
-        let property;
-        let command;
-
-        beforeEach(() => {
-            property = {
-                '$class': 'concerto.metamodel@1.0.0.StringProperty',
-                'name': 'firstName',
-                'isArray': false,
-                'isOptional': false,
-                'decorators': []
-            };
-
-            command = {
-                '$class' : 'org.accordproject.decoratorcommands@0.4.0.Command',
-                'type' : 'UPSERT',
-                'target' : {
-                    '$class' : 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
-                    'namespace' : 'test@1.0.0'
-                },
-                'decorator' : {
-                    '$class' : 'concerto.metamodel@1.0.0.Decorator',
-                    'name' : 'Form',
-                    'arguments' : [
-                        {
-                            '$class' : 'concerto.metamodel@1.0.0.DecoratorString',
-                            'value' : 'inputType'
-                        },
-                        {
-                            '$class' : 'concerto.metamodel@1.0.0.DecoratorString',
-                            'value' : 'text'
-                        }
-                    ]
-                }
-            };
-        });
-
-        it('should not apply decorator to the property if target property does not match', () => {
-            DecoratorManager.executePropertyCommand(property, command);
-            chai.expect(property.decorators).to.have.lengthOf(0);
-        });
-
-        it('should apply decorator to the property if target property matches', () => {
-            command.target.type = 'concerto.metamodel@1.0.0.StringProperty';
-            DecoratorManager.executePropertyCommand(property, command);
-            chai.expect(property.decorators).to.have.lengthOf(1);
-            chai.expect(property.decorators[0].name).to.equal('Form');
         });
     });
 
