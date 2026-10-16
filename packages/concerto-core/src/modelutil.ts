@@ -131,11 +131,16 @@ class ModelUtil {
         }
 
         if (parts.length === 2 && !options?.disableVersionParsing) {
-            // Validate the version using semver
-            if (!semver.valid(parts[1])) {
+            const parsedVersion = semver.parse(parts[1]);
+            const canonicalVersion = parts[1].split('+')[0];
+            if (
+                !parsedVersion ||
+                parsedVersion.raw !== parts[1] ||
+                semver.valid(parts[1]) !== canonicalVersion
+            ) {
                 throw new Error(`Invalid namespace ${ns}`);
             }
-            version = semver.parse(parts[1]);
+            version = parsedVersion;
         }
 
         if (options?.disableVersionParsing) {
