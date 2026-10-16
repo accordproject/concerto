@@ -206,7 +206,7 @@ describe('ModelManager', () => {
 
             const bar = {
                 $class : 'org.acme@1.0.0.Bar',
-                foo : 'Ã°Å¸ËœÅ '
+                foo : '😊'
             };
 
             const factory = new Factory(modelManagerWithOptions);
