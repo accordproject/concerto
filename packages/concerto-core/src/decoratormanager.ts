@@ -406,7 +406,6 @@ class DecoratorManager {
         if (propertyCommands) {
             const byName = new Map<string, IndexedCommand[]>();
             const byType = new Map<string, IndexedCommand[]>();
-            const wildcards: IndexedCommand[] = [];
 
             for (const ic of propertyCommands) {
                 const { target } = ic.command;
@@ -424,8 +423,6 @@ class DecoratorManager {
                     let list = byType.get(target.type);
                     if (!list) { list = []; byType.set(target.type, list); }
                     list.push(ic);
-                } else {
-                    wildcards.push(ic);
                 }
             }
 
@@ -436,7 +433,6 @@ class DecoratorManager {
                 if (nameMatched) { matched.push(...nameMatched); }
                 const typeMatched = byType.get(property.$class);
                 if (typeMatched) { matched.push(...typeMatched); }
-                if (wildcards.length > 0) { matched.push(...wildcards); }
                 if (matched.length === 0) { continue; }
                 if (matched.length > 1) { matched.sort((a, b) => a.index - b.index); }
 

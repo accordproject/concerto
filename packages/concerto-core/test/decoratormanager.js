@@ -783,6 +783,22 @@ describe('DecoratorManager', () => {
                 disableMetamodelResolution: false
             })).should.throw(/skipValidationAndResolution/);
         });
+
+        it('should clone existing map key/value decorators', async function() {
+            const testModelManager = new ModelManager({skipLocationNodes: true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = JSON.parse(fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8'));
+            const opts = {skipValidationAndResolution: true};
+            const firstPass = DecoratorManager.decorateModelsNew(testModelManager, dcs, opts);
+            const dcs2 = JSON.parse(JSON.stringify(dcs));
+            dcs2.commands.forEach(c => { c.decorator.name = c.decorator.name + '2'; });
+            const oldSecondPass = DecoratorManager.decorateModels(firstPass, dcs2, opts);
+            const newSecondPass = DecoratorManager.decorateModelsNew(firstPass, dcs2, opts);
+            const oldCTO = Printer.toCTO(oldSecondPass.getModelFile('test@1.0.0').getAst()).trimEnd();
+            const newCTO = Printer.toCTO(newSecondPass.getModelFile('test@1.0.0').getAst()).trimEnd();
+            chai.expect(newCTO).to.equal(oldCTO);
+        });
     });
 
     describe('#validateCommand', function() {
