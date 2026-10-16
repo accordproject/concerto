@@ -107,17 +107,35 @@ function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
     return name === unversionedNamespace;
 }
 
+/**
+ * A decorator command paired with its original index in the flattened command list,
+ * used to preserve application order when commands are grouped by target.
+ * @private
+ */
 interface IndexedCommand {
     command: DecoratorCommand;
     index: number;
 }
 
+/**
+ * Commands grouped for a single namespace. Commands targeting a specific declaration
+ * go into byDeclaration; commands with no declaration target (wildcards) go into
+ * wildcardCommands and are applied to every declaration in the namespace.
+ * modelCommands target the namespace itself (e.g. namespace-level decorators).
+ * @private
+ */
 interface NamespaceBucket {
     modelCommands: IndexedCommand[];
     byDeclaration: Map<string, IndexedCommand[]>;
     wildcardCommands: IndexedCommand[];
 }
 
+/**
+ * Hierarchical index built from a flattened command list. Commands are bucketed
+ * first by namespace (or into wildcardNs if no namespace is specified), then
+ * within each namespace by declaration name or as wildcards.
+ * @private
+ */
 interface CommandIndex {
     byNamespace: Map<string, NamespaceBucket>;
     wildcardNs: NamespaceBucket;
@@ -199,6 +217,13 @@ class DecoratorManager {
     }
 
     /**
+     * Builds a hierarchical index from a flat list of decorator commands.
+     * Commands are bucketed by namespace, then by declaration name within
+     * each namespace. Commands with no namespace go into a wildcard bucket
+     * applied to all namespaces. Commands with no declaration go into a
+     * per-namespace wildcard list applied to all declarations.
+     * @param {DecoratorCommand[]} commands the flattened command list
+     * @returns {CommandIndex} the hierarchical command index
      * @private
      */
     private static buildCommandIndex(commands: DecoratorCommand[]): CommandIndex {
@@ -246,6 +271,11 @@ class DecoratorManager {
     }
 
     /**
+     * Applies a set of indexed commands to a single declaration. Handles map elements,
+     * type-targeted commands, property-targeted commands, and declaration-level commands.
+     * Property commands are indexed by name and type for O(1) lookup per property.
+     * @param {object} decl the declaration AST node (already cloned by the caller)
+     * @param {IndexedCommand[]} commands the commands to apply, pre-sorted by index
      * @private
      */
     private static applyCommandsToDeclaration(decl, commands: IndexedCommand[]) {
