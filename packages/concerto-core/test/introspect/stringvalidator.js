@@ -16,8 +16,11 @@
 
 const { Field } = require('../../src/introspect/field');
 const { StringValidator } = require('../../src/introspect/stringvalidator');
+const { IllegalModelException } = require('../../src/introspect/illegalmodelexception');
+const { ErrorCodes } = require('@accordproject/concerto-util');
 
 require('chai').should();
+const { expect } = require('chai');
 const sinon = require('sinon');
 const { NumberValidator } = require('../../src/introspect/numbervalidator');
 
@@ -41,21 +44,32 @@ describe('StringValidator', () => {
 
     beforeEach(() => {
         mockField = sinon.createStubInstance(Field);
+        mockField.getName.returns('myField');
         mockField.getFullyQualifiedName.returns('org.acme.myField');
     });
 
     describe('#constructor', () => {
 
-        it('should throw for invalid regexes', () => {
-            (() => {
-                new StringValidator(mockField, { pattern: '^[A-z' });
-            }).should.throw(/Validator error for field/);
+        it('should throw an IllegalModelException for invalid regexes', () => {
+            let err;
+            try { new StringValidator(mockField, { pattern: '^[A-z' }); } catch (e) { err = e; }
+            expect(err).to.be.instanceOf(IllegalModelException);
+            expect(err.errorType).to.equal(ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
+            expect(err.message).to.match(/Validator error for field `myField`/);
         });
 
         it('should throw for invalid string length', () => {
             (() => {
                 new StringValidator(mockField, { pattern: '^[A-z]' }, NO_PARMS_IN_AST);
             }).should.throw(/Invalid string length, minLength and-or maxLength must be specified/);
+        });
+
+        it('should throw an IllegalModelException for invalid string length', () => {
+            let err;
+            try { new StringValidator(mockField, { pattern: '^[A-z]' }, NO_PARMS_IN_AST); } catch (e) { err = e; }
+            expect(err).to.be.instanceOf(IllegalModelException);
+            expect(err.errorType).to.equal(ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION);
+            expect(err.message).to.match(/Validator error for field `myField`/);
         });
 
         it('should throw for string min length is bigger than max length', () => {
@@ -82,6 +96,18 @@ describe('StringValidator', () => {
             }).should.throw(/minLength and-or maxLength must be positive integers/);
         });
 
+        it('should throw an IllegalModelException when defaultValue length is less than minLength', () => {
+            mockField.ast = { defaultValue: 'abc' };
+            let err;
+            try {
+                new StringValidator(mockField, null, { minLength: 5, maxLength: 10 });
+            } catch (e) { err = e; }
+            expect(err).to.be.instanceOf(IllegalModelException);
+            expect(err.errorType).to.equal(ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION);
+            expect(err.message).to.match(/Validator error for field `myField`/);
+            expect(err.message).to.match(/The string length of 'abc' should be at least 5 characters/);
+        });
+
         it('should throw when defaultValue length is less than minLength', () => {
             mockField.ast = { defaultValue: 'abc' };
             (() => {
@@ -100,6 +126,27 @@ describe('StringValidator', () => {
                     maxLength: 5,
                 });
             }).should.throw(/The string length of 'abcdefgh' should not exceed 5 characters./);
+        });
+
+        it('should throw an IllegalModelException when defaultValue fails regex', () => {
+            mockField.ast = { defaultValue: 'b' };
+            let err;
+            try {
+                new StringValidator(mockField, { pattern: 'a' }, null);
+            } catch (e) { err = e; }
+            expect(err).to.be.instanceOf(IllegalModelException);
+            expect(err.errorType).to.equal(ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION);
+            expect(err.message).to.match(/Validator error for field `myField`/);
+            expect(err.message).to.match(/failed to match validation regex/);
+        });
+
+        it('should not throw for undefined bounds (e.g. AST loaded from JSON)', () => {
+            // When the AST is loaded from JSON/AST the bounds may be absent (undefined),
+            // which is different from explicitly null.  Neither bound being present is
+            // caught earlier by the parser; the validator must not crash here.
+            (() => {
+                new StringValidator(mockField, null, { minLength: undefined, maxLength: undefined });
+            }).should.throw(/Invalid string length, minLength and-or maxLength must be specified/);
         });
 
         it('should accept valid defaultValue that matches length and pattern constraints', () => {
@@ -131,7 +178,14 @@ describe('StringValidator', () => {
 
             (() => {
                 v.validate('id', 'xyz');
-            }).should.throw(/Validator error for field `id`. org.acme.myField/);
+            }).should.throw(/Validator error for field `myField` \(instance `id`\). org.acme.myField/);
+        });
+
+        it('should include field name even when instance id is undefined', () => {
+            let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}' });
+            let err;
+            try { v.validate(undefined, 'xyz'); } catch (e) { err = e; }
+            expect(err.message).to.match(/Validator error for field `myField`/);
         });
 
         it('should repeatedly validate a matching string with a global regex', () => {
@@ -145,10 +199,10 @@ describe('StringValidator', () => {
             let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}', flags: 'g' });
             (() => {
                 v.validate('id', 'xyz');
-            }).should.throw(/Validator error for field `id`. org.acme.myField/);
+            }).should.throw(/Validator error for field `myField` \(instance `id`\). org.acme.myField/);
             (() => {
                 v.validate('id', 'xyz');
-            }).should.throw(/Validator error for field `id`. org.acme.myField/);
+            }).should.throw(/Validator error for field `myField` \(instance `id`\). org.acme.myField/);
         });
 
         it('should not leave lastIndex set on the regex it exposes', () => {
@@ -173,7 +227,7 @@ describe('StringValidator', () => {
             let v = new StringValidator(mockField, { pattern: '^[\\\\]*\\n$' });
             (() => {
                 v.validate('id', '\\hi!\n');
-            }).should.throw(/Validator error for field `id`. org.acme.myField/);
+            }).should.throw(/Validator error for field `myField` \(instance `id`\). org.acme.myField/);
         });
 
         it('should validate a unicode string', () => {
@@ -185,7 +239,7 @@ describe('StringValidator', () => {
             let v = new StringValidator(mockField, { pattern: '^(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$', flags: 'u' });
             (() => {
                 v.validate('id', '1FOO');
-            }).should.throw(/Validator error for field `id`. org.acme.myField/);
+            }).should.throw(/Validator error for field `myField` \(instance `id`\). org.acme.myField/);
         });
 
         it('should validate a string', () => {

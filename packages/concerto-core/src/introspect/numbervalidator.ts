@@ -62,23 +62,23 @@ class NumberValidator extends Validator{
 
         if(this.lowerBound === null && this.upperBound === null) {
             // can't specify no upper and lower value
-            this.reportError(null, 'Invalid range, lower and-or upper bound must be specified.');
+            this.reportModelError('Invalid range, lower and-or upper bound must be specified.');
         } else if (this.lowerBound === null || this.upperBound === null) {
             // this is fine and means that we don't need to check whether upper > lower
         } else {
             if(this.lowerBound > this.upperBound) {
-                this.reportError(null, 'Lower bound must be less than or equal to upper bound.');
+                this.reportModelError('Lower bound must be less than or equal to upper bound.');
             }
         }
 
-        if(this.field?.ast?.defaultValue !== undefined) {
+        if (this.field?.ast?.defaultValue !== undefined) {
             let value = this.field.ast.defaultValue;
-            if(this.lowerBound !== null && value < this.lowerBound) {
-                this.reportError(null, `Value ${value} is outside lower bound ${this.lowerBound}`);
+            if (this.lowerBound !== null && value < this.lowerBound) {
+                this.reportModelError(`Value ${value} is outside lower bound ${this.lowerBound}`);
             }
 
-            if(this.upperBound !== null && value > this.upperBound) {
-                this.reportError(null, `Value ${value} is outside upper bound ${this.upperBound}`);
+            if (this.upperBound !== null && value > this.upperBound) {
+                this.reportModelError(`Value ${value} is outside upper bound ${this.upperBound}`);
             }
         }
     }
@@ -106,13 +106,13 @@ class NumberValidator extends Validator{
      * @private
      */
     validate(identifier: string | null, value: number): void {
-        if(value !== null) {
-            if(this.lowerBound !== null && value < this.lowerBound) {
-                this.reportError(identifier, `Value ${value} is outside lower bound ${this.lowerBound}`);
+        if (value !== null) {
+            if (this.lowerBound !== null && value < this.lowerBound) {
+                this.reportValidationError(identifier, `Value ${value} is outside lower bound ${this.lowerBound}`);
             }
 
-            if(this.upperBound !== null && value > this.upperBound) {
-                this.reportError(identifier, `Value ${value} is outside upper bound ${this.upperBound}`);
+            if (this.upperBound !== null && value > this.upperBound) {
+                this.reportValidationError(identifier, `Value ${value} is outside upper bound ${this.upperBound}`);
             }
         }
     }

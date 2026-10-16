@@ -48,6 +48,12 @@ function getCTOFiles() {
 }
 
 describe('parser', () => {
+    it('Should not parse a length validator with no bounds', () => {
+        (() => {
+            Parser.parse('namespace t@1.0.0\nconcept A { o String x length=[,] }');
+        }).should.throw();
+    });
+
     getCTOFiles().forEach(({ file, content, ast }) => {
         it(`Should parse ${file}`, () => {
             const mm = Parser.parse(content, undefined, { skipLocationNodes: true });

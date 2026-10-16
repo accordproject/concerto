@@ -935,6 +935,10 @@ function peg$parse(input, options) {
    	return regex
   };
   var peg$f83 = function(minLength, maxLength) {
+    if (!minLength && !maxLength) {
+      error('At least one length bound must be specified');
+    }
+
     const result = {
       $class: `${metamodelNamespace}.StringLengthValidator`
     };
@@ -944,7 +948,7 @@ function peg$parse(input, options) {
     if (maxLength) {
       result.maxLength = parseInt(maxLength);
     }
-   	return result;
+    return result;
   };
   var peg$f84 = function(minSize, maxSize) {
     const result = {

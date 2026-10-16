@@ -24,6 +24,7 @@ describe('CollectionSizeValidator', () => {
     const mockField = {
         getName: () => 'testField',
         getFullyQualifiedName: () => 'org.example.Thing.testField',
+        getModelFile: () => undefined,
     };
 
     describe('#constructor', () => {
