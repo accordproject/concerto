@@ -263,6 +263,51 @@ describe('Serializer', () => {
             (() => {
                 serializer.fromJSON({});
             }).should.throw(/Does not contain a \$class type identifier/);
+            (() => {
+                serializer.fromJSON({ $class: '' });
+            }).should.throw(/Does not contain a \$class type identifier/);
+            (() => {
+                serializer.fromJSON({ $class: null });
+            }).should.throw(/Does not contain a \$class type identifier/);
+        });
+
+        it('should throw if $class is not a string', () => {
+            let serializer = new Serializer(factory, modelManager);
+            (() => {
+                serializer.fromJSON({ $class: 42 });
+            }).should.throw(Error, 'Invalid JSON data. $class must be a string, found number: 42');
+            (() => {
+                serializer.fromJSON({ $class: [1, 2] });
+            }).should.throw(Error, 'Invalid JSON data. $class must be a string, found array: [1,2]');
+            (() => {
+                serializer.fromJSON({ $class: false });
+            }).should.throw(Error, 'Invalid JSON data. $class must be a string, found boolean: false');
+        });
+
+        it('should throw ValidationException if a concept array holds null or non-object in fromJSON', () => {
+            modelManager.addCTOModel(`namespace org.acme.conceptarray@1.0.0
+            concept Addr { o String s }
+            concept R { o Addr[] as }`);
+            let serializer = new Serializer(factory, modelManager);
+            (() => {
+                serializer.fromJSON({ $class: 'org.acme.conceptarray@1.0.0.R', as: [null] });
+            }).should.throw(ValidationException, /Expected value at path `\$\.as\[0\]` to be of type `Addr`/);
+            (() => {
+                serializer.fromJSON({ $class: 'org.acme.conceptarray@1.0.0.R', as: [42] });
+            }).should.throw(ValidationException, /Expected value at path `\$\.as\[0\]` to be of type `Addr`/);
+        });
+
+        it('should throw ValidationException if a concept field holds a non-object in fromJSON', () => {
+            modelManager.addCTOModel(`namespace org.acme.singleconcept@1.0.0
+            concept Addr { o String s }
+            concept R { o Addr a }`);
+            let serializer = new Serializer(factory, modelManager);
+            (() => {
+                serializer.fromJSON({ $class: 'org.acme.singleconcept@1.0.0.R', a: 42 });
+            }).should.throw(ValidationException, /Expected value at path `\$\.a` to be of type `Addr`/);
+            (() => {
+                serializer.fromJSON({ $class: 'org.acme.singleconcept@1.0.0.R', a: { $class: 42 } });
+            }).should.throw(Error, 'Invalid JSON data. $class must be a string, found number: 42');
         });
 
         it('should throw if the class declaration cannot be found', () => {

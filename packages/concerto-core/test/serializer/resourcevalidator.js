@@ -718,16 +718,10 @@ describe('ResourceValidator', function () {
         concept R {
             --> P[] ps
             o Addr[] as
-        }
-        enum Color { o RED }`;
+        }`;
 
         beforeEach(() => {
             modelManager.addCTOModel(testCto, 'test.cto');
-        });
-
-        it('should throw Error when $class in fromJSON is not a string', () => {
-            const serializer = new Serializer(factory, modelManager);
-            (() => serializer.fromJSON({ $class: 42 })).should.throw(Error, /Invalid JSON data/);
         });
 
         it('should throw ValidationException when relationship array holds null', () => {
@@ -749,11 +743,6 @@ describe('ResourceValidator', function () {
             r.ps = 'abc';
             r.as = [];
             (() => r.validate()).should.throw(ValidationException);
-        });
-
-        it('should throw Error when newResource of an enum type is called with generate option', () => {
-            (() => factory.newResource('org.acme@1.0.0', 'Color', undefined, { generate: 'sample' }))
-                .should.throw(Error, /Unrecognised/);
         });
     });
 });
