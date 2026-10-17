@@ -1339,5 +1339,27 @@ concept Bar {
 
             visitedDeclarations.should.deep.equal(['org.acme@1.0.0.Person']);
         });
+
+        it('should not treat user namespaces starting with "concerto." as internal', () => {
+            modelManager.addCTOModel(`namespace concerto.scalar@1.0.0
+            concept Measurement { o String unit }
+            concept Temperature extends Measurement {}`, 'concerto.scalar.cto');
+
+            modelManager.addCTOModel(`namespace org.acme@1.0.0
+            import concerto.scalar@1.0.0.{Measurement, Temperature}
+            concept Reading {
+                o Measurement m
+            }`, 'acme.cto');
+
+            const filtered = modelManager.filter(
+                decl => ['org.acme@1.0.0.Reading', 'concerto.scalar@1.0.0.Measurement'].includes(decl.getFullyQualifiedName())
+            );
+
+            filtered.validateModelFiles();
+
+            const scalarFile = filtered.getModelFile('concerto.scalar@1.0.0');
+            scalarFile.getAllDeclarations().length.should.equal(1);
+            scalarFile.getAllDeclarations()[0].getName().should.equal('Measurement');
+        });
     });
 });
