@@ -219,7 +219,22 @@ class ClassDeclaration extends Declaration {
                     'class': this.name,
                 }), this.modelFile, this.ast.location);
             }
-            this._resolveSuperType();
+            const superDecl = this._resolveSuperType();
+            if (superDecl) {
+                const visited = new Set<string>([this.getFullyQualifiedName()]);
+                let currentSuper: ClassDeclaration | null = superDecl;
+                while (currentSuper) {
+                    const superFqn = currentSuper.getFullyQualifiedName();
+                    if (visited.has(superFqn)) {
+                        let formatter = Globalize('en').messageFormatter('classdeclaration-validate-circularinheritance');
+                        throw new IllegalModelException(formatter({
+                            'class': currentSuper.getName(),
+                        }), this.modelFile, this.ast.location);
+                    }
+                    visited.add(superFqn);
+                    currentSuper = currentSuper.getSuperTypeDeclaration();
+                }
+            }
         }
 
         if (this.idField) {
@@ -344,9 +359,10 @@ class ClassDeclaration extends Declaration {
      * Returns the name of the identifying field for this class. Note
      * that the identifying field may come from a super type.
      *
+     * @param {Set<string>} [visited] internal set of visited class names to prevent infinite recursion
      * @return {string} the name of the id field for this class or null if it does not exist
      */
-    getIdentifierFieldName(): string | null {
+    getIdentifierFieldName(visited?: Set<string>): string | null {
         if (this.idField) {
             return this.idField;
         } else {
@@ -361,7 +377,15 @@ class ClassDeclaration extends Declaration {
                 if (!classDecl) {
                     classDecl = this.modelFile.getModelManager().getType(superType);
                 }
-                return classDecl!.getIdentifierFieldName();
+                if (classDecl) {
+                    const visitedSet = visited ?? new Set<string>([this.getFullyQualifiedName()]);
+                    const superFqn = classDecl.getFullyQualifiedName();
+                    if (!visitedSet.has(superFqn)) {
+                        visitedSet.add(superFqn);
+                        return (classDecl as ClassDeclaration).getIdentifierFieldName(visitedSet);
+                    }
+                }
+                return null;
             } else {
                 return null;
             }
@@ -452,11 +476,13 @@ class ClassDeclaration extends Declaration {
         // Recursive function to collect all direct and indirect subclasses of a given (set) of base classes.
         const collectSubclasses = (superclasses) => {
             superclasses.forEach((declaration) => {
-                results.add(declaration);
-                const superType = declaration.getFullyQualifiedName();
-                const subclasses = subclassMap.get(superType);
-                if (subclasses) {
-                    collectSubclasses(subclasses);
+                if (!results.has(declaration)) {
+                    results.add(declaration);
+                    const superType = declaration.getFullyQualifiedName();
+                    const subclasses = subclassMap.get(superType);
+                    if (subclasses) {
+                        collectSubclasses(subclasses);
+                    }
                 }
             });
         };
@@ -501,8 +527,14 @@ class ClassDeclaration extends Declaration {
      */
     getAllSuperTypeDeclarations(): ClassDeclaration[] {
         const results: ClassDeclaration[] = [];
+        const seen = new Set<string>([this.getFullyQualifiedName()]);
         for (let type: ClassDeclaration | null = this;
             (type = type.getSuperTypeDeclaration());) {
+            const fqn = type.getFullyQualifiedName();
+            if (seen.has(fqn)) {
+                break;
+            }
+            seen.add(fqn);
             results.push(type);
         }
 
@@ -514,9 +546,10 @@ class ClassDeclaration extends Declaration {
      * Fields defined in super-types are also introspected.
      *
      * @param {string} name the name of the field
+     * @param {Set<string>} [visited] internal set of visited class names to prevent infinite recursion
      * @return {Property} the field, or null if it does not exist
      */
-    getProperty(name: string): Property | null {
+    getProperty(name: string, visited?: Set<string>): Property | null {
         let result = this.getOwnProperty(name);
         let classDecl: ClassDeclaration;
 
@@ -527,7 +560,14 @@ class ClassDeclaration extends Declaration {
             } else {
                 classDecl = this.getModelFile().getType(this.superType);
             }
-            result = classDecl.getProperty(name);
+            if (classDecl) {
+                const visitedSet = visited ?? new Set<string>([this.getFullyQualifiedName()]);
+                const superFqn = classDecl.getFullyQualifiedName();
+                if (!visitedSet.has(superFqn)) {
+                    visitedSet.add(superFqn);
+                    result = classDecl.getProperty(name, visitedSet);
+                }
+            }
         }
 
         return result;
@@ -536,9 +576,10 @@ class ClassDeclaration extends Declaration {
     /**
      * Returns the properties defined in this class and all super classes.
      *
+     * @param {Set<string>} [visited] internal set of visited class names to prevent infinite recursion
      * @return {Property[]} the array of fields
      */
-    getProperties(): Property[] {
+    getProperties(visited?: Set<string>): Property[] {
         let result = this.getOwnProperties();
         let classDecl: ClassDeclaration;
         if (this.superType !== null) {
@@ -557,7 +598,12 @@ class ClassDeclaration extends Declaration {
             // Note: this allows addition of an $identifier field from a supertype
             // even if this type is explicitly identified.
             // We allow this because it allows normalization of identifier lookup without the model present
-            result = result.concat(classDecl.getProperties());
+            const visitedSet = visited ?? new Set<string>([this.getFullyQualifiedName()]);
+            const superFqn = classDecl.getFullyQualifiedName();
+            if (!visitedSet.has(superFqn)) {
+                visitedSet.add(superFqn);
+                result = result.concat(classDecl.getProperties(visitedSet));
+            }
         }
 
         return result;

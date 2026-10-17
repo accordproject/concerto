@@ -97,6 +97,85 @@ describe('ClassDeclaration', () => {
             const clazz = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.scalararray.cto', ConceptDeclaration);
             clazz.validate();
         });
+
+        it('should throw when circular inheritance is detected (2 classes)', () => {
+            (() => {
+                modelManager.addCTOModel(`
+                    namespace com.testing@1.0.0
+                    concept A extends B {}
+                    concept B extends A {}
+                `);
+            }).should.throw(/Circular inheritance detected for class "(A|B)"/);
+        });
+
+        it('should throw when circular inheritance is detected (3 classes)', () => {
+            (() => {
+                modelManager.addCTOModel(`
+                    namespace com.testing@1.0.0
+                    concept A extends B {}
+                    concept B extends C {}
+                    concept C extends A {}
+                `);
+            }).should.throw(/Circular inheritance detected for class "(A|B|C)"/);
+        });
+
+        it('should throw when circular inheritance occurs across namespaces', () => {
+            (() => {
+                modelManager.addModelFiles([
+                    `namespace org.a@1.0.0
+                    import org.b@1.0.0.B
+                    concept A extends B {}`,
+                    `namespace org.b@1.0.0
+                    import org.a@1.0.0.A
+                    concept B extends A {}`,
+                ]);
+            }).should.throw(/Circular inheritance detected for class "(A|B)"/);
+        });
+
+        it('should throw when inheriting from a class involved in a circular inheritance hierarchy', () => {
+            (() => {
+                modelManager.addCTOModel(`
+                    namespace com.testing@1.0.0
+                    concept D extends A {}
+                    concept A extends B {}
+                    concept B extends A {}
+                `);
+            }).should.throw(/Circular inheritance detected for class "(A|B)"/);
+        });
+
+        it('should throw when class directly extends itself', () => {
+            const clz = new ConceptDeclaration(modelFile, {
+                name: 'Self',
+                superType: {
+                    name: 'Self'
+                },
+                properties: []
+            });
+            (() => {
+                clz.validate();
+            }).should.throw(/Class "Self" cannot extend itself\./);
+        });
+    });
+
+    describe('#circularInheritanceSafety', () => {
+        it('should handle circular inheritance safely without stack overflow', () => {
+            const mf = modelManager.addCTOModel(`
+                namespace com.testing@1.0.0
+                concept A extends B {
+                    o String propA
+                }
+                concept B extends A {
+                    o String propB
+                }
+            `, 'cyclic.cto', true);
+            const a = mf.getType('A');
+
+            a.getAllSuperTypeDeclarations().map(x => x.getName()).should.deep.equal(['B']);
+            a.getProperties().map(p => p.getName()).should.deep.equal(['propA', 'propB']);
+            a.getProperty('propB').getName().should.equal('propB');
+            should.not.exist(a.getIdentifierFieldName());
+            a.getAssignableClassDeclarations().map(x => x.getName()).should.deep.equal(['A', 'B']);
+        });
     });
 
     describe('#accept', () => {
