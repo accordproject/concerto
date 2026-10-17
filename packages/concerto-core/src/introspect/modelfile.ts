@@ -911,7 +911,7 @@ class ModelFile extends Decorated {
 
             ast.imports = ast.imports.filter(imp => {
                 const ns = imp.namespace;
-                if (ns.startsWith('concerto@') || ns === 'concerto' || ns.startsWith('concerto.')) {
+                if (ns.startsWith('concerto@') || ns === 'concerto' || ns.startsWith('concerto.decorator@') || ns === 'concerto.decorator') {
                     return true;
                 }
 
