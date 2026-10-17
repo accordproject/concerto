@@ -155,8 +155,13 @@ class Serializer {
         // set default options
         options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
 
-        if(!jsonObject?.$class || typeof jsonObject.$class !== 'string') {
+        if (!jsonObject || !('$class' in jsonObject) || jsonObject.$class === null || jsonObject.$class === undefined || jsonObject.$class === '') {
             throw new Error('Invalid JSON data. Does not contain a $class type identifier.');
+        }
+
+        if (typeof jsonObject.$class !== 'string') {
+            const foundType = Array.isArray(jsonObject.$class) ? 'array' : typeof jsonObject.$class;
+            throw new Error(`Invalid JSON data. $class must be a string, found ${foundType}: ${JSON.stringify(jsonObject.$class)}`);
         }
 
         const classDeclaration = this.modelManager.getType(jsonObject.$class);
