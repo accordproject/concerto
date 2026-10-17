@@ -395,7 +395,13 @@ class DecoratorManager {
             const factory = new Factory(validationModelManager);
             const serializer = new Serializer(factory, validationModelManager);
             decoratorCommandSets.forEach((commandSet) => {
-                serializer.fromJSON(commandSet);
+                const resource = serializer.fromJSON(commandSet);
+                const expectedType = 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet';
+                if (resource.getFullyQualifiedType() !== expectedType) {
+                    throw new Error(
+                        `Expected a DecoratorCommandSet, received "${commandSet.$class}".`
+                    );
+                }
                 if (shouldValidateCommands) {
                     commandSet.commands.forEach((command) => {
                         DecoratorManager.validateCommand(
