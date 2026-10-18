@@ -1,0 +1,9 @@
+namespace org.example@1.0.0
+
+abstract concept A {
+  o String a
+}
+
+abstract concept B extends A {
+  o String b
+}

@@ -54,9 +54,29 @@ export const hasConcreteSubclass: IFunction = (
         }
     }
 
+    // Map child declaration name to superType name
+    const superTypeMap = new Map<string, string>();
     for (const decl of allDeclarations) {
-        if (decl && !decl.isAbstract && decl.superType && typeof decl.superType.name === 'string') {
-            abstractNames.delete(decl.superType.name);
+        if (decl && typeof decl.name === 'string' && decl.superType && typeof decl.superType.name === 'string') {
+            superTypeMap.set(decl.name, decl.superType.name);
+        }
+    }
+
+    // For every concrete declaration, walk up the inheritance chain and remove all ancestor abstract declarations
+    for (const decl of allDeclarations) {
+        if (decl && !decl.isAbstract && typeof decl.name === 'string') {
+            let current = decl.name;
+            const visited = new Set<string>();
+            while (superTypeMap.has(current) && !visited.has(current)) {
+                visited.add(current);
+                const parentName = superTypeMap.get(current);
+                if (parentName) {
+                    abstractNames.delete(parentName);
+                    current = parentName;
+                } else {
+                    break;
+                }
+            }
         }
     }
     if (abstractNames.size > 0) {
