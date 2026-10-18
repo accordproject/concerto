@@ -15,6 +15,32 @@
 import { ComparerFactory } from '../comparer';
 import { getValidatorType } from '../compare-utils';
 
+const scalarDeclarationAdded: ComparerFactory = (context) => ({
+    compareScalarDeclaration: (a, b) => {
+        if (a || !b) {
+            return;
+        }
+        context.report({
+            key: 'scalar-declaration-added',
+            message: `The scalar "${b.getName()}" was added`,
+            element: b
+        });
+    }
+});
+
+const scalarDeclarationRemoved: ComparerFactory = (context) => ({
+    compareScalarDeclaration: (a, b) => {
+        if (!a || b) {
+            return;
+        }
+        context.report({
+            key: 'scalar-declaration-removed',
+            message: `The scalar "${a.getName()}" was removed`,
+            element: a
+        });
+    }
+});
+
 const scalarDeclarationExtendsChanged: ComparerFactory = (context) => ({
     compareScalarDeclaration: (a, b) => {
 
@@ -100,4 +126,4 @@ const scalarDefaultValueChanged: ComparerFactory = (context) => ({
     }
 });
 
-export const scalarDeclarationComparerFactories = [scalarDeclarationExtendsChanged, scalarValidatorChanged, scalarDefaultValueChanged];
+export const scalarDeclarationComparerFactories = [scalarDeclarationAdded, scalarDeclarationRemoved, scalarDeclarationExtendsChanged, scalarValidatorChanged, scalarDefaultValueChanged];

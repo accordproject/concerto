@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { ClassDeclaration, Declaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
+import { ClassDeclaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
 import { CompareConfig, CompareResult, defaultCompareConfig } from './compare-config';
 import { CompareFinding, CompareResults } from './compare-results';
 import { Comparer } from './comparer';
@@ -83,15 +83,15 @@ export class Compare {
         return a.filter(aItem => !b.some(bItem => aItem.getName() === bItem.getName()));
     }
 
-    private getAddedClassDeclarations(a: Declaration[], b: Declaration[]): Declaration[] {
+    private getAddedClassDeclarations(a: ClassDeclaration[], b: ClassDeclaration[]): ClassDeclaration[] {
         return b.filter(bItem => !a.some(aItem => bItem.getName() === aItem.getName()));
     }
 
-    private getMatchingClassDeclarations(a: Declaration[], b: Declaration[]): [a: Declaration, b: Declaration][] {
-        return a.map(aItem => [aItem, b.find(bItem => aItem.getName() === bItem.getName())]).filter(([, b]) => !!b) as [Declaration, Declaration][];
+    private getMatchingClassDeclarations(a: ClassDeclaration[], b: ClassDeclaration[]): [a: ClassDeclaration, b: ClassDeclaration][] {
+        return a.map(aItem => [aItem, b.find(bItem => aItem.getName() === bItem.getName())]).filter(([, b]) => !!b) as [ClassDeclaration, ClassDeclaration][];
     }
 
-    private getRemovedClassDeclarations(a: Declaration[], b: Declaration[]): Declaration[] {
+    private getRemovedClassDeclarations(a: ClassDeclaration[], b: ClassDeclaration[]): ClassDeclaration[] {
         return a.filter(aItem => !b.some(bItem => aItem.getName() === bItem.getName()));
     }
 
@@ -113,18 +113,12 @@ export class Compare {
         removed.forEach(a => comparers.forEach(comparer => comparer.compareScalarDeclaration?.(a, undefined)));
     }
 
-
-    private compareClassDeclaration(comparers: Comparer[], a: Declaration, b: Declaration) {
+    private compareClassDeclaration(comparers: Comparer[], a: ClassDeclaration, b: ClassDeclaration) {
         comparers.forEach(comparer => comparer.compareClassDeclaration?.(a, b));
-        // ClassDeclaration is the only kind of declaration that owns properties: map and
-        // scalar declarations have none, so there is nothing further to compare for them.
-        if(!(a instanceof ClassDeclaration) || !(b instanceof ClassDeclaration)) {
-            return;
-        }
         this.compareProperties(comparers, a.getOwnProperties(), b.getOwnProperties());
     }
 
-    private compareClassDeclarations(comparers: Comparer[], a: Declaration[], b: Declaration[]) {
+    private compareClassDeclarations(comparers: Comparer[], a: ClassDeclaration[], b: ClassDeclaration[]) {
         const added = this.getAddedClassDeclarations(a, b);
         const matching = this.getMatchingClassDeclarations(a, b);
         const removed = this.getRemovedClassDeclarations(a, b);
@@ -135,9 +129,7 @@ export class Compare {
 
     private compareModelFiles(comparers: Comparer[], a: ModelFile, b: ModelFile) {
         comparers.forEach(comparer => comparer.compareModelFiles?.(a, b));
-        // every declaration is put through the class declaration comparers; map and
-        // scalar declarations are additionally compared by the calls below
-        this.compareClassDeclarations(comparers, a.getAllDeclarations(), b.getAllDeclarations());
+        this.compareClassDeclarations(comparers, a.getClassDeclarations(), b.getClassDeclarations());
         this.compareMapDeclarations(comparers, a.getMapDeclarations(), b.getMapDeclarations());
         this.compareScalarDeclarations(comparers, a.getScalarDeclarations(), b.getScalarDeclarations());
     }
