@@ -330,15 +330,27 @@ class VocabularyManager {
         const CLASS_TARGET = `${DC_NAMESPACE}.CommandTarget`;
         const CLASS_DECORATOR = `${MetaModelNamespace}.Decorator`;
         const CLASS_DECORATOR_STRING = `${MetaModelNamespace}.DecoratorString`;
+        const CLASS_DECORATOR_NUMBER = `${MetaModelNamespace}.DecoratorNumber`;
+        const CLASS_DECORATOR_BOOLEAN = `${MetaModelNamespace}.DecoratorBoolean`;
 
-        const makeCommand = (target: any, decoratorName: string, value: string) => ({
+        const makeArgument = (value: any) => {
+            if (typeof value === 'number') {
+                return { '$class': CLASS_DECORATOR_NUMBER, 'value': value };
+            }
+            if (typeof value === 'boolean') {
+                return { '$class': CLASS_DECORATOR_BOOLEAN, 'value': value };
+            }
+            return { '$class': CLASS_DECORATOR_STRING, 'value': String(value) };
+        };
+
+        const makeCommand = (target: any, decoratorName: string, value: any) => ({
             '$class': CLASS_COMMAND,
             'type': 'UPSERT',
             'target': target,
             'decorator': {
                 '$class': CLASS_DECORATOR,
                 'name': decoratorName,
-                'arguments': [{ '$class': CLASS_DECORATOR_STRING, 'value': value }]
+                'arguments': [makeArgument(value)]
             }
         });
 

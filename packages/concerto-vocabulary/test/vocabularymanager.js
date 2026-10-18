@@ -498,6 +498,88 @@ declarations:
         ssnDecorator.getArguments()[0].should.equal('SSN');
     });
 
+    it('generateDecoratorCommands - preserves number and boolean types in decorator arguments', () => {
+        const cto = `namespace org.typed@1.0.0
+concept Widget {
+    o String name
+}
+`;
+        const voc = `locale: en
+namespace: org.typed@1.0.0
+term: Typed Namespace
+sortOrder: 10
+featured: true
+declarations:
+  - Widget: A Widget Concept
+    priority: 1
+    isActive: false
+    properties:
+      - name: Widget Name
+        maxLength: 256
+        required: true
+`;
+        const mm = new ModelManager();
+        mm.addCTOModel(cto);
+        const vm = new VocabularyManager();
+        vm.addVocabulary(voc);
+        const commandSet = vm.generateDecoratorCommands(mm, 'en');
+
+        // Check namespace level commands
+        const nsCommands = commandSet.commands.filter(c => !c.target.declaration && !c.target.property);
+        const nsTerm = nsCommands.find(c => c.decorator.name === 'Term');
+        nsTerm.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorString');
+        nsTerm.decorator.arguments[0].value.should.equal('Typed Namespace');
+
+        const nsSort = nsCommands.find(c => c.decorator.name === 'Term_sortOrder');
+        nsSort.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+        nsSort.decorator.arguments[0].value.should.equal(10);
+
+        const nsFeatured = nsCommands.find(c => c.decorator.name === 'Term_featured');
+        nsFeatured.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
+        nsFeatured.decorator.arguments[0].value.should.equal(true);
+
+        // Check declaration level commands
+        const declCommands = commandSet.commands.filter(c => c.target.declaration === 'Widget' && !c.target.property);
+        const declTerm = declCommands.find(c => c.decorator.name === 'Term');
+        declTerm.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorString');
+        declTerm.decorator.arguments[0].value.should.equal('A Widget Concept');
+
+        const declPriority = declCommands.find(c => c.decorator.name === 'Term_priority');
+        declPriority.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+        declPriority.decorator.arguments[0].value.should.equal(1);
+
+        const declIsActive = declCommands.find(c => c.decorator.name === 'Term_isActive');
+        declIsActive.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
+        declIsActive.decorator.arguments[0].value.should.equal(false);
+
+        // Check property level commands
+        const propCommands = commandSet.commands.filter(c => c.target.declaration === 'Widget' && c.target.property === 'name');
+        const propTerm = propCommands.find(c => c.decorator.name === 'Term');
+        propTerm.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorString');
+        propTerm.decorator.arguments[0].value.should.equal('Widget Name');
+
+        const propMaxLength = propCommands.find(c => c.decorator.name === 'Term_maxLength');
+        propMaxLength.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+        propMaxLength.decorator.arguments[0].value.should.equal(256);
+
+        const propRequired = propCommands.find(c => c.decorator.name === 'Term_required');
+        propRequired.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
+        propRequired.decorator.arguments[0].value.should.equal(true);
+
+        // Decorate models and verify types in the decorated AST
+        const decoratedMm = DecoratorManager.decorateModels(mm, commandSet, { validate: true, migrate: true, validateCommands: true });
+        const decoratedMf = decoratedMm.getModelFile('org.typed@1.0.0');
+        const widgetDecl = decoratedMf.getLocalType('Widget');
+        widgetDecl.getDecorator('Term').getArguments()[0].should.equal('A Widget Concept');
+        widgetDecl.getDecorator('Term_priority').getArguments()[0].should.equal(1);
+        widgetDecl.getDecorator('Term_isActive').getArguments()[0].should.equal(false);
+
+        const nameProp = widgetDecl.getProperty('name');
+        nameProp.getDecorator('Term').getArguments()[0].should.equal('Widget Name');
+        nameProp.getDecorator('Term_maxLength').getArguments()[0].should.equal(256);
+        nameProp.getDecorator('Term_required').getArguments()[0].should.equal(true);
+    });
+
     it('addVocabulary - preserves flow-style collections as strings', () => {
         const yaml = `locale: en
 namespace: org.test@1.0.0
