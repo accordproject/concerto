@@ -108,7 +108,7 @@ class MapValueType extends Decorated {
         case `${MetaModelNamespace}.RelationshipMapValueType`:
 
             // ObjectMapValueType must have TypeIdentifier.
-            if (!('type' in ast)) {
+            if (!('type' in ast) || !ast.type) {
                 throw new IllegalModelException(`ObjectMapValueType must contain property 'type', for MapDeclaration named ${this.parent.name}`);
             }
 
