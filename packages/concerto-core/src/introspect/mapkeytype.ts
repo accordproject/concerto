@@ -71,11 +71,18 @@ class MapKeyType extends Decorated {
      */
     validate() {
         if (!ModelUtil.isPrimitiveType(this.type)) {
-            const decl = this.modelFile.getType(this.ast.type.name);
+            this.modelFile.resolveType(
+                `the key of map ${this.parent.getFullyQualifiedName()}`,
+                this.type
+            );
+
+            const decl = this.modelFile.getType(this.type);
             // All but StringScalar & DateTimeScalar are unsupported.
-            if  (!ModelUtil.isValidMapKeyScalar(decl)) {
+            if (!ModelUtil.isValidMapKeyScalar(decl)) {
                 throw new IllegalModelException(
-                    `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}, for MapDeclaration ${this.parent.name}`
+                    `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}, for MapDeclaration ${this.parent.name}`,
+                    this.modelFile,
+                    this.ast.location
                 );
             }
         }
@@ -96,6 +103,21 @@ class MapKeyType extends Decorated {
             this.type = 'String';
             break;
         case `${MetaModelNamespace}.ObjectMapKeyType`:
+            // ObjectMapKeyType must have TypeIdentifier.
+            if (!('type' in ast) || !ast.type) {
+                throw new IllegalModelException(`ObjectMapKeyType must contain property 'type', for MapDeclaration named ${this.parent.name}`);
+            }
+
+            // ObjectMapKeyType TypeIdentifier must be properly formed.
+            if (!('$class' in ast.type) || !('name' in ast.type)) {
+                throw new IllegalModelException(`ObjectMapKeyType type must contain property '$class' and property 'name', for MapDeclaration named ${this.parent.name}`);
+            }
+
+            // And the $class must be valid.
+            if (ast.type.$class !== 'concerto.metamodel@1.0.0.TypeIdentifier') {
+                throw new IllegalModelException(`ObjectMapKeyType type $class must be of TypeIdentifier for MapDeclaration named ${this.parent.name}`);
+            }
+
             this.type = String(this.ast.type.name);
             break;
         }
