@@ -40,6 +40,10 @@ The linter provide the lintModel function which provides a robust and efficient 
 
 - **Custom Ruleset Flexibility**: Enables the use of a custom Spectral ruleset by allowing you to specify its file path for tailored linting rules.
 
+### Compatibility Context
+
+- **Compatibility-aware linting**: Supports `dangerouslyAllowReservedSystemTypeNamesInUserModels` so the linter can warn when reserved system concept names are used in risky compatibility modes.
+
 ### Namespace Filtering
 
 - **Namespace Filtering**: Filters linting results by namespace, with configurable exclusion patterns. By default, excludes `'concerto.*'` and `'org.accordproject.*'` namespaces.
@@ -85,7 +89,7 @@ const ast = modelManager.getAst();
 ```
 ## Ruleset Configuration
 
-The concerto Linter provides flexible `ruleset` configuration options to suit your project needs.
+The concerto Linter provides flexible configuration options to suit your project needs.
 
 ### Default Ruleset
 
@@ -109,6 +113,14 @@ You can customize the linting rules in several ways:
 3. **Force the default ruleset** 
    ```javascript
    const results = await lintModel(ast, {ruleset: 'default'});
+   ```
+
+4. **Enable risky reserved system concept checks for v4 compatibility mode**
+   ```javascript
+   const results = await lintModel(ast, {
+     ruleset: 'default',
+     dangerouslyAllowReservedSystemTypeNamesInUserModels: true
+   });
    ```
 
 ### Automatic Ruleset Discovery
@@ -200,6 +212,12 @@ const results = await lintModel(ast, {
 const results = await lintModel(ast, {
   ruleset: "D:\\linter-test\\my-ruleset.yaml",
   excludeNamespaces: ['org.example.*']
+});
+
+// Match concerto-core dangerous compatibility mode during linting
+const riskyResults = await lintModel(ast, {
+  ruleset: 'default',
+  dangerouslyAllowReservedSystemTypeNamesInUserModels: true
 });
 ```
 ## License

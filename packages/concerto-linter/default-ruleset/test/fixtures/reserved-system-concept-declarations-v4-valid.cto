@@ -1,0 +1,9 @@
+namespace org.example@1.0.0
+
+asset Vehicle identified by vehicleId {
+  o String vehicleId
+}
+
+concept Shipment {
+  o String shipmentId
+}

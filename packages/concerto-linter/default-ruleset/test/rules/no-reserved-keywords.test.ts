@@ -30,4 +30,14 @@ describe('No Reserved Keywords Rule', () => {
         const messageText = results.map(r => r.message).join(' ');
         expect(messageText).toContain('is a reserved keyword');
     });
+
+    test('should not report reserved system concept declarations through the generic keyword rule', async () => {
+        const results = await testRules({
+            rules: {
+                'no-reserved-keywords': noReservedKeywords,
+            }
+        }, 'no-reserved-keywords-system-concepts-valid.cto');
+
+        expect(results).toHaveLength(0);
+    });
 });
