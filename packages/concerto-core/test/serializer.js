@@ -90,6 +90,39 @@ describe('Serializer', () => {
         sandbox.restore();
     });
 
+    describe('integer validation consistency', () => {
+        const namespace = 'org.acme.numeric@1.0.0';
+
+        for (const type of ['Integer', 'Long']) {
+            describe(type, () => {
+                beforeEach(() => {
+                    modelManager.addCTOModel(`namespace ${namespace}
+                    concept Stock { o ${type} units }`);
+                });
+
+                it('should reject fractions before writing JSON and retain valid round trips', () => {
+                    const stock = factory.newConcept(namespace, 'Stock');
+                    stock.units = 1.5;
+                    (() => serializer.toJSON(stock)).should.throw(ValidationException);
+                    (() => stock.toJSON()).should.throw(ValidationException);
+                    stock.units = 1;
+                    const json = JSON.parse(JSON.stringify(serializer.toJSON(stock)));
+                    serializer.toJSON(serializer.fromJSON(json)).should.deep.equal(json);
+                });
+
+                it('should preserve explicit validation bypasses and deserializer conversion checks', () => {
+                    const stock = factory.newConcept(namespace, 'Stock', undefined, { disableValidation: true });
+                    stock.setPropertyValue('units', 1.5);
+                    const json = serializer.toJSON(stock, { validate: false });
+                    json.units.should.equal(1.5);
+                    (() => serializer.fromJSON(json)).should.throw(ValidationException);
+                    (() => serializer.fromJSON(json, { validate: false })).should.throw(ValidationException);
+                    (() => serializer.toJSON(stock)).should.throw(ValidationException);
+                });
+            });
+        }
+    });
+
     describe('#constructor', () => {
 
         it('should throw if factory not specified', () => {

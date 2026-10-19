@@ -422,6 +422,10 @@ class ResourceValidator {
                 break;
             case 'Long':
             case 'Integer':
+                if (!Number.isInteger(obj)) {
+                    invalid = true;
+                }
+                // falls through
             case 'Double': {
                 if(dataType !== 'number') {
                     invalid = true;
