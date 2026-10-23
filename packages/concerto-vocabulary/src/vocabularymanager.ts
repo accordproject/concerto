@@ -212,7 +212,18 @@ class VocabularyManager {
         const modelFile = modelManager.getModelFile(namespace);
         // @ts-ignore
         const classDecl = modelFile ? (modelFile as any).getType(declarationName) : null;
-        const property = propertyName ? classDecl ? classDecl.getProperty(propertyName) : null : null;
+        let property;
+        if (classDecl && !classDecl.isScalarDeclaration()) {
+            if (classDecl.isMapDeclaration()) {
+                if (propertyName === 'KEY') {
+                    property = classDecl.getKey();
+                } else if (propertyName === 'VALUE') {
+                    property = classDecl.getValue();
+                }
+            } else {
+                property = propertyName ? classDecl.getProperty(propertyName) : null;
+            }
+        }
         return this.getTerm(property ? property.getNamespace() : namespace, locale, property ? (property.getParent() as any).getName() : declarationName, propertyName, identifier);
     }
 
