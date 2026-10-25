@@ -15,6 +15,7 @@
 'use strict';
 
 const { AstModelManager } = require('../src/astmodelmanager');
+const { ModelManager } = require('../src/modelmanager');
 const { IllegalModelException } = require('../src/introspect/illegalmodelexception');
 
 const chai = require('chai');
@@ -108,6 +109,30 @@ describe('AstModelManager', () => {
                 /Decorator cannot be null or undefined/
             );
         });
+    });
+
+    it('should preserve existing models when fromAst fails', () => {
+        const manager = new ModelManager();
+        manager.addCTOModel(
+            'namespace org.example.original@1.0.0\nconcept Original {}'
+        );
+
+        const source = new ModelManager();
+        source.addCTOModel(
+            'namespace org.example.replacement@1.0.0\nconcept Replacement {}'
+        );
+
+        const ast = source.getAst(false, true);
+        ast.models.push({
+            ...ast.models[0],
+            namespace: 'org.example.invalid'
+        });
+
+        chai.expect(() => manager.fromAst(ast)).to.throw();
+
+        chai.expect(
+            manager.getModelFile('org.example.original@1.0.0')
+        ).to.not.be.undefined;
     });
 
 });
