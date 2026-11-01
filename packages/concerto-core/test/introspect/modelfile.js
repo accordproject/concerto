@@ -327,6 +327,67 @@ describe('ModelFile', () => {
             }).should.throw('Importing types from different versions ("1.0.0", "2.0.0") of the same namespace "org.freddos@2.0.0" is not permitted.');
         });
 
+        describe('imports that share a local name', () => {
+            const validateAcme = (acme, options) => {
+                const myModelManager = new ModelManager(options);
+                myModelManager.addCTOModel(`namespace org.reserved@1.0.0
+                concept Asset {}`, 'reserved.cto', true);
+                myModelManager.addCTOModel(`namespace org.first@1.0.0
+                concept Chocolate {}`);
+                myModelManager.addCTOModel(`namespace org.second@1.0.0
+                concept Chocolate {}
+                concept Vanilla {}`);
+                return ParserUtil.newModelFile(myModelManager, `namespace org.acme@1.0.0
+                ${acme}`).validate();
+            };
+
+            it('should throw when the same name is imported from two namespaces', () => {
+                (() => validateAcme(`import org.first@1.0.0.{ Chocolate }
+                import org.second@1.0.0.{ Chocolate }`))
+                    .should.throw('Type \'Chocolate\' is imported from both \'org.first@1.0.0.Chocolate\' and \'org.second@1.0.0.Chocolate\'.');
+            });
+
+            it('should throw when an alias matches another imported name', () => {
+                (() => validateAcme(`import org.first@1.0.0.{ Chocolate }
+                import org.second@1.0.0.{ Vanilla as Chocolate }`))
+                    .should.throw('Type \'Chocolate\' is imported from both \'org.first@1.0.0.Chocolate\' and \'org.second@1.0.0.Vanilla\'.');
+            });
+
+            it('should allow the same name from two namespaces when an alias separates them', () => {
+                (() => validateAcme(`import org.first@1.0.0.{ Chocolate }
+                import org.second@1.0.0.{ Chocolate as SecondChocolate }`))
+                    .should.not.throw();
+            });
+
+            it('should allow several types from one namespace in separate imports', () => {
+                (() => validateAcme(`import org.second@1.0.0.{ Chocolate }
+                import org.second@1.0.0.{ Vanilla }`))
+                    .should.not.throw();
+            });
+
+            it('should allow the same type to be imported twice', () => {
+                (() => validateAcme(`import org.first@1.0.0.{ Chocolate }
+                import org.first@1.0.0.{ Chocolate }`))
+                    .should.not.throw();
+            });
+
+            it('should throw when an import matches a system type name', () => {
+                (() => validateAcme('import org.reserved@1.0.0.{ Asset }'))
+                    .should.throw('Type \'Asset\' is imported from both \'org.reserved@1.0.0.Asset\' and \'concerto@1.0.0.Asset\'.');
+            });
+
+            it('should allow an import to match a system type name when dangerouslyAllowReservedSystemTypeNamesInUserModels is enabled', () => {
+                (() => validateAcme('import org.reserved@1.0.0.{ Asset }', { dangerouslyAllowReservedSystemTypeNamesInUserModels: true }))
+                    .should.not.throw();
+            });
+
+            it('should still throw for non-system clashes when dangerouslyAllowReservedSystemTypeNamesInUserModels is enabled', () => {
+                (() => validateAcme(`import org.first@1.0.0.{ Chocolate }
+                import org.second@1.0.0.{ Chocolate }`, { dangerouslyAllowReservedSystemTypeNamesInUserModels: true }))
+                    .should.throw('Type \'Chocolate\' is imported from both');
+            });
+        });
+
         it('should throw when declaring an ambiguous type', () => {
             const myModelManager = new ModelManager();
 

@@ -59,6 +59,7 @@ class ModelFile extends Decorated {
     localTypes: Map<string, Declaration> | null;
     imports: AstNode[];
     importShortNames: Map<string, string>;
+    importShortNameClashes: { name: string, firstFqn: string, secondFqn: string }[];
     importWildcardNamespaces: string[];
     importUriMap: Record<string, string>;
     concertoVersion: string | null;
@@ -83,6 +84,7 @@ class ModelFile extends Decorated {
         this.localTypes = null;
         this.imports = [];
         this.importShortNames = new Map();
+        this.importShortNameClashes = [];
         this.importWildcardNamespaces = [];
         this.importUriMap = {};
         this.fileName = 'UNKNOWN';
@@ -279,6 +281,19 @@ class ModelFile extends Decorated {
                     namespace: importNamespace
                 }), this);
             }
+        });
+
+        // Two imports can't share a local name: only the last one would be resolved.
+        const allowReservedSystemTypeNames = Boolean(this.getModelManager()?.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels);
+        this.importShortNameClashes.forEach(({ name, firstFqn, secondFqn }) => {
+            const isSystemTypeClash = [firstFqn, secondFqn].some(fqn => ModelUtil.getNamespace(fqn) === 'concerto@1.0.0');
+            if (allowReservedSystemTypeNames && isSystemTypeClash) {
+                return;
+            }
+            throw new IllegalModelException(
+                `Type '${name}' is imported from both '${firstFqn}' and '${secondFqn}'. Use an alias to import one of them under a different name.`,
+                this
+            );
         });
 
         // Validate all of the types in this model file.
@@ -714,6 +729,21 @@ class ModelFile extends Decorated {
     }
 
     /**
+     * Maps a local type name to the fully qualified name of its import, and
+     * records a clash when that name already refers to a different type.
+     * @param {string} name - the local name of the imported type
+     * @param {string} fqn - the fully qualified name of the imported type
+     * @private
+     */
+    addImportShortName(name: string, fqn: string) {
+        const firstFqn = this.importShortNames.get(name);
+        if (firstFqn && firstFqn !== fqn) {
+            this.importShortNameClashes.push({ name, firstFqn, secondFqn: fqn });
+        }
+        this.importShortNames.set(name, fqn);
+    }
+
+    /**
      * Populate from an AST
      * @param {object} ast - the AST obtained from the parser
      * @private
@@ -768,17 +798,17 @@ class ModelFile extends Decorated {
                     // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
                     imp.types.forEach((type) => {
                         const alias = aliasedTypes.get(type);
-                        this.importShortNames.set(alias ?? type, `${ns}.${type}`);
+                        this.addImportShortName(alias ?? type, `${ns}.${type}`);
                     });
                 } else {
                     imp.types.forEach((type) =>
-                        this.importShortNames.set(type, `${ns}.${type}`)
+                        this.addImportShortName(type, `${ns}.${type}`)
                     );
                 }
                 break;
             }
             default:
-                this.importShortNames.set((imp as IImportType).name, ModelUtil.importFullyQualifiedNames(imp)[0]);
+                this.addImportShortName((imp as IImportType).name, ModelUtil.importFullyQualifiedNames(imp)[0]);
             }
             if(imp.uri) {
                 this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
