@@ -43,12 +43,15 @@ class CollectionSizeValidator extends Validator {
      */
     constructor(field: ValidatedElement, validator: ICollectionSizeValidator) {
         super(field, validator);
-        this.minSize = validator.minSize ?? null;
-        this.maxSize = validator.maxSize ?? null;
+        this.minSize = !isNull(validator?.minSize) ? validator.minSize : null;
+        this.maxSize = !isNull(validator?.maxSize) ? validator.maxSize : null;
 
         if (isNull(this.minSize) && isNull(this.maxSize)) {
             this.reportModelError('Invalid collection size, minSize and/or maxSize must be specified.');
-        } else if ((this.minSize ?? 0) < 0 || (this.maxSize ?? 0) < 0) {
+        } else if (
+            (this.minSize !== null && (!Number.isInteger(this.minSize) || this.minSize < 0)) ||
+            (this.maxSize !== null && (!Number.isInteger(this.maxSize) || this.maxSize < 0))
+        ) {
             this.reportModelError('minSize and/or maxSize must be positive integers.');
         } else if (isNull(this.minSize) || isNull(this.maxSize)) {
             // this is fine and means that we don't need to check whether minSize > maxSize

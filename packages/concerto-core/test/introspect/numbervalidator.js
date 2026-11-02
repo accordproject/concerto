@@ -66,6 +66,48 @@ describe('NumberValidator', () => {
             }).should.throw(/Invalid range, lower and-or upper bound must be specified./);
         });
 
+        it('should throw an error for constructor parms with undefined bounds', () => {
+            (() => {
+                new NumberValidator(mockField, { lower: undefined, upper: undefined });
+            }).should.throw(/Invalid range, lower and-or upper bound must be specified./);
+        });
+
+        it('should throw an error for constructor parms with empty bounds object', () => {
+            (() => {
+                new NumberValidator(mockField, {});
+            }).should.throw(/Invalid range, lower and-or upper bound must be specified./);
+        });
+
+        it('should throw an error for null or undefined ast', () => {
+            (() => {
+                new NumberValidator(mockField, null);
+            }).should.throw(/Invalid range, lower and-or upper bound must be specified./);
+            (() => {
+                new NumberValidator(mockField, undefined);
+            }).should.throw(/Invalid range, lower and-or upper bound must be specified./);
+        });
+
+        it('should throw an error for non-number lower bound', () => {
+            (() => {
+                new NumberValidator(mockField, { lower: 'abc', upper: 100 });
+            }).should.throw(/lower and-or upper bound must be numbers./);
+        });
+
+        it('should throw an error for non-number upper bound', () => {
+            (() => {
+                new NumberValidator(mockField, { lower: 0, upper: 'xyz' });
+            }).should.throw(/lower and-or upper bound must be numbers./);
+        });
+
+        it('should throw an error for NaN bounds', () => {
+            (() => {
+                new NumberValidator(mockField, { lower: NaN, upper: 100 });
+            }).should.throw(/lower and-or upper bound must be numbers./);
+            (() => {
+                new NumberValidator(mockField, { lower: 0, upper: NaN });
+            }).should.throw(/lower and-or upper bound must be numbers./);
+        });
+
         it('should throw an error for constructor parms LOWER_IS_HIGHER_THAN_UPPER', () => {
             (() => {
                 new NumberValidator(mockField, LOWER_IS_HIGHER_THAN_UPPER);

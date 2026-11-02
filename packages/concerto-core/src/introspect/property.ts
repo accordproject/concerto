@@ -151,6 +151,14 @@ class Property extends Decorated {
     validate(classDecl: ClassDeclaration) {
         super.validate();
 
+        if (this.ast.$class === `${MetaModelNamespace}.ObjectProperty` && (!this.ast.type || !this.ast.type.name)) {
+            throw new IllegalModelException(
+                `ObjectProperty must contain property 'type', for property ${this.ast.name}`,
+                this.getModelFile(),
+                this.ast.location
+            );
+        }
+
         if(this.type) {
             classDecl.getModelFile().resolveType( 'property ' + this.getFullyQualifiedName(), this.type);
         }
@@ -160,7 +168,7 @@ class Property extends Decorated {
             if(this.type && !this.isPrimitive()) {
                 try {
                     const resolvedType = classDecl.getModelFile().getType(this.type);
-                    isMapType = resolvedType.isMapDeclaration?.() === true;
+                    isMapType = (resolvedType as any)?.isMapDeclaration?.() === true;
                 } catch(e) {
                     // type resolution failed — will be caught by other validation
                 }
