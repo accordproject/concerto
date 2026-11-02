@@ -766,6 +766,10 @@ class ModelFile extends Decorated {
             throw new Error(`Cannot create a ModelFile with an unversioned namespace: ${ast.namespace}. All models must specify a version (e.g., @1.0.0).`);
         }
 
+        if (ast.imports && !Array.isArray(ast.imports)) {
+            throw new IllegalModelException('Model imports must be an array', this, this.ast.location);
+        }
+
         // Make sure to clone imports since we will add built-in imports
         const imports = ast.imports ? ast.imports.concat([]) : [];
 
@@ -781,6 +785,9 @@ class ModelFile extends Decorated {
 
         this.imports = imports;
         this.imports.forEach((imp) => {
+            if (!imp) {
+                throw new IllegalModelException('Import cannot be null or undefined', this, this.ast.location);
+            }
             this.enforceImportVersioning(imp);
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportAll`:
@@ -820,8 +827,16 @@ class ModelFile extends Decorated {
             return;
         }
 
+        if (!Array.isArray(ast.declarations)) {
+            throw new IllegalModelException('Model declarations must be an array', this, this.ast.location);
+        }
+
         for(let n=0; n < ast.declarations.length; n++) {
             let thing = ast.declarations[n];
+
+            if (!thing) {
+                throw new IllegalModelException('Declaration cannot be null or undefined', this, this.ast.location);
+            }
 
             switch(thing.$class) {
             case `${MetaModelNamespace}.AssetDeclaration`:

@@ -294,10 +294,10 @@ class BaseModelManager {
         } catch (err: unknown) {
             const error = err as Error;
             throw new MetamodelException(error.message);
-        }
-
-        if (!alreadyHasMetamodel) {
-            this.deleteModelFile(MetaModelNamespace);
+        } finally {
+            if (!alreadyHasMetamodel) {
+                this.deleteModelFile(MetaModelNamespace);
+            }
         }
     }
 
@@ -853,6 +853,14 @@ class BaseModelManager {
      * @param {object} [options.disableValidation] - option to disable metamodel validation and just fetch the models, to be used only if the metamodel is already validated
      */
     fromAst(ast: IModels, options?: { disableValidation?: boolean }) {
+        if (!ast || !Array.isArray(ast.models)) {
+            throw new IllegalModelException('Models AST must contain a models array');
+        }
+        for (const model of ast.models) {
+            if (!model) {
+                throw new IllegalModelException('Model cannot be null or undefined');
+            }
+        }
         this.clearModelFiles();
         ast.models.forEach( (model: IModel) => {
             if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added

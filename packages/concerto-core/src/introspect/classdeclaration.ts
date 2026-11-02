@@ -108,6 +108,14 @@ class ClassDeclaration extends Declaration {
         for (let n = 0; n < this.ast.properties.length; n++) {
             let thing = this.ast.properties[n];
 
+            if (!thing) {
+                throw new IllegalModelException(
+                    `Property cannot be null or undefined, for class ${this.name}`,
+                    this.modelFile,
+                    this.ast.location
+                );
+            }
+
             if(ModelUtil.isSystemProperty(thing.name)) {
                 throw new IllegalModelException(`Invalid field name '${thing.name}'`, this.modelFile, this.ast.location);
             }
