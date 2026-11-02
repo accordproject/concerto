@@ -15,6 +15,7 @@
 'use strict';
 
 const DateTimeUtil = require('../src/datetimeutil').default;
+const { checkStrictDateTime } = require('../src/datetimeutil');
 
 const chai = require('chai');
 
@@ -136,5 +137,22 @@ describe('DateTime validation via setCurrentTime', () => {
             .should.throw('Current time \'2024-01-01T12:00:00+24:00\' is not in standard UTC format');
         (() => DateTimeUtil.setCurrentTime('2024-01-01T12:00:00+05:60'))
             .should.throw('Current time \'2024-01-01T12:00:00+05:60\' is not in standard UTC format');
+    });
+});
+
+describe('checkStrictDateTime', () => {
+    it('accepts a full date-time with Z or an offset, with or without milliseconds', () => {
+        checkStrictDateTime('2024-05-01T12:30:00Z').should.equal('valid');
+        checkStrictDateTime('2024-05-01T12:30:00.123+05:30').should.equal('valid');
+    });
+
+    it('reports a date-only or offset-less value as a format error', () => {
+        checkStrictDateTime('2024-05-01').should.equal('format');
+        checkStrictDateTime('2008-09-15T15:53:00').should.equal('format');
+    });
+
+    it('reports an impossible date or time as invalid', () => {
+        checkStrictDateTime('2024-02-30T00:00:00Z').should.equal('invalid');
+        checkStrictDateTime('2024-05-01T24:00:00Z').should.equal('invalid');
     });
 });

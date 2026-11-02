@@ -27,6 +27,7 @@ import ResourceValidator from './serializer/resourcevalidator';
 import Relationship from './model/relationship';
 import Resource from './model/resource';
 import ValidatedResource from './model/validatedresource';
+import { DEFER_DATETIME_DEFAULT_CHECK } from './model/typed';
 
 import * as uuid from 'uuid';
 
@@ -144,7 +145,7 @@ class Factory {
         else {
             newObj = new ValidatedResource(this.modelManager, classDecl, ns, type, id, timestamp, new ResourceValidator());
         }
-        newObj.assignFieldDefaults();
+        newObj.assignFieldDefaults(!options[DEFER_DATETIME_DEFAULT_CHECK]);
         this.initializeNewObject(newObj, classDecl, options);
 
         if (idField) {

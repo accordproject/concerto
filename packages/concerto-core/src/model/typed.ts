@@ -14,6 +14,8 @@
 
 import dayjs from '../dayjs-setup';
 import { NullUtil as Util } from '@accordproject/concerto-util';
+import ValidationException from '../serializer/validationexception';
+import { checkStrictDateTime } from '../datetimeutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -133,10 +135,41 @@ class Typed {
     }
 
     /**
-     * Sets the fields to their default values, based on the model
+     * Throws if a property is a DateTime field whose default value is not a valid DateTime.
+     * @param {Field} property - the property to check
+     * @param {boolean} [strict] - apply the strict rule used for instance values (the
+     * default), or only require that the value parses
+     * @throws {ValidationException} if the default value is not a valid DateTime
      * @private
      */
-    assignFieldDefaults(): void {
+    static checkDateTimeDefault(property: Field, strict = true): void {
+        let field = property;
+        if (field.isTypeScalar?.()) {
+            field = field.getScalarField();
+        }
+        if (!field.isField?.() || field.getType() !== 'DateTime') {
+            return;
+        }
+        const defaultValue = field.getDefaultValue();
+        if (Util.isNull(defaultValue)) {
+            return;
+        }
+        const valid = strict
+            ? typeof defaultValue === 'string' && checkStrictDateTime(defaultValue) === 'valid'
+            : dayjs.utc(defaultValue as string).isValid();
+        if (!valid) {
+            throw new ValidationException(`Invalid default value '${defaultValue}' for DateTime field '${field.getName()}'.`);
+        }
+    }
+
+    /**
+     * Sets the fields to their default values, based on the model
+     * @param {boolean} [checkDateTimeDefaults] - throw if a DateTime default is not a
+     * valid DateTime. Defaults to true. The Serializer passes false and checks only the
+     * defaults that are used for fields missing from the JSON.
+     * @private
+     */
+    assignFieldDefaults(checkDateTimeDefaults = true): void {
         let classDeclaration = this.getClassDeclaration();
         let fields = classDeclaration.getProperties();
 
@@ -166,6 +199,9 @@ class Typed {
                 } else if (type === 'Boolean') {
                     this.setPropertyValue(field.getName(), (defaultValue === true));
                 } else if (type === 'DateTime') {
+                    if (checkDateTimeDefaults) {
+                        Typed.checkDateTimeDefault(field);
+                    }
                     const dateTime = dayjs.utc(defaultValue);
                     this.setPropertyValue(field.getName(), dateTime);
                 } else {
@@ -210,5 +246,13 @@ class Typed {
     }
 }
 
-export { Typed };
+/**
+ * Factory option key that skips the DateTime default check when an instance is
+ * created. Only the Serializer and JSONPopulator set it, because they check the
+ * defaults they fall back to; it is not exported from the package.
+ * @private
+ */
+const DEFER_DATETIME_DEFAULT_CHECK = Symbol('deferDateTimeDefaultCheck');
+
+export { Typed, DEFER_DATETIME_DEFAULT_CHECK };
 export default Typed;
