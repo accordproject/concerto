@@ -42,6 +42,7 @@ chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 const tmp = require('tmp-promise');
 const { BaseModelManager } = require('../src/basemodelmanager');
+const { IllegalModelException } = require('../src/introspect/illegalmodelexception');
 
 describe('ModelManager', () => {
 
@@ -274,7 +275,7 @@ describe('ModelManager', () => {
     });
 
     describe('#addModel', () => {
-        it('should throw for a bad metamodel AST', () => {
+        it('should throw for a bad metamodel AST and clean up metamodel file', () => {
             const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,
@@ -284,6 +285,7 @@ describe('ModelManager', () => {
             (() => {
                 basemodelmanager.addModel(ast, undefined, 'origFile');
             }).should.throw('Unexpected properties for type concerto.metamodel@1.0.0.Model: undeclared');
+            (basemodelmanager.getModelFile(MetaModelNamespace) === undefined).should.be.true;
         });
 
         it('should throw when using an unknown metamodel version', () => {
@@ -296,6 +298,52 @@ describe('ModelManager', () => {
             (() => {
                 basemodelmanager.addModel(ast, undefined, 'origFile');
             }).should.throw('Model file version 99.0.0 does not match metamodel version 1.0.0');
+        });
+    });
+
+    describe('#fromAst', () => {
+        it('should throw IllegalModelException when ast is null or models array is missing', () => {
+            const basemodelmanager = new BaseModelManager();
+            (() => {
+                basemodelmanager.fromAst(null);
+            }).should.throw(IllegalModelException, /Models AST must contain a models array/);
+            (() => {
+                basemodelmanager.fromAst({});
+            }).should.throw(IllegalModelException, /Models AST must contain a models array/);
+        });
+
+        it('should throw IllegalModelException when a model in models is null', () => {
+            const basemodelmanager = new BaseModelManager();
+            (() => {
+                basemodelmanager.fromAst({
+                    $class: `${MetaModelNamespace}.Models`,
+                    models: [null]
+                });
+            }).should.throw(IllegalModelException, /Model cannot be null or undefined/);
+        });
+
+        it('should populate model files from a valid Models AST', () => {
+            const basemodelmanager = new BaseModelManager();
+            const ast = {
+                $class: `${MetaModelNamespace}.Models`,
+                models: [
+                    {
+                        $class: `${MetaModelNamespace}.Model`,
+                        namespace: 'org.acme.valid@1.0.0',
+                        imports: [],
+                        declarations: [
+                            {
+                                $class: `${MetaModelNamespace}.ConceptDeclaration`,
+                                name: 'TestConcept',
+                                isAbstract: false,
+                                properties: []
+                            }
+                        ]
+                    }
+                ]
+            };
+            basemodelmanager.fromAst(ast);
+            basemodelmanager.getModelFile('org.acme.valid@1.0.0').should.not.be.undefined;
         });
     });
 
