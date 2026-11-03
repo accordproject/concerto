@@ -195,6 +195,20 @@ describe('ModelUtil', function () {
     });
 
     describe('#parseNamespace', function() {
+        it('should reject a namespace version with a leading v', function() {
+            (() => ModelUtil.parseNamespace('org.acme@v1.0.0'))
+                .should.throw(/Invalid namespace/);
+        });
+
+        it('should reject a namespace version with trailing whitespace', function() {
+            (() => ModelUtil.parseNamespace('org.acme@1.0.0 '))
+                .should.throw(/Invalid namespace/);
+        });
+
+        it('should accept a prerelease version with build metadata', function() {
+            const nsInfo = ModelUtil.parseNamespace('org.acme@1.0.0-beta.1+build');
+            nsInfo.version.toString().should.equal('1.0.0-beta.1+build');
+        });
         it('valid, with version', function() {
             const nsInfo = ModelUtil.parseNamespace('org.acme@1.0.0');
             nsInfo.name.should.equal('org.acme');
