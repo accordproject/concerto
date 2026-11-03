@@ -73,7 +73,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-cto": "5.0.0",
-    "@accordproject/concerto-metamodel": "^3.17.0",
+    "@accordproject/concerto-metamodel": "3.17.0",
     "@accordproject/concerto-util": "5.0.0",
     "dayjs": "1.11.13",
     "debug": "4.3.7",
@@ -81,7 +81,7 @@
     "rfdc": "1.4.1",
     "semver": "7.6.3",
     "uuid": "11.0.3",
-    "yaml": "^2.8.3"
+    "yaml": "2.8.3"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
