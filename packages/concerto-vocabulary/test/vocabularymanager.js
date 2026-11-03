@@ -25,7 +25,7 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 chai.use(jestSnapshotPlugin());
 
-const { VocabularyManager } = require('../src');
+const { Vocabulary, VocabularyManager } = require('../src');
 const { ModelManager, DecoratorManager } = require('@accordproject/concerto-core');
 
 let modelManager = null;
@@ -314,6 +314,31 @@ describe('VocabularyManager', () => {
         (terms === null).should.be.true;
     });
 
+    it('resolveTerms - map declaration KEY', () => {
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en', 'Address', 'KEY');
+        terms.KEY.should.equal('vin of the vehicle');
+    });
+
+    it('resolveTerms - map declaration VALUE', () => {
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en', 'Address', 'VALUE');
+        terms.VALUE.should.equal('address of the vehicle');
+    });
+
+    it('resolveTerms - map declaration invalid property', () => {
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en', 'Address', 'foo');
+        (terms === null).should.be.true;
+    });
+
+    it('resolveTerms - scalar declaration', () => {
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en', 'VIN');
+        terms.VIN.should.equal('A vehicle identification number');
+    });
+
+    it('resolveTerms - scalar declaration with property', () => {
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en', 'VIN', 'foo');
+        (terms === null).should.be.true;
+    });
+
     it('resolveTerm - class', () => {
         const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck');
         term.should.equal('A lorry');
@@ -351,6 +376,36 @@ describe('VocabularyManager', () => {
 
     it('resolveTerm - missing namespace', () => {
         const term = vocabularyManager.resolveTerm(modelManager, 'org.foo', 'en-gb', 'Dog');
+        (term === null).should.be.true;
+    });
+
+    it('resolveTerm - map declaration', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en', 'Address');
+        term.should.equal('Registered address of the vehicle');
+    });
+
+    it('resolveTerm - map declaration KEY', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en', 'Address', 'KEY');
+        term.should.equal('vin of the vehicle');
+    });
+
+    it('resolveTerm - map declaration VALUE', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en', 'Address', 'VALUE');
+        term.should.equal('address of the vehicle');
+    });
+
+    it('resolveTerm - map declaration invalid property', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en', 'Address', 'foo');
+        (term === null).should.be.true;
+    });
+
+    it('resolveTerm - scalar declaration', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en', 'VIN');
+        term.should.equal('A vehicle identification number');
+    });
+
+    it('resolveTerm - scalar declaration with property', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en', 'VIN', 'foo');
         (term === null).should.be.true;
     });
 
@@ -394,6 +449,24 @@ describe('VocabularyManager', () => {
         result.vocabularies['org.acme@1.0.0/fr'].additionalTerms.should.have.members([]);
         result.vocabularies['org.acme@1.0.0/zh-cn'].missingTerms.should.have.members(['SSN', 'VIN', 'Address', 'Truck', 'namespace']);
         result.vocabularies['org.acme@1.0.0/zh-cn'].additionalTerms.should.have.members([]);
+    });
+
+    it('validate - scalar declaration with property in vocabulary is reported as additional term', () => {
+        const voc = new Vocabulary(vocabularyManager, {
+            locale: 'en',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    SSN: 'A social security number',
+                    properties: [
+                        { format: 'XXX-XX-XXXX' }
+                    ]
+                }
+            ]
+        });
+        const modelFile = modelManager.getModelFile('org.acme@1.0.0');
+        const validation = voc.validate(modelFile);
+        validation.additionalTerms.should.deep.equal(['SSN.format']);
     });
 
     describe('getTerm / getTerms - falsy term values (no locale fallback)', () => {
