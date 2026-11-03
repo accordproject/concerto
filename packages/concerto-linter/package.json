@@ -37,10 +37,10 @@
     "@accordproject/concerto-cto": "5.0.0",
     "@accordproject/concerto-linter-default-ruleset": "5.0.0",
     "@accordproject/concerto-metamodel": "^3.17.0",
-    "@stoplight/spectral-cli": "6.15.0",
-    "@stoplight/spectral-core": "1.20.0",
+    "@stoplight/spectral-cli": "6.17.0",
+    "@stoplight/spectral-core": "1.24.0",
     "@stoplight/spectral-parsers": "1.0.5",
-    "ajv": "^8.17.1",
+    "ajv": "^8.18.0",
     "find-up": "5.0.0"
   },
   "devDependencies": {
