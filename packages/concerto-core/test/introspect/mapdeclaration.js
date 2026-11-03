@@ -409,6 +409,87 @@ describe('MapDeclaration', () => {
                 }).should.throw(IllegalModelException);
             })();
         });
+
+        it('should throw if ObjectMapKeyType does not contain type property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException, /ObjectMapKeyType must contain property 'type'/);
+        });
+
+        it('should throw if ObjectMapKeyType contains a nullish type property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapKeyType',
+                        type: null
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException, /ObjectMapKeyType must contain property 'type'/);
+        });
+
+        it('should throw if ObjectMapKeyType TypeIdentifier does not contain name property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapKeyType',
+                        type: {
+                            $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                        }
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException, /ObjectMapKeyType type must contain property '\$class' and property 'name'/);
+        });
+
+        it('should throw if ObjectMapKeyType TypeIdentifier has bad $class', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapKeyType',
+                        type: {
+                            $class: 'concerto.metamodel@1.0.0.BAD_$CLASS',
+                            name: 'MyKey',
+                        }
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException, /ObjectMapKeyType type \$class must be of TypeIdentifier/);
+        });
+
+        it('should throw for an undeclared map key type', () => {
+            (() => {
+                const mm = new ModelManager();
+                mm.addCTOModel(`
+                    namespace org.acme@1.0.0
+                    map M { o Missing o String }
+                `, 'test.cto');
+            }).should.throw(
+                IllegalModelException,
+                /Undeclared type "Missing" in "the key of map org.acme@1.0.0.M"/
+            );
+        });
     });
 
     describe('#validate failure scenarios - Map Value', () => {
@@ -423,6 +504,22 @@ describe('MapDeclaration', () => {
                     },
                     value: {
                         $class: 'concerto.metamodel@1.0.0.ObjectMapValueType',
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
+        it('should throw if ObjectMapValueType contains a nullish type property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapValueType',
+                        type: null
                     }
                 });
             }).should.throw(IllegalModelException);

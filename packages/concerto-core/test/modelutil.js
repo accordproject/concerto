@@ -229,4 +229,74 @@ describe('ModelUtil', function () {
             }).should.throw(/Invalid namespace/);
         });
     });
+
+    describe('#isValidMapKey', function() {
+        it('should return false for undefined or null', function() {
+            ModelUtil.isValidMapKey(undefined).should.equal(false);
+            ModelUtil.isValidMapKey(null).should.equal(false);
+        });
+
+        it('should return false for invalid objects or primitives', function() {
+            ModelUtil.isValidMapKey({}).should.equal(false);
+            ModelUtil.isValidMapKey('string').should.equal(false);
+            ModelUtil.isValidMapKey(123).should.equal(false);
+        });
+
+        it('should return true for valid map key types', function() {
+            ModelUtil.isValidMapKey({ $class: 'concerto.metamodel@1.0.0.StringMapKeyType' }).should.equal(true);
+            ModelUtil.isValidMapKey({ $class: 'concerto.metamodel@1.0.0.DateTimeMapKeyType' }).should.equal(true);
+            ModelUtil.isValidMapKey({ $class: 'concerto.metamodel@1.0.0.ObjectMapKeyType' }).should.equal(true);
+        });
+    });
+
+    describe('#isValidMapKeyScalar', function() {
+        it('should return false for undefined, null, or empty object', function() {
+            ModelUtil.isValidMapKeyScalar(undefined).should.equal(false);
+            ModelUtil.isValidMapKeyScalar(null).should.equal(false);
+            ModelUtil.isValidMapKeyScalar({}).should.equal(false);
+            ModelUtil.isValidMapKeyScalar({ isScalarDeclaration: () => false }).should.equal(false);
+        });
+
+        it('should return true for valid StringScalar or DateTimeScalar declaration', function() {
+            const validStringScalar = {
+                isScalarDeclaration: () => true,
+                ast: { $class: 'concerto.metamodel@1.0.0.StringScalar' }
+            };
+            const validDateTimeScalar = {
+                isScalarDeclaration: () => true,
+                ast: { $class: 'concerto.metamodel@1.0.0.DateTimeScalar' }
+            };
+            const invalidScalar = {
+                isScalarDeclaration: () => true,
+                ast: { $class: 'concerto.metamodel@1.0.0.DoubleScalar' }
+            };
+            ModelUtil.isValidMapKeyScalar(validStringScalar).should.equal(true);
+            ModelUtil.isValidMapKeyScalar(validDateTimeScalar).should.equal(true);
+            ModelUtil.isValidMapKeyScalar(invalidScalar).should.equal(false);
+        });
+    });
+
+    describe('#isValidMapValue', function() {
+        it('should return false for undefined or null', function() {
+            ModelUtil.isValidMapValue(undefined).should.equal(false);
+            ModelUtil.isValidMapValue(null).should.equal(false);
+        });
+
+        it('should return false for invalid objects or primitives', function() {
+            ModelUtil.isValidMapValue({}).should.equal(false);
+            ModelUtil.isValidMapValue('string').should.equal(false);
+            ModelUtil.isValidMapValue(123).should.equal(false);
+        });
+
+        it('should return true for valid map value types', function() {
+            ModelUtil.isValidMapValue({ $class: 'concerto.metamodel@1.0.0.BooleanMapValueType' }).should.equal(true);
+            ModelUtil.isValidMapValue({ $class: 'concerto.metamodel@1.0.0.DateTimeMapValueType' }).should.equal(true);
+            ModelUtil.isValidMapValue({ $class: 'concerto.metamodel@1.0.0.StringMapValueType' }).should.equal(true);
+            ModelUtil.isValidMapValue({ $class: 'concerto.metamodel@1.0.0.IntegerMapValueType' }).should.equal(true);
+            ModelUtil.isValidMapValue({ $class: 'concerto.metamodel@1.0.0.LongMapValueType' }).should.equal(true);
+            ModelUtil.isValidMapValue({ $class: 'concerto.metamodel@1.0.0.DoubleMapValueType' }).should.equal(true);
+            ModelUtil.isValidMapValue({ $class: 'concerto.metamodel@1.0.0.ObjectMapValueType' }).should.equal(true);
+            ModelUtil.isValidMapValue({ $class: 'concerto.metamodel@1.0.0.RelationshipMapValueType' }).should.equal(true);
+        });
+    });
 });
