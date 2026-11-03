@@ -29,6 +29,28 @@ chai.use(require('chai-as-promised'));
 
 describe('DecoratorManager', () => {
 
+    describe('#falsyOrEqual (deprecated)', function() {
+        it('should match null', async function() {
+            DecoratorManager.falsyOrEqual( null, ['one']).should.be.true;
+        });
+
+        it('should match undefined', async function() {
+            DecoratorManager.falsyOrEqual( undefined, ['one']).should.be.true;
+        });
+
+        it('should match token', async function() {
+            DecoratorManager.falsyOrEqual( 'one', ['one']).should.be.true;
+        });
+
+        it('should match token array', async function() {
+            DecoratorManager.falsyOrEqual( ['one', 'two'], ['one', 'three']).should.be.true;
+        });
+
+        it('should not match token', async function() {
+            DecoratorManager.falsyOrEqual( 'one', ['two']).should.be.false;
+        });
+    });
+
     describe('#validate', function() {
         it('should support syntax validation', async function() {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
@@ -622,6 +644,43 @@ describe('DecoratorManager', () => {
             const result = DecoratorManager.decorateModels(testModelManager, dcs);
             const cto = Printer.toCTO(result.getModelFile('test@1.0.0').getAst()).trimEnd();
             chai.expect(cto).to.not.include('Ghost');
+        });
+
+        it('should preserve modelManager options on the returned ModelManager', async function() {
+            const testModelManager = new ModelManager({strict: true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const result = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), {skipValidationAndResolution: true});
+            chai.expect(result.options.strict).to.equal(true);
+        });
+
+        const dcsFixtures = [
+            {dcs: 'web.json', label: 'web.json'},
+            {dcs: 'possible-decorator-command-targets.json', label: 'possible-decorator-command-targets.json'},
+            {dcs: 'map-declaration.json', label: 'map-declaration.json'},
+            {dcs: 'validated.json', label: 'validated.json', opts: {validate: true, validateCommands: true, migrate: true, defaultNamespace: 'org.acme.decorators@1.0.0'}, extraModels: true},
+        ];
+        dcsFixtures.forEach(({dcs, label, opts, extraModels}) => {
+            it(`should produce stable output for ${label}`, async function() {
+                const mm = new ModelManager({skipLocationNodes: true});
+                if (extraModels) {
+                    mm.addCTOModel('namespace org.acme.categories@1.0.0\nabstract concept Category {}\nconcept HR extends Category {}', 'categories.cto');
+                    mm.addCTOModel('namespace org.acme.decorators@1.0.0\nimport concerto.decorator@1.0.0.Decorator\nconcept Form extends Decorator {\n  o String key\n  o String value\n  o Concept category\n}', 'decorators.cto');
+                    const validatedText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/validated.cto'), 'utf-8');
+                    mm.addCTOModel(validatedText, 'validated.cto');
+                } else {
+                    const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+                    mm.addCTOModel(modelText, 'test.cto');
+                }
+                const dcsData = JSON.parse(fs.readFileSync(path.join(__dirname,`/data/decoratorcommands/${dcs}`), 'utf-8'));
+                const options = opts || {skipValidationAndResolution: true};
+                const result1 = DecoratorManager.decorateModels(mm, dcsData, options);
+                const result2 = DecoratorManager.decorateModels(mm, JSON.parse(JSON.stringify(dcsData)), options);
+                const ast1 = JSON.stringify(result1.getAst(true, true));
+                const ast2 = JSON.stringify(result2.getAst(true, true));
+                chai.expect(ast1).to.equal(ast2);
+            });
         });
     });
 
@@ -1241,6 +1300,255 @@ describe('DecoratorManager', () => {
             chai.expect(propEntry.myField).to.equal('myField');
             // Term_ extension key must be present alongside it
             chai.expect(propEntry.desc).to.equal('my desc');
+        });
+    });
+
+    describe('#executePropertyCommand (deprecated)', () => {
+        it('should not apply decorator to the property if target property does not match', () => {
+            const property = {
+                '$class': 'concerto.metamodel@1.0.0.StringProperty',
+                'name': 'firstName',
+                'isArray': false,
+                'isOptional': false,
+                'decorators': []
+            };
+            const command = {
+                '$class' : 'org.accordproject.decoratorcommands@0.4.0.Command',
+                'type' : 'UPSERT',
+                'target' : {
+                    '$class' : 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                    'namespace' : 'test@1.0.0'
+                },
+                'decorator' : {
+                    '$class' : 'concerto.metamodel@1.0.0.Decorator',
+                    'name' : 'Form',
+                    'arguments' : []
+                }
+            };
+            DecoratorManager.executePropertyCommand(property, command);
+            chai.expect(property.decorators).to.have.lengthOf(0);
+        });
+
+        it('should apply decorator to the property if target property matches', () => {
+            const property = {
+                '$class': 'concerto.metamodel@1.0.0.StringProperty',
+                'name': 'firstName',
+                'isArray': false,
+                'isOptional': false,
+                'decorators': []
+            };
+            const command = {
+                '$class' : 'org.accordproject.decoratorcommands@0.4.0.Command',
+                'type' : 'UPSERT',
+                'target' : {
+                    '$class' : 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                    'namespace' : 'test@1.0.0',
+                    'type': 'concerto.metamodel@1.0.0.StringProperty'
+                },
+                'decorator' : {
+                    '$class' : 'concerto.metamodel@1.0.0.Decorator',
+                    'name' : 'Form',
+                    'arguments' : []
+                }
+            };
+            DecoratorManager.executePropertyCommand(property, command);
+            chai.expect(property.decorators).to.have.lengthOf(1);
+            chai.expect(property.decorators[0].name).to.equal('Form');
+        });
+    });
+
+    describe('#executeCommand (deprecated)', () => {
+        it('should apply a declaration-level decorator', () => {
+            const declaration = {
+                '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                'name': 'Person',
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'test@1.0.0', declaration: 'Person' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'Readable', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeCommand('test@1.0.0', declaration, command);
+            chai.expect(declaration.decorators).to.have.lengthOf(1);
+            chai.expect(declaration.decorators[0].name).to.equal('Readable');
+        });
+
+        it('should apply a property decorator when property is passed', () => {
+            const declaration = {
+                '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                'name': 'Person',
+                'decorators': []
+            };
+            const property = {
+                '$class': 'concerto.metamodel@1.0.0.StringProperty',
+                'name': 'firstName',
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'test@1.0.0', declaration: 'Person', property: 'firstName' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'Label', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeCommand('test@1.0.0', declaration, command, property);
+            chai.expect(property.decorators).to.have.lengthOf(1);
+        });
+
+        it('should apply decorator to map key via mapElement target', () => {
+            const declaration = {
+                '$class': 'concerto.metamodel@1.0.0.MapDeclaration',
+                'name': 'Lookup',
+                'key': { '$class': 'concerto.metamodel@1.0.0.StringMapKeyType', 'decorators': [] },
+                'value': { '$class': 'concerto.metamodel@1.0.0.StringMapValueType', 'decorators': [] },
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'test@1.0.0', declaration: 'Lookup', mapElement: 'KEY' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'Label', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeCommand('test@1.0.0', declaration, command);
+            chai.expect(declaration.key.decorators).to.have.lengthOf(1);
+            chai.expect(declaration.value.decorators).to.have.lengthOf(0);
+        });
+
+        it('should apply decorator to map key and value via KEY_VALUE', () => {
+            const declaration = {
+                '$class': 'concerto.metamodel@1.0.0.MapDeclaration',
+                'name': 'Lookup',
+                'key': { '$class': 'concerto.metamodel@1.0.0.StringMapKeyType', 'decorators': [] },
+                'value': { '$class': 'concerto.metamodel@1.0.0.StringMapValueType', 'decorators': [] },
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'test@1.0.0', declaration: 'Lookup', mapElement: 'KEY_VALUE' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'Searchable', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeCommand('test@1.0.0', declaration, command);
+            chai.expect(declaration.key.decorators).to.have.lengthOf(1);
+            chai.expect(declaration.value.decorators).to.have.lengthOf(1);
+        });
+
+        it('should apply decorator to map value via type targeting', () => {
+            const declaration = {
+                '$class': 'concerto.metamodel@1.0.0.MapDeclaration',
+                'name': 'Lookup',
+                'key': { '$class': 'concerto.metamodel@1.0.0.StringMapKeyType', 'decorators': [] },
+                'value': { '$class': 'concerto.metamodel@1.0.0.StringMapValueType', 'decorators': [] },
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'test@1.0.0', declaration: 'Lookup', type: 'concerto.metamodel@1.0.0.StringMapValueType' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'Hidden', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeCommand('test@1.0.0', declaration, command);
+            chai.expect(declaration.key.decorators).to.have.lengthOf(0);
+            chai.expect(declaration.value.decorators).to.have.lengthOf(1);
+        });
+
+        it('should apply decorator to map key via type targeting on key $class', () => {
+            const declaration = {
+                '$class': 'concerto.metamodel@1.0.0.MapDeclaration',
+                'name': 'Lookup',
+                'key': { '$class': 'concerto.metamodel@1.0.0.StringMapKeyType', 'decorators': [] },
+                'value': { '$class': 'concerto.metamodel@1.0.0.StringMapValueType', 'decorators': [] },
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'test@1.0.0', declaration: 'Lookup', type: 'concerto.metamodel@1.0.0.StringMapKeyType' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'KeyTag', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeCommand('test@1.0.0', declaration, command);
+            chai.expect(declaration.key.decorators).to.have.lengthOf(1);
+            chai.expect(declaration.value.decorators).to.have.lengthOf(0);
+        });
+
+        it('should apply declaration decorator to map with no mapElement or type', () => {
+            const declaration = {
+                '$class': 'concerto.metamodel@1.0.0.MapDeclaration',
+                'name': 'Lookup',
+                'key': { '$class': 'concerto.metamodel@1.0.0.StringMapKeyType', 'decorators': [] },
+                'value': { '$class': 'concerto.metamodel@1.0.0.StringMapValueType', 'decorators': [] },
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'test@1.0.0', declaration: 'Lookup' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'MapLevel', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeCommand('test@1.0.0', declaration, command);
+            chai.expect(declaration.decorators).to.have.lengthOf(1);
+        });
+
+        it('should apply decorator to map element with type filter via mapElement target', () => {
+            const declaration = {
+                '$class': 'concerto.metamodel@1.0.0.MapDeclaration',
+                'name': 'Lookup',
+                'key': { '$class': 'concerto.metamodel@1.0.0.StringMapKeyType', 'decorators': [] },
+                'value': { '$class': 'concerto.metamodel@1.0.0.StringMapValueType', 'decorators': [] },
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'test@1.0.0', declaration: 'Lookup', mapElement: 'VALUE', type: 'concerto.metamodel@1.0.0.StringMapValueType' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'TypedMapEl', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeCommand('test@1.0.0', declaration, command);
+            chai.expect(declaration.value.decorators).to.have.lengthOf(1);
+        });
+
+        it('should not match when namespace does not match', () => {
+            const declaration = {
+                '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                'name': 'Person',
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'other@1.0.0', declaration: 'Person' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'Readable', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeCommand('test@1.0.0', declaration, command);
+            chai.expect(declaration.decorators).to.have.lengthOf(0);
+        });
+    });
+
+    describe('#executeNamespaceCommand (deprecated)', () => {
+        it('should apply decorator to model when target is namespace-only', () => {
+            const model = {
+                'namespace': 'test@1.0.0',
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'test@1.0.0' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'Ns', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeNamespaceCommand(model, command);
+            chai.expect(model.decorators).to.have.lengthOf(1);
+        });
+
+        it('should not apply when target has extra fields', () => {
+            const model = {
+                'namespace': 'test@1.0.0',
+                'decorators': []
+            };
+            const command = {
+                target: { '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget', namespace: 'test@1.0.0', declaration: 'Person' },
+                decorator: { '$class': 'concerto.metamodel@1.0.0.Decorator', name: 'Ns', arguments: [] },
+                type: 'UPSERT'
+            };
+            DecoratorManager.executeNamespaceCommand(model, command);
+            chai.expect(model.decorators).to.have.lengthOf(0);
+        });
+    });
+
+    describe('#isNamespaceTargetEnabled (deprecated)', function() {
+        it('should return true', function() {
+            DecoratorManager.isNamespaceTargetEnabled().should.be.true;
         });
     });
 

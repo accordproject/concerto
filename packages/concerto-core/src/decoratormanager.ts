@@ -95,6 +95,21 @@ concept DecoratorCommandSet {
 `;
 
 /**
+ * Intersection of two string arrays
+ * @param {string[]} a the first array
+ * @param {string[]} b the second array
+ * @returns {string[]} returns the intersection of a and b (i.e. an
+ * array of the elements they have in common)
+ * @private
+ */
+function intersect(a, b) {
+    const setA = new Set(a);
+    const setB = new Set(b);
+    const intersection = new Set([...setA].filter((x) => setB.has(x)));
+    return Array.from(intersection);
+}
+
+/**
  * Returns true if the unversioned namespace for a model
  * file is equal to a target
  * @param {ModelFile} modelFile the model file to test
@@ -765,6 +780,157 @@ class DecoratorManager {
         return jsonOutput;
     }
 
+    /**
+     * Compares two arrays. If the first argument is falsy
+     * the function returns true.
+     * @param {string | string[] | null} test the value to test
+     * @param {string[]} values the values to compare
+     * @returns {Boolean} true if the test is falsy or the intersection of
+     * the test and values arrays is not empty (i.e. they have values in common)
+     * @deprecated Use direct comparisons instead. Will be removed in 6.0.0.
+     */
+    static falsyOrEqual(test, values) {
+        return Array.isArray(test)
+            ? intersect(test, values).length > 0
+            : test
+                ? values.includes(test)
+                : true;
+    }
+
+    /**
+     * Executes a Command against a Declaration, adding
+     * decorators to the Declaration, or its properties, as required.
+     * @param {string} namespace the namespace for the declaration
+     * @param {*} declaration the class declaration
+     * @param {*} command the Command object from the dcs
+     * @param {*} [property] the property of a declaration, optional, to be passed if the command is for a property
+     * @param {object} [options] - execute command options
+     * @deprecated No longer used. Will be removed in 6.0.0.
+     */
+    static executeCommand(namespace, declaration, command, property?, options?) {
+        const { target, decorator, type } = command;
+        const { name } = ModelUtil.parseNamespace( namespace, { disableVersionParsing: true } );
+        if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
+            this.falsyOrEqual(target.declaration, [declaration.name])) {
+
+            if (declaration.$class === `${MetaModelNamespace}.MapDeclaration`) {
+                if (target.mapElement) {
+                    switch (target.mapElement) {
+                    case 'KEY':
+                    case 'VALUE':
+                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
+                        break;
+                    case 'KEY_VALUE':
+                        this.applyDecoratorForMapElement('KEY', target, declaration, type, decorator);
+                        this.applyDecoratorForMapElement('VALUE', target, declaration, type, decorator);
+                        break;
+                    }
+                } else if (target.type) {
+                    if (this.falsyOrEqual(target.type, declaration.key.$class)) {
+                        this.applyDecorator(declaration.key, type, decorator);
+                    }
+                    if (this.falsyOrEqual(target.type, declaration.value.$class)) {
+                        this.applyDecorator(declaration.value, type, decorator);
+                    }
+                } else {
+                    this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target);
+                }
+            } else if (!(target.property || target.properties || target.type)) {
+                this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target);
+            } else {
+                if(property) {
+                    this.executePropertyCommand(property, command);
+                }
+            }
+        }
+    }
+
+    /**
+     * Executes a Command against a Property, adding
+     * decorators to the Property as required.
+     * @param {*} property the property
+     * @param {*} command the Command object from the
+     * org.accordproject.decoratorcommands model
+     * @deprecated No longer used. Will be removed in 6.0.0.
+     */
+    static executePropertyCommand(property, command) {
+        const { target, decorator, type } = command;
+        if(target.properties || target.property || target.type) {
+            if (
+                this.falsyOrEqual(
+                    target.property ? target.property : target.properties,
+                    [property.name]
+                ) &&
+                this.falsyOrEqual(target.type, [property.$class])
+            ) {
+                this.applyDecorator(property, type, decorator);
+            }
+        }
+    }
+
+    /**
+     * Executes a Command against a Model Namespace, adding
+     * decorators to the Namespace.
+     * @private
+     * @param {*} model the model
+     * @param {*} command the Command object from the dcs
+     * @deprecated No longer used. Will be removed in 6.0.0.
+     */
+    static executeNamespaceCommand(model, command) {
+        const { target, decorator, type } = command;
+        if (Object.keys(target).length === 2 && target.namespace) {
+            const { name } = ModelUtil.parseNamespace( model.namespace );
+            if(this.falsyOrEqual(target.namespace, [model.namespace, name])) {
+                this.applyDecorator(model, type, decorator);
+            }
+        }
+    }
+
+    /**
+     * Applies a new decorator to the Map element
+     * @private
+     * @param {string} element the element to apply the decorator to
+     * @param {string} target the command target
+     * @param {*} declaration the map declaration
+     * @param {string} type the command type
+     * @param {*} newDecorator the decorator to add
+     * @deprecated No longer used. Will be removed in 6.0.0.
+     */
+    static applyDecoratorForMapElement(element, target, declaration, type, newDecorator) {
+        const decl = element === 'KEY' ? declaration.key : declaration.value;
+        if (target.type) {
+            if (this.falsyOrEqual(target.type, decl.$class)) {
+                this.applyDecorator(decl, type, newDecorator);
+            }
+        } else {
+            this.applyDecorator(decl, type, newDecorator);
+        }
+    }
+
+    /**
+     * Applies the decorator on top of the namespace or else on all declarations
+     * within the namespace.
+     * @private
+     * @param {*} declaration the type to apply the decorator to
+     * @param {string} type the command type
+     * @param {*} decorator the decorator to add
+     * @param {*} target the target object for the decorator
+     * @deprecated No longer used. Will be removed in 6.0.0.
+     */
+    static checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target) {
+        if (target.declaration) {
+            this.applyDecorator(declaration, type, decorator);
+        }
+    }
+
+    /**
+     * Legacy method. Kept for compatibility. Returns true.
+     * @returns {Boolean} true
+     * @deprecated Will be removed in 6.0.0.
+     */
+    static isNamespaceTargetEnabled() {
+        return true;
+    }
 }
 
 export { DecoratorManager };
