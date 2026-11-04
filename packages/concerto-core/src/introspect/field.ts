@@ -17,6 +17,7 @@ import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import Property from './property';
 import NumberValidator from './numbervalidator';
 import StringValidator from './stringvalidator';
+import IllegalModelException from './illegalmodelexception';
 import { NullUtil as Util } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
@@ -136,11 +137,38 @@ class Field extends Property {
     }
 
     /**
+     * Validate the field
+     * @param {ClassDeclaration} classDecl the class declaration of the property
+     * @throws {IllegalModelException}
+     * @protected
+     */
+    validate(classDecl: ClassDeclaration) {
+        if ((this.defaultValue !== null || this.sizeValidator !== null) && this.isTypeScalar()) {
+            if (this.defaultValue !== null) {
+                throw new IllegalModelException(
+                    `Scalar-typed property '${this.getFullyQualifiedName()}' cannot declare a default value. Declare the default on the scalar '${this.getType()}' instead, or use the primitive type.`,
+                    this.getModelFile(),
+                    this.ast.location
+                );
+            }
+            if (this.sizeValidator !== null) {
+                throw new IllegalModelException(
+                    `Scalar-typed property '${this.getFullyQualifiedName()}' cannot declare a size validator. Declare the constraint on the scalar '${this.getType()}' instead, or use the primitive type.`,
+                    this.getModelFile(),
+                    this.ast.location
+                );
+            }
+        }
+
+        super.validate(classDecl);
+    }
+
+    /**
      * Returns true if the field's type is a scalar
      * @returns {boolean} true if the field is a scalar type
      */
     isTypeScalar(): boolean {
-        if (this.isPrimitive()) {
+        if (this.isPrimitive() || !this.getType()) {
             return false;
         } else {
             this.getParent()
@@ -148,7 +176,7 @@ class Field extends Property {
             const type = this.getParent()
                 .getModelFile()
                 .getType(this.getType());
-            return type.isScalarDeclaration?.();
+            return Boolean(type?.isScalarDeclaration?.());
         }
     }
 

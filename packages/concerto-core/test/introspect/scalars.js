@@ -20,6 +20,8 @@ const { ClassDeclaration } = require('../../src/introspect/classdeclaration');
 const { ScalarDeclaration } = require('../../src/introspect/scalardeclaration');
 const { Field } = require('../../src/introspect/field');
 const { ModelFile } = require('../../src/introspect/modelfile');
+const { ModelManager } = require('../../src/modelmanager');
+const { IllegalModelException } = require('../../src/introspect/illegalmodelexception');
 
 // eslint-disable-next-line no-unused-vars
 const should = require('chai').should();
@@ -200,6 +202,108 @@ describe('Scalars', () => {
                 },
             });
             p.getScalarField().isArray().should.equal(false);
+        });
+    });
+
+    describe('#validate', () => {
+        let modelManager;
+
+        beforeEach(() => {
+            modelManager = new ModelManager();
+        });
+
+        it('should throw when a scalar property declares a default value', () => {
+            (() => {
+                modelManager.addCTOModel(`
+                namespace t@1.0.0
+                scalar Tag extends String
+                concept C {
+                  o Tag t default="x"
+                }
+                `);
+            }).should.throw(IllegalModelException, /Scalar-typed property 't@1.0.0.C.t' cannot declare a default value. Declare the default on the scalar 'Tag' instead, or use the primitive type./);
+        });
+
+        it('should throw when a scalar array property declares a default value', () => {
+            (() => {
+                modelManager.addCTOModel(`
+                namespace t@1.0.0
+                scalar Tag extends String
+                concept C {
+                  o Tag[] tags default="x"
+                }
+                `);
+            }).should.throw(IllegalModelException, /Scalar-typed property 't@1.0.0.C.tags' cannot declare a default value. Declare the default on the scalar 'Tag' instead, or use the primitive type./);
+        });
+
+        it('should throw when a scalar array property declares a size validator', () => {
+            (() => {
+                modelManager.addCTOModel(`
+                namespace t@1.0.0
+                scalar Tag extends String
+                concept C {
+                  o Tag[] tags size=[1,2]
+                }
+                `);
+            }).should.throw(IllegalModelException, /Scalar-typed property 't@1.0.0.C.tags' cannot declare a size validator. Declare the constraint on the scalar 'Tag' instead, or use the primitive type./);
+        });
+
+        it('should throw when a scalar single property declares a size validator', () => {
+            (() => {
+                modelManager.addCTOModel(`
+                namespace t@1.0.0
+                scalar Tag extends String
+                concept C {
+                  o Tag t size=[1,2]
+                }
+                `);
+            }).should.throw(IllegalModelException, /Scalar-typed property 't@1.0.0.C.t' cannot declare a size validator. Declare the constraint on the scalar 'Tag' instead, or use the primitive type./);
+        });
+
+        it('should throw when an imported scalar property declares a default value', () => {
+            modelManager.addCTOModel(`
+            namespace base@1.0.0
+            scalar Tag extends String
+            `);
+            (() => {
+                modelManager.addCTOModel(`
+                namespace child@1.0.0
+                import base@1.0.0.Tag
+                concept C {
+                  o Tag t default="x"
+                }
+                `);
+            }).should.throw(IllegalModelException, /Scalar-typed property 'child@1.0.0.C.t' cannot declare a default value. Declare the default on the scalar 'Tag' instead, or use the primitive type./);
+        });
+
+        it('should throw when an imported scalar array property declares a size validator', () => {
+            modelManager.addCTOModel(`
+            namespace base@1.0.0
+            scalar Tag extends String
+            `);
+            (() => {
+                modelManager.addCTOModel(`
+                namespace child@1.0.0
+                import base@1.0.0.Tag
+                concept C {
+                  o Tag[] tags size=[1,2]
+                }
+                `);
+            }).should.throw(IllegalModelException, /Scalar-typed property 'child@1.0.0.C.tags' cannot declare a size validator. Declare the constraint on the scalar 'Tag' instead, or use the primitive type./);
+        });
+
+        it('should succeed when scalar property has no default or size modifiers', () => {
+            modelManager.addCTOModel(`
+            namespace t@1.0.0
+            scalar Tag extends String default="fromScalar"
+            concept C {
+              o Tag t
+              o Tag[] tags
+            }
+            `);
+            const c = modelManager.getType('t@1.0.0.C');
+            c.getProperty('t').should.be.an.instanceOf(Field);
+            c.getProperty('tags').should.be.an.instanceOf(Field);
         });
     });
 });
