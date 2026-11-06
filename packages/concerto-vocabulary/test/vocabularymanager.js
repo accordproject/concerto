@@ -498,7 +498,7 @@ declarations:
         ssnDecorator.getArguments()[0].should.equal('SSN');
     });
 
-    it('generateDecoratorCommands - preserves number and boolean types in decorator arguments', () => {
+    describe('generateDecoratorCommands - type preservation and fallback handling', () => {
         const cto = `namespace org.typed@1.0.0
 concept Widget {
     o String name
@@ -508,76 +508,200 @@ concept Widget {
 namespace: org.typed@1.0.0
 term: Typed Namespace
 sortOrder: 10
+minLevel: 0
+offset: -5
 featured: true
+deprecated: false
+emptyNs: null
+nsArray:
+  - 1
+  - 2
+nsObject:
+  key: value
 declarations:
   - Widget: A Widget Concept
     priority: 1
+    tier: 0
+    zIndex: -1
     isActive: false
+    isSearchable: true
+    emptyDecl: null
+    declArray:
+      - tag1
+      - tag2
+    declObject:
+      nested: true
     properties:
       - name: Widget Name
         maxLength: 256
+        minValue: 0
+        minTemp: -40
         required: true
+        readOnly: false
+        emptyProp: null
+        propArray:
+          - 100
+        propObject:
+          inner: val
 `;
-        const mm = new ModelManager();
-        mm.addCTOModel(cto);
-        const vm = new VocabularyManager();
-        vm.addVocabulary(voc);
-        const commandSet = vm.generateDecoratorCommands(mm, 'en');
 
-        // Check namespace level commands
-        const nsCommands = commandSet.commands.filter(c => !c.target.declaration && !c.target.property);
-        const nsTerm = nsCommands.find(c => c.decorator.name === 'Term');
-        nsTerm.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorString');
-        nsTerm.decorator.arguments[0].value.should.equal('Typed Namespace');
+        it('preserves string, number (including 0 and negative), and boolean types for namespace-level terms', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto);
+            const vm = new VocabularyManager();
+            vm.addVocabulary(voc);
+            const commandSet = vm.generateDecoratorCommands(mm, 'en');
 
-        const nsSort = nsCommands.find(c => c.decorator.name === 'Term_sortOrder');
-        nsSort.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
-        nsSort.decorator.arguments[0].value.should.equal(10);
+            const nsCommands = commandSet.commands.filter(c => !c.target.declaration && !c.target.property);
 
-        const nsFeatured = nsCommands.find(c => c.decorator.name === 'Term_featured');
-        nsFeatured.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
-        nsFeatured.decorator.arguments[0].value.should.equal(true);
+            const nsTerm = nsCommands.find(c => c.decorator.name === 'Term');
+            nsTerm.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorString');
+            nsTerm.decorator.arguments[0].value.should.equal('Typed Namespace');
 
-        // Check declaration level commands
-        const declCommands = commandSet.commands.filter(c => c.target.declaration === 'Widget' && !c.target.property);
-        const declTerm = declCommands.find(c => c.decorator.name === 'Term');
-        declTerm.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorString');
-        declTerm.decorator.arguments[0].value.should.equal('A Widget Concept');
+            const nsSort = nsCommands.find(c => c.decorator.name === 'Term_sortOrder');
+            nsSort.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+            nsSort.decorator.arguments[0].value.should.equal(10);
 
-        const declPriority = declCommands.find(c => c.decorator.name === 'Term_priority');
-        declPriority.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
-        declPriority.decorator.arguments[0].value.should.equal(1);
+            const nsMinLevel = nsCommands.find(c => c.decorator.name === 'Term_minLevel');
+            nsMinLevel.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+            nsMinLevel.decorator.arguments[0].value.should.equal(0);
 
-        const declIsActive = declCommands.find(c => c.decorator.name === 'Term_isActive');
-        declIsActive.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
-        declIsActive.decorator.arguments[0].value.should.equal(false);
+            const nsOffset = nsCommands.find(c => c.decorator.name === 'Term_offset');
+            nsOffset.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+            nsOffset.decorator.arguments[0].value.should.equal(-5);
 
-        // Check property level commands
-        const propCommands = commandSet.commands.filter(c => c.target.declaration === 'Widget' && c.target.property === 'name');
-        const propTerm = propCommands.find(c => c.decorator.name === 'Term');
-        propTerm.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorString');
-        propTerm.decorator.arguments[0].value.should.equal('Widget Name');
+            const nsFeatured = nsCommands.find(c => c.decorator.name === 'Term_featured');
+            nsFeatured.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
+            nsFeatured.decorator.arguments[0].value.should.equal(true);
 
-        const propMaxLength = propCommands.find(c => c.decorator.name === 'Term_maxLength');
-        propMaxLength.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
-        propMaxLength.decorator.arguments[0].value.should.equal(256);
+            const nsDeprecated = nsCommands.find(c => c.decorator.name === 'Term_deprecated');
+            nsDeprecated.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
+            nsDeprecated.decorator.arguments[0].value.should.equal(false);
+        });
 
-        const propRequired = propCommands.find(c => c.decorator.name === 'Term_required');
-        propRequired.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
-        propRequired.decorator.arguments[0].value.should.equal(true);
+        it('preserves string, number (including 0 and negative), and boolean types for declaration-level terms', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto);
+            const vm = new VocabularyManager();
+            vm.addVocabulary(voc);
+            const commandSet = vm.generateDecoratorCommands(mm, 'en');
 
-        // Decorate models and verify types in the decorated AST
-        const decoratedMm = DecoratorManager.decorateModels(mm, commandSet, { validate: true, migrate: true, validateCommands: true });
-        const decoratedMf = decoratedMm.getModelFile('org.typed@1.0.0');
-        const widgetDecl = decoratedMf.getLocalType('Widget');
-        widgetDecl.getDecorator('Term').getArguments()[0].should.equal('A Widget Concept');
-        widgetDecl.getDecorator('Term_priority').getArguments()[0].should.equal(1);
-        widgetDecl.getDecorator('Term_isActive').getArguments()[0].should.equal(false);
+            const declCommands = commandSet.commands.filter(c => c.target.declaration === 'Widget' && !c.target.property);
 
-        const nameProp = widgetDecl.getProperty('name');
-        nameProp.getDecorator('Term').getArguments()[0].should.equal('Widget Name');
-        nameProp.getDecorator('Term_maxLength').getArguments()[0].should.equal(256);
-        nameProp.getDecorator('Term_required').getArguments()[0].should.equal(true);
+            const declTerm = declCommands.find(c => c.decorator.name === 'Term');
+            declTerm.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorString');
+            declTerm.decorator.arguments[0].value.should.equal('A Widget Concept');
+
+            const declPriority = declCommands.find(c => c.decorator.name === 'Term_priority');
+            declPriority.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+            declPriority.decorator.arguments[0].value.should.equal(1);
+
+            const declTier = declCommands.find(c => c.decorator.name === 'Term_tier');
+            declTier.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+            declTier.decorator.arguments[0].value.should.equal(0);
+
+            const declZIndex = declCommands.find(c => c.decorator.name === 'Term_zIndex');
+            declZIndex.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+            declZIndex.decorator.arguments[0].value.should.equal(-1);
+
+            const declIsActive = declCommands.find(c => c.decorator.name === 'Term_isActive');
+            declIsActive.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
+            declIsActive.decorator.arguments[0].value.should.equal(false);
+
+            const declIsSearchable = declCommands.find(c => c.decorator.name === 'Term_isSearchable');
+            declIsSearchable.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
+            declIsSearchable.decorator.arguments[0].value.should.equal(true);
+        });
+
+        it('preserves string, number (including 0 and negative), and boolean types for property-level terms', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto);
+            const vm = new VocabularyManager();
+            vm.addVocabulary(voc);
+            const commandSet = vm.generateDecoratorCommands(mm, 'en');
+
+            const propCommands = commandSet.commands.filter(c => c.target.declaration === 'Widget' && c.target.property === 'name');
+
+            const propTerm = propCommands.find(c => c.decorator.name === 'Term');
+            propTerm.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorString');
+            propTerm.decorator.arguments[0].value.should.equal('Widget Name');
+
+            const propMaxLength = propCommands.find(c => c.decorator.name === 'Term_maxLength');
+            propMaxLength.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+            propMaxLength.decorator.arguments[0].value.should.equal(256);
+
+            const propMinValue = propCommands.find(c => c.decorator.name === 'Term_minValue');
+            propMinValue.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+            propMinValue.decorator.arguments[0].value.should.equal(0);
+
+            const propMinTemp = propCommands.find(c => c.decorator.name === 'Term_minTemp');
+            propMinTemp.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorNumber');
+            propMinTemp.decorator.arguments[0].value.should.equal(-40);
+
+            const propRequired = propCommands.find(c => c.decorator.name === 'Term_required');
+            propRequired.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
+            propRequired.decorator.arguments[0].value.should.equal(true);
+
+            const propReadOnly = propCommands.find(c => c.decorator.name === 'Term_readOnly');
+            propReadOnly.decorator.arguments[0].$class.should.equal('concerto.metamodel@1.0.0.DecoratorBoolean');
+            propReadOnly.decorator.arguments[0].value.should.equal(false);
+        });
+
+        it('skips decorator command generation for terms with null, undefined, array, or object values', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto);
+            const vm = new VocabularyManager();
+            vm.addVocabulary(voc);
+            const commandSet = vm.generateDecoratorCommands(mm, 'en');
+
+            // Fallback values at namespace level must be skipped
+            should.not.exist(commandSet.commands.find(c => c.decorator.name === 'Term_emptyNs'));
+            should.not.exist(commandSet.commands.find(c => c.decorator.name === 'Term_nsArray'));
+            should.not.exist(commandSet.commands.find(c => c.decorator.name === 'Term_nsObject'));
+
+            // Fallback values at declaration level must be skipped
+            should.not.exist(commandSet.commands.find(c => c.decorator.name === 'Term_emptyDecl'));
+            should.not.exist(commandSet.commands.find(c => c.decorator.name === 'Term_declArray'));
+            should.not.exist(commandSet.commands.find(c => c.decorator.name === 'Term_declObject'));
+
+            // Fallback values at property level must be skipped
+            should.not.exist(commandSet.commands.find(c => c.decorator.name === 'Term_emptyProp'));
+            should.not.exist(commandSet.commands.find(c => c.decorator.name === 'Term_propArray'));
+            should.not.exist(commandSet.commands.find(c => c.decorator.name === 'Term_propObject'));
+        });
+
+        it('decorates models correctly and preserves types in the decorated AST', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto);
+            const vm = new VocabularyManager();
+            vm.addVocabulary(voc);
+            const commandSet = vm.generateDecoratorCommands(mm, 'en');
+
+            const decoratedMm = DecoratorManager.decorateModels(mm, commandSet, { validate: true, migrate: true, validateCommands: true });
+            const decoratedMf = decoratedMm.getModelFile('org.typed@1.0.0');
+
+            const widgetDecl = decoratedMf.getLocalType('Widget');
+            widgetDecl.getDecorator('Term').getArguments()[0].should.equal('A Widget Concept');
+            widgetDecl.getDecorator('Term_priority').getArguments()[0].should.equal(1);
+            widgetDecl.getDecorator('Term_tier').getArguments()[0].should.equal(0);
+            widgetDecl.getDecorator('Term_zIndex').getArguments()[0].should.equal(-1);
+            widgetDecl.getDecorator('Term_isActive').getArguments()[0].should.equal(false);
+            widgetDecl.getDecorator('Term_isSearchable').getArguments()[0].should.equal(true);
+            should.not.exist(widgetDecl.getDecorator('Term_emptyDecl'));
+            should.not.exist(widgetDecl.getDecorator('Term_declArray'));
+            should.not.exist(widgetDecl.getDecorator('Term_declObject'));
+
+            const nameProp = widgetDecl.getProperty('name');
+            nameProp.getDecorator('Term').getArguments()[0].should.equal('Widget Name');
+            nameProp.getDecorator('Term_maxLength').getArguments()[0].should.equal(256);
+            nameProp.getDecorator('Term_minValue').getArguments()[0].should.equal(0);
+            nameProp.getDecorator('Term_minTemp').getArguments()[0].should.equal(-40);
+            nameProp.getDecorator('Term_required').getArguments()[0].should.equal(true);
+            nameProp.getDecorator('Term_readOnly').getArguments()[0].should.equal(false);
+            should.not.exist(nameProp.getDecorator('Term_emptyProp'));
+            should.not.exist(nameProp.getDecorator('Term_propArray'));
+            should.not.exist(nameProp.getDecorator('Term_propObject'));
+        });
     });
 
     it('addVocabulary - preserves flow-style collections as strings', () => {

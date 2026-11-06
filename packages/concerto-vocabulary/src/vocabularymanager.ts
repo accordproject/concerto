@@ -334,25 +334,41 @@ class VocabularyManager {
         const CLASS_DECORATOR_BOOLEAN = `${MetaModelNamespace}.DecoratorBoolean`;
 
         const makeArgument = (value: any) => {
-            if (typeof value === 'number') {
+            if (typeof value === 'number' && Number.isFinite(value)) {
                 return { '$class': CLASS_DECORATOR_NUMBER, 'value': value };
             }
             if (typeof value === 'boolean') {
                 return { '$class': CLASS_DECORATOR_BOOLEAN, 'value': value };
             }
-            return { '$class': CLASS_DECORATOR_STRING, 'value': String(value) };
+            if (typeof value === 'string') {
+                return { '$class': CLASS_DECORATOR_STRING, 'value': value };
+            }
+            return null;
         };
 
-        const makeCommand = (target: any, decoratorName: string, value: any) => ({
-            '$class': CLASS_COMMAND,
-            'type': 'UPSERT',
-            'target': target,
-            'decorator': {
-                '$class': CLASS_DECORATOR,
-                'name': decoratorName,
-                'arguments': [makeArgument(value)]
+        const makeCommand = (target: any, decoratorName: string, value: any) => {
+            const argument = makeArgument(value);
+            if (!argument) {
+                return null;
             }
-        });
+            return {
+                '$class': CLASS_COMMAND,
+                'type': 'UPSERT',
+                'target': target,
+                'decorator': {
+                    '$class': CLASS_DECORATOR,
+                    'name': decoratorName,
+                    'arguments': [argument]
+                }
+            };
+        };
+
+        const addCommand = (target: any, decoratorName: string, value: any) => {
+            const command = makeCommand(target, decoratorName, value);
+            if (command) {
+                commands.push(command);
+            }
+        };
 
         // @ts-ignore
         (modelManager as any).getModelFiles().forEach((model: any) => {
@@ -364,15 +380,15 @@ class VocabularyManager {
                 for (let i = 0; i < keys.length; i++) {
                     const term = keys[i];
                     if (term === 'term') {
-                        commands.push(makeCommand(
+                        addCommand(
                             { '$class': CLASS_TARGET, 'namespace': namespace },
                             'Term', nsTerms[term]
-                        ));
+                        );
                     } else if (term !== 'declarations' && term !== 'namespace' && term !== 'locale') {
-                        commands.push(makeCommand(
+                        addCommand(
                             { '$class': CLASS_TARGET, 'namespace': namespace },
                             `Term_${term}`, nsTerms[term]
-                        ));
+                        );
                     }
                 }
             }
@@ -386,15 +402,15 @@ class VocabularyManager {
                     for (let i = 0; i < keys.length; i++) {
                         const term = keys[i];
                         if (term === declName) {
-                            commands.push(makeCommand(
+                            addCommand(
                                 { '$class': CLASS_TARGET, 'namespace': namespace, 'declaration': declName },
                                 'Term', declTerms[term]
-                            ));
+                            );
                         } else if (term !== 'properties') {
-                            commands.push(makeCommand(
+                            addCommand(
                                 { '$class': CLASS_TARGET, 'namespace': namespace, 'declaration': declName },
                                 `Term_${term}`, declTerms[term]
-                            ));
+                            );
                         }
                     }
                 }
@@ -416,10 +432,10 @@ class VocabularyManager {
                         const keys = Object.keys(propertyTerms);
                         for (let i = 0; i < keys.length; i++) {
                             const term = keys[i];
-                            commands.push(makeCommand(
+                            addCommand(
                                 { '$class': CLASS_TARGET, 'namespace': namespace, 'declaration': declName, [propertyType]: propertyName },
                                 term === propertyName ? 'Term' : `Term_${term}`, propertyTerms[term]
-                            ));
+                            );
                         }
                     }
                 }
