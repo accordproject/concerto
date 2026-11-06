@@ -49,6 +49,18 @@ describe('Abstract Must Be Subclassed Rule', () => {
         expect(results).toHaveLength(0);
     });
 
+    test('should stop at an imported supertype and report only the local orphan', async () => {
+        const results = await testRules({
+            rules: {
+                'abstract-must-subclassed': abstractMustSubclassed,
+            }
+        }, 'abstract-must-subclassed-imported-supertype.cto');
+
+        expect(results).toHaveLength(1);
+        expect(results[0].code).toBe('abstract-must-subclassed');
+        expect(results[0].message).toBe('Abstract declaration \'Orphan\' must have concrete subclasses');
+    });
+
     test('should report only un-subclassed branch in a branching hierarchy', async () => {
         const results = await testRules({
             rules: {
