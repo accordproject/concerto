@@ -68,7 +68,9 @@ check('Node resolves the import condition, not the browser build', async () => {
 check('model round-trips through Factory and Serializer', () => {
     const modelManager = new ModelManager();
     modelManager.addCTOModel(MODEL, 'smoke.cto');
-    const serializer = new Serializer(new Factory(modelManager), modelManager);
+    // Pin the offset so the DateTime serializes back in UTC whatever the
+    // machine's local timezone is.
+    const serializer = new Serializer(new Factory(modelManager), modelManager, { utcOffset: 0 });
     const json = { $class: 'smoke@1.0.0.Ping', id: 'e1', when: '2020-01-01T12:00:00.000Z' };
     const resource = serializer.fromJSON(json);
     assert.strictEqual(resource.getIdentifier(), 'e1');
