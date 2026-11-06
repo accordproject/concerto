@@ -326,4 +326,57 @@ describe('ScalarDeclaration', () => {
             testClass.isClassDeclaration().should.be.false;
         });
     });
+
+    describe('#validate', () => {
+        it('should throw when numeric scalar has non-numeric defaultValue', () => {
+            (() => {
+                modelManager.fromAst({
+                    $class: 'concerto.metamodel@1.0.0.Models',
+                    models: [{
+                        $class: 'concerto.metamodel@1.0.0.ModelFile',
+                        namespace: 'test@1.0.0',
+                        declarations: [{
+                            $class: 'concerto.metamodel@1.0.0.IntegerScalar',
+                            name: 'MyInt',
+                            defaultValue: 'notanumber'
+                        }]
+                    }]
+                });
+            }).should.throw(/Invalid default value 'notanumber' for numeric scalar, expected a number/);
+        });
+
+        it('should throw when boolean scalar has non-boolean defaultValue', () => {
+            (() => {
+                modelManager.fromAst({
+                    $class: 'concerto.metamodel@1.0.0.Models',
+                    models: [{
+                        $class: 'concerto.metamodel@1.0.0.ModelFile',
+                        namespace: 'test@1.0.0',
+                        declarations: [{
+                            $class: 'concerto.metamodel@1.0.0.BooleanScalar',
+                            name: 'MyBool',
+                            defaultValue: 'notaboolean'
+                        }]
+                    }]
+                });
+            }).should.throw(/Invalid default value 'notaboolean' for boolean scalar, expected a boolean/);
+        });
+
+        it('should throw when string scalar has non-string defaultValue', () => {
+            (() => {
+                modelManager.fromAst({
+                    $class: 'concerto.metamodel@1.0.0.Models',
+                    models: [{
+                        $class: 'concerto.metamodel@1.0.0.ModelFile',
+                        namespace: 'test@1.0.0',
+                        declarations: [{
+                            $class: 'concerto.metamodel@1.0.0.StringScalar',
+                            name: 'MyString',
+                            defaultValue: 12345
+                        }]
+                    }]
+                });
+            }).should.throw(/Invalid default value '12345' for String scalar, expected a string/);
+        });
+    });
 });

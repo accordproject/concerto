@@ -71,14 +71,18 @@ class NumberValidator extends Validator{
             }
         }
 
-        if (this.field?.ast?.defaultValue !== undefined) {
+        if (!isNull(this.field?.ast?.defaultValue)) {
             let value = this.field.ast.defaultValue;
-            if (this.lowerBound !== null && value < this.lowerBound) {
-                this.reportModelError(`Value ${value} is outside lower bound ${this.lowerBound}`);
-            }
+            if (typeof value !== 'number' || Number.isNaN(value)) {
+                this.reportModelError(`Invalid default value '${value}' for numeric field, expected a number.`);
+            } else {
+                if (this.lowerBound !== null && value < this.lowerBound) {
+                    this.reportModelError(`Value ${value} is outside lower bound ${this.lowerBound}`);
+                }
 
-            if (this.upperBound !== null && value > this.upperBound) {
-                this.reportModelError(`Value ${value} is outside upper bound ${this.upperBound}`);
+                if (this.upperBound !== null && value > this.upperBound) {
+                    this.reportModelError(`Value ${value} is outside upper bound ${this.upperBound}`);
+                }
             }
         }
     }

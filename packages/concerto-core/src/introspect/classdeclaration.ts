@@ -91,10 +91,23 @@ class ClassDeclaration extends Declaration {
 
         if (this.ast.identified) {
             if (this.ast.identified.$class === `${MetaModelNamespace}.IdentifiedBy`) {
+                if (!this.ast.identified.name || typeof this.ast.identified.name !== 'string' || this.ast.identified.name.trim().length === 0) {
+                    throw new IllegalModelException(
+                        `IdentifiedBy must contain property 'name', for class ${this.name}`,
+                        this.modelFile,
+                        this.ast.location
+                    );
+                }
                 this.idField = this.ast.identified.name;
-            } else {
+            } else if (this.ast.identified.$class === `${MetaModelNamespace}.Identified`) {
                 this.idField = '$identifier';
                 this.addIdentifierField();
+            } else {
+                throw new IllegalModelException(
+                    `Unrecognized identified type '${this.ast.identified.$class}', for class ${this.name}`,
+                    this.modelFile,
+                    this.ast.location
+                );
             }
         }
 
@@ -247,6 +260,10 @@ class ClassDeclaration extends Declaration {
 
                 if (idField.isOptional()) {
                     throw new IllegalModelException('Identifying fields cannot be optional.', this.modelFile, this.ast.location);
+                }
+
+                if (idField.isArray()) {
+                    throw new IllegalModelException('Identifying fields cannot be arrays.', this.modelFile, this.ast.location);
                 }
 
                 if(this.superType) {

@@ -827,6 +827,28 @@ describe('MapDeclaration', () => {
                 `, 'invalid.cto');
             }).should.throw(IllegalModelException, /Undeclared type "MissingType"/);
         });
+
+        it('should throw IllegalModelException if relationship points to primitive type', () => {
+            const mm = new ModelManager({ strict: true });
+            (() => {
+                mm.fromAst({
+                    $class: 'concerto.metamodel@1.0.0.Models',
+                    models: [{
+                        $class: 'concerto.metamodel@1.0.0.ModelFile',
+                        namespace: 'org.acme.maptest@1.0.0',
+                        declarations: [{
+                            $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                            name: 'InvalidMap',
+                            key: { $class: 'concerto.metamodel@1.0.0.StringMapKeyType' },
+                            value: {
+                                $class: 'concerto.metamodel@1.0.0.RelationshipMapValueType',
+                                type: { $class: 'concerto.metamodel@1.0.0.TypeIdentifier', name: 'String' }
+                            }
+                        }]
+                    }]
+                });
+            }).should.throw(IllegalModelException, /Relationship InvalidMap cannot be to the primitive type String/);
+        });
     });
 });
 

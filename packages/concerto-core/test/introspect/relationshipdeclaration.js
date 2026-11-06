@@ -111,5 +111,38 @@ describe('RelationshipDeclaration', function () {
                 field.validate(vehicleDeclaration);
             }).should.throw(/Relationship owner must be to a class that has an identifier/);
         });
+
+        it('should throw if relationship has a default value', () => {
+            (() => {
+                modelManager.fromAst({
+                    $class: 'concerto.metamodel@1.0.0.Models',
+                    models: [{
+                        $class: 'concerto.metamodel@1.0.0.ModelFile',
+                        namespace: 'org.acme.rel@1.0.0',
+                        declarations: [{
+                            $class: 'concerto.metamodel@1.0.0.AssetDeclaration',
+                            name: 'Car',
+                            properties: [{
+                                $class: 'concerto.metamodel@1.0.0.RelationshipProperty',
+                                name: 'owner',
+                                type: { $class: 'concerto.metamodel@1.0.0.TypeIdentifier', name: 'Person' },
+                                defaultValue: 'person1'
+                            }]
+                        }, {
+                            $class: 'concerto.metamodel@1.0.0.ParticipantDeclaration',
+                            name: 'Person',
+                            properties: [{
+                                $class: 'concerto.metamodel@1.0.0.StringProperty',
+                                name: 'id'
+                            }],
+                            identified: {
+                                $class: 'concerto.metamodel@1.0.0.IdentifiedBy',
+                                name: 'id'
+                            }
+                        }]
+                    }]
+                });
+            }).should.throw(/Relationship owner cannot have a default value/);
+        });
     });
 });
