@@ -15,6 +15,7 @@
 import Property from './property';
 import IllegalModelException from './illegalmodelexception';
 import ModelUtil from '../modelutil';
+import { NullUtil } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -49,6 +50,15 @@ class RelationshipDeclaration extends Property {
      */
     validate(classDecl: ClassDeclaration): void {
         super.validate(classDecl);
+
+        if (!NullUtil.isNull((this.ast as any).defaultValue)) {
+            throw new IllegalModelException(
+                `Relationship ${this.getName()} cannot have a default value`,
+                classDecl.getModelFile(),
+                this.ast.location
+            );
+        }
+
         // relationship cannot point to primitive types
         if(!this.getType()) {
             throw new IllegalModelException('Relationship must have a type', classDecl.getModelFile(), this.ast.location);

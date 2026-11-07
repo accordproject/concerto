@@ -139,6 +139,35 @@ class ScalarDeclaration extends Declaration {
                 `Duplicate class name ${duplicateElements[0]}`
             );
         }
+
+        if (!Util.isNull(this.defaultValue)) {
+            const type = this.getType();
+            if (['Integer', 'Double', 'Long'].includes(type!)) {
+                if (typeof this.defaultValue !== 'number' || Number.isNaN(this.defaultValue)) {
+                    throw new IllegalModelException(
+                        `Invalid default value '${this.defaultValue}' for numeric scalar, expected a number.`,
+                        this.modelFile,
+                        this.ast.location
+                    );
+                }
+            } else if (type === 'Boolean') {
+                if (typeof this.defaultValue !== 'boolean') {
+                    throw new IllegalModelException(
+                        `Invalid default value '${this.defaultValue}' for boolean scalar, expected a boolean.`,
+                        this.modelFile,
+                        this.ast.location
+                    );
+                }
+            } else if (type === 'String' || type === 'DateTime') {
+                if (typeof this.defaultValue !== 'string') {
+                    throw new IllegalModelException(
+                        `Invalid default value '${this.defaultValue}' for ${type} scalar, expected a string.`,
+                        this.modelFile,
+                        this.ast.location
+                    );
+                }
+            }
+        }
     }
 
     /**

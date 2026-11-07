@@ -98,6 +98,13 @@ describe('AssetDeclaration', () => {
             }).should.throw(/Identifying fields cannot be optional/);
         });
 
+        it('should throw when identifying field is an array', () => {
+            let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.arrayid.cto');
+            (() => {
+                asset.validate();
+            }).should.throw(/Identifying fields cannot be arrays/);
+        });
+
         it('should throw when field has been duplicated in the same class', () => {
             let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.dupesimp.cto');
 

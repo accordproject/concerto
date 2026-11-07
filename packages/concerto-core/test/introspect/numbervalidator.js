@@ -106,6 +106,20 @@ describe('NumberValidator', () => {
                 new NumberValidator(mockField, { lower: 0, upper: 50 });
             }).should.not.throw();
         });
+
+        it('should not throw an error if default value is null and lower bound is greater than 0', () => {
+            mockField.ast = { defaultValue: null };
+            (() => {
+                new NumberValidator(mockField, { lower: 10, upper: 100 });
+            }).should.not.throw();
+        });
+
+        it('should throw an error if default value is not a number', () => {
+            mockField.ast = { defaultValue: 'notanumber' };
+            (() => {
+                new NumberValidator(mockField, { lower: 0, upper: 100 });
+            }).should.throw(/Invalid default value 'notanumber' for numeric field, expected a number/);
+        });
     });
 
     describe('#validate', () => {

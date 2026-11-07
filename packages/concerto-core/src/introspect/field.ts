@@ -17,6 +17,7 @@ import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import Property from './property';
 import NumberValidator from './numbervalidator';
 import StringValidator from './stringvalidator';
+import IllegalModelException from './illegalmodelexception';
 import { NullUtil as Util } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
@@ -124,6 +125,53 @@ class Field extends Property {
             this.optional +
             '}'
         );
+    }
+
+    /**
+     * Validate the field
+     * @param {ClassDeclaration} classDecl the class declaration of the property
+     * @throws {IllegalModelException}
+     * @protected
+     */
+    validate(classDecl: ClassDeclaration): void {
+        super.validate(classDecl);
+
+        if (this.array && !Util.isNull(this.defaultValue)) {
+            throw new IllegalModelException(
+                'Array properties cannot have a default value.',
+                classDecl.getModelFile(),
+                this.ast.location
+            );
+        }
+
+        if (this.isPrimitive() && !Util.isNull(this.defaultValue)) {
+            const type = this.getType();
+            if (['Integer', 'Double', 'Long'].includes(type!)) {
+                if (typeof this.defaultValue !== 'number' || Number.isNaN(this.defaultValue)) {
+                    throw new IllegalModelException(
+                        `Invalid default value '${this.defaultValue}' for numeric field, expected a number.`,
+                        classDecl.getModelFile(),
+                        this.ast.location
+                    );
+                }
+            } else if (type === 'Boolean') {
+                if (typeof this.defaultValue !== 'boolean') {
+                    throw new IllegalModelException(
+                        `Invalid default value '${this.defaultValue}' for boolean field, expected a boolean.`,
+                        classDecl.getModelFile(),
+                        this.ast.location
+                    );
+                }
+            } else if (type === 'String' || type === 'DateTime') {
+                if (typeof this.defaultValue !== 'string') {
+                    throw new IllegalModelException(
+                        `Invalid default value '${this.defaultValue}' for ${type} field, expected a string.`,
+                        classDecl.getModelFile(),
+                        this.ast.location
+                    );
+                }
+            }
+        }
     }
 
     /**

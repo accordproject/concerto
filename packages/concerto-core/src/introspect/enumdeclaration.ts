@@ -13,6 +13,7 @@
  */
 
 import ClassDeclaration from './classdeclaration';
+import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -44,6 +45,50 @@ class EnumDeclaration extends ClassDeclaration {
      */
     toString() {
         return 'EnumDeclaration {id=' + this.getFullyQualifiedName() + '}';
+    }
+
+    /**
+     * Semantic validation of the structure of this enum declaration.
+     *
+     * @throws {IllegalModelException}
+     * @protected
+     */
+    validate() {
+        if (this.ast.superType) {
+            throw new IllegalModelException(
+                `Enum declaration '${this.name}' cannot extend another type.`,
+                this.modelFile,
+                this.ast.location
+            );
+        }
+
+        if (this.ast.isAbstract) {
+            throw new IllegalModelException(
+                `Enum declaration '${this.name}' cannot be abstract.`,
+                this.modelFile,
+                this.ast.location
+            );
+        }
+
+        if (this.isIdentified()) {
+            throw new IllegalModelException(
+                `Enum declaration '${this.name}' cannot be identified.`,
+                this.modelFile,
+                this.ast.location
+            );
+        }
+
+        for (const property of this.getOwnProperties()) {
+            if (!(property as any).isEnumValue?.()) {
+                throw new IllegalModelException(
+                    `Enum declaration '${this.name}' can only contain enum values, but contains property '${property.getName()}'.`,
+                    this.modelFile,
+                    property.ast?.location
+                );
+            }
+        }
+
+        super.validate();
     }
 
     /**

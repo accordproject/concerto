@@ -68,6 +68,14 @@ class MapValueType extends Decorated {
      * @protected
      */
     validate() {
+        if (this.isRelationship() && ModelUtil.isPrimitiveType(this.type)) {
+            throw new IllegalModelException(
+                `Relationship ${this.getName()} cannot be to the primitive type ${this.type}`,
+                this.modelFile,
+                this.ast.location
+            );
+        }
+
         if (!ModelUtil.isPrimitiveType(this.type)) {
             this.modelFile.resolveType(
                 `the value of map ${this.parent.getFullyQualifiedName()}`,

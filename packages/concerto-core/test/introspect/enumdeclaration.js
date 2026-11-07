@@ -83,4 +83,113 @@ describe('EnumDeclaration', () => {
         });
     });
 
+    describe('#validate', () => {
+        it('should throw when an enum declaration is identified', () => {
+            (() => {
+                modelManager.fromAst({
+                    $class: 'concerto.metamodel@1.0.0.Models',
+                    models: [{
+                        $class: 'concerto.metamodel@1.0.0.ModelFile',
+                        namespace: 'test@1.0.0',
+                        declarations: [{
+                            $class: 'concerto.metamodel@1.0.0.EnumDeclaration',
+                            name: 'BadEnum',
+                            identified: { $class: 'concerto.metamodel@1.0.0.Identified' },
+                            properties: [
+                                { $class: 'concerto.metamodel@1.0.0.EnumProperty', name: 'A' }
+                            ]
+                        }]
+                    }]
+                });
+            }).should.throw(/Enum declaration 'BadEnum' cannot be identified/);
+        });
+
+        it('should throw when an enum declaration contains non-enum properties', () => {
+            (() => {
+                modelManager.fromAst({
+                    $class: 'concerto.metamodel@1.0.0.Models',
+                    models: [{
+                        $class: 'concerto.metamodel@1.0.0.ModelFile',
+                        namespace: 'test@1.0.0',
+                        declarations: [{
+                            $class: 'concerto.metamodel@1.0.0.EnumDeclaration',
+                            name: 'BadEnum',
+                            properties: [
+                                { $class: 'concerto.metamodel@1.0.0.EnumProperty', name: 'A' },
+                                { $class: 'concerto.metamodel@1.0.0.StringProperty', name: 'field' }
+                            ]
+                        }]
+                    }]
+                });
+            }).should.throw(/Enum declaration 'BadEnum' can only contain enum values, but contains property 'field'/);
+        });
+
+        it('should throw when an enum declaration extends another type', () => {
+            (() => {
+                modelManager.fromAst({
+                    $class: 'concerto.metamodel@1.0.0.Models',
+                    models: [{
+                        $class: 'concerto.metamodel@1.0.0.ModelFile',
+                        namespace: 'test@1.0.0',
+                        declarations: [{
+                            $class: 'concerto.metamodel@1.0.0.EnumDeclaration',
+                            name: 'BadEnum',
+                            superType: { $class: 'concerto.metamodel@1.0.0.TypeIdentifier', name: 'Other' },
+                            properties: [
+                                { $class: 'concerto.metamodel@1.0.0.EnumProperty', name: 'A' }
+                            ]
+                        }]
+                    }]
+                });
+            }).should.throw(/Enum declaration 'BadEnum' cannot extend another type/);
+        });
+
+        it('should throw when an enum declaration is abstract', () => {
+            (() => {
+                modelManager.fromAst({
+                    $class: 'concerto.metamodel@1.0.0.Models',
+                    models: [{
+                        $class: 'concerto.metamodel@1.0.0.ModelFile',
+                        namespace: 'test@1.0.0',
+                        declarations: [{
+                            $class: 'concerto.metamodel@1.0.0.EnumDeclaration',
+                            name: 'BadEnum',
+                            isAbstract: true,
+                            properties: [
+                                { $class: 'concerto.metamodel@1.0.0.EnumProperty', name: 'A' }
+                            ]
+                        }]
+                    }]
+                });
+            }).should.throw(/Enum declaration 'BadEnum' cannot be abstract/);
+        });
+
+        it('should throw when an enum declaration uses IdentifiedBy with a non-existent property', () => {
+            (() => {
+                modelManager.fromAst({
+                    $class: 'concerto.metamodel@1.0.0.Models',
+                    models: [{
+                        $class: 'concerto.metamodel@1.0.0.ModelFile',
+                        namespace: 'test@1.0.0',
+                        declarations: [{
+                            $class: 'concerto.metamodel@1.0.0.EnumDeclaration',
+                            name: 'BadEnum',
+                            identified: { $class: 'concerto.metamodel@1.0.0.IdentifiedBy', name: 'missing' },
+                            properties: [
+                                { $class: 'concerto.metamodel@1.0.0.EnumProperty', name: 'A' }
+                            ]
+                        }]
+                    }]
+                });
+            }).should.throw(/Enum declaration 'BadEnum' cannot be identified/);
+        });
+
+        it('should pass validation for a valid enum declaration', () => {
+            let declaration = loadLastDeclaration('test/data/model/enum.cto', EnumDeclaration);
+            (() => {
+                declaration.validate();
+            }).should.not.throw();
+        });
+    });
+
 });
