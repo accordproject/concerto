@@ -249,6 +249,10 @@ class ClassDeclaration extends Declaration {
                     throw new IllegalModelException('Identifying fields cannot be optional.', this.modelFile, this.ast.location);
                 }
 
+                if (idField.isArray()) {
+                    throw new IllegalModelException('Identifying fields cannot be arrays.', this.modelFile, this.ast.location);
+                }
+
                 if(this.superType) {
                     const superType = this.getModelFile().getType(this.superType);
                     if (superType && superType.isIdentified() ) {
