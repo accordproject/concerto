@@ -320,7 +320,17 @@ class JSONPopulator {
         let result = null;
 
         if(!field.isPrimitive?.() && !field.isTypeEnum?.()) {
+            if (!jsonItem || typeof jsonItem !== 'object' || Array.isArray(jsonItem)) {
+                parameters.path ?? (parameters.path = new TypedStack('$'));
+                const path = parameters.path?.stack.join('');
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+            }
+
             let typeName = jsonItem.$class;
+            if (typeName !== undefined && typeof typeName !== 'string') {
+                const foundType = Array.isArray(typeName) ? 'array' : typeof typeName;
+                throw new Error(`Invalid JSON data. $class must be a string, found ${foundType}: ${JSON.stringify(typeName)}`);
+            }
             if(!typeName) {
                 // If the type name is not specified in the data, then use the
                 // type name from the model. This will only happen in the case of
