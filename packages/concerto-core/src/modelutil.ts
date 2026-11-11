@@ -315,11 +315,11 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key
     */
     static isValidMapKey(key) {
-        return [
+        return Boolean(key?.$class && [
             `${MetaModelNamespace}.StringMapKeyType`,
             `${MetaModelNamespace}.DateTimeMapKeyType`,
             `${MetaModelNamespace}.ObjectMapKeyType`,
-        ].includes(key.$class);
+        ].includes(key.$class));
     }
 
     /**
@@ -329,8 +329,11 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
     static isValidMapKeyScalar(decl) {
-        return (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.StringScalar`) ||
-            (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.DateTimeScalar`);
+        if (!decl || !decl.isScalarDeclaration?.()) {
+            return false;
+        }
+        return decl.ast?.$class === `${MetaModelNamespace}.StringScalar` ||
+            decl.ast?.$class === `${MetaModelNamespace}.DateTimeScalar`;
     }
 
     /**
@@ -340,7 +343,7 @@ class ModelUtil {
      * @return {boolean} true if the Value is a valid Map Value
      */
     static isValidMapValue(value) {
-        return [
+        return Boolean(value?.$class && [
             `${MetaModelNamespace}.BooleanMapValueType`,
             `${MetaModelNamespace}.DateTimeMapValueType`,
             `${MetaModelNamespace}.StringMapValueType`,
@@ -349,7 +352,7 @@ class ModelUtil {
             `${MetaModelNamespace}.DoubleMapValueType`,
             `${MetaModelNamespace}.ObjectMapValueType`,
             `${MetaModelNamespace}.RelationshipMapValueType`
-        ].includes(value.$class);
+        ].includes(value.$class));
     }
 }
 
