@@ -660,7 +660,9 @@ class DecoratorManager {
             const decl = validationModelManager.getType(
                 `${modelFile!.getNamespace()}.${command.target.declaration}`
             );
-            const property = decl.getProperty(command.target.property);
+            const property = typeof decl.getProperty === 'function'
+                ? decl.getProperty(command.target.property)
+                : null;
             if (!property) {
                 throw new Error(
                     `Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${command.target.property}" which does not exist.`
@@ -676,7 +678,9 @@ class DecoratorManager {
                 `${modelFile!.getNamespace()}.${command.target.declaration}`
             );
             command.target.properties.forEach((commandProperty) => {
-                const property = decl.getProperty(commandProperty);
+                const property = typeof decl.getProperty === 'function'
+                    ? decl.getProperty(commandProperty)
+                    : null;
                 if (!property) {
                     throw new Error(
                         `Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${commandProperty}" which does not exist.`
