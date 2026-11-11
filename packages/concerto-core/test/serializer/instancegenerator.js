@@ -400,6 +400,43 @@ describe('InstanceGenerator', () => {
             resource.theValues[0].theValue.should.be.a('string');
         });
 
+        it('should generate an identifier that meets a minimum length validator', () => {
+            let resource = test(`namespace org.acme.test@1.0.0
+            asset MyInnerAsset identified by isbn {
+                o String isbn length=[10,13]
+            }
+            asset MyAsset identified by assetId {
+                o String assetId
+                o MyInnerAsset theValue
+            }`);
+            resource.theValue.getIdentifier().should.match(/^\d{10}$/);
+        });
+
+        it('should generate an identifier that meets a length validator on a scalar', () => {
+            let resource = test(`namespace org.acme.test@1.0.0
+            scalar ISBN extends String length=[10,13]
+            asset MyInnerAsset identified by isbn {
+                o ISBN isbn
+            }
+            asset MyAsset identified by assetId {
+                o String assetId
+                o MyInnerAsset theValue
+            }`);
+            resource.theValue.getIdentifier().should.match(/^\d{10}$/);
+        });
+
+        it('should generate a sample that passes validation when the identifier has a length validator', () => {
+            modelManager.addCTOModel(`namespace org.acme.test@1.0.0
+            asset MyInnerAsset identified by isbn {
+                o String isbn length=[10,13]
+            }
+            concept MyConcept {
+                o MyInnerAsset theValue
+            }`);
+            const concept = factory.newConcept('org.acme.test@1.0.0', 'MyConcept', undefined, { generate: 'sample' });
+            (() => concept.validate()).should.not.throw();
+        });
+
         it('should generate a default value for base class properties', () => {
             let resource = test(`namespace org.acme.test@1.0.0
             abstract asset BaseAsset {

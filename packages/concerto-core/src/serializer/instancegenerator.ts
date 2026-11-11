@@ -245,14 +245,20 @@ class InstanceGenerator {
     }
 
     /**
-     * Generate a random ID for a given type.
+     * Generate a random ID for a given type, zero-padded to at least the
+     * identifier's minimum length.
      * @private
      * @param {ClassDeclaration} classDeclaration - class declaration for a type.
      * @return {String} an ID.
      */
     generateRandomId(classDeclaration) {
+        let idField = classDeclaration.getProperty(classDeclaration.getIdentifierFieldName());
+        if (idField?.isTypeScalar?.()) {
+            idField = idField.getScalarField();
+        }
+        const length = Math.max(4, idField?.validator?.minLength ?? 0);
         let id = Math.round(Math.random() * 9999).toString();
-        id = id.padStart(4, '0');
+        id = id.padStart(length, '0');
         return id;
     }
 
