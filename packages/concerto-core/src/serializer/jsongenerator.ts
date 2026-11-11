@@ -185,37 +185,42 @@ class JSONGenerator {
      */
     visitField(field, parameters) {
         const obj = parameters.stack.pop();
-        let result;
         if (field.isArray()) {
-            let array: unknown[] = [];
+            const array: unknown[] = [];
             // Walk the object
-            for (let index in obj) {
-                const item = obj[index];
-                if (!field.isPrimitive() && !ModelUtil.isEnum(field)) {
-                    parameters.stack.push(item, Typed);
-                    const classDeclaration = parameters.modelManager.getType(item.getFullyQualifiedType());
-                    array.push(classDeclaration.accept(this, parameters));
-                } else {
-                    array.push(this.convertToJSON(field, item));
-                }
+            for (const index in obj) {
+                array.push(this.serializeFieldValue(field, obj[index], parameters, true));
             }
-            result = array;
-        } else if (field.isPrimitive()) {
-            result = this.convertToJSON(field, obj);
-        } else if (ModelUtil.isEnum(field)) {
-            result = this.convertToJSON(field, obj);
-        } else if (ModelUtil.isMap(field)) {
-            parameters.stack.push(obj);
-            const mapDeclaration = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
-            result = mapDeclaration.accept(this, parameters);
+            return array;
         }
-        else {
-            parameters.stack.push(obj);
-            const classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
-            result = classDeclaration.accept(this, parameters);
-        }
+        return this.serializeFieldValue(field, obj, parameters, false);
+    }
 
-        return result;
+    /**
+     * Serialize a single field value (directly or as an array element) to JSON.
+     * @param {Field} field - the field declaration
+     * @param {*} value - the value to serialize
+     * @param {Object} parameters - visitor parameters
+     * @param {boolean} expectTyped - whether to assert Typed on complex class values
+     * @return {*} the serialized JSON value
+     * @private
+     */
+    serializeFieldValue(field, value, parameters, expectTyped: boolean) {
+        if (field.isPrimitive() || ModelUtil.isEnum(field)) {
+            return this.convertToJSON(field, value);
+        }
+        if (ModelUtil.isMap(field)) {
+            parameters.stack.push(value);
+            const mapDeclaration = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
+            return mapDeclaration.accept(this, parameters);
+        }
+        if (expectTyped) {
+            parameters.stack.push(value, Typed);
+        } else {
+            parameters.stack.push(value);
+        }
+        const classDeclaration = parameters.modelManager.getType(value.getFullyQualifiedType());
+        return classDeclaration.accept(this, parameters);
     }
 
     /**

@@ -229,9 +229,12 @@ class ModelUtil {
      * @private
      */
     static isMap(field) {
-        const modelFile = field.getParent().getModelFile();
+        const modelFile = field.getParent?.()?.getModelFile?.();
+        if (!modelFile) {
+            return false;
+        }
         const typeDeclaration = modelFile.getType(field.getType());
-        return typeDeclaration?.isMapDeclaration?.();
+        return Boolean(typeDeclaration?.isMapDeclaration?.());
     }
 
     /**

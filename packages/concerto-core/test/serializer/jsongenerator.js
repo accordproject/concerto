@@ -72,6 +72,13 @@ describe('JSONGenerator', () => {
                 o String assetId
                 --> SimpleAssetCircleArray[] next
             }
+            map Dictionary {
+                o String
+                o String
+            }
+            concept MapContainer {
+                o Dictionary[] dicts
+            }
         `);
 
         modelManager.addCTOModel(`
@@ -626,6 +633,24 @@ describe('JSONGenerator', () => {
                 { '$class': 'org.acme@1.0.0.MyAsset1', '$identifier': 'child2', assetId: 'child2' } ]);
 
             spy.callCount.should.equal(5); // we call it once at the start, the function recurses into it twice
+        });
+
+        it('should populate an array if array contains Maps', () => {
+            const field = modelManager.getType('org.acme@1.0.0.MapContainer').getProperty('dicts');
+            const map1 = new Map([['a', '1'], ['b', '2']]);
+            const map2 = new Map([['c', '3']]);
+            const parameters = {
+                stack: new TypedStack({}),
+                modelManager: modelManager
+            };
+            parameters.stack.push([map1, map2]);
+            isEnumStub.returns(false);
+
+            const result = jsonGenerator.visitField(field, parameters);
+            result.should.deep.equal([
+                { a: '1', b: '2' },
+                { c: '3' }
+            ]);
         });
 
     });
