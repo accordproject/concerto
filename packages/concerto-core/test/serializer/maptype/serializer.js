@@ -1031,6 +1031,71 @@ describe('Serializer', () => {
         });
     });
 
+    describe('Map with enum values', () => {
+        let enumModelManager;
+        let enumSerializer;
+
+        beforeEach(() => {
+            enumModelManager = new ModelManager();
+            enumModelManager.addCTOModel(`
+            namespace org.acme.colors@1.0.0
+
+            enum Color {
+                o RED
+                o BLUE
+            }
+            `, 'colors.cto');
+            enumModelManager.addCTOModel(`
+            namespace org.acme.palette@1.0.0
+
+            import org.acme.colors@1.0.0.{Color}
+
+            enum Shade {
+                o LIGHT
+                o DARK
+            }
+
+            map Swatches {
+                o String
+                o Shade
+            }
+
+            map Labels {
+                o String
+                o Color
+            }
+
+            concept Palette {
+                o Swatches swatches optional
+                o Labels labels optional
+            }
+            `, 'palette.cto');
+            enumSerializer = new Serializer(new Factory(enumModelManager), enumModelManager);
+        });
+
+        it('should deserialize -> serialize a Map whose values are enum values', () => {
+            const json = {
+                $class: 'org.acme.palette@1.0.0.Palette',
+                swatches: { sky: 'LIGHT', night: 'DARK' },
+                labels: { stop: 'RED' },
+            };
+            const resource = enumSerializer.fromJSON(json);
+            resource.swatches.should.be.an.instanceOf(Map);
+            resource.swatches.get('sky').should.equal('LIGHT');
+            resource.labels.get('stop').should.equal('RED');
+            enumSerializer.toJSON(resource).should.deep.equal(json);
+        });
+
+        it('should throw for a Map value that is not one of the enum values', () => {
+            (() => {
+                enumSerializer.fromJSON({
+                    $class: 'org.acme.palette@1.0.0.Palette',
+                    swatches: { sky: 'MEDIUM' },
+                });
+            }).should.throw('Invalid enum value of "MEDIUM"');
+        });
+    });
+
     describe('# cross-namespace concept values in maps', () => {
         let xnsModelManager;
         let xnsFactory;

@@ -264,8 +264,9 @@ class JSONPopulator {
             decl = undefined;
         }
 
-        // if its a ClassDeclaration, populate the Concept.
-        if (decl?.isClassDeclaration()) {
+        // if its a ClassDeclaration, populate the Concept. An enum value is a
+        // plain string, so it is returned as-is like a scalar.
+        if (decl?.isClassDeclaration() && !decl.isEnum()) {
             let subResource = parameters.factory.newConcept(decl.getNamespace(),
                 decl.getName(), decl.getIdentifierFieldName() );
 
