@@ -158,6 +158,35 @@ describe('StringValidator', () => {
                 );
             }).should.not.throw();
         });
+
+        it('should throw an IllegalModelException when an empty string default fails the regex', () => {
+            mockField.ast = { defaultValue: '' };
+            let err;
+            try {
+                new StringValidator(mockField, { pattern: '^y$' }, null);
+            } catch (e) { err = e; }
+            expect(err).to.be.instanceOf(IllegalModelException);
+            expect(err.errorType).to.equal(ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION);
+            expect(err.message).to.match(/failed to match validation regex/);
+        });
+
+        it('should throw an IllegalModelException when an empty string default is shorter than minLength', () => {
+            mockField.ast = { defaultValue: '' };
+            let err;
+            try {
+                new StringValidator(mockField, null, { minLength: 1, maxLength: 5 });
+            } catch (e) { err = e; }
+            expect(err).to.be.instanceOf(IllegalModelException);
+            expect(err.errorType).to.equal(ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION);
+            expect(err.message).to.match(/The string length of '' should be at least 1 characters/);
+        });
+
+        it('should accept an empty string default when the constraints allow it', () => {
+            mockField.ast = { defaultValue: '' };
+            (() => {
+                new StringValidator(mockField, { pattern: '^y*$' }, { minLength: 0, maxLength: 5 });
+            }).should.not.throw();
+        });
     });
 
     describe('#validate', () => {
