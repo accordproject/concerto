@@ -1608,5 +1608,183 @@ describe('Serializer', () => {
             }).should.throw(/failed to match validation regex/);
         });
     });
+
+    describe('# Map array serialization', () => {
+        let arrModelManager;
+        let arrFactory;
+        let arrSerializer;
+
+        beforeEach(() => {
+            arrModelManager = new ModelManager();
+            Util.addComposerModel(arrModelManager);
+            arrModelManager.addCTOModel(`
+            namespace org.shared@1.0.0
+
+            map SharedMap {
+                o String
+                o String
+            }
+            `);
+            arrModelManager.addCTOModel(`
+            namespace org.acme.maparray@1.0.0
+
+            import org.shared@1.0.0.SharedMap
+
+            concept Person identified by name {
+                o String name
+            }
+
+            asset Item identified by id {
+                o String id
+            }
+
+            map Dict {
+                o String
+                o String
+            }
+
+            map Rolodex {
+                o String
+                o Person
+            }
+
+            map ItemRelMap {
+                o String
+                --> Item
+            }
+
+            concept Container {
+                o Dict[] dicts optional
+                o Dict[] sizedDicts size=[1, 2] optional
+                o Rolodex[] rolodexes optional
+                o ItemRelMap[] itemMaps optional
+                o SharedMap[] sharedMaps optional
+            }
+
+            concept DictArrayContainer {
+                o Dict[] dicts
+            }
+            `);
+            arrFactory = new Factory(arrModelManager);
+            arrSerializer = new Serializer(arrFactory, arrModelManager);
+        });
+
+        it('should serialize and deserialize an array of Map <String, String>', () => {
+            const concept = arrFactory.newConcept('org.acme.maparray@1.0.0', 'Container');
+            concept.dicts = [
+                new Map([['a', '1'], ['b', '2']]),
+                new Map([['c', '3']])
+            ];
+
+            const json = arrSerializer.toJSON(concept);
+            json.should.deep.equal({
+                $class: 'org.acme.maparray@1.0.0.Container',
+                dicts: [
+                    { a: '1', b: '2' },
+                    { c: '3' }
+                ]
+            });
+
+            const roundTripped = arrSerializer.fromJSON(json);
+            roundTripped.dicts.should.have.lengthOf(2);
+            roundTripped.dicts[0].should.be.an.instanceOf(Map);
+            roundTripped.dicts[0].get('a').should.equal('1');
+            roundTripped.dicts[1].get('c').should.equal('3');
+        });
+
+        it('should serialize and deserialize an empty array of Maps', () => {
+            const concept = arrFactory.newConcept('org.acme.maparray@1.0.0', 'Container');
+            concept.dicts = [];
+
+            const json = arrSerializer.toJSON(concept);
+            json.should.deep.equal({
+                $class: 'org.acme.maparray@1.0.0.Container',
+                dicts: []
+            });
+
+            const roundTripped = arrSerializer.fromJSON(json);
+            roundTripped.dicts.should.deep.equal([]);
+        });
+
+        it('should serialize and deserialize an array of Map <String, Concept>', () => {
+            const p1 = arrFactory.newConcept('org.acme.maparray@1.0.0', 'Person', 'Alice');
+            const p2 = arrFactory.newConcept('org.acme.maparray@1.0.0', 'Person', 'Bob');
+            const concept = arrFactory.newConcept('org.acme.maparray@1.0.0', 'Container');
+            concept.rolodexes = [
+                new Map([['first', p1]]),
+                new Map([['second', p2]])
+            ];
+
+            const json = arrSerializer.toJSON(concept);
+            json.should.deep.equal({
+                $class: 'org.acme.maparray@1.0.0.Container',
+                rolodexes: [
+                    { first: { $class: 'org.acme.maparray@1.0.0.Person', name: 'Alice' } },
+                    { second: { $class: 'org.acme.maparray@1.0.0.Person', name: 'Bob' } }
+                ]
+            });
+
+            const roundTripped = arrSerializer.fromJSON(json);
+            roundTripped.rolodexes[0].get('first').name.should.equal('Alice');
+            roundTripped.rolodexes[1].get('second').name.should.equal('Bob');
+        });
+
+        it('should serialize and deserialize an array of Map with Relationship values', () => {
+            const rel1 = arrFactory.newRelationship('org.acme.maparray@1.0.0', 'Item', 'ITEM_1');
+            const rel2 = arrFactory.newRelationship('org.acme.maparray@1.0.0', 'Item', 'ITEM_2');
+            const concept = arrFactory.newConcept('org.acme.maparray@1.0.0', 'Container');
+            concept.itemMaps = [
+                new Map([['one', rel1]]),
+                new Map([['two', rel2]])
+            ];
+
+            const json = arrSerializer.toJSON(concept);
+            json.should.deep.equal({
+                $class: 'org.acme.maparray@1.0.0.Container',
+                itemMaps: [
+                    { one: 'resource:org.acme.maparray@1.0.0.Item#ITEM_1' },
+                    { two: 'resource:org.acme.maparray@1.0.0.Item#ITEM_2' }
+                ]
+            });
+
+            const roundTripped = arrSerializer.fromJSON(json);
+            roundTripped.itemMaps[0].get('one').getIdentifier().should.equal('ITEM_1');
+            roundTripped.itemMaps[1].get('two').getIdentifier().should.equal('ITEM_2');
+        });
+
+        it('should serialize and deserialize an array of imported Map types', () => {
+            const concept = arrFactory.newConcept('org.acme.maparray@1.0.0', 'Container');
+            concept.sharedMaps = [
+                new Map([['key', 'val']])
+            ];
+
+            const json = arrSerializer.toJSON(concept);
+            json.should.deep.equal({
+                $class: 'org.acme.maparray@1.0.0.Container',
+                sharedMaps: [{ key: 'val' }]
+            });
+        });
+
+        it('should validate collection size constraints when serializing an array of Maps', () => {
+            const valid = arrSerializer.fromJSON({
+                $class: 'org.acme.maparray@1.0.0.Container',
+                sizedDicts: [{ a: '1' }]
+            });
+            arrSerializer.toJSON(valid).sizedDicts.should.deep.equal([{ a: '1' }]);
+
+            const empty = arrFactory.newConcept('org.acme.maparray@1.0.0', 'Container');
+            empty.sizedDicts = [];
+            (() => {
+                arrSerializer.toJSON(empty);
+            }).should.throw(/Collection must contain at least 1 elements/);
+        });
+
+        it('should serialize Factory-generated instances with Map array fields', () => {
+            const generated = arrFactory.newConcept('org.acme.maparray@1.0.0', 'DictArrayContainer', null, { generate: true });
+            const json = arrSerializer.toJSON(generated);
+            json.dicts.should.be.an('array').that.is.not.empty;
+            json.dicts.forEach(entry => entry.should.be.an('object'));
+        });
+    });
 });
 
