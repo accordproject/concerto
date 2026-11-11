@@ -755,5 +755,77 @@ describe('ResourceValidator', function () {
             (() => factory.newResource('org.acme@1.0.0', 'Color', undefined, { generate: 'sample' }))
                 .should.throw(Error, /Unrecognised/);
         });
+
+        it('should throw ValidationException when DateTime property holds an invalid dayjs instance', () => {
+            modelManager.addCTOModel(`namespace org.acme.dt1@1.0.0
+            concept CalendarEvent {
+                o DateTime timestamp
+            }`, 'event1.cto');
+            const event = factory.newConcept('org.acme.dt1@1.0.0', 'CalendarEvent');
+            event.timestamp = dayjs.utc('invalid-date');
+            (() => event.validate()).should.throw(ValidationException);
+        });
+
+        it('should throw ValidationException when DateTime[] array holds an invalid dayjs instance', () => {
+            modelManager.addCTOModel(`namespace org.acme.dt2@1.0.0
+            concept EventLog {
+                o DateTime[] timestamps
+            }`, 'eventlog.cto');
+            const log = factory.newConcept('org.acme.dt2@1.0.0', 'EventLog');
+            log.timestamps = [dayjs.utc('invalid-date')];
+            (() => log.validate()).should.throw(ValidationException);
+        });
+
+        it('should accept valid dayjs instances for DateTime property', () => {
+            modelManager.addCTOModel(`namespace org.acme.dt3@1.0.0
+            concept CalendarEvent {
+                o DateTime timestamp
+            }`, 'event3.cto');
+            const event = factory.newConcept('org.acme.dt3@1.0.0', 'CalendarEvent');
+            event.timestamp = dayjs.utc('2024-01-15T12:00:00.000Z');
+            (() => event.validate()).should.not.throw();
+        });
+
+        it('should throw Error when Map with DateTime value holds an invalid dayjs instance', () => {
+            modelManager.addCTOModel(`namespace org.acme.dt4@1.0.0
+            map Schedule {
+                o String
+                o DateTime
+            }`, 'schedule.cto');
+            const scheduleMap = new Map([
+                ['$class', 'org.acme.dt4@1.0.0.Schedule'],
+                ['meeting', dayjs.utc('invalid-date')]
+            ]);
+            const typedStack = new TypedStack(scheduleMap);
+            const mapDecl = modelManager.getType('org.acme.dt4@1.0.0.Schedule');
+            const params = { stack: typedStack, modelManager: modelManager, rootResourceIdentifier: 'TEST' };
+            (() => mapDecl.accept(resourceValidator, params)).should.throw(/Expected Type of DateTime/);
+        });
+
+        it('should accept valid dayjs instance in Map with DateTime value', () => {
+            modelManager.addCTOModel(`namespace org.acme.dt5@1.0.0
+            map Schedule {
+                o String
+                o DateTime
+            }`, 'schedule5.cto');
+            const scheduleMap = new Map([
+                ['$class', 'org.acme.dt5@1.0.0.Schedule'],
+                ['meeting', dayjs.utc('2024-01-15T12:00:00.000Z')]
+            ]);
+            const typedStack = new TypedStack(scheduleMap);
+            const mapDecl = modelManager.getType('org.acme.dt5@1.0.0.Schedule');
+            const params = { stack: typedStack, modelManager: modelManager, rootResourceIdentifier: 'TEST' };
+            (() => mapDecl.accept(resourceValidator, params)).should.not.throw();
+        });
+
+        it('should prevent serializing invalid dayjs DateTime instances by failing validate()', () => {
+            modelManager.addCTOModel(`namespace org.acme.dt6@1.0.0
+            concept Meeting {
+                o DateTime start
+            }`, 'meeting.cto');
+            const meeting = factory.newConcept('org.acme.dt6@1.0.0', 'Meeting');
+            meeting.start = dayjs.utc('invalid-timestamp');
+            (() => meeting.validate()).should.throw(ValidationException);
+        });
     });
 });

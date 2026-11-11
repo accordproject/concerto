@@ -153,11 +153,15 @@ class ResourceValidator {
                 throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of String but found '${value}' instead.`);
             }
             break;
-        case 'DateTime':
-            if (typeof value !== 'string' || !dayjs.utc(value).isValid()) {
+        case 'DateTime': {
+            const isDayjs = typeof value === 'object' && typeof value?.isBefore === 'function';
+            const isValidDayjs = isDayjs && typeof value?.isValid === 'function' && value.isValid();
+            const isValidString = typeof value === 'string' && dayjs.utc(value).isValid();
+            if (!isValidDayjs && !isValidString) {
                 throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
             }
             break;
+        }
         case 'Boolean':
             if (typeof value !== 'boolean') {
                 throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Boolean but found ${typeof value} instead, for value '${value}'.`);
@@ -437,7 +441,7 @@ class ResourceValidator {
                 }
                 break;
             case 'DateTime':
-                if(!(typeof obj === 'object' && typeof obj.isBefore === 'function')) {
+                if (!(typeof obj === 'object' && typeof obj?.isBefore === 'function' && typeof obj?.isValid === 'function' && obj.isValid())) {
                     invalid = true;
                 }
                 break;
