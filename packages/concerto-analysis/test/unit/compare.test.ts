@@ -180,13 +180,14 @@ test('should detect a enum value being added', async () => {
 
 test('should detect an enum value being removed', async () => {
     const [a, b] = await getModelFiles('enum-value-added-b.cto', 'enum-value-added-a.cto');
+    const removedValue = a.getEnumDeclarations().find(e => e.getName() === 'Thing')?.getProperty('BAR');
+    expect(removedValue).toBeDefined();
+
     const results = new Compare().compare(a, b);
-    expect(results.findings).toEqual(expect.arrayContaining([
-        expect.objectContaining({
-            key: 'enum-value-removed',
-            message: 'The enum value "BAR" was removed from the enum "Thing"'
-        })
-    ]));
+    const finding = results.findings.find(f => f.key === 'enum-value-removed');
+    expect(finding).toBeDefined();
+    expect(finding?.message).toBe('The enum value "BAR" was removed from the enum "Thing"');
+    expect(finding?.element).toBe(removedValue);
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 

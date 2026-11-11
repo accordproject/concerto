@@ -63,7 +63,7 @@ const propertyRemoved: ComparerFactory = (context) => ({
             context.report({
                 key: 'enum-value-removed',
                 message: `The enum value "${a.getName()}" was removed from the ${classDeclarationType} "${a.getParent().getName()}"`,
-                element: b,
+                element: a,
             });
             return;
         }
