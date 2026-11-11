@@ -76,6 +76,7 @@ import {
 type Aliases = Map<string, string>;
 
 const NO_ALIASES: Aliases = new Map();
+const REGEX_FLAGS = 'dgimsuvy';
 
 /**
  * Reads the aliased types of a model's imports.
@@ -90,6 +91,25 @@ function aliasesOf(imports?: any[]): Aliases {
         });
     });
     return aliases;
+}
+
+/**
+ * Converts Concertino's regex literal representation into a Concerto regex validator.
+ * @param regex The regex pattern, optionally represented as /pattern/flags.
+ * @returns The Concerto regex validator.
+ */
+function regexValidator(regex: string): IStringRegexValidator {
+    const result: IStringRegexValidator = {
+        $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
+        pattern: regex,
+        flags: ''
+    };
+    const match = regex.match(new RegExp(`^/(.*)/([${REGEX_FLAGS}]*)$`));
+    if (match) {
+        result.pattern = match[1];
+        result.flags = match[2];
+    }
+    return result;
 }
 
 /**
@@ -133,19 +153,7 @@ function extractScalarValidators(declaration: IConcertinoScalarDeclaration) {
   } = {};
     const stringDeclaration = declaration as IConcertinoStringScalarDeclaration;
     if ('regex' in declaration && stringDeclaration.regex) {
-        const regexValidator: IStringRegexValidator = {
-            $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
-            pattern: stringDeclaration.regex,
-            flags: ''
-        };
-
-        // Check if it's already in the form /pattern/flags
-        const match = stringDeclaration.regex.match(/^\/(.*)\/([gimuy]*)$/);
-        if (match) {
-            regexValidator.pattern = match[1];
-            regexValidator.flags = match[2];
-        }
-        result.validator = regexValidator;
+        result.validator = regexValidator(stringDeclaration.regex);
     }
 
     const integerDeclaration = declaration as IConcertinoIntegerScalarDeclaration;
@@ -374,19 +382,7 @@ function transformProperties(properties: Record<string, IConcertinoProperty>, al
 
                     const stringProperty = property as IConcertinoStringProperty;
                     if (stringProperty.regex) {
-                        const regexValidator: IStringRegexValidator = {
-                            $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
-                            pattern: stringProperty.regex,
-                            flags: ''
-                        };
-
-                        // Check if it's already in the form /pattern/flags
-                        const match = stringProperty.regex.match(/^\/(.*)\/([gimuy]*)$/);
-                        if (match) {
-                            regexValidator.pattern = match[1];
-                            regexValidator.flags = match[2];
-                        }
-                        validator = regexValidator;
+                        validator = regexValidator(stringProperty.regex);
                     }
 
                     const integerProperty = property as IConcertinoIntegerProperty;
@@ -681,5 +677,4 @@ function convertToMetamodel(concertino: IConcertino): IModels {
 }
 
 export { convertToMetamodel };
-
 

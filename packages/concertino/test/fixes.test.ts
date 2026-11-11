@@ -208,6 +208,17 @@ describe('converter fixes', () => {
         expect(concertino.declarations['r@1.0.0.Upper'].range).toStrictEqual([null, 1]);
     });
 
+    it('should keep all supported regular expression flags', () => {
+        const metamodel = resolved([[
+            'namespace r@1.0.0',
+            'scalar S extends String regex=/scalar/dgimsy',
+            'concept C { o String p regex=/property/v }',
+        ].join('\n')]);
+        const concertino = expectLosslessRoundTrip(metamodel);
+        expect(concertino.declarations['r@1.0.0.S'].regex).toBe('/scalar/dgimsy');
+        expect(concertino.declarations['r@1.0.0.C'].properties.p.regex).toBe('/property/v');
+    });
+
     it('should keep falsy scalar defaults', () => {
         const metamodel = resolved([
             'namespace d@1.0.0\nscalar Zero extends Integer default=0\nscalar No extends Boolean default=false\nscalar Empty extends String default=""\nscalar ZeroD extends Double default=0.0\nconcept C { o Zero z o No n o Empty e o ZeroD f }',
