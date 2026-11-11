@@ -682,6 +682,72 @@ describe('DecoratorManager', () => {
             }).should.throw(/Decorator Command references property "test@1.0.0.Person.missing" which does not exist./);
         });
 
+        it('should detect invalid target property on declarations without properties', async function() {
+            const testModelManager = new ModelManager();
+            testModelManager.addCTOModel(`
+                namespace test@1.0.0
+                scalar ZipCode extends String
+                map ConfigMap {
+                    o String
+                    o String
+                }
+            `, 'test.cto');
+
+            const dcsPropertyScalar = {
+                $class: 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet',
+                name: 'test',
+                version: '1.0.0',
+                commands: [
+                    {
+                        $class: 'org.accordproject.decoratorcommands@0.4.0.Command',
+                        type: 'UPSERT',
+                        target: {
+                            $class: 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                            namespace: 'test@1.0.0',
+                            declaration: 'ZipCode',
+                            property: 'missing'
+                        },
+                        decorator: {
+                            $class: 'concerto.metamodel@1.0.0.Decorator',
+                            name: 'secret'
+                        }
+                    }
+                ]
+            };
+
+            const dcsPropertiesMap = {
+                $class: 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet',
+                name: 'test',
+                version: '1.0.0',
+                commands: [
+                    {
+                        $class: 'org.accordproject.decoratorcommands@0.4.0.Command',
+                        type: 'UPSERT',
+                        target: {
+                            $class: 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                            namespace: 'test@1.0.0',
+                            declaration: 'ConfigMap',
+                            properties: ['missing']
+                        },
+                        decorator: {
+                            $class: 'concerto.metamodel@1.0.0.Decorator',
+                            name: 'secret'
+                        }
+                    }
+                ]
+            };
+
+            (() => {
+                DecoratorManager.decorateModels(testModelManager, dcsPropertyScalar,
+                    {validate: true, validateCommands: true});
+            }).should.throw(/Decorator Command references property "test@1.0.0.ZipCode.missing" which does not exist./);
+
+            (() => {
+                DecoratorManager.decorateModels(testModelManager, dcsPropertiesMap,
+                    {validate: true, validateCommands: true});
+            }).should.throw(/Decorator Command references property "test@1.0.0.ConfigMap.missing" which does not exist./);
+        });
+
         it('should detect invalid target properties', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager();
