@@ -30,7 +30,11 @@ import decoratorModelModule from './decoratormodelhelper';
 import type { ModelFileSource, ModelManagerOptions } from './types';
 import type { AstNode } from './introspect/decorated';
 type ModelFileInstance = InstanceType<typeof ModelFile>;
-type ModelFileInput = string | ModelFileInstance;
+type ModelFileInput = string | ModelFileInstance | Record<string, unknown>;
+
+function isModelFile(obj: unknown): obj is ModelFileInstance {
+    return Boolean(obj) && (obj instanceof ModelFile || (typeof (obj as any).isModelFile === 'function' && (obj as any).isModelFile() === true));
+}
 
 function getFileNameFromIdentifier(fileIdentifier) {
     const normalizedIdentifier = fileIdentifier.replace(/[\\/]+$/, '');
@@ -184,12 +188,13 @@ class BaseModelManager {
      * @throws {IllegalModelException}
      */
     validateModelFile(modelFile, fileName?) {
-        if (typeof modelFile === 'string') {
-            const { ast } = this.processFile(fileName, modelFile);
-            let m = new ModelFile(this, ast as AstNode, modelFile, fileName);
-            m.validate();
-        } else {
+        if (isModelFile(modelFile)) {
             modelFile.validate();
+        } else {
+            const { ast } = this.processFile(fileName, modelFile);
+            const definitions = typeof modelFile === 'string' ? modelFile : null;
+            let m = new ModelFile(this, ast as AstNode, definitions, fileName);
+            m.validate();
         }
     }
 
@@ -343,10 +348,11 @@ class BaseModelManager {
     updateModelFile(modelFile, fileName?, disableValidation?) {
         const NAME = 'updateModelFile';
         debug(NAME, 'updateModelFile', modelFile, fileName);
-        if (typeof modelFile === 'string') {
+        if (!isModelFile(modelFile)) {
             const { ast } = this.processFile(fileName, modelFile);
-            let m = new ModelFile(this, ast as AstNode, modelFile, fileName);
-            return this.updateModelFile(m,fileName,disableValidation);
+            const definitions = typeof modelFile === 'string' ? modelFile : null;
+            let m = new ModelFile(this, ast as AstNode, definitions, fileName);
+            return this.updateModelFile(m, fileName, disableValidation);
         } else {
             let existing = this.modelFiles[modelFile.getNamespace()];
             if (!existing) {
@@ -400,11 +406,12 @@ class BaseModelManager {
                 }
 
                 let m: ModelFileInstance;
-                if (typeof modelFile === 'string') {
-                    const { ast } = this.processFile(fileName, modelFile);
-                    m = new ModelFile(this, ast as AstNode, modelFile, fileName);
-                } else {
+                if (isModelFile(modelFile)) {
                     m = modelFile;
+                } else {
+                    const { ast } = this.processFile(fileName, modelFile);
+                    const definitions = typeof modelFile === 'string' ? modelFile : null;
+                    m = new ModelFile(this, ast as AstNode, definitions, fileName);
                 }
                 if (!m.getVersion()) {
                     throw new Error(`Cannot add an unversioned namespace: ${m.getNamespace()}`);
