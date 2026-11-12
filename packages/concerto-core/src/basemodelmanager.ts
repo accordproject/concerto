@@ -183,7 +183,7 @@ class BaseModelManager {
      * Note that if there are dependencies between multiple files the files
      * must be added in dependency order, or the addModelFiles method can be
      * used to add a set of files irrespective of dependencies.
-     * @param {string|ModelFile} modelFile - The Concerto file as a string
+     * @param {string|ModelFile|object} modelFile - The Concerto file as a string, AST object, or ModelFile
      * @param {string} [fileName] - a file name to associate with the model file
      * @throws {IllegalModelException}
      */
@@ -339,7 +339,7 @@ class BaseModelManager {
      * Concerto files have a single namespace. If a Concerto file with the
      * same namespace has already been added to the ModelManager then it
      * will be replaced.
-     * @param {string|ModelFile} modelFile - Model as a string or object
+     * @param {string|ModelFile|object} modelFile - Model as a string, AST object, or ModelFile
      * @param {string} [fileName] - a file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
@@ -383,7 +383,7 @@ class BaseModelManager {
 
     /**
      * Add a set of Concerto files to the model manager.
-     * @param {string[]|ModelFile[]} modelFiles - An array of models as strings or ModelFile objects.
+     * @param {string[]|ModelFile[]|object[]} modelFiles - An array of models as strings, AST objects, or ModelFile objects.
      * @param {string[]} [fileNames] - A array of file names to associate with the model files
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @returns {Object[]} The newly added model files (internal).
