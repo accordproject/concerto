@@ -58,6 +58,64 @@ describe('StringValidator', () => {
             expect(err.message).to.match(/Validator error for field `myField`/);
         });
 
+        it('should throw an IllegalModelException for regex validator without pattern', () => {
+            let err;
+            try { new StringValidator(mockField, {}); } catch (e) { err = e; }
+            expect(err).to.be.instanceOf(IllegalModelException);
+            expect(err.errorType).to.equal(ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
+            expect(err.message).to.match(/Regex pattern must be specified/);
+        });
+
+        it('should throw an IllegalModelException for regex validator with null pattern', () => {
+            let err;
+            try { new StringValidator(mockField, { pattern: null }); } catch (e) { err = e; }
+            expect(err).to.be.instanceOf(IllegalModelException);
+            expect(err.errorType).to.equal(ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
+            expect(err.message).to.match(/Regex pattern must be specified/);
+        });
+
+        it('should throw an IllegalModelException for regex validator with non-string pattern', () => {
+            let err;
+            try { new StringValidator(mockField, { pattern: 123 }); } catch (e) { err = e; }
+            expect(err).to.be.instanceOf(IllegalModelException);
+            expect(err.errorType).to.equal(ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
+            expect(err.message).to.match(/Regex pattern must be specified/);
+        });
+
+        it('should throw an IllegalModelException for regex validator with empty pattern', () => {
+            let err;
+            try { new StringValidator(mockField, { pattern: '' }); } catch (e) { err = e; }
+            expect(err).to.be.instanceOf(IllegalModelException);
+            expect(err.errorType).to.equal(ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
+            expect(err.message).to.match(/Regex pattern must be specified/);
+        });
+
+        it('should accept regex validator with null flags', () => {
+            const v = new StringValidator(mockField, { pattern: '^[A-z]', flags: null });
+            expect(v.getRegex()).to.not.be.null;
+        });
+
+        it('should throw for string length with undefined bounds or empty object', () => {
+            (() => {
+                new StringValidator(mockField, null, { minLength: undefined, maxLength: undefined });
+            }).should.throw(/Invalid string length, minLength and-or maxLength must be specified/);
+            (() => {
+                new StringValidator(mockField, null, {});
+            }).should.throw(/Invalid string length, minLength and-or maxLength must be specified/);
+        });
+
+        it('should throw for string length with non-integer bounds', () => {
+            (() => {
+                new StringValidator(mockField, null, { minLength: 1.5 });
+            }).should.throw(/minLength and-or maxLength must be positive integers/);
+            (() => {
+                new StringValidator(mockField, null, { maxLength: 2.5 });
+            }).should.throw(/minLength and-or maxLength must be positive integers/);
+            (() => {
+                new StringValidator(mockField, null, { minLength: NaN });
+            }).should.throw(/minLength and-or maxLength must be positive integers/);
+        });
+
         it('should throw for invalid string length', () => {
             (() => {
                 new StringValidator(mockField, { pattern: '^[A-z]' }, NO_PARMS_IN_AST);
