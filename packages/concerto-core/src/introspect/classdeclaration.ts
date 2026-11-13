@@ -590,7 +590,7 @@ class ClassDeclaration extends Declaration {
             // not the last element, get the class of the element
             if (n < propertyNames.length - 1) {
                 if (result.isPrimitive() || result.isTypeEnum()) {
-                    throw new Error('Property ' + propertyNames[n] + ' is a primitive or enum. Invalid property path: ' + propertyPath);
+                    throw new IllegalModelException('Property ' + propertyNames[n] + ' is a primitive or enum. Invalid property path: ' + propertyPath, this.modelFile, this.ast.location);
                 } else {
                     // get the nested type, this throws if the type is missing or if the type is an enum
                     classDeclaration = classDeclaration.getModelFile().getModelManager().getType(result.getFullyQualifiedTypeName());
