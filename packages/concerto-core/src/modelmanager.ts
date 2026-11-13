@@ -27,9 +27,12 @@ import type ModelFile from './introspect/modelfile';
 
 // How to create a modelfile from a cto file
 const ctoProcessFile = (options: ModelManagerOptions = {}): ((name: string | null, data: unknown) => ModelFileSource) => (name: string | null, data: unknown) => {
+    if (typeof data !== 'string') {
+        throw new Error('ModelManager expects CTO model content as a string. For AST objects, use AstModelManager.');
+    }
     // Clone individual properties to avoid options injection to Peggy.
     const parserOptions = { skipLocationNodes: options?.skipLocationNodes };
-    const content = typeof data === 'string' ? data : String(data);
+    const content = data;
     const fileName = name ?? 'UNKNOWN';
     return {
         ast: Parser.parse(content, fileName, parserOptions),

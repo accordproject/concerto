@@ -30,7 +30,11 @@ import decoratorModelModule from './decoratormodelhelper';
 import type { ModelFileSource, ModelManagerOptions } from './types';
 import type { AstNode } from './introspect/decorated';
 type ModelFileInstance = InstanceType<typeof ModelFile>;
-type ModelFileInput = string | ModelFileInstance;
+type ModelFileInput = string | ModelFileInstance | Record<string, unknown>;
+
+function isModelFile(obj: unknown): obj is ModelFileInstance {
+    return Boolean(obj) && (obj instanceof ModelFile || (typeof (obj as any).isModelFile === 'function' && (obj as any).isModelFile() === true));
+}
 
 function getFileNameFromIdentifier(fileIdentifier) {
     const normalizedIdentifier = fileIdentifier.replace(/[\\/]+$/, '');
@@ -179,17 +183,19 @@ class BaseModelManager {
      * Note that if there are dependencies between multiple files the files
      * must be added in dependency order, or the addModelFiles method can be
      * used to add a set of files irrespective of dependencies.
-     * @param {string|ModelFile} modelFile - The Concerto file as a string
+     * Note: AST objects require an AST-based model manager (such as AstModelManager).
+     * @param {string|ModelFile|object} modelFile - The Concerto file as a string, AST object (requires an AST-based model manager), or ModelFile
      * @param {string} [fileName] - a file name to associate with the model file
      * @throws {IllegalModelException}
      */
     validateModelFile(modelFile, fileName?) {
-        if (typeof modelFile === 'string') {
-            const { ast } = this.processFile(fileName, modelFile);
-            let m = new ModelFile(this, ast as AstNode, modelFile, fileName);
-            m.validate();
-        } else {
+        if (isModelFile(modelFile)) {
             modelFile.validate();
+        } else {
+            const { ast } = this.processFile(fileName, modelFile);
+            const definitions = typeof modelFile === 'string' ? modelFile : null;
+            let m = new ModelFile(this, ast as AstNode, definitions, fileName);
+            m.validate();
         }
     }
 
@@ -334,7 +340,8 @@ class BaseModelManager {
      * Concerto files have a single namespace. If a Concerto file with the
      * same namespace has already been added to the ModelManager then it
      * will be replaced.
-     * @param {string|ModelFile} modelFile - Model as a string or object
+     * Note: AST objects require an AST-based model manager (such as AstModelManager).
+     * @param {string|ModelFile|object} modelFile - Model as a string, AST object (requires an AST-based model manager), or ModelFile
      * @param {string} [fileName] - a file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
@@ -343,10 +350,11 @@ class BaseModelManager {
     updateModelFile(modelFile, fileName?, disableValidation?) {
         const NAME = 'updateModelFile';
         debug(NAME, 'updateModelFile', modelFile, fileName);
-        if (typeof modelFile === 'string') {
+        if (!isModelFile(modelFile)) {
             const { ast } = this.processFile(fileName, modelFile);
-            let m = new ModelFile(this, ast as AstNode, modelFile, fileName);
-            return this.updateModelFile(m,fileName,disableValidation);
+            const definitions = typeof modelFile === 'string' ? modelFile : null;
+            let m = new ModelFile(this, ast as AstNode, definitions, fileName);
+            return this.updateModelFile(m, fileName, disableValidation);
         } else {
             let existing = this.modelFiles[modelFile.getNamespace()];
             if (!existing) {
@@ -377,7 +385,8 @@ class BaseModelManager {
 
     /**
      * Add a set of Concerto files to the model manager.
-     * @param {string[]|ModelFile[]} modelFiles - An array of models as strings or ModelFile objects.
+     * Note: AST objects require an AST-based model manager (such as AstModelManager).
+     * @param {string[]|ModelFile[]|object[]} modelFiles - An array of models as strings, AST objects (requires an AST-based model manager), or ModelFile objects.
      * @param {string[]} [fileNames] - A array of file names to associate with the model files
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @returns {Object[]} The newly added model files (internal).
@@ -400,11 +409,12 @@ class BaseModelManager {
                 }
 
                 let m: ModelFileInstance;
-                if (typeof modelFile === 'string') {
-                    const { ast } = this.processFile(fileName, modelFile);
-                    m = new ModelFile(this, ast as AstNode, modelFile, fileName);
-                } else {
+                if (isModelFile(modelFile)) {
                     m = modelFile;
+                } else {
+                    const { ast } = this.processFile(fileName, modelFile);
+                    const definitions = typeof modelFile === 'string' ? modelFile : null;
+                    m = new ModelFile(this, ast as AstNode, definitions, fileName);
                 }
                 if (!m.getVersion()) {
                     throw new Error(`Cannot add an unversioned namespace: ${m.getNamespace()}`);
