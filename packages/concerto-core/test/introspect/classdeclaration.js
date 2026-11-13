@@ -277,7 +277,7 @@ describe('ClassDeclaration', () => {
         });
         it('get error with primitives', function() {
             let extremeOuter = modelManager.getType('com.hyperledger.testing@1.0.0.ExtremeOuter');
-            (()=>{extremeOuter.getNestedProperty('outerAsset.int.innerAsset');}).should.throw(/Property int is a primitive or enum/);
+            (()=>{extremeOuter.getNestedProperty('outerAsset.int.innerAsset');}).should.throw(IllegalModelException, /Property int is a primitive or enum/);
         });
     });
 
