@@ -30,6 +30,10 @@ import {
     IDecoratorBoolean,
     IDecoratorNumber
 } from '@accordproject/concerto-metamodel';
+import { NullUtil } from '@accordproject/concerto-util';
+
+const { isNull } = NullUtil;
+
 
 /**
  * Returns true if the metamodel is a MapDeclaration
@@ -102,6 +106,9 @@ function decoratorFromMetaModel(mm: IDecorator): string {
  * @return {string} the string for the decorators
  */
 function decoratorsFromMetaModel(mm: IDecorator[], prefix: string): string {
+    if (!mm || mm.length === 0) {
+        return '';
+    }
     let result = '';
     result += mm.map(decoratorFromMetaModel).join(`\n${prefix}`);
     result += `\n${prefix}`;
@@ -190,68 +197,68 @@ function modifiersFromMetaModel(mm: any): string {
             break;
         case `${MetaModelNamespace}.DateTimeProperty`:
         case `${MetaModelNamespace}.DateTimeScalar`:
-            if (mm.defaultValue !== undefined) {
+            if (!isNull(mm.defaultValue)) {
                 defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
             break;
         case `${MetaModelNamespace}.DoubleProperty`:
         case `${MetaModelNamespace}.DoubleScalar`:
-            if (mm.defaultValue !== undefined) {
+            if (!isNull(mm.defaultValue)) {
                 const doubleString = toDoubleString(mm.defaultValue);
                 defaultString += ` default=${doubleString}`;
             }
-            if (mm.validator) {
-                const lowerString = mm.validator.lower !== undefined ? toDoubleString(mm.validator.lower) : '';
-                const upperString = mm.validator.upper !== undefined ? toDoubleString(mm.validator.upper) : '';
+            if (mm.validator && (!isNull(mm.validator.lower) || !isNull(mm.validator.upper))) {
+                const lowerString = !isNull(mm.validator.lower) ? toDoubleString(mm.validator.lower) : '';
+                const upperString = !isNull(mm.validator.upper) ? toDoubleString(mm.validator.upper) : '';
                 validatorString += ` range=[${lowerString},${upperString}]`;
             }
             break;
         case `${MetaModelNamespace}.IntegerProperty`:
         case `${MetaModelNamespace}.IntegerScalar`:
-            if (mm.defaultValue !== undefined) {
+            if (!isNull(mm.defaultValue)) {
                 defaultString += ` default=${mm.defaultValue.toString()}`;
             }
-            if (mm.validator) {
-                const lowerString = mm.validator.lower !== undefined ? mm.validator.lower : '';
-                const upperString = mm.validator.upper !== undefined ? mm.validator.upper : '';
+            if (mm.validator && (!isNull(mm.validator.lower) || !isNull(mm.validator.upper))) {
+                const lowerString = !isNull(mm.validator.lower) ? mm.validator.lower : '';
+                const upperString = !isNull(mm.validator.upper) ? mm.validator.upper : '';
                 validatorString += ` range=[${lowerString},${upperString}]`;
             }
             break;
         case `${MetaModelNamespace}.LongProperty`:
         case `${MetaModelNamespace}.LongScalar`:
-            if (mm.defaultValue !== undefined) {
+            if (!isNull(mm.defaultValue)) {
                 defaultString += ` default=${mm.defaultValue.toString()}`;
             }
-            if (mm.validator) {
-                const lowerString = mm.validator.lower !== undefined ? mm.validator.lower : '';
-                const upperString = mm.validator.upper !== undefined ? mm.validator.upper : '';
+            if (mm.validator && (!isNull(mm.validator.lower) || !isNull(mm.validator.upper))) {
+                const lowerString = !isNull(mm.validator.lower) ? mm.validator.lower : '';
+                const upperString = !isNull(mm.validator.upper) ? mm.validator.upper : '';
                 validatorString += ` range=[${lowerString},${upperString}]`;
             }
             break;
         case `${MetaModelNamespace}.StringProperty`:
         case `${MetaModelNamespace}.StringScalar`:
-            if (mm.defaultValue !== undefined) {
+            if (!isNull(mm.defaultValue)) {
                 defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
-            if (mm.validator) {
+            if (mm.validator && !isNull(mm.validator.pattern)) {
                 validatorString += ` regex=${toRegexLiteral(mm.validator.pattern, mm.validator.flags)}`;
             }
-            if (mm.lengthValidator) {
-                const minLength = mm.lengthValidator.minLength !== undefined ? mm.lengthValidator.minLength : '';
-                const maxLength = mm.lengthValidator.maxLength !== undefined ? mm.lengthValidator.maxLength : '';
+            if (mm.lengthValidator && (!isNull(mm.lengthValidator.minLength) || !isNull(mm.lengthValidator.maxLength))) {
+                const minLength = !isNull(mm.lengthValidator.minLength) ? mm.lengthValidator.minLength : '';
+                const maxLength = !isNull(mm.lengthValidator.maxLength) ? mm.lengthValidator.maxLength : '';
                 validatorString += ` length=[${minLength},${maxLength}]`;
             }
             break;
         case `${MetaModelNamespace}.ObjectProperty`:
-            if (mm.defaultValue !== undefined) {
-                defaultString += ` default="${mm.defaultValue}"`;
+            if (!isNull(mm.defaultValue)) {
+                defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
             break;
     }
 
-    if (mm.sizeValidator) {
-        const minSize = mm.sizeValidator.minSize !== undefined ? mm.sizeValidator.minSize : '';
-        const maxSize = mm.sizeValidator.maxSize !== undefined ? mm.sizeValidator.maxSize : '';
+    if (mm.sizeValidator && (!isNull(mm.sizeValidator.minSize) || !isNull(mm.sizeValidator.maxSize))) {
+        const minSize = !isNull(mm.sizeValidator.minSize) ? mm.sizeValidator.minSize : '';
+        const maxSize = !isNull(mm.sizeValidator.maxSize) ? mm.sizeValidator.maxSize : '';
         validatorString += ` size=[${minSize},${maxSize}]`;
     }
 
@@ -280,12 +287,13 @@ function toStringLiteral(value: string): string {
  */
 function toRegexLiteral(pattern: string, flags?: string): string {
     let source = pattern;
+    const cleanFlags = flags || undefined;
     try {
-        source = new RegExp(pattern, flags).source;
+        source = new RegExp(pattern, cleanFlags).source;
     } catch {
         // Leave invalid patterns untouched rather than throwing while printing
     }
-    return `/${source}/${flags || ''}`;
+    return `/${source}/${cleanFlags || ''}`;
 }
 
 /**
@@ -427,9 +435,11 @@ function declFromMetaModel(mm: IDeclaration): string {
         result += '{';
 
         // Handle properties
-        conceptDecl.properties.forEach((property: IProperty) => {
-            result += `\n  ${propertyFromMetaModel(property)}`;
-        });
+        if (conceptDecl.properties) {
+            conceptDecl.properties.forEach((property: IProperty) => {
+                result += `\n  ${propertyFromMetaModel(property)}`;
+            });
+        }
         result += '\n}';
     }
 
