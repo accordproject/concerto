@@ -19,6 +19,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const { ClassDeclaration } = require('../../src/introspect/classdeclaration');
 const { Field } = require('../../src/introspect/field');
 const { ModelFile } = require('../../src/introspect/modelfile');
+const { IllegalModelException } = require('../../src/introspect/illegalmodelexception');
 
 const should = require('chai').should();
 const sinon = require('sinon');
@@ -128,6 +129,120 @@ describe('Field', () => {
                 defaultValue: false
             });
             f.getDefaultValue().should.equal(false);
+        });
+    });
+
+    describe('#validate', () => {
+        it('should validate primitive field', () => {
+            let f = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.StringProperty`,
+                name: 'field',
+            });
+            f.validate(mockClassDeclaration);
+        });
+
+        it('should throw when scalar field has defaultValue', () => {
+            let f = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'field',
+                type: { name: 'MyScalar' },
+                defaultValue: 'foo'
+            });
+            sinon.stub(f, 'isTypeScalar').returns(true);
+            sinon.stub(f, 'getFullyQualifiedName').returns('org.test@1.0.0.C.field');
+            (() => {
+                f.validate(mockClassDeclaration);
+            }).should.throw(IllegalModelException, /Scalar-typed property 'org.test@1.0.0.C.field' cannot declare a default value/);
+        });
+
+        it('should throw when scalar field has sizeValidator', () => {
+            let f = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'field',
+                type: { name: 'MyScalar' },
+                isArray: true,
+                sizeValidator: {
+                    minSize: 1,
+                    maxSize: 5
+                }
+            });
+            sinon.stub(f, 'isTypeScalar').returns(true);
+            sinon.stub(f, 'getFullyQualifiedName').returns('org.test@1.0.0.C.field');
+            (() => {
+                f.validate(mockClassDeclaration);
+            }).should.throw(IllegalModelException, /Scalar-typed property 'org.test@1.0.0.C.field' cannot declare a size validator/);
+        });
+
+        it('should pass validation when non-scalar field has defaultValue or sizeValidator', () => {
+            let f1 = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.StringProperty`,
+                name: 'field1',
+                defaultValue: 'val'
+            });
+            sinon.stub(f1, 'isTypeScalar').returns(false);
+            f1.validate(mockClassDeclaration);
+
+            let f2 = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.StringProperty`,
+                name: 'field2',
+                isArray: true,
+                sizeValidator: {
+                    minSize: 1,
+                    maxSize: 5
+                }
+            });
+            sinon.stub(f2, 'isTypeScalar').returns(false);
+            f2.validate(mockClassDeclaration);
+        });
+    });
+
+    describe('#isTypeScalar', () => {
+        it('should return false for primitive fields', () => {
+            let f = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.StringProperty`,
+                name: 'field',
+            });
+            f.isTypeScalar().should.equal(false);
+        });
+
+        it('should return false when getType returns falsy', () => {
+            let f = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'field',
+            });
+            sinon.stub(f, 'isPrimitive').returns(false);
+            sinon.stub(f, 'getType').returns(null);
+            f.isTypeScalar().should.equal(false);
+        });
+
+        it('should return true when type is a scalar declaration', () => {
+            let f = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'field',
+                type: { name: 'MyScalar' },
+            });
+            sinon.stub(f, 'isPrimitive').returns(false);
+            const mockModelFile = {
+                resolveType: sinon.stub(),
+                getType: sinon.stub().returns({ isScalarDeclaration: () => true })
+            };
+            mockClassDeclaration.getModelFile.returns(mockModelFile);
+            f.isTypeScalar().should.equal(true);
+        });
+
+        it('should return false when type is not a scalar declaration', () => {
+            let f = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'field',
+                type: { name: 'ConceptType' },
+            });
+            sinon.stub(f, 'isPrimitive').returns(false);
+            const mockModelFile = {
+                resolveType: sinon.stub(),
+                getType: sinon.stub().returns({ isScalarDeclaration: () => false })
+            };
+            mockClassDeclaration.getModelFile.returns(mockModelFile);
+            f.isTypeScalar().should.equal(false);
         });
     });
 
