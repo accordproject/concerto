@@ -421,9 +421,17 @@ class ResourceValidator {
                 }
                 break;
             case 'Long':
-            case 'Integer':
             case 'Double': {
                 if(dataType !== 'number') {
+                    invalid = true;
+                }
+                if (!isFinite(obj)) {
+                    invalid = true;
+                }
+            }
+                break;
+            case 'Integer': {
+                if(dataType !== 'number' || !Number.isInteger(obj)) {
                     invalid = true;
                 }
                 if (!isFinite(obj)) {
