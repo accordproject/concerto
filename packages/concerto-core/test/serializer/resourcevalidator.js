@@ -711,6 +711,143 @@ describe('ResourceValidator', function () {
         });
     });
 
+    describe('numeric type validation', () => {
+        const namespace = 'org.acme.numeric@1.0.0';
+
+        for (const type of ['Integer', 'Long', 'Double']) {
+            describe(type, () => {
+                let serializer;
+
+                beforeEach(() => {
+                    modelManager.addCTOModel(`namespace org.acme.numeric.types@1.0.0
+                    scalar NumericAlias extends ${type}`);
+                    modelManager.addCTOModel(`namespace ${namespace}
+                    import org.acme.numeric.types@1.0.0.NumericAlias
+                    concept Base {
+                        o ${type} inheritedValue optional
+                    }
+                    concept Numeric extends Base {
+                        o ${type} value optional
+                        o ${type}[] values optional
+                        o NumericAlias alias optional
+                        o NumericAlias[] aliases optional
+                        o Numeric child optional
+                        o ${type} defaulted default=${type === 'Double' ? '2.0' : '2'}
+                        o ${type} ranged range=${type === 'Double' ? '[-2.0,2.0]' : '[-2,2]'} optional
+                    }`);
+                    serializer = new Serializer(factory, modelManager);
+                });
+
+                const fields = [
+                    ['value', value => value],
+                    ['values', value => [value]],
+                    ['alias', value => value],
+                    ['aliases', value => [value]],
+                    ['inheritedValue', value => value],
+                    ['child', value => {
+                        const child = factory.newConcept(namespace, 'Numeric');
+                        child.value = value;
+                        return child;
+                    }],
+                    ['ranged', value => value],
+                    ['defaulted', value => value]
+                ];
+
+                if (type !== 'Double') {
+                    for (const [field, wrap] of fields) {
+                        it(`should reject fractions in ${field} during validation and serialization`, () => {
+                            for (const value of [1.5, -1.5, 0.1]) {
+                                const resource = factory.newConcept(namespace, 'Numeric');
+                                resource[field] = wrap(value);
+                                (() => resource.validate()).should.throw(ValidationException);
+                                (() => serializer.toJSON(resource)).should.throw(ValidationException);
+                            }
+                        });
+                    }
+
+                    it('should reject fractional setter writes without changing scalar fields', () => {
+                        const resource = factory.newConcept(namespace, 'Numeric');
+                        for (const field of ['value', 'alias', 'inheritedValue', 'ranged']) {
+                            resource.setPropertyValue(field, 1);
+                            (() => resource.setPropertyValue(field, 1.5)).should.throw(ValidationException,
+                                `Expected type of value: "${type}".`);
+                            resource[field].should.equal(1);
+                        }
+                    });
+
+                    it('should reject fractional array setters and additions without changing the array', () => {
+                        const resource = factory.newConcept(namespace, 'Numeric');
+                        for (const field of ['values', 'aliases']) {
+                            const original = [1];
+                            resource.setPropertyValue(field, original);
+                            (() => resource.setPropertyValue(field, [1.5])).should.throw(ValidationException);
+                            resource[field].should.equal(original);
+                            resource[field].should.deep.equal([1]);
+                            (() => resource.addArrayValue(field, 1.5)).should.throw(ValidationException);
+                            resource[field].should.equal(original);
+                            resource[field].should.deep.equal([1]);
+                        }
+                    });
+                }
+
+                it('should accept and round-trip valid numeric values', () => {
+                    const validValues = type === 'Double' ? [-1, 0, 2, 1.5, -1.5, 0.1] : [-1, 0, 2];
+                    for (const [field, wrap] of fields) {
+                        for (const value of validValues) {
+                            const resource = factory.newConcept(namespace, 'Numeric');
+                            resource.setPropertyValue(field, wrap(value));
+                            resource.validate();
+                            const json = serializer.toJSON(resource);
+                            serializer.toJSON(serializer.fromJSON(json)).should.deep.equal(json);
+                        }
+                    }
+                });
+
+                it('should continue rejecting numeric strings and non-finite values', () => {
+                    for (const field of ['value', 'values']) {
+                        for (const value of ['1', NaN, Infinity, -Infinity]) {
+                            const resource = factory.newConcept(namespace, 'Numeric');
+                            resource[field] = field === 'values' ? [value] : value;
+                            (() => resource.validate()).should.throw(ValidationException);
+                            (() => serializer.toJSON(resource)).should.throw(ValidationException);
+                        }
+                    }
+                });
+
+                it('should preserve numeric defaults when an omitted value is validated and restored', () => {
+                    const resource = factory.newConcept(namespace, 'Numeric');
+                    resource.defaulted.should.equal(2);
+                    resource.defaulted = undefined;
+                    resource.validate();
+                    const json = serializer.toJSON(resource);
+                    json.should.not.have.property('defaulted');
+                    serializer.fromJSON(json).defaulted.should.equal(2);
+                });
+
+                it('should preserve declared range validation and its errors', () => {
+                    const resource = factory.newConcept(namespace, 'Numeric');
+                    resource.setPropertyValue('ranged', 1);
+                    (() => resource.setPropertyValue('ranged', 3)).should.throw(ValidationException,
+                        'Value 3 is outside upper bound 2');
+                    resource.ranged.should.equal(1);
+                    resource.ranged = -3;
+                    (() => resource.validate()).should.throw(ValidationException,
+                        'Value -3 is outside lower bound -2');
+                });
+
+                if (type === 'Long') {
+                    it('should retain support for integral Numbers outside the safe-integer range', () => {
+                        const resource = factory.newConcept(namespace, 'Numeric');
+                        resource.setPropertyValue('value', Number.MAX_SAFE_INTEGER + 1);
+                        resource.validate();
+                        const json = serializer.toJSON(resource);
+                        serializer.fromJSON(json).value.should.equal(Number.MAX_SAFE_INTEGER + 1);
+                    });
+                }
+            });
+        }
+    });
+
     describe('invalid input scenario handling', () => {
         const testCto = `namespace org.acme@1.0.0
         participant P identified by id { o String id }
