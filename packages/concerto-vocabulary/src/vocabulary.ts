@@ -199,6 +199,8 @@ class Vocabulary {
                 } else {
                     return false;
                 }
+            } else if (declaration.isScalarDeclaration()) {
+                return false;
             } else {
                 return declaration.getOwnProperty(Object.keys(p)[0]);
             }
