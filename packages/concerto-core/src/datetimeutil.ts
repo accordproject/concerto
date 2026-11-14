@@ -110,5 +110,25 @@ function setCurrentTime(currentTime?: string | null, utcOffset?: number, strict 
     };
 }
 
-export { setCurrentTime, isValidDateTime };
+// The strict DateTime format: YYYY-MM-DDTHH:mm:ss[.sss] followed by Z or ±HH:mm.
+const STRICT_DATETIME_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d+)?)(Z|[+-]\d{2}:\d{2})$/;
+
+/**
+ * Checks a string against the strict DateTime rule used for instance values: the
+ * strict format, naming a real date and time (no 2024-02-30, no T24:00).
+ *
+ * @param {string} value - The DateTime string
+ * @returns {string} 'valid', 'format' when the string doesn't have the strict format,
+ * or 'invalid' when it has the format but names an impossible date or time
+ */
+function checkStrictDateTime(value: string): 'valid' | 'format' | 'invalid' {
+    const match = value.match(STRICT_DATETIME_PATTERN);
+    if (!match) {
+        return 'format';
+    }
+    const second = match[6].split('.')[0];
+    return isValidDateTime(match[1], match[2], match[3], match[4], match[5], second, match[7]) ? 'valid' : 'invalid';
+}
+
+export { setCurrentTime, isValidDateTime, checkStrictDateTime };
 export default { setCurrentTime };
