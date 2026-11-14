@@ -853,15 +853,24 @@ class BaseModelManager {
      * @param {object} [options.disableValidation] - option to disable metamodel validation and just fetch the models, to be used only if the metamodel is already validated
      */
     fromAst(ast: IModels, options?: { disableValidation?: boolean }) {
-        this.clearModelFiles();
-        ast.models.forEach( (model: IModel) => {
-            if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
-                const modelFile = new ModelFile( this, model );
-                this.addModelFile( modelFile, null, null, true );
+        const originalModelFiles = {};
+        Object.assign(originalModelFiles, this.modelFiles);
+
+        try {
+            this.clearModelFiles();
+            ast.models.forEach((model: IModel) => {
+                if (!EXCLUDE_NS.includes(model.namespace)) {
+                    const modelFile = new ModelFile(this, model);
+                    this.addModelFile(modelFile, null, null, true);
+                }
+            });
+            if (!options?.disableValidation) {
+                this.validateModelFiles();
             }
-        });
-        if (!options?.disableValidation) {
-            this.validateModelFiles();
+        } catch (err) {
+            this.modelFiles = {};
+            Object.assign(this.modelFiles, originalModelFiles);
+            throw err;
         }
     }
 
