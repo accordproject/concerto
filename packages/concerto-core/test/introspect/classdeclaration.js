@@ -97,6 +97,73 @@ describe('ClassDeclaration', () => {
             const clazz = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.scalararray.cto', ConceptDeclaration);
             clazz.validate();
         });
+
+        it('should throw when a string array is used as an identifier', () => {
+            const mm = new ModelManager();
+            (() => {
+                mm.addCTOModel(`
+namespace com.testing@1.0.0
+asset Person identified by names {
+    o String[] names
+}
+                `);
+            }).should.throw(/Identifying fields cannot be arrays/);
+        });
+
+        it('should throw when a scalar string array is used as an identifier', () => {
+            const mm = new ModelManager();
+            (() => {
+                mm.addCTOModel(`
+namespace com.testing@1.0.0
+scalar SSN extends String default="000-00-0000" regex=/\\d{3}-\\d{2}-\\d{4}/
+concept Person identified by ssnArray {
+    o SSN[] ssnArray
+}
+                `);
+            }).should.throw(/Identifying fields cannot be arrays/);
+        });
+
+        it('should throw when an inherited string array is used as an identifier', () => {
+            const mm = new ModelManager();
+            (() => {
+                mm.addCTOModel(`
+namespace com.testing@1.0.0
+abstract asset Base {
+    o String[] ids
+}
+asset Child identified by ids extends Base {
+}
+                `);
+            }).should.throw(/Identifying fields cannot be arrays/);
+        });
+
+        it('should throw when a participant is identified by an array', () => {
+            const mm = new ModelManager();
+            (() => {
+                mm.addCTOModel(`
+namespace com.testing@1.0.0
+participant Member identified by memberIds {
+    o String[] memberIds
+}
+                `);
+            }).should.throw(/Identifying fields cannot be arrays/);
+        });
+
+        it('should throw when a 3rd-level subclass is identified by an array defined in a root class', () => {
+            const mm = new ModelManager();
+            (() => {
+                mm.addCTOModel(`
+namespace com.testing@1.0.0
+abstract concept Root {
+    o String[] codes
+}
+abstract concept Middle extends Root {
+}
+asset Leaf identified by codes extends Middle {
+}
+                `);
+            }).should.throw(/Identifying fields cannot be arrays/);
+        });
     });
 
     describe('#accept', () => {
