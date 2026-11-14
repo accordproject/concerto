@@ -413,6 +413,37 @@ describe('MapDeclaration', () => {
 
     describe('#validate failure scenarios - Map Value', () => {
 
+        it('should throw if ObjectMapKeyType does not contain type property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation0',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType',
+                    }
+                });
+            }).should.throw(IllegalModelException, /ObjectMapKeyType must contain property 'type'/);
+        });
+
+        it('should throw if ObjectMapKeyType contains null type property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation0',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapKeyType',
+                        type: null
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType',
+                    }
+                });
+            }).should.throw(IllegalModelException, /ObjectMapKeyType must contain property 'type'/);
+        });
+
         it('should throw if ObjectMapValueType does not contain type property ', () => {
             (() => {
                 new MapDeclaration(modelFile, {
@@ -426,6 +457,22 @@ describe('MapDeclaration', () => {
                     }
                 });
             }).should.throw(IllegalModelException);
+        });
+
+        it('should throw if ObjectMapValueType contains null type property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapValueType',
+                        type: null
+                    }
+                });
+            }).should.throw(IllegalModelException, /ObjectMapValueType must contain property 'type'/);
         });
 
         it('should throw if ObjectMapValueType TypeIdentifier does not contain name property', () => {
@@ -463,6 +510,37 @@ describe('MapDeclaration', () => {
                     }
                 });
             }).should.throw(IllegalModelException);
+        });
+
+        it('should throw if RelationshipMapValueType does not contain type property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.RelationshipMapValueType',
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
+        it('should throw if RelationshipMapValueType contains null type property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.RelationshipMapValueType',
+                        type: null
+                    }
+                });
+            }).should.throw(IllegalModelException, /ObjectMapValueType must contain property 'type'/);
         });
 
         it('should throw if ast contains illegal Map Value Property', () => {

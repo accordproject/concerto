@@ -96,6 +96,13 @@ class MapKeyType extends Decorated {
             this.type = 'String';
             break;
         case `${MetaModelNamespace}.ObjectMapKeyType`:
+            if (!this.ast.type || !this.ast.type.name) {
+                throw new IllegalModelException(
+                    `ObjectMapKeyType must contain property 'type', for MapDeclaration named ${this.parent.name}`,
+                    this.modelFile,
+                    this.ast.location
+                );
+            }
             this.type = String(this.ast.type.name);
             break;
         }

@@ -294,10 +294,10 @@ class BaseModelManager {
         } catch (err: unknown) {
             const error = err as Error;
             throw new MetamodelException(error.message);
-        }
-
-        if (!alreadyHasMetamodel) {
-            this.deleteModelFile(MetaModelNamespace);
+        } finally {
+            if (!alreadyHasMetamodel) {
+                this.deleteModelFile(MetaModelNamespace);
+            }
         }
     }
 
@@ -854,7 +854,13 @@ class BaseModelManager {
      */
     fromAst(ast: IModels, options?: { disableValidation?: boolean }) {
         this.clearModelFiles();
+        if (!ast || !Array.isArray(ast.models)) {
+            throw new IllegalModelException('Models AST must contain a models array');
+        }
         ast.models.forEach( (model: IModel) => {
+            if (!model) {
+                throw new IllegalModelException('Model cannot be null or undefined');
+            }
             if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
                 const modelFile = new ModelFile( this, model );
                 this.addModelFile( modelFile, null, null, true );
