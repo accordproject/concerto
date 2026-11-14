@@ -1,0 +1,7 @@
+namespace org.example.child@1.0.0
+
+import org.example.base@1.0.0.ExternalBase
+
+abstract concept LocalBase extends ExternalBase {}
+concept Child extends LocalBase {}
+abstract concept Orphan {}
