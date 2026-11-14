@@ -89,7 +89,7 @@ class StringValidator extends Validator{
             }
         }
 
-        if (this.field?.ast?.defaultValue) {
+        if (!isNull(this.field?.ast?.defaultValue)) {
             const def = this.field.ast.defaultValue as string;
             if (this.minLength !== null && this.minLength !== undefined && def.length < this.minLength) {
                 this.reportModelError(`The string length of '${def}' should be at least ${this.minLength} characters.`);
