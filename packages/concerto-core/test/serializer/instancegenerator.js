@@ -70,6 +70,13 @@ describe('InstanceGenerator', () => {
             }).should.throw(/Unrecognised/);
         });
 
+        it('should throw Error naming enum value when newResource is called with generate option on enum', () => {
+            modelManager.addCTOModel(`namespace org.acme.enumgen@1.0.0
+            enum Color { o RED }`);
+            (() => factory.newResource('org.acme.enumgen@1.0.0', 'Color', undefined, { generate: 'sample' }))
+                .should.throw(Error, /Unrecognised org\.acme\.enumgen@1\.0\.0\.Color\.RED/);
+        });
+
         it('should generate a default value for a string property', () => {
             let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
