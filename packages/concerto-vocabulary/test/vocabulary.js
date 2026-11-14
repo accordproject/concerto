@@ -15,6 +15,7 @@
 'use strict';
 
 const chai = require('chai');
+const { ModelManager } = require('@accordproject/concerto-core');
 
 // eslint-disable-next-line no-unused-vars
 const should = chai.should();
@@ -189,6 +190,35 @@ describe('Vocabulary', () => {
             const terms = voc.getElementTerms('Widget', 'label');
             should.exist(terms);
             terms.label.should.equal('');
+        });
+
+        it('validate - preserves falsy declaration, property, and namespace terms', () => {
+            const modelManager = new ModelManager();
+            const modelFile = modelManager.addCTOModel(`
+                namespace org.falsy@1.0.0
+                concept Widget {
+                    o Boolean enabled
+                    o Integer count
+                    o String label
+                }
+            `);
+            const vocabulary = new Vocabulary({}, {
+                locale: 'en',
+                namespace: 'org.falsy@1.0.0',
+                term: false,
+                declarations: [
+                    {
+                        Widget: 0,
+                        properties: [
+                            { enabled: false },
+                            { count: 0 },
+                            { label: '' }
+                        ]
+                    }
+                ]
+            });
+
+            vocabulary.validate(modelFile).missingTerms.should.deep.equal([]);
         });
     });
 

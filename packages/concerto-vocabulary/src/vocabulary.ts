@@ -205,15 +205,15 @@ class Vocabulary {
         };
 
         const result = {
-            missingTerms: modelFile.getAllDeclarations().flatMap( (d: Declaration) => this.getTerm(d.getName())
-                ? getOwnProperties(d).flatMap( (p: Property) => this.getTerm(d.getName(), getPropertyName(p)) ? null : `${d.getName()}.${getPropertyName(p)}`)
+            missingTerms: modelFile.getAllDeclarations().flatMap( (d: Declaration) => this.getTerm(d.getName()) != null
+                ? getOwnProperties(d).flatMap( (p: Property) => this.getTerm(d.getName(), getPropertyName(p)) != null ? null : `${d.getName()}.${getPropertyName(p)}`)
                 : d.getName() ).filter( (i: any) => i !== null),
             additionalTerms: this.content.declarations.flatMap( (k: any) => modelFile.getLocalType(Object.keys(k)[0])
                 ? Array.isArray(k.properties) ? k.properties.flatMap( (p: any) => checkPropertyExists(k, p) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
                 : k ).filter( (i: any) => i !== null)
         };
 
-        if(!this.content.term){
+        if(this.content.term == null){
             result.missingTerms.push('namespace');
         }
 
