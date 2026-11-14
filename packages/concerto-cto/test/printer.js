@@ -336,4 +336,529 @@ describe('parser', () => {
 
         result.should.include('o Double value range=[0.0000001,1.0]');
     });
+
+    it('Should not print default value when defaultValue is null', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.IntegerProperty',
+                            name: 'intProp',
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: null
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.LongProperty',
+                            name: 'longProp',
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: null
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'doubleProp',
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: null
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'stringProp',
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: null
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DateTimeProperty',
+                            name: 'dateTimeProp',
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: null
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.ObjectProperty',
+                            name: 'objProp',
+                            type: {
+                                $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                                name: 'Sample'
+                            },
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: null
+                        }
+                    ]
+                },
+                {
+                    $class: 'concerto.metamodel@1.0.0.IntegerScalar',
+                    name: 'IntScalar',
+                    defaultValue: null
+                },
+                {
+                    $class: 'concerto.metamodel@1.0.0.DoubleScalar',
+                    name: 'DoubleScalar',
+                    defaultValue: null
+                },
+                {
+                    $class: 'concerto.metamodel@1.0.0.StringScalar',
+                    name: 'StringScalar',
+                    defaultValue: null
+                }
+            ]
+        });
+
+        result.should.not.include('default=');
+        const reparsed = Parser.parse(result);
+        reparsed.declarations[0].properties.forEach((p) => {
+            should.not.exist(p.defaultValue);
+        });
+    });
+
+    it('Should print falsy default values correctly', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.IntegerProperty',
+                            name: 'zeroInt',
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: 0
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'zeroDouble',
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: 0
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'emptyStr',
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: ''
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.BooleanProperty',
+                            name: 'falseBool',
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: false
+                        }
+                    ]
+                }
+            ]
+        });
+
+        result.should.include('o Integer zeroInt default=0');
+        result.should.include('o Double zeroDouble default=0.0');
+        result.should.include('o String emptyStr default=""');
+        result.should.include('o Boolean falseBool default=false');
+        const reparsed = Parser.parse(result);
+        reparsed.declarations[0].properties[0].defaultValue.should.equal(0);
+        reparsed.declarations[0].properties[1].defaultValue.should.equal(0);
+        reparsed.declarations[0].properties[2].defaultValue.should.equal('');
+        reparsed.declarations[0].properties[3].defaultValue.should.equal(false);
+    });
+
+    it('Should print single-bounded validator ranges when other bound is null', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.IntegerProperty',
+                            name: 'intLowerOnly',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.IntegerDomainValidator',
+                                lower: 10,
+                                upper: null
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.IntegerProperty',
+                            name: 'intUpperOnly',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.IntegerDomainValidator',
+                                lower: null,
+                                upper: 10
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.LongProperty',
+                            name: 'longLowerOnly',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.LongDomainValidator',
+                                lower: 100,
+                                upper: null
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.LongProperty',
+                            name: 'longUpperOnly',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.LongDomainValidator',
+                                lower: null,
+                                upper: 100
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'doubleLowerOnly',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator',
+                                lower: 5.5,
+                                upper: null
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'doubleUpperOnly',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator',
+                                lower: null,
+                                upper: 5.5
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'strMinOnly',
+                            isArray: false,
+                            isOptional: false,
+                            lengthValidator: {
+                                $class: 'concerto.metamodel@1.0.0.StringLengthValidator',
+                                minLength: 3,
+                                maxLength: null
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'strMaxOnly',
+                            isArray: false,
+                            isOptional: false,
+                            lengthValidator: {
+                                $class: 'concerto.metamodel@1.0.0.StringLengthValidator',
+                                minLength: null,
+                                maxLength: 10
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'arraySizeMinOnly',
+                            isArray: true,
+                            isOptional: false,
+                            sizeValidator: {
+                                $class: 'concerto.metamodel@1.0.0.CollectionSizeValidator',
+                                minSize: 1,
+                                maxSize: null
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'arraySizeMaxOnly',
+                            isArray: true,
+                            isOptional: false,
+                            sizeValidator: {
+                                $class: 'concerto.metamodel@1.0.0.CollectionSizeValidator',
+                                minSize: null,
+                                maxSize: 5
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        result.should.include('o Integer intLowerOnly range=[10,]');
+        result.should.include('o Integer intUpperOnly range=[,10]');
+        result.should.include('o Long longLowerOnly range=[100,]');
+        result.should.include('o Long longUpperOnly range=[,100]');
+        result.should.include('o Double doubleLowerOnly range=[5.5,]');
+        result.should.include('o Double doubleUpperOnly range=[,5.5]');
+        result.should.include('o String strMinOnly length=[3,]');
+        result.should.include('o String strMaxOnly length=[,10]');
+        result.should.include('o String[] arraySizeMinOnly size=[1,]');
+        result.should.include('o String[] arraySizeMaxOnly size=[,5]');
+
+        const reparsed = Parser.parse(result);
+        reparsed.declarations[0].properties[0].validator.lower.should.equal(10);
+        should.not.exist(reparsed.declarations[0].properties[0].validator.upper);
+        reparsed.declarations[0].properties[1].validator.upper.should.equal(10);
+        should.not.exist(reparsed.declarations[0].properties[1].validator.lower);
+        reparsed.declarations[0].properties[4].validator.lower.should.equal(5.5);
+        should.not.exist(reparsed.declarations[0].properties[4].validator.upper);
+        reparsed.declarations[0].properties[5].validator.upper.should.equal(5.5);
+        should.not.exist(reparsed.declarations[0].properties[5].validator.lower);
+    });
+
+    it('Should normalize and escape regex pattern when flags is null', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'path',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
+                                pattern: 'foo/bar',
+                                flags: null
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        result.should.include('regex=/foo\\/bar/');
+        const reparsed = Parser.parse(result);
+        const pattern = reparsed.declarations[0].properties[0].validator.pattern;
+        new RegExp(pattern).test('foo/bar').should.equal(true);
+    });
+
+    it('Should not print validators when all bounds or pattern are null or omitted', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'doubleProp',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator',
+                                lower: null,
+                                upper: null
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.IntegerProperty',
+                            name: 'intProp',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.IntegerDomainValidator',
+                                lower: null,
+                                upper: null
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.LongProperty',
+                            name: 'longProp',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.LongDomainValidator',
+                                lower: null,
+                                upper: null
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'strProp',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
+                                pattern: null,
+                                flags: null
+                            },
+                            lengthValidator: {
+                                $class: 'concerto.metamodel@1.0.0.StringLengthValidator',
+                                minLength: null,
+                                maxLength: null
+                            }
+                        },
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'arrayProp',
+                            isArray: true,
+                            isOptional: false,
+                            sizeValidator: {
+                                $class: 'concerto.metamodel@1.0.0.CollectionSizeValidator',
+                                minSize: null,
+                                maxSize: null
+                            }
+                        }
+                    ]
+                },
+                {
+                    $class: 'concerto.metamodel@1.0.0.DoubleScalar',
+                    name: 'DoubleScalar',
+                    validator: {
+                        $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator',
+                        lower: null,
+                        upper: null
+                    }
+                },
+                {
+                    $class: 'concerto.metamodel@1.0.0.IntegerScalar',
+                    name: 'IntScalar',
+                    validator: {
+                        $class: 'concerto.metamodel@1.0.0.IntegerDomainValidator',
+                        lower: null,
+                        upper: null
+                    }
+                },
+                {
+                    $class: 'concerto.metamodel@1.0.0.LongScalar',
+                    name: 'LongScalar',
+                    validator: {
+                        $class: 'concerto.metamodel@1.0.0.LongDomainValidator',
+                        lower: null,
+                        upper: null
+                    }
+                },
+                {
+                    $class: 'concerto.metamodel@1.0.0.StringScalar',
+                    name: 'StringScalar',
+                    lengthValidator: {
+                        $class: 'concerto.metamodel@1.0.0.StringLengthValidator',
+                        minLength: null,
+                        maxLength: null
+                    }
+                }
+            ]
+        });
+
+        result.should.not.include('range=');
+        result.should.not.include('length=');
+        result.should.not.include('size=');
+        result.should.not.include('regex=');
+        const reparsed = Parser.parse(result);
+        should.exist(reparsed);
+    });
+
+    it('Should escape quotes and backslashes in ObjectProperty default values', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.ObjectProperty',
+                            name: 'objWithQuote',
+                            type: {
+                                $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                                name: 'Sample'
+                            },
+                            isArray: false,
+                            isOptional: false,
+                            defaultValue: 'hello"world'
+                        }
+                    ]
+                }
+            ]
+        });
+
+        result.should.include('default="hello\\"world"');
+        const reparsed = Parser.parse(result);
+        reparsed.declarations[0].properties[0].defaultValue.should.equal('hello"world');
+    });
+
+    it('Should handle empty decorators array without inserting spurious newlines or indentation', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    decorators: [],
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'field',
+                            isArray: false,
+                            isOptional: false,
+                            decorators: []
+                        }
+                    ]
+                },
+                {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'SampleMap',
+                    decorators: [],
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType',
+                        decorators: []
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType',
+                        decorators: []
+                    }
+                }
+            ]
+        });
+
+        result.should.equal('namespace org.acme@1.0.0\n\nconcept Sample {\n  o String field\n}\n\nmap SampleMap {\n  o String\n  o String\n}');
+        const reparsed = Parser.parse(result);
+        should.exist(reparsed);
+    });
+
+    it('Should handle concept declaration without properties array', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'EmptyConcept',
+                    isAbstract: false
+                }
+            ]
+        });
+
+        result.should.include('concept EmptyConcept {\n}');
+        const reparsed = Parser.parse(result);
+        reparsed.declarations[0].name.should.equal('EmptyConcept');
+    });
 });
