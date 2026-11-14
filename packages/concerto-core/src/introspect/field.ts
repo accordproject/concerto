@@ -17,6 +17,7 @@ import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import Property from './property';
 import NumberValidator from './numbervalidator';
 import StringValidator from './stringvalidator';
+import IllegalModelException from './illegalmodelexception';
 import { NullUtil as Util } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
@@ -133,6 +134,61 @@ class Field extends Property {
      */
     isField(): boolean {
         return true;
+    }
+
+    /**
+     * Validate the field
+     * @param {ClassDeclaration} classDecl the class declaration of the property
+     * @throws {IllegalModelException}
+     * @protected
+     */
+    validate(classDecl: ClassDeclaration) {
+        super.validate(classDecl);
+
+        if (this.defaultValue !== null) {
+            if (this.isArray()) {
+                throw new IllegalModelException(
+                    `Array property '${this.getFullyQualifiedName()}' cannot declare a default value.`,
+                    this.getModelFile(),
+                    this.ast.location
+                );
+            }
+
+            if (this.type && !this.isPrimitive()) {
+                const resolvedType = this.getParent().getModelFile().getType(this.type);
+                if (resolvedType) {
+                    if (resolvedType.isEnum?.()) {
+                        const validValues = resolvedType.getProperties().map(p => p.getName());
+                        if (!validValues.includes(String(this.defaultValue))) {
+                            throw new IllegalModelException(
+                                `Invalid default value '${this.defaultValue}' for enum property '${this.getFullyQualifiedName()}'. Expected one of: ${validValues.join(', ')}.`,
+                                this.getModelFile(),
+                                this.ast.location
+                            );
+                        }
+                    } else if (!resolvedType.isScalarDeclaration?.()) {
+                        let isSubtype = false;
+                        try {
+                            const defaultDecl = this.getParent().getModelFile().getType(String(this.defaultValue));
+                            if (defaultDecl && typeof defaultDecl.getAllSuperTypeDeclarations === 'function') {
+                                isSubtype = defaultDecl.getAllSuperTypeDeclarations().some(
+                                    s => s.getFullyQualifiedName() === resolvedType.getFullyQualifiedName()
+                                );
+                            }
+                        } catch (e) {
+                            // not a valid subtype
+                        }
+                        if (!isSubtype) {
+                            throw new IllegalModelException(
+                                `Property '${this.getFullyQualifiedName()}' of type '${this.type}' cannot declare a default value. Default values are only supported for primitive and enum properties.`,
+                                this.getModelFile(),
+                                this.ast.location
+                            );
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
