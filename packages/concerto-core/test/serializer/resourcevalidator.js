@@ -817,7 +817,7 @@ describe('ResourceValidator', function () {
                 $class: 'org.example@1.0.0.Container',
                 scores: {
                     '$identifier': 100,
-                    '$timestamp': 200
+                    'alice': 200
                 }
             });
             resource.should.not.be.null;
