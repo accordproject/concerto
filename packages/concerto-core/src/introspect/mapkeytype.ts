@@ -71,11 +71,18 @@ class MapKeyType extends Decorated {
      */
     validate() {
         if (!ModelUtil.isPrimitiveType(this.type)) {
-            const decl = this.modelFile.getType(this.ast.type.name);
+            this.modelFile.resolveType(
+                `the key of map ${this.parent.getFullyQualifiedName()}`,
+                this.type,
+                this.ast.location
+            );
+            const decl = this.modelFile.getType(this.type);
             // All but StringScalar & DateTimeScalar are unsupported.
-            if  (!ModelUtil.isValidMapKeyScalar(decl)) {
+            if (!ModelUtil.isValidMapKeyScalar(decl)) {
                 throw new IllegalModelException(
-                    `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}, for MapDeclaration ${this.parent.name}`
+                    `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}, for MapDeclaration ${this.parent.getFullyQualifiedName()}`,
+                    this.modelFile,
+                    this.ast.location
                 );
             }
         }

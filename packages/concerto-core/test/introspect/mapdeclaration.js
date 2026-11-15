@@ -134,6 +134,24 @@ describe('MapDeclaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.imported.scalar.cto', MapDeclaration);
             decl.validate();
         });
+
+        it('should validate when map key is an imported scalar across models', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(`
+                namespace base@1.0.0
+                scalar StringId extends String
+            `, 'base.cto');
+            mm.addCTOModel(`
+                namespace child@1.0.0
+                import base@1.0.0.StringId
+                map MyMap {
+                    o StringId
+                    o String
+                }
+            `, 'child.cto');
+            const mapDecl = mm.getType('child@1.0.0.MyMap');
+            expect(() => mapDecl.validate()).to.not.throw();
+        });
     });
 
     describe('#validate success scenarios - Map Value', () => {
@@ -408,6 +426,59 @@ describe('MapDeclaration', () => {
                     decl.validate();
                 }).should.throw(IllegalModelException);
             })();
+        });
+
+        it('should throw for an undeclared map key type', () => {
+            (() => {
+                const mm = new ModelManager();
+                mm.addCTOModel(`
+                    namespace org.acme@1.0.0
+                    map M { o Missing o String }
+                `, 'test.cto');
+            }).should.throw(
+                IllegalModelException,
+                /Undeclared type "Missing" in "the key of map org.acme@1.0.0.M"/
+            );
+        });
+
+        it('should preserve file name and location coordinates when map key is invalid scalar', () => {
+            const mm = new ModelManager({ skipLocationNodes: false });
+            let caughtError = null;
+            try {
+                mm.addCTOModel(`
+                    namespace org.acme@1.0.0
+                    concept User {
+                        o String id
+                    }
+                    map M { o User o String }
+                `, 'models/invalid_key.cto');
+            } catch (err) {
+                caughtError = err;
+            }
+            expect(caughtError).to.be.instanceOf(IllegalModelException);
+            expect(caughtError.fileName).to.equal('models/invalid_key.cto');
+            expect(caughtError.fileLocation).to.be.an('object');
+            expect(caughtError.fileLocation.start.line).to.be.a('number');
+            expect(caughtError.message).to.match(/Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType/);
+            expect(caughtError.message).to.include('org.acme@1.0.0.M');
+        });
+
+        it('should preserve file name and location coordinates when map key is undeclared', () => {
+            const mm = new ModelManager({ skipLocationNodes: false });
+            let caughtError = null;
+            try {
+                mm.addCTOModel(`
+                    namespace org.acme@1.0.0
+                    map M { o MissingKey o String }
+                `, 'models/undeclared_key.cto');
+            } catch (err) {
+                caughtError = err;
+            }
+            expect(caughtError).to.be.instanceOf(IllegalModelException);
+            expect(caughtError.fileName).to.equal('models/undeclared_key.cto');
+            expect(caughtError.fileLocation).to.be.an('object');
+            expect(caughtError.fileLocation.start.line).to.be.a('number');
+            expect(caughtError.message).to.match(/Undeclared type "MissingKey" in "the key of map org.acme@1.0.0.M"/);
         });
     });
 
