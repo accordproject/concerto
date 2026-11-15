@@ -493,6 +493,21 @@ describe('ResourceValidator', function () {
             }).should.throw('Model violation in the "org.acme.l3@1.0.0.Car#foo" instance. The field "milage" has a value of "NaN" (type of value: "number"). Expected type of value: "Double".');
         });
 
+        it('should reject a fractional Integer', function () {
+            const vehicle = factory.newResource('org.acme.l3@1.0.0', 'Car', 'foo');
+            vehicle.$identifier = '42';
+            vehicle.model = 'Ford';
+            vehicle.numberOfWheels = 4.5;
+            vehicle.milage = 3.14;
+            const typedStack = new TypedStack(vehicle);
+            const assetDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
+
+            (() => {
+                assetDeclaration.accept(resourceValidator, parameters);
+            }).should.throw('Model violation in the "org.acme.l3@1.0.0.Car#foo" instance. The field "numberOfWheels" has a value of "4.5" (type of value: "number"). Expected type of value: "Integer".');
+        });
+
         it('should report undeclared field if not identifiable', () => {
             const data = factory.newConcept('org.acme.l1@1.0.0', 'Data');
             data.name = 'name';
