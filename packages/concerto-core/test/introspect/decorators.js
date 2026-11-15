@@ -275,8 +275,364 @@ concept A {}`, 'test.cto');
             modelDefinitions = fs.readFileSync('test/data/decorators/valid-typeref-imported.cto', 'utf8');
             modelManager.addCTOModel(modelDefinitions);
         });
+        it('should preserve the non-array decorator type error message', () => {
+            const modelManager = new ModelManager({
+                strict: true,
+                decoratorValidation: {
+                    missingDecorator: 'error',
+                    invalidDecorator: 'error'
+                }
+            });
+
+            (() => {
+                modelManager.addCTOModel(`namespace t@1.0.0
+abstract concept Interface {}
+concept Implements {
+    o Interface interface
+}
+concept NotAnInterface {}
+@Implements(NotAnInterface)
+concept C {}`, 'test.cto');
+
+                modelManager.validateModelFiles();
+            }).should.throw(/Decorator Implements references a type NotAnInterface which cannot be assigned to the declared type/);
+        });
+        it('should validate remaining arguments against a trailing array property', () => {
+            const modelManager = new ModelManager({
+                strict: true,
+                decoratorValidation: {
+                    missingDecorator: 'error',
+                    invalidDecorator: 'error'
+                }
+            });
+
+            modelManager.addCTOModel(`namespace t@1.0.0
+abstract concept Interface {}
+concept A extends Interface {}
+concept B extends Interface {}
+concept Implements {
+    o Interface[] interfaces
+}
+@Implements(A, B)
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        });
+
+        it('should reject an invalid type in a trailing array argument', () => {
+            const modelManager = new ModelManager({
+                strict: true,
+                decoratorValidation: {
+                    missingDecorator: 'error',
+                    invalidDecorator: 'error'
+                }
+            });
+
+            (() => {
+                modelManager.addCTOModel(`namespace t@1.0.0
+abstract concept Interface {}
+concept A extends Interface {}
+concept Implements {
+    o Interface[] interfaces
+}
+concept NotAnInterface {}
+@Implements(A, NotAnInterface)
+concept C {}`, 'test.cto');
+
+                modelManager.validateModelFiles();
+            }).should.throw(/NotAnInterface/);
+        });
+
+        it('should reject an undefined type in a trailing array argument', () => {
+            const modelManager = new ModelManager({
+                strict: true,
+                decoratorValidation: {
+                    missingDecorator: 'error',
+                    invalidDecorator: 'error'
+                }
+            });
+
+            (() => {
+                modelManager.addCTOModel(`namespace t@1.0.0
+abstract concept Interface {}
+concept A extends Interface {}
+concept Implements {
+    o Interface[] interfaces
+}
+@Implements(A, Undefined)
+concept C {}`, 'test.cto');
+
+                modelManager.validateModelFiles();
+            }).should.throw(/Undefined.*has not been defined\/imported/);
+        });
+        it('should reject a missing required trailing array when earlier properties are optional', () => {
+            const modelManager = new ModelManager({
+                strict: true,
+                decoratorValidation: {
+                    missingDecorator: 'error',
+                    invalidDecorator: 'error'
+                }
+            });
+
+            (() => {
+                modelManager.addCTOModel(`namespace t@1.0.0
+abstract concept Interface {}
+concept Implements {
+    o String label optional
+    o Interface[] interfaces
+}
+@Implements("example")
+concept C {}`, 'test.cto');
+
+                modelManager.validateModelFiles();
+            }).should.throw(/too few arguments/);
+        });
+        it('should accept a required trailing array after an optional property is supplied', () => {
+            const modelManager = new ModelManager({
+                strict: true,
+                decoratorValidation: {
+                    missingDecorator: 'error',
+                    invalidDecorator: 'error'
+                }
+            });
+
+            modelManager.addCTOModel(`namespace t@1.0.0
+concept Tags {
+    o String label optional
+    o String[] values
+}
+@Tags("example", "one", "two")
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        });
+        it('should validate a trailing array after a regular decorator property', () => {
+            const modelManager = new ModelManager({
+                strict: true,
+                decoratorValidation: {
+                    missingDecorator: 'error',
+                    invalidDecorator: 'error'
+                }
+            });
+
+            modelManager.addCTOModel(`namespace t@1.0.0
+abstract concept Interface {}
+concept A extends Interface {}
+concept B extends Interface {}
+concept Implements {
+    o String label
+    o Interface[] interfaces
+}
+@Implements("example", A, B)
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        });
+        it('should validate multiple primitive arguments against a trailing array property', () => {
+            const modelManager = new ModelManager({
+                strict: true,
+                decoratorValidation: {
+                    missingDecorator: 'error',
+                    invalidDecorator: 'error'
+                }
+            });
+
+            modelManager.addCTOModel(`namespace t@1.0.0
+concept Tags {
+    o String[] values
+}
+@Tags("one", "two", "three")
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        });
+
+        it('should reject an invalid primitive in a trailing array argument', () => {
+            const modelManager = new ModelManager({
+                strict: true,
+                decoratorValidation: {
+                    missingDecorator: 'error',
+                    invalidDecorator: 'error'
+                }
+            });
+
+            (() => {
+                modelManager.addCTOModel(`namespace t@1.0.0
+concept Tags {
+    o String[] values
+}
+@Tags("one", 42)
+concept C {}`, 'test.cto');
+
+                modelManager.validateModelFiles();
+            }).should.throw(/Expected string/);
+        });
     });
 
+    it('should allow an optional trailing array property with no arguments', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'error'
+            }
+        });
+
+        modelManager.addCTOModel(`namespace t@1.0.0
+concept Tags {
+    o String[] values optional
+}
+@Tags
+concept C {}`, 'test.cto');
+
+        modelManager.validateModelFiles();
+    });
+
+    it('should reject no arguments for a required trailing array property', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'error'
+            }
+        });
+
+        (() => {
+            modelManager.addCTOModel(`namespace t@1.0.0
+concept Tags {
+    o String[] values
+}
+@Tags
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        }).should.throw(/too few arguments/);
+    });
+
+    it('should report the position of an invalid trailing array argument', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'error'
+            }
+        });
+
+        (() => {
+            modelManager.addCTOModel(`namespace t@1.0.0
+concept Tags {
+    o String[] values
+}
+@Tags("one", 42)
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        }).should.throw(/argument 2.*Expected string/);
+    });
+
+    it('should not crash on an invalid trailing array argument in warning mode', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'warning'
+            }
+        });
+
+        (() => {
+            modelManager.addCTOModel(`namespace t@1.0.0
+concept Tags {
+    o String[] values
+}
+@Tags("one", 42, "three")
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        }).should.not.throw();
+    });
+    it('should not crash on a non-type trailing array argument in warning mode', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'warning'
+            }
+        });
+
+        (() => {
+            modelManager.addCTOModel(`namespace t@1.0.0
+abstract concept Interface {}
+concept Implements {
+    o Interface[] interfaces
+}
+@Implements(42)
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        }).should.not.throw();
+    });
+
+    it('should not crash on an undefined trailing array type in warning mode', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'warning'
+            }
+        });
+
+        (() => {
+            modelManager.addCTOModel(`namespace t@1.0.0
+abstract concept Interface {}
+concept Implements {
+    o Interface[] interfaces
+}
+@Implements(Undefined)
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        }).should.not.throw();
+    });
+    it('should not crash when a non-array decorator has too many arguments in warning mode', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'warning'
+            }
+        });
+
+        (() => {
+            modelManager.addCTOModel(`namespace t@1.0.0
+concept Tags {
+    o String value
+}
+@Tags("one", "two")
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        }).should.not.throw();
+    });
+    it('should preserve required-first ordering when optional properties are declared first', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'error'
+            }
+        });
+
+        modelManager.addCTOModel(`namespace t@1.0.0
+import concerto.decorator@1.0.0.Decorator
+concept Options extends Decorator {
+    o String description optional
+    o Boolean enabled
+}
+@Options(true)
+concept C {}`, 'test.cto');
+
+        modelManager.validateModelFiles();
+    });
     describe('#factories', () => {
 
         it('should let a factory specify a decorator implementation', () => {
