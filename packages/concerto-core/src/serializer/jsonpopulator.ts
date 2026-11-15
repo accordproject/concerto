@@ -15,10 +15,11 @@
 import createDebug from 'debug';
 import { TypedStack, NullUtil as Util } from '@accordproject/concerto-util';
 import Relationship from '../model/relationship';
+import Typed, { DEFER_DATETIME_DEFAULT_CHECK } from '../model/typed';
 import ModelUtil from '../modelutil';
 import ValidationException from './validationexception';
 import dayjs from '../dayjs-setup';
-import { isValidDateTime } from '../datetimeutil';
+import { checkStrictDateTime } from '../datetimeutil';
 import type Factory from '../factory';
 import type BaseModelManager from '../basemodelmanager';
 import type Declaration from '../introspect/declaration';
@@ -29,6 +30,10 @@ import type Resource from '../model/resource';
 import Field from '../introspect/field';
 
 const debug = createDebug('concerto:JSONPopulator');
+
+// Nested instances are created like the root one in Serializer.fromJSON: their
+// DateTime defaults are checked in visitClassDeclaration, not by the factory.
+const FACTORY_OPTIONS = { [DEFER_DATETIME_DEFAULT_CHECK]: true };
 
 
 type Stack<T> = {
@@ -187,6 +192,14 @@ class JSONPopulator {
                 parameters.path?.pop();
             }
         });
+
+        // A field that is missing from the JSON (or null) keeps the default the
+        // factory assigned, so this is where a DateTime default is actually used.
+        classDeclaration.getProperties().forEach((property) => {
+            if (Util.isNull(jsonObj[property.getName()])) {
+                Typed.checkDateTimeDefault(property as Field, this.strictQualifiedDateTimes);
+            }
+        });
         return resourceObj;
     }
 
@@ -267,7 +280,7 @@ class JSONPopulator {
         // if its a ClassDeclaration, populate the Concept.
         if (decl?.isClassDeclaration()) {
             let subResource = parameters.factory.newConcept(decl.getNamespace(),
-                decl.getName(), decl.getIdentifierFieldName() );
+                decl.getName(), decl.getIdentifierFieldName(), FACTORY_OPTIONS);
 
             parameters.jsonStack.push(value);
             parameters.resourceStack.push(subResource);
@@ -339,11 +352,11 @@ class JSONPopulator {
                 // if this is identifiable, then we create a resource
                 if (declaration.isIdentified()) {
                     subResource = parameters.factory.newResource(declaration.getNamespace(),
-                        declaration.getName(), jsonItem[declaration.getIdentifierFieldName()] );
+                        declaration.getName(), jsonItem[declaration.getIdentifierFieldName()], FACTORY_OPTIONS);
                 } else {
                     // otherwise we create a concept
                     subResource = parameters.factory.newConcept(declaration.getNamespace(),
-                        declaration.getName());
+                        declaration.getName(), undefined, FACTORY_OPTIONS);
                 }
                 parameters.resourceStack.push(subResource);
             }
@@ -379,14 +392,11 @@ class JSONPopulator {
             } else if (!this.strictQualifiedDateTimes){
                 result = dayjs.utc(json).utcOffset(this.utcOffset);
             } else if (this.strictQualifiedDateTimes){
-                const match = json.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d+)?)(Z|[+-]\d{2}:\d{2})$/);
-                if (match) {
-                    const second = match[6].split('.')[0];
-                    if (isValidDateTime(match[1], match[2], match[3], match[4], match[5], second, match[7])) {
-                        result = dayjs.utc(json);
-                    } else {
-                        throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` (${json} is not a valid date-time)`);
-                    }
+                const check = checkStrictDateTime(json);
+                if (check === 'valid') {
+                    result = dayjs.utc(json);
+                } else if (check === 'invalid') {
+                    throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` (${json} is not a valid date-time)`);
                 } else {
                     throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
                 }
@@ -473,7 +483,7 @@ class JSONPopulator {
 
             // create a new instance, using the identifier field name as the ID.
             let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
-                classDeclaration.getName(), jsonObjAsObject[classDeclaration.getIdentifierFieldName()] );
+                classDeclaration.getName(), jsonObjAsObject[classDeclaration.getIdentifierFieldName()], FACTORY_OPTIONS);
             parameters.jsonStack.push(jsonObjAsObject);
             parameters.resourceStack.push(subResource);
             classDeclaration.accept(this, parameters);

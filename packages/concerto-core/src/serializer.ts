@@ -17,7 +17,7 @@ import DateTimeUtil from './datetimeutil';
 import Globalize from './globalize';
 import JSONGenerator from './serializer/jsongenerator';
 import JSONPopulator from './serializer/jsonpopulator';
-import Typed from './model/typed';
+import Typed, { DEFER_DATETIME_DEFAULT_CHECK } from './model/typed';
 import ResourceValidator from './serializer/resourcevalidator';
 
 const { utcOffset: defaultUtcOffset } = DateTimeUtil.setCurrentTime();
@@ -162,19 +162,22 @@ class Serializer {
         const classDeclaration = this.modelManager.getType(jsonObject.$class);
 
         // create a new instance, using the identifier field name as the ID.
+        // DateTime defaults are checked by the JSONPopulator, once it knows
+        // which fields the JSON supplies.
+        const factoryOptions = { [DEFER_DATETIME_DEFAULT_CHECK]: true };
         let resource;
         if (classDeclaration.isTransaction?.()) {
             resource = this.factory.newTransaction(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
-                jsonObject[classDeclaration.getIdentifierFieldName()] );
+                jsonObject[classDeclaration.getIdentifierFieldName()], factoryOptions);
         } else if (classDeclaration.isEvent?.()) {
             resource = this.factory.newEvent(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
-                jsonObject[classDeclaration.getIdentifierFieldName()] );
+                jsonObject[classDeclaration.getIdentifierFieldName()], factoryOptions);
         } else if (classDeclaration.isConcept?.()) {
             resource = this.factory.newConcept(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
-                jsonObject[classDeclaration.getIdentifierFieldName()] );
+                jsonObject[classDeclaration.getIdentifierFieldName()], factoryOptions);
         } else if (classDeclaration.isMapDeclaration?.()) {
             throw new Error('Attempting to create a Map declaration is not supported.');
         } else if (classDeclaration.isEnum()) {
@@ -182,7 +185,7 @@ class Serializer {
         } else {
             resource = this.factory.newResource( classDeclaration.getNamespace(),
                 classDeclaration.getName(),
-                jsonObject[classDeclaration.getIdentifierFieldName()] );
+                jsonObject[classDeclaration.getIdentifierFieldName()], factoryOptions);
         }
 
         // populate the resource based on the jsonObject
