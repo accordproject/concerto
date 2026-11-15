@@ -14,9 +14,10 @@
 
 import Relationship from '../model/relationship';
 import Resource from '../model/resource';
+import ModelUtil from '../modelutil';
 import Identifiable from '../model/identifiable';
 import { NullUtil as Util } from '@accordproject/concerto-util';
-import ModelUtil from '../modelutil';
+
 import ValidationException from './validationexception';
 import Globalize from '../globalize';
 import dayjs from '../dayjs-setup';
@@ -204,12 +205,10 @@ class ResourceValidator {
         }
 
         obj.forEach((value, key) => {
-            if (!ModelUtil.isSystemProperty(key)) {
                 // Validate Key
                 this.checkMapType(mapDeclaration.getKey(), key, parameters, mapDeclaration);
                 // Validate Value
                 this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
-            }
         });
 
         return null;
