@@ -15,6 +15,7 @@
 import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import { Logger } from '@accordproject/concerto-util';
 import ModelUtil from '../modelutil';
+import dayjs from '../dayjs-setup';
 import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
@@ -123,7 +124,10 @@ class Decorator {
     }
 
     /**
-     * Validate the decorator
+     * Validate the decorator.
+     * If the final property of a decorator declaration is an array,
+     * remaining positional arguments are validated against that property's
+     * element type.
      * @throws {IllegalModelException}
      * @private
      */
@@ -151,66 +155,122 @@ class Decorator {
             }
 
             const decoratorDecl = mf.getType(this.getName());
-            const requiredProperties = decoratorDecl.getProperties().filter(p => !p.isOptional());
-            const optionalProperties = decoratorDecl.getProperties().filter(p => p.isOptional());
-            const allProperties = [...requiredProperties, ...optionalProperties];
-            if (this.getArguments().length < requiredProperties.length) {
+            const declaredProperties = decoratorDecl.getProperties();
+
+            const trailingArrayProperty = declaredProperties.length > 0 && declaredProperties[declaredProperties.length - 1].isArray()
+                ? declaredProperties[declaredProperties.length - 1]
+                : undefined;
+
+            const requiredProperties = declaredProperties.filter(p => !p.isOptional());
+            const optionalProperties = declaredProperties.filter(p => p.isOptional());
+
+            const requiredPropertiesWithoutTrailingArray = trailingArrayProperty
+                ? requiredProperties.filter(p => p !== trailingArrayProperty)
+                : requiredProperties;
+
+            // Preserve required-first binding. A required trailing array must
+            // receive its position before optional properties.
+            const allProperties = trailingArrayProperty && !trailingArrayProperty.isOptional()
+                ? [
+                    ...requiredPropertiesWithoutTrailingArray,
+                    trailingArrayProperty,
+                    ...optionalProperties.filter(p => p !== trailingArrayProperty)
+                ]
+                : [
+                    ...requiredPropertiesWithoutTrailingArray,
+                    ...optionalProperties.filter(p => p !== trailingArrayProperty),
+                    ...(trailingArrayProperty ? [trailingArrayProperty] : [])
+                ];
+
+            const trailingArrayIndex = trailingArrayProperty
+                ? allProperties.indexOf(trailingArrayProperty)
+                : -1;
+
+            const args = this.getArguments();
+
+            const minimumRequiredArguments = requiredPropertiesWithoutTrailingArray.length +
+                (trailingArrayProperty && !trailingArrayProperty.isOptional() ? 1 : 0);
+
+            if (args.length < minimumRequiredArguments) {
                 const err = `Decorator ${this.getName()} has too few arguments. Required properties are: [${requiredProperties.map(p => p.getName()).join()}]`;
                 this.handleError(validationOptions.invalidDecorator, err);
             }
-            const args = this.getArguments();
+
             for (let n = 0; n < args.length; n++) {
                 const arg = args[n];
-                if (n > allProperties.length - 1) {
+                const argumentPosition = n + 1;
+                const isTrailingArrayArgument = Boolean(trailingArrayProperty && n >= trailingArrayIndex);
+
+                if (n >= allProperties.length && !trailingArrayProperty) {
                     const err = `Decorator ${this.getName()} has too many arguments. Properties are: [${allProperties.map(p => p.getName()).join()}]`;
                     this.handleError(validationOptions.invalidDecorator, err);
+                    continue;
                 }
-                else {
-                    const property = allProperties[n];
-                    const argType = typeof arg;
-                    switch (property.getType()) {
-                        case 'Integer':
-                        case 'Double':
-                        case 'Long':
-                            if (argType !== 'number') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected number. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            break;
-                        case 'String':
-                            if (argType !== 'string') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected string. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            break;
-                        case 'Boolean':
-                            if (argType !== 'boolean') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected boolean. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            break;
-                        default: {
-                            if (typeof arg !== 'object' || arg?.type !== 'Identifier') {
-                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected object. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            // handleError above only throws when the decorator
-                            // validation option is set to 'error', so arg may still
-                            // be something other than a type reference here
-                            const typeReference = arg as DecoratorTypeReferenceArgument;
-                            const typeDecl = mf.getType(typeReference.name);
-                            if (!typeDecl) {
-                                const err = `Decorator ${this.getName()} references a type ${typeReference.name} which has not been defined/imported.`;
-                                this.handleError(validationOptions.invalidDecorator, err);
-                            }
-                            else {
-                                if (!ModelUtil.isAssignableTo(typeDecl.getModelFile(), typeDecl.getFullyQualifiedName(), property)) {
-                                    const err = `Decorator ${this.getName()} references a type ${typeReference.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`;
-                                    this.handleError(validationOptions.invalidDecorator, err);
-                                }
-                            }
-                            break;
+
+                const property = isTrailingArrayArgument
+                    ? trailingArrayProperty
+                    : allProperties[n];
+
+                const argType = typeof arg;
+
+                switch (property.getType()) {
+                    case 'Integer':
+                    case 'Double':
+                    case 'Long':
+                        if (argType !== 'number') {
+                            const err = isTrailingArrayArgument ? `Decorator ${this.getName()} argument ${argumentPosition} is invalid. Expected number. Found ${argType}, with value ${JSON.stringify(arg)}` : `Decorator ${this.getName()} has invalid decorator argument. Expected number. Found ${argType}, with value ${JSON.stringify(arg)}`;
+                            this.handleError(validationOptions.invalidDecorator, err);
                         }
+                        break;
+
+                    case 'String':
+                        if (argType !== 'string') {
+                            const err = isTrailingArrayArgument ? `Decorator ${this.getName()} argument ${argumentPosition} is invalid. Expected string. Found ${argType}, with value ${JSON.stringify(arg)}` : `Decorator ${this.getName()} has invalid decorator argument. Expected string. Found ${argType}, with value ${JSON.stringify(arg)}`;
+                            this.handleError(validationOptions.invalidDecorator, err);
+                        }
+                        break;
+
+                    case 'Boolean':
+                        if (argType !== 'boolean') {
+                            const err = isTrailingArrayArgument ? `Decorator ${this.getName()} argument ${argumentPosition} is invalid. Expected boolean. Found ${argType}, with value ${JSON.stringify(arg)}` : `Decorator ${this.getName()} has invalid decorator argument. Expected boolean. Found ${argType}, with value ${JSON.stringify(arg)}`;
+                            this.handleError(validationOptions.invalidDecorator, err);
+                        }
+                        break;
+
+                    case 'DateTime':
+                        if (typeof arg !== 'string' || !dayjs.utc(arg).isValid()) {
+                            const err = isTrailingArrayArgument
+                                ? `Decorator ${this.getName()} argument ${argumentPosition} is invalid. Expected valid DateTime. Found ${JSON.stringify(arg)}`
+                                : `Decorator ${this.getName()} has invalid decorator argument. Expected valid DateTime. Found ${JSON.stringify(arg)}`;
+                            this.handleError(validationOptions.invalidDecorator, err);
+                        }
+                        break;
+
+                    default: {
+                        if (!arg || typeof arg !== 'object' || arg.type !== 'Identifier') {
+                            const err = isTrailingArrayArgument ? `Decorator ${this.getName()} argument ${argumentPosition} is invalid. Expected a type reference. Found ${argType}, with value ${JSON.stringify(arg)}` : `Decorator ${this.getName()} has invalid decorator argument. Expected object. Found ${argType}, with value ${JSON.stringify(arg)}`;
+                            this.handleError(validationOptions.invalidDecorator, err);
+                            continue;
+                        }
+
+                        const typeReference = arg as DecoratorTypeReferenceArgument;
+                        const typeDecl = mf.getType(typeReference.name);
+
+                        if (!typeDecl) {
+                            const err = isTrailingArrayArgument
+                                ? `Decorator ${this.getName()} argument ${argumentPosition} references a type ${typeReference.name} which has not been defined/imported.`
+                                : `Decorator ${this.getName()} references a type ${typeReference.name} which has not been defined/imported.`;
+                            this.handleError(validationOptions.invalidDecorator, err);
+                            continue;
+                        }
+
+                        if (typeof typeDecl === 'string' || !ModelUtil.isAssignableTo(typeDecl.getModelFile(), typeDecl.getFullyQualifiedName(), property)) {
+                            const err = isTrailingArrayArgument
+                                ? `Decorator ${this.getName()} argument ${argumentPosition} references a type ${typeReference.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`
+                                : `Decorator ${this.getName()} references a type ${typeReference.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`;
+                            this.handleError(validationOptions.invalidDecorator, err);
+                        }
+                        break;
                     }
                 }
             }
