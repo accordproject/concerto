@@ -381,13 +381,13 @@ concept Implements {
     o String label optional
     o Interface[] interfaces
 }
-@Implements("example")
+@Implements()
 concept C {}`, 'test.cto');
 
                 modelManager.validateModelFiles();
             }).should.throw(/too few arguments/);
         });
-        it('should accept a required trailing array after an optional property is supplied', () => {
+        it('should accept a required trailing array declared after an optional property', () => {
             const modelManager = new ModelManager({
                 strict: true,
                 decoratorValidation: {
@@ -401,7 +401,7 @@ concept Tags {
     o String label optional
     o String[] values
 }
-@Tags("example", "one", "two")
+@Tags("one", "two")
 concept C {}`, 'test.cto');
 
             modelManager.validateModelFiles();
@@ -632,6 +632,27 @@ concept C {}`, 'test.cto');
         }).should.not.throw();
     });
 
+    it('should not crash on a primitive type reference in warning mode', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'warning'
+            }
+        });
+
+        (() => {
+            modelManager.addCTOModel(`namespace t@1.0.0
+abstract concept Interface {}
+concept Implements {
+    o Interface[] interfaces
+}
+@Implements(String)
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        }).should.not.throw();
+    });
     it('should not crash on an undefined trailing array type in warning mode', () => {
         const modelManager = new ModelManager({
             strict: true,

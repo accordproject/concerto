@@ -164,24 +164,34 @@ class Decorator {
             const requiredProperties = declaredProperties.filter(p => !p.isOptional());
             const optionalProperties = declaredProperties.filter(p => p.isOptional());
 
-            // Preserve the original required-first, optional-second argument order.
-            // A declared trailing array must remain the final positional destination.
-            const allProperties = trailingArrayProperty
-                ? [
-                    ...requiredProperties.filter(p => p !== trailingArrayProperty),
-                    ...optionalProperties.filter(p => p !== trailingArrayProperty),
-                    trailingArrayProperty
-                ]
-                : [...requiredProperties, ...optionalProperties];
-
             const requiredPropertiesWithoutTrailingArray = trailingArrayProperty
                 ? requiredProperties.filter(p => p !== trailingArrayProperty)
                 : requiredProperties;
 
+            // Preserve required-first binding. A required trailing array must
+            // receive its position before optional properties.
+            const allProperties = trailingArrayProperty && !trailingArrayProperty.isOptional()
+                ? [
+                    ...requiredPropertiesWithoutTrailingArray,
+                    trailingArrayProperty,
+                    ...optionalProperties.filter(p => p !== trailingArrayProperty)
+                ]
+                : [
+                    ...requiredPropertiesWithoutTrailingArray,
+                    ...optionalProperties.filter(p => p !== trailingArrayProperty),
+                    ...(trailingArrayProperty ? [trailingArrayProperty] : [])
+                ];
+
+            const trailingArrayIndex = trailingArrayProperty
+                ? allProperties.indexOf(trailingArrayProperty)
+                : -1;
+
             const args = this.getArguments();
 
-            if (args.length < requiredPropertiesWithoutTrailingArray.length ||
-                (trailingArrayProperty && !trailingArrayProperty.isOptional() && args.length < allProperties.length)) {
+            const minimumRequiredArguments = requiredPropertiesWithoutTrailingArray.length +
+                (trailingArrayProperty && !trailingArrayProperty.isOptional() ? 1 : 0);
+
+            if (args.length < minimumRequiredArguments) {
                 const err = `Decorator ${this.getName()} has too few arguments. Required properties are: [${requiredProperties.map(p => p.getName()).join()}]`;
                 this.handleError(validationOptions.invalidDecorator, err);
             }
@@ -189,7 +199,7 @@ class Decorator {
             for (let n = 0; n < args.length; n++) {
                 const arg = args[n];
                 const argumentPosition = n + 1;
-                const isTrailingArrayArgument = Boolean(trailingArrayProperty && n >= allProperties.length - 1);
+                const isTrailingArrayArgument = Boolean(trailingArrayProperty && n >= trailingArrayIndex);
 
                 if (n >= allProperties.length && !trailingArrayProperty) {
                     const err = `Decorator ${this.getName()} has too many arguments. Properties are: [${allProperties.map(p => p.getName()).join()}]`;
@@ -254,7 +264,7 @@ class Decorator {
                             continue;
                         }
 
-                        if (!ModelUtil.isAssignableTo(typeDecl.getModelFile(), typeDecl.getFullyQualifiedName(), property)) {
+                        if (typeof typeDecl === 'string' || !ModelUtil.isAssignableTo(typeDecl.getModelFile(), typeDecl.getFullyQualifiedName(), property)) {
                             const err = isTrailingArrayArgument
                                 ? `Decorator ${this.getName()} argument ${argumentPosition} references a type ${typeReference.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`
                                 : `Decorator ${this.getName()} references a type ${typeReference.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`;
