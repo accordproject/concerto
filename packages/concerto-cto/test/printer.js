@@ -109,12 +109,12 @@ describe('parser', () => {
                     name: 'slashed',
                     isArray: false,
                     isOptional: false,
-                    defaultValue: 'a\b'
+                    defaultValue: 'a\\b'
                 }]
             }],
         });
         cto.should.include('default="he said \\"hi\\""');
-        cto.should.include('default="a\\b"');
+        cto.should.include('default="a\\\\b"');
     });
 
     it('Should produce parseable CTO for String defaults containing quotes', () => {
@@ -167,12 +167,12 @@ describe('parser', () => {
                     },
                     isArray: false,
                     isOptional: false,
-                    defaultValue: 'a\b'
+                    defaultValue: 'a\\b'
                 }]
             }],
         });
         cto.should.include('default="he said \\"hi\\""');
-        cto.should.include('default="a\\b"');
+        cto.should.include('default="a\\\\b"');
     });
 
     it('Should produce parseable CTO for ObjectProperty defaults containing quotes', () => {
