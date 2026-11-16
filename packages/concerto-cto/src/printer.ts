@@ -244,7 +244,7 @@ function modifiersFromMetaModel(mm: any): string {
             break;
         case `${MetaModelNamespace}.ObjectProperty`:
             if (mm.defaultValue !== undefined) {
-                defaultString += ` default="${mm.defaultValue}"`;
+                defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
             break;
     }

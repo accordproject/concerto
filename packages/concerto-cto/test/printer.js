@@ -109,12 +109,12 @@ describe('parser', () => {
                     name: 'slashed',
                     isArray: false,
                     isOptional: false,
-                    defaultValue: 'a\b'
+                    defaultValue: 'a\\b'
                 }]
             }],
         });
         cto.should.include('default="he said \\"hi\\""');
-        cto.should.include('default="a\\b"');
+        cto.should.include('default="a\\\\b"');
     });
 
     it('Should produce parseable CTO for String defaults containing quotes', () => {
@@ -129,6 +129,68 @@ describe('parser', () => {
                 properties: [{
                     $class: 'concerto.metamodel@1.0.0.StringProperty',
                     name: 'quoted',
+                    isArray: false,
+                    isOptional: false,
+                    defaultValue: 'he said "hi"'
+                }]
+            }],
+        });
+        const reparsed = Parser.parse(cto);
+        reparsed.declarations[0].properties[0].defaultValue.should.equal('he said "hi"');
+    });
+
+    it('Should escape quotes and backslashes in ObjectProperty default values', () => {
+        const cto = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [],
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'C',
+                isAbstract: false,
+                properties: [{
+                    $class: 'concerto.metamodel@1.0.0.ObjectProperty',
+                    name: 'quoted',
+                    type: {
+                        $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                        name: 'Status'
+                    },
+                    isArray: false,
+                    isOptional: false,
+                    defaultValue: 'he said "hi"'
+                }, {
+                    $class: 'concerto.metamodel@1.0.0.ObjectProperty',
+                    name: 'slashed',
+                    type: {
+                        $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                        name: 'Status'
+                    },
+                    isArray: false,
+                    isOptional: false,
+                    defaultValue: 'a\\b'
+                }]
+            }],
+        });
+        cto.should.include('default="he said \\"hi\\""');
+        cto.should.include('default="a\\\\b"');
+    });
+
+    it('Should produce parseable CTO for ObjectProperty defaults containing quotes', () => {
+        const cto = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [],
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'C',
+                isAbstract: false,
+                properties: [{
+                    $class: 'concerto.metamodel@1.0.0.ObjectProperty',
+                    name: 'quoted',
+                    type: {
+                        $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                        name: 'Status'
+                    },
                     isArray: false,
                     isOptional: false,
                     defaultValue: 'he said "hi"'
