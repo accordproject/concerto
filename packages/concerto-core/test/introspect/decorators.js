@@ -469,6 +469,66 @@ concept C {}`, 'test.cto');
         });
     });
 
+    it('should accept valid DateTime values in a trailing array property', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'error'
+            }
+        });
+
+        modelManager.addCTOModel(`namespace t@1.0.0
+concept Dates {
+    o DateTime[] values
+}
+@Dates("2026-11-16T10:30:00.000Z", "2026-11-16T11:30:00.000Z")
+concept C {}`, 'test.cto');
+
+        modelManager.validateModelFiles();
+    });
+
+    it('should reject invalid DateTime values in a trailing array property', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'error'
+            }
+        });
+
+        (() => {
+            modelManager.addCTOModel(`namespace t@1.0.0
+concept Dates {
+    o DateTime[] values
+}
+@Dates("not-a-valid-date")
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        }).should.throw(/argument 1 is invalid\. Expected valid DateTime/);
+    });
+
+    it('should reject invalid DateTime values in a non-array decorator property', () => {
+        const modelManager = new ModelManager({
+            strict: true,
+            decoratorValidation: {
+                missingDecorator: 'error',
+                invalidDecorator: 'error'
+            }
+        });
+
+        (() => {
+            modelManager.addCTOModel(`namespace t@1.0.0
+concept Dates {
+    o DateTime value
+}
+@Dates("not-a-valid-date")
+concept C {}`, 'test.cto');
+
+            modelManager.validateModelFiles();
+        }).should.throw(/Expected valid DateTime/);
+    });
     it('should allow an optional trailing array property with no arguments', () => {
         const modelManager = new ModelManager({
             strict: true,

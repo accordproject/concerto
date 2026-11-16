@@ -15,6 +15,7 @@
 import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import { Logger } from '@accordproject/concerto-util';
 import ModelUtil from '../modelutil';
+import dayjs from '../dayjs-setup';
 import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
@@ -222,6 +223,15 @@ class Decorator {
                     case 'Boolean':
                         if (argType !== 'boolean') {
                             const err = isTrailingArrayArgument ? `Decorator ${this.getName()} argument ${argumentPosition} is invalid. Expected boolean. Found ${argType}, with value ${JSON.stringify(arg)}` : `Decorator ${this.getName()} has invalid decorator argument. Expected boolean. Found ${argType}, with value ${JSON.stringify(arg)}`;
+                            this.handleError(validationOptions.invalidDecorator, err);
+                        }
+                        break;
+
+                    case 'DateTime':
+                        if (typeof arg !== 'string' || !dayjs.utc(arg).isValid()) {
+                            const err = isTrailingArrayArgument
+                                ? `Decorator ${this.getName()} argument ${argumentPosition} is invalid. Expected valid DateTime. Found ${JSON.stringify(arg)}`
+                                : `Decorator ${this.getName()} has invalid decorator argument. Expected valid DateTime. Found ${JSON.stringify(arg)}`;
                             this.handleError(validationOptions.invalidDecorator, err);
                         }
                         break;
