@@ -24,6 +24,7 @@ const { ConceptDeclaration } = require('../src/introspect/conceptdeclaration');
 const { DecoratorFactory } = require('../src/introspect/decoratorfactory');
 const { EnumDeclaration } = require('../src/introspect/enumdeclaration');
 const { MapDeclaration } = require('../src/introspect/mapdeclaration');
+const { ScalarDeclaration } = require('../src/introspect/scalardeclaration');
 const { EventDeclaration } = require('../src/introspect/eventdeclaration');
 const { Factory } = require('../src/factory');
 const { ModelFile } = require('../src/introspect/modelfile');
@@ -1052,6 +1053,32 @@ concept Bar {
                 let decls = modelManager.getConceptDeclarations();
                 decls.should.all.be.an.instanceOf(ConceptDeclaration);
                 decls.length.should.equal(numberModelBaseConcepts);
+            });
+        });
+
+        describe('#getScalarDeclarations', () => {
+
+            it('should return all of the scalar declarations', () => {
+                modelManager.addCTOModel(`
+                    namespace test@1.0.0
+                    scalar ZipCode extends String
+                    scalar Count extends Integer
+                `, 'scalars.cto');
+                let decls = modelManager.getScalarDeclarations();
+                decls.should.all.be.an.instanceOf(ScalarDeclaration);
+                decls.length.should.equal(2);
+                decls.map(d => d.getName()).should.deep.equal(['ZipCode', 'Count']);
+            });
+
+            it('should return empty array when no scalar declarations exist', () => {
+                modelManager.addCTOModel(`
+                    namespace test@1.0.0
+                    concept Person {
+                        o String name
+                    }
+                `, 'empty.cto');
+                let decls = modelManager.getScalarDeclarations();
+                decls.should.be.an('array').that.is.empty;
             });
         });
     });

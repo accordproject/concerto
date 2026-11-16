@@ -49,6 +49,7 @@ import type EnumDeclaration from './introspect/enumdeclaration';
 import type EventDeclaration from './introspect/eventdeclaration';
 import type ParticipantDeclaration from './introspect/participantdeclaration';
 import type TransactionDeclaration from './introspect/transactiondeclaration';
+import type ScalarDeclaration from './introspect/scalardeclaration';
 /* eslint-enable no-unused-vars */
 
 import debugLib from 'debug';
@@ -744,6 +745,16 @@ class BaseModelManager {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getConceptDeclarations());
         }, [] as ConceptDeclaration[]);
+    }
+
+    /**
+     * Get the ScalarDeclarations defined in this model manager
+     * @return {ScalarDeclaration[]} the ScalarDeclarations defined in the model manager
+     */
+    getScalarDeclarations(): ScalarDeclaration[] {
+        return this.getModelFiles().reduce((prev, cur) => {
+            return prev.concat(cur.getScalarDeclarations());
+        }, [] as ScalarDeclaration[]);
     }
 
     /**
