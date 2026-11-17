@@ -26,7 +26,7 @@ const scalarDeclarationExtendsChanged: ComparerFactory = (context) => ({
             context.report({
                 key: 'scalar-extends-changed',
                 message: `The scalar extends was changed from "${a.getType()}" to "${b.getType()}"`,
-                element: b.getName()
+                element: a
             });
         }
     },
@@ -46,7 +46,7 @@ const scalarValidatorChanged: ComparerFactory = (context) => ({
             context.report({
                 key: 'scalar-validator-added',
                 message: `A ${bValidatorType} validator was added to the scalar "${a.getName()}"`,
-                element: a.getName()
+                element: a
             });
             return;
         } else if (aValidator && !bValidator) {
@@ -54,7 +54,7 @@ const scalarValidatorChanged: ComparerFactory = (context) => ({
             context.report({
                 key: 'scalar-validator-removed',
                 message: `A ${aValidatorType} validator was removed from the scalar "${a.getName()}"`,
-                element: a.getName()
+                element: a
             });
             return;
         } else if (!aValidator!.compatibleWith(bValidator)) {
@@ -62,7 +62,7 @@ const scalarValidatorChanged: ComparerFactory = (context) => ({
             context.report({
                 key: 'scalar-validator-changed',
                 message: `A ${aValidatorType} validator for the scalar "${a.getName()}" was changed and is no longer compatible`,
-                element: a.getName()
+                element: a
             });
             return;
         }
@@ -82,19 +82,19 @@ const scalarDefaultValueChanged: ComparerFactory = (context) => ({
             context.report({
                 key: 'scalar-default-value-added',
                 message: `Default value "${bDefaultValue}" added to scalar "${a.getName()}"`,
-                element: a.getName()
+                element: a
             });
         } else if (bDefaultValue === null) {
             context.report({
                 key: 'scalar-default-value-removed',
                 message: `Default value "${aDefaultValue}" removed from scalar "${a.getName()}"`,
-                element: a.getName()
+                element: a
             });
         } else {
             context.report({
                 key: 'scalar-default-value-changed',
                 message: `Default value changed from "${aDefaultValue}" to "${bDefaultValue}" in scalar "${a.getName()}"`,
-                element: a.getName()
+                element: a
             });
         }
     }
