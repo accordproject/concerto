@@ -287,7 +287,7 @@ const propertyDefaultChanged: ComparerFactory = (context) => ({
             message: changeType === 'added' ? `Default value "${bDefaultValue}" added to property "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`
                 : changeType === 'removed' ? `Default value "${aDefaultValue}" removed from property "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`
                     : `Default value changed from "${aDefaultValue}" to "${bDefaultValue}" in property "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`,
-            element: a.getName()
+            element: a
         });
     }
 });

@@ -279,14 +279,17 @@ test('should detect a map value type changing from x to y', async () => {
 
 test('should detect a scalar extends changing from x to y', async () => {
     const [a, b] = await getModelFiles('scalar-added.cto', 'scalar-changed-extends.cto');
+    const scalar = a.getScalarDeclarations().find(s => s.getName() === 'Thing');
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([
         expect.objectContaining({
             key: 'scalar-extends-changed',
-            message: 'The scalar extends was changed from "String" to "Integer"'
+            message: 'The scalar extends was changed from "String" to "Integer"',
+            element: scalar
         })
     ]));
     expect(results.findings[0].message).toBe('The scalar extends was changed from "String" to "Integer"');
+    expect(results.findings[0].element).toBe(scalar);
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
@@ -514,11 +517,13 @@ test('should detect a string validator being changed on a property (incompatible
 
 test('should detect a number validator being added to a scalar', async () => {
     const [a, b] = await getModelFiles('scalar-number-validators.cto', 'scalar-number-validator-added.cto');
+    const scalar = a.getScalarDeclarations().find(s => s.getName() === 'Thing');
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([
         expect.objectContaining({
             key: 'scalar-validator-added',
-            message: 'A number validator was added to the scalar "Thing"'
+            message: 'A number validator was added to the scalar "Thing"',
+            element: scalar
         })
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
@@ -526,11 +531,13 @@ test('should detect a number validator being added to a scalar', async () => {
 
 test('should detect a number validator being removed from a scalar', async () => {
     const [a, b] = await getModelFiles('scalar-number-validator-added.cto', 'scalar-number-validators.cto');
+    const scalar = a.getScalarDeclarations().find(s => s.getName() === 'Thing');
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([
         expect.objectContaining({
             key: 'scalar-validator-removed',
-            message: 'A number validator was removed from the scalar "Thing"'
+            message: 'A number validator was removed from the scalar "Thing"',
+            element: scalar
         })
     ]));
     expect(results.result).toBe(CompareResult.PATCH);
@@ -711,6 +718,7 @@ test('should detect an optional property changed to required', async () => {
 
 test('should detect a default value being added to a scalar', async () => {
     const [a, b] = await getModelFiles('scalar-added.cto', 'scalar-default-value-added.cto');
+    const scalar = a.getScalarDeclarations().find(s => s.getName() === 'Thing');
     const results = new Compare().compare(a, b);
     const findings = results.findings.map(finding => ({
         key: finding.key,
@@ -722,6 +730,7 @@ test('should detect a default value being added to a scalar', async () => {
             message: 'Default value "hello" added to scalar "Thing"',
         }),
     ]));
+    expect(results.findings[0].element).toBe(scalar);
     expect(results.result).toBe(CompareResult.MINOR);
 });
 
@@ -775,6 +784,7 @@ test('should detect a falsy default value being removed from a scalar', async ()
 
 test('should detect a default value being added to a property', async () => {
     const [a, b] = await getModelFiles('property-added.cto', 'property-default-value-added.cto');
+    const property = a.getConceptDeclarations().find(c => c.getName() === 'Thing')?.getProperty('name');
     const results = new Compare().compare(a, b);
     const findings = results.findings.map(finding => ({
         key: finding.key,
@@ -786,6 +796,7 @@ test('should detect a default value being added to a property', async () => {
             message: 'Default value "Fred" added to property "name" in the concept "Thing"',
         }),
     ]));
+    expect(results.findings[0].element).toBe(property);
     expect(results.result).toBe(CompareResult.MINOR);
 });
 
