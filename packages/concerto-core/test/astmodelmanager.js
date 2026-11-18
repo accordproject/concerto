@@ -15,7 +15,9 @@
 'use strict';
 
 const { AstModelManager } = require('../src/astmodelmanager');
+const { ModelManager } = require('../src/modelmanager');
 const { IllegalModelException } = require('../src/introspect/illegalmodelexception');
+const { TypeNotFoundException } = require('../src/typenotfoundexception');
 
 const chai = require('chai');
 chai.should();
@@ -110,4 +112,229 @@ describe('AstModelManager', () => {
         });
     });
 
+    describe('#addModelFiles', () => {
+        it('should add multiple model files from AST objects', () => {
+            const modelContent1 = {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.example.test1@1.0.0',
+                'imports': [],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'Concept1',
+                        'isAbstract': false,
+                        'properties': [],
+                        'decorators': []
+                    }
+                ]
+            };
+            const modelContent2 = {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.example.test2@1.0.0',
+                'imports': [],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'Concept2',
+                        'isAbstract': false,
+                        'properties': [],
+                        'decorators': []
+                    }
+                ]
+            };
+
+            const added = modelManager.addModelFiles([modelContent1, modelContent2]);
+            added.should.have.lengthOf(2);
+            modelManager.getModelFile('org.example.test1@1.0.0').should.not.be.undefined;
+            modelManager.getModelFile('org.example.test2@1.0.0').should.not.be.undefined;
+            modelManager.getType('org.example.test1@1.0.0.Concept1').getName().should.equal('Concept1');
+            modelManager.getType('org.example.test2@1.0.0.Concept2').getName().should.equal('Concept2');
+        });
+
+        it('should rollback added models if a later AST is invalid', () => {
+            const validModel = {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.example.valid@1.0.0',
+                'imports': [],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'ValidConcept',
+                        'isAbstract': false,
+                        'properties': [],
+                        'decorators': []
+                    }
+                ]
+            };
+            const invalidModel = {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.example.invalid@1.0.0',
+                'imports': [],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'InvalidConcept',
+                        'isAbstract': false,
+                        'properties': [
+                            {
+                                '$class': 'concerto.metamodel@1.0.0.RelationshipProperty',
+                                'name': 'target',
+                                'type': {
+                                    '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
+                                    'name': 'NonExistentType'
+                                },
+                                'isArray': false,
+                                'isOptional': false,
+                                'decorators': []
+                            }
+                        ],
+                        'decorators': []
+                    }
+                ]
+            };
+
+            (() => {
+                modelManager.addModelFiles([validModel, invalidModel]);
+            }).should.throw(IllegalModelException, /NonExistentType/);
+
+            chai.expect(modelManager.getModelFile('org.example.valid@1.0.0')).to.be.undefined;
+            chai.expect(modelManager.getModelFile('org.example.invalid@1.0.0')).to.be.undefined;
+        });
+    });
+
+    describe('#updateModelFile', () => {
+        it('should update a model file from an AST object', () => {
+            const initialContent = {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.example.update@1.0.0',
+                'imports': [],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'InitialConcept',
+                        'isAbstract': false,
+                        'properties': [],
+                        'decorators': []
+                    }
+                ]
+            };
+
+            modelManager.addModel(initialContent);
+            modelManager.getType('org.example.update@1.0.0.InitialConcept').getName().should.equal('InitialConcept');
+
+            const updatedContent = {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.example.update@1.0.0',
+                'imports': [],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'UpdatedConcept',
+                        'isAbstract': false,
+                        'properties': [],
+                        'decorators': []
+                    }
+                ]
+            };
+
+            modelManager.updateModelFile(updatedContent);
+            modelManager.getType('org.example.update@1.0.0.UpdatedConcept').getName().should.equal('UpdatedConcept');
+            (() => {
+                modelManager.getType('org.example.update@1.0.0.InitialConcept');
+            }).should.throw(TypeNotFoundException, /InitialConcept/);
+        });
+    });
+
+    describe('#validateModelFile', () => {
+        it('should validate an AST object model', () => {
+            const modelContent = {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.example.validate@1.0.0',
+                'imports': [],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'ValidConcept',
+                        'isAbstract': false,
+                        'properties': [],
+                        'decorators': []
+                    }
+                ]
+            };
+
+            (() => {
+                modelManager.validateModelFile(modelContent);
+            }).should.not.throw();
+        });
+
+        it('should throw IllegalModelException for an invalid AST object model', () => {
+            const invalidContent = {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.example.validate.invalid@1.0.0',
+                'imports': [],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'InvalidConcept',
+                        'isAbstract': false,
+                        'properties': [
+                            {
+                                '$class': 'concerto.metamodel@1.0.0.RelationshipProperty',
+                                'name': 'target',
+                                'type': {
+                                    '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
+                                    'name': 'NonExistentType'
+                                },
+                                'isArray': false,
+                                'isOptional': false,
+                                'decorators': []
+                            }
+                        ],
+                        'decorators': []
+                    }
+                ]
+            };
+
+            (() => {
+                modelManager.validateModelFile(invalidContent);
+            }).should.throw(IllegalModelException, /NonExistentType/);
+        });
+    });
+
+});
+
+describe('ModelManager input validation', () => {
+    let modelManager;
+
+    beforeEach(() => {
+        modelManager = new ModelManager();
+    });
+
+    it('should throw a clear error when a plain AST object is passed', () => {
+        const ast = {
+            '$class': 'concerto.metamodel@1.0.0.Model',
+            'namespace': 'org.example.test@1.0.0',
+            'imports': [],
+            'declarations': []
+        };
+
+        (() => {
+            modelManager.addModelFiles([ast]);
+        }).should.throw(
+            Error,
+            'ModelManager expects CTO model content as a string. For AST objects, use AstModelManager.'
+        );
+    });
+
+    it('should accept Buffer input containing CTO model content', () => {
+        const cto = Buffer.from(
+            'namespace org.example.buffer@1.0.0\nconcept BufferModel { o String name }',
+            'utf8'
+        );
+
+        modelManager.addModelFiles([cto]);
+
+        modelManager.getModelFile('org.example.buffer@1.0.0')
+            .should.not.be.undefined;
+    });
 });
