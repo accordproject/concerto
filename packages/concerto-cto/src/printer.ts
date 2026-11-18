@@ -102,6 +102,9 @@ function decoratorFromMetaModel(mm: IDecorator): string {
  * @return {string} the string for the decorators
  */
 function decoratorsFromMetaModel(mm: IDecorator[], prefix: string): string {
+    if (!mm || mm.length === 0) {
+        return '';
+    }
     let result = '';
     result += mm.map(decoratorFromMetaModel).join(`\n${prefix}`);
     result += `\n${prefix}`;
@@ -316,7 +319,7 @@ function toDoubleString(value: number): string {
 function propertyFromMetaModel(prop: IProperty): string {
     let result = '';
 
-    if (prop.decorators) {
+    if (prop.decorators && prop.decorators.length > 0) {
         result += decoratorsFromMetaModel(prop.decorators, '  ');
     }
 
@@ -345,7 +348,7 @@ function propertyFromMetaModel(prop: IProperty): string {
  */
 function mapFromMetaModel(entry: any): string {
     let result = '';
-    if (entry.decorators) {
+    if (entry.decorators && entry.decorators.length > 0) {
         result += decoratorsFromMetaModel(entry.decorators, '  ');
     }
     if (entry.$class === `${MetaModelNamespace}.RelationshipMapValueType`) {
@@ -366,7 +369,7 @@ function mapFromMetaModel(entry: any): string {
 function declFromMetaModel(mm: IDeclaration): string {
     let result = '';
 
-    if (mm.decorators) {
+    if (mm.decorators && mm.decorators.length > 0) {
         result += decoratorsFromMetaModel(mm.decorators, '');
     }
 
