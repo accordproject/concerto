@@ -336,4 +336,77 @@ describe('parser', () => {
 
         result.should.include('o Double value range=[0.0000001,1.0]');
     });
+
+    it('Should not print extra blank lines or indentation when decorators array is empty', () => {
+        const withoutDecorators = {
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Foo',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'bar',
+                            isArray: false,
+                            isOptional: false,
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const withEmptyDecorators = {
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            decorators: [],
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Foo',
+                    isAbstract: false,
+                    decorators: [],
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.StringProperty',
+                            name: 'bar',
+                            isArray: false,
+                            isOptional: false,
+                            decorators: []
+                        }
+                    ]
+                }
+            ]
+        };
+
+        Printer.toCTO(withEmptyDecorators).should.equal(Printer.toCTO(withoutDecorators));
+    });
+
+    it('Should not print extra blank lines for map with empty decorators', () => {
+        const mapWithEmptyDecorators = {
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MyMap',
+                    decorators: [],
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType',
+                        decorators: []
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType',
+                        decorators: []
+                    }
+                }
+            ]
+        };
+
+        const result = Printer.toCTO(mapWithEmptyDecorators);
+        result.should.equal('namespace org.acme@1.0.0\n\nmap MyMap {\n  o String\n  o String\n}');
+    });
 });
+
