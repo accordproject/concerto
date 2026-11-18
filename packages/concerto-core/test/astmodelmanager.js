@@ -15,6 +15,7 @@
 'use strict';
 
 const { AstModelManager } = require('../src/astmodelmanager');
+const { ModelManager } = require('../src/modelmanager');
 const { IllegalModelException } = require('../src/introspect/illegalmodelexception');
 const { TypeNotFoundException } = require('../src/typenotfoundexception');
 
@@ -300,4 +301,40 @@ describe('AstModelManager', () => {
         });
     });
 
+});
+
+describe('ModelManager input validation', () => {
+    let modelManager;
+
+    beforeEach(() => {
+        modelManager = new ModelManager();
+    });
+
+    it('should throw a clear error when a plain AST object is passed', () => {
+        const ast = {
+            '$class': 'concerto.metamodel@1.0.0.Model',
+            'namespace': 'org.example.test@1.0.0',
+            'imports': [],
+            'declarations': []
+        };
+
+        (() => {
+            modelManager.addModelFiles([ast]);
+        }).should.throw(
+            Error,
+            'ModelManager expects CTO model content as a string. For AST objects, use AstModelManager.'
+        );
+    });
+
+    it('should accept Buffer input containing CTO model content', () => {
+        const cto = Buffer.from(
+            'namespace org.example.buffer@1.0.0\nconcept BufferModel { o String name }',
+            'utf8'
+        );
+
+        modelManager.addModelFiles([cto]);
+
+        modelManager.getModelFile('org.example.buffer@1.0.0')
+            .should.not.be.undefined;
+    });
 });
