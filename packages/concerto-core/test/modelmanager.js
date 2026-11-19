@@ -1167,6 +1167,78 @@ concept Bar {
         it('should return true for a valid ModelManager', () => {
             (modelManager instanceof ModelManager).should.be.true;
         });
+
+        it('should not share nested import structures with the original model', () => {
+            modelManager.addCTOModel(`namespace child@1.0.0
+concept Used {}
+concept Unused {}
+`, 'child.cto', true);
+
+            modelManager.addCTOModel(`namespace test@1.0.0
+import child@1.0.0.{Used as Renamed,Unused}
+concept Person {
+    o Renamed used
+}
+`, 'test.cto');
+
+            const filtered = modelManager.filter(declaration =>
+                [
+                    'concerto@1.0.0.Concept',
+                    'test@1.0.0.Person',
+                    'child@1.0.0.Used'
+                ].includes(declaration.getFullyQualifiedName())
+            );
+
+            const originalAst = modelManager
+                .getModelFile('test@1.0.0')
+                .getAst();
+
+            const filteredAst = filtered
+                .getModelFile('test@1.0.0')
+                .getAst();
+
+            const originalImport = originalAst.imports.find(
+                imp => imp.namespace === 'child@1.0.0'
+            );
+
+            const filteredImport = filteredAst.imports.find(
+                imp => imp.namespace === 'child@1.0.0'
+            );
+
+            filteredImport.aliasedTypes[0].aliasedName = 'MutatedAlias';
+
+            originalImport.aliasedTypes[0].aliasedName.should.equal('Renamed');
+
+            modelManager.addCTOModel(`namespace typeschild@1.0.0
+concept First {}
+concept Second {}
+`, 'typeschild.cto');
+
+            modelManager.addCTOModel(`namespace typessource@1.0.0
+import typeschild@1.0.0.{First,Second}
+concept Person {}
+`, 'typessource.cto');
+
+            const sourceModel = modelManager.getModelFile('typessource@1.0.0');
+            modelManager.deleteModelFile('typeschild@1.0.0');
+
+            const filteredSource = sourceModel.filter(
+                declaration => declaration.getFullyQualifiedName() === 'typessource@1.0.0.Person',
+                modelManager
+            );
+
+            const originalTypesImport = sourceModel.getAst().imports.find(
+                imp => imp.namespace === 'typeschild@1.0.0'
+            );
+
+            const filteredTypesImport = filteredSource.getAst().imports.find(
+                imp => imp.namespace === 'typeschild@1.0.0'
+            );
+
+            filteredTypesImport.types.push('MutatedType');
+
+            originalTypesImport.types.should.not.include('MutatedType');
+        });
     });
 
     describe('#derivesFrom', () => {

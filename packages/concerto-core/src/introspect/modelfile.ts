@@ -933,7 +933,13 @@ class ModelFile extends Decorated {
         const ast = {
             ...this.ast,
             declarations,
-            imports: this.ast.imports?.map(imp => ({...imp})),
+            imports: this.ast.imports?.map(imp => ({
+                ...imp,
+                ...(imp.types && { types: [...imp.types] }),
+                ...(imp.aliasedTypes && {
+                    aliasedTypes: imp.aliasedTypes.map(a => ({ ...a })),
+                }),
+            })),
         };
 
         if (ast.imports) {
