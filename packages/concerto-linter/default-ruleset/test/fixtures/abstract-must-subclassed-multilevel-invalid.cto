@@ -1,0 +1,17 @@
+namespace org.example@1.0.0
+
+abstract concept Vehicle {
+  o String make
+}
+
+abstract concept LandVehicle extends Vehicle {
+  o String terrain
+}
+
+abstract concept WaterVehicle extends Vehicle {
+  o Double maxKts
+}
+
+concept Car extends LandVehicle {
+  o Integer numberOfDoors
+}

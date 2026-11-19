@@ -54,9 +54,26 @@ export const hasConcreteSubclass: IFunction = (
         }
     }
 
+    const declMap = new Map<string, Declaration>();
     for (const decl of allDeclarations) {
-        if (decl && !decl.isAbstract && decl.superType && typeof decl.superType.name === 'string') {
-            abstractNames.delete(decl.superType.name);
+        if (decl && typeof decl.name === 'string') {
+            declMap.set(decl.name, decl);
+        }
+    }
+
+    for (const decl of allDeclarations) {
+        if (decl && !decl.isAbstract) {
+            let current: Declaration | undefined = decl;
+            const visited = new Set<string>();
+            while (current?.superType && typeof current.superType.name === 'string') {
+                const superTypeName = current.superType.name;
+                if (visited.has(superTypeName)) {
+                    break;
+                }
+                visited.add(superTypeName);
+                abstractNames.delete(superTypeName);
+                current = declMap.get(superTypeName);
+            }
         }
     }
     if (abstractNames.size > 0) {
