@@ -365,7 +365,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in org.acme.map@1.0.0.PhoneBook. Expected Type of String but found \'3\' instead.');
+            }).should.throw(ValidationException, 'Model violation in org.acme.map@1.0.0.PhoneBook. Expected Type of String but found \'3\' instead.');
         });
 
         it('should not validate map with bad key', function () {
@@ -376,7 +376,35 @@ describe('ResourceValidator', function () {
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in org.acme.map@1.0.0.PhoneBook. Expected Type of String but found \'1\' instead');
+            }).should.throw(ValidationException, 'Model violation in org.acme.map@1.0.0.PhoneBook. Expected Type of String but found \'1\' instead');
+        });
+
+        it('should throw ValidationException when visited object is not a Map', function () {
+            const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
+
+            ['not-a-map', null, undefined, {}, { a: 1 }].forEach((invalidObj) => {
+                const typedStack = new TypedStack(invalidObj);
+                const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
+
+                (() => {
+                    mapDeclaration.accept(resourceValidator, parameters);
+                }).should.throw(ValidationException, /Expected a Map, but found/);
+            });
+        });
+
+        it('should throw ValidationException as an instance of Error', function () {
+            const map = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], ['Lorem', 3]]);
+            const typedStack = new TypedStack(map);
+            const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
+
+            try {
+                mapDeclaration.accept(resourceValidator, parameters);
+                throw new Error('should have thrown');
+            } catch (err) {
+                err.should.be.an.instanceof(ValidationException);
+                err.should.be.an.instanceof(Error);
+            }
         });
     });
 

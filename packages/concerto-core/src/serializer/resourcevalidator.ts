@@ -118,6 +118,7 @@ class ResourceValidator {
      * @param {Object} value - the object being validated
      * @param {Object} parameters  - the parameter
      * @param {Map} mapDeclaration - the object being visited
+     * @throws {ValidationException}
      * @private
      */
     checkMapType(type, value, parameters, mapDeclaration, ) {
@@ -150,28 +151,28 @@ class ResourceValidator {
         switch(typeName) {
         case 'String':
             if (typeof value !== 'string') {
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of String but found '${value}' instead.`);
+                throw new ValidationException(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of String but found '${value}' instead.`);
             }
             break;
         case 'DateTime':
             if (typeof value !== 'string' || !dayjs.utc(value).isValid()) {
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
+                throw new ValidationException(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
             }
             break;
         case 'Boolean':
             if (typeof value !== 'boolean') {
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Boolean but found ${typeof value} instead, for value '${value}'.`);
+                throw new ValidationException(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Boolean but found ${typeof value} instead, for value '${value}'.`);
             }
             break;
         case 'Integer':
         case 'Long':
-            if (typeof value !== 'number' || !isFinite(value) || !Number.isInteger(value)) {
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of ${typeName} but found '${value}' instead.`);
+            if (typeof value !== 'number' || !Number.isInteger(value)) {
+                throw new ValidationException(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of ${typeName} but found '${value}' instead.`);
             }
             break;
         case 'Double':
             if (typeof value !== 'number' || !isFinite(value)) {
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Double but found '${value}' instead.`);
+                throw new ValidationException(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Double but found '${value}' instead.`);
             }
             break;
         }
@@ -192,7 +193,7 @@ class ResourceValidator {
      * @param {MapDeclaration} mapDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
-     *
+     * @throws {ValidationException}
      * @private
      */
     visitMapDeclaration(mapDeclaration, parameters) {
@@ -200,7 +201,13 @@ class ResourceValidator {
         const obj = parameters.stack.pop();
 
         if (!((obj instanceof Map))) {
-            throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
+            let objStr;
+            try {
+                objStr = JSON.stringify(obj);
+            } catch {
+                objStr = String(obj);
+            }
+            throw new ValidationException('Expected a Map, but found ' + objStr);
         }
 
         obj.forEach((value, key) => {
