@@ -1171,11 +1171,39 @@ concept Person {
                 imp => imp.namespace === 'child@1.0.0'
             );
 
-            filteredImport.types.push('MutatedType');
             filteredImport.aliasedTypes[0].aliasedName = 'MutatedAlias';
 
-            originalImport.types.should.not.include('MutatedType');
             originalImport.aliasedTypes[0].aliasedName.should.equal('Renamed');
+
+            modelManager.addCTOModel(`namespace typeschild@1.0.0
+concept First {}
+concept Second {}
+`, 'typeschild.cto');
+
+            modelManager.addCTOModel(`namespace typessource@1.0.0
+import typeschild@1.0.0.{First,Second}
+concept Person {}
+`, 'typessource.cto');
+
+            const sourceModel = modelManager.getModelFile('typessource@1.0.0');
+            modelManager.deleteModelFile('typeschild@1.0.0');
+
+            const filteredSource = sourceModel.filter(
+                declaration => declaration.getFullyQualifiedName() === 'typessource@1.0.0.Person',
+                modelManager
+            );
+
+            const originalTypesImport = sourceModel.getAst().imports.find(
+                imp => imp.namespace === 'typeschild@1.0.0'
+            );
+
+            const filteredTypesImport = filteredSource.getAst().imports.find(
+                imp => imp.namespace === 'typeschild@1.0.0'
+            );
+
+            filteredTypesImport.types.push('MutatedType');
+
+            originalTypesImport.types.should.not.include('MutatedType');
         });
     });
 

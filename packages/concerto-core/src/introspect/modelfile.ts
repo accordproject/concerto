@@ -905,10 +905,10 @@ class ModelFile extends Decorated {
             declarations,
             imports: this.ast.imports?.map(imp => ({
                 ...imp,
-                types: imp.types ? [...imp.types] : undefined,
-                aliasedTypes: imp.aliasedTypes
-                    ? imp.aliasedTypes.map(a => ({ ...a }))
-                    : undefined,
+                ...(imp.types && { types: [...imp.types] }),
+                ...(imp.aliasedTypes && {
+                    aliasedTypes: imp.aliasedTypes.map(a => ({ ...a })),
+                }),
             })),
         };
 
