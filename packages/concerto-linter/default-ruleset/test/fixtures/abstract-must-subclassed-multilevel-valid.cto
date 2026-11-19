@@ -1,0 +1,13 @@
+namespace org.example@1.0.0
+
+abstract concept Vehicle {
+  o String make
+}
+
+abstract concept MotorVehicle extends Vehicle {
+  o String engineType
+}
+
+concept Car extends MotorVehicle {
+  o Integer numberOfDoors
+}

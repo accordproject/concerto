@@ -30,4 +30,24 @@ describe('Abstract Must Be Subclassed Rule', () => {
         const messageText = results.map(r => r.message).join(' ');
         expect(messageText).toContain('must have concrete subclasses');
     });
+
+    test('should not report violations when abstract declarations have indirect concrete subclasses via multi-level inheritance', async () => {
+        const results = await testRules({
+            rules: {
+                'abstract-must-subclassed': abstractMustSubclassed,
+            }
+        }, 'abstract-must-subclassed-multilevel-valid.cto');
+        expect(results).toHaveLength(0);
+    });
+
+    test('should only report un-subclassed abstract declarations in branching multi-level inheritance', async () => {
+        const results = await testRules({
+            rules: {
+                'abstract-must-subclassed': abstractMustSubclassed,
+            }
+        }, 'abstract-must-subclassed-multilevel-invalid.cto');
+        expect(results).toHaveLength(1);
+        expect(results[0].message).toContain('\'WaterVehicle\'');
+    });
 });
+
