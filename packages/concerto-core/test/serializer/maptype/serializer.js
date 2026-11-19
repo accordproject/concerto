@@ -18,6 +18,7 @@ const { Factory } = require('../../../src/factory');
 const { ModelManager } = require('../../../src/modelmanager');
 const { Resource } = require('../../../src/model/resource');
 const { Serializer } = require('../../../src/serializer');
+const { ValidationException } = require('../../../src/serializer/validationexception');
 const Util = require('../../composer/composermodelutility');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
@@ -937,7 +938,7 @@ describe('Serializer', () => {
 
             (() => {
                 serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample@1.0.0.Appointment. Expected Type of DateTime but found \'BAD-DATE-28T01:02:03Z\' instead.');
+            }).should.throw(ValidationException, 'Model violation in org.acme.sample@1.0.0.Appointment. Expected Type of DateTime but found \'BAD-DATE-28T01:02:03Z\' instead.');
         });
 
         it('should throw if bad Key value is provided for Map, where Key Type String is expected', () => {
@@ -948,7 +949,7 @@ describe('Serializer', () => {
 
             (() => {
                 serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample@1.0.0.Dictionary. Expected Type of String but found \'1234\' instead.');
+            }).should.throw(ValidationException, 'Model violation in org.acme.sample@1.0.0.Dictionary. Expected Type of String but found \'1234\' instead.');
         });
 
         it('should throw if a bad Value is Supplied for Map, where Value type Boolean is expected', () => {
@@ -960,7 +961,7 @@ describe('Serializer', () => {
 
             (() => {
                 serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample@1.0.0.RSVP. Expected Type of Boolean but found string instead, for value \'false\'.');
+            }).should.throw(ValidationException, 'Model violation in org.acme.sample@1.0.0.RSVP. Expected Type of Boolean but found string instead, for value \'false\'.');
         });
 
         it('should throw if a bad Value is Supplied for Map, where Value type String is expected', () => {
@@ -971,7 +972,7 @@ describe('Serializer', () => {
 
             (() => {
                 serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample@1.0.0.Dictionary. Expected Type of String but found \'1234\' instead.');
+            }).should.throw(ValidationException, 'Model violation in org.acme.sample@1.0.0.Dictionary. Expected Type of String but found \'1234\' instead.');
         });
 
         it('should throw if a bad value is Supplied for Map - where Value type Boolean is expected', () => {
@@ -983,7 +984,7 @@ describe('Serializer', () => {
 
             (() => {
                 serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample@1.0.0.Timer. Expected Type of DateTime but found \'BAD-DATE-VALUE\' instead.');
+            }).should.throw(ValidationException, 'Model violation in org.acme.sample@1.0.0.Timer. Expected Type of DateTime but found \'BAD-DATE-VALUE\' instead.');
         });
 
         it('should throw if the value of a Map is not a Map instance', () => {
@@ -993,7 +994,7 @@ describe('Serializer', () => {
 
             (() => {
                 serializer.toJSON(concept);
-            }).should.throw(`Expected a Map, but found ${JSON.stringify(concept.dict)}`);
+            }).should.throw(ValidationException, `Expected a Map, but found ${JSON.stringify(concept.dict)}`);
         });
 
         it('should ignore system properties', () => {
@@ -1435,14 +1436,14 @@ describe('Serializer', () => {
                     $class: 'org.acme.types@1.0.0.Container',
                     intMap: { k: 'abc' }
                 });
-            }).should.throw(/Expected Type of Integer but found 'abc'/);
+            }).should.throw(ValidationException, /Expected Type of Integer but found 'abc'/);
 
             (() => {
                 typeSerializer.fromJSON({
                     $class: 'org.acme.types@1.0.0.Container',
                     intMap: { k: 1.5 }
                 });
-            }).should.throw(/Expected Type of Integer but found '1.5'/);
+            }).should.throw(ValidationException, /Expected Type of Integer but found '1.5'/);
         });
 
         it('should accept valid Long and reject non-long values', () => {
@@ -1457,14 +1458,14 @@ describe('Serializer', () => {
                     $class: 'org.acme.types@1.0.0.Container',
                     longMap: { k: 'abc' }
                 });
-            }).should.throw(/Expected Type of Long but found 'abc'/);
+            }).should.throw(ValidationException, /Expected Type of Long but found 'abc'/);
 
             (() => {
                 typeSerializer.fromJSON({
                     $class: 'org.acme.types@1.0.0.Container',
                     longMap: { k: 2.5 }
                 });
-            }).should.throw(/Expected Type of Long but found '2.5'/);
+            }).should.throw(ValidationException, /Expected Type of Long but found '2.5'/);
         });
 
         it('should accept valid Double and reject non-number values', () => {
@@ -1479,14 +1480,14 @@ describe('Serializer', () => {
                     $class: 'org.acme.types@1.0.0.Container',
                     doubleMap: { k: 'abc' }
                 });
-            }).should.throw(/Expected Type of Double but found 'abc'/);
+            }).should.throw(ValidationException, /Expected Type of Double but found 'abc'/);
 
             (() => {
                 typeSerializer.fromJSON({
                     $class: 'org.acme.types@1.0.0.Container',
                     doubleMap: { k: Infinity }
                 });
-            }).should.throw(/Expected Type of Double/);
+            }).should.throw(ValidationException, /Expected Type of Double/);
         });
 
         it('should accept valid Boolean and reject non-boolean values', () => {
@@ -1501,7 +1502,7 @@ describe('Serializer', () => {
                     $class: 'org.acme.types@1.0.0.Container',
                     boolMap: { k: 'true' }
                 });
-            }).should.throw(/Expected Type of Boolean/);
+            }).should.throw(ValidationException, /Expected Type of Boolean/);
         });
 
         it('should accept valid DateTime and reject numbers, booleans, and non-date strings', () => {
@@ -1516,14 +1517,14 @@ describe('Serializer', () => {
                     $class: 'org.acme.types@1.0.0.Container',
                     dateMap: { k: true }
                 });
-            }).should.throw(/Expected Type of DateTime but found 'true'/);
+            }).should.throw(ValidationException, /Expected Type of DateTime but found 'true'/);
 
             (() => {
                 typeSerializer.fromJSON({
                     $class: 'org.acme.types@1.0.0.Container',
                     dateMap: { k: 1 }
                 });
-            }).should.throw(/Expected Type of DateTime but found '1'/);
+            }).should.throw(ValidationException, /Expected Type of DateTime but found '1'/);
 
             (() => {
                 typeSerializer.fromJSON({
