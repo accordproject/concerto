@@ -28,10 +28,7 @@ import type { AstNode } from './decorated';
 /**
  * MapKeyType defines a Key type of an MapDeclaration.
  *
- * @extends Decorated
- * @see See {@link Decorated}
  * @class
- * @memberof module:concerto-core
  */
 class MapKeyType extends Decorated {
     parent: MapDeclaration;
@@ -42,7 +39,6 @@ class MapKeyType extends Decorated {
      * Create an MapKeyType.
      * @param {MapDeclaration} parent - The owner of this property
      * @param {Object} ast - The AST created by the parser
-     * @param {ModelFile} modelFile - the ModelFile for the Map class
      * @throws {IllegalModelException}
      */
     constructor(parent: MapDeclaration, ast: AstNode) {

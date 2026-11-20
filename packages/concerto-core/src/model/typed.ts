@@ -28,7 +28,6 @@ import type Field from '../introspect/field';
  * This class is abstract.
  * @abstract
  * @class
- * @memberof module:concerto-core
  */
 class Typed {
     $modelManager: BaseModelManager;

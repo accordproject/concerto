@@ -48,7 +48,6 @@ export type FilterFunction = (declaration: Declaration) => boolean;
  * and a set of model elements: assets, transactions etc.
  *
  * @class
- * @memberof module:concerto-core
  */
 class ModelFile extends Decorated {
     modelManager: BaseModelManager;

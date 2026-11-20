@@ -58,7 +58,6 @@ export type ValidatedElement = Property | ScalarDeclaration;
  * @private
  * @class
  * @abstract
- * @memberof module:concerto-core
  */
 class Validator {
     validator: ValidatorAst | undefined;

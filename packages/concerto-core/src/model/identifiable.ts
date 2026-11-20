@@ -30,7 +30,6 @@ import type { Dayjs } from 'dayjs';
  * @extends Typed
  * @abstract
  * @class
- * @memberof module:concerto-core
  */
 class Identifiable extends Typed {
     $identifierFieldName: string;

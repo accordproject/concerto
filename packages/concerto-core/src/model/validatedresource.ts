@@ -27,7 +27,6 @@ import type ResourceValidator from '../serializer/resourcevalidator';
  * @extends Resource
  * @see See {@link Resource}
  * @class
- * @memberof module:concerto-core
  */
 class ValidatedResource extends Resource {
     $validator: ResourceValidator;

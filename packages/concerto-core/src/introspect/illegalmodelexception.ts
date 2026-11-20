@@ -24,18 +24,13 @@ import type ModelFile from './modelfile';
  * @extends BaseFileException
  * @see See  {@link BaseFileException}
  * @class
- * @memberof module:concerto-core
  */
 class IllegalModelException extends BaseFileException {
     /**
      * Create an IllegalModelException.
      * @param {string} message - the message for the exception
      * @param {ModelFile} [modelFile] - the modelfile associated with the exception
-     * @param {Object} [fileLocation] - location details of the error within the model file.
-     * @param {number} fileLocation.start.line - start line of the error location.
-     * @param {number} fileLocation.start.column - start column of the error location.
-     * @param {number} fileLocation.end.line - end line of the error location.
-     * @param {number} fileLocation.end.column - end column of the error location.
+     * @param {Object} [fileLocation] - location details of the error within the model file, including start and end line and column.
      * @param {string} [component] - the component which throws this error
      */
     constructor(message, modelFile?, fileLocation?, component?) {

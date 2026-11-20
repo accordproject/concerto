@@ -32,7 +32,6 @@ import type ScalarDeclaration from './scalardeclaration';
  * A Validator to enforce that a string matches a regex
  * @private
  * @class
- * @memberof module:concerto-core
  */
 class StringValidator extends Validator{
     declare validator: IStringRegexValidator | undefined;

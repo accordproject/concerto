@@ -31,7 +31,6 @@ import type ScalarDeclaration from './scalardeclaration';
  * A Validator to enforce that non null numeric values are between two values.
  * @private
  * @class
- * @memberof module:concerto-core
  */
 class NumberValidator extends Validator{
     declare validator: NumberDomainValidatorAst;

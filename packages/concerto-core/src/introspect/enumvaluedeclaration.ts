@@ -25,7 +25,6 @@ import type ClassDeclaration from './classdeclaration';
  * @extends Property
  * @see See {@link Property}
  * @class
- * @memberof module:concerto-core
  */
 class EnumValueDeclaration extends Property {
     /**

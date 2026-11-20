@@ -30,7 +30,6 @@ import type { Dayjs } from 'dayjs';
  * @extends Identifiable
  * @see See {@link Identifiable}
  * @class
- * @memberof module:concerto-core
  */
 class Relationship extends Identifiable {
     $class: 'Relationship';

@@ -25,7 +25,6 @@ import type ModelFile from './modelfile';
  * @extends ClassDeclaration
  * @see See {@link ClassDeclaration}
  * @class
- * @memberof module:concerto-core
  * @abstract
  */
 class IdentifiedDeclaration extends ClassDeclaration {

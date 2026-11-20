@@ -32,7 +32,6 @@ import type { AstNode } from './decorated';
  * either a Field or a Relationship.
  *
  * @class
- * @memberof module:concerto-core
  */
 class Property extends Decorated {
     parent: ClassDeclaration;

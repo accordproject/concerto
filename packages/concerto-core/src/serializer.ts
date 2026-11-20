@@ -40,7 +40,6 @@ import type Resource from './model/resource';
  * (e.g. on the blockchain).
  *
  * @class
- * @memberof module:concerto-core
  */
 class Serializer {
     factory: Factory;
@@ -79,19 +78,7 @@ class Serializer {
      * peristent storage.
      * </p>
      * @param {Resource} resource - The instance to convert to JSON
-     * @param {Object} [options] - the optional serialization options.
-     * @param {boolean} [options.validate] - validate the structure of the Resource
-     * with its model prior to serialization (default to true)
-     * @param {boolean} [options.convertResourcesToRelationships] - Convert resources that
-     * are specified for relationship fields into relationships, false by default.
-     * @param {boolean} [options.permitResourcesForRelationships] - Permit resources in the
-     * place of relationships (serializing them as resources), false by default.
-     * @param {boolean} [options.deduplicateResources] - Generate $id for resources and
-     * if a resources appears multiple times in the object graph only the first instance is
-     * serialized in full, subsequent instances are replaced with a reference to the $id
-     * @param {boolean} [options.convertResourcesToId] - Convert resources that
-     * are specified for relationship fields into their id, false by default.
-     * @param {number} [options.utcOffset] - UTC Offset for DateTime values.
+     * @param {Object} [options] - Optional serialization options: validate (true by default) validates the Resource before serialization; convertResourcesToRelationships (false by default) converts resources in relationship fields into relationships; permitResourcesForRelationships (false by default) permits resources instead of relationships; deduplicateResources generates $id references for repeated resources; convertResourcesToId (false by default) converts resources in relationship fields to their IDs; utcOffset specifies the UTC offset for DateTime values.
      * @return {Object} - The Javascript Object that represents the resource
      * @throws {Error} - throws an exception if resource is not an instance of
      * Resource or fails validation.
@@ -142,13 +129,7 @@ class Serializer {
      * The Resource is populated based on the JavaScript object.
      *
      * @param {Object} jsonObject The JavaScript Object for a Resource
-     * @param {Object} [options] - the optional serialization options
-     * @param {boolean} options.acceptResourcesForRelationships - handle JSON objects
-     * in the place of strings for relationships, defaults to false.
-     * @param {boolean} options.validate - validate the structure of the Resource
-     * with its model prior to serialization (default to true)
-     * @param {number} [options.utcOffset] - UTC Offset for DateTime values.
-     * @param {boolean} [options.strictQualifiedDateTimes=true] - Only allow fully-qualified date-times with offsets.
+     * @param {Object} [options] - Optional serialization options: acceptResourcesForRelationships (false by default) permits JSON objects instead of strings for relationships; validate (true by default) validates the Resource; utcOffset specifies the UTC offset for DateTime values; strictQualifiedDateTimes (true by default) only allows fully qualified date-times with offsets.
      * @return {Resource} The new populated resource
      */
     fromJSON(jsonObject, options?) {

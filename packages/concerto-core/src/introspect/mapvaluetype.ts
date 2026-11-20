@@ -27,10 +27,7 @@ import type { AstNode } from './decorated';
 /**
  * MapValueType defines a Value type of MapDeclaration.
  *
- * @extends Decorated
- * @see See {@link Decorated}
  * @class
- * @memberof module:concerto-core
  */
 class MapValueType extends Decorated {
     parent: MapDeclaration;

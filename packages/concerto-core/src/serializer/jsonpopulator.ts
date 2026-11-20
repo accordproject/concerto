@@ -109,7 +109,6 @@ function validateProperties(properties, classDeclaration) {
  * 'modelManager' - the ModelManager instance to use to resolve classes
  * @private
  * @class
- * @memberof module:concerto-core
  */
 class JSONPopulator {
     acceptResourcesForRelationships: boolean | undefined;

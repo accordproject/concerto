@@ -38,7 +38,6 @@ import type { AstNode } from './decorated';
  *
  * @abstract
  * @class
- * @memberof module:concerto-core
  */
 class ClassDeclaration extends Declaration {
     // These are populated by process(), which the Declaration constructor calls,

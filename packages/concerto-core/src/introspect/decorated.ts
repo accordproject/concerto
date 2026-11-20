@@ -45,7 +45,6 @@ export interface AstNode {
  * @private
  * @abstract
  * @class
- * @memberof module:concerto-core
  */
 class Decorated {
     ast: AstNode;

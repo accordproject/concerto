@@ -27,7 +27,6 @@ const { isNull } = NullUtil;
  * A Validator to enforce that a collection (array or map) has a size within a specified range.
  * @private
  * @class
- * @memberof module:concerto-core
  */
 class CollectionSizeValidator extends Validator {
     declare validator: ICollectionSizeValidator;

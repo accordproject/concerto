@@ -42,7 +42,6 @@ export type DecoratorArgument = string | number | boolean | DecoratorTypeReferen
 /**
  * Decorator encapsulates a decorator (annotation) on a class or property.
  * @class
- * @memberof module:concerto-core
  */
 class Decorator {
     ast: AstNode;

@@ -36,7 +36,6 @@ import type ClassDeclaration from './classdeclaration';
  *
  * @abstract
  * @class
- * @memberof module:concerto-core
  */
 class ScalarDeclaration extends Declaration {
     // Populated by process(), which the Declaration constructor calls, so these

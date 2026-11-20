@@ -21,7 +21,6 @@ import Globalize from '../globalize';
  * updated with either default values or generated sample data.
  * @private
  * @class
- * @memberof module:concerto-core
  */
 class InstanceGenerator {
 

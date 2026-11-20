@@ -19,7 +19,6 @@ import { BaseException } from '@accordproject/concerto-util';
  * @extends BaseException
  * @see See {@link  BaseException}
  * @class
- * @memberof module:concerto-core
  * @private
  */
 class ValidationException extends BaseException {

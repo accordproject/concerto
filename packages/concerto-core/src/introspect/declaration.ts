@@ -31,7 +31,6 @@ import type ModelFile from './modelfile';
  *
  * @abstract
  * @class
- * @memberof module:concerto-core
  */
 class Declaration extends Decorated {
     modelFile: ModelFile;

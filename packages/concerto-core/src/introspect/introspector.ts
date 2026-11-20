@@ -24,7 +24,6 @@ import type BaseModelManager from '../basemodelmanager';
  * Provides access to the structure of transactions, assets and participants.
  *
  * @class
- * @memberof module:concerto-core
  */
 class Introspector {
     modelManager: BaseModelManager;

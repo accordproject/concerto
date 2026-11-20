@@ -29,7 +29,6 @@ const DECORATOR_STRING_TYPE = `${MetaModelNamespace}.DecoratorString`;
 /**
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
- * @memberof module:concerto-core
  * @private
  */
 /**
@@ -62,7 +61,6 @@ class DecoratorExtractor {
 
     /**
      * Create the DecoratorExtractor.
-     * @constructor
      * @param {boolean} removeDecoratorsFromModel - flag to determine whether to remove decorators from source model
      * @param {string} locale - locale for extracted vocabularies
      * @param {string} dcs_version - version string
