@@ -205,6 +205,9 @@ class ResourceValidator {
         }
 
         obj.forEach((value, key) => {
+            if (key === '$class') {
+                return;
+            }
                 // Validate Key
                 this.checkMapType(mapDeclaration.getKey(), key, parameters, mapDeclaration);
                 // Validate Value

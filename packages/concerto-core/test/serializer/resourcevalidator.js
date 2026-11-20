@@ -762,9 +762,18 @@ describe('ResourceValidator', function () {
 
         scalar NonSystemKey extends String regex=/^[^$]/
 
+        concept Item {
+            o String label
+        }
+
         map Scores {
             o String
             o Integer
+        }
+
+        map ItemMap {
+            o String
+            o Item
         }
 
         map RestrictedKeys {
@@ -774,6 +783,7 @@ describe('ResourceValidator', function () {
 
         concept Container {
             o Scores scores optional
+            o ItemMap items optional
             o RestrictedKeys restrictedKeys optional
         }
         `;
@@ -808,7 +818,29 @@ describe('ResourceValidator', function () {
             }).should.throw(/failed to match validation regex/);
         });
 
-        it('should accept valid map entries with system property key names when permitted by model', () => {
+        it('should accept and round-trip valid map entries with system property key names when permitted by model', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(model);
+            const serializer = new Serializer(new Factory(mm), mm);
+
+            const input = {
+                $class: 'org.example@1.0.0.Container',
+                scores: {
+                    '$identifier': 100,
+                    'alice': 200
+                }
+            };
+            const resource = serializer.fromJSON(input);
+            resource.should.not.be.null;
+
+            const roundTripped = serializer.toJSON(resource);
+            roundTripped.scores.should.deep.equal({
+                '$identifier': 100,
+                'alice': 200
+            });
+        });
+
+        it('should allow $class metadata entry on primitive-valued and concept-valued maps', () => {
             const mm = new ModelManager();
             mm.addCTOModel(model);
             const serializer = new Serializer(new Factory(mm), mm);
@@ -816,8 +848,15 @@ describe('ResourceValidator', function () {
             const resource = serializer.fromJSON({
                 $class: 'org.example@1.0.0.Container',
                 scores: {
-                    '$identifier': 100,
-                    'alice': 200
+                    $class: 'org.example@1.0.0.Scores',
+                    alice: 1
+                },
+                items: {
+                    $class: 'org.example@1.0.0.ItemMap',
+                    first: {
+                        $class: 'org.example@1.0.0.Item',
+                        label: 'hello'
+                    }
                 }
             });
             resource.should.not.be.null;
