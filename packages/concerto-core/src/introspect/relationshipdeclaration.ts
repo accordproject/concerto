@@ -28,7 +28,6 @@ import type ClassDeclaration from './classdeclaration';
  * @see See  {@link Property}
  *
  * @class
- * @memberof module:concerto-core
  */
 class RelationshipDeclaration extends Property {
     /**

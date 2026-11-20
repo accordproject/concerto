@@ -23,7 +23,6 @@ import type ModelFile from './modelfile';
  * @extends ClassDeclaration
  * @see See  {@link ClassDeclaration}
  * @class
- * @memberof module:concerto-core
  */
 class EventDeclaration extends IdentifiedDeclaration {
     /**

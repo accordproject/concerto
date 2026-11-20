@@ -38,7 +38,6 @@ import type { Dayjs } from 'dayjs';
  * @extends Identifiable
  * @see See {@link Resource}
  * @class
- * @memberof module:concerto-core
  * @public
  */
 class Resource extends Identifiable {

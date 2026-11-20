@@ -29,7 +29,6 @@ type ModelLoaderOptions = ModelManagerOptions & { offline?: boolean };
  * If a ctoFile is not provided, the Accord Project system model is used.
  *
  * @class
- * @memberof module:concerto-core
  */
 class ModelLoader {
     /**

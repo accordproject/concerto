@@ -146,7 +146,6 @@ interface CommandIndex {
 /**
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
- * @memberof module:concerto-core
  */
 class DecoratorManager {
 
@@ -367,9 +366,7 @@ class DecoratorManager {
      * @param {*} decoratorCommandSet a DecoratorCommandSet object, or an array of DecoratorCommandSet objects
      * @param {boolean} shouldMigrate migrate the decoratorCommandSet $class to match the dcs model version
      * @param {boolean} shouldValidate validate that decorator command set is valid
-     * with respect to to decorator command set model
      * @param {boolean} shouldValidateCommands validate the decorator command set targets. Note that
-     * the validate option must also be true
      * @private
      */
     static migrateAndValidate(modelManager, decoratorCommandSet, shouldMigrate, shouldValidate, shouldValidateCommands) {
@@ -420,16 +417,7 @@ class DecoratorManager {
      * and selective cloning instead of deep-cloning the entire AST.
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object, or an array of DecoratorCommandSet objects
-     * @param {object} [options] - decorator models options
-     * @param {boolean} [options.validate] - validate that decorator command set is valid
-     * with respect to to decorator command set model
-     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
-     * the validate option must also be true
-     * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
-     * @param {boolean} [options.defaultNamespace] - the default namespace to use for decorator commands that include a decorator without a namespace
-     * @param {boolean} [options.skipValidationAndResolution] - optional flag to disable both metamodel resolution and validation, only use if you are sure that the model manager has fully resolved models
-     * @param {boolean} [options.disableMetamodelResolution] - flag to disable metamodel resolution, only use if you are sure that the model manager has fully resolved models
-     * @param {boolean} [options.disableMetamodelValidation] - flag to disable metamodel validation, only use if you are sure that the models and decorators are already validated
+     * @param {object} [options] - decorator models options. Options include validate (validate the command set), validateCommands (validate command targets; requires validate), migrate (migrate the command set version), defaultNamespace (default namespace for decorators without one), skipValidationAndResolution (disable both metamodel resolution and validation), disableMetamodelResolution (disable metamodel resolution), and disableMetamodelValidation (disable metamodel validation).
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options?) {
@@ -545,9 +533,7 @@ class DecoratorManager {
     /**
      * Extracts all the decorator commands from all the models in modelManager
      * @param {ModelManager} modelManager the input model manager
-     * @param {object} options - decorator models options
-     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out decorators from models
-     * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {object} options - decorator models options. Options include removeDecoratorsFromModel (whether to strip decorators from models) and locale (locale for the extracted vocabulary set).
      * @returns {ExtractDecoratorsResult} - a new model manager with the decorations removed and a list of extracted decorator jsons and vocab yamls
      */
     static extractDecorators(modelManager,options) {
@@ -568,9 +554,7 @@ class DecoratorManager {
     /**
      * Extracts all the vocab decorator commands from all the models in modelManager
      * @param {ModelManager} modelManager the input model manager
-     * @param {object} options - decorator models options
-     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out vocab decorators from models
-     * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {object} options - decorator models options. Options include removeDecoratorsFromModel (whether to strip decorators from models) and locale (locale for the extracted vocabulary set).
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
      */
     static extractVocabularies(modelManager,options) {
@@ -590,9 +574,7 @@ class DecoratorManager {
     /**
      * Extracts all the non-vocab decorator commands from all the models in modelManager
      * @param {ModelManager} modelManager the input model manager
-     * @param {object} options - decorator models options
-     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out non-vocab decorators from models
-     * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {object} options - decorator models options. Options include removeDecoratorsFromModel (whether to strip decorators from models) and locale (locale for the extracted vocabulary set).
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
      */
     static extractNonVocabDecorators(modelManager,options) {

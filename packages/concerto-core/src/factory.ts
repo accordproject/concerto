@@ -46,7 +46,6 @@ import type { GenerateOptions, InstanceGeneratorParameters } from './types';
  * and assets.
  *
  * @class
- * @memberof module:concerto-core
  */
 class Factory {
     modelManager: BaseModelManager;
@@ -72,14 +71,7 @@ class Factory {
      * @param {String} ns - the namespace of the Resource
      * @param {String} type - the type of the Resource
      * @param {String} [id] - an optional string identifier
-     * @param {Object} [options] - an optional set of options
-     * @param {boolean} [options.disableValidation] - pass true if you want the factory to
-     * return a {@link Resource} instead of a {@link ValidatedResource}. Defaults to false.
-     * @param {String} [options.generate] - Pass one of: <dl>
-     * <dt>sample</dt><dd>return a resource instance with generated sample data.</dd>
-     * <dt>empty</dt><dd>return a resource instance with empty property values.</dd></dl>
-     * @param {boolean} [options.includeOptionalFields] - if <code>options.generate</code>
-     * is specified, whether optional fields should be generated.
+     * @param {Object} [options] - optional settings. Options include disableValidation (return an unvalidated Resource instead of a ValidatedResource; defaults to false), generate (use "sample" for generated sample data or "empty" for empty property values), and includeOptionalFields (whether to generate optional fields when generate is specified).
      * @return {Resource} the new instance
      * @throws {TypeNotFoundException} if the type is not registered with the ModelManager
      */
@@ -161,14 +153,7 @@ class Factory {
      * @param {String} ns - the namespace of the Concept
      * @param {String} type - the type of the Concept
      * @param {String} [id] - an optional string identifier
-     * @param {Object} [options] - an optional set of options
-     * @param {boolean} [options.disableValidation] - pass true if you want the factory to
-     * return a {@link Concept} instead of a {@link ValidatedConcept}. Defaults to false.
-     * @param {String} [options.generate] - Pass one of: <dl>
-     * <dt>sample</dt><dd>return a resource instance with generated sample data.</dd>
-     * <dt>empty</dt><dd>return a resource instance with empty property values.</dd></dl>
-     * @param {boolean} [options.includeOptionalFields] - if <code>options.generate</code>
-     * is specified, whether optional fields should be generated.
+     * @param {Object} [options] - optional settings. Options include disableValidation (return an unvalidated Concept instead of a ValidatedConcept; defaults to false), generate (use "sample" for generated sample data or "empty" for empty property values), and includeOptionalFields (whether to generate optional fields when generate is specified).
      * @return {Resource} the new instance
      * @throws {TypeNotFoundException} if the type is not registered with the ModelManager
      */
@@ -204,12 +189,7 @@ class Factory {
      * @param {String} ns - the namespace of the transaction.
      * @param {String} type - the type of the transaction.
      * @param {String} [id] - an optional string identifier
-     * @param {Object} [options] - an optional set of options
-     * @param {String} [options.generate] - Pass one of: <dl>
-     * <dt>sample</dt><dd>return a resource instance with generated sample data.</dd>
-     * <dt>empty</dt><dd>return a resource instance with empty property values.</dd></dl>
-     * @param {boolean} [options.includeOptionalFields] - if <code>options.generate</code>
-     * is specified, whether optional fields should be generated.
+     * @param {Object} [options] - optional settings. Options include generate (use "sample" for generated sample data or "empty" for empty property values) and includeOptionalFields (whether to generate optional fields when generate is specified).
      * @return {Resource} A resource for the new transaction.
      */
     newTransaction(ns, type, id?, options?) {
@@ -234,12 +214,7 @@ class Factory {
      * @param {String} ns - the namespace of the event.
      * @param {String} type - the type of the event.
      * @param {String} [id] - an optional string identifier
-     * @param {Object} [options] - an optional set of options
-     * @param {String} [options.generate] - Pass one of: <dl>
-     * <dt>sample</dt><dd>return a resource instance with generated sample data.</dd>
-     * <dt>empty</dt><dd>return a resource instance with empty property values.</dd></dl>
-     * @param {boolean} [options.includeOptionalFields] - if <code>options.generate</code>
-     * is specified, whether optional fields should be generated.
+     * @param {Object} [options] - optional settings. Options include generate (use "sample" for generated sample data or "empty" for empty property values) and includeOptionalFields (whether to generate optional fields when generate is specified).
      * @return {Resource} A resource for the new event.
      */
     newEvent(ns, type, id?, options?) {

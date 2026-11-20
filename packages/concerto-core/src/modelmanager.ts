@@ -49,12 +49,10 @@ const ctoProcessFile = (options: ModelManagerOptions = {}): ((name: string | nul
  * Concerto applications load their Concerto files and then call the {@link ModelManager#addModelFile addModelFile}
  * method to register the Concerto file(s) with the ModelManager.
  *
- * @memberof module:concerto-core
  */
 class ModelManager extends BaseModelManager {
     /**
      * Create the ModelManager.
-     * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.dangerouslyAllowReservedSystemTypeNamesInUserModels] - Transitional escape hatch; when true, declarations may use reserved system type names

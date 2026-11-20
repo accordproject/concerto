@@ -28,10 +28,7 @@ import type { AstNode } from './decorated';
  * MapDeclaration defines a Map data structure, which allows storage of a collection
  * of values, where each value is associated and indexed with a unique key.
  *
- * @extends Decorated
- * @see See {@link Decorated}
  * @class
- * @memberof module:concerto-core
  */
 class MapDeclaration extends Declaration {
     // Populated by process(), which the Declaration constructor calls, so these

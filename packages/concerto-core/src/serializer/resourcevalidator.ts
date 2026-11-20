@@ -42,7 +42,6 @@ import type { SerializerOptions } from '../types';
  * </ul>
  * @private
  * @class
- * @memberof module:concerto-core
  */
 class ResourceValidator {
     options: SerializerOptions;

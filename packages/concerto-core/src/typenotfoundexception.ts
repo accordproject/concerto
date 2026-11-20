@@ -20,7 +20,6 @@ import Globalize from './globalize';
  * @extends BaseException
  * @see see {@link BaseException}
  * @class
- * @memberof module:concerto-core
  */
 class TypeNotFoundException extends BaseException {
     typeName: string;

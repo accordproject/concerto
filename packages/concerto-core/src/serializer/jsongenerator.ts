@@ -25,7 +25,6 @@ import { NullUtil as Util } from '@accordproject/concerto-util';
  * 'modelManager' - the ModelManager to use.
  * @private
  * @class
- * @memberof module:concerto-core
  */
 class JSONGenerator {
     convertResourcesToRelationships: boolean | undefined;

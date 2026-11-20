@@ -34,7 +34,6 @@ import type { AstNode } from './decorated';
  * @extends Property
  * @see See  {@link  Property}
  * @class
- * @memberof module:concerto-core
  */
 class Field extends Property {
     // Populated by process(), which the Property constructor calls, so these

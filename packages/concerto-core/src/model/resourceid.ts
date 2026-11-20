@@ -101,7 +101,6 @@ function parseUri(uri: string) {
  * All the identifying properties of a resource.
  * @private
  * @class
- * @memberof module:concerto-core
  * @property {String} namespace
  * @property {String} type
  * @property {String} id

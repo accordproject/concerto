@@ -35,12 +35,10 @@ const astProcessFile = (name: string | null, data: unknown): ModelFileSource => 
  * Concerto applications load their Concerto files and then call the {@link ModelManager#addModelFile addModelFile}
  * method to register the Concerto file(s) with the ModelManager.
  *
- * @memberof module:concerto-core
  */
 class AstModelManager extends BaseModelManager {
     /**
      * Create the ModelManager.
-     * @constructor
      * @param {object} [options] - Serializer options
      */
     constructor(options?: ModelManagerOptions) {

@@ -86,7 +86,6 @@ const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
  *
  * Use the {@link Concerto} class to validate instances.
  *
- * @memberof module:concerto-core
  */
 class BaseModelManager {
      modelFiles: Record<string, ModelFileInstance>;
@@ -99,7 +98,6 @@ class BaseModelManager {
      metamodelModelFile: ModelFileInstance;
     /**
      * Create the ModelManager.
-     * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
@@ -492,9 +490,7 @@ class BaseModelManager {
      * Write all models in this model manager to the specified path in the file system
      *
      * @param {string} path to a local directory
-     * @param {Object} [options] - Options object
-     * @param {boolean} options.includeExternalModels -
-     *  If true, external models are written to the file system. Defaults to true
+     * @param {Object} [options] - Options object. Set includeExternalModels to true to include external models when writing them to the file system (defaults to true).
      */
     writeModelsToFileSystem(path, options = {}) {
         // A ModelFile is only writable if it knows its own file name and carries its CTO
@@ -543,9 +539,7 @@ class BaseModelManager {
 
     /**
      * Gets all the Concerto models
-     * @param {Object} [options] - Options object
-     * @param {boolean} options.includeExternalModels -
-     *  If true, external models are written to the file system. Defaults to true
+     * @param {Object} [options] - Options object. Set includeExternalModels to false to exclude external models from the returned list (defaults to true).
      * @return {Array<{name:string, content:string}>} the name and content of each CTO file
      */
     getModels(options?: { includeExternalModels?: boolean }) {
@@ -902,8 +896,7 @@ class BaseModelManager {
      * ModelFiles with no declarations after filtering will be removed.
      *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
-     * @param {Object} [options] - options for the filter method
-     * @param {boolean} [options.disableValidation] — If true then the model files are not validated
+     * @param {Object} [options] - options for the filter method. Set disableValidation to true to skip model validation.
      * @returns {BaseModelManager} - the filtered ModelManager
      */
     filter(predicate, options?){

@@ -1,0 +1,26 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "src/index.ts"
+    ],
+    "tsconfig": "./tsconfig.build.json",
+    "out": "out",
+    "externalSymbolLinkMappings": {
+        "@accordproject/concerto-util": {
+            "BaseFileException": "#",
+            "BaseException": "#"
+        }
+    },
+    "intentionallyNotExported": [
+        "BaseModelManager",
+        "ModelFileInstance",
+        "ModelFileInput",
+        "ModelLoaderOptions",
+        "AstNode",
+        "DecoratorArgument",
+        "ModelManagerOptions",
+        "SerializerOptions",
+        "ModelFileSource"
+    ],
+    "treatWarningsAsErrors": true
+}

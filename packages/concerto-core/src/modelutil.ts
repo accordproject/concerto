@@ -61,10 +61,8 @@ const reservedProperties = [
 
 /**
  * Internal Model Utility Class
- * <p><a href="./diagrams-private/modelutil.svg"><img src="./diagrams-private/modelutil.svg" style="height:100%;"/></a></p>
  * @private
  * @class
- * @memberof module:concerto-core
  */
 class ModelUtil {
     /**
