@@ -284,7 +284,7 @@ class ResourceValidator {
             parameters.currentIdentifier = obj.getFullyQualifiedIdentifier();
         }
 
-             try {
+        try {
             // now validate each property
             const properties = toBeAssignedClassDeclaration.getProperties();
             for(let n=0; n < properties.length; n++) {
