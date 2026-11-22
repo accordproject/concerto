@@ -314,6 +314,7 @@ class ResourceValidator {
             parameters.currentIdentifier = previousCurrentIdentifier;
         }
     }
+
     /**
      * Visitor design pattern
      * @param {Field} field - the object being visited

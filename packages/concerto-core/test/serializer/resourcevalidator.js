@@ -783,4 +783,5 @@ describe('ResourceValidator', function () {
         (() => serializer.toJSON(parent)).should.throw(ValidationException);
 
         validateSpy.firstCall.args[0].should.equal(parent.getFullyQualifiedIdentifier());
-    });});
+    });
+});
