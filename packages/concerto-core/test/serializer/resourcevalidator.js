@@ -756,4 +756,32 @@ describe('ResourceValidator', function () {
                 .should.throw(Error, /Unrecognised/);
         });
     });
+
+    it('should preserve the parent identifier when validating fields after a nested resource', () => {
+        modelManager.addCTOModel(`namespace org.acme.context@1.0.0
+        asset Child identified by id {
+            o String id
+        }
+        asset Parent identified by id {
+            o String id
+            o Child child
+            o String code regex=/^[A-Z]+$/
+        }`);
+
+        const parent = factory.newResource('org.acme.context@1.0.0', 'Parent', 'parent-1');
+        const child = factory.newResource('org.acme.context@1.0.0', 'Child', 'child-1');
+
+        parent.child = child;
+        parent.code = 'invalid';
+
+        const parentType = modelManager.getType('org.acme.context@1.0.0.Parent');
+        const codeValidator = parentType.getProperty('code').getValidator();
+        const validateSpy = sandbox.spy(codeValidator, 'validate');
+
+        const serializer = new Serializer(factory, modelManager);
+
+        (() => serializer.toJSON(parent)).should.throw(ValidationException);
+
+        validateSpy.firstCall.args[0].should.equal(parent.getFullyQualifiedIdentifier());
+    });
 });

@@ -225,6 +225,7 @@ class ResourceValidator {
     visitClassDeclaration(classDeclaration, parameters) {
 
         const obj = parameters.stack.pop();
+        const previousCurrentIdentifier = parameters.currentIdentifier;
 
         // are we dealing with a Resource?
         if(!((obj instanceof Resource))) {
@@ -283,31 +284,35 @@ class ResourceValidator {
             parameters.currentIdentifier = obj.getFullyQualifiedIdentifier();
         }
 
-        // now validate each property
-        const properties = toBeAssignedClassDeclaration.getProperties();
-        for(let n=0; n < properties.length; n++) {
-            const property = properties[n];
-            const value = obj[property.getName()];
-            if(!Util.isNull(value)) {
-                parameters.stack.push(value);
-                property.accept(this,parameters);
-            }
-            else {
-                if(!property.isOptional()) {
-                    // Allow shadowing of the $identifier field to normalize lookup of the identifying field.
-                    if (property.getName() === '$identifier' && identifierFieldName !== '$identifier'
-                    ) {
-                        continue;
+        try {
+            // now validate each property
+            const properties = toBeAssignedClassDeclaration.getProperties();
+            for(let n=0; n < properties.length; n++) {
+                const property = properties[n];
+                const value = obj[property.getName()];
+                if(!Util.isNull(value)) {
+                    parameters.stack.push(value);
+                    property.accept(this,parameters);
+                }
+                else {
+                    if(!property.isOptional()) {
+                        // Allow shadowing of the $identifier field to normalize lookup of the identifying field.
+                        if (property.getName() === '$identifier' && identifierFieldName !== '$identifier'
+                        ) {
+                            continue;
+                        }
+                        // Allow implicit optionality by declaring a default value, without using the optional keyword.
+                        if (!Util.isNull(property?.defaultValue)){
+                            continue;
+                        }
+                        ResourceValidator.reportMissingRequiredProperty( parameters.rootResourceIdentifier, property);
                     }
-                    // Allow implicit optionality by declaring a default value, without using the optional keyword.
-                    if (!Util.isNull(property?.defaultValue)){
-                        continue;
-                    }
-                    ResourceValidator.reportMissingRequiredProperty( parameters.rootResourceIdentifier, property);
                 }
             }
+            return null;
+        } finally {
+            parameters.currentIdentifier = previousCurrentIdentifier;
         }
-        return null;
     }
 
     /**
