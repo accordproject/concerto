@@ -46,6 +46,10 @@ The following table provides an overview of the available linting rules in the d
 <td>Enforces that names used for declarations, properties, and decorators in concerto models do not use reserved keywords. Reserved keywords are language-specific terms that may cause conflicts or unexpected behavior if used as identifiers.</td>
 </tr>
 <tr>
+<td><a href="#no-reserved-system-type-names">no-reserved-system-type-names</a></td>
+<td>Reports declarations named exactly like a Concerto system type (<code>Concept</code>, <code>Asset</code>, <code>Participant</code>, <code>Transaction</code>, <code>Event</code>). Concerto 4+ rejects these models unless the ModelManager option <code>dangerouslyAllowReservedSystemTypeNamesInUserModels</code> is enabled, and with that option (or in Concerto 3) the name is ambiguous. The rule reports in every context, so models migrated with that option are flagged until the declaration is renamed.</td>
+</tr>
+<tr>
 <td><a href="#pascal-case-declarations">pascal-case-declarations</a></td>
 <td>Ensures that declaration names (scalar, enum, concept, asset, participant, transaction, event) follow PascalCase naming convention (e.g., 'MyDeclaration'). This promotes consistency and readability across model declarations.</td>
 </tr>
@@ -147,6 +151,7 @@ Here are all the rule IDs that can be disabled:
 |---------|-------------|
 | `namespace-version` | Ensures namespaces include version numbers |
 | `no-reserved-keywords` | Prevents use of reserved keywords |
+| `no-reserved-system-type-names` | Prevents declarations that clash with Concerto system types |
 | `pascal-case-declarations` | Enforces PascalCase for declarations |
 | `camel-case-properties` | Enforces camelCase for properties |
 | `upper-snake-case-enum-constants` | Enforces UPPER_SNAKE_CASE for enum constants |

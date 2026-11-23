@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { pattern } from '@stoplight/spectral-functions';
+import { findReservedKeywords } from './functions/find-reserved-keywords';
 
 /**
  * Rule: No Reserved Keywords with Declarations, Properties, and Decorators
@@ -21,7 +21,8 @@ import { pattern } from '@stoplight/spectral-functions';
  * in Concerto models do not use reserved keywords. Reserved keywords are language-specific
  * terms that may cause conflicts or unexpected behavior if used as identifiers.
  * If a name matches any of the reserved keywords (case-insensitive), the linter will
- * report an error to prevent its usage.
+ * report an error to prevent its usage. A declaration named exactly like a Concerto
+ * system type (e.g. `Asset`) is reported by `no-reserved-system-type-names` instead.
  */
 export default {
     description: 'Names should not be reserved words.',
@@ -35,9 +36,6 @@ export default {
     message: 'Name "{{value}}" is a reserved keyword.',
     severity: 0, // 0 = error, 1 = warning, 2 = info, 3 = hint
     then: {
-        function: pattern,
-        functionOptions: {
-            notMatch: '/^(String|Double|Integer|Long|DateTime|Boolean|scalar|concept|enum|asset|participant|transaction|event|map|optional|length|regex|range|default)$/i'
-        },
+        function: findReservedKeywords,
     },
 };

@@ -1,0 +1,27 @@
+namespace org.example@1.0.0
+
+// Names that only resemble a system type are fine
+concept MyConcept {
+  o String name
+}
+
+asset Vehicle identified by vin {
+  o String vin
+}
+
+participant Customer identified by customerId {
+  o String customerId
+}
+
+transaction AssetTransfer {
+  o String Asset
+}
+
+event OrderShipped {
+  o String orderId
+}
+
+enum EventKind {
+  o Event
+  o Transaction
+}

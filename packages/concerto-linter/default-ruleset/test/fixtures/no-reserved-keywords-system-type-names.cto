@@ -1,0 +1,9 @@
+namespace org.example@1.0.0
+
+concept Asset {
+  o String asset
+}
+
+concept String {
+  o String name
+}
