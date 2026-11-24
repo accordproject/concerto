@@ -52,6 +52,34 @@ describe('CollectionSizeValidator', () => {
                 .should.throw(/minSize and\/or maxSize must be specified/);
         });
 
+        it('should throw when minSize and maxSize are undefined or null', () => {
+            (() => new CollectionSizeValidator(mockField, { minSize: undefined, maxSize: undefined }))
+                .should.throw(/minSize and\/or maxSize must be specified/);
+            (() => new CollectionSizeValidator(mockField, { minSize: null, maxSize: null }))
+                .should.throw(/minSize and\/or maxSize must be specified/);
+        });
+
+        it('should throw when validator object is null or undefined', () => {
+            (() => new CollectionSizeValidator(mockField, null))
+                .should.throw(/minSize and\/or maxSize must be specified/);
+            (() => new CollectionSizeValidator(mockField, undefined))
+                .should.throw(/minSize and\/or maxSize must be specified/);
+        });
+
+        it('should throw when minSize is not an integer', () => {
+            (() => new CollectionSizeValidator(mockField, { minSize: 1.5 }))
+                .should.throw(/positive integers/);
+            (() => new CollectionSizeValidator(mockField, { minSize: NaN }))
+                .should.throw(/positive integers/);
+        });
+
+        it('should throw when maxSize is not an integer', () => {
+            (() => new CollectionSizeValidator(mockField, { maxSize: 2.5 }))
+                .should.throw(/positive integers/);
+            (() => new CollectionSizeValidator(mockField, { maxSize: NaN }))
+                .should.throw(/positive integers/);
+        });
+
         it('should throw when minSize is negative', () => {
             (() => new CollectionSizeValidator(mockField, { minSize: -1 }))
                 .should.throw(/positive integers/);

@@ -48,25 +48,21 @@ class NumberValidator extends Validator{
     constructor(field: ValidatedElement, ast: NumberDomainValidatorAst) {
         super(field, ast);
 
-        this.lowerBound = null;
-        this.upperBound = null;
+        this.lowerBound = !isNull(ast?.lower) ? (ast.lower as number) : null;
+        this.upperBound = !isNull(ast?.upper) ? (ast.upper as number) : null;
 
-        // the hasOwnProperty guards establish that the bound is present
-        if(Object.prototype.hasOwnProperty.call(ast, 'lower')) {
-            this.lowerBound = ast.lower as number;
-        }
-
-        if(Object.prototype.hasOwnProperty.call(ast, 'upper')) {
-            this.upperBound = ast.upper as number;
-        }
-
-        if(this.lowerBound === null && this.upperBound === null) {
+        if (this.lowerBound === null && this.upperBound === null) {
             // can't specify no upper and lower value
             this.reportModelError('Invalid range, lower and-or upper bound must be specified.');
+        } else if (
+            (this.lowerBound !== null && (typeof this.lowerBound !== 'number' || Number.isNaN(this.lowerBound))) ||
+            (this.upperBound !== null && (typeof this.upperBound !== 'number' || Number.isNaN(this.upperBound)))
+        ) {
+            this.reportModelError('lower and-or upper bound must be numbers.');
         } else if (this.lowerBound === null || this.upperBound === null) {
             // this is fine and means that we don't need to check whether upper > lower
         } else {
-            if(this.lowerBound > this.upperBound) {
+            if (this.lowerBound > this.upperBound) {
                 this.reportModelError('Lower bound must be less than or equal to upper bound.');
             }
         }

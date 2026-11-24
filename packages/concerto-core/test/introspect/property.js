@@ -118,6 +118,53 @@ describe('Property', () => {
             );
         });
 
+        it('should throw for an object property without a type on validate', () => {
+            const p = new Property(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'o',
+                isArray: false,
+                isOptional: false
+            });
+            (() => {
+                p.validate(mockClassDeclaration);
+            }).should.throw(
+                IllegalModelException,
+                /ObjectProperty must contain property 'type', for property o/
+            );
+        });
+
+        it('should throw for an object property with null type on validate', () => {
+            const p = new Property(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'o',
+                isArray: false,
+                isOptional: false,
+                type: null
+            });
+            (() => {
+                p.validate(mockClassDeclaration);
+            }).should.throw(
+                IllegalModelException,
+                /ObjectProperty must contain property 'type', for property o/
+            );
+        });
+
+        it('should throw for an object property with a type missing name on validate', () => {
+            const p = new Property(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'o',
+                isArray: false,
+                isOptional: false,
+                type: {}
+            });
+            (() => {
+                p.validate(mockClassDeclaration);
+            }).should.throw(
+                IllegalModelException,
+                /ObjectProperty must contain property 'type', for property o/
+            );
+        });
+
     });
 
     describe('#hasInstance', () => {

@@ -57,35 +57,44 @@ class StringValidator extends Validator{
         this.regex = null;
 
         if (lengthValidator) {
-            this.minLength = lengthValidator?.minLength;
-            this.maxLength = lengthValidator?.maxLength;
+            this.minLength = !isNull(lengthValidator.minLength) ? lengthValidator.minLength : null;
+            this.maxLength = !isNull(lengthValidator.maxLength) ? lengthValidator.maxLength : null;
 
-            if ((this.minLength === null || this.minLength === undefined) &&
-                (this.maxLength === null || this.maxLength === undefined)) {
+            if (this.minLength === null && this.maxLength === null) {
                 // can't specify no upper and lower value
                 this.reportModelError('Invalid string length, minLength and-or maxLength must be specified.');
-            } else if ((this.minLength ?? 0) < 0 || (this.maxLength ?? 0) < 0) {
+            } else if (
+                (this.minLength !== null && (!Number.isInteger(this.minLength) || this.minLength < 0)) ||
+                (this.maxLength !== null && (!Number.isInteger(this.maxLength) || this.maxLength < 0))
+            ) {
                 this.reportModelError('minLength and-or maxLength must be positive integers.');
             } else if (this.minLength === null || this.maxLength === null) {
                 // this is fine and means that we don't need to check whether minLength > maxLength
-            } else if (this.minLength !== undefined && this.maxLength !== undefined && this.minLength > this.maxLength) {
+            } else if (this.minLength > this.maxLength) {
                 this.reportModelError('minLength must be less than or equal to maxLength.');
             }
         }
 
         if (validator) {
-            try {
-                // ScalarDeclarations have no parent, so the custom RegExp option
-                // is only picked up for properties
-                const parent = 'getParent' in field ? field.getParent() : undefined;
-                const CustomRegExp = (parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp) as typeof RegExp;
-                this.regex = new CustomRegExp(validator.pattern, validator.flags);
-            }
-            catch (exception) {
+            if (isNull(validator.pattern) || typeof validator.pattern !== 'string' || validator.pattern.length === 0) {
                 this.reportModelError(
-                    (exception as Error).message,
+                    'Regex pattern must be specified.',
                     ErrorCodes.REGEX_VALIDATOR_EXCEPTION
                 );
+            } else {
+                try {
+                    // ScalarDeclarations have no parent, so the custom RegExp option
+                    // is only picked up for properties
+                    const parent = 'getParent' in field ? field.getParent() : undefined;
+                    const CustomRegExp = (parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp) as typeof RegExp;
+                    this.regex = new CustomRegExp(validator.pattern, validator.flags || undefined);
+                }
+                catch (exception) {
+                    this.reportModelError(
+                        (exception as Error).message,
+                        ErrorCodes.REGEX_VALIDATOR_EXCEPTION
+                    );
+                }
             }
         }
 
