@@ -201,6 +201,33 @@ describe('Typed', () => {
             typed.validDate.toISOString().should.equal('2024-05-01T00:00:00.000Z');
         });
 
+        it('should reject an offset-less DateTime default', () => {
+            modelManager.addCTOModel(`namespace org.acme.defaults@1.0.0
+            concept DefaultAsset {
+                o DateTime noOffset default="2008-09-15T15:53:00"
+            }`);
+            const classDecl = modelManager.getType('org.acme.defaults@1.0.0.DefaultAsset');
+            const typed = new Typed(modelManager, classDecl, 'org.acme.defaults@1.0.0', 'DefaultAsset');
+            (() => typed.assignFieldDefaults()).should.throw(
+                ValidationException,
+                /Invalid default value '2008-09-15T15:53:00' for DateTime field 'noOffset'\./
+            );
+        });
+
+        it('should reject an invalid default on a scalar that extends DateTime', () => {
+            modelManager.addCTOModel(`namespace org.acme.defaults@1.0.0
+            scalar TS extends DateTime default="nope"
+            concept DefaultAsset {
+                o TS ts
+            }`);
+            const classDecl = modelManager.getType('org.acme.defaults@1.0.0.DefaultAsset');
+            const typed = new Typed(modelManager, classDecl, 'org.acme.defaults@1.0.0', 'DefaultAsset');
+            (() => typed.assignFieldDefaults()).should.throw(
+                ValidationException,
+                /Invalid default value 'nope' for DateTime field/
+            );
+        });
+
     });
 
 });
