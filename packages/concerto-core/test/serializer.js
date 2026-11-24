@@ -724,6 +724,125 @@ describe('Serializer', () => {
                 }).should.throw(ValidationException, /is not a valid date-time/);
             });
         });
+
+        describe('invalid DateTime default', () => {
+            beforeEach(() => {
+                modelManager.addCTOModel(`namespace org.acme.defaults@1.0.0
+                concept G {
+                    o DateTime d default="FOO"
+                }
+                concept H {
+                    o G g
+                }`);
+            });
+
+            it('should throw a ValidationException when the field is missing', () => {
+                (() => {
+                    serializer.fromJSON({ $class: 'org.acme.defaults@1.0.0.G' });
+                }).should.throw(ValidationException, /Invalid default value 'FOO' for DateTime field 'd'\./);
+            });
+
+            it('should throw a ValidationException when the field is null', () => {
+                (() => {
+                    serializer.fromJSON({ $class: 'org.acme.defaults@1.0.0.G', d: null });
+                }).should.throw(ValidationException, /Invalid default value 'FOO' for DateTime field 'd'\./);
+            });
+
+            it('should throw a ValidationException when a nested concept is missing the field', () => {
+                (() => {
+                    serializer.fromJSON({ $class: 'org.acme.defaults@1.0.0.H', g: { $class: 'org.acme.defaults@1.0.0.G' } });
+                }).should.throw(ValidationException, /Invalid default value 'FOO' for DateTime field 'd'\./);
+            });
+
+            it('should throw a ValidationException for a date-only or impossible default', () => {
+                modelManager.addCTOModel(`namespace org.acme.strictdefaults@1.0.0
+                concept DateOnly {
+                    o DateTime d default="2024-05-01"
+                }
+                concept Impossible {
+                    o DateTime d default="2024-02-30T00:00:00Z"
+                }`);
+                (() => {
+                    serializer.fromJSON({ $class: 'org.acme.strictdefaults@1.0.0.DateOnly' });
+                }).should.throw(ValidationException, /Invalid default value '2024-05-01' for DateTime field 'd'\./);
+                (() => {
+                    serializer.fromJSON({ $class: 'org.acme.strictdefaults@1.0.0.Impossible' });
+                }).should.throw(ValidationException, /Invalid default value '2024-02-30T00:00:00Z' for DateTime field 'd'\./);
+            });
+
+            it('should accept a date-only default when strictQualifiedDateTimes is false', () => {
+                modelManager.addCTOModel(`namespace org.acme.strictdefaults@1.0.0
+                concept DateOnly {
+                    o DateTime d default="2024-05-01"
+                }`);
+                const resource = serializer.fromJSON({ $class: 'org.acme.strictdefaults@1.0.0.DateOnly' }, { strictQualifiedDateTimes: false });
+                resource.d.toISOString().should.equal('2024-05-01T00:00:00.000Z');
+            });
+
+            it('should use the value from the JSON when the field is present', () => {
+                const resource = serializer.fromJSON({ $class: 'org.acme.defaults@1.0.0.G', d: '2024-05-01T00:00:00.000Z' });
+                serializer.toJSON(resource).should.deep.equal({
+                    $class: 'org.acme.defaults@1.0.0.G',
+                    d: '2024-05-01T00:00:00.000Z',
+                });
+            });
+
+            it('should use the value from the JSON when a nested concept has the field', () => {
+                const json = {
+                    $class: 'org.acme.defaults@1.0.0.H',
+                    g: { $class: 'org.acme.defaults@1.0.0.G', d: '2024-05-01T00:00:00.000Z' },
+                };
+                serializer.toJSON(serializer.fromJSON(json)).should.deep.equal(json);
+            });
+
+            describe('offset-less default', () => {
+                beforeEach(() => {
+                    modelManager.addCTOModel(`namespace org.acme.offsetless@1.0.0
+                    concept NoOffset {
+                        o DateTime d default="2008-09-15T15:53:00"
+                    }`);
+                });
+
+                it('should throw a ValidationException from Factory.newConcept', () => {
+                    (() => {
+                        factory.newConcept('org.acme.offsetless@1.0.0', 'NoOffset');
+                    }).should.throw(ValidationException, /Invalid default value '2008-09-15T15:53:00' for DateTime field 'd'\./);
+                });
+
+                it('should throw a ValidationException from fromJSON when the field is missing', () => {
+                    (() => {
+                        serializer.fromJSON({ $class: 'org.acme.offsetless@1.0.0.NoOffset' });
+                    }).should.throw(ValidationException, /Invalid default value '2008-09-15T15:53:00' for DateTime field 'd'\./);
+                });
+
+                it('should assign the default as UTC when strictQualifiedDateTimes is false', () => {
+                    const resource = serializer.fromJSON({ $class: 'org.acme.offsetless@1.0.0.NoOffset' }, { strictQualifiedDateTimes: false });
+                    resource.d.toISOString().should.equal('2008-09-15T15:53:00.000Z');
+                });
+            });
+
+            describe('scalar that extends DateTime', () => {
+                beforeEach(() => {
+                    modelManager.addCTOModel(`namespace org.acme.scalardefaults@1.0.0
+                    scalar TS extends DateTime default="nope"
+                    concept S {
+                        o TS ts
+                    }`);
+                });
+
+                it('should throw a ValidationException from Factory.newConcept', () => {
+                    (() => {
+                        factory.newConcept('org.acme.scalardefaults@1.0.0', 'S');
+                    }).should.throw(ValidationException, /Invalid default value 'nope' for DateTime field/);
+                });
+
+                it('should throw a ValidationException from fromJSON when the field is missing', () => {
+                    (() => {
+                        serializer.fromJSON({ $class: 'org.acme.scalardefaults@1.0.0.S' });
+                    }).should.throw(ValidationException, /Invalid default value 'nope' for DateTime field/);
+                });
+            });
+        });
     });
 
 });
