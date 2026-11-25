@@ -43,7 +43,7 @@ The following table provides an overview of the available linting rules in the d
 </tr>
 <tr>
 <td><a href="#no-reserved-keywords">no-reserved-keywords</a></td>
-<td>Enforces that names used for declarations, properties, and decorators in concerto models do not use reserved keywords. Reserved keywords are language-specific terms that may cause conflicts or unexpected behavior if used as identifiers.</td>
+<td>Enforces that names used for declarations, properties, and decorators in concerto models do not use reserved keywords. Reserved keywords are language-specific terms that may cause conflicts or unexpected behavior if used as identifiers. A declaration named exactly like a Concerto system type (<code>Concept</code>, <code>Asset</code>, <code>Participant</code>, <code>Transaction</code>, <code>Event</code>) is reported only by <a href="#no-reserved-system-type-names">no-reserved-system-type-names</a>, not by this rule, so turning that rule off stops those reports.</td>
 </tr>
 <tr>
 <td><a href="#no-reserved-system-type-names">no-reserved-system-type-names</a></td>
