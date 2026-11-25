@@ -18,6 +18,8 @@ const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const { Factory } = require('../../src/factory');
 const { InstanceGenerator } = require('../../src/serializer/instancegenerator');
 const { ModelManager } = require('../../src/modelmanager');
+const { Relationship } = require('../../src/model/relationship');
+const { Serializer } = require('../../src/serializer');
 const ValueGenerator = require('../../src/serializer/valuegenerator').default;
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
@@ -61,6 +63,80 @@ describe('InstanceGenerator', () => {
         let classDeclaration = resource.getClassDeclaration();
         return classDeclaration.accept(visitor, parameters);
     };
+
+    describe('#visitMapDeclaration', () => {
+
+        // generates a Holder, validates it, and returns the entries of its map
+        const generate = (declarations, key, value, mode = 'sample') => {
+            modelManager.addCTOModel(`namespace org.acme.test@1.0.0
+            ${declarations}
+            map Dictionary {
+                ${key}
+                ${value}
+            }
+            concept Holder {
+                o Dictionary dictionary
+            }`);
+            const resource = factory.newResource('org.acme.test@1.0.0', 'Holder', undefined, { generate: mode });
+            new Serializer(factory, modelManager).toJSON(resource);
+            return [...resource.dictionary];
+        };
+
+        ['String', 'Integer', 'Long', 'Double', 'Boolean', 'DateTime'].forEach(type => {
+            it(`should generate a valid ${type} value`, () => {
+                generate('', 'o String', `o ${type}`).should.have.lengthOf(1);
+            });
+        });
+
+        it('should generate a valid DateTime key', () => {
+            generate('', 'o DateTime', 'o String').should.have.lengthOf(1);
+        });
+
+        it('should generate a valid DateTime scalar key', () => {
+            generate('scalar Day extends DateTime', 'o Day', 'o String').should.have.lengthOf(1);
+        });
+
+        it('should honour the validators of scalar keys and values', () => {
+            const [[key, value]] = generate(`scalar Code extends String regex=/^[A-Z]{3}$/
+                scalar Rating extends Integer range=[1,5]`, 'o Code', 'o Rating');
+            key.should.match(/^[A-Z]{3}$/);
+            value.should.be.within(1, 5);
+        });
+
+        it('should generate an enum value', () => {
+            const [[, value]] = generate('enum Color { o RED o GREEN }', 'o String', 'o Color');
+            value.should.be.oneOf(['RED', 'GREEN']);
+        });
+
+        it('should generate a concrete concept with an id matching its regex', () => {
+            const [[, value]] = generate(`abstract concept Item identified by itemId {
+                    o String itemId regex=/^ID-[0-9]{3}$/
+                }
+                concept Book extends Item { }`, 'o String', 'o Item');
+            value.getType().should.equal('Book');
+            value.getIdentifier().should.match(/^ID-[0-9]{3}$/);
+        });
+
+        it('should generate a relationship', () => {
+            const [[, value]] = generate(`concept Item identified by itemId {
+                    o String itemId
+                }`, 'o String', '--> Item');
+            value.should.be.an.instanceOf(Relationship);
+        });
+
+        it('should leave the map empty when the value is the enclosing type', () => {
+            generate('', 'o String', 'o Holder').should.be.empty;
+        });
+
+        it('should leave a nested map empty when it recurses into itself', () => {
+            const [[, child]] = generate('concept Child { o Dictionary children }', 'o String', 'o Child');
+            [...child.children].should.be.empty;
+        });
+
+        it('should generate an empty map for the empty option', () => {
+            generate('', 'o String', 'o Integer', 'empty').should.be.empty;
+        });
+    });
 
     describe('#visit', () => {
 

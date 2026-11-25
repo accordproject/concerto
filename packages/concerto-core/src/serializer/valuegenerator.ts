@@ -263,9 +263,10 @@ class EmptyValueGenerator {
 
     /**
      * Get an instance of an empty map.
-     * @return {*} an map value.
+     * @param {Function} entrySupplier - callback to obtain a map entry.
+     * @return {Map} an empty map.
      */
-    getMap() {
+    getMap(entrySupplier?: () => [unknown, unknown] | null): Map<unknown, unknown> {
         return new Map();
     }
 
@@ -368,11 +369,14 @@ class SampleValueGenerator extends EmptyValueGenerator {
     }
 
     /**
-     * Get a map instance with randomly generated values for key & value.
-     * @return {*} a map value.
+     * Get a map holding the entry obtained from the supplied callback.
+     * @param {Function} entrySupplier - callback to obtain a [key, value] entry,
+     * or null if no entry can be generated.
+     * @return {Map} a map with at most one entry.
      */
-    getMap() {
-        return new Map([[this.getString(1,10), this.getString(1,10)]]);
+    getMap(entrySupplier?: () => [unknown, unknown] | null): Map<unknown, unknown> {
+        const entry = entrySupplier?.();
+        return new Map(entry ? [entry] : []);
     }
 
     /**

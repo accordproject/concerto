@@ -14,6 +14,7 @@
 
 import { NullUtil as Util } from '@accordproject/concerto-util';
 import Globalize from '../globalize';
+import ModelUtil from '../modelutil';
 
 /**
  * Generate sample instance data for the specified class declaration
@@ -92,6 +93,9 @@ class InstanceGenerator {
                 if (field.isOptional()) {
                     return null;
                 }
+                if (classDeclaration.isMapDeclaration?.()) {
+                    return new Map();
+                }
                 throw new Error('Model is recursive.');
             }
             parameters.seen.push(fqn);
@@ -122,35 +126,7 @@ class InstanceGenerator {
         }
         let type = field.getFullyQualifiedTypeName();
         if (field.isPrimitive()) {
-            switch(type) {
-            case 'DateTime':
-                return parameters.valueGenerator.getDateTime();
-            case 'Integer':
-                if(fieldOrScalarDeclaration.validator){
-                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, fieldOrScalarDeclaration.validator.upperBound, type);
-                }
-                return parameters.valueGenerator.getInteger();
-            case 'Long':
-                if(fieldOrScalarDeclaration.validator){
-                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, fieldOrScalarDeclaration.validator.upperBound, type);
-                }
-                return parameters.valueGenerator.getLong();
-            case 'Double':
-                if(fieldOrScalarDeclaration.validator){
-                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, fieldOrScalarDeclaration.validator.upperBound, type);
-                }
-                return parameters.valueGenerator.getDouble();
-            case 'Boolean':
-                return parameters.valueGenerator.getBoolean();
-            default:
-                if(fieldOrScalarDeclaration.validator?.regex){
-                    return parameters.valueGenerator.getRegex(fieldOrScalarDeclaration.validator.regex,
-                        fieldOrScalarDeclaration.validator.minLength,
-                        fieldOrScalarDeclaration.validator.maxLength);
-                }
-                return parameters.valueGenerator.getString(fieldOrScalarDeclaration.validator?.minLength,
-                    fieldOrScalarDeclaration.validator?.maxLength);
-            }
+            return this.getPrimitiveValue(type, fieldOrScalarDeclaration.validator, parameters);
         }
 
         let declaration = parameters.modelManager.getType(type);
@@ -162,25 +138,77 @@ class InstanceGenerator {
 
         declaration = this.findConcreteSubclass(declaration);
 
-        if (!declaration.isMapDeclaration?.()) {
-            let id: string | null = null;
-            if (declaration.isIdentified()) {
-                let idFieldName = declaration.getIdentifierFieldName();
-                let idField = declaration.getProperty(idFieldName);
-                if (idField?.isTypeScalar?.()){
-                    idField = idField.getScalarField();
-                }
-                if(idField?.validator?.regex){
-                    id = parameters.valueGenerator.getRegex(idField.validator.regex,
-                        idField.validator.minLength, idField.validator.maxLength);
-                } else {
-                    id = this.generateRandomId(declaration);
-                }
-            }
-            let resource = parameters.factory.newResource(declaration.getNamespace(), declaration.getName(), id);
-            parameters.stack.push(resource);
+        if (declaration.isMapDeclaration?.()) {
+            return declaration.accept(this, parameters);
         }
-        return declaration.accept(this, parameters);
+        return this.generateResource(declaration, parameters);
+    }
+
+    /**
+     * Get a value for a primitive type.
+     * @param {String} type - the primitive type name
+     * @param {Validator} validator - the validator that constrains the value, if any
+     * @param {Object} parameters  - the parameter
+     * @return {*} A value of the primitive type.
+     * @private
+     */
+    getPrimitiveValue(type, validator, parameters) {
+        switch(type) {
+        case 'DateTime':
+            return parameters.valueGenerator.getDateTime();
+        case 'Integer':
+            if(validator){
+                return parameters.valueGenerator.getRange(validator.lowerBound, validator.upperBound, type);
+            }
+            return parameters.valueGenerator.getInteger();
+        case 'Long':
+            if(validator){
+                return parameters.valueGenerator.getRange(validator.lowerBound, validator.upperBound, type);
+            }
+            return parameters.valueGenerator.getLong();
+        case 'Double':
+            if(validator){
+                return parameters.valueGenerator.getRange(validator.lowerBound, validator.upperBound, type);
+            }
+            return parameters.valueGenerator.getDouble();
+        case 'Boolean':
+            return parameters.valueGenerator.getBoolean();
+        default:
+            if(validator?.regex){
+                return parameters.valueGenerator.getRegex(validator.regex,
+                    validator.minLength,
+                    validator.maxLength);
+            }
+            return parameters.valueGenerator.getString(validator?.minLength,
+                validator?.maxLength);
+        }
+    }
+
+    /**
+     * Create and populate an instance of a concrete class declaration.
+     * @param {ClassDeclaration} classDeclaration - the type to instantiate
+     * @param {Object} parameters  - the parameter
+     * @return {Resource} the generated instance.
+     * @private
+     */
+    generateResource(classDeclaration, parameters) {
+        let id: string | null = null;
+        if (classDeclaration.isIdentified()) {
+            let idFieldName = classDeclaration.getIdentifierFieldName();
+            let idField = classDeclaration.getProperty(idFieldName);
+            if (idField?.isTypeScalar?.()){
+                idField = idField.getScalarField();
+            }
+            if(idField?.validator?.regex){
+                id = parameters.valueGenerator.getRegex(idField.validator.regex,
+                    idField.validator.minLength, idField.validator.maxLength);
+            } else {
+                id = this.generateRandomId(classDeclaration);
+            }
+        }
+        let resource = parameters.factory.newResource(classDeclaration.getNamespace(), classDeclaration.getName(), id);
+        parameters.stack.push(resource);
+        return classDeclaration.accept(this, parameters);
     }
 
     /**
@@ -226,7 +254,8 @@ class InstanceGenerator {
             const id = this.generateRandomId(classDeclaration);
             return factory.newRelationship(classDeclaration.getNamespace(), classDeclaration.getName(), id);
         };
-        if (relationshipDeclaration.isArray()) {
+        // a map value type can also be a relationship, and is never an array
+        if (relationshipDeclaration.isArray?.()) {
             return parameters.valueGenerator.getArray(valueSupplier);
         } else {
             return valueSupplier();
@@ -241,7 +270,56 @@ class InstanceGenerator {
      * @private
      */
     visitMapDeclaration(mapDeclaration, parameters) {
-        return parameters.valueGenerator.getMap();
+        return parameters.valueGenerator.getMap(() => {
+            const value = this.getMapItem(mapDeclaration.getValue(), parameters);
+            // null means the value would recurse, so the map is left empty
+            if (value === null) {
+                return null;
+            }
+            const key = this.getMapItem(mapDeclaration.getKey(), parameters);
+            return [key, value];
+        });
+    }
+
+    /**
+     * Get a key or a value for a map entry.
+     * @param {MapKeyType|MapValueType} mapType - the declared key or value type
+     * @param {Object} parameters  - the parameter
+     * @return {*} the generated item, or null if generating it would recurse.
+     * @private
+     */
+    getMapItem(mapType, parameters) {
+        if (mapType.isRelationship?.()) {
+            return this.visitRelationshipDeclaration(mapType, parameters);
+        }
+
+        let type = mapType.getType();
+        let validator = null;
+
+        if (!ModelUtil.isPrimitiveType(type)) {
+            const declaration = parameters.modelManager.getType(mapType.getFullyQualifiedTypeName());
+
+            if (declaration.isScalarDeclaration?.()) {
+                type = declaration.getType();
+                validator = declaration.getValidator();
+            } else if (declaration.isEnum()) {
+                return parameters.valueGenerator.getEnum(declaration.getOwnProperties()).getName();
+            } else {
+                const concrete = this.findConcreteSubclass(declaration);
+                const fqn = concrete.getFullyQualifiedName();
+                if (parameters.seen.includes(fqn)) {
+                    return null;
+                }
+                parameters.seen.push(fqn);
+                const resource = this.generateResource(concrete, parameters);
+                parameters.seen.pop();
+                return resource;
+            }
+        }
+
+        const value = this.getPrimitiveValue(type, validator, parameters);
+        // a DateTime in a map is held as an ISO 8601 string, unlike a DateTime field
+        return type === 'DateTime' ? value.toISOString() : value;
     }
 
     /**
