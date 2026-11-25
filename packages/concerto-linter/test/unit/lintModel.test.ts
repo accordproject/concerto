@@ -52,6 +52,29 @@ describe('lintModel', () => {
         expect(Array.isArray(results)).toBe(true);
     });
 
+    test('should report a declaration named after a system type once, with remediation', async () => {
+        const model = `
+      namespace com.example@1.0.0
+
+      asset Asset identified by assetId {
+        o String assetId
+      }
+    `;
+
+        mockedConfigLoader.resolveRulesetPath.mockResolvedValue(null);
+
+        const results = await lintModel(model, { ruleset: 'default' });
+        const declarationName = results.filter(r => r.path.join('.') === 'models.0.declarations.0.name');
+
+        expect(declarationName).toHaveLength(1);
+        expect(declarationName[0]).toMatchObject({
+            code: 'no-reserved-system-type-names',
+            severity: 'error',
+            namespace: 'com.example@1.0.0',
+        });
+        expect(declarationName[0].message).toContain('dangerouslyAllowReservedSystemTypeNamesInUserModels');
+    });
+
     test('should handle malformed model', async () => {
         const malformedModel = 'namespace invalid syntax }}}';
 

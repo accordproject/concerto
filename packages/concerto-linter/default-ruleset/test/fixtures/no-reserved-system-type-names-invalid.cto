@@ -1,0 +1,19 @@
+namespace org.example@1.0.0
+
+concept Concept {
+  o String name
+}
+
+asset Asset identified by assetId {
+  o String assetId
+}
+
+participant Participant identified by participantId {
+  o String participantId
+}
+
+transaction Transaction {
+  o String note
+}
+
+scalar Event extends String

@@ -21,6 +21,7 @@ import upperSnakeCaseEnumConst from './upper-snake-case-enum-const';
 import pascalCaseDecorators from './pascal-case-decorators';
 import stringLengthValidator from './string-length-validator';
 import noReservedKeywords from './no-reserved-keywords';
+import noReservedSystemTypeNames from './no-reserved-system-type-names';
 import noEmptyDeclarations from './no-empty-declarations';
 import abstractMustSubclassed from './abstract-must-subclassed';
 
@@ -28,6 +29,7 @@ const concertoRuleset: RulesetDefinition = {
     rules: {
         'namespace-version': namespaceVersion,
         'no-reserved-keywords': noReservedKeywords,
+        'no-reserved-system-type-names': noReservedSystemTypeNames,
         'pascal-case-declarations': pascalCaseDeclarations,
         'camel-case-properties': camelCaseProperties,
         'upper-snake-case-enum-constants': upperSnakeCaseEnumConst,
