@@ -136,6 +136,16 @@ describe('InstanceGenerator', () => {
         it('should generate an empty map for the empty option', () => {
             generate('', 'o String', 'o Integer', 'empty').should.be.empty;
         });
+
+        it('should throw when the value type has no concrete subclass', () => {
+            (() => generate('abstract concept Item { }', 'o String', 'o Item'))
+                .should.throw('No concrete extending type for "org.acme.test@1.0.0.Item".');
+        });
+
+        it('should throw when the relationship type has no concrete subclass', () => {
+            (() => generate('abstract asset Item identified by itemId { o String itemId }', 'o String', '--> Item'))
+                .should.throw('No concrete extending type for "org.acme.test@1.0.0.Item".');
+        });
     });
 
     describe('#visit', () => {
