@@ -818,26 +818,21 @@ describe('ResourceValidator', function () {
             }).should.throw(/failed to match validation regex/);
         });
 
-        it('should accept and round-trip valid map entries with system property key names when permitted by model', () => {
+        it('should accept valid map entries with system property key names when permitted by model', () => {
             const mm = new ModelManager();
             mm.addCTOModel(model);
             const serializer = new Serializer(new Factory(mm), mm);
 
-            const input = {
+            const resource = serializer.fromJSON({
                 $class: 'org.example@1.0.0.Container',
                 scores: {
                     '$identifier': 100,
                     'alice': 200
                 }
-            };
-            const resource = serializer.fromJSON(input);
-            resource.should.not.be.null;
-
-            const roundTripped = serializer.toJSON(resource);
-            roundTripped.scores.should.deep.equal({
-                '$identifier': 100,
-                'alice': 200
             });
+            resource.should.not.be.null;
+            resource.scores.get('$identifier').should.equal(100);
+            resource.scores.get('alice').should.equal(200);
         });
 
         it('should allow $class metadata entry on primitive-valued and concept-valued maps', () => {

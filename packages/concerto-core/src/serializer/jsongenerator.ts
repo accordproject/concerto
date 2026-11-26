@@ -96,7 +96,7 @@ class JSONGenerator {
         obj.forEach((value, key) => {
 
             // don't serialize System Properties, other than $class
-            if (key === '$class') {
+            if(ModelUtil.isSystemProperty(key)) {
                 return;
             }
 
