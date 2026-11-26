@@ -201,6 +201,10 @@ class ModelUtil {
             throw new Error('Cannot find type ' + typeName);
         }
 
+        if (typeof typeDeclaration.getAllSuperTypeDeclarations !== 'function') {
+            return false;
+        }
+
         return typeDeclaration.getAllSuperTypeDeclarations().
             some(type => type.getFullyQualifiedName() === propertyTypeName);
     }

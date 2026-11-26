@@ -193,10 +193,8 @@ class Decorator {
                             if (typeof arg !== 'object' || arg?.type !== 'Identifier') {
                                 const err = `Decorator ${this.getName()} has invalid decorator argument. Expected object. Found ${argType}, with value ${JSON.stringify(arg)}`;
                                 this.handleError(validationOptions.invalidDecorator, err);
+                                break;
                             }
-                            // handleError above only throws when the decorator
-                            // validation option is set to 'error', so arg may still
-                            // be something other than a type reference here
                             const typeReference = arg as DecoratorTypeReferenceArgument;
                             const typeDecl = mf.getType(typeReference.name);
                             if (!typeDecl) {
@@ -204,7 +202,9 @@ class Decorator {
                                 this.handleError(validationOptions.invalidDecorator, err);
                             }
                             else {
-                                if (!ModelUtil.isAssignableTo(typeDecl.getModelFile(), typeDecl.getFullyQualifiedName(), property)) {
+                                const typeModelFile = typeof typeDecl === 'string' ? mf : typeDecl.getModelFile();
+                                const typeFqn = typeof typeDecl === 'string' ? typeDecl : typeDecl.getFullyQualifiedName();
+                                if (!ModelUtil.isAssignableTo(typeModelFile, typeFqn, property)) {
                                     const err = `Decorator ${this.getName()} references a type ${typeReference.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`;
                                     this.handleError(validationOptions.invalidDecorator, err);
                                 }

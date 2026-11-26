@@ -166,6 +166,13 @@ describe('ModelUtil', function () {
             }).should.throw(/Cannot find type/);
         });
 
+        it('returns false when declaration has no super-type hierarchy (e.g. scalar or map)', function() {
+            mockProperty.getFullyQualifiedTypeName.returns('org.doge.BaseDoge');
+            mockModelFile.getType.returns({});
+            const result = ModelUtil.isAssignableTo(mockModelFile, 'org.doge.EmailScalar', mockProperty);
+            result.should.equal(false);
+        });
+
     });
 
     describe('#getFullyQualifiedName', function() {
