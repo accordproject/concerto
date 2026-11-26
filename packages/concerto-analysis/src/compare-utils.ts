@@ -14,8 +14,53 @@
 
 import { ClassDeclaration, Declaration, EnumValueDeclaration, Field, MapDeclaration, ScalarDeclaration, NumberValidator, Property, RelationshipDeclaration, StringValidator, Validator } from '@accordproject/concerto-core';
 
+interface DuckProperty {
+    isField?: () => boolean;
+    isRelationship?: () => boolean;
+    isEnumValue?: () => boolean;
+}
+
+interface DuckValidator {
+    getLowerBound?: () => number | null;
+    getUpperBound?: () => number | null;
+    getRegex?: () => RegExp | null;
+    getMinLength?: () => number | null | undefined;
+}
+
+export function isClassDeclaration(declaration: Declaration): declaration is ClassDeclaration {
+    return Boolean(declaration?.isClassDeclaration?.() || declaration instanceof ClassDeclaration);
+}
+
+export function isMapDeclaration(declaration: Declaration): declaration is MapDeclaration {
+    return Boolean(declaration?.isMapDeclaration?.() || declaration instanceof MapDeclaration);
+}
+
+export function isScalarDeclaration(declaration: Declaration): declaration is ScalarDeclaration {
+    return Boolean(declaration?.isScalarDeclaration?.() || declaration instanceof ScalarDeclaration);
+}
+
+export function isField(property: Property): property is Field {
+    return Boolean((property as DuckProperty)?.isField?.() || property instanceof Field);
+}
+
+export function isRelationship(property: Property): property is RelationshipDeclaration {
+    return Boolean((property as DuckProperty)?.isRelationship?.() || property instanceof RelationshipDeclaration);
+}
+
+export function isEnumValue(property: Property): property is EnumValueDeclaration {
+    return Boolean((property as DuckProperty)?.isEnumValue?.() || property instanceof EnumValueDeclaration);
+}
+
+export function isNumberValidator(validator: Validator): validator is NumberValidator {
+    return Boolean(validator instanceof NumberValidator || (typeof (validator as DuckValidator)?.getLowerBound === 'function' && typeof (validator as DuckValidator)?.getUpperBound === 'function'));
+}
+
+export function isStringValidator(validator: Validator): validator is StringValidator {
+    return Boolean(validator instanceof StringValidator || (typeof (validator as DuckValidator)?.getRegex === 'function' || typeof (validator as DuckValidator)?.getMinLength === 'function'));
+}
+
 export function getDeclarationType(declaration: Declaration) {
-    if (declaration instanceof ClassDeclaration) {
+    if (isClassDeclaration(declaration)) {
         if (declaration.isAsset()) {
             return 'asset';
         } else if (declaration.isConcept()) {
@@ -31,9 +76,9 @@ export function getDeclarationType(declaration: Declaration) {
         } else {
             throw new Error(`unknown class declaration type "${declaration}"`);
         }
-    } else if (declaration instanceof MapDeclaration) {
+    } else if (isMapDeclaration(declaration)) {
         return 'map';
-    } else if (declaration instanceof ScalarDeclaration) {
+    } else if (isScalarDeclaration(declaration)) {
         return 'scalar';
     }
     else {
@@ -42,11 +87,11 @@ export function getDeclarationType(declaration: Declaration) {
 }
 
 export function getPropertyType(property: Property) {
-    if (property instanceof Field) {
+    if (isField(property)) {
         return 'field';
-    } else if (property instanceof RelationshipDeclaration) {
+    } else if (isRelationship(property)) {
         return 'relationship';
-    } else if (property instanceof EnumValueDeclaration) {
+    } else if (isEnumValue(property)) {
         return 'enum value';
     } else {
         throw new Error(`unknown property type "${property}"`);
@@ -54,9 +99,9 @@ export function getPropertyType(property: Property) {
 }
 
 export function getValidatorType(validator: Validator) {
-    if (validator instanceof NumberValidator) {
+    if (isNumberValidator(validator)) {
         return 'number';
-    } else if (validator instanceof StringValidator) {
+    } else if (isStringValidator(validator)) {
         return 'string';
     } else {
         throw new Error(`unknown validator type "${validator}"`);

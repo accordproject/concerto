@@ -12,10 +12,11 @@
  * limitations under the License.
  */
 
-import { ClassDeclaration, Declaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
+import { Declaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
 import { CompareConfig, CompareResult, defaultCompareConfig } from './compare-config';
 import { CompareFinding, CompareResults } from './compare-results';
 import { Comparer } from './comparer';
+import { isClassDeclaration } from './compare-utils';
 
 export class Compare {
     private config: CompareConfig;
@@ -118,7 +119,7 @@ export class Compare {
         comparers.forEach(comparer => comparer.compareClassDeclaration?.(a, b));
         // ClassDeclaration is the only kind of declaration that owns properties: map and
         // scalar declarations have none, so there is nothing further to compare for them.
-        if(!(a instanceof ClassDeclaration) || !(b instanceof ClassDeclaration)) {
+        if(!isClassDeclaration(a) || !isClassDeclaration(b)) {
             return;
         }
         this.compareProperties(comparers, a.getOwnProperties(), b.getOwnProperties());
