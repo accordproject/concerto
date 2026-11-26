@@ -15,7 +15,11 @@
 'use strict';
 
 require('chai').should();
+const { expect } = require('chai');
+const sinon = require('sinon');
+const { Logger } = require('@accordproject/concerto-util');
 const { ModelManager } = require('../src/modelmanager');
+const { IllegalModelException } = require('../src/introspect/illegalmodelexception');
 
 describe('ModelManager', () => {
 
@@ -314,6 +318,130 @@ concept Person {
    o Integer age
 }`, 'test.cto', true);
             validatedModelManager.validateModelFiles();
+        });
+
+        it('should throw IllegalModelException when decorator has primitive type reference for concept parameter', () => {
+            validatedModelManager.addCTOModel(`namespace test@1.0.0
+import concerto.decorator@1.0.0.Decorator
+
+concept Hide extends Decorator {
+    o Concept concept
+}
+
+concept Person {
+   @Hide(String)
+   o String ssn
+}`, 'test.cto', true);
+            expect(() => {
+                validatedModelManager.validateModelFiles();
+            }).to.throw(IllegalModelException, /Decorator Hide references a type String which cannot be assigned/);
+        });
+
+        it('should throw IllegalModelException when decorator has scalar or map type reference for concept parameter', () => {
+            const mm = new ModelManager({
+                enableMapType: true,
+                decoratorValidation: {
+                    missingDecorator: 'error',
+                    invalidDecorator: 'error'
+                }
+            });
+            mm.addCTOModel(`namespace test@1.0.0
+import concerto.decorator@1.0.0.Decorator
+
+scalar Email extends String
+map Metadata {
+    o String
+    o String
+}
+
+concept Hide extends Decorator {
+    o Concept concept
+}
+
+concept Person {
+   @Hide(Email)
+   o String ssn
+   @Hide(Metadata)
+   o String name
+}`, 'test.cto', true);
+            expect(() => {
+                mm.validateModelFiles();
+            }).to.throw(IllegalModelException, /Decorator Hide references a type Email which cannot be assigned/);
+        });
+
+        it('should not throw when decorator has matching scalar type reference', () => {
+            validatedModelManager.addCTOModel(`namespace test@1.0.0
+import concerto.decorator@1.0.0.Decorator
+
+scalar Email extends String
+
+concept Hide extends Decorator {
+    o Email target
+}
+
+concept Person {
+   @Hide(Email)
+   o String ssn
+}`, 'test.cto', true);
+            validatedModelManager.validateModelFiles();
+        });
+
+        it('should log only one warning for non-identifier argument in warning mode', () => {
+            const dispatchSpy = sinon.spy(Logger, 'dispatch');
+            try {
+                const warnModelManager = new ModelManager({
+                    decoratorValidation: {
+                        missingDecorator: 'warning',
+                        invalidDecorator: 'warning'
+                    }
+                });
+                warnModelManager.addCTOModel(`namespace test@1.0.0
+import concerto.decorator@1.0.0.Decorator
+
+concept Hide extends Decorator {
+    o Concept concept
+}
+
+concept Person {
+   @Hide("foo")
+   o String ssn
+}`, 'test.cto', true);
+                warnModelManager.validateModelFiles();
+                dispatchSpy.callCount.should.equal(1);
+                dispatchSpy.firstCall.args[0].should.equal('warning');
+                dispatchSpy.firstCall.args[1].should.match(/Expected object/);
+            } finally {
+                dispatchSpy.restore();
+            }
+        });
+
+        it('should log a warning without throwing TypeError for primitive type reference in warning mode', () => {
+            const dispatchSpy = sinon.spy(Logger, 'dispatch');
+            try {
+                const warnModelManager = new ModelManager({
+                    decoratorValidation: {
+                        missingDecorator: 'warning',
+                        invalidDecorator: 'warning'
+                    }
+                });
+                warnModelManager.addCTOModel(`namespace test@1.0.0
+import concerto.decorator@1.0.0.Decorator
+
+concept Hide extends Decorator {
+    o Concept concept
+}
+
+concept Person {
+   @Hide(String)
+   o String ssn
+}`, 'test.cto', true);
+                warnModelManager.validateModelFiles();
+                dispatchSpy.callCount.should.equal(1);
+                dispatchSpy.firstCall.args[0].should.equal('warning');
+                dispatchSpy.firstCall.args[1].should.match(/cannot be assigned/);
+            } finally {
+                dispatchSpy.restore();
+            }
         });
     });
 });
