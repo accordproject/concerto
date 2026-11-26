@@ -256,6 +256,24 @@ describe('JSONPopulator', () => {
             value.should.equal(32768);
         });
 
+        it('should accept the signed 32-bit Integer boundaries', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Integer');
+            jsonPopulator.convertToObject(field, -2147483648, {}).should.equal(-2147483648);
+            jsonPopulator.convertToObject(field, 2147483647, {}).should.equal(2147483647);
+        });
+
+        it('should reject Integer values outside the signed 32-bit range', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Integer');
+            [-2147483649, 2147483648].forEach((value) => {
+                (() => jsonPopulator.convertToObject(field, value, {})).should.throw(
+                    ValidationException,
+                    /Expected value at path `\$` to be of type `Integer`/
+                );
+            });
+        });
+
         it('should not convert to longs from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');

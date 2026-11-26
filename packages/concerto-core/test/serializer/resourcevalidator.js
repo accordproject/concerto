@@ -205,6 +205,42 @@ describe('ResourceValidator', function () {
     });
 
     describe('#visitField', function() {
+        it('should enforce the signed 32-bit Integer range on resource fields', function () {
+            modelManager.addCTOModel(`namespace org.acme.integer@1.0.0
+            asset IntegerHolder identified by id {
+                o String id
+                o Integer value
+            }`);
+            const holder = factory.newResource('org.acme.integer@1.0.0', 'IntegerHolder', 'holder-1');
+            const serializer = new Serializer(factory, modelManager);
+
+            holder.value = -2147483648;
+            (() => serializer.toJSON(holder)).should.not.throw();
+            holder.value = 2147483647;
+            (() => serializer.toJSON(holder)).should.not.throw();
+            [-2147483649, 2147483648].forEach((value) => {
+                holder.value = value;
+                (() => serializer.toJSON(holder)).should.throw(/Expected type of value: "Integer"/);
+            });
+        });
+
+        it('should enforce the signed 32-bit Integer range in map values', function () {
+            modelManager.addCTOModel(`namespace org.acme.integermap@1.0.0
+            map IntegerValues {
+                o String
+                o Integer
+            }
+            asset IntegerMapHolder identified by id {
+                o String id
+                o IntegerValues values
+            }`);
+            const holder = factory.newResource('org.acme.integermap@1.0.0', 'IntegerMapHolder', 'holder-1');
+            const serializer = new Serializer(factory, modelManager);
+
+            holder.values = new Map([['tooLarge', 2147483648]]);
+            (() => serializer.toJSON(holder)).should.throw(/Expected Type of Integer/);
+        });
+
         it('should allow assigning a resource type', function () {
             const employee = factory.newResource('org.acme.l1@1.0.0', 'Employee', 'DAN');
             employee.ssn = 'abc';

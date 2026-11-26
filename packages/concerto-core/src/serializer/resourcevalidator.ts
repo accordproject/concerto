@@ -20,6 +20,7 @@ import ModelUtil from '../modelutil';
 import ValidationException from './validationexception';
 import Globalize from '../globalize';
 import dayjs from '../dayjs-setup';
+import { isValidInteger } from './numericvalidation';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -164,6 +165,10 @@ class ResourceValidator {
             }
             break;
         case 'Integer':
+            if (!isValidInteger(value)) {
+                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Integer but found '${value}' instead.`);
+            }
+            break;
         case 'Long':
             if (typeof value !== 'number' || !isFinite(value) || !Number.isInteger(value)) {
                 throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of ${typeName} but found '${value}' instead.`);
@@ -420,8 +425,12 @@ class ResourceValidator {
                     invalid = true;
                 }
                 break;
-            case 'Long':
             case 'Integer':
+                if(dataType !== 'number' || !isValidInteger(obj)) {
+                    invalid = true;
+                }
+                break;
+            case 'Long':
             case 'Double': {
                 if(dataType !== 'number') {
                     invalid = true;
