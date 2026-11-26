@@ -17,6 +17,7 @@ import { TypedStack, NullUtil as Util } from '@accordproject/concerto-util';
 import Relationship from '../model/relationship';
 import ModelUtil from '../modelutil';
 import ValidationException from './validationexception';
+import { isValidInteger } from './numericvalidation';
 import dayjs from '../dayjs-setup';
 import { isValidDateTime } from '../datetimeutil';
 import type Factory from '../factory';
@@ -400,7 +401,7 @@ class JSONPopulator {
         case 'Long': {
             const num = json;
             if (typeof num === 'number') {
-                if (Math.trunc(num) !== num) {
+                if (Math.trunc(num) !== num || (field.getType() === 'Integer' && !isValidInteger(num))) {
                     throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
                 } else {
                     result = num;
