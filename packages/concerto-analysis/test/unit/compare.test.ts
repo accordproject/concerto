@@ -1,4 +1,4 @@
-import { ModelFile, ModelManager } from '@accordproject/concerto-core';
+import { ClassDeclaration, ModelFile, ModelManager, Property } from '@accordproject/concerto-core';
 import { Parser } from '@accordproject/concerto-cto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -890,4 +890,52 @@ test('should not detect a size validator change when identical', async () => {
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual([]);
     expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should handle cross-realm declarations and properties without prototype mismatch errors', async () => {
+    const [a, b] = await getModelFiles('optional-field-added-a.cto', 'optional-field-added-b.cto');
+    const origGetAllDeclarations = b.getAllDeclarations.bind(b);
+    b.getAllDeclarations = () => {
+        const decls = origGetAllDeclarations();
+        return decls.map(decl => {
+            const protoStripped = Object.create(null);
+            Object.assign(protoStripped, decl);
+            protoStripped.isClassDeclaration = () => decl.isClassDeclaration();
+            protoStripped.isMapDeclaration = () => decl.isMapDeclaration();
+            protoStripped.isScalarDeclaration = () => decl.isScalarDeclaration();
+            protoStripped.isConcept = () => decl.isConcept();
+            protoStripped.isAsset = () => decl.isAsset();
+            protoStripped.isEnum = () => decl.isEnum();
+            protoStripped.isEvent = () => decl.isEvent();
+            protoStripped.isParticipant = () => decl.isParticipant();
+            protoStripped.isTransaction = () => decl.isTransaction();
+            protoStripped.getName = () => decl.getName();
+            protoStripped.getOwnProperties = () => {
+                if ('getOwnProperties' in decl) {
+                    return (decl as ClassDeclaration).getOwnProperties().map((prop: Property) => {
+                        const propStripped = Object.create(null);
+                        Object.assign(propStripped, prop);
+                        propStripped.getName = () => prop.getName();
+                        propStripped.isOptional = () => prop.isOptional();
+                        propStripped.isField = () => true;
+                        propStripped.isRelationship = () => false;
+                        propStripped.isEnumValue = () => false;
+                        propStripped.getDefaultValue = () => null;
+                        propStripped.getParent = () => protoStripped;
+                        return propStripped;
+                    });
+                }
+                return [];
+            };
+            return protoStripped;
+        });
+    };
+
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'optional-property-added',
+            message: 'The optional field "value" was added to the concept "Thing"'
+        })
+    ]));
 });

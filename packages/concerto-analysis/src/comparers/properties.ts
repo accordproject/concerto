@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-import { EnumValueDeclaration, Field, ModelUtil } from '@accordproject/concerto-core';
+import { ModelUtil } from '@accordproject/concerto-core';
 import * as semver from 'semver';
-import { getDeclarationType, getPropertyType, getValidatorType } from '../compare-utils';
+import { getDeclarationType, getPropertyType, getValidatorType, isEnumValue, isField } from '../compare-utils';
 import { ComparerFactory } from '../comparer';
 
 const propertyAdded: ComparerFactory = (context) => ({
@@ -23,7 +23,7 @@ const propertyAdded: ComparerFactory = (context) => ({
             return;
         }
         const classDeclarationType = getDeclarationType(b.getParent());
-        if (b instanceof EnumValueDeclaration) {
+        if (isEnumValue(b)) {
             context.report({
                 key: 'enum-value-added',
                 message: `The enum value "${b.getName()}" was added to the ${classDeclarationType} "${b.getParent().getName()}"`,
@@ -32,7 +32,7 @@ const propertyAdded: ComparerFactory = (context) => ({
             return;
         }
         const isOptional = b.isOptional();
-        const hasDefault = b instanceof Field ? b.getDefaultValue() !== null : false;
+        const hasDefault = isField(b) ? b.getDefaultValue() !== null : false;
         const required = !isOptional && !hasDefault;
         const type = getPropertyType(b);
         if (required) {
@@ -59,7 +59,7 @@ const propertyRemoved: ComparerFactory = (context) => ({
             return;
         }
         const classDeclarationType = getDeclarationType(a.getParent());
-        if (a instanceof EnumValueDeclaration) {
+        if (isEnumValue(a)) {
             context.report({
                 key: 'enum-value-removed',
                 message: `The enum value "${a.getName()}" was removed from the ${classDeclarationType} "${a.getParent().getName()}"`,
@@ -68,7 +68,7 @@ const propertyRemoved: ComparerFactory = (context) => ({
             return;
         }
         const isOptional = a.isOptional();
-        const hasDefault = a instanceof Field ? a.getDefaultValue() !== null : false;
+        const hasDefault = isField(a) ? a.getDefaultValue() !== null : false;
         const required = !isOptional && !hasDefault;
         const type = getPropertyType(a);
         if (required) {
@@ -104,7 +104,7 @@ const propertyTypeChanged: ComparerFactory = (context) => ({
                 element: a
             });
             return;
-        } else if (a instanceof EnumValueDeclaration || b instanceof EnumValueDeclaration) {
+        } else if (isEnumValue(a) || isEnumValue(b)) {
             return;
         }
         const aIsArray = a.isArray();
@@ -198,9 +198,9 @@ const propertyValidatorChanged: ComparerFactory = (context) => ({
     compareProperty: (a, b) => {
         if (!a || !b) {
             return;
-        } else if (!(a instanceof Field)) {
+        } else if (!isField(a)) {
             return;
-        } else if (!(b instanceof Field)) {
+        } else if (!isField(b)) {
             return;
         }
         const aValidator = a.getValidator();
@@ -294,7 +294,7 @@ const propertyDefaultChanged: ComparerFactory = (context) => ({
 
 const propertySizeValidatorChanged: ComparerFactory = (context) => ({
     compareProperty: (a, b) => {
-        if (!a || !b || a instanceof EnumValueDeclaration || b instanceof EnumValueDeclaration) {
+        if (!a || !b || isEnumValue(a) || isEnumValue(b)) {
             return;
         }
         const aValidator = a.getSizeValidator();
