@@ -756,4 +756,105 @@ describe('ResourceValidator', function () {
                 .should.throw(Error, /Unrecognised/);
         });
     });
+    describe('#mapSystemPropertyKeys', () => {
+        const model = `
+        namespace org.example@1.0.0
+
+        scalar NonSystemKey extends String regex=/^[^$]/
+
+        concept Item {
+            o String label
+        }
+
+        map Scores {
+            o String
+            o Integer
+        }
+
+        map ItemMap {
+            o String
+            o Item
+        }
+
+        map RestrictedKeys {
+            o NonSystemKey
+            o Integer
+        }
+
+        concept Container {
+            o Scores scores optional
+            o ItemMap items optional
+            o RestrictedKeys restrictedKeys optional
+        }
+        `;
+
+        it('should validate map values when key matches a system property name like $identifier', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(model);
+            const serializer = new Serializer(new Factory(mm), mm);
+
+            (() => {
+                serializer.fromJSON({
+                    $class: 'org.example@1.0.0.Container',
+                    scores: {
+                        '$identifier': 'not-an-integer'
+                    }
+                });
+            }).should.throw(/Expected Type of Integer/);
+        });
+
+        it('should validate map keys when key matches a system property name like $identifier', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(model);
+            const serializer = new Serializer(new Factory(mm), mm);
+
+            (() => {
+                serializer.fromJSON({
+                    $class: 'org.example@1.0.0.Container',
+                    restrictedKeys: {
+                        '$identifier': 42
+                    }
+                });
+            }).should.throw(/failed to match validation regex/);
+        });
+
+        it('should accept valid map entries with system property key names when permitted by model', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(model);
+            const serializer = new Serializer(new Factory(mm), mm);
+
+            const resource = serializer.fromJSON({
+                $class: 'org.example@1.0.0.Container',
+                scores: {
+                    '$identifier': 100,
+                    'alice': 200
+                }
+            });
+            resource.should.not.be.null;
+            resource.scores.get('$identifier').should.equal(100);
+            resource.scores.get('alice').should.equal(200);
+        });
+
+        it('should allow $class metadata entry on primitive-valued and concept-valued maps', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(model);
+            const serializer = new Serializer(new Factory(mm), mm);
+
+            const resource = serializer.fromJSON({
+                $class: 'org.example@1.0.0.Container',
+                scores: {
+                    $class: 'org.example@1.0.0.Scores',
+                    alice: 1
+                },
+                items: {
+                    $class: 'org.example@1.0.0.ItemMap',
+                    first: {
+                        $class: 'org.example@1.0.0.Item',
+                        label: 'hello'
+                    }
+                }
+            });
+            resource.should.not.be.null;
+        });
+    });
 });
